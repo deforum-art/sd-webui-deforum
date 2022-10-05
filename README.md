@@ -3,6 +3,14 @@
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=deforum_sd_repo)
 [![Replicate](https://replicate.com/deforum/deforum_stable_diffusion/badge)](https://replicate.com/deforum/deforum_stable_diffusion)
 
+<p align="center">
+    <img src="https://img.shields.io/github/last-commit/deforum/stable-diffuson?logo=Python&logoColor=green&style=for-the-badge" alt="last-commit"/>
+    <img src="https://img.shields.io/github/stars/deforum/stable-diffuson?logo=GitHub&style=for-the-badge" alt="stars"/>
+    <br>
+    <img src="https://img.shields.io/github/issues/deforum/stable-diffuson?logo=GitHub&style=for-the-badge" alt="issues"/>
+    <img src="https://img.shields.io/github/issues-pr/deforum/stable-diffuson?logo=GitHub&style=for-the-badge" alt="pull-requests"/>
+</p>
+
 # Deforum Stable Diffusion
 
 ```
