@@ -46,7 +46,8 @@ Please read the full license here: https://huggingface.co/spaces/CompVis/stable-
 #@markdown **NVIDIA GPU**
 import subprocess
 sub_p_res = subprocess.run(['nvidia-smi', '--query-gpu=name,memory.total,memory.free', '--format=csv,noheader'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-print(sub_p_res)
+print("NVIDIA GPU:")
+print(f"  {sub_p_res[:-1]}")
 
 # %%
 # !! {"metadata":{
@@ -55,7 +56,7 @@ print(sub_p_res)
 # !! }}
 #@markdown **Model and Output Paths**
 # ask for the link
-print("Local Path Variables:\n")
+print("Path Variables:")
 
 models_path = "./models" #@param {type:"string"}
 output_path = "./output" #@param {type:"string"}
@@ -81,8 +82,8 @@ import os
 os.makedirs(models_path, exist_ok=True)
 os.makedirs(output_path, exist_ok=True)
 
-print(f"models_path: {models_path}")
-print(f"output_path: {output_path}")
+print(f"  models_path: {models_path}")
+print(f"  output_path: {output_path}")
 
 # %%
 # !! {"metadata":{
@@ -972,14 +973,14 @@ ckpt_config_path = custom_config_path if model_config == "custom" else os.path.j
 if os.path.exists(ckpt_config_path):
     print(f"{ckpt_config_path} exists")
 else:
-    ckpt_config_path = "./stable-diffusion/configs/stable-diffusion/v1-inference.yaml"
-print(f"Using config: {ckpt_config_path}")
+    ckpt_config_path = "./configs/stable-diffusion/v1-inference.yaml"
+
 
 # checkpoint path or download
 ckpt_path = custom_checkpoint_path if model_checkpoint == "custom" else os.path.join(models_path, model_checkpoint)
 ckpt_valid = True
 if os.path.exists(ckpt_path):
-    print(f"{ckpt_path} exists")
+    pass
 elif 'url' in model_map[model_checkpoint]:
     url = model_map[model_checkpoint]['url']
 
@@ -988,15 +989,15 @@ elif 'url' in model_map[model_checkpoint]:
         print("This model requires an authentication token")
         print("Please ensure you have accepted its terms of service before continuing.")
 
-        username = input("What is your huggingface username?:")
-        token = input("What is your huggingface token?:")
+        username = input("[What is your huggingface username?]: ")
+        token = input("[What is your huggingface token?]: ")
 
         _, path = url.split("https://")
 
         url = f"https://{username}:{token}@{path}"
 
     # contact server for model
-    print(f"Attempting to download {model_checkpoint}...this may take a while")
+    print(f"...attempting to download {model_checkpoint}...this may take a while")
     ckpt_request = requests.get(url)
     request_status = ckpt_request.status_code
 
@@ -1014,26 +1015,30 @@ elif 'url' in model_map[model_checkpoint]:
 else:
     print(f"Please download model checkpoint and place in {os.path.join(models_path, model_checkpoint)}")
     ckpt_valid = False
+    
+print("Config and Model Location:")
+print(f"  {ckpt_config_path}")
+print(f"  {ckpt_path}")
 
 if check_sha256 and model_checkpoint != "custom" and ckpt_valid:
     import hashlib
-    print("\n...checking sha256")
+    print("...checking sha256")
     with open(ckpt_path, "rb") as f:
         bytes = f.read() 
         hash = hashlib.sha256(bytes).hexdigest()
         del bytes
     if model_map[model_checkpoint]["sha256"] == hash:
-        print("hash is correct\n")
+        print("...hash is correct")
     else:
-        print("hash in not correct\n")
+        print("...hash in not correct")
         ckpt_valid = False
 
 if ckpt_valid:
-    print(f"Using ckpt: {ckpt_path}")
+    print(f"...using {ckpt_path}")
 
 def load_model_from_config(config, ckpt, verbose=False, device='cuda', half_precision=True):
     map_location = "cuda" #@param ["cpu", "cuda"]
-    print(f"Loading model from {ckpt}")
+    print(f"...loading model")
     pl_sd = torch.load(ckpt, map_location=map_location)
     if "global_step" in pl_sd:
         print(f"Global Step: {pl_sd['global_step']}")
