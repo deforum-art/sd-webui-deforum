@@ -11,6 +11,11 @@
 </p>
 
 ## Local Setup
+
+```
+git clone -b local https://github.com/deforum/stable-diffusion.git
+```
+
 ```
 conda create -n dsd python=3.9 -y
 conda activate dsd
