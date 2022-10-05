@@ -57,11 +57,11 @@ print(sub_p_res)
 # ask for the link
 print("Local Path Variables:\n")
 
-models_path = "/content/models" #@param {type:"string"}
-output_path = "/content/output" #@param {type:"string"}
+models_path = "./models" #@param {type:"string"}
+output_path = "./output" #@param {type:"string"}
 
 #@markdown **Google Drive Path Variables (Optional)**
-mount_google_drive = True #@param {type:"boolean"}
+mount_google_drive = False #@param {type:"boolean"}
 force_remount = False
 
 if mount_google_drive:
@@ -91,7 +91,7 @@ print(f"output_path: {output_path}")
 # !! }}
 #@markdown **Setup Environment**
 
-setup_environment = True #@param {type:"boolean"}
+setup_environment = False #@param {type:"boolean"}
 print_subprocess = False #@param {type:"boolean"}
 
 if setup_environment:
@@ -154,10 +154,6 @@ import re
 from scipy.ndimage import gaussian_filter
 
 sys.path.extend([
-    'src/taming-transformers',
-    'src/clip',
-    'stable-diffusion/',
-    'k-diffusion',
     'pytorch3d-lite',
     'AdaBins',
     'MiDaS',
