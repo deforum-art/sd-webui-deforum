@@ -27,7 +27,7 @@ install required packages:
 ```
 python -m pip install -r requirements.txt
 ```
-run deforum stable diffusion
+run deforum stable diffusion:
 ```
 python Deforum_Stable_Diffusion.py
 ```
