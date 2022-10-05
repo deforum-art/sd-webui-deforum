@@ -39,3 +39,17 @@ run deforum stable diffusion:
 ```
 python Deforum_Stable_Diffusion.py
 ```
+
+## Running Colab Local Runtime
+open google colab. file > upload notebook > select .ipynb file in the stable-diffusion folder. enable jupyter extension
+```
+jupyter serverextension enable --py jupyter_http_over_ws
+```
+start server
+```
+jupyter notebook \
+  --NotebookApp.allow_origin='https://colab.research.google.com' \
+  --port=8888 \
+  --NotebookApp.port_retries=0
+```
+copy paste url token.
