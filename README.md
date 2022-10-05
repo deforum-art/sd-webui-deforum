@@ -11,6 +11,8 @@
     <img src="https://img.shields.io/github/issues-pr/deforum/stable-diffuson" alt="pull-requests"/>
 </p>
 
+<a href="https://github.com/deforum/stable-diffusion/network"><img alt="GitHub forks" src="https://img.shields.io/github/forks/deforum/stable-diffusion"></a>
+
 # Deforum Stable Diffusion
 
 ```
