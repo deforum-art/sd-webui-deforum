@@ -8,5 +8,7 @@ scikit-image
 k-diffusion
 matplotlib
 timm
-git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
-git+https://github.com/openai/CLIP.git@main#egg=clip
+transformers==4.19.2
+-e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
+-e git+https://github.com/openai/CLIP.git@main#egg=clip
+
