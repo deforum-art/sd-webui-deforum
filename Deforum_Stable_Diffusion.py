@@ -93,11 +93,11 @@ print(f"  output_path: {output_path}")
 #@markdown **Setup Environment**
 
 setup_environment = False #@param {type:"boolean"}
-print_subprocess = False #@param {type:"boolean"}
+print_subprocess = True #@param {type:"boolean"}
 
 if setup_environment:
     import subprocess, time
-    print("Setting up environment...")
+    print("...setting up environment")
     start_time = time.time()
     all_process = [
         ['pip', 'install', 'torch==1.12.1+cu113', 'torchvision==0.13.1+cu113', '--extra-index-url', 'https://download.pytorch.org/whl/cu113'],
