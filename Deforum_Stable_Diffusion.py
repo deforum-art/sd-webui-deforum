@@ -75,8 +75,8 @@ if mount_google_drive:
         models_path = models_path_gdrive
         output_path = output_path_gdrive
     except:
-        print("...error mounting drive or with drive path variables")
-        print("...reverting to default path variables")
+        print("..error mounting drive or with drive path variables")
+        print("..reverting to default path variables")
 
 import os
 os.makedirs(models_path, exist_ok=True)
@@ -97,7 +97,7 @@ print_subprocess = True #@param {type:"boolean"}
 
 if setup_environment:
     import subprocess, time
-    print("...setting up environment")
+    print("..setting up environment")
     start_time = time.time()
     all_process = [
         ['pip', 'install', 'torch==1.12.1+cu113', 'torchvision==0.13.1+cu113', '--extra-index-url', 'https://download.pytorch.org/whl/cu113'],
@@ -997,7 +997,7 @@ elif 'url' in model_map[model_checkpoint]:
         url = f"https://{username}:{token}@{path}"
 
     # contact server for model
-    print(f"...attempting to download {model_checkpoint}...this may take a while")
+    print(f"..attempting to download {model_checkpoint}...this may take a while")
     ckpt_request = requests.get(url)
     request_status = ckpt_request.status_code
 
@@ -1022,23 +1022,23 @@ print(f"  {ckpt_path}")
 
 if check_sha256 and model_checkpoint != "custom" and ckpt_valid:
     import hashlib
-    print("...checking sha256")
+    print("..checking sha256")
     with open(ckpt_path, "rb") as f:
         bytes = f.read() 
         hash = hashlib.sha256(bytes).hexdigest()
         del bytes
     if model_map[model_checkpoint]["sha256"] == hash:
-        print("...hash is correct")
+        print("..hash is correct")
     else:
-        print("...hash in not correct")
+        print("..hash in not correct")
         ckpt_valid = False
 
 if ckpt_valid:
-    print(f"...using {ckpt_path}")
+    print(f"..using {ckpt_path}")
 
 def load_model_from_config(config, ckpt, verbose=False, device='cuda', half_precision=True):
     map_location = "cuda" #@param ["cpu", "cuda"]
-    print(f"...loading model")
+    print(f"..loading model")
     pl_sd = torch.load(ckpt, map_location=map_location)
     if "global_step" in pl_sd:
         print(f"Global Step: {pl_sd['global_step']}")
