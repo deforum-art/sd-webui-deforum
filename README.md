@@ -12,21 +12,22 @@
 
 ## Local Setup
 
+clone the github repository:
 ```
 git clone -b local https://github.com/deforum/stable-diffusion.git
 cd stable-diffusion
 ```
-
+create anaconda environment:
 ```
 conda create -n dsd python=3.9 -y
 conda activate dsd
 conda install pytorch cudatoolkit=11.6 torchvision torchaudio -c pytorch -c conda-forge -y
 ```
-
+install required packages:
 ```
 python -m pip install -r requirements.txt
 ```
-
+run deforum stable diffusion
 ```
 python Deforum_Stable_Diffusion.py
 ```
