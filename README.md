@@ -26,3 +26,7 @@ conda install pytorch cudatoolkit=11.6 torchvision torchaudio -c pytorch -c cond
 ```
 python -m pip install -r requirements.txt
 ```
+
+```
+python Deforum_Stable_Diffusion.py
+```
