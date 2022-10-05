@@ -4,14 +4,11 @@
 [![Replicate](https://replicate.com/deforum/deforum_stable_diffusion/badge)](https://replicate.com/deforum/deforum_stable_diffusion)
 
 <p align="center">
-    <img src="https://img.shields.io/github/last-commit/deforum/stable-diffuson" alt="last-commit"/>
-    <img src="https://img.shields.io/github/stars/deforum/stable-diffuson" alt="stars"/>
-    <br>
-    <img src="https://img.shields.io/github/issues/deforum/stable-diffuson" alt="issues"/>
-    <img src="https://img.shields.io/github/issues-pr/deforum/stable-diffuson" alt="pull-requests"/>
+    <a href="https://github.com/deforum/stable-diffusion/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/deforum/stable-diffusion"></a>
+    <a href="https://github.com/deforum/stable-diffusion/network"><img alt="GitHub forks" src="https://img.shields.io/github/forks/deforum/stable-diffusion"></a>
 </p>
 
-<a href="https://github.com/deforum/stable-diffusion/network"><img alt="GitHub forks" src="https://img.shields.io/github/forks/deforum/stable-diffusion"></a>
+
 
 # Deforum Stable Diffusion
 
