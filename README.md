@@ -4,7 +4,7 @@
 [![Replicate](https://replicate.com/deforum/deforum_stable_diffusion/badge)](https://replicate.com/deforum/deforum_stable_diffusion)
 
 <p align="left">
-    <a href="https://twitter.com/intent/tweet?text=Wow:&url=https%3A%2F%2Fgithub.com%2Fdeforum%2Fstable-diffusion%2Ftree%2Flocal"><img alt="Twitter" src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2Fdeforum_art"></a>
+    <a href="https://github.com/deforum/stable-diffusion/commits"><img alt="Last Commit" src="https://img.shields.io/github/last-commit/deforum/stable-diffusion"></a>
     <a href="https://github.com/deforum/stable-diffusion/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/deforum/stable-diffusion"></a>
     <a href="https://github.com/deforum/stable-diffusion/network"><img alt="GitHub forks" src="https://img.shields.io/github/forks/deforum/stable-diffusion"></a>
     <a href="https://github.com/deforum/stable-diffusion/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/deforum/stable-diffusion"></a>
