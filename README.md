@@ -10,7 +10,7 @@
     <a href="https://replicate.com/deforum/deforum_stable_diffusion"><img alt="Replicate" src="https://replicate.com/deforum/deforum_stable_diffusion/badge"></a>
 </p>
 
-## Before You Start
+## Before Starting
 install anaconda for managing python environments and packages https://www.anaconda.com/. using anaconda is not required but recommended
 
 ## Getting Started
