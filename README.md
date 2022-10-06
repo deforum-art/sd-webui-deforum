@@ -18,6 +18,7 @@ clone the github repository:
 ```
 git clone -b local https://github.com/deforum/stable-diffusion.git
 cd stable-diffusion
+
 ```
 create anaconda environment:
 ```
