@@ -54,7 +54,7 @@ jupyter lab
 jupyter notebook
 ```
 
-## Running Colab Local Runtime
+## Colab Local Runtime
 open google colab. file > upload notebook > select .ipynb file in the stable-diffusion folder. enable jupyter extension
 ```
 jupyter serverextension enable --py jupyter_http_over_ws
