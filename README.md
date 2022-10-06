@@ -53,13 +53,7 @@ navigate to the stable-diffusion folder and run either the Deforum_Stable_Diffus
 ```
 python Deforum_Stable_Diffusion.py
 ```
-if you prefer a more colab-like experience you can run the .ipynb in jupyter-lab or jupyter-notebook. install with either of the following commands
-```
-conda install -c conda-forge jupyterlab
-
-conda install -c conda-forge notebook
-```
-activate jupyter-lab or jupyter-notebook from within the stable-diffusion folder with either of the following commands:
+if you prefer a more colab-like experience you can run the .ipynb in jupyter-lab or jupyter-notebook. activate jupyter-lab or jupyter-notebook from within the stable-diffusion folder with either of the following commands:
 ```
 jupyter lab
 jupyter notebook
