@@ -55,7 +55,6 @@ print(f"{sub_p_res[:-1]}")
 # !!   "id": "TxIOPT0G5Lx1"
 # !! }}
 #@markdown **Model and Output Paths**
-# ask for the link
 print("Path Variables:")
 
 models_path = "./models" #@param {type:"string"}
@@ -65,37 +64,50 @@ output_path = "./output" #@param {type:"string"}
 mount_google_drive = True #@param {type:"boolean"}
 force_remount = False
 
-if mount_google_drive:
-    from google.colab import drive # type: ignore
-    try:
-        drive_path = "/content/drive"
-        drive.mount(drive_path,force_remount=force_remount)
-        models_path_gdrive = "/content/drive/MyDrive/AI/models" #@param {type:"string"}
-        output_path_gdrive = "/content/drive/MyDrive/AI/StableDiffusion" #@param {type:"string"}
-        models_path = models_path_gdrive
-        output_path = output_path_gdrive
-    except:
-        print("..error mounting drive or with drive path variables")
-        print("..reverting to default path variables")
+try:
+   ipy = get_ipython()
+except:
+   ipy = 'could not get_ipython'
 
-import os
+if 'google.colab' in str(ipy):
+    if mount_google_drive:
+        from google.colab import drive # type: ignore
+        try:
+            drive_path = "/content/drive"
+            drive.mount(drive_path,force_remount=force_remount)
+            models_path_gdrive = "/content/drive/MyDrive/AI/models" #@param {type:"string"}
+            output_path_gdrive = "/content/drive/MyDrive/AI/StableDiffusion" #@param {type:"string"}
+            models_path = models_path_gdrive
+            output_path = output_path_gdrive
+        except:
+            print("..error mounting drive or with drive path variables")
+            print("..reverting to default path variables")
+
+import os, sys
+models_path = os.path.abspath(models_path)
+output_path = os.path.abspath(output_path)
 os.makedirs(models_path, exist_ok=True)
 os.makedirs(output_path, exist_ok=True)
 
 print(f"models_path: {models_path}")
 print(f"output_path: {output_path}")
 
-@markdown **Setup Environment**
+# %%
+# !! {"metadata":{
+# !!   "cellView": "form",
+# !!   "id": "0MjQ9YBrqTcD"
+# !! }}
+#@markdown **Setup Environment**
 print_subprocess = False
 
-if 'google.colab' in str(get_ipython()):
+if 'google.colab' in str(ipy):
     import subprocess, time
-    print("..setting up environment")
+    print("Setting up environment...")
     start_time = time.time()
     all_process = [
         ['pip', 'install', 'torch==1.12.1+cu113', 'torchvision==0.13.1+cu113', '--extra-index-url', 'https://download.pytorch.org/whl/cu113'],
         ['pip', 'install', 'omegaconf==2.2.3', 'einops==0.4.1', 'pytorch-lightning==1.7.4', 'torchmetrics==0.9.3', 'torchtext==0.13.1', 'transformers==4.21.2', 'kornia==0.6.7'],
-        ['git', 'clone',  'https://github.com/deforum/stable-diffusion'],
+        ['git', 'clone',  '-b', 'local', 'https://github.com/deforum/stable-diffusion'],
         ['pip', 'install', '-e', 'git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers'],
         ['pip', 'install', '-e', 'git+https://github.com/openai/CLIP.git@main#egg=clip'],
         ['pip', 'install', 'accelerate', 'ftfy', 'jsonmerge', 'matplotlib', 'resize-right', 'timm', 'torchdiffeq'],
@@ -112,8 +124,26 @@ if 'google.colab' in str(get_ipython()):
     with open('k-diffusion/k_diffusion/__init__.py', 'w') as f:
         f.write('')
 
+    sys.path.extend([
+        'src/taming-transformers',
+        'src/clip',
+        'stable-diffusion/',
+        'k-diffusion',
+        'pytorch3d-lite',
+        'AdaBins',
+        'MiDaS',
+    ])
+
     end_time = time.time()
     print(f"Environment set up in {end_time-start_time:.0f} seconds")
+
+else:
+
+    sys.path.extend([
+      'pytorch3d-lite',
+      'AdaBins',
+      'MiDaS',
+    ])
 
 # %%
 # !! {"metadata":{
@@ -146,12 +176,6 @@ from types import SimpleNamespace
 from torch import autocast
 import re
 from scipy.ndimage import gaussian_filter
-
-sys.path.extend([
-    'pytorch3d-lite',
-    'AdaBins',
-    'MiDaS',
-])
 
 import py3d_tools as p3d
 
@@ -907,9 +931,9 @@ if model_checkpoint == "waifu-diffusion-v1-3.ckpt":
 custom_config_path = "" #@param {type:"string"}
 custom_checkpoint_path = "" #@param {type:"string"}
 
-load_on_run_all = True #@param {type: 'boolean'}
-half_precision = True # check
-check_sha256 = True #@param {type:"boolean"}
+load_on_run_all = True
+half_precision = True
+check_sha256 = True
 
 model_map = {
     "sd-v1-4-full-ema.ckpt": {
@@ -1033,7 +1057,7 @@ if ckpt_valid:
     print(f"..using {ckpt_path}")
 
 def load_model_from_config(config, ckpt, verbose=False, device='cuda', half_precision=True,print_flag=False):
-    map_location = "cuda" #@param ["cpu", "cuda"]
+    map_location = "cuda" # ["cpu", "cuda"]
     print(f"..loading model")
     pl_sd = torch.load(ckpt, map_location=map_location)
     if "global_step" in pl_sd:
