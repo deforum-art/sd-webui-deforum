@@ -57,8 +57,8 @@ print(f"{sub_p_res[:-1]}")
 #@markdown **Model and Output Paths**
 print("Path Variables:")
 
-models_path = "./models" #@param {type:"string"}
-output_path = "./output" #@param {type:"string"}
+models_path = "models" #@param {type:"string"}
+output_path = "output" #@param {type:"string"}
 
 #@markdown **Google Drive Path Variables (Optional)**
 mount_google_drive = True #@param {type:"boolean"}
@@ -136,13 +136,11 @@ if 'google.colab' in str(ipy):
 
     end_time = time.time()
     print(f"Environment set up in {end_time-start_time:.0f} seconds")
-
+    
 else:
 
     sys.path.extend([
-      'pytorch3d-lite',
-      'AdaBins',
-      'MiDaS',
+        'src'
     ])
 
 # %%
@@ -992,7 +990,7 @@ ckpt_config_path = custom_config_path if model_config == "custom" else os.path.j
 if os.path.exists(ckpt_config_path):
     print(f"{ckpt_config_path} exists")
 else:
-    ckpt_config_path = "./configs/stable-diffusion/v1-inference.yaml"
+    ckpt_config_path = "./configs/v1-inference.yaml"
 
 
 # checkpoint path or download
