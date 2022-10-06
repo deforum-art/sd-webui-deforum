@@ -5,7 +5,6 @@ einops
 omegaconf
 pytorch_lightning
 scikit-image
-k-diffusion
 matplotlib
 timm
 transformers==4.19.2
@@ -13,5 +12,3 @@ jupyter
 jupyter_http_over_ws
 colab-convert
 numexpr
--e git+https://github.com/CompVis/taming-transformers.git@master#egg=taming-transformers
--e git+https://github.com/openai/CLIP.git@main#egg=clip
