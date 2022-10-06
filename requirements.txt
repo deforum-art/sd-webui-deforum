@@ -4,10 +4,11 @@ einops
 ftfy
 ipython
 jsonmerge
-jupyter
+jupyterlab
 jupyter_http_over_ws
 kornia
 matplotlib
+notebook
 numexpr
 omegaconf
 opencv-python
