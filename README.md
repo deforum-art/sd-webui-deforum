@@ -19,12 +19,6 @@ clone the github repository:
 git clone -b local https://github.com/deforum/stable-diffusion.git
 cd stable-diffusion
 ```
-clone dependencies:
-```
-git clone https://github.com/shariqfarooq123/AdaBins.git
-git clone https://github.com/isl-org/MiDaS.git
-git clone https://github.com/MSFTserver/pytorch3d-lite.git
-```
 create anaconda environment:
 ```
 conda create -n dsd python=3.9 -y
