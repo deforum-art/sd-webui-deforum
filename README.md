@@ -31,7 +31,7 @@ python -m pip install -r requirements.txt
 ```
 
 ## Starting Over
-the dsd conda environment can be removed with the following set of commands:
+the stable-diffusion folder can be deleted and the dsd conda environment can be removed with the following set of commands:
 ```
 conda deactivate
 conda env remove -n dsd
