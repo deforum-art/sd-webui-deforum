@@ -9,6 +9,7 @@ k-diffusion
 matplotlib
 timm
 transformers==4.19.2
+jupyter
 jupyter_http_over_ws
 colab-convert
 numexpr
