@@ -46,7 +46,6 @@ Please read the full license here: https://huggingface.co/spaces/CompVis/stable-
 #@markdown **NVIDIA GPU**
 import subprocess
 sub_p_res = subprocess.run(['nvidia-smi', '--query-gpu=name,memory.total,memory.free', '--format=csv,noheader'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-print("NVIDIA GPU:")
 print(f"{sub_p_res[:-1]}")
 
 # %%
@@ -55,7 +54,6 @@ print(f"{sub_p_res[:-1]}")
 # !!   "id": "TxIOPT0G5Lx1"
 # !! }}
 #@markdown **Model and Output Paths**
-print("Path Variables:")
 
 models_path = "models" #@param {type:"string"}
 output_path = "output" #@param {type:"string"}
@@ -979,8 +977,9 @@ ckpt_config_path = custom_config_path if model_config == "custom" else os.path.j
 if os.path.exists(ckpt_config_path):
     print(f"{ckpt_config_path} exists")
 else:
-    ckpt_config_path = "./configs/v1-inference.yaml"
-
+    ckpt_config_path = "configs/v1-inference.yaml"
+    
+ckpt_config_path = os.path.abspath(ckpt_config_path)
 
 # checkpoint path or download
 ckpt_path = custom_checkpoint_path if model_checkpoint == "custom" else os.path.join(models_path, model_checkpoint)
@@ -993,7 +992,7 @@ elif 'url' in model_map[model_checkpoint]:
     # CLI dialogue to authenticate download
     if model_map[model_checkpoint]['requires_login']:
         print("This model requires an authentication token")
-        print("Please ensure you have accepted its terms of service before continuing.")
+        print("Please ensure you have accepted the terms of service before continuing.")
 
         username = input("[What is your huggingface username?]: ")
         token = input("[What is your huggingface token?]: ")
@@ -1022,9 +1021,8 @@ else:
     print(f"Please download model checkpoint and place in {os.path.join(models_path, model_checkpoint)}")
     ckpt_valid = False
     
-print("Config and Model Location:")
-print(f"{ckpt_config_path}")
-print(f"{ckpt_path}")
+print(f"config_path: {ckpt_config_path}")
+print(f"ckpt_path: {ckpt_path}")
 
 if check_sha256 and model_checkpoint != "custom" and ckpt_valid:
     import hashlib
@@ -1038,9 +1036,6 @@ if check_sha256 and model_checkpoint != "custom" and ckpt_valid:
     else:
         print("..hash in not correct")
         ckpt_valid = False
-
-if ckpt_valid:
-    print(f"..using {ckpt_path}")
 
 def load_model_from_config(config, ckpt, verbose=False, device='cuda', half_precision=True,print_flag=False):
     map_location = "cuda" # ["cpu", "cuda"]
