@@ -62,7 +62,7 @@ models_path = "./models" #@param {type:"string"}
 output_path = "./output" #@param {type:"string"}
 
 #@markdown **Google Drive Path Variables (Optional)**
-mount_google_drive = False #@param {type:"boolean"}
+mount_google_drive = True #@param {type:"boolean"}
 force_remount = False
 
 if mount_google_drive:
@@ -85,17 +85,10 @@ os.makedirs(output_path, exist_ok=True)
 print(f"models_path: {models_path}")
 print(f"output_path: {output_path}")
 
-# %%
-# !! {"metadata":{
-# !!   "id": "VRNl2mfepEIe",
-# !!   "cellView": "form"
-# !! }}
-#@markdown **Setup Environment**
+@markdown **Setup Environment**
+print_subprocess = False
 
-setup_environment = False #@param {type:"boolean"}
-print_subprocess = True #@param {type:"boolean"}
-
-if setup_environment:
+if 'google.colab' in str(get_ipython()):
     import subprocess, time
     print("..setting up environment")
     start_time = time.time()
@@ -1898,7 +1891,7 @@ else:
 # !!     "provenance": [],
 # !!     "private_outputs": true
 # !!   },
-# !!   "gpuClass": "standard",
+# !!   "gpuClass": "premium",
 # !!   "kernelspec": {
 # !!     "display_name": "Python 3",
 # !!     "name": "python3"
