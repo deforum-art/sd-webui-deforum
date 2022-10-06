@@ -12,6 +12,7 @@
 
 ## Before You Start
 install anaconda for managing python environments and packages https://www.anaconda.com/
+using anaconda is not required but recommended
 
 ## Local Setup
 
@@ -38,9 +39,12 @@ install required packages:
 ```
 python -m pip install -r requirements.txt
 ```
-run deforum stable diffusion:
+
+## Starting Over
+the dsd conda environment can be removed with the following set of commands:
 ```
-python Deforum_Stable_Diffusion.py
+conda deactivate
+conda env remove -n dsd
 ```
 
 ## Running Locally
@@ -48,20 +52,15 @@ navigate to the stable-diffusion folder and run either the Deforum_Stable_Diffus
 ```
 python Deforum_Stable_Diffusion.py
 ```
-if you prefer a more colab-like experience you can run the .ipynb in jupyter-lab or jupyter-notebook.
+if you prefer a more colab-like experience you can run the .ipynb in jupyter-lab or jupyter-notebook. install with either of the following commands
 ```
 conda install -c conda-forge jupyterlab
-```
-or
-```
+
 conda install -c conda-forge notebook
 ```
-activate jupyter-lab or jupyter-notebook from within the stable-diffusion folder with the following commands:
+activate jupyter-lab or jupyter-notebook from within the stable-diffusion folder with either of the following commands:
 ```
 jupyter lab
-```
-or
-```
 jupyter notebook
 ```
 
@@ -78,11 +77,3 @@ jupyter notebook \
   --NotebookApp.port_retries=0
 ```
 copy paste url token.
-
-## Starting Over
-the dsd conda environment can be removed with the following set of commands:
-```
-conda deactivate
-conda env remove -n dsd
-```
-make sure you are removing the correct conda environment
