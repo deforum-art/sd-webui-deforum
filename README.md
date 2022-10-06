@@ -10,6 +10,9 @@
     <a href="https://replicate.com/deforum/deforum_stable_diffusion"><img alt="Replicate" src="https://replicate.com/deforum/deforum_stable_diffusion/badge"></a>
 </p>
 
+## Before You Start
+install anaconda for managing python environments and packages https://www.anaconda.com/
+
 ## Local Setup
 
 clone the github repository:
@@ -40,6 +43,28 @@ run deforum stable diffusion:
 python Deforum_Stable_Diffusion.py
 ```
 
+## Running Locally
+navigate to the stable-diffusion folder and run either the Deforum_Stable_Diffusion.py or the Deforum_Stable_Diffusion.ipynb. running the .py is the quickest and easiest way to check that your installation is working, however, it is not the best environment for tinkering with prompts and settings.
+```
+python Deforum_Stable_Diffusion.py
+```
+if you prefer a more colab-like experience you can run the .ipynb in jupyter-lab or jupyter-notebook.
+```
+conda install -c conda-forge jupyterlab
+```
+or
+```
+conda install -c conda-forge notebook
+```
+activate jupyter-lab or jupyter-notebook from within the stable-diffusion folder with the following commands:
+```
+jupyter lab
+```
+or
+```
+jupyter notebook
+```
+
 ## Running Colab Local Runtime
 open google colab. file > upload notebook > select .ipynb file in the stable-diffusion folder. enable jupyter extension
 ```
@@ -53,3 +78,11 @@ jupyter notebook \
   --NotebookApp.port_retries=0
 ```
 copy paste url token.
+
+## Starting Over
+the dsd conda environment can be removed with the following set of commands:
+```
+conda deactivate
+conda env remove -n dsd
+```
+make sure you are removing the correct conda environment
