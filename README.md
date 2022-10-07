@@ -42,6 +42,11 @@ conda env remove -n dsd
 ```
 
 ## Running Locally
+make sure the dsd conda environment is active:
+```
+conda activate dsd
+
+```
 navigate to the stable-diffusion folder and run either the Deforum_Stable_Diffusion.py or the Deforum_Stable_Diffusion.ipynb. running the .py is the quickest and easiest way to check that your installation is working, however, it is not the best environment for tinkering with prompts and settings.
 ```
 python Deforum_Stable_Diffusion.py
