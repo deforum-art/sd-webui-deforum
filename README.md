@@ -11,7 +11,7 @@
 </p>
 
 ## Before Starting
-install anaconda for managing python environments and packages https://www.anaconda.com/. using anaconda is not required but recommended
+install anaconda for managing python environments and packages https://www.anaconda.com/
 
 ## Getting Started
 clone the github repository:
