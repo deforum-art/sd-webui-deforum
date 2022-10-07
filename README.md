@@ -60,6 +60,11 @@ jupyter notebook
 ```
 
 ## Colab Local Runtime
+make sure the dsd conda environment is active:
+```
+conda activate dsd
+
+```
 open google colab. file > upload notebook > select .ipynb file in the stable-diffusion folder. enable jupyter extension
 ```
 jupyter serverextension enable --py jupyter_http_over_ws
