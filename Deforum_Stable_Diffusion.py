@@ -1602,7 +1602,7 @@ def vid2frames(video_path, frames_path, n=1, overwrite=True):
     if not os.path.exists(frames_path) or overwrite: 
         try:
             for f in pathlib.Path(video_in_frame_path).glob('*.jpg'):
-            f.unlink()
+            	f.unlink()
         except:
             pass
         assert os.path.exists(video_path), f"Video input {video_path} does not exist"
