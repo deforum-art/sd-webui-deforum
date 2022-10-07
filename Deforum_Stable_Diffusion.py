@@ -119,6 +119,8 @@ if 'google.colab' in str(ipy):
         'stable-diffusion/',
         'stable-diffusion/src',
     ])
+    
+    path_extend = "stable-diffusion"
 
     end_time = time.time()
     print(f"Environment set up in {end_time-start_time:.0f} seconds")
@@ -128,6 +130,8 @@ else:
     sys.path.extend([
         'src'
     ])
+    
+    path_extend = ""
 
 # %%
 # !! {"metadata":{
@@ -975,7 +979,7 @@ ckpt_config_path = custom_config_path if model_config == "custom" else os.path.j
 if os.path.exists(ckpt_config_path):
     print(f"{ckpt_config_path} exists")
 else:
-    ckpt_config_path = "configs/v1-inference.yaml"
+    ckpt_config_path = os.path.join(path_extend,"configs","v1-inference.yaml")
     
 ckpt_config_path = os.path.abspath(ckpt_config_path)
 
