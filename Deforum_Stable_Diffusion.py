@@ -40,8 +40,8 @@ Please read the full license here: https://huggingface.co/spaces/CompVis/stable-
 
 # %%
 # !! {"metadata":{
-# !!   "id": "2g-f7cQmf2Nt",
-# !!   "cellView": "form"
+# !!   "cellView": "form",
+# !!   "id": "2g-f7cQmf2Nt"
 # !! }}
 #@markdown **NVIDIA GPU**
 import subprocess
@@ -54,7 +54,6 @@ print(f"{sub_p_res[:-1]}")
 # !!   "id": "TxIOPT0G5Lx1"
 # !! }}
 #@markdown **Model and Output Paths**
-
 models_path = "models" #@param {type:"string"}
 output_path = "output" #@param {type:"string"}
 
@@ -132,8 +131,8 @@ else:
 
 # %%
 # !! {"metadata":{
-# !!   "id": "81qmVZbrm4uu",
-# !!   "cellView": "form"
+# !!   "cellView": "form",
+# !!   "id": "81qmVZbrm4uu"
 # !! }}
 #@markdown **Python Definitions**
 import json
@@ -908,7 +907,6 @@ def generate(args, frame = 0, return_latent=False, return_sample=False, return_c
 # !!   "id": "CIUJ7lWI4v53"
 # !! }}
 #@markdown **Select and Load Model**
-
 model_config = "v1-inference.yaml" #@param ["custom","v1-inference.yaml"]
 model_checkpoint =  "sd-v1-4.ckpt" #@param ["custom","sd-v1-4-full-ema.ckpt","sd-v1-4.ckpt","sd-v1-3-full-ema.ckpt","sd-v1-3.ckpt","sd-v1-2-full-ema.ckpt","sd-v1-2.ckpt","sd-v1-1-full-ema.ckpt","sd-v1-1.ckpt", "robo-diffusion-v1.ckpt","wd-v1-3-float16.ckpt"]
 
@@ -1089,7 +1087,6 @@ if load_on_run_all and ckpt_valid:
 # !!   "cellView": "form",
 # !!   "id": "8HJN2TE3vh-J"
 # !! }}
-
 def DeforumAnimArgs():
 
     #@markdown ####**Animation:**
@@ -1225,7 +1222,6 @@ def parse_key_frames(string, prompt_parser=None):
 # !! {"metadata":{
 # !!   "id": "2ujwkGZTcGev"
 # !! }}
-
 prompts = [
     "a beautiful forest by Asher Brown Durand, trending on Artstation", # the first prompt I want
     "a beautiful portrait of a woman by Artgerm, trending on Artstation", # the second prompt I want
@@ -1252,8 +1248,8 @@ animation_prompts = {
 
 # %%
 # !! {"metadata":{
-# !!   "id": "qH74gBWDd2oq",
-# !!   "cellView": "form"
+# !!   "cellView": "form",
+# !!   "id": "qH74gBWDd2oq"
 # !! }}
 #@markdown **Load Settings**
 override_settings_with_file = False #@param {type:"boolean"}
@@ -1893,15 +1889,25 @@ else:
 # !!   "accelerator": "GPU",
 # !!   "colab": {
 # !!     "collapsed_sections": [],
-# !!     "provenance": [],
-# !!     "private_outputs": true
+# !!     "private_outputs": true,
+# !!     "provenance": []
 # !!   },
 # !!   "gpuClass": "premium",
 # !!   "kernelspec": {
-# !!     "display_name": "Python 3",
+# !!     "display_name": "Python 3 (ipykernel)",
+# !!     "language": "python",
 # !!     "name": "python3"
 # !!   },
 # !!   "language_info": {
-# !!     "name": "python"
+# !!     "codemirror_mode": {
+# !!       "name": "ipython",
+# !!       "version": 3
+# !!     },
+# !!     "file_extension": ".py",
+# !!     "mimetype": "text/x-python",
+# !!     "name": "python",
+# !!     "nbconvert_exporter": "python",
+# !!     "pygments_lexer": "ipython3",
+# !!     "version": "3.9.13"
 # !!   }
 # !! }}
