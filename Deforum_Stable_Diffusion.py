@@ -365,10 +365,10 @@ def load_img(path, shape, use_alpha_as_mask=False):
 
     mask_image = None
     if use_alpha_as_mask:
-      # Split alpha channel into a mask_image
-      red, green, blue, alpha = Image.Image.split(image)
-      mask_image = alpha.convert('L')
-      image = image.convert('RGB')
+        # Split alpha channel into a mask_image
+        red, green, blue, alpha = Image.Image.split(image)
+        mask_image = alpha.convert('L')
+        image = image.convert('RGB')
 
     image = np.array(image).astype(np.float16) / 255.0
     image = image[None].transpose(0, 3, 1, 2)
@@ -1006,11 +1006,11 @@ elif 'url' in model_map[model_checkpoint]:
 
     # inform user of errors
     if request_status == 403:
-      raise ConnectionRefusedError("You have not accepted the license for this model.")
+        raise ConnectionRefusedError("You have not accepted the license for this model.")
     elif request_status == 404:
-      raise ConnectionError("Could not make contact with server")
+        raise ConnectionError("Could not make contact with server")
     elif request_status != 200:
-      raise ConnectionError(f"Some other error has ocurred - response code: {request_status}")
+        raise ConnectionError(f"Some other error has ocurred - response code: {request_status}")
 
     # write to model path
     with open(os.path.join(models_path, model_checkpoint), 'wb') as model_file:
@@ -1040,16 +1040,16 @@ def load_model_from_config(config, ckpt, verbose=False, device='cuda', half_prec
     print(f"..loading model")
     pl_sd = torch.load(ckpt, map_location=map_location)
     if "global_step" in pl_sd:
-    	if print_flag:
-    	    print(f"Global Step: {pl_sd['global_step']}")
+        if print_flag:
+            print(f"Global Step: {pl_sd['global_step']}")
     sd = pl_sd["state_dict"]
     model = instantiate_from_config(config.model)
     m, u = model.load_state_dict(sd, strict=False)
     if print_flag:
-    	if len(m) > 0 and verbose:
+        if len(m) > 0 and verbose:
             print("missing keys:")
             print(m)
-    	if len(u) > 0 and verbose:
+        if len(u) > 0 and verbose:
             print("unexpected keys:")
             print(u)
 
@@ -1090,7 +1090,7 @@ if load_on_run_all and ckpt_valid:
 def DeforumAnimArgs():
 
     #@markdown ####**Animation:**
-    animation_mode = 'None' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
+    animation_mode = '3D' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
     max_frames = 1000 #@param {type:"number"}
     border = 'replicate' #@param ['wrap', 'replicate'] {type:'string'}
 
@@ -1180,9 +1180,9 @@ def get_inbetweens(key_frames, max_frames, integer=False, interp_method='Linear'
     key_frame_series = key_frame_series.astype(float)
     
     if interp_method == 'Cubic' and len(key_frames.items()) <= 3:
-      interp_method = 'Quadratic'    
+        interp_method = 'Quadratic'    
     if interp_method == 'Quadratic' and len(key_frames.items()) <= 2:
-      interp_method = 'Linear'
+        interp_method = 'Linear'
           
     key_frame_series[0] = key_frame_series[key_frame_series.first_valid_index()]
     key_frame_series[max_frames-1] = key_frame_series[key_frame_series.last_valid_index()]
@@ -1600,25 +1600,25 @@ def render_animation(args, anim_args):
 
 def vid2frames(video_path, frames_path, n=1, overwrite=True):      
     if not os.path.exists(frames_path) or overwrite: 
-      try:
-          for f in pathlib.Path(video_in_frame_path).glob('*.jpg'):
-              f.unlink()
-      except:
-          pass
-      assert os.path.exists(video_path), f"Video input {video_path} does not exist"
+        try:
+            for f in pathlib.Path(video_in_frame_path).glob('*.jpg'):
+            f.unlink()
+        except:
+            pass
+        assert os.path.exists(video_path), f"Video input {video_path} does not exist"
           
-      vidcap = cv2.VideoCapture(video_path)
-      success,image = vidcap.read()
-      count = 0
-      t=1
-      success = True
-      while success:
-        if count % n == 0:
-            cv2.imwrite(frames_path + os.path.sep + f"{t:05}.jpg" , image)     # save frame as JPEG file
-            t += 1
+        vidcap = cv2.VideoCapture(video_path)
+        success,image = vidcap.read()
+        count = 0
+        t=1
+        success = True
+        while success:
+            if count % n == 0:
+                cv2.imwrite(frames_path + os.path.sep + f"{t:05}.jpg" , image)     # save frame as JPEG file
+                t += 1
         success,image = vidcap.read()
         count += 1
-      print("Converted %d frames" % count)
+        print("Converted %d frames" % count)
     else: print("Frames already unpacked")
 
 def render_input_video(args, anim_args):
@@ -1670,17 +1670,17 @@ def render_interpolation(args, anim_args):
     print(f"Preparing for interpolation of the following...")
 
     for i, prompt in animation_prompts.items():
-      args.prompt = prompt
+        args.prompt = prompt
 
-      # sample the diffusion model
-      results = generate(args, return_c=True)
-      c, image = results[0], results[1]
-      prompts_c_s.append(c) 
+        # sample the diffusion model
+        results = generate(args, return_c=True)
+        c, image = results[0], results[1]
+        prompts_c_s.append(c) 
       
-      # display.clear_output(wait=True)
-      display.display(image)
+        # display.clear_output(wait=True)
+        display.display(image)
       
-      args.seed = next_seed(args)
+        args.seed = next_seed(args)
 
     display.clear_output(wait=True)
     print(f"Interpolation start...")
@@ -1688,51 +1688,51 @@ def render_interpolation(args, anim_args):
     frame_idx = 0
 
     if anim_args.interpolate_key_frames:
-      for i in range(len(prompts_c_s)-1):
-        dist_frames = list(animation_prompts.items())[i+1][0] - list(animation_prompts.items())[i][0]
-        if dist_frames <= 0:
-          print("key frames duplicated or reversed. interpolation skipped.")
-          return
+        for i in range(len(prompts_c_s)-1):
+            dist_frames = list(animation_prompts.items())[i+1][0] - list(animation_prompts.items())[i][0]
+            if dist_frames <= 0:
+                print("key frames duplicated or reversed. interpolation skipped.")
+                return
         else:
-          for j in range(dist_frames):
-            # interpolate the text embedding
-            prompt1_c = prompts_c_s[i]
-            prompt2_c = prompts_c_s[i+1]  
-            args.init_c = prompt1_c.add(prompt2_c.sub(prompt1_c).mul(j * 1/dist_frames))
+            for j in range(dist_frames):
+                # interpolate the text embedding
+                prompt1_c = prompts_c_s[i]
+                prompt2_c = prompts_c_s[i+1]  
+                args.init_c = prompt1_c.add(prompt2_c.sub(prompt1_c).mul(j * 1/dist_frames))
 
-            # sample the diffusion model
-            results = generate(args)
-            image = results[0]
+                # sample the diffusion model
+                results = generate(args)
+                image = results[0]
 
-            filename = f"{args.timestring}_{frame_idx:05}.png"
-            image.save(os.path.join(args.outdir, filename))
-            frame_idx += 1
+                filename = f"{args.timestring}_{frame_idx:05}.png"
+                image.save(os.path.join(args.outdir, filename))
+                frame_idx += 1
 
-            display.clear_output(wait=True)
-            display.display(image)
+                display.clear_output(wait=True)
+                display.display(image)
 
-            args.seed = next_seed(args)
+                args.seed = next_seed(args)
 
     else:
-      for i in range(len(prompts_c_s)-1):
-        for j in range(anim_args.interpolate_x_frames+1):
-          # interpolate the text embedding
-          prompt1_c = prompts_c_s[i]
-          prompt2_c = prompts_c_s[i+1]  
-          args.init_c = prompt1_c.add(prompt2_c.sub(prompt1_c).mul(j * 1/(anim_args.interpolate_x_frames+1)))
+        for i in range(len(prompts_c_s)-1):
+            for j in range(anim_args.interpolate_x_frames+1):
+                # interpolate the text embedding
+                prompt1_c = prompts_c_s[i]
+                prompt2_c = prompts_c_s[i+1]  
+                args.init_c = prompt1_c.add(prompt2_c.sub(prompt1_c).mul(j * 1/(anim_args.interpolate_x_frames+1)))
 
-          # sample the diffusion model
-          results = generate(args)
-          image = results[0]
+                # sample the diffusion model
+                results = generate(args)
+                image = results[0]
 
-          filename = f"{args.timestring}_{frame_idx:05}.png"
-          image.save(os.path.join(args.outdir, filename))
-          frame_idx += 1
+                filename = f"{args.timestring}_{frame_idx:05}.png"
+                image.save(os.path.join(args.outdir, filename))
+                frame_idx += 1
 
-          display.clear_output(wait=True)
-          display.display(image)
+                display.clear_output(wait=True)
+                display.display(image)
 
-          args.seed = next_seed(args)
+                args.seed = next_seed(args)
 
     # generate the last prompt
     args.init_c = prompts_c_s[-1]
