@@ -1090,7 +1090,7 @@ if load_on_run_all and ckpt_valid:
 def DeforumAnimArgs():
 
     #@markdown ####**Animation:**
-    animation_mode = '3D' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
+    animation_mode = 'None' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
     max_frames = 1000 #@param {type:"number"}
     border = 'replicate' #@param ['wrap', 'replicate'] {type:'string'}
 
