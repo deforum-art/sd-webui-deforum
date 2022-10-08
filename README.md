@@ -39,10 +39,12 @@ the midas and adabins model downloads are broken for windows at the moment. wind
 in models folder:
 ```
 https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt
+
 ```
 in pretrained folder
 ```
-https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt 
+https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt
+
 ```
 
 ## Starting Over
