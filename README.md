@@ -33,6 +33,16 @@ python -m pip install -r requirements.txt
 
 ```
 
+## Windows Users
+the midas and adabins model downloads are borken for windows at the moment. windows users will need to manually download model weights and place in the correct folders. in models folder:
+```
+https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt
+```
+in pretrained folder
+```
+https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt 
+```
+
 ## Starting Over
 the stable-diffusion folder can be deleted and the dsd conda environment can be removed with the following set of commands:
 ```
