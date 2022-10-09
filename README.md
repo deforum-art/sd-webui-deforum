@@ -54,6 +54,7 @@ conda deactivate
 conda env remove -n dsd
 
 ```
+with the dsd environment removed you can start over.
 
 ## Running Locally
 make sure the dsd conda environment is active:
