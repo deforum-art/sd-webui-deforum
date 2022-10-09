@@ -10,6 +10,7 @@ from PIL import Image
 from infer import InferenceHelper
 from midas.dpt_depth import DPTDepthModel
 from midas.transforms import Resize, NormalizeImage, PrepareForNet
+import torchvision.transforms.functional as TF
 
 
 def wget(url, outputdir):
@@ -25,11 +26,11 @@ class DepthModel():
         self.midas_model = None
         self.midas_transform = None
     
-    def load_adabins(self):
-        if not os.path.exists('pretrained/AdaBins_nyu.pt'):
+    def load_adabins(self, models_path):
+        if not os.path.exists(os.path.join(models_path,'AdaBins_nyu.pt')):
             print("Downloading AdaBins_nyu.pt...")
-            os.makedirs('pretrained', exist_ok=True)
-            wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", 'pretrained')
+            os.makedirs(models_path, exist_ok=True)
+            wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", models_path)
         self.adabins_helper = InferenceHelper(dataset='nyu', device=self.device)
 
     def load_midas(self, models_path, half_precision=True):
