@@ -34,15 +34,11 @@ python -m pip install -r requirements.txt
 ```
 
 ## Windows Users
-the midas and adabins model downloads are broken for windows at the moment. windows users will need to manually download model weights and place in the correct folders.
+the midas and adabins model downloads are broken for windows at the moment. windows users will need to manually download model weights and place in the models folders. note: if you do not specify an existing models folder, the folder will be created automatically when you run either the .py or .ipynb for the first time.
 
-in models folder:
+manual download links:
 ```
 https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt
-
-```
-in pretrained folder
-```
 https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt
 
 ```
