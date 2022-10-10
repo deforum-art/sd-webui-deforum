@@ -1,6 +1,7 @@
 clean-fid
 colab-convert
 einops
+ffmpeg
 ftfy
 ipython
 jsonmerge
