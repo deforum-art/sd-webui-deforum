@@ -86,7 +86,7 @@ copy paste url token.
 
 
 ## Colab Hosted Runtime
-Deforum_Stable_Diffusion.ipynb can be uploaded to colab an run normally in a hosted session.
+Deforum_Stable_Diffusion.ipynb can be uploaded to colab and run normally in a hosted session.
 
 
 ## Windows Users
