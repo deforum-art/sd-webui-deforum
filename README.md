@@ -33,6 +33,12 @@ python -m pip install -r requirements.txt
 
 ```
 
+check your installation by running the .py
+```
+python Deforum_Stable_Diffusion.py
+
+```
+
 ## Windows Users
 the midas and adabins model downloads are broken for windows at the moment. windows users will need to manually download model weights and place in the models folders. note: if you do not specify an existing models folder, the folder will be created automatically when you run either the .py or .ipynb for the first time.
 
