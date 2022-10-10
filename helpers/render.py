@@ -147,7 +147,7 @@ def render_animation(args, anim_args, animation_prompts, root):
         depth_model = DepthModel(root.device)
         depth_model.load_midas(root.models_path)
         if anim_args.midas_weight < 1.0:
-            depth_model.load_adabins()
+            depth_model.load_adabins(root.models_path)
     else:
         depth_model = None
         anim_args.save_depth_maps = False
