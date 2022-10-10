@@ -48,15 +48,6 @@ https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.
 
 https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt
 
-## Starting Over
-the stable-diffusion folder can be deleted and the dsd conda environment can be removed with the following set of commands:
-```
-conda deactivate
-conda env remove -n dsd
-
-```
-with the dsd environment removed you can start over.
-
 ## Running Locally
 make sure the dsd conda environment is active:
 ```
@@ -95,3 +86,12 @@ jupyter notebook \
   
 ```
 copy paste url token.
+
+## Starting Over
+the stable-diffusion folder can be deleted and the dsd conda environment can be removed with the following set of commands:
+```
+conda deactivate
+conda env remove -n dsd
+
+```
+with the dsd environment removed you can start over.
