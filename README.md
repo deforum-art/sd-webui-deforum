@@ -75,12 +75,12 @@ make sure the dsd conda environment is active:
 conda activate dsd
 
 ```
-open google colab. file > upload notebook > select .ipynb file in the stable-diffusion folder. enable jupyter extension
+open google colab. file > upload notebook > select .ipynb file in the stable-diffusion folder. enable jupyter extension. note: you only need to run this cell one time.
 ```
 jupyter serverextension enable --py jupyter_http_over_ws
 
 ```
-start server
+start server.
 ```
 jupyter notebook \
   --NotebookApp.allow_origin='https://colab.research.google.com' \
