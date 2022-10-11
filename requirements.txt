@@ -20,3 +20,4 @@ scikit-image
 timm
 torchdiffeq
 transformers==4.19.2
+xformers
