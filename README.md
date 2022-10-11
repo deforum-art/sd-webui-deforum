@@ -101,6 +101,7 @@ xformers can be enabled with the following commands:
 ```
 conda install xformers -c xformers/label/dev -y
 mv src/ldm/modules/attention_xformers.py src/ldm/models/attention.py
+
 ```
 
 
