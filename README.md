@@ -25,7 +25,7 @@ create anaconda environment:
 ```
 conda create -n dsd python=3.9 -y
 conda activate dsd
-conda install pytorch cudatoolkit=11.6 torchvision torchaudio -c pytorch -c conda-forge -y
+conda install pytorch cudatoolkit=11.6 torchvision torchaudio xformers -c xformers/label/dev -c pytorch -c conda-forge -y
 
 ```
 install required packages:
