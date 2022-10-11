@@ -103,8 +103,8 @@ conda install xformers -c xformers/label/dev -y
 
 ```
 ```
-mv src/ldm/models/attention.py src/ldm/modules/attention_backup.py
-mv src/ldm/modules/attention_xformers.py src/ldm/models/attention.py
+mv src/ldm/modules/attention.py src/ldm/modules/attention_backup.py
+mv src/ldm/modules/attention_xformers.py src/ldm/modules/attention.py
 
 ```
 
