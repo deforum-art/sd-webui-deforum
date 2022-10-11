@@ -50,8 +50,8 @@ def vid2frames(video_path, frames_path, video_in_frame_path, n=1, overwrite=True
             if count % n == 0:
                 cv2.imwrite(frames_path + os.path.sep + f"{t:05}.jpg" , image)     # save frame as JPEG file
                 t += 1
-        success,image = vidcap.read()
-        count += 1
+            success,image = vidcap.read()
+            count += 1
         print("Converted %d frames" % count)
     else: print("Frames already unpacked")
 
