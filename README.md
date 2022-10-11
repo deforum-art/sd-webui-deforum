@@ -100,7 +100,7 @@ https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/
 xformers can be enabled with the following commands:
 ```
 conda install xformers -c xformers/label/dev -y
-mv src/ldm/modules/attention_xformers.py src/ldm/models/attention.py
+mv -f src/ldm/modules/attention_xformers.py src/ldm/models/attention.py
 
 ```
 
