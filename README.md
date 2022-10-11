@@ -95,6 +95,7 @@ https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.
 
 https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt
 
+
 ## Linux Users
 xformers can be enabled with the following commands:
 ```
