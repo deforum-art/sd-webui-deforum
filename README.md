@@ -99,6 +99,24 @@ https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.
 
 https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt
 
+xformers can be installed with the following commands:
+```
+wget https://github.com/neonsecret/xformers/releases/download/v0.14/xformers-0.0.14.dev0-cp39-cp39-win_amd64.whl
+pip install xformers-0.0.14.dev0-cp39-cp39-win_amd64.whl
+
+```
+xformers can be enabled by switching the attention.py
+```
+mv src/ldm/modules/attention.py src/ldm/modules/attention_backup.py
+mv src/ldm/modules/attention_xformers.py src/ldm/modules/attention.py
+
+```
+to turn off xformers run the following:
+```
+mv src/ldm/modules/attention.py src/ldm/modules/attention_xformers.py 
+mv src/ldm/modules/attention_backup.py src/ldm/modules/attention.py
+
+```
 
 ## Linux Users
 xformers can be installed with the following commands:
