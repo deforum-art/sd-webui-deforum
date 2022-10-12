@@ -1,10 +1,11 @@
+import scripts.deforum.args as deforum_args
+
 import modules.scripts as scripts
 import gradio as gr
 
 from modules.processing import Processed
 from modules.shared import opts, cmd_opts, state
-
-import deforum.args as deforum_args
+from types import SimpleNamespace
 
 class Script(scripts.Script):
 
@@ -12,7 +13,7 @@ class Script(scripts.Script):
         return "Deforum"
 
     def ui(self, is_img2img):
-        da = SimpleNamespace(**DeforumAnimArgs()) #default args
+        da = SimpleNamespace(**deforum_args.DeforumAnimArgs()) #default args
         gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Import settings from file</p>")
         with gr.Row():
             override_settings_with_file = gr.Checkbox(label="Override settings", value=False)
