@@ -107,7 +107,12 @@ mv src/ldm/modules/attention.py src/ldm/modules/attention_backup.py
 mv src/ldm/modules/attention_xformers.py src/ldm/modules/attention.py
 
 ```
+to turn off xformers run the following:
+```
+mv src/ldm/modules/attention.py src/ldm/modules/attention_xformers.py 
+mv src/ldm/modules/attention_backup.py src/ldm/modules/attention.py
 
+```
 
 ## Starting Over
 the stable-diffusion folder can be deleted and the dsd conda environment can be removed with the following set of commands:
