@@ -7,6 +7,7 @@ def Root():
     models_path = ph.models_path + '/Deforum'
     half_precision = not cmd_opts.no_half
     p = None
+    p_txt = None
     return locals()
 
 def DeforumAnimArgs():
@@ -195,7 +196,7 @@ def setup_deforum_setting_ui(is_img2img):
     #TODO make a some sort of the original dictionary parsing
     i9 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Animation settings</p>")
     with gr.Row():
-        animation_mode = gr.Dropdown(label="animation_mode", choices=['None', '2D', '3D', 'Video Input', 'Interpolation'], value=da.animation_mode, type="index", elem_id="animation_mode", interactive=True)
+        animation_mode = gr.Dropdown(label="animation_mode", choices=['None', '2D', '3D', 'Video Input'], value=da.animation_mode, type="index", elem_id="animation_mode", interactive=True)
         max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True)
         border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="index", elem_id="border", interactive=True)
     
@@ -400,6 +401,35 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
 
     root = SimpleNamespace(**Root())
     root.p = p
+    
+    if is_img2img:
+        root.p_txt = StableDiffusionProcessingTxt2Img(
+            sd_model=p.sd_model,
+            outpath_samples=p.outpath_samples,
+            outpath_grids=p.outpath_grids,
+            prompt=p.prompt,
+            styles=[p.prompt_style, p.prompt_style2],
+            negative_prompt=p.negative_prompt,
+            seed=p.seed,
+            subseed=p.subseed,
+            subseed_strength=p.subseed_strength,
+            seed_resize_from_h=p.seed_resize_from_h,
+            seed_resize_from_w=p.seed_resize_from_w,
+            seed_enable_extras=p.seed_enable_extras,
+            sampler_index=p.sampler_index,
+            batch_size=p.batch_size,
+            n_iter=p.n_iter,
+            steps=p.steps,
+            cfg_scale=p.cfg_scale,
+            width=p.width,
+            height=p.height,
+            restore_faces=p.restore_faces,
+            tiling=p.tiling,
+            enable_hr=p.enable_hr,
+            denoising_strength=p.outpath_grids,
+        )
+    
+    
     args = SimpleNamespace(**args_dict)
     anim_args = SimpleNamespace(**anim_args_dict)
     video_args = SimpleNamespace(**video_args_dict)
