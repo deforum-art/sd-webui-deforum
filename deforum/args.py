@@ -144,14 +144,27 @@ def DeforumArgs():
 
     return locals()
     
+def DeforumOutputArgs():
+    skip_video_for_run_all = True #@param {type: 'boolean'}
+    fps = 12 #@param {type:"number"}
+    #@markdown **Manual Settings**
+    use_manual_settings = False #@param {type:"boolean"}
+    image_path = "/content/drive/MyDrive/AI/StableDiffusion/2022-09/20220903000939_%05d.png" #@param {type:"string"}
+    mp4_path = "/content/drive/MyDrive/AI/StableDiffusion/content/drive/MyDrive/AI/StableDiffusion/2022-09/sion/2022-09/20220903000939.mp4" #@param {type:"string"}
+    render_steps = False  #@param {type: 'boolean'}
+    path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
+    max_frames = "200" #@param {type:"string"}
+    return locals()
+    
 import gradio as gr
 import os
 import time
 from types import SimpleNamespace
 
 def setup_deforum_setting_ui(is_img2img):
-    d = SimpleNamespace(**DeforumArgs())
-    da = SimpleNamespace(**DeforumAnimArgs()) #default args
+    d = SimpleNamespace(**DeforumArgs()) #default args
+    da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
+    dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
     i1 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>")
     i2 = gr.HTML("<p style=\"margin-bottom:0.75em\">Made by deforum.github.io</p>")
     i3 = gr.HTML("<p style=\"margin-bottom:0.75em\">Original Deforum Github repo  github.com/deforum/stable-diffusion</p>")
@@ -318,7 +331,23 @@ def setup_deforum_setting_ui(is_img2img):
         mask_overlay_blur = gr.Number(label="mask_overlay_blur", value=d.mask_overlay_blur, interactive=True)
     # Init settings END
     
-    return [override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, override_webui_with_these, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34]
+    # Video output settings START
+    
+    with gr.Row():
+        skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
+        fps = gr.Number(label="fps", value=dv.fps, interactive=True)
+    with gr.Row():
+        use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
+        render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True)
+        path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="index", elem_id="path_name_modifier", interactive=True)
+        
+    with gr.Row():
+        image_path = gr.Textbox(label="image_path", lines=1, interactive=True, value = dv.image_path)
+    with gr.Row():
+        mp4_path = gr.Textbox(label="mp4_path", lines=1, interactive=True, value = dv.mp4_path)
+    # Video output settings END
+    
+    return [override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, override_webui_with_these, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur, skip_video_for_run_all, fps, use_manual_settings, render_steps, path_name_modifier, image_path, mp4_path, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34]
 
 def pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring):
     return locals()
@@ -326,10 +355,14 @@ def pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_
 def pack_args(override_webui_with_these, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur):
     return locals()
     
-def process_args(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, override_webui_with_these, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34):
+def pack_video_args(skip_video_for_run_all, fps, use_manual_settings, render_steps, path_name_modifier, image_path, mp4_path):
+    return locals()
+    
+def process_args(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, override_webui_with_these, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur, skip_video_for_run_all, fps, use_manual_settings, render_steps, path_name_modifier, image_path, mp4_path, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34):
 
     args = SimpleNamespace(**pack_args(override_webui_with_these, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur))
     anim_args = SimpleNamespace(**pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring))
+    video_args = SimpleNamespace(**pack_video_args(skip_video_for_run_all, fps, use_manual_settings, render_steps, path_name_modifier, image_path, mp4_path))
 
     # TODO handle override and vanilla to auto's samplers mapping
 
@@ -347,5 +380,23 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
         anim_args.max_frames = 1
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
+
+    print(f"{image_path} -> {mp4_path}")
+
+    if video_args.use_manual_settings:
+        video_args.max_frames = "200" #@param {type:"string"}
+    else:
+        if render_steps: # render steps from a single image
+            fname = f"{path_name_modifier}_%05d.png"
+            all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
+            newest_dir = max(all_step_dirs, key=os.path.getmtime)
+            video_args.image_path = os.path.join(newest_dir, fname)
+            print(f"Reading images from {image_path}")
+            video_args.mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
+            video_args.max_frames = str(args.steps)
+        else: # render images for a video
+            video_args.image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
+            video_args.mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
+            video_args.max_frames = str(anim_args.max_frames)
     
-    return args, anim_args
+    return args, anim_args, video_args
