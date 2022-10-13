@@ -1,5 +1,4 @@
 import scripts.deforum.args as deforum_args
-from scripts.deforum.render import render_animation, render_input_video, render_image_batch, render_interpolation
 
 import modules.scripts as scripts
 import gradio as gr
@@ -10,7 +9,6 @@ from modules.shared import opts, cmd_opts, state
 from types import SimpleNamespace
 
 class Script(scripts.Script):
-    path_extended = False
 
     def title(self):
         return "Deforum v0.5-webui-beta"
@@ -22,6 +20,13 @@ class Script(scripts.Script):
         # clean up unused memory
         gc.collect()
         torch.cuda.empty_cache()
+        
+        sys.path.extend([
+            'scripts/deforum/src',
+        ])
+        
+        from scripts.deforum.render import render_animation, render_input_video, render_image_batch, render_interpolation
+    
 
         # dispatch to appropriate renderer
         if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
@@ -41,7 +46,7 @@ class Script(scripts.Script):
             from base64 import b64encode
 
             if video_args.use_manual_settings:
-                max_frames = video_args.max_frames #@param {type:"string"}
+                max_video_frames = video_args.max_video_frames #@param {type:"string"}
                 image_path = video_args.image_path
                 mp4_path = video_args.mp4_path
             else:
@@ -53,11 +58,11 @@ class Script(scripts.Script):
                     image_path = os.path.join(newest_dir, fname)
                     print(f"Reading images from {image_path}")
                     mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
-                    max_frames = str(args.steps)
+                    max_video_frames = args.steps
                 else: # render images for a video
                     image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
                     mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
-                    max_frames = str(anim_args.max_frames)
+                    max_video_frames = anim_args.max_frames
 
             print(f"{image_path} -> {mp4_path}")
             
@@ -69,7 +74,7 @@ class Script(scripts.Script):
                 '-r', str(fps),
                 '-start_number', str(0),
                 '-i', image_path,
-                '-frames:v', max_frames,
+                '-frames:v', str(max_video_frames),
                 '-c:v', 'libx264',
                 '-vf',
                 f'fps={fps}',
@@ -91,17 +96,10 @@ class Script(scripts.Script):
     
         return Processed(p)
 
-    def run(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, override_webui_with_these, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur, skip_video_for_run_all, fps, use_manual_settings, render_steps, path_name_modifier, image_path, mp4_path, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34):
+    def run(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, override_webui_with_these, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur, skip_video_for_run_all, fps, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34):
         print('Hello, deforum!')
-
-        if not path_extended:
-            # to include midas and stuff
-            sys.path.extend([
-                'scripts/deforum/src',
-            ])
-            path_extended = True
         
-        args, anim_args, video_args = deforum_args.process_args(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, override_webui_with_these, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur, skip_video_for_run_all, fps, use_manual_settings, render_steps, path_name_modifier, image_path, mp4_path, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34)
+        args, anim_args, video_args = deforum_args.process_args(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, override_webui_with_these, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur, skip_video_for_run_all, fps, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34)
         
         #return deforum_main(self, p, args, anim_args, video_args)
         return Processed(p)
