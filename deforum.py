@@ -13,6 +13,7 @@ class Script(scripts.Script):
         return "Deforum v0.5-webui-beta"
 
     def ui(self, is_img2img):
+        d = SimpleNamespace(**deforum_args.DeforumArgs())
         da = SimpleNamespace(**deforum_args.DeforumAnimArgs()) #default args
         gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>")
         gr.HTML("<p style=\"margin-bottom:0.75em\">Made by deforum.github.io</p>")
@@ -124,7 +125,7 @@ class Script(scripts.Script):
         gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Prompts</p>")
         gr.HTML("<p style=\"margin-bottom:0.75em\">`animation_mode: None` batches on list of *prompts*.</p>")
         gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">*Important change!*</p>")
-        gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">This script used the built-in webui weighting settings.</p>")
+        gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">This script uses the built-in webui weighting settings.</p>")
         gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">So if you want to use math functions as prompt weights,</p>")
         gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">keep the values above zero in both parts</p>")
         gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">Negative prompt part can be specified with --negative</p>")
@@ -137,25 +138,61 @@ class Script(scripts.Script):
         
         gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Run settings</p>")
         
-        # Generation settings START
-        gr.HTML("<p style=\"margin-bottom:0.75em\">Generation settings</p>")
+        # Sampling settings START
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Sampling settings</p>")
         gr.HTML("<p style=\"margin-bottom:0.75em\">The following settings have already been set up in the webui</p>")
         gr.HTML("<p style=\"margin-bottom:0.75em\">Do you want to override them?</p>")
-        override_webui_with_these = gr.Checkbox(label="override_webui_with_these", value=False, interactive=True)
+        gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">WIP *Doesn't do anything at the moment!*</p>") #TODO
+        with gr.Row():
+            override_webui_with_these = gr.Checkbox(label="override_webui_with_these", value=False, interactive=True)
+        gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">W, H, seed, sampler, steps, scale, ddim_eta, n_batch, make_grid, grid_rows</p>")
+        # Sampling settings END
         
-        # Generation settings END
+        # Batch settings START
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Batch settings</p>")
+        with gr.Row():
+            batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
+        with gr.Row():    
+            filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format)
+        with gr.Row():
+            seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random'], value=d.seed_behavior, type="index", elem_id="seed_behavior", interactive=True)
+        # output - made in run
+        # Batch settings END
         
+        # Init settings START
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Init settings</p>")
+        with gr.Row():
+            use_init = gr.Checkbox(label="use_init", value=is_img2img, interactive=True, visible=True)
+            from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=is_img2img, interactive=True, visible=is_img2img)
+        with gr.Row():
+            strength_0_no_init = gr.Checkbox(label="strength_0_no_init", value=True, interactive=True)
+            strength = gr.Slider(label="strength", minimum=0, maximum=1, step=0.02, value=0, interactive=True)
+        with gr.Row():
+            init_image = gr.Textbox(label="init_image", lines=1, interactive=True, value = d.init_image)
+        with gr.Row():
+            use_mask = gr.Checkbox(label="use_mask", value=d.use_mask, interactive=True)
+            use_alpha_as_mask = gr.Checkbox(label="use_alpha_as_mask", value=d.use_alpha_as_mask, interactive=True)
+            invert_mask = gr.Checkbox(label="invert_mask", value=d.invert_mask, interactive=True)
+            overlay_mask = gr.Checkbox(label="overlay_mask", value=d.overlay_mask, interactive=True)
+        with gr.Row():
+            mask_file = gr.Textbox(label="mask_file", lines=1, interactive=True, value = d.mask_file)
+        with gr.Row():
+            mask_brightness_adjust = gr.Number(label="mask_brightness_adjust", value=d.mask_brightness_adjust, interactive=True)
+            mask_overlay_blur = gr.Number(label="mask_overlay_blur", value=d.mask_overlay_blur, interactive=True)
+        # Init settings END
         
-        
-        
-        return [interpolate_x_frames]
+        return [interpolate_x_frames, batch_name]
 
 
-    def run(self, p, interpolate_x_frames):
+    def run(self, p, interpolate_x_frames, batch_name):
         print('Hello, deforum!')
+        
+        outdir =  os.path.join(p.outpath_samples, batch_name)
+        if not os.path.exists(outdir):
+            os.mkdir(outdir)
 
         display_result_data = ["Hello, deforum!"]
 
-        return Processed(p, *display_result_data)
+        return Processed(p, display_result_data)
     
     
