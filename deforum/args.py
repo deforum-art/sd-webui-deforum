@@ -1,3 +1,14 @@
+from modules.shared import cmd_opts
+import modules.shared as sh
+import modules.paths as ph
+
+def Root():
+    device = sh.device
+    models_path = ph.models_path + '/Deforum'
+    half_precision = not cmd_opts.no_half
+    p = None
+    return locals()
+
 def DeforumAnimArgs():
 
     #@markdown ####**Animation:**
@@ -387,6 +398,8 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     if override_settings_with_file:
         load_args(args_dict,anim_args_dict,custom_settings_file)
 
+    root = SimpleNamespace(**Root())
+    root.p = p
     args = SimpleNamespace(**args_dict)
     anim_args = SimpleNamespace(**anim_args_dict)
     video_args = SimpleNamespace(**video_args_dict)
@@ -418,4 +431,4 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
     
-    return args, anim_args, video_args
+    return root, args, anim_args, video_args
