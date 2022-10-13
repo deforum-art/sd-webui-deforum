@@ -13,7 +13,7 @@ def Root():
 def DeforumAnimArgs():
 
     #@markdown ####**Animation:**
-    animation_mode = 'None' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
+    animation_mode = '2D' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
     max_frames = 1000 #@param {type:"number"}
     border = 'replicate' #@param ['wrap', 'replicate'] {type:'string'}
 
@@ -196,7 +196,7 @@ def setup_deforum_setting_ui(is_img2img):
     #TODO make a some sort of the original dictionary parsing
     i9 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Animation settings</p>")
     with gr.Row():
-        animation_mode = gr.Dropdown(label="animation_mode", choices=['None', '2D', '3D', 'Video Input'], value=da.animation_mode, type="index", elem_id="animation_mode", interactive=True)
+        animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input'], value=da.animation_mode, type="index", elem_id="animation_mode", interactive=True)
         max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True)
         border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="index", elem_id="border", interactive=True)
     

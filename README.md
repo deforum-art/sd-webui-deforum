@@ -1,5 +1,7 @@
 
-# Deforum Stable Diffusion — (WIP) full-fledged official extension script for automatic1111's webui
+# Deforum Stable Diffusion — (WIP) official extension script for automatic1111's webui
+
+For now, video-input, 2D, pseudo-2D and 3D animation modes are available. Interpolation and render image batch temporary excluded for simplicity
 
 <p align="left">
     <a href="https://github.com/deforum/stable-diffusion/commits"><img alt="Last Commit" src="https://img.shields.io/github/last-commit/deforum/stable-diffusion"></a>
