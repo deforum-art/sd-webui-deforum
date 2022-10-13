@@ -32,6 +32,6 @@ https://github.com/deforum/stable-diffusion
 
 6. If it gives errors on missing modules, run `pip install requirements.txt` with `requirements.txt` being from this repo.
 
-7. Join our Discord where you can post generated stuff, ask questions and ~~infuriate the devs with 'this feature is in auto's build. When will it be in Deforum?'~~(not anymore, ha-ha) https://discord.gg/deforum. There's also the 'Issues' tab in the repo.
+7. Join our Discord where you can post generated stuff, ask questions and ~~infuriate the devs with 'this feature is in auto's build. When will it be in Deforum? Why can't I launch Deforum on my potato computer?'~~(not anymore, ha-ha) https://discord.gg/deforum. There's also the 'Issues' tab in the repo.
 
 8. Profit!
