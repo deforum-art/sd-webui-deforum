@@ -10,16 +10,27 @@ from types import SimpleNamespace
 class Script(scripts.Script):
 
     def title(self):
-        return "Deforum"
+        return "Deforum v0.5-webui-beta"
 
     def ui(self, is_img2img):
         da = SimpleNamespace(**deforum_args.DeforumAnimArgs()) #default args
+        gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Made by </p><p style=\"margin-bottom:0.75em\" href=\"https://deforum.github.io/\">Deforum team</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Original </p><p style=\"margin-bottom:0.75em\" href=\"https://github.com/deforum/stable-diffusion\">Deforum Github repo</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">This </p><p style=\"margin-bottom:0.75em\" href=\"https://github.com/kabachuha/stable-diffusion/tree/automatic1111-webui\">WIP fork for auto1111's webui</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Join the official Deforum </p><p style=\"margin-bottom:0.75em\" href=\"https://discord.gg/deforum\">Discord</p><p style=\"margin-bottom:0.75em\"> to hang out together, report bugs and share your creations </p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\" href=\"https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit\">User guide for v0.5</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\" href=\"https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing\">Math keyframing explanation</p>")
+        
+        
         gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Import settings from file</p>")
         with gr.Row():
             override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
             custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
+            #TODO make a button
             
-            
+        # Animation settings START
+        #TODO make a some sort of the original dictionary parsing
         gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Animation settings</p>")
         with gr.Row():
             animation_mode = gr.Dropdown(label="animation_mode", choices=['None', '2D', '3D', 'Video Input', 'Interpolation'], value=da.animation_mode, type="index", elem_id="animation_mode", interactive=True)
@@ -106,15 +117,44 @@ class Script(scripts.Script):
         with gr.Row():
             resume_from_timestring = gr.Checkbox(label="resume_from_timestring", value=da.resume_from_timestring, interactive=True)
             resume_timestring = gr.Textbox(label="resume_timestring", lines=1, value = da.resume_timestring, interactive=True)
-            
-
+        # Animation settings END
+        
+        # Prompts settings START
+        
+        gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Prompts</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">`animation_mode: None` batches on list of *prompts*.</p>")
+        gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">*Important change!*</p>")
+        gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">This script used the built-in webui weighting settings.</p>")
+        gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">So if you want to use math functions as prompt weights,</p>")
+        gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">keep the values above zero in both parts</p>")
+        gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">Negative prompt part can be specified with --negative</p>")
+        with gr.Row():
+            prompts = gr.Textbox(label="prompts", lines=8, interactive=True, value = deforum_args.prompts)
+        with gr.Row():
+            animation_prompts = gr.Textbox(label="animation_prompts", lines=8, interactive=True, value = deforum_args.animation_prompts)
+        
+        # Prompts settings END
+        
+        gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Run settings</p>")
+        
+        # Generation settings START
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Generation settings</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">The following settings have already been set up in the webui</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Do you want to override them?</p>")
+        override_webui_with_these = gr.Checkbox(label="override_webui_with_these", value=False, interactive=True)
+        
+        # Generation settings END
+        
+        
+        
+        
         return [interpolate_x_frames]
 
 
     def run(self, p, interpolate_x_frames):
         print('Hello, deforum!')
 
-        display_result_data = [""]
+        display_result_data = ["Hello, deforum!"]
 
         return Processed(p, *display_result_data)
     
