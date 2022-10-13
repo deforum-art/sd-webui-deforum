@@ -106,7 +106,7 @@ def DeforumArgs():
 
     #@markdown **Batch Settings**
     n_batch = 1 #@param
-    batch_name = "StableFun" #@param {type:"string"}
+    batch_name = "Deforum" #@param {type:"string"}
     filename_format = "{timestring}_{index}_{prompt}.png" #@param ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
     seed_behavior = "iter" #@param ["iter","fixed","random"]
     make_grid = False #@param {type:"boolean"}
@@ -339,6 +339,8 @@ def setup_deforum_setting_ui(is_img2img):
     with gr.Row():
         use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
         render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True)
+    with gr.Row():
+        max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
         path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="index", elem_id="path_name_modifier", interactive=True)
         
     with gr.Row():
@@ -389,23 +391,5 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
         anim_args.max_frames = 1
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
-
-    print(f"{image_path} -> {mp4_path}")
-
-    if video_args.use_manual_settings:
-        video_args.max_frames = "200" #@param {type:"string"}
-    else:
-        if render_steps: # render steps from a single image
-            fname = f"{path_name_modifier}_%05d.png"
-            all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
-            newest_dir = max(all_step_dirs, key=os.path.getmtime)
-            video_args.image_path = os.path.join(newest_dir, fname)
-            print(f"Reading images from {image_path}")
-            video_args.mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
-            video_args.max_frames = str(args.steps)
-        else: # render images for a video
-            video_args.image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
-            video_args.mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
-            video_args.max_frames = str(anim_args.max_frames)
     
     return args, anim_args, video_args
