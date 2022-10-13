@@ -73,10 +73,10 @@ class SamplerCallback(object):
         return
 
     def display_images(self, images):
-        images = images.double().cpu().add(1).div(2).clamp(0, 1)
-        images = torch.tensor(np.array(images))
-        grid = make_grid(images, 4).cpu()
-        display.display(TF.to_pil_image(grid))
+        #images = images.double().cpu().add(1).div(2).clamp(0, 1)
+        #images = torch.tensor(np.array(images))
+        #grid = make_grid(images, 4).cpu()
+        #display.display(TF.to_pil_image(grid))
         return
 
     # The callback function is applied to the image at each step

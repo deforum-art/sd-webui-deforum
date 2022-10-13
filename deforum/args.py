@@ -401,6 +401,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
 
     root = SimpleNamespace(**Root())
     root.p = p
+    p.do_not_save_grid = True
     
     if is_img2img:
         root.p_txt = StableDiffusionProcessingTxt2Img(
@@ -428,6 +429,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
             enable_hr=p.enable_hr,
             denoising_strength=p.outpath_grids,
         )
+        p_txt.do_not_save_grid = True
     
     
     args = SimpleNamespace(**args_dict)

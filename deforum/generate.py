@@ -96,11 +96,9 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
     mask = np.clip(mask,0,1)
     return mask
 
-def generate(args, root, frame = 0, return_latent=False, return_sample=False, return_c=False):
-    seed_everything(args.seed)
+def generate(args, root, frame = 0, return_sample=False, return_c=False):
     os.makedirs(args.outdir, exist_ok=True)
 
-    sampler = PLMSSampler(root.model) if args.sampler == 'plms' else DDIMSampler(root.model)
     model_wrap = CompVisDenoiser(root.model)
     batch_size = args.n_samples
     prompt = args.prompt
@@ -157,18 +155,20 @@ def generate(args, root, frame = 0, return_latent=False, return_sample=False, re
 
     # Noise schedule for the k-diffusion samplers (used for masking)
     k_sigmas = model_wrap.get_sigmas(args.steps)
-    k_sigmas = k_sigmas[len(k_sigmas)-t_enc-1:]
+    k_sigmas = k_sigmas[len(k_sigmas)-t_enc-1:] #!!! TODO mask_blur
 
     if args.sampler in ['plms','ddim']:
         sampler.make_schedule(ddim_num_steps=args.steps, ddim_eta=args.ddim_eta, ddim_discretize='fill', verbose=False)
-
-    callback = SamplerCallback(args=args,
+        
+    
+    # TODO add catch/finally around the stuff
+    sd_samplers.KDiffusionSampler.callback_state = SamplerCallback(args=args,
                             root=root,
                             mask=mask, 
                             init_latent=init_latent,
                             sigmas=k_sigmas,
                             sampler=sampler,
-                            verbose=False).callback  
+                            verbose=False).callback
 
     results = []
     with torch.no_grad():
@@ -177,6 +177,8 @@ def generate(args, root, frame = 0, return_latent=False, return_sample=False, re
                 for prompts in data:
                     if isinstance(prompts, tuple):
                         prompts = list(prompts)
+                        
+                    ## TODO SPLIT PROMPT!!!
                     if args.prompt_weighting:
                         uc, c = get_uc_and_c(prompts, root.model, args, frame)
                     else:
@@ -227,9 +229,6 @@ def generate(args, root, frame = 0, return_latent=False, return_sample=False, re
                         else:
                             raise Exception(f"Sampler {args.sampler} not recognised.")
 
-                    
-                    if return_latent:
-                        results.append(samples.clone())
 
                     x_samples = root.p.sd_model.decode_first_stage(samples)
 
