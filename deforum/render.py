@@ -101,6 +101,9 @@ def render_image_batch(args, prompts, root):
             grid_image.save(os.path.join(args.outdir, filename))
             display.clear_output(wait=True)            
             display.display(grid_image)
+            return grid
+        
+        return all_images
 
 
 def render_animation(args, anim_args, animation_prompts, root):

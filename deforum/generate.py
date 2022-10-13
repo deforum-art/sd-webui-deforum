@@ -231,7 +231,7 @@ def generate(args, root, frame = 0, return_latent=False, return_sample=False, re
                     if return_latent:
                         results.append(samples.clone())
 
-                    x_samples = root.model.decode_first_stage(samples)
+                    x_samples = root.p.sd_model.decode_first_stage(samples)
 
                     if args.use_mask and args.overlay_mask:
                         # Overlay the masked image after the image is generated
