@@ -15,12 +15,12 @@ class Script(scripts.Script):
     def ui(self, is_img2img):
         da = SimpleNamespace(**deforum_args.DeforumAnimArgs()) #default args
         gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>")
-        gr.HTML("<p style=\"margin-bottom:0.75em\">Made by </p><p style=\"margin-bottom:0.75em\" href=\"https://deforum.github.io/\">Deforum team</p>")
-        gr.HTML("<p style=\"margin-bottom:0.75em\">Original </p><p style=\"margin-bottom:0.75em\" href=\"https://github.com/deforum/stable-diffusion\">Deforum Github repo</p>")
-        gr.HTML("<p style=\"margin-bottom:0.75em\">This </p><p style=\"margin-bottom:0.75em\" href=\"https://github.com/kabachuha/stable-diffusion/tree/automatic1111-webui\">WIP fork for auto1111's webui</p>")
-        gr.HTML("<p style=\"margin-bottom:0.75em\">Join the official Deforum </p><p style=\"margin-bottom:0.75em\" href=\"https://discord.gg/deforum\">Discord</p><p style=\"margin-bottom:0.75em\"> to hang out together, report bugs and share your creations </p>")
-        gr.HTML("<p style=\"margin-bottom:0.75em\" href=\"https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit\">User guide for v0.5</p>")
-        gr.HTML("<p style=\"margin-bottom:0.75em\" href=\"https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing\">Math keyframing explanation</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Made by deforum.github.io</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Original Deforum Github repo  github.com/deforum/stable-diffusion</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">This WIP fork for auto1111's webui github.com/kabachuha/stable-diffusion/tree/automatic1111-webui</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Join the official Deforum Discord discord.gg/deforum to share your creations and suggestions</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">User guide for v0.5 docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit</p>")
+        gr.HTML("<p style=\"margin-bottom:0.75em\">Math keyframing explanation docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing</p>")
         
         
         gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Import settings from file</p>")
