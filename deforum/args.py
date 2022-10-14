@@ -198,7 +198,7 @@ def setup_deforum_setting_ui(is_img2img):
     i9 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Animation settings</p>")
     with gr.Row():
         animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
-        max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True)
+        max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0)
         border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
     
     
@@ -266,7 +266,7 @@ def setup_deforum_setting_ui(is_img2img):
     with gr.Row():
         video_init_path = gr.Textbox(label="video_init_path", lines=1, value = da.video_init_path, interactive=True)
     with gr.Row():
-        extract_nth_frame = gr.Number(label="extract_nth_frame", value=da.extract_nth_frame, interactive=True)
+        extract_nth_frame = gr.Number(label="extract_nth_frame", value=da.extract_nth_frame, interactive=True, precision=0)
         overwrite_extracted_frames = gr.Checkbox(label="overwrite_extracted_frames", value=False, interactive=True)
         use_mask_video = gr.Checkbox(label="use_mask_video", value=False, interactive=True)
     with gr.Row():
@@ -275,7 +275,7 @@ def setup_deforum_setting_ui(is_img2img):
     i16 = gr.HTML("<p style=\"margin-bottom:0.75em\">Interpolation:</p>")
     with gr.Row():
         interpolate_key_frames = gr.Checkbox(label="interpolate_key_frames", value=da.interpolate_key_frames, interactive=True)
-        interpolate_x_frames = gr.Number(label="interpolate_x_frames", value=da.interpolate_x_frames, interactive=True)
+        interpolate_x_frames = gr.Number(label="interpolate_x_frames", value=da.interpolate_x_frames, interactive=True, precision=0)
     
     i17 = gr.HTML("<p style=\"margin-bottom:0.75em\">Resume animation:</p>")
     with gr.Row():
@@ -315,15 +315,15 @@ def setup_deforum_setting_ui(is_img2img):
         H = gr.Slider(label="H", minimum=512, maximum=2048, step=64, value=d.W, interactive=True)
     
     with gr.Row():
-        seed = gr.Number(label="seed", value=d.seed, interactive=True)
+        seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
         sampler = gr.Dropdown(label="sampler", choices=["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"], value=d.sampler, type="value", elem_id="sampler", interactive=True)
     with gr.Row():
         steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
         scale = gr.Slider(label="scale", minimum=1, maximum=100, step=1, value=d.scale, interactive=True)
         ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
-        n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True)
+        n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0)
         make_grid = gr.Checkbox(label="make_grid", value=d.make_grid, interactive=True)
-        grid_rows = gr.Number(label="n_batch", value=d.n_batch, interactive=True)
+        grid_rows = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0)
     
     # Sampling settings END
     
@@ -430,6 +430,9 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     args.outdir = os.path.join(os.getcwd(), args.outdir)
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
+        
+    if args.seed == -1:
+        args.seed = random.randint(0, 2**32 - 1)
         
     args.timestring = time.strftime('%Y%m%d%H%M%S')
     args.strength = max(0.0, min(1.0, args.strength))
