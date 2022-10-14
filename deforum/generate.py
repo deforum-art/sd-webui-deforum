@@ -111,7 +111,6 @@ def generate(args, root, frame = 0, return_sample=False):
     p.batch_size = args.n_samples
     p.width = args.W
     p.height = args.H
-    p.steps = int((1.0-args.strength) * args.steps)
     p.seed = args.seed
     p.do_not_save_samples = not args.save_samples
     p.do_not_save_grid = not args.make_grid
@@ -137,6 +136,8 @@ def generate(args, root, frame = 0, return_sample=False):
     mask_image = None
     init_image = None
     
+    p.steps = int((1.0-args.strength) * args.steps)
+    
     if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
@@ -145,9 +146,7 @@ def generate(args, root, frame = 0, return_sample=False):
         init_image, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
-        #init_image = repeat(init_image, '1 ... -> b ...', b=batch_size)
     else:
-        #random noise
         a = np.random.rand(args.W, args.H, 3)*255
         init_image = Image.fromarray(a.astype('uint8')).convert('RGB')
     
