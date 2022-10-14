@@ -118,9 +118,9 @@ def generate(args, root, frame = 0, return_sample=False):
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = 1
-    # color corrections are kinda cringe
-    #if root.color_corrections is not None:
-    #    p.color_corrections = root.color_corrections
+    # FIXME better color corrections as match histograms doesn't seem to be fully working
+    if root.color_corrections is not None:
+        p.color_corrections = root.color_corrections
     p.cfg_scale = args.scale
     p.outpath_samples = root.outpath_samples
     p.outpath_grids = root.outpath_samples
