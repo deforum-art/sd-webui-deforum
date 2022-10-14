@@ -18,6 +18,10 @@ from scipy.ndimage import gaussian_filter
 
 from .callback import SamplerCallback
 
+#Webui
+from modules import processing
+from modules.processing import process_images
+
 def add_noise(sample: torch.Tensor, noise_amt: float) -> torch.Tensor:
     return sample + torch.randn(sample.shape, device=sample.device) * noise_amt
 
