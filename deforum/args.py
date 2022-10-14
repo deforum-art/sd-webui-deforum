@@ -11,6 +11,7 @@ def Root():
     initial_info = None
     first_frame = None
     prompts = None
+    outpath_samples = ""
     animation_prompts = None
     return locals()
 
@@ -75,12 +76,8 @@ def DeforumAnimArgs():
 
 def DeforumPrompts():
     return r"""[
-    "a beautiful forest by Asher Brown Durand, trending on Artstation", # the first prompt I want
-    "a beautiful portrait of a woman by Artgerm, trending on Artstation"#, # the second prompt I want
-    #"this prompt I don't want it I commented it out",
-    #"a nousr robot, trending on Artstation", # use "nousr robot" with the robot diffusion model (see model_checkpoint setting)
-    #"touhou 1girl komeiji_koishi portrait, green hair", # waifu diffusion prompts can use danbooru tag groups (see model_checkpoint)
-    #"this prompt has weights if prompt weighting enabled:2 can also do negative:-2", # (see prompt_weighting)
+    "a beautiful forest by Asher Brown Durand, trending on Artstation",
+    "a beautiful portrait of a woman by Artgerm, trending on Artstation"
 ]
 """
 
@@ -400,7 +397,6 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     
     import json
     
-    root.prompts = json.loads(prompts)
     print(animation_prompts)
     animation_prompts_json = json.loads(animation_prompts)
     
@@ -411,6 +407,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
 
     root = SimpleNamespace(**Root())
     root.p = p
+    root.prompts = json.loads(prompts)
     root.animation_prompts = animation_prompts_json
 
     args = SimpleNamespace(**args_dict)
@@ -430,8 +427,10 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     args.sampler = str(p.sampler_index)
 
     args.outdir = os.path.join(p.outpath_samples, batch_name)
+    root.outpath_samples = args.outdir
+    args.outdir = os.path.join(os.getcwd(), args.outdir)
     if not os.path.exists(args.outdir):
-        os.mkdir(args.outdir)
+        os.makedirs(args.outdir)
         
     args.timestring = time.strftime('%Y%m%d%H%M%S')
     args.strength = max(0.0, min(1.0, args.strength))

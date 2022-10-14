@@ -112,8 +112,8 @@ def generate(args, root, frame = 0, return_sample=False):
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = args.n_iter
     p.cfg_scale = args.scale
-    p.outpath_samples = args.outdir
-    p.outpath_grids = args.outdir
+    p.outpath_samples = root.outdir
+    p.outpath_grids = root.outdir
     p.prompt, p.negative_prompt = parsed_prompt.split("--neg") #TODO: add to vanilla Deforum for compat
     
     if not args.use_init and args.strength > 0 and args.strength_0_no_init:
