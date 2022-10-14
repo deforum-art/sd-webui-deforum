@@ -1,5 +1,5 @@
 
-# Deforum Stable Diffusion — (WIP) official extension script for automatic1111's webui
+# Deforum Stable Diffusion — official extension script for automatic1111's webui
 
 For now, video-input, 2D, pseudo-2D and 3D animation modes are available. Interpolation and render image batch temporary excluded for simplicity
 
@@ -20,7 +20,7 @@ https://github.com/deforum/stable-diffusion
 
 ## Getting Started
 
-0. ~~Cover yourself in oil~~ Wait for completion of this port
+0. ~~Cover yourself in oil~~
 
 1. Install Automatic1111's webui
 
