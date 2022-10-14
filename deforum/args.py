@@ -100,7 +100,7 @@ def DeforumArgs():
     #@markdown **Sampling Settings**
     seed = -1 #@param
     sampler = 'klms' #@param ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
-    steps = 50 #@param
+    steps = 21 #@param
     scale = 7 #@param
     ddim_eta = 0.0 #@param
     dynamic_threshold = None
