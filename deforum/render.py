@@ -17,6 +17,9 @@ from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_fram
 from .depth import DepthModel
 from .colors import maintain_colors
 
+# Webui
+from modules.shared import opts, cmd_opts, state
+
 def next_seed(args):
     if args.seed_behavior == 'iter':
         args.seed += 1
@@ -100,8 +103,18 @@ def render_animation(args, anim_args, animation_prompts, root):
 
     args.n_samples = 1
     frame_idx = start_frame
+    
+    #Webui
+    state.job_count = anim_args.max_frames
+    
     while frame_idx < anim_args.max_frames:
         print(f"Rendering animation frame {frame_idx} of {anim_args.max_frames}")
+        state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
+        
+        #Webui
+        if state.interrupted:
+                break
+        
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
         contrast = keys.contrast_schedule_series[frame_idx]
