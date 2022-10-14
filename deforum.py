@@ -96,9 +96,10 @@ class Script(wscripts.Script):
                 print(stderr)
                 raise RuntimeError(stderr)
 
-            mp4 = open(mp4_path,'rb').read()
-            data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-            display.display( display.HTML(f'<video controls loop><source src="{data_url}" type="video/mp4"></video>') )
+            # TODO add gradio video display
+            #mp4 = open(mp4_path,'rb').read()
+            #data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
+            #display.display( display.HTML(f'<video controls loop><source src="{data_url}" type="video/mp4"></video>') )
     
         if root.initial_info is None:
             root.initial_info = "An error has occured and nothing has been generated!"
