@@ -13,6 +13,7 @@ def Root():
     prompts = None
     outpath_samples = ""
     animation_prompts = None
+    color_corrections = None
     return locals()
 
 def DeforumAnimArgs():
@@ -424,7 +425,6 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
 
     root = SimpleNamespace(**Root())
     root.p = p
-    root.p.color_corrections = None
     root.prompts = json.loads(prompts)
     root.animation_prompts = animation_prompts_json
     

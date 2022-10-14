@@ -118,6 +118,8 @@ def generate(args, root, frame = 0, return_sample=False):
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = 1
+    if root.color_corrections is not None:
+        p.color_corrections = root.color_corrections
     p.cfg_scale = args.scale
     p.outpath_samples = root.outpath_samples
     p.outpath_grids = root.outpath_samples
@@ -182,7 +184,7 @@ def generate(args, root, frame = 0, return_sample=False):
     
     if root.first_frame == None:
         root.first_frame = processed.images[0]
-        p.color_corrections = [processing.setup_color_correction(root.first_frame)]
+        root.color_corrections = [processing.setup_color_correction(root.first_frame)]
     
     if return_sample:
         pil_image = processed.images[0].convert('RGB') 
