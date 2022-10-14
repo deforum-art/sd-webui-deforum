@@ -319,7 +319,9 @@ def setup_deforum_setting_ui(is_img2img):
         sampler = gr.Dropdown(label="sampler", choices=["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"], value=d.sampler, type="value", elem_id="sampler", interactive=True)
     with gr.Row():
         steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
+    with gr.Row():
         scale = gr.Slider(label="scale", minimum=1, maximum=100, step=1, value=d.scale, interactive=True)
+    with gr.Row():
         ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
         n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0)
         make_grid = gr.Checkbox(label="make_grid", value=d.make_grid, interactive=True)
