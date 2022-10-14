@@ -1,7 +1,7 @@
 import os
 import json
 
-def load_args(args_dict,anim_args_dict, custom_settings_file):
+def load_args(args_dict,anim_args_dict, custom_settings_file, animation_prompts):
     print(f"reading custom settings from {custom_settings_file}")
     if not os.path.isfile(custom_settings_file):
         print('The custom settings file does not exist. The in-notebook settings will be used instead')

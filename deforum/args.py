@@ -74,7 +74,7 @@ def DeforumAnimArgs():
     return locals()
 
 def DeforumPrompts():
-    return """[
+    return r"""[
     "a beautiful forest by Asher Brown Durand, trending on Artstation", # the first prompt I want
     "a beautiful portrait of a woman by Artgerm, trending on Artstation", # the second prompt I want
     #"this prompt I don't want it I commented it out",
@@ -85,7 +85,7 @@ def DeforumPrompts():
 """
 
 def DeforumAnimPrompts():
-    return """{
+    return r"""{
     "0": "a beautiful apple, trending on Artstation",
     "20": "a beautiful banana, trending on Artstation",
     "30": "a beautiful coconut, trending on Artstation",
@@ -344,7 +344,7 @@ def setup_deforum_setting_ui(is_img2img):
     # Init settings START
     i32 = gr.HTML("<p style=\"margin-bottom:0.75em\">Init settings</p>")
     with gr.Row():
-        use_init = gr.Checkbox(label="use_init", value=is_img2img, interactive=True, visible=True)
+        use_init = gr.Checkbox(label="use_init", value=False, interactive=True, visible=True)
         from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=is_img2img, interactive=True, visible=is_img2img)
     with gr.Row():
         strength_0_no_init = gr.Checkbox(label="strength_0_no_init", value=True, interactive=True)
@@ -400,16 +400,18 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     
     import json
     
-    root.prompts = json.loads(prompts)
-    root.animation_prompts = json.loads(animation_prompts)
+    #root.prompts = json.loads(prompts)
+    print(animation_prompts)
+    animation_prompts_json = json.loads(animation_prompts)
     
     from scripts.deforum.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict,anim_args_dict,custom_settings_file)
+        load_args(args_dict,anim_args_dict,custom_settings_file, animation_prompts_json)
 
     root = SimpleNamespace(**Root())
     root.p = p
+    root.animation_prompts = animation_prompts_json
 
     args = SimpleNamespace(**args_dict)
     anim_args = SimpleNamespace(**anim_args_dict)
