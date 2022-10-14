@@ -61,7 +61,7 @@ def render_animation(args, anim_args, animation_prompts, root):
     # expand prompts out to per-frame
     prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
     for i, prompt in animation_prompts.items():
-        prompt_series[i] = prompt
+        prompt_series[int(i)] = prompt
     prompt_series = prompt_series.ffill().bfill()
 
     # check for video inits
