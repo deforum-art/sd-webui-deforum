@@ -26,11 +26,11 @@ https://github.com/deforum/stable-diffusion
 
 2. Download this repository and put the files deforum.py and the 'deforum' folder into the 'scripts' folder inside your WebUI installation directory
 
-3. Open the webui and select the 'Deforum v0.5-webui-beta' in the 'Custom scripts' dropdown menu
+3. Open the webui, switch to 'img2img' tab and select 'Deforum v0.5-webui-beta' in the 'Custom scripts' dropdown menu
 
 4. Enter the animation settings. Refer to [this general guide](https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit) and [this guide to math keyframing functions in Deforum](https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing)
 
-5. Run the script and see if you got it working or even got something.
+5. Run the script and see if you got it working or even got something. **In this version prompt weights less than zero don't work properly yet!** Split the positive and the negative prompt using --neg argument like this "apple:\`where(cos(t)>=0, cos(t), 0)\`, snow --neg strawberry:\`where(cos(t)<0, -cos(t), 0)\`"
 
 6. If it gives errors on missing modules, run `pip install requirements.txt` with `requirements.txt` being from this repo.
 
