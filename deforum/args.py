@@ -424,6 +424,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
 
     root = SimpleNamespace(**Root())
     root.p = p
+    root.p.color_corrections = None
     root.prompts = json.loads(prompts)
     root.animation_prompts = animation_prompts_json
     
