@@ -99,6 +99,7 @@ def generate(args, root, frame = 0, return_sample=False):
     parsed_prompt = re.sub(math_parser, lambda m: str(parse_weight(m, frame)), args.prompt)
     
     # Setup the pipeline
+    p = root.p
     
     os.makedirs(args.outdir, exist_ok=True)
     p.batch_size = args.n_samples
