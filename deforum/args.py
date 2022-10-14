@@ -9,6 +9,7 @@ def Root():
     p = None
     initial_seed = None
     initial_info = None
+    first_frame = None
     prompts = None
     animation_prompts = None
     return locals()

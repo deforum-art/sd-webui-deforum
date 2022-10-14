@@ -164,9 +164,12 @@ def generate(args, root, frame = 0, return_sample=False):
     
     processed = processing.process_images(p)
     
-    if root.initial_info = None:
+    if root.initial_info == None:
         root.initial_seed = processed.seed
         root.initial_info = processed.info
+    
+    if root.first_frame == None:
+        root.first_frame = processed.images[0]
     
     if return_sample:
         image = np.array(image).astype(np.float16) / 255.0
