@@ -1,5 +1,5 @@
 import torch
-from PIL import Image
+from PIL import Image, ImageOps
 import requests
 import numpy as np
 import torchvision.transforms.functional as TF
@@ -12,7 +12,7 @@ from torch import autocast
 from contextlib import nullcontext
 from einops import rearrange, repeat
 
-from .prompt import get_uc_and_c
+from .prompt import get_uc_and_c, parse_weight
 from .k_samplers import sampler_fn
 from scipy.ndimage import gaussian_filter
 
@@ -42,12 +42,7 @@ def load_img(path, shape, use_alpha_as_mask=False):
         mask_image = alpha.convert('L')
         image = image.convert('RGB')
 
-    image = np.array(image).astype(np.float16) / 255.0
-    image = image[None].transpose(0, 3, 1, 2)
-    image = torch.from_numpy(image)
-    image = 2.*image - 1.
-
-    return image, mask_image
+    return image, mask_image #PIL image for auto's pipeline
 
 def load_mask_latent(mask_input, shape):
     # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
@@ -84,19 +79,64 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
     if mask_contrast_adjust != 1:
         mask = TF.adjust_contrast(mask, mask_contrast_adjust)
 
-    # Mask image to array
-    mask = np.array(mask).astype(np.float32) / 255.0
-    mask = np.tile(mask,(4,1,1))
-    mask = np.expand_dims(mask,axis=0)
-    mask = torch.from_numpy(mask)
-
     if invert_mask:
-        mask = ( (mask - 0.5) * -1) + 0.5
+        mask = PIL.ImageOps.invert(mask)
     
-    mask = np.clip(mask,0,1)
     return mask
+    
+def generate(args, root, frame = 0, return_sample=False):
+    assert args.prompt is not None
+    
+    # Evaluate prompt math!
+    
+    math_parser = re.compile("""
+            (?P<weight>(
+            `[\S\s]*?`# a math function wrapped in `-characters
+            )
+            """, re.VERBOSE)
+    
+    parsed_prompt = re.sub(math_parser, lambda m: str(parse_weight(m, frame)), args.prompt)
+    
+    # Setup the pipeline
+    
+    os.makedirs(args.outdir, exist_ok=True)
+    p.batch_size = args.n_samples
+    p.width = args.W
+    p.height = args.H
+    p.steps = args.steps
+    p.seed = args.seed
+    p.do_not_save_samples = not args.save_samples
+    p.do_not_save_grid = not args.make_grid
+    p.sampler_index = int(args.sampler)
+    p.mask_blur = args.mask_overlay_blur
+    p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
+    p.n_iter = args.n_iter
+    p.cfg_scale = args.scale
+    p.outpath_samples = args.outdir
+    p.outpath_grids = args.outdir
+    p.prompt, p.negative_prompt = parsed_prompt.split("--neg") #TODO: add to vanilla Deforum for compat
+    
+    if not args.use_init and args.strength > 0 and args.strength_0_no_init:
+        print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
+        print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
+        args.strength = 0
+    p.denoising_strength = args.strength
+    mask_image = None
+    init_image = None
+    
+    if args.init_sample is not None:
+        with precision_scope("cuda"):
+            init_latent = root.model.get_first_stage_encoding(root.model.encode_first_stage(args.init_sample))
+    elif args.use_init and args.init_image != None and args.init_image != '':
+        init_image, mask_image = load_img(args.init_image, 
+                                          shape=(args.W, args.H),  
+                                          use_alpha_as_mask=args.use_alpha_as_mask)
+        init_image = init_image.to(root.device)
+        init_image = repeat(init_image, '1 ... -> b ...', b=batch_size)
+        with precision_scope("cuda"):
+            init_latent = root.model.get_first_stage_encoding(root.model.encode_first_stage(init_image))  # move to latent space   
 
-def generate(args, root, frame = 0, return_sample=False, return_c=False):
+def generate_old(args, root, frame = 0, return_sample=False, return_c=False):
     os.makedirs(args.outdir, exist_ok=True)
 
     model_wrap = CompVisDenoiser(root.model)
