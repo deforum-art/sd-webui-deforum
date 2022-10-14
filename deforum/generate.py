@@ -112,7 +112,7 @@ def generate(args, root, frame = 0, return_sample=False):
     p.width = args.W
     p.height = args.H
     p.seed = args.seed
-    p.do_not_save_samples = not args.save_samples
+    p.do_not_save_samples = not args.save_samples_per_step
     p.do_not_save_grid = not args.make_grid
     p.sampler_index = int(args.sampler)
     p.mask_blur = args.mask_overlay_blur
