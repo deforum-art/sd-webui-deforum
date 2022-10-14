@@ -103,7 +103,7 @@ class Script(wscripts.Script):
     
         if root.initial_info is None:
             root.initial_info = "An error has occured and nothing has been generated!"
-            root.initial_info += "\nPlease, report the bug to https://github.com/kabachuha/stable-diffusion/issues"
+            root.initial_info += "\nPlease, report the bug to https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"
             import numpy as np
             from PIL import Image
             a = np.random.rand(args.W, args.H, 3)*255
