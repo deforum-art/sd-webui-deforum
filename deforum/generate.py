@@ -112,11 +112,17 @@ def generate(args, root, frame = 0, return_sample=False):
     p.sampler_index = int(args.sampler)
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
-    p.n_iter = args.n_iter
+    p.n_iter = 1
     p.cfg_scale = args.scale
-    p.outpath_samples = root.outdir
-    p.outpath_grids = root.outdir
-    p.prompt, p.negative_prompt = parsed_prompt.split("--neg") #TODO: add to vanilla Deforum for compat
+    p.outpath_samples = root.outpath_samples
+    p.outpath_grids = root.outpath_samples
+    
+    prompt_split = parsed_prompt.split("--neg")
+    if len(prompt_split) > 1:
+        p.prompt, p.negative_prompt = parsed_prompt.split("--neg") #TODO: add --neg to vanilla Deforum for compat
+    else:
+        p.prompt = prompt_split[0]
+        p.negative_prompt = ""
     
     if not args.use_init and args.strength > 0 and args.strength_0_no_init:
         print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")

@@ -350,7 +350,7 @@ def setup_deforum_setting_ui(is_img2img):
     # Init settings START
     i32 = gr.HTML("<p style=\"margin-bottom:0.75em\">Init settings</p>")
     with gr.Row():
-        use_init = gr.Checkbox(label="use_init", value=False, interactive=True, visible=True)
+        use_init = gr.Checkbox(label="use_init", value=d.use_init, interactive=True, visible=True)
         from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=is_img2img, interactive=True, visible=is_img2img)
     with gr.Row():
         strength_0_no_init = gr.Checkbox(label="strength_0_no_init", value=True, interactive=True)
@@ -393,6 +393,15 @@ def pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_
     return locals()
 
 def pack_args(W, H, seed, sampler, steps, scale, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_brightness_adjust, mask_overlay_blur):
+    precision = 'autocast' 
+    C = 4
+    f = 8
+
+    prompt = ""
+    timestring = ""
+    init_latent = None
+    init_sample = None
+    init_c = None
     return locals()
     
 def pack_video_args(skip_video_for_run_all, fps, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path):
