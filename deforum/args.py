@@ -397,7 +397,6 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     
     import json
     
-    print(animation_prompts)
     animation_prompts_json = json.loads(animation_prompts)
     
     from scripts.deforum.settings import load_args
