@@ -19,6 +19,8 @@ from scipy.ndimage import gaussian_filter
 from .callback import SamplerCallback
 
 #Webui
+import cv2
+from .animation import sample_from_cv2, sample_to_cv2
 from modules import processing
 from modules.processing import process_images
 
@@ -136,9 +138,9 @@ def generate(args, root, frame = 0, return_sample=False):
     init_image = None
     
     if args.init_sample is not None:
-        # Converts to PIL, but 
-        args.init_sample = 255. * rearrange(args.init_sample.cpu().numpy(), 'c h w -> h w c')
-        init_image = Image.fromarray(args.init_sample.astype(np.uint8))
+        open_cv_image = sample_to_cv2(args.init_sample)
+        img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
+        init_image = Image.fromarray(img)
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
@@ -183,11 +185,12 @@ def generate(args, root, frame = 0, return_sample=False):
         root.first_frame = processed.images[0]
     
     if return_sample:
-        image = np.array(image).astype(np.float16) / 255.0
-        image = image[None].transpose(0, 3, 1, 2)
-        image = torch.from_numpy(image)
-        image = 2.*image - 1.
-        results = [image, process_images[0]]
+        pil_image = processed.images[0].convert('RGB') 
+        open_cv_image = np.array(pil_image) 
+        # Convert RGB to BGR 
+        open_cv_image = open_cv_image[:, :, ::-1].copy() 
+        image = sample_from_cv2(open_cv_image)
+        results = [image, processed.images[0]]
     else:
         results = [processed.images[0]]
     
