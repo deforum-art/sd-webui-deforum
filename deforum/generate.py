@@ -93,7 +93,7 @@ def generate(args, root, frame = 0, return_sample=False):
     math_parser = re.compile("""
             (?P<weight>(
             `[\S\s]*?`# a math function wrapped in `-characters
-            )
+            ))
             """, re.VERBOSE)
     
     parsed_prompt = re.sub(math_parser, lambda m: str(parse_weight(m, frame)), args.prompt)
