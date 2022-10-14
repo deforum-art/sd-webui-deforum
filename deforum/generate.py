@@ -85,6 +85,7 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
     return mask
     
 def generate(args, root, frame = 0, return_sample=False):
+    import re
     assert args.prompt is not None
     
     # Evaluate prompt math!

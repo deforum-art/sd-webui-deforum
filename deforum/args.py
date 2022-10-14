@@ -436,7 +436,8 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
         os.makedirs(args.outdir)
         
     if args.seed == -1:
-        args.seed = random.randint(0, 2**32 - 1)
+        import numpy as np
+        args.seed = np.random.randint(0, 2**32 - 1)
         
     args.timestring = time.strftime('%Y%m%d%H%M%S')
     args.strength = max(0.0, min(1.0, args.strength))
