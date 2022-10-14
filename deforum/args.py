@@ -130,7 +130,7 @@ def DeforumArgs():
     use_init = False #@param {type:"boolean"}
     strength = 0.0 #@param {type:"number"}
     strength_0_no_init = True # Set the strength to 0 automatically when no init image is used
-    init_image = "https://cdn.pixabay.com/photo/2022/07/30/13/10/green-longhorn-beetle-7353749_1280.jpg" #@param {type:"string"}
+    init_image = "https://user-images.githubusercontent.com/14872007/195867706-d067cdc6-28cd-450b-a61e-55e25bc67010.png" #@param {type:"string"}
     # Whiter areas of the mask are areas that change more
     use_mask = False #@param {type:"boolean"}
     use_alpha_as_mask = False # use the alpha channel of the init image as the mask
