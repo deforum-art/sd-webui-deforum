@@ -197,9 +197,9 @@ def setup_deforum_setting_ui(is_img2img):
     #TODO make a some sort of the original dictionary parsing
     i9 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Animation settings</p>")
     with gr.Row():
-        animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input'], value=da.animation_mode, type="index", elem_id="animation_mode", interactive=True)
+        animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
         max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True)
-        border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="index", elem_id="border", interactive=True)
+        border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
     
     
     i10 = gr.HTML("<p style=\"margin-bottom:0.75em\">Motion parameters:</p>")
@@ -247,7 +247,7 @@ def setup_deforum_setting_ui(is_img2img):
     
     i13 = gr.HTML("<p style=\"margin-bottom:0.75em\">Coherence:</p>")
     with gr.Row():
-        color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB'], value=da.color_coherence, type="index", elem_id="color_coherence", interactive=True)
+        color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
         diffusion_cadence = gr.Slider(label="diffusion_cadence", minimum=1, maximum=8, step=1, value=1, interactive=True)
         
     i14 = gr.HTML("<p style=\"margin-bottom:0.75em\">3D Depth Warping:</p>")
@@ -258,8 +258,8 @@ def setup_deforum_setting_ui(is_img2img):
         near_plane = gr.Number(label="near_plane", value=da.near_plane, interactive=True)
         far_plane = gr.Number(label="far_plane", value=da.far_plane, interactive=True)
         fov = gr.Number(label="fov", value=da.fov, interactive=True)
-        padding_mode = gr.Dropdown(label="padding_mode", choices=['border', 'reflection', 'zeros'], value=da.padding_mode, type="index", elem_id="padding_mode", interactive=True)
-        sampling_mode = gr.Dropdown(label="sampling_mode", choices=['bicubic', 'bilinear', 'nearest'], value=da.sampling_mode, type="index", elem_id="sampling_mode", interactive=True)
+        padding_mode = gr.Dropdown(label="padding_mode", choices=['border', 'reflection', 'zeros'], value=da.padding_mode, type="value", elem_id="padding_mode", interactive=True)
+        sampling_mode = gr.Dropdown(label="sampling_mode", choices=['bicubic', 'bilinear', 'nearest'], value=da.sampling_mode, type="value", elem_id="sampling_mode", interactive=True)
         save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
     
     i15 = gr.HTML("<p style=\"margin-bottom:0.75em\">Video Input:</p>")
@@ -316,7 +316,7 @@ def setup_deforum_setting_ui(is_img2img):
     
     with gr.Row():
         seed = gr.Number(label="seed", value=d.seed, interactive=True)
-        sampler = gr.Dropdown(label="sampler", choices=["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"], value=d.sampler, type="index", elem_id="sampler", interactive=True)
+        sampler = gr.Dropdown(label="sampler", choices=["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"], value=d.sampler, type="value", elem_id="sampler", interactive=True)
     with gr.Row():
         steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
         scale = gr.Slider(label="scale", minimum=1, maximum=100, step=1, value=d.scale, interactive=True)
@@ -334,7 +334,7 @@ def setup_deforum_setting_ui(is_img2img):
     with gr.Row():    
         filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format)
     with gr.Row():
-        seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random'], value=d.seed_behavior, type="index", elem_id="seed_behavior", interactive=True)
+        seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
     # output - made in run
     # Batch settings END
     
@@ -370,7 +370,7 @@ def setup_deforum_setting_ui(is_img2img):
         render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True)
     with gr.Row():
         max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
-        path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="index", elem_id="path_name_modifier", interactive=True)
+        path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True)
         
     with gr.Row():
         image_path = gr.Textbox(label="image_path", lines=1, interactive=True, value = dv.image_path)
