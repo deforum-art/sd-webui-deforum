@@ -76,7 +76,7 @@ def DeforumAnimArgs():
 def DeforumPrompts():
     return r"""[
     "a beautiful forest by Asher Brown Durand, trending on Artstation", # the first prompt I want
-    "a beautiful portrait of a woman by Artgerm, trending on Artstation", # the second prompt I want
+    "a beautiful portrait of a woman by Artgerm, trending on Artstation"#, # the second prompt I want
     #"this prompt I don't want it I commented it out",
     #"a nousr robot, trending on Artstation", # use "nousr robot" with the robot diffusion model (see model_checkpoint setting)
     #"touhou 1girl komeiji_koishi portrait, green hair", # waifu diffusion prompts can use danbooru tag groups (see model_checkpoint)
@@ -89,7 +89,7 @@ def DeforumAnimPrompts():
     "0": "a beautiful apple, trending on Artstation",
     "20": "a beautiful banana, trending on Artstation",
     "30": "a beautiful coconut, trending on Artstation",
-    "40": "a beautiful durian, trending on Artstation",
+    "40": "a beautiful durian, trending on Artstation"
 }
 """
 
@@ -400,7 +400,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     
     import json
     
-    #root.prompts = json.loads(prompts)
+    root.prompts = json.loads(prompts)
     print(animation_prompts)
     animation_prompts_json = json.loads(animation_prompts)
     
