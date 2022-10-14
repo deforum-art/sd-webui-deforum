@@ -40,6 +40,11 @@ https://github.com/deforum/stable-diffusion
 
 ## Showcase
 
+Proof that it works good enough of automatic1111's build with MATH keyframing and prompt-weighting enabled in 3D mode
+
+![sw-min](https://user-images.githubusercontent.com/14872007/195954681-6b0f5a8d-e575-4ce3-9c10-e39ffbbca6ac.gif)
+
+
 'Le Grand Interface' at work:
 
 ![le_grand_interface](https://user-images.githubusercontent.com/14872007/195954002-5227cd40-079a-4c82-8553-157d77e3bdff.png)
