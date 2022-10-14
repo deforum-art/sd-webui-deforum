@@ -408,6 +408,10 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     root.p = p
     root.prompts = json.loads(prompts)
     root.animation_prompts = animation_prompts_json
+    
+    print(f"Additional models path: {root.models_path}")
+    if not os.path.exists(root.models_path):
+        os.mkdir(root.models_path)
 
     args = SimpleNamespace(**args_dict)
     anim_args = SimpleNamespace(**anim_args_dict)
