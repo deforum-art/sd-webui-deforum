@@ -31,7 +31,7 @@ class DepthModel():
             print("Downloading AdaBins_nyu.pt...")
             os.makedirs(models_path, exist_ok=True)
             wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", models_path)
-        self.adabins_helper = InferenceHelper(dataset='nyu', device=self.device)
+        self.adabins_helper = InferenceHelper(models_path=models_path, dataset='nyu', device=self.device)
 
     def load_midas(self, models_path, half_precision=True):
         if not os.path.exists(os.path.join(models_path, 'dpt_large-midas-2f21e586.pt')):
