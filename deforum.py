@@ -44,9 +44,9 @@ class Script(wscripts.Script):
 
         # dispatch to appropriate renderer
         if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
-            render_animation(args, anim_args, animation_prompts, root)
+            render_animation(args, anim_args, root.animation_prompts, root)
         elif anim_args.animation_mode == 'Video Input':
-            render_input_video(args, anim_args, animation_prompts, root)
+            render_input_video(args, anim_args, root.animation_prompts, root)#TODO: prettify code
         else:
             print('Other modes are not available yet!')
         
