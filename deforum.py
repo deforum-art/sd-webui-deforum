@@ -37,7 +37,7 @@ class Script(wscripts.Script):
         
         print(sys.path)
         
-        from scripts.deforum.render import render_animation, render_input_video, render_image_batch, render_interpolation
+        from scripts.deforum.render import render_animation, render_input_video
         
         if defdeb:
             return Processed(p, "", "Hello, Deforum!")
@@ -47,10 +47,8 @@ class Script(wscripts.Script):
             render_animation(args, anim_args, animation_prompts, root)
         elif anim_args.animation_mode == 'Video Input':
             render_input_video(args, anim_args, animation_prompts, root)
-        elif anim_args.animation_mode == 'Interpolation':
-            render_interpolation(args, anim_args, animation_prompts, root)
         else:
-            render_image_batch(args, prompts, root)
+            print('Other modes are not available yet!')
         
         if video_args.skip_video_for_run_all:
             print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
