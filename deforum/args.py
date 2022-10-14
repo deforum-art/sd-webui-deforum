@@ -20,7 +20,7 @@ def DeforumAnimArgs():
 
     #@markdown ####**Animation:**
     animation_mode = '2D' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
-    max_frames = 1000 #@param {type:"number"}
+    max_frames = 120 #@param {type:"number"}
     border = 'replicate' #@param ['wrap', 'replicate'] {type:'string'}
 
     #@markdown ####**Motion Parameters:**
@@ -84,10 +84,10 @@ def DeforumPrompts():
 
 def DeforumAnimPrompts():
     return r"""{
-    "0": "a beautiful apple, trending on Artstation",
-    "20": "a beautiful banana, trending on Artstation",
-    "30": "a beautiful coconut, trending on Artstation",
-    "40": "a beautiful durian, trending on Artstation"
+    "0": "apple:`where(cos(6.28*t/10)>=0, 2*cos(6.28*t/10), 0)`, strawberry:`where(cos(6.28*t/10)<0, -2*cos(6.28*t/10), 0)`, snow --neg apple:`where(cos(6.28*t/10)<0, -2*cos(6.28*t/10), 0)`, strawberry:`where(cos(6.28*t/10)>=0, 2*cos(6.28*t/10), 0)`",
+    "60": "a beautiful (((banana))), trending on Artstation",
+    "80": "a beautiful coconut, trending on Artstation",
+    "100": "a beautiful durian, trending on Artstation"
 }
 """
 
