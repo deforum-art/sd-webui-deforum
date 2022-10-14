@@ -127,8 +127,11 @@ def generate(args, root, frame = 0, return_sample=False):
     prompt_split = parsed_prompt.split("--neg")
     if len(prompt_split) > 1:
         p.prompt, p.negative_prompt = parsed_prompt.split("--neg") #TODO: add --neg to vanilla Deforum for compat
+        print(f'Positive prompt:{p.prompt}')
+        print(f'Negative prompt:{p.negative_prompt}')
     else:
         p.prompt = prompt_split[0]
+        print(f'Positive prompt:{p.prompt}')
         p.negative_prompt = ""
     
     if not args.use_init and args.strength > 0 and args.strength_0_no_init:
