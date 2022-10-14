@@ -133,7 +133,7 @@ def generate(args, root, frame = 0, return_sample=False):
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
         #init_image = repeat(init_image, '1 ... -> b ...', b=batch_size)
-    else
+    else:
         #random noise
         a = np.random.rand(args.W, args.H, 3)*255
         init_image = Image.fromarray(a.astype('uint8')).convert('RGB')
