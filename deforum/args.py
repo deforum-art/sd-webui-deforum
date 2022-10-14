@@ -252,7 +252,7 @@ def setup_deforum_setting_ui(is_img2img):
         
     i14 = gr.HTML("<p style=\"margin-bottom:0.75em\">3D Depth Warping:</p>")
     with gr.Row():
-        use_depth_warping = gr.Checkbox(label="use_depth_warping", value=False, interactive=True)
+        use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
     with gr.Row():
         midas_weight = gr.Number(label="midas_weight", value=da.midas_weight, interactive=True)
         near_plane = gr.Number(label="near_plane", value=da.near_plane, interactive=True)
