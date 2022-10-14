@@ -222,8 +222,7 @@ def render_animation(args, anim_args, animation_prompts, root):
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
             frame_idx += 1
 
-        display.clear_output(wait=True)
-        display.display(image)
+        state.current_image = image
 
         args.seed = next_seed(args)
 
