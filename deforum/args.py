@@ -164,7 +164,7 @@ def DeforumOutputArgs():
     #@markdown **Manual Settings**
     use_manual_settings = False #@param {type:"boolean"}
     image_path = "/content/drive/MyDrive/AI/StableDiffusion/2022-09/20220903000939_%05d.png" #@param {type:"string"}
-    mp4_path = "/content/drive/MyDrive/AI/StableDiffusion/content/drive/MyDrive/AI/StableDiffusion/2022-09/sion/2022-09/20220903000939.mp4" #@param {type:"string"}
+    mp4_path = "/content/drive/MyDrive/AI/StableDiffusion/content/drive/MyDrive/AI/StableDiffusion/2022-09/kabachuha/2022-09/20220903000939.mp4" #@param {type:"string"}
     render_steps = False  #@param {type: 'boolean'}
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
     max_video_frames = 200 #@param {type:"string"}
@@ -180,7 +180,7 @@ def setup_deforum_setting_ui(is_img2img):
     da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
     dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
     i1 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>")
-    i2 = gr.HTML("<p style=\"margin-bottom:0.75em\">Made by deforum.github.io</p>")
+    i2 = gr.HTML("<p style=\"margin-bottom:0.75em\">Made by deforum.github.io, port for automatic1111's webui maintained by kabachuha</p>")
     i3 = gr.HTML("<p style=\"margin-bottom:0.75em\">Original Deforum Github repo  github.com/deforum/stable-diffusion</p>")
     i4 = gr.HTML("<p style=\"margin-bottom:0.75em\">This WIP fork for auto1111's webui github.com/kabachuha/stable-diffusion/tree/automatic1111-webui</p>")
     i5 = gr.HTML("<p style=\"margin-bottom:0.75em\">Join the official Deforum Discord discord.gg/deforum to share your creations and suggestions</p>")
@@ -273,10 +273,10 @@ def setup_deforum_setting_ui(is_img2img):
     with gr.Row():
         video_mask_path = gr.Textbox(label="video_mask_path", lines=1, value = da.video_mask_path, interactive=True)
     
-    i16 = gr.HTML("<p style=\"margin-bottom:0.75em\">Interpolation:</p>")
+    i16 = gr.HTML("<p style=\"margin-bottom:0.75em\">Interpolation (turned off atm)</p>")
     with gr.Row():
-        interpolate_key_frames = gr.Checkbox(label="interpolate_key_frames", value=da.interpolate_key_frames, interactive=True)
-        interpolate_x_frames = gr.Number(label="interpolate_x_frames", value=da.interpolate_x_frames, interactive=True, precision=0)
+        interpolate_key_frames = gr.Checkbox(label="interpolate_key_frames", value=da.interpolate_key_frames, interactive=False, visible = False)
+        interpolate_x_frames = gr.Number(label="interpolate_x_frames", value=da.interpolate_x_frames, interactive=False, precision=0, visible = False)#TODO
     
     i17 = gr.HTML("<p style=\"margin-bottom:0.75em\">Resume animation:</p>")
     with gr.Row():
@@ -287,14 +287,14 @@ def setup_deforum_setting_ui(is_img2img):
     # Prompts settings START
     
     i18 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Prompts</p>")
-    i19 = gr.HTML("<p style=\"margin-bottom:0.75em\">`animation_mode: None` batches on list of *prompts*.</p>")
+    i19 = gr.HTML("<p style=\"margin-bottom:0.75em\">`animation_mode: None` batches on list of *prompts*. (Batch mode disabled atm, only animation_prompts are working)</p>")
     i20 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">*Important change from vanilla Deforum!*</p>")
     i21 = gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">This script uses the built-in webui weighting settings.</p>")
     i22 = gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">So if you want to use math functions as prompt weights,</p>")
     i23 = gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">keep the values above zero in both parts</p>")
     i24 = gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">Negative prompt part can be specified with --negative</p>")
     with gr.Row():
-        prompts = gr.Textbox(label="prompts", lines=8, interactive=True, value = DeforumPrompts())
+        prompts = gr.Textbox(label="prompts", lines=8, interactive=False, value = DeforumPrompts(), visible = True) # TODO
     with gr.Row():
         animation_prompts = gr.Textbox(label="animation_prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
     
@@ -306,7 +306,7 @@ def setup_deforum_setting_ui(is_img2img):
     i26 = gr.HTML("<p style=\"margin-bottom:0.75em\">Sampling settings</p>")
     i27 = gr.HTML("<p style=\"margin-bottom:0.75em\">The following settings have already been set up in the webui</p>")
     i28 = gr.HTML("<p style=\"margin-bottom:0.75em\">Do you want to override them with the values above?</p>")
-    i29 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">FIXME! Need to make deforum <-> webui samplers map. Before that, the sampler gets used from webui anyway</p>") #TODO
+    i29 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">FIXME! Need to make deforum <-> webui samplers map. Before that, the sampler and Denoising strength get used from webui anyway. If your images are changing too adruptly, lower steps, denoising strength or increase strength schedule!</p>") #TODO
     with gr.Row():
         override_these_with_webui = gr.Checkbox(label="override_these_with_webui", value=False, interactive=True)
     i30 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">W, H, seed, sampler, steps, scale, ddim_eta, n_batch, make_grid, grid_rows</p>")
@@ -320,7 +320,9 @@ def setup_deforum_setting_ui(is_img2img):
         sampler = gr.Dropdown(label="sampler", choices=["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"], value=d.sampler, type="value", elem_id="sampler", interactive=True)
     with gr.Row():
         steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
+    with gr.Row():
         scale = gr.Slider(label="scale", minimum=1, maximum=100, step=1, value=d.scale, interactive=True)
+    with gr.Row():
         ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
         n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0)
         make_grid = gr.Checkbox(label="make_grid", value=d.make_grid, interactive=True)
@@ -330,10 +332,10 @@ def setup_deforum_setting_ui(is_img2img):
         save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
     with gr.Row():
         save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
-        display_samples = gr.Checkbox(label="display_samples", value=d.display_samples, interactive=True)
+        display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
     with gr.Row():
         save_sample_per_step = gr.Checkbox(label="save_sample_per_step", value=d.save_sample_per_step, interactive=True)
-        show_sample_per_step = gr.Checkbox(label="show_sample_per_step", value=d.show_sample_per_step, interactive=True)
+        show_sample_per_step = gr.Checkbox(label="show_sample_per_step", value=False, interactive=False)
     
     # Sampling settings END
     
@@ -352,7 +354,7 @@ def setup_deforum_setting_ui(is_img2img):
     i32 = gr.HTML("<p style=\"margin-bottom:0.75em\">Init settings</p>")
     with gr.Row():
         use_init = gr.Checkbox(label="use_init", value=d.use_init, interactive=True, visible=True)
-        from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=is_img2img, interactive=True, visible=is_img2img)
+        from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=True)
     with gr.Row():
         strength_0_no_init = gr.Checkbox(label="strength_0_no_init", value=True, interactive=True)
         strength = gr.Slider(label="strength", minimum=0, maximum=1, step=0.02, value=0, interactive=True)
