@@ -99,6 +99,13 @@ class Script(wscripts.Script):
             data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
             display.display( display.HTML(f'<video controls loop><source src="{data_url}" type="video/mp4"></video>') )
     
+        if root.initial_info is None:
+            root.initial_info = "An error has occured and nothing has been generated!"
+            import numpy as np
+            from PIL import Image
+            a = np.random.rand(args.W, args.H, 3)*255
+            root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
+            root.initial_seed = 6934
         root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
         root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
         return Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
