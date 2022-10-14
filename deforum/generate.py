@@ -109,7 +109,7 @@ def generate(args, root, frame = 0, return_sample=False):
     p.batch_size = args.n_samples
     p.width = args.W
     p.height = args.H
-    p.steps = args.steps
+    p.steps = int((1.0-args.strength) * args.steps)
     p.seed = args.seed
     p.do_not_save_samples = not args.save_samples
     p.do_not_save_grid = not args.make_grid
@@ -132,7 +132,6 @@ def generate(args, root, frame = 0, return_sample=False):
         print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
         print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
         args.strength = 0
-    p.denoising_strength = args.strength
     mask_image = None
     init_image = None
     
