@@ -104,7 +104,6 @@ def DeforumArgs():
     steps = 21 #@param
     scale = 7 #@param
     ddim_eta = 0.0 #@param
-    denoising_strength = 0.61
     dynamic_threshold = None
     static_threshold = None   
 
@@ -403,7 +402,7 @@ def pack_args(W, H, seed, sampler, steps, scale, ddim_eta, n_batch, make_grid, g
     precision = 'autocast' 
     C = 4
     f = 8
-
+    denoising_strength = 0.61
     prompt = ""
     timestring = ""
     init_latent = None
