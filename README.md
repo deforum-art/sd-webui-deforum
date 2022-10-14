@@ -49,3 +49,9 @@ Proof that it works good enough of automatic1111's build with MATH keyframing an
 
 ![le_grand_interface](https://user-images.githubusercontent.com/14872007/195954002-5227cd40-079a-4c82-8553-157d77e3bdff.png)
 
+Math evaluation:
+
+![math-eval](https://user-images.githubusercontent.com/14872007/195957601-3c3fecab-5ef2-4a2f-9eba-3bb0c70bd4b8.png)
+
+
+
