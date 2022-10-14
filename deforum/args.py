@@ -7,6 +7,8 @@ def Root():
     models_path = ph.models_path + '/Deforum'
     half_precision = not cmd_opts.no_half
     p = None
+    initial_seed = None
+    initial_info = None
     return locals()
 
 def DeforumAnimArgs():

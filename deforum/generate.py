@@ -10,7 +10,7 @@ from ldm.models.diffusion.ddim import DDIMSampler
 from k_diffusion.external import CompVisDenoiser
 from torch import autocast
 from contextlib import nullcontext
-from einops import rearrange, repeat
+from einops import rearrange
 
 from .prompt import get_uc_and_c, parse_weight
 from .k_samplers import sampler_fn
@@ -125,187 +125,55 @@ def generate(args, root, frame = 0, return_sample=False):
     init_image = None
     
     if args.init_sample is not None:
-        with precision_scope("cuda"):
-            init_latent = root.model.get_first_stage_encoding(root.model.encode_first_stage(args.init_sample))
+        # Converts to PIL, but 
+        args.init_sample = 255. * rearrange(args.init_sample.cpu().numpy(), 'c h w -> h w c')
+        init_image = Image.fromarray(args.init_sample.astype(np.uint8))
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
-        init_image = init_image.to(root.device)
-        init_image = repeat(init_image, '1 ... -> b ...', b=batch_size)
-        with precision_scope("cuda"):
-            init_latent = root.model.get_first_stage_encoding(root.model.encode_first_stage(init_image))  # move to latent space   
-
-def generate_old(args, root, frame = 0, return_sample=False, return_c=False):
-    os.makedirs(args.outdir, exist_ok=True)
-
-    model_wrap = CompVisDenoiser(root.model)
-    batch_size = args.n_samples
-    prompt = args.prompt
-    assert prompt is not None
-    data = [batch_size * [prompt]]
-    precision_scope = autocast if args.precision == "autocast" else nullcontext
-
-    init_latent = None
-    mask_image = None
-    init_image = None
-    if args.init_latent is not None:
-        init_latent = args.init_latent
-    elif args.init_sample is not None:
-        with precision_scope("cuda"):
-            init_latent = root.model.get_first_stage_encoding(root.model.encode_first_stage(args.init_sample))
-    elif args.use_init and args.init_image != None and args.init_image != '':
-        init_image, mask_image = load_img(args.init_image, 
-                                          shape=(args.W, args.H),  
-                                          use_alpha_as_mask=args.use_alpha_as_mask)
-        init_image = init_image.to(root.device)
-        init_image = repeat(init_image, '1 ... -> b ...', b=batch_size)
-        with precision_scope("cuda"):
-            init_latent = root.model.get_first_stage_encoding(root.model.encode_first_stage(init_image))  # move to latent space        
-
-    if not args.use_init and args.strength > 0 and args.strength_0_no_init:
-        print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
-        print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
-        args.strength = 0
-
+        #init_image = repeat(init_image, '1 ... -> b ...', b=batch_size)
+    else
+        a = np.random.rand(args.W, args.H, 3)*255
+        init_image = Image.fromarray(a.astype('uint8')).convert('RGB')
+    
     # Mask functions
     if args.use_mask:
         assert args.mask_file is not None or mask_image is not None, "use_mask==True: An mask image is required for a mask. Please enter a mask_file or use an init image with an alpha channel"
         assert args.use_init, "use_mask==True: use_init is required for a mask"
-        assert init_latent is not None, "use_mask==True: An latent init image is required for a mask"
 
 
         mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
-                            init_latent.shape, 
+                            init_image.shape, 
                             args.mask_contrast_adjust, 
                             args.mask_brightness_adjust,
                             args.invert_mask)
         
-        if (torch.all(mask == 0) or torch.all(mask == 1)) and args.use_alpha_as_mask:
-            raise Warning("use_alpha_as_mask==True: Using the alpha channel from the init image as a mask, but the alpha channel is blank.")
+        #if (torch.all(mask == 0) or torch.all(mask == 1)) and args.use_alpha_as_mask:
+        #    raise Warning("use_alpha_as_mask==True: Using the alpha channel from the init image as a mask, but the alpha channel is blank.")
         
-        mask = mask.to(root.device)
-        mask = repeat(mask, '1 ... -> b ...', b=batch_size)
+        #mask = repeat(mask, '1 ... -> b ...', b=batch_size)
     else:
         mask = None
 
     assert not ( (args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
-        
-    t_enc = int((1.0-args.strength) * args.steps)
-
-    # Noise schedule for the k-diffusion samplers (used for masking)
-    k_sigmas = model_wrap.get_sigmas(args.steps)
-    k_sigmas = k_sigmas[len(k_sigmas)-t_enc-1:] #!!! TODO mask_blur
-
-    if args.sampler in ['plms','ddim']:
-        sampler.make_schedule(ddim_num_steps=args.steps, ddim_eta=args.ddim_eta, ddim_discretize='fill', verbose=False)
-        
     
-    # TODO add catch/finally around the stuff
-    sd_samplers.KDiffusionSampler.callback_state = SamplerCallback(args=args,
-                            root=root,
-                            mask=mask, 
-                            init_latent=init_latent,
-                            sigmas=k_sigmas,
-                            sampler=sampler,
-                            verbose=False).callback
-
-    results = []
-    with torch.no_grad():
-        with precision_scope("cuda"):
-            with root.model.ema_scope():
-                for prompts in data:
-                    if isinstance(prompts, tuple):
-                        prompts = list(prompts)
-                        
-                    ## TODO SPLIT PROMPT!!!
-                    if args.prompt_weighting:
-                        uc, c = get_uc_and_c(prompts, root.model, args, frame)
-                    else:
-                        uc = root.model.get_learned_conditioning(batch_size * [""])
-                        c = root.model.get_learned_conditioning(prompts)
-
-
-                    if args.scale == 1.0:
-                        uc = None
-                    if args.init_c != None:
-                        c = args.init_c
-
-                    if args.sampler in ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral"]:
-                        samples = sampler_fn(
-                            c=c, 
-                            uc=uc, 
-                            args=args, 
-                            model_wrap=model_wrap, 
-                            init_latent=init_latent, 
-                            t_enc=t_enc, 
-                            device=root.device, 
-                            cb=callback)
-                    else:
-                        # args.sampler == 'plms' or args.sampler == 'ddim':
-                        if init_latent is not None and args.strength > 0:
-                            z_enc = sampler.stochastic_encode(init_latent, torch.tensor([t_enc]*batch_size).to(root.device))
-                        else:
-                            z_enc = torch.randn([args.n_samples, args.C, args.H // args.f, args.W // args.f], device=root.device)
-                        if args.sampler == 'ddim':
-                            samples = sampler.decode(z_enc, 
-                                                     c, 
-                                                     t_enc, 
-                                                     unconditional_guidance_scale=args.scale,
-                                                     unconditional_conditioning=uc,
-                                                     img_callback=callback)
-                        elif args.sampler == 'plms': # no "decode" function in plms, so use "sample"
-                            shape = [args.C, args.H // args.f, args.W // args.f]
-                            samples, _ = sampler.sample(S=args.steps,
-                                                            conditioning=c,
-                                                            batch_size=args.n_samples,
-                                                            shape=shape,
-                                                            verbose=False,
-                                                            unconditional_guidance_scale=args.scale,
-                                                            unconditional_conditioning=uc,
-                                                            eta=args.ddim_eta,
-                                                            x_T=z_enc,
-                                                            img_callback=callback)
-                        else:
-                            raise Exception(f"Sampler {args.sampler} not recognised.")
-
-
-                    x_samples = root.p.sd_model.decode_first_stage(samples)
-
-                    if args.use_mask and args.overlay_mask:
-                        # Overlay the masked image after the image is generated
-                        if args.init_sample is not None:
-                            img_original = args.init_sample
-                        elif init_image is not None:
-                            img_original = init_image
-                        else:
-                            raise Exception("Cannot overlay the masked image without an init image to overlay")
-
-                        mask_fullres = prepare_mask(args.mask_file if mask_image is None else mask_image, 
-                                                    img_original.shape, 
-                                                    args.mask_contrast_adjust, 
-                                                    args.mask_brightness_adjust,
-                                                    args.inver_mask)
-                        mask_fullres = mask_fullres[:,:3,:,:]
-                        mask_fullres = repeat(mask_fullres, '1 ... -> b ...', b=batch_size)
-
-                        mask_fullres[mask_fullres < mask_fullres.max()] = 0
-                        mask_fullres = gaussian_filter(mask_fullres, args.mask_overlay_blur)
-                        mask_fullres = torch.Tensor(mask_fullres).to(root.device)
-
-                        x_samples = img_original * mask_fullres + x_samples * ((mask_fullres * -1.0) + 1)
-
-
-                    if return_sample:
-                        results.append(x_samples.clone())
-
-                    x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
-
-                    if return_c:
-                        results.append(c.clone())
-
-                    for x_sample in x_samples:
-                        x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-                        image = Image.fromarray(x_sample.astype(np.uint8))
-                        results.append(image)
+    p.init_images = [init_image]
+    p.mask = mask
+    
+    processed = processing.process_images(p)
+    
+    if root.initial_info = None:
+        root.initial_seed = processed.seed
+        root.initial_info = processed.info
+    
+    if return_sample:
+        image = np.array(image).astype(np.float16) / 255.0
+        image = image[None].transpose(0, 3, 1, 2)
+        image = torch.from_numpy(image)
+        image = 2.*image - 1.
+        results = [image, process_images[0]]
+    else:
+        results = [processed.images[0]]
+    
     return results
