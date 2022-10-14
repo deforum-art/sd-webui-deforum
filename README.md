@@ -37,3 +37,10 @@ https://github.com/deforum/stable-diffusion
 7. Join our Discord where you can post generated stuff, ask questions and ~~infuriate the devs with 'this feature is in auto's build. When will it be in Deforum? Why can't I launch Deforum on my potato computer?'~~(not anymore, ha-ha) https://discord.gg/deforum. There's also the 'Issues' tab in the repo.
 
 8. Profit!
+
+## Showcase
+
+'Le Grand Interface' at work:
+
+![le_grand_interface](https://user-images.githubusercontent.com/14872007/195954002-5227cd40-079a-4c82-8553-157d77e3bdff.png)
+
