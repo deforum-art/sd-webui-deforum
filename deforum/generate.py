@@ -22,7 +22,7 @@ from .callback import SamplerCallback
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
 from modules import processing
-from modules.processing import process_images
+from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
 def add_noise(sample: torch.Tensor, noise_amt: float) -> torch.Tensor:
     return sample + torch.randn(sample.shape, device=sample.device) * noise_amt
@@ -145,6 +145,8 @@ def generate(args, root, frame = 0, return_sample=False):
     
     p.steps = int((1.0-args.strength) * args.steps)
     
+    processed = None
+    
     if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
@@ -154,34 +156,61 @@ def generate(args, root, frame = 0, return_sample=False):
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
     else:
-        a = np.random.rand(args.W, args.H, 3)*255
-        init_image = Image.fromarray(a.astype('uint8')).convert('RGB')
+        # sometimes my genius... is almost frightening
+        p_txt = StableDiffusionProcessingTxt2Img(
+                sd_model=p.sd_model,
+                outpath_samples=p.outpath_samples,
+                outpath_grids=p.outpath_samples,
+                prompt=p.prompt,
+                styles=p.styles,
+                negative_prompt=p.negative_prompt,
+                seed=p.seed,
+                subseed=p.subseed,
+                subseed_strength=p.subseed_strength,
+                seed_resize_from_h=p.seed_resize_from_h,
+                seed_resize_from_w=p.seed_resize_from_w,
+                seed_enable_extras=None,
+                sampler_index=p.sampler_index,
+                batch_size=p.batch_size,
+                n_iter=p.n_iter,
+                steps=p.steps,
+                cfg_scale=p.cfg_scale,
+                width=p.width,
+                height=p.height,
+                restore_faces=p.restore_faces,
+                tiling=p.tiling,
+                enable_hr=None,
+                scale_latent=None,
+                denoising_strength=None,#for initial image
+            )
+        processed = processing.process_images(p_txt)
     
-    # Mask functions
-    if args.use_mask:
-        assert args.mask_file is not None or mask_image is not None, "use_mask==True: An mask image is required for a mask. Please enter a mask_file or use an init image with an alpha channel"
-        assert args.use_init, "use_mask==True: use_init is required for a mask"
+    if processed is None:
+        # Mask functions
+        if args.use_mask:
+            assert args.mask_file is not None or mask_image is not None, "use_mask==True: An mask image is required for a mask. Please enter a mask_file or use an init image with an alpha channel"
+            assert args.use_init, "use_mask==True: use_init is required for a mask"
 
 
-        mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
-                            init_image.shape, 
-                            args.mask_contrast_adjust, 
-                            args.mask_brightness_adjust,
-                            args.invert_mask)
+            mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
+                                init_image.shape, 
+                                args.mask_contrast_adjust, 
+                                args.mask_brightness_adjust,
+                                args.invert_mask)
+            
+            #if (torch.all(mask == 0) or torch.all(mask == 1)) and args.use_alpha_as_mask:
+            #    raise Warning("use_alpha_as_mask==True: Using the alpha channel from the init image as a mask, but the alpha channel is blank.")
+            
+            #mask = repeat(mask, '1 ... -> b ...', b=batch_size)
+        else:
+            mask = None
+
+        assert not ( (args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
         
-        #if (torch.all(mask == 0) or torch.all(mask == 1)) and args.use_alpha_as_mask:
-        #    raise Warning("use_alpha_as_mask==True: Using the alpha channel from the init image as a mask, but the alpha channel is blank.")
+        p.init_images = [init_image]
+        p.mask = mask
         
-        #mask = repeat(mask, '1 ... -> b ...', b=batch_size)
-    else:
-        mask = None
-
-    assert not ( (args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
-    
-    p.init_images = [init_image]
-    p.mask = mask
-    
-    processed = processing.process_images(p)
+        processed = processing.process_images(p)
     
     if root.initial_info == None:
         root.initial_seed = processed.seed
