@@ -32,7 +32,7 @@ https://github.com/deforum/stable-diffusion
 
 5. Run the script and see if you got it working or even got something. **In 3D mode a large delay is expected at first** as the script downloads the depth models.
 
-6. If it gives errors on missing modules, run `pip install requirements.txt` with `requirements.txt` being from this repo.
+6. If it gives errors on missing modules, such as one about missing 'numexpr', go to the original webui directory, open 'requirements_versions.txt' and append the missing packages names at the end of that file. Then restart the webui.
 
 7. Join our Discord where you can post generated stuff, ask questions and ~~infuriate the devs with 'this feature is in auto's build. When will it be in Deforum? Why can't I launch Deforum on my potato computer?'~~(not anymore, ha-ha) https://discord.gg/deforum. There's also the 'Issues' tab in the repo.
 
