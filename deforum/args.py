@@ -310,7 +310,7 @@ def setup_deforum_setting_ui(is_img2img):
     i26 = gr.HTML("<p style=\"margin-bottom:0.75em\">Sampling settings</p>")
     i27 = gr.HTML("<p style=\"margin-bottom:0.75em\">The following settings have already been set up in the webui</p>")
     i28 = gr.HTML("<p style=\"margin-bottom:0.75em\">Do you want to override them with the values above?</p>")
-    i29 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">FIXME! Need to make deforum <-> webui samplers map. Before that, the sampler and Denoising strength get used from webui anyway. If your images are changing too adruptly, lower steps, denoising strength schedule or increase strength schedule!</p>") #TODO
+    i29 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">FIXME! Need to make deforum <-> webui samplers map. Before that, the sampler gets used from webui anyway. If your images are changing too adruptly, lower steps, denoising strength schedule or increase strength schedule!</p>") #TODO
     with gr.Row():
         override_these_with_webui = gr.Checkbox(label="override_these_with_webui", value=False, interactive=True)
     i30 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">W, H, seed, sampler, steps, scale, ddim_eta, n_batch, make_grid, grid_rows</p>")
