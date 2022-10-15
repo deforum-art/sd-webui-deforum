@@ -422,17 +422,15 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     
     import json
     
-    animation_prompts_json = json.loads(animation_prompts)
+    root = SimpleNamespace(**Root())
+    root.p = p
+    root.prompts = json.loads(prompts)
+    root.animation_prompts = json.loads(animation_prompts)
     
     from scripts.deforum.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict,anim_args_dict,custom_settings_file, animation_prompts_json)
-
-    root = SimpleNamespace(**Root())
-    root.p = p
-    root.prompts = json.loads(prompts)
-    root.animation_prompts = animation_prompts_json
+        load_args(args_dict,anim_args_dict, custom_settings_file, root)
     
     print(f"Additional models path: {root.models_path}")
     if not os.path.exists(root.models_path):
