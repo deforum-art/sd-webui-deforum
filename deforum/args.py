@@ -1,4 +1,5 @@
 from modules.shared import cmd_opts
+from modules.processing import get_fixed_seed
 import modules.shared as sh
 import modules.paths as ph
 
@@ -458,10 +459,8 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     args.outdir = os.path.join(os.getcwd(), args.outdir)
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
-        
-    if args.seed == -1:
-        import numpy as np
-        args.seed = np.random.randint(0, 2**32 - 1)
+    
+    args.seed = get_fixed_seed(args.seed)
         
     args.timestring = time.strftime('%Y%m%d%H%M%S')
     args.strength = max(0.0, min(1.0, args.strength))
