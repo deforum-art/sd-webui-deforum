@@ -182,7 +182,7 @@ def setup_deforum_setting_ui(is_img2img):
     da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
     dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
     i1 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>")
-    i2 = gr.HTML("<p style=\"margin-bottom:0.75em\">Made by deforum.github.io, port for automatic1111's webui maintained by kabachuha</p>")
+    i2 = gr.HTML("<p style=\"margin-bottom:0.75em\">Made by deforum.github.io, port for AUTOMATIC1111's webui maintained by kabachuha</p>")
     i3 = gr.HTML("<p style=\"margin-bottom:0.75em\">Original Deforum Github repo  github.com/deforum/stable-diffusion</p>")
     i4 = gr.HTML("<p style=\"margin-bottom:0.75em\">This fork for auto1111's webui github.com/deforum-art/deforum-for-automatic1111-webui</p>")
     i5 = gr.HTML("<p style=\"margin-bottom:0.75em\">Join the official Deforum Discord discord.gg/deforum to share your creations and suggestions</p>")
