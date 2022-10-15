@@ -1,16 +1,11 @@
 clean-fid
-colab-convert
 einops
 ffmpeg
 ftfy
 jsonmerge
-jupyterlab
-jupyter_http_over_ws
 kornia
 numexpr
 matplotlib
-notebook
-numexpr
 omegaconf
 opencv-python
 pandas
