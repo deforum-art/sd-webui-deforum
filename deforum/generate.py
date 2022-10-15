@@ -181,7 +181,6 @@ def generate(args, root, frame = 0, return_sample=False):
                 restore_faces=p.restore_faces,
                 tiling=p.tiling,
                 enable_hr=None,
-                scale_latent=None,
                 denoising_strength=None,#for initial image
             )
         processed = processing.process_images(p_txt)
