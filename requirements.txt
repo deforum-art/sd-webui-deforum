@@ -7,6 +7,7 @@ jsonmerge
 jupyterlab
 jupyter_http_over_ws
 kornia
+numexpr
 matplotlib
 notebook
 numexpr
