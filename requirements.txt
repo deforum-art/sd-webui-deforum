@@ -3,7 +3,6 @@ colab-convert
 einops
 ffmpeg
 ftfy
-ipython
 jsonmerge
 jupyterlab
 jupyter_http_over_ws

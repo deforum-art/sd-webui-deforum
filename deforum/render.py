@@ -1,6 +1,5 @@
 import os
 import json
-from IPython import display
 import random
 from torchvision.utils import make_grid
 from einops import rearrange

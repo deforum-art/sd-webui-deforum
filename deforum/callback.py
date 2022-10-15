@@ -3,7 +3,6 @@ import os
 import torchvision.transforms.functional as TF
 from torchvision.utils import make_grid
 import numpy as np
-from IPython import display
 
 #
 # Callback functions
