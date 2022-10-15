@@ -1,5 +1,5 @@
 
-# Deforum Stable Diffusion — official extension script for automatic1111's webui
+# Deforum Stable Diffusion — official extension script for AUTOMATIC1111's webui
 
 For now, video-input, 2D, pseudo-2D and 3D animation modes are available. Interpolation and render image batch temporary excluded for simplicity
 
@@ -22,7 +22,7 @@ https://github.com/deforum/stable-diffusion
 
 0. ~~Cover yourself in oil~~
 
-1. Install Automatic1111's webui
+1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
 
 2. Download this repository and put the files deforum.py and the 'deforum' folder into the 'scripts' folder inside your WebUI installation directory
 
@@ -42,7 +42,7 @@ https://github.com/deforum/stable-diffusion
 
 ## Showcase
 
-Proof that it works good enough of automatic1111's build with MATH keyframing and prompt-weighting enabled in 3D mode
+Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing and prompt-weighting enabled in 3D mode
 
 ![sw-min](https://user-images.githubusercontent.com/14872007/195954681-6b0f5a8d-e575-4ce3-9c10-e39ffbbca6ac.gif)
 
