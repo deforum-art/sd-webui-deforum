@@ -119,6 +119,7 @@ def generate(args, root, frame = 0, return_sample=False):
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = 1
     p.denoising_strength = args.denoising_strength
+    p.cfg_scale = args.scale
     # FIXME better color corrections as match histograms doesn't seem to be fully working
     if root.color_corrections is not None:
         p.color_corrections = root.color_corrections
