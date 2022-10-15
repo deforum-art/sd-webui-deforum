@@ -325,7 +325,7 @@ def setup_deforum_setting_ui(is_img2img):
     with gr.Row():
         steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
     with gr.Row():
-        scale = gr.Slider(label="scale", minimum=1, maximum=100, step=1, value=d.scale, interactive=True)
+        scale = gr.Slider(label="scale", minimum=1, maximum=50, step=0.5, value=d.scale, interactive=True)
     with gr.Row():
         ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
         n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0)
