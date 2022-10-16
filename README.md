@@ -54,7 +54,8 @@ Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing an
 
 'Le Grand Interface' at work:
 
-![le_grand_interface](https://user-images.githubusercontent.com/14872007/195954002-5227cd40-079a-4c82-8553-157d77e3bdff.png)
+![Screenshot 2022-10-17 at 02-43-32 Stable Diffusion](https://user-images.githubusercontent.com/14872007/196064518-8e827009-83e0-4a52-894c-77281e89b0d8.png)
+
 
 Math evaluation:
 
