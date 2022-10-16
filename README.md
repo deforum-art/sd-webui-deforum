@@ -32,13 +32,18 @@ https://github.com/deforum/stable-diffusion
 
 5. Enter the animation settings. Refer to [this general guide](https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit) and [this guide to math keyframing functions in Deforum](https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing). However, **in this version prompt weights less than zero don't just like in original Deforum!** Split the positive and the negative prompt in the json section using --neg argument like this "apple:\`where(cos(t)>=0, cos(t), 0)\`, snow --neg strawberry:\`where(cos(t)<0, -cos(t), 0)\`"
 
-6. Run the script and see if you got it working or even got something. **In 3D mode a large delay is expected at first** as the script loads the depth models. In the end, using the default settings the whole thing should consume only 5.7 GBs of VRAM at 3D mode peaks.
+6. To view animation frames as they're being made, without waiting for the completion of an animation, go to the 'Settings' tab and set the value of this toolbar **above zero**, then click 'Apply settings' at the top of the page and return to the 'Deforum' tab. Warning: it may slow down the generation process.
 
-7. If it gives errors on missing modules, such as about missing 'numexpr', go to the original webui directory, open 'requirements_versions.txt' and append the missing packages names at the end of that file. Then restart the webui.
+![adsdasunknown](https://user-images.githubusercontent.com/14872007/196064311-1b79866a-e55b-438a-84a7-004ff30829ad.png)
 
-8. Join our Discord where you can post generated stuff, ask questions and ~~infuriate the devs with 'this feature is in auto's build. When will it be in Deforum? Why can't I launch Deforum on my potato computer?'~~(not anymore, ha-ha) https://discord.gg/deforum. There's also the 'Issues' tab in the repo.
 
-9. Profit!
+7. Run the script and see if you got it working or even got something. **In 3D mode a large delay is expected at first** as the script loads the depth models. In the end, using the default settings the whole thing should consume only 5.7 GBs of VRAM at 3D mode peaks.
+
+8. If it gives errors on missing modules, such as about missing 'numexpr', go to the original webui directory, open 'requirements_versions.txt' and append the missing packages names at the end of that file. Then restart the webui.
+
+9. Join our Discord where you can post generated stuff, ask questions and ~~infuriate the devs with 'this feature is in auto's build. When will it be in Deforum? Why can't I launch Deforum on my potato computer?'~~(not anymore, ha-ha) https://discord.gg/deforum. There's also the 'Issues' tab in the repo.
+
+10. Profit!
 
 ## Showcase
 
@@ -49,7 +54,8 @@ Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing an
 
 'Le Grand Interface' at work:
 
-![le_grand_interface](https://user-images.githubusercontent.com/14872007/195954002-5227cd40-079a-4c82-8553-157d77e3bdff.png)
+![Screenshot 2022-10-17 at 02-43-32 Stable Diffusion](https://user-images.githubusercontent.com/14872007/196064518-8e827009-83e0-4a52-894c-77281e89b0d8.png)
+
 
 Math evaluation:
 
