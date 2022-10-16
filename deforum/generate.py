@@ -119,6 +119,7 @@ def generate(args, root, frame = 0, return_sample=False):
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = 1
+    p.steps = args.steps
     if opts.img2img_fix_steps:
         p.denoising_strength = 1 / (1 - args.strength + 1.0/args.steps) #see https://github.com/deforum-art/deforum-for-automatic1111-webui/issues/3
     else:
