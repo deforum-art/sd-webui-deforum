@@ -22,6 +22,7 @@ from .callback import SamplerCallback
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
 from modules import processing
+from modules.shared import opts
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
 def add_noise(sample: torch.Tensor, noise_amt: float) -> torch.Tensor:
@@ -118,7 +119,10 @@ def generate(args, root, frame = 0, return_sample=False):
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = 1
-    p.denoising_strength = args.denoising_strength
+    if opts.img2img_fix_steps:
+        p.denoising_strength = 1 / (1 - args.strength + 1.0/args.steps) #see https://github.com/deforum-art/deforum-for-automatic1111-webui/issues/3
+    else:
+        p.denoising_strength = 1 - args.strength
     p.cfg_scale = args.scale
     # FIXME better color corrections as match histograms doesn't seem to be fully working
     if root.color_corrections is not None:
@@ -143,8 +147,6 @@ def generate(args, root, frame = 0, return_sample=False):
         args.strength = 0
     mask_image = None
     init_image = None
-    
-    p.steps = int((1.0-args.strength) * args.steps)
     
     processed = None
     
@@ -174,7 +176,7 @@ def generate(args, root, frame = 0, return_sample=False):
                 sampler_index=p.sampler_index,
                 batch_size=p.batch_size,
                 n_iter=p.n_iter,
-                steps=p.steps,
+                steps=args.steps,
                 cfg_scale=p.cfg_scale,
                 width=p.width,
                 height=p.height,

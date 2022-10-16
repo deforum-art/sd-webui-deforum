@@ -116,7 +116,6 @@ def render_animation(args, anim_args, animation_prompts, root):
         
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
-        denoising_strength = keys.denoising_strength_schedule_series[frame_idx]
         scale = keys.cfg_scale_schedule_series[frame_idx]
         contrast = keys.contrast_schedule_series[frame_idx]
         depth = None
@@ -187,7 +186,6 @@ def render_animation(args, anim_args, animation_prompts, root):
             else:
                 args.init_sample = noised_sample.to(root.device)
             args.strength = max(0.0, min(1.0, strength))
-            args.denoising_strength = max(0.0, min(1.0, denoising_strength))
             args.scale = scale
 
         # grab prompt for current frame
