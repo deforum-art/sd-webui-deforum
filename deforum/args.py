@@ -312,9 +312,9 @@ def setup_deforum_setting_ui(is_img2img):
         override_these_with_webui = gr.Checkbox(label="override_these_with_webui", value=False, interactive=True)
     i30 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">W, H, seed, sampler, steps, scale, ddim_eta, n_batch, make_grid, grid_rows</p>")
     with gr.Row():
-        W = gr.Slider(label="W", minimum=512, maximum=2048, step=64, value=d.W, interactive=True)
+        W = gr.Slider(label="W", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
     with gr.Row():
-        H = gr.Slider(label="H", minimum=512, maximum=2048, step=64, value=d.W, interactive=True)
+        H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
     
     with gr.Row():
         seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
