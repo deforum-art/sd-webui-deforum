@@ -28,7 +28,7 @@ https://github.com/deforum/stable-diffusion
 
 3. If you're on Windows and want to launch Deforum in 3D mode, you'll have to download the depths model manually. Download these files https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt and https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt and put them into the 'models/Deforum' folder of your webui installation. (if it doesn't exist, create it)
 
-4.**Important: If you want to use 3D mode, launch the WebUI with the `--disable-safe-unpickle` option or else it won't let you to use the depth models!** .Open the webui, switch to 'img2img' tab and select 'Deforum v0.5-webui-beta' in the 'Custom scripts' dropdown menu
+4.**Important: If you want to use 3D mode, launch the WebUI with the `--disable-safe-unpickle` option or else it won't let you to use the depth models!** [How to add it to the .bat file on Windows.](https://imgur.com/a/TJHglot) Open the webui, switch to 'img2img' tab and select 'Deforum v0.5-webui-beta' in the 'Custom scripts' dropdown menu
 
 5. Enter the animation settings. Refer to [this general guide](https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit) and [this guide to math keyframing functions in Deforum](https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing). However, **in this version prompt weights less than zero don't just like in original Deforum!** Split the positive and the negative prompt in the json section using --neg argument like this "apple:\`where(cos(t)>=0, cos(t), 0)\`, snow --neg strawberry:\`where(cos(t)<0, -cos(t), 0)\`"
 
