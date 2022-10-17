@@ -37,7 +37,7 @@ https://github.com/deforum/stable-diffusion
 ![adsdasunknown](https://user-images.githubusercontent.com/14872007/196064311-1b79866a-e55b-438a-84a7-004ff30829ad.png)
 
 
-7. Run the script and see if you got it working or even got something. **In 3D mode a large delay is expected at first** as the script loads the depth models. In the end, using the default settings the whole thing should consume only 5.7 GBs of VRAM at 3D mode peaks.
+7. Run the script and see if you got it working or even got something. **In 3D mode a large delay is expected at first** as the script loads the depth models. In the end, using the default settings the whole thing should consume 6.4 GBs of VRAM at 3D mode peaks and no more than 3.8 GB VRAM in 3D mode if you launch the webui with the '--lowvram' command line argument.
 
 8. If it gives errors on missing modules, such as about missing 'numexpr', go to the original webui directory, open 'requirements_versions.txt' and append the missing packages names at the end of that file. Then restart the webui.
 
@@ -67,4 +67,13 @@ Math evaluation:
 ![math-eval](https://user-images.githubusercontent.com/14872007/195957601-3c3fecab-5ef2-4a2f-9eba-3bb0c70bd4b8.png)
 
 
+## Benchmarks
+
+3D mode without additional WebUI flags
+
+![image](https://user-images.githubusercontent.com/14872007/196294447-7817f138-ec4b-4001-885f-454f8667100d.png)
+
+3D mode when WebUI is launched with '--lowvram'
+
+![image](https://user-images.githubusercontent.com/14872007/196294517-125fbb27-c06d-4c4b-bcbc-7c743103eff6.png)
 
