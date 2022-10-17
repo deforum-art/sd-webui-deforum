@@ -37,13 +37,17 @@ https://github.com/deforum/stable-diffusion
 ![adsdasunknown](https://user-images.githubusercontent.com/14872007/196064311-1b79866a-e55b-438a-84a7-004ff30829ad.png)
 
 
-7. Run the script and see if you got it working or even got something. **In 3D mode a large delay is expected at first** as the script loads the depth models. In the end, using the default settings the whole thing should consume only 5.7 GBs of VRAM at 3D mode peaks.
+7. Run the script and see if you got it working or even got something. **In 3D mode a large delay is expected at first** as the script loads the depth models. In the end, using the default settings the whole thing should consume 6.4 GBs of VRAM at 3D mode peaks and no more than 3.8 GB VRAM in 3D mode if you launch the webui with the '--lowvram' command line argument.
 
 8. If it gives errors on missing modules, such as about missing 'numexpr', go to the original webui directory, open 'requirements_versions.txt' and append the missing packages names at the end of that file. Then restart the webui.
 
-9. Join our Discord where you can post generated stuff, ask questions and ~~infuriate the devs with 'this feature is in auto's build. When will it be in Deforum? Why can't I launch Deforum on my potato computer?'~~(not anymore, ha-ha) https://discord.gg/deforum. There's also the 'Issues' tab in the repo.
+9. After the generation process is completed, click the button with the self-describing name to show the video or gif result right in the GUI!
 
-10. Profit!
+![Screenshot 2022-10-18 at 01-06-24 Stable Diffusion](https://user-images.githubusercontent.com/14872007/196292734-245eb795-8ffc-4e4a-b8c5-1daa27dacf24.png)
+
+10. Join our Discord where you can post generated stuff, ask questions and ~~infuriate the devs with 'this feature is in auto's build. When will it be in Deforum? Why can't I launch Deforum on my potato computer?'~~(not anymore, ha-ha) https://discord.gg/deforum. There's also the 'Issues' tab in the repo.
+
+11. Profit!
 
 ## Showcase
 
@@ -54,7 +58,8 @@ Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing an
 
 'Le Grand Interface' at work:
 
-![Screenshot 2022-10-17 at 02-43-32 Stable Diffusion](https://user-images.githubusercontent.com/14872007/196064518-8e827009-83e0-4a52-894c-77281e89b0d8.png)
+
+![Screenshot 2022-10-18 at 01-04-09 Stable Diffusion](https://user-images.githubusercontent.com/14872007/196292481-c77bcf3a-4712-44f5-97b2-d4b2480ca012.png)
 
 
 Math evaluation:
@@ -62,4 +67,13 @@ Math evaluation:
 ![math-eval](https://user-images.githubusercontent.com/14872007/195957601-3c3fecab-5ef2-4a2f-9eba-3bb0c70bd4b8.png)
 
 
+## Benchmarks
+
+3D mode without additional WebUI flags
+
+![image](https://user-images.githubusercontent.com/14872007/196294447-7817f138-ec4b-4001-885f-454f8667100d.png)
+
+3D mode when WebUI is launched with '--lowvram'
+
+![image](https://user-images.githubusercontent.com/14872007/196294517-125fbb27-c06d-4c4b-bcbc-7c743103eff6.png)
 
