@@ -177,7 +177,7 @@ def generate(args, root, frame = 0, return_sample=False):
                 sampler_index=p.sampler_index,
                 batch_size=p.batch_size,
                 n_iter=p.n_iter,
-                steps=args.steps,
+                steps=p.steps,
                 cfg_scale=p.cfg_scale,
                 width=p.width,
                 height=p.height,
