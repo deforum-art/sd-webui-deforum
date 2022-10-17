@@ -51,11 +51,12 @@ class Script(wscripts.Script):
         else:
             print('Other modes are not available yet!')
         
+        from base64 import b64encode
+        
         if video_args.skip_video_for_run_all:
             print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
         elif video_args.output_format == 'FFMPEG mp4':
             import subprocess
-            from base64 import b64encode
 
             if video_args.use_manual_settings:
                 max_video_frames = video_args.max_video_frames #@param {type:"string"}
@@ -138,6 +139,11 @@ class Script(wscripts.Script):
                 duration=1000/fps,
                 loop=0
             )
+            
+            mp4 = open(mp4_path,'rb').read()
+            data_url = "data:image/gif;base64," + b64encode(mp4).decode()
+            
+            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><img src="{data_url}" type="image/gif"></img>'
     
         if root.initial_info is None:
             root.initial_info = "An error has occured and nothing has been generated!"

@@ -183,7 +183,7 @@ def setup_deforum_setting_ui(self, is_img2img):
     da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
     dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
     with gr.Row():
-        btn = gr.Button("Show result")
+        btn = gr.Button("Click here after the generation to show the video")
     #self.i1_store = "<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>"
     i1 = gr.HTML(i1_store, elem_id='deforum_header')
     i2 = gr.HTML("<p style=\"margin-bottom:0.75em\">Made by deforum.github.io, port for AUTOMATIC1111's webui maintained by kabachuha</p>")
