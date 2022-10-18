@@ -149,7 +149,7 @@ class Script(wscripts.Script):
 
             print(f"{image_path} -> {mp4_path}")
             
-            imagelist = [Image.open(os.path.join(args.outdir, image_path%d)) for d in range(max_video_frames) if os.path.join(args.outdir, image_path%d)]
+            imagelist = [Image.open(os.path.join(args.outdir, image_path%d)) for d in range(max_video_frames) if os.path.exists(os.path.join(args.outdir, image_path%d))]
             
             imagelist[0].save(
                 mp4_path,#gif here
