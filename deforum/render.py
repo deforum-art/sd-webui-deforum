@@ -152,7 +152,7 @@ def render_animation(args, anim_args, animation_prompts, root):
                     img = turbo_next_image
 
                 filename = f"{args.timestring}_{tween_frame_idx:05}.png"
-                cv2.imwrite(os.path.join(args.outdir, filename), cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_RGB2BGR))
+                cv2.imwrite(os.path.join(args.outdir, filename), img)
                 if anim_args.save_depth_maps:
                     depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:05}.png"), depth)
             if turbo_next_image is not None:
