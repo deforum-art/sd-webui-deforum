@@ -32,7 +32,7 @@ def construct_RotationMatrixHomogenous(rotation_angles):
     cv2.Rodrigues(np.array(rotation_angles), RH[0:3, 0:3])
     return RH
 
-def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True):     
+def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True):
 	Input_Folder_Contents = os.listdir(video_in_frame_path)
     if len(Input_Folder_Contents) == 0 or overwrite: 
         try:
