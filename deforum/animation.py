@@ -33,8 +33,8 @@ def construct_RotationMatrixHomogenous(rotation_angles):
     return RH
 
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True):     
-	entries = os.listdir(video_in_frame_path)
-    if len(entries) == 0 or overwrite: 
+	Input_Folder_Contents = os.listdir(video_in_frame_path)
+    if len(Input_Folder_Contents) == 0 or overwrite: 
         try:
             for f in pathlib.Path(video_path).glob('*.jpg'):
                 f.unlink()
