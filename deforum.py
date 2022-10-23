@@ -204,6 +204,6 @@ def on_ui_tabs():
                         [i1]
                         )
                     
-            
+    return [(deforum_interface, "Deforum", "deforum_interface")]
 
 script_callbacks.on_ui_tabs(on_ui_tabs)
