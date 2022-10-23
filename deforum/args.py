@@ -26,8 +26,8 @@ def DeforumAnimArgs():
 
     #@markdown ####**Motion Parameters:**
     angle = "0:(0)"#@param {type:"string"}
-    zoom = "0:(1.04)"#@param {type:"string"}
-    translation_x = "0:(10*sin(2*3.14*t/10))"#@param {type:"string"}
+    zoom = "0:(1.02+0.02*sin(2*3.14*t/20))"#@param {type:"string"}
+    translation_x = "0:(0)"#@param {type:"string"}
     translation_y = "0:(0)"#@param {type:"string"}
     translation_z = "0:(10)"#@param {type:"string"}
     rotation_3d_x = "0:(0)"#@param {type:"string"}

@@ -91,7 +91,6 @@ def render_animation(args, anim_args, animation_prompts, root):
             last_frame -= last_frame%turbo_steps
         path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:05}.png")
         img = cv2.imread(path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         prev_sample = sample_from_cv2(img)
         if anim_args.color_coherence != 'None':
             color_match_sample = img
