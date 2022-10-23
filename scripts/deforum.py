@@ -204,7 +204,7 @@ def on_ui_tabs():
                         [],
                         [i1]
                         )
-                with gr.Row():
+                with gr.Row(elem_id='toprow'):
                     id_part = 'deforum'
                     skip = gr.Button('Skip', elem_id=f"{id_part}_skip")
                     interrupt = gr.Button('Interrupt', elem_id=f"{id_part}_interrupt")
@@ -218,6 +218,13 @@ def on_ui_tabs():
 
                     interrupt.click(
                         fn=lambda: state.interrupt(),
+                        inputs=[],
+                        outputs=[],
+                    )
+
+                    submit.click(
+                        fn=lambda: print('deforum submitted'),
+                        _js = "submit_deforum",
                         inputs=[],
                         outputs=[],
                     )
