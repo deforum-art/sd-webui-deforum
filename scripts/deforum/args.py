@@ -243,7 +243,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Row():
             H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
         with gr.Row():
-            restore_faces = gr.Checkbox(label='Restore faces', value=False, visible=len(shared.face_restorers) > 1)
+            restore_faces = gr.Checkbox(label='Restore faces', value=False, visible=len(sh.face_restorers) > 1)
             tiling = gr.Checkbox(label='Tiling', value=False)
             enable_hr = gr.Checkbox(label='Highres. fix', value=False)
         with gr.Row(visible=False) as hr_options:
