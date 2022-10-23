@@ -104,6 +104,7 @@ def DeforumArgs():
     firstphase_width = 0
     firstphase_height = 0
     seed_enable_extras = False
+    subseed = -1
     subseed_strength = 0
     seed_resize_from_w = 0
     seed_resize_from_h = 0
