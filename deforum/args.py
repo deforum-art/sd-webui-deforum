@@ -187,6 +187,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     if not is_extension:
         with gr.Row():
             btn = gr.Button("Click here after the generation to show the video")
+        with gr.Row():
             i1 = gr.HTML(i1_store, elem_id='deforum_header')
     else:
         btn = i1 = gr.HTML("")
