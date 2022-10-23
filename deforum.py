@@ -36,6 +36,7 @@ class Script(wscripts.Script):
         
         sys.path.extend([
             os.getcwd()+'/scripts/deforum/src',
+            os.getcwd()+'/extensions/deforum/scripts/deforum/src'
         ])
         
         # clean up unused memory
