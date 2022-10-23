@@ -182,22 +182,12 @@ class Script(wscripts.Script):
     
 def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
-        with gr.Row(elem_id='deforum_progress_row'):
-            with gr.Column(scale=1):
-                pass
-
-            with gr.Column(scale=1):
-                progressbar = gr.HTML(elem_id="deforum_progressbar")
-                deforum_preview = gr.Image(elem_id='deforum_preview', visible=False)
-                setup_progressbar(progressbar, deforum_preview, 'deforum')
-                deforum_gallery = gr.Gallery(label='Output', show_label=False, elem_id='deforum_gallery').style(grid=4)
-        kek = gr.HTML("<p style=\"margin-bottom:0.75em\">Sampling settings</p>")
         components = {}
-        with gr.Row().style(equal_height=False):
-            with gr.Column(variant='panel'):
+        with gr.Row(elem_id='deforum_progress_row').style(equal_height=False):
+            with gr.Column(scale=1, variant='panel'):
                 components = deforum_args.setup_deforum_setting_dictionary(None, True, True)
         
-            with gr.Column():
+            with gr.Column(scale=1):
                 with gr.Row():
                     btn = gr.Button("Click here after the generation to show the video")
                     components['btn'] = btn
@@ -214,22 +204,27 @@ def on_ui_tabs():
                         [],
                         [i1]
                         )
+                with gr.Row():
                     id_part = 'deforum'
                     skip = gr.Button('Skip', elem_id=f"{id_part}_skip")
                     interrupt = gr.Button('Interrupt', elem_id=f"{id_part}_interrupt")
                     submit = gr.Button('Generate', elem_id=f"{id_part}_generate", variant='primary')
 
                     skip.click(
-                        fn=lambda: shared.state.skip(),
+                        fn=lambda: state.skip(),
                         inputs=[],
                         outputs=[],
                     )
 
                     interrupt.click(
-                        fn=lambda: shared.state.interrupt(),
+                        fn=lambda: state.interrupt(),
                         inputs=[],
                         outputs=[],
                     )
+                progressbar = gr.HTML(elem_id="deforum_progressbar")
+                deforum_preview = gr.Image(elem_id='deforum_preview', visible=False)
+                setup_progressbar(progressbar, deforum_preview, 'deforum')
+                deforum_gallery = gr.Gallery(label='Output', show_label=False, elem_id='deforum_gallery').style(grid=4)
 
 
     return [(deforum_interface, "Deforum", "deforum_interface")]
