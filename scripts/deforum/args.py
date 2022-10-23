@@ -103,10 +103,10 @@ def DeforumArgs():
     enable_hr = False
     firstphase_width = 0
     firstphase_height = 0
-    args.seed_enable_extras = False
-    args.subseed_strength = 0
-    args.seed_resize_from_w = 0
-    args.seed_resize_from_h = 0
+    seed_enable_extras = False
+    subseed_strength = 0
+    seed_resize_from_w = 0
+    seed_resize_from_h = 0
 
     #@markdown **Sampling Settings**
     seed = -1 #@param
