@@ -4,7 +4,7 @@ import modules.scripts as wscripts
 from modules import script_callbacks
 import gradio as gr
 
-from modules.processing import Processed
+from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
 import gc
 import torch
@@ -13,7 +13,7 @@ from modules.shared import opts, cmd_opts, state
 from modules.ui import setup_progressbar
 from types import SimpleNamespace
 
-class Script(wscripts.Script):
+class DeforumScript(wscripts.Script):
 
     def title(self):
         return "Deforum v0.5-webui-beta"
@@ -179,7 +179,26 @@ class Script(wscripts.Script):
         root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
         return Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
 
-    
+def run_deforum(**args):
+    p = StableDiffusionProcessingImg2Img(
+        sd_model=shared.sd_model
+        #we'll setup the rest later
+    )
+
+    processed = DeforumScript.run(p, args)
+    if processed is None:
+        processed = process_images(p)
+
+    shared.total_tqdm.clear()
+
+    generation_info_js = processed.js()
+    if opts.samples_log_stdout:
+        print(generation_info_js)
+
+    if opts.do_not_show_images:
+        processed.images = []
+    return processed.images, generation_info_js, plaintext_to_html(processed.info)
+
 def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
         components = {}
@@ -233,6 +252,23 @@ def on_ui_tabs():
                 setup_progressbar(progressbar, deforum_preview, 'deforum')
                 deforum_gallery = gr.Gallery(label='Output', show_label=False, elem_id='deforum_gallery').style(grid=4)
 
+    ds = SimpleNamespace(**components)
+    component_list = [ds.btn, ds.override_settings_with_file, ds.custom_settings_file, ds.animation_mode, ds.max_frames, ds.border, ds.angle, ds.zoom, ds.translation_x, ds.translation_y, ds.translation_z, ds.rotation_3d_x, ds.rotation_3d_y, ds.rotation_3d_z, ds.flip_2d_perspective, ds.perspective_flip_theta, ds.perspective_flip_phi, ds.perspective_flip_gamma, ds.perspective_flip_fv, ds.noise_schedule, ds.strength_schedule, ds.contrast_schedule, ds.cfg_scale_schedule, ds.seed_schedule, ds.color_coherence, ds.diffusion_cadence, ds.use_depth_warping, ds.midas_weight, ds.near_plane, ds.far_plane, ds.fov, ds.padding_mode, ds.sampling_mode, ds.save_depth_maps, ds.video_init_path, ds.extract_nth_frame, ds.overwrite_extracted_frames, ds.use_mask_video, ds.video_mask_path, ds.interpolate_key_frames, ds.interpolate_x_frames, ds.resume_from_timestring, ds.resume_timestring, ds.prompts, ds.animation_prompts, ds.W, ds.H, ds.seed, ds.sampler, ds.steps, ds.ddim_eta, ds.n_batch, ds.make_grid, ds.grid_rows, ds.save_settings, ds.save_samples, ds.display_samples, ds.save_sample_per_step, ds.show_sample_per_step, ds.override_these_with_webui, ds.batch_name, ds.filename_format, ds.seed_behavior, ds.use_init, ds.from_img2img_instead_of_link, ds.strength_0_no_init, ds.strength, ds.init_image, ds.use_mask, ds.use_alpha_as_mask, ds.invert_mask, ds.overlay_mask, ds.mask_file, ds.mask_brightness_adjust, ds.mask_overlay_blur, ds.skip_video_for_run_all, ds.fps, ds.output_format, ds.ffmpeg_location, ds.add_soundtrack, ds.soundtrack_path, ds.use_manual_settings, ds.render_steps, ds.max_video_frames, ds.path_name_modifier, ds.image_path, ds.mp4_path, ds.i1, ds.i2, ds.i3, ds.i4, ds.i5, ds.i6, ds.i7, ds.i8, ds.i9, ds.i10, ds.i11, ds.i12, ds.i13, ds.i14, ds.i15, ds.i16, ds.i17, ds.i18, ds.i19, ds.i20, ds.i21, ds.i22, ds.i23, ds.i24, ds.i25, ds.i26, ds.i27, ds.i28, ds.i29, ds.i30, ds.i31, ds.i32, ds.i33, ds.i34, ds.i35, ds.i36]
+
+    deforum_args = dict(
+                fn=wrap_gradio_gpu_call(run_deforum),
+                _js="submit_deforum",
+                inputs=component_list,
+
+                outputs=[
+                    txt2img_gallery,
+                    generation_info,
+                    html_info
+                ],
+                show_progress=False,
+            )
+
+    submit.click(**deforum_args)
 
     return [(deforum_interface, "Deforum", "deforum_interface")]
 

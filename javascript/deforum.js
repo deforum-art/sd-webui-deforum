@@ -1,7 +1,7 @@
 function submit_deforum(){
     requestProgress('deforum')
 
-    return []
+    return create_submit_args(arguments)
 }
 
 onUiUpdate(function(){
