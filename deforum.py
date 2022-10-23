@@ -1,6 +1,7 @@
 import scripts.deforum.args as deforum_args
 
 import modules.scripts as wscripts
+from modules import script_callbacks
 import gradio as gr
 
 from modules.processing import Processed
@@ -177,4 +178,32 @@ class Script(wscripts.Script):
         return Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
 
     
-    
+def on_ui_tabs():
+    with gr.Blocks(analytics_enabled=False) as deforum_interface:
+        components = {}
+        with gr.Row().style(equal_height=False):
+            with gr.Column(variant='panel'):
+                components = deforum_args.setup_deforum_setting_ui(None, True, True)
+            
+            with gr.Column():
+                gr.Text("Output")
+                with gr.Row():
+                    btn = gr.Button("Click here after the generation to show the video")
+                    components['btn'] = btn
+                with gr.Row():
+                    i1 = gr.HTML(deforum_args.i1_store, elem_id='deforum_header')
+                    components['i1'] = i1
+                    def show_vid():
+                        return {
+                            i1: gr.update(value=deforum_args.i1_store, visible=True)
+                        }
+                    
+                    btn.click(
+                        show_vid,
+                        [],
+                        [i1]
+                        )
+                    
+            
+
+script_callbacks.on_ui_tabs(on_ui_tabs)

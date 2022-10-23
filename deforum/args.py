@@ -184,10 +184,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     d = SimpleNamespace(**DeforumArgs()) #default args
     da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
     dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
-    with gr.Row():
-        btn = gr.Button("Click here after the generation to show the video")
-    #self.i1_store = "<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>"
-    i1 = gr.HTML(i1_store, elem_id='deforum_header')
+    btn = None
+    i1 = None
+    if not is_extension:
+        with gr.Row():
+            btn = gr.Button("Click here after the generation to show the video")
+            i1 = gr.HTML(i1_store, elem_id='deforum_header')
+    
     i2 = gr.HTML("<p style=\"margin-bottom:0.75em\">Made by deforum.github.io, port for AUTOMATIC1111's webui maintained by kabachuha</p>")
     i3 = gr.HTML("<p style=\"margin-bottom:0.75em\">Original Deforum Github repo  github.com/deforum/stable-diffusion</p>")
     i4 = gr.HTML("<p style=\"margin-bottom:0.75em\">This fork for auto1111's webui github.com/deforum-art/deforum-for-automatic1111-webui</p>")
@@ -195,16 +198,17 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     i6 = gr.HTML("<p style=\"margin-bottom:0.75em\">User guide for v0.5 docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit</p>")
     i7 = gr.HTML("<p style=\"margin-bottom:0.75em\">Math keyframing explanation docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing</p>")
     
-    def show_vid():
-        return {
-            i1: gr.update(value=i1_store, visible=True)
-        }
-    
-    btn.click(
-        show_vid,
-        [],
-        [i1]
-        )
+    if not is_extension:
+        def show_vid():
+            return {
+                i1: gr.update(value=i1_store, visible=True)
+            }
+        
+        btn.click(
+            show_vid,
+            [],
+            [i1]
+            )
     
     with gr.Tab('Run'):
         i25 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Run settings</p>")
@@ -213,7 +217,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Row():
             override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
             custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
-            #TODO make a button
         
         # Sampling settings START
         i26 = gr.HTML("<p style=\"margin-bottom:0.75em\">Sampling settings</p>")
