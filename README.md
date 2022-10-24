@@ -71,7 +71,10 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing and prompt-weighting enabled in 3D mode
 
-![sw-min](https://user-images.githubusercontent.com/14872007/195954681-6b0f5a8d-e575-4ce3-9c10-e39ffbbca6ac.gif)
+
+
+https://user-images.githubusercontent.com/14872007/197588218-6c42c54f-6874-46df-a650-e41433a09f74.mp4
+
 
 
 'Le not so Grand Interface' at work:
