@@ -204,12 +204,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     else:
         btn = i1 = gr.HTML("")
     
-    i2 = gr.HTML("<p style=\"margin-bottom:0.75em\">Made by deforum.github.io, port for AUTOMATIC1111's webui maintained by kabachuha</p>")
-    i3 = gr.HTML("<p style=\"margin-bottom:0.75em\">Original Deforum Github repo  github.com/deforum/stable-diffusion</p>")
-    i4 = gr.HTML("<p style=\"margin-bottom:0.75em\">This fork for auto1111's webui github.com/deforum-art/deforum-for-automatic1111-webui</p>")
-    i5 = gr.HTML("<p style=\"margin-bottom:0.75em\">Join the official Deforum Discord discord.gg/deforum to share your creations and suggestions</p>")
-    i6 = gr.HTML("<p style=\"margin-bottom:0.75em\">User guide for v0.5 docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit</p>")
-    i7 = gr.HTML("<p style=\"margin-bottom:0.75em\">Math keyframing explanation docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing</p>")
+    i2 = gr.HTML("<p>Made by deforum.github.io, port for AUTOMATIC1111's webui maintained by kabachuha</p>")
+    i3 = gr.HTML("<p>Original Deforum Github repo  github.com/deforum/stable-diffusion</p>")
+    i4 = gr.HTML("<p>This fork for auto1111's webui github.com/deforum-art/deforum-for-automatic1111-webui</p>")
+    i5 = gr.HTML("<p>Join the official Deforum Discord discord.gg/deforum to share your creations and suggestions</p>")
+    i6 = gr.HTML("<p>User guide for v0.5 docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit</p>")
+    i7 = gr.HTML("<p>Math keyframing explanation docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing</p>")
     
     if not is_extension:
         def show_vid():
@@ -233,12 +233,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         
         # Sampling settings START
         i26 = gr.HTML("<p style=\"margin-bottom:0.75em\">Sampling settings</p>")
-        i27 = gr.HTML("<p style=\"margin-bottom:0.75em\">The following settings have already been set up in the webui</p>")
-        i28 = gr.HTML("<p style=\"margin-bottom:0.75em\">Do you want to override them with the values above?</p>")
-        i29 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">FIXME! Need to make deforum <-> webui samplers map. Before that, the sampler gets used from webui anyway. If your images are changing too adruptly, lower steps or increase strength schedule!</p>") #TODO
-        with gr.Row():
-            override_these_with_webui = gr.Checkbox(label="override_these_with_webui", value=False, interactive=True)
-        i30 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">W, H, seed, sampler, steps, scale, ddim_eta, n_batch, make_grid, grid_rows</p>")
+        i27 = gr.HTML("")
+        i28 = gr.HTML("")#TODO cleanup
+        i29 = gr.HTML("")
+        #with gr.Row():
+        override_these_with_webui = gr.Checkbox(label="override_these_with_webui", value=False, interactive=True)
+        i30 = gr.HTML("")
         with gr.Row():
             W = gr.Slider(label="W", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
         with gr.Row():
