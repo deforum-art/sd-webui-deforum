@@ -24,7 +24,7 @@ https://github.com/deforum/stable-diffusion
 
 1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/). Make sure it's updated to the newer version that supports *extensions* (i.e. AUTOMATIC1111 versions released after 2022-10-21).
 
-2. Now two ways: either clone the repo into the `extensions` directory via git commandline launched in the webui folder
+2. Now two ways: either clone the repo into the `extensions` directory via git commandline launched within in the `stable-diffusion-webui` folder
 
 ```sh
 git clone https://github.com/deforum-art/deforum-for-automatic1111-webui/ extensions/deforum
