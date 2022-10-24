@@ -282,7 +282,7 @@ def on_ui_tabs():
                 with gr.Row():
                     save_settings_btn = gr.Button('Save Settings', elem_id='deforum_save_settings_btn')
                     load_settings_btn = gr.Button('Load Settings', elem_id='deforum_load_settings_btn')
-                path_info = gr.HTML("<p>Path relative to the webui folder</p>")
+                path_info = gr.HTML("<p>Path relative to the webui folder. Warning: buttons for regular settings work no more than once, idk why. If you have a minute, please peek at the code in the repo</p>")
                 with gr.Row():
                     settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path')
                     #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
