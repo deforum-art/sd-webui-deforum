@@ -27,7 +27,7 @@ https://github.com/deforum/stable-diffusion
 2. Now two ways: either clone the repo into the `extensions` directory via git commandline launched in the webui folder
 
 ```sh
-git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui/ extensions/deforum
+git clone https://github.com/deforum-art/deforum-for-automatic1111-webui/ extensions/deforum
 ```
 
 Or download this repository, locate the `extensions` folder within your WebUI installation, create folder named `deforum` in it and then put the contents of the archive inside. Then restart WebUI.
