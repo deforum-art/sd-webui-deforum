@@ -20,11 +20,17 @@ https://github.com/deforum/stable-diffusion
 
 ## Getting Started
 
-0. ~~Cover yourself in oil~~
+0. ~~Cover yourself in oil~~ If you have legacy Deforum installed *as a script* (it is located in stable-diffusion-webui/scripts), remove it (`deforum.py` and the folder `deforum`) and proceed with the instructions below to get more interactive Deforum with an improved UI.
 
-1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
+1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/). Make sure it's updated to the newer version that supports *extensions* (i.e. AUTOMATIC1111 versions released after 21.10.22 or 10/21/22)).
 
-2. Download this repository and put the files deforum.py and the 'deforum' folder into the 'scripts' folder inside your WebUI installation directory
+2. Now two ways: either clone the repo into the `extensions` directory via git commandline launched in the webui folder
+
+```sh
+git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui/ extensions/deforum
+```
+
+Or download this repository, locate the `extensions` folder within your WebUI installation, create folder named `deforum` in it and then put the contents of the archive inside. Then restart WebUI.
 
 3. If you're on Windows and want to launch Deforum in 3D mode, you'll have to download the depths model manually. Download these files https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt and https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt and put them into the 'models/Deforum' folder of your webui installation. (if it doesn't exist, create it)
 
@@ -43,23 +49,38 @@ https://github.com/deforum/stable-diffusion
 
 9. After the generation process is completed, click the button with the self-describing name to show the video or gif result right in the GUI!
 
-![Screenshot 2022-10-18 at 01-06-24 Stable Diffusion](https://user-images.githubusercontent.com/14872007/196292734-245eb795-8ffc-4e4a-b8c5-1daa27dacf24.png)
-
 10. Join our Discord where you can post generated stuff, ask questions and ~~infuriate the devs with 'this feature is in auto's build. When will it be in Deforum? Why can't I launch Deforum on my potato computer?'~~(not anymore, ha-ha) https://discord.gg/deforum. There's also the 'Issues' tab in the repo.
 
-11. Profit!
+11. In case the overhauled version is too unusable for you or you cannot update AUTOMATIC1111's webui, roll back to this script-only version https://github.com/deforum-art/deforum-for-automatic1111-webui/tree/000deeeef69016612fe3cdec9234f97d87d30748
 
-## Showcase
+12. Profit!
+
+## Known issues
+
+* This port is not fully backward-compatible with the notebook and the local version both due to the changes in how AUTOMATIC1111's webui handles Stable Diffusion models and the changes in this script to get it to work in the new environment. *Expect* that you may not get exactly the same result or that the thing may break down because of the older settings.
+
+* The progressbar showing nonsense due to how AUTOMATIC1111's webui computes the max value as `steps * job_count` and `steps` fluctuate here due to `diffusion_cadence` and `strength_schedule`.
+
+* Color correction is quite forced atm.
+
+* Save/load settings button works no more than once for some reason.
+
+* Browsers often cannot load too big gifs, so try to use `ffmpeg` when possible. Make sure it's installed and linked in your PATH!
+
+## Screenshots
 
 Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing and prompt-weighting enabled in 3D mode
 
-![sw-min](https://user-images.githubusercontent.com/14872007/195954681-6b0f5a8d-e575-4ce3-9c10-e39ffbbca6ac.gif)
 
 
-'Le Grand Interface' at work:
+https://user-images.githubusercontent.com/14872007/197588218-6c42c54f-6874-46df-a650-e41433a09f74.mp4
 
 
-![Screenshot 2022-10-18 at 01-04-09 Stable Diffusion](https://user-images.githubusercontent.com/14872007/196292481-c77bcf3a-4712-44f5-97b2-d4b2480ca012.png)
+
+'Le not so Grand Interface' at work:
+
+
+![Screenshot 2022-10-24 at 20-04-42 Stable Diffusion](https://user-images.githubusercontent.com/14872007/197587723-290a7ab6-b272-49ca-aeb3-958d5f1f6a37.png)
 
 
 Math evaluation:

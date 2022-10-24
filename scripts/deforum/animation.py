@@ -207,16 +207,18 @@ def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
         math.radians(keys.rotation_3d_z_series[frame_idx])
     ]
     rot_mat = p3d.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
-    result = transform_image_3d(device, prev_img_cv2, depth, rot_mat, translate_xyz, anim_args)
+    result = transform_image_3d(device, prev_img_cv2, depth, rot_mat, translate_xyz, anim_args, keys, frame_idx)
     torch.cuda.empty_cache()
     return result
 
-def transform_image_3d(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args):
+def transform_image_3d(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx):
     # adapted and optimized version of transform_image_3d from Disco Diffusion https://github.com/alembics/disco-diffusion 
     w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
 
     aspect_ratio = float(w)/float(h)
-    near, far, fov_deg = anim_args.near_plane, anim_args.far_plane, anim_args.fov
+    near = keys.near_series[frame_idx]
+    far = keys.far_series[frame_idx]
+    fov_deg = keys.fov_series[frame_idx]
     persp_cam_old = p3d.FoVPerspectiveCameras(near, far, aspect_ratio, fov=fov_deg, degrees=True, device=device)
     persp_cam_new = p3d.FoVPerspectiveCameras(near, far, aspect_ratio, fov=fov_deg, degrees=True, R=rot_mat, T=torch.tensor([translate]), device=device)
 
@@ -270,6 +272,9 @@ class DeformAnimKeys():
         self.contrast_schedule_series = get_inbetweens(parse_key_frames(anim_args.contrast_schedule), anim_args.max_frames)
         self.cfg_scale_schedule_series = get_inbetweens(parse_key_frames(anim_args.cfg_scale_schedule), anim_args.max_frames)
         self.seed_schedule_series = get_inbetweens(parse_key_frames(anim_args.seed_schedule), anim_args.max_frames)
+        self.fov_series = get_inbetweens(parse_key_frames(anim_args.fov_schedule), anim_args.max_frames)
+        self.near_series = get_inbetweens(parse_key_frames(anim_args.near_schedule), anim_args.max_frames)
+        self.far_series = get_inbetweens(parse_key_frames(anim_args.far_schedule), anim_args.max_frames)
 
 def get_inbetweens(key_frames, max_frames, integer=False, interp_method='Linear'):
     import numexpr
