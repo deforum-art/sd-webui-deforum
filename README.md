@@ -22,7 +22,7 @@ https://github.com/deforum/stable-diffusion
 
 0. ~~Cover yourself in oil~~ If you have legacy Deforum installed *as a script* (it is located in stable-diffusion-webui/scripts), remove it (`deforum.py` and the folder `deforum`) and proceed with the instructions below to get more interactive Deforum with an improved UI.
 
-1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/). Make sure it's updated to the newer version that supports *extensions* (i.e. AUTOMATIC1111 versions released after 21.10.22 or 10/21/22)).
+1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/). Make sure it's updated to the newer version that supports *extensions* (i.e. AUTOMATIC1111 versions released after 2022-10-21).
 
 2. Now two ways: either clone the repo into the `extensions` directory via git commandline launched in the webui folder
 
