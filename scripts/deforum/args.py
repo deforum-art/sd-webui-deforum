@@ -38,7 +38,7 @@ def DeforumAnimArgs():
     perspective_flip_phi = "0:(t%15)"#@param {type:"string"}
     perspective_flip_gamma = "0:(0)"#@param {type:"string"}
     perspective_flip_fv = "0:(53)"#@param {type:"string"}
-    noise_schedule = "0: (0.02)"#@param {type:"string"}
+    noise_schedule = "0: (0.08)"#@param {type:"string"}
     strength_schedule = "0: (0.65)"#@param {type:"string"}
     contrast_schedule = "0: (1.0)"#@param {type:"string"}
     cfg_scale_schedule = "0: (7)"
