@@ -86,7 +86,7 @@ def DeforumAnimPrompts():
     return r"""{
     "0": "apple:`where(cos(6.28*t/10)>0, 2*cos(6.28*t/10), 0.001)`, strawberry:`where(cos(6.28*t/10)<0, -2*cos(6.28*t/10), 0.001)`, snow, detailed painting by greg rutkowski --neg apple:`where(cos(6.28*t/10)<0, -2*cos(6.28*t/10), 0.001)`, strawberry:`where(cos(6.28*t/10)>0, 2*cos(6.28*t/10), 0.001)`",
     "60": "a beautiful (((banana))), trending on Artstation",
-    "80": "a beautiful coconut, trending on Artstation",
+    "80": "a beautiful coconut --neg photo, realistic",
     "100": "a beautiful durian, trending on Artstation"
 }
 """
