@@ -375,12 +375,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     # Prompts settings START    
     with gr.Tab('Prompts'):
         i18 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Prompts</p>")
-        i19 = gr.HTML("<p style=\"margin-bottom:0.75em\">`animation_mode: None` batches on list of *prompts*. (Batch mode disabled atm, only animation_prompts are working)</p>")
-        i20 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">*Important change from vanilla Deforum!*</p>")
-        i21 = gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">This script uses the built-in webui weighting settings.</p>")
-        i22 = gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">So if you want to use math functions as prompt weights,</p>")
-        i23 = gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">keep the values above zero in both parts</p>")
-        i24 = gr.HTML("<p style=\"font-weight:italic;margin-bottom:0.75em\">Negative prompt part can be specified with --neg</p>")
+        i19 = gr.HTML("<p>`animation_mode: None` batches on list of *prompts*. (Batch mode disabled atm, only animation_prompts are working)</p>")
+        i20 = gr.HTML("<p style=\"font-weight:bold\">*Important change from vanilla Deforum!*</p>")
+        i21 = gr.HTML("<p style=\"font-weight:italic\">This script uses the built-in webui weighting settings.</p>")
+        i22 = gr.HTML("<p style=\"font-weight:italic\">So if you want to use math functions as prompt weights,</p>")
+        i23 = gr.HTML("<p style=\"font-weight:italic\">keep the values above zero in both parts</p>")
+        i24 = gr.HTML("<p style=\"font-weight:italic\">Negative prompt part can be specified with --neg</p>")
         with gr.Row():
             prompts = gr.Textbox(label="batch_prompts (disabled atm)", lines=8, interactive=False, value = DeforumPrompts(), visible = True) # TODO
         with gr.Row():
