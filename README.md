@@ -74,10 +74,10 @@ Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing an
 ![sw-min](https://user-images.githubusercontent.com/14872007/195954681-6b0f5a8d-e575-4ce3-9c10-e39ffbbca6ac.gif)
 
 
-'Le Grand Interface' at work:
+'Le not so Grand Interface' at work:
 
 
-![Screenshot 2022-10-18 at 01-04-09 Stable Diffusion](https://user-images.githubusercontent.com/14872007/196292481-c77bcf3a-4712-44f5-97b2-d4b2480ca012.png)
+![Screenshot 2022-10-24 at 20-04-42 Stable Diffusion](https://user-images.githubusercontent.com/14872007/197587723-290a7ab6-b272-49ca-aeb3-958d5f1f6a37.png)
 
 
 Math evaluation:
