@@ -30,7 +30,7 @@ https://github.com/deforum/stable-diffusion
 git clone https://github.com/deforum-art/deforum-for-automatic1111-webui/ extensions/deforum
 ```
 
-Or download this repository, locate the `extensions` folder within your WebUI installation, create folder named `deforum` in it and then put the contents of the archive inside. Then restart WebUI.
+Or download this repository, locate the `extensions` folder within your WebUI installation, create folder named `deforum` in it and then put the contents of the archive inside. Then restart WebUI. **Warning: the extension folder has to be named 'deforum' or else it will fail to locate the 3D modules as the PATH addition is hardcoded**
 
 3. If you're on Windows and want to launch Deforum in 3D mode, you'll have to download the depths model manually. Download these files https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt and https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt and put them into the 'models/Deforum' folder of your webui installation. (if it doesn't exist, create it)
 
