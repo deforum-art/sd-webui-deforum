@@ -12,7 +12,7 @@ import os, sys
 from webui import wrap_gradio_gpu_call
 import modules.shared as shared
 from modules.shared import opts, cmd_opts, state
-from modules.ui import setup_progressbar
+from modules.ui import setup_progressbar, plaintext_to_html
 from types import SimpleNamespace
 
 class DeforumScript(wscripts.Script):
