@@ -17,11 +17,22 @@ from types import SimpleNamespace
 
 class DeforumScript(wscripts.Script):
 
+    SCRIPT_DEPRECATED = True
+    AS_SCRIPT_DEPRECATION_WARNING = "This script is deprecated. Please use the full Deforum extension instead.\nUpdate instructions:"
+    GITHUB_LINK = "github.com/deforum-art/deforum-for-automatic1111-webui/blob/automatic1111-webui/README.md"
+    DISCORD_LINK = "discord.gg/deforum"
+
     def title(self):
-        return "Deforum v0.5-webui-beta"
+        return "Deforum-webui (use tab extension instead!)"
 
     def ui(self, is_img2img):
-        return deforum_args.setup_deforum_setting_ui(self, is_img2img, is_extension = False)
+        if not self.SCRIPT_DEPRECATED:
+            return deforum_args.setup_deforum_setting_ui(self, is_img2img, is_extension = False)
+        i_x = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>")
+        i_y = gr.HTML(plaintext_to_html(self.AS_SCRIPT_DEPRECATION_WARNING))  
+        i_z = gr.HTML(plaintext_to_html(self.GITHUB_LINK))  
+        i_i = gr.HTML(plaintext_to_html(self.DISCORD_LINK))
+        return [i_x, i_y, i_z, i_i]
         
     def show(self, is_img2img):
         return is_img2img
@@ -256,6 +267,10 @@ def on_ui_tabs():
                     generation_info = gr.Textbox(visible=False)
                 components['override_these_with_webui'].visible = False
                 components['prompts'].visible = False#hide prompts for the time being
+                #TODO clean up the code
+                components['save_sample_per_step'].visible = False
+                components['show_sample_per_step'].visible = False
+                components['display_samples'].visible = False
 
         ds = SimpleNamespace(**components)
         component_list = [ds.override_settings_with_file, ds.custom_settings_file, ds.animation_mode, ds.max_frames, ds.border, ds.angle, ds.zoom, ds.translation_x, ds.translation_y, ds.translation_z, ds.rotation_3d_x, ds.rotation_3d_y, ds.rotation_3d_z, ds.flip_2d_perspective, ds.perspective_flip_theta, ds.perspective_flip_phi, ds.perspective_flip_gamma, ds.perspective_flip_fv, ds.noise_schedule, ds.strength_schedule, ds.contrast_schedule, ds.cfg_scale_schedule, ds.seed_schedule, ds.color_coherence, ds.diffusion_cadence, ds.use_depth_warping, ds.midas_weight, ds.near_plane, ds.far_plane, ds.fov, ds.padding_mode, ds.sampling_mode, ds.save_depth_maps, ds.video_init_path, ds.extract_nth_frame, ds.overwrite_extracted_frames, ds.use_mask_video, ds.video_mask_path, ds.interpolate_key_frames, ds.interpolate_x_frames, ds.resume_from_timestring, ds.resume_timestring, ds.prompts, ds.animation_prompts, ds.W, ds.H, ds.restore_faces, ds.tiling, ds.enable_hr, ds.firstphase_width, ds.firstphase_height, ds.seed, ds.sampler, ds.seed_enable_extras, ds.subseed_strength, ds.seed_resize_from_w, ds.seed_resize_from_h, ds.steps, ds.ddim_eta, ds.n_batch, ds.make_grid, ds.grid_rows, ds.save_settings, ds.save_samples, ds.display_samples, ds.save_sample_per_step, ds.show_sample_per_step, ds.override_these_with_webui, ds.batch_name, ds.filename_format, ds.seed_behavior, ds.use_init, ds.from_img2img_instead_of_link, ds.strength_0_no_init, ds.strength, ds.init_image, ds.use_mask, ds.use_alpha_as_mask, ds.invert_mask, ds.overlay_mask, ds.mask_file, ds.mask_brightness_adjust, ds.mask_overlay_blur, ds.skip_video_for_run_all, ds.fps, ds.output_format, ds.ffmpeg_location, ds.add_soundtrack, ds.soundtrack_path, ds.use_manual_settings, ds.render_steps, ds.max_video_frames, ds.path_name_modifier, ds.image_path, ds.mp4_path, ds.i1, ds.i2, ds.i3, ds.i4, ds.i5, ds.i6, ds.i7, ds.i8, ds.i9, ds.i10, ds.i11, ds.i12, ds.i13, ds.i14, ds.i15, ds.i16, ds.i17, ds.i18, ds.i19, ds.i20, ds.i21, ds.i22, ds.i23, ds.i24, ds.i25, ds.i26, ds.i27, ds.i28, ds.i29, ds.i30, ds.i31, ds.i32, ds.i33, ds.i34, ds.i35, ds.i36]
