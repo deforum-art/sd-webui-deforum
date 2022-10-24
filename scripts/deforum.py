@@ -94,6 +94,12 @@ class DeforumScript(wscripts.Script):
                     max_video_frames = anim_args.max_frames
 
             print(f"{image_path} -> {mp4_path}")
+
+            #save settings for the video
+            video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
+            with open(video_settings_filename, "w+", encoding="utf-8") as f:
+                s = {**dict(video_args.__dict__)}
+                json.dump(s, f, ensure_ascii=False, indent=4)
             
             # make video
             cmd = [
@@ -164,6 +170,12 @@ class DeforumScript(wscripts.Script):
                     max_video_frames = anim_args.max_frames
 
             print(f"{image_path} -> {mp4_path}")
+
+            #save settings for the video
+            video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
+            with open(video_settings_filename, "w+", encoding="utf-8") as f:
+                s = {**dict(video_args.__dict__)}
+                json.dump(s, f, ensure_ascii=False, indent=4)
             
             imagelist = [Image.open(os.path.join(args.outdir, image_path%d)) for d in range(max_video_frames) if os.path.exists(os.path.join(args.outdir, image_path%d))]
             
