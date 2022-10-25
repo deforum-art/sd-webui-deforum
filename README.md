@@ -65,7 +65,7 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 * Browsers often cannot load too big gifs, so try to use `ffmpeg` when possible. Make sure it's installed and linked in your PATH!
 
-* 3D mode doesn't work on resolutions so high that one of the dimensions is greater than 768. It's the limitation of the Adabins model
+* 3D mode doesn't work on resolutions when one of the dimensions is greater than 768 or less than 448. It's the limitation of the Adabins model
 
 * If you encounter issues with the downloaded depth models failing to load, try launching the WebUI with the `--disable-safe-unpickle` option! [How to add it to the .bat file on Windows.](https://imgur.com/a/TJHglot)
 
