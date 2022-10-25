@@ -63,8 +63,6 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 * Color correction is quite forced atm.
 
-* Save/load settings button works no more than once for some reason.
-
 * Browsers often cannot load too big gifs, so try to use `ffmpeg` when possible. Make sure it's installed and linked in your PATH!
 
 * 3D mode doesn't work on resolutions so high that one of the dimensions is greater than 768. It's the limitation of the Adabins model
