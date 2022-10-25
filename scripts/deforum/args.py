@@ -488,7 +488,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     
     root = SimpleNamespace(**Root())
     root.p = p
-    root.prompts = json.loads(prompts)
+    #root.prompts = json.loads(prompts)#TODO make proper animation_mode=None handling
     root.animation_prompts = json.loads(animation_prompts)
     
     from scripts.deforum.settings import load_args

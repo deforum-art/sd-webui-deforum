@@ -62,12 +62,18 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
         jdata['prompts'] = jdata['animation_prompts']#compatibility with old versions
 
     for key in data:
-        if key in jdata:
+        if key == 'sampler':
+            sampler_val = jdata[key]
+            if type(sampler_val) == int:
+                from modules.sd_samplers import samplers_for_img2img
+                ret.append(samplers_for_img2img[sampler_val].name)
+            else:
+                ret.append(sampler_val)
+
+        elif key in jdata:
             ret.append(jdata[key])
         else:
             if key == 'animation_prompts':
-                print('prompts!')
-                print(json.dumps(jdata['prompts']))
                 ret.append(json.dumps(jdata['prompts'], ensure_ascii=False, indent=4))
             else:
                 ret.append(data[key])
