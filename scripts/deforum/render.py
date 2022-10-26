@@ -185,7 +185,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             else:
                 args.init_sample = noised_sample.to(root.device)
             args.strength = max(0.0, min(1.0, strength))
-            args.scale = scale
+        args.scale = scale
 
         # grab prompt for current frame
         args.prompt = prompt_series[frame_idx]
