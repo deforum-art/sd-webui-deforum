@@ -1,3 +1,4 @@
+from math import ceil
 import os
 import json
 
@@ -142,13 +143,13 @@ class DeforumTQDM:
             strength = keys.strength_schedule_series[frame_idx]
             #sample, image = generate(args, root, frame_idx, return_sample=True)
             if not had_first and self._args.use_init and self._args.init_image != None and self._args.init_image != '':
-                deforum_total += int(self._args.steps * (1-strength))
+                deforum_total += int(ceil(self._args.steps * (1-strength)))
                 had_first = True
             elif not had_first:
-                deforum_total += self._args.steps if self._args.strength_0_no_init else int(self._args.steps * (1-strength))
+                deforum_total += self._args.steps
                 had_first = True
             else:
-                deforum_total += int(self._args.steps * (1-strength))
+                deforum_total += int(ceil(self._args.steps * (1-strength)))
 
             if turbo_steps > 1:
                 frame_idx += turbo_steps
