@@ -108,6 +108,7 @@ def render_animation(args, anim_args, animation_prompts, root):
     while frame_idx < anim_args.max_frames:
         print(f"Rendering animation frame {frame_idx} of {anim_args.max_frames}")
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
+        state.job_no = frame_idx + 1
         
         #Webui
         if state.interrupted:
