@@ -38,7 +38,7 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 5. Enter the animation settings. Refer to [this general guide](https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit) and [this guide to math keyframing functions in Deforum](https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing). However, **in this version prompt weights less than zero don't just like in original Deforum!** Split the positive and the negative prompt in the json section using --neg argument like this "apple:\`where(cos(t)>=0, cos(t), 0)\`, snow --neg strawberry:\`where(cos(t)<0, -cos(t), 0)\`"
 
-6. To view animation frames as they're being made, without waiting for the completion of an animation, go to the 'Settings' tab and set the value of this toolbar **above zero**, then click 'Apply settings' at the top of the page and return to the 'Deforum' tab. Warning: it may slow down the generation process.
+6. To view animation frames as they're being made, without waiting for the completion of an animation, go to the 'Settings' tab and set the value of this toolbar **above zero**. Warning: it may slow down the generation process. If you have 'Do exactly the amount of steps the slider specifies' checkbox selected in the tab, unselect it as it won't allow you to use Deforum schedules and you will get adrupt frame changes without transitions. Then click 'Apply settings' at the top of the page. Now return to the 'Deforum' tab.
 
 ![adsdasunknown](https://user-images.githubusercontent.com/14872007/196064311-1b79866a-e55b-438a-84a7-004ff30829ad.png)
 
