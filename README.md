@@ -59,8 +59,6 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 * This port is not fully backward-compatible with the notebook and the local version both due to the changes in how AUTOMATIC1111's webui handles Stable Diffusion models and the changes in this script to get it to work in the new environment. *Expect* that you may not get exactly the same result or that the thing may break down because of the older settings.
 
-* The progressbar showing nonsense due to how AUTOMATIC1111's webui computes the max value as `steps * job_count` and `steps` fluctuate here due to `diffusion_cadence` and `strength_schedule`.
-
 * Color correction is quite forced atm.
 
 * Browsers often cannot load too big gifs, so try to use `ffmpeg` when possible. Make sure it's installed and linked in your PATH!
