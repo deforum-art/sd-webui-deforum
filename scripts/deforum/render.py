@@ -9,10 +9,12 @@ import numpy as np
 from PIL import Image
 import pathlib
 import torchvision.transforms as T
+import logging
 
 from .generate import generate, add_noise
 from .prompt import sanitize
 from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp_2d, anim_frame_warp_3d, vid2frames
+from .parseq_adapter import ParseqAnimKeys
 from .depth import DepthModel
 from .colors import maintain_colors
 
@@ -32,8 +34,11 @@ def render_animation(args, anim_args, animation_prompts, root):
     # animations use key framed prompts
     args.prompts = animation_prompts
 
+    # use everything with parseq if manifest is provided
+    use_parseq = args.parseq_manifest != None and args.parseq_manifest.strip()
+
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args)
+    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(args.parseq_manifest)
 
     # resume animation
     start_frame = 0
@@ -58,10 +63,13 @@ def render_animation(args, anim_args, animation_prompts, root):
         args.timestring = anim_args.resume_timestring
 
     # expand prompts out to per-frame
-    prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
-    for i, prompt in animation_prompts.items():
-        prompt_series[int(i)] = prompt
-    prompt_series = prompt_series.ffill().bfill()
+    if use_parseq:
+        prompt_series = keys.prompts
+    else:
+        prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
+        for i, prompt in animation_prompts.items():
+            prompt_series[int(i)] = prompt
+        prompt_series = prompt_series.ffill().bfill()
 
     # check for video inits
     using_vid_init = anim_args.animation_mode == 'Video Input'
@@ -193,7 +201,11 @@ def render_animation(args, anim_args, animation_prompts, root):
         
         if args.seed_behavior == 'schedule':
             args.seed = int(keys.seed_schedule_series[frame_idx])
-        
+
+        if use_parseq:
+            args.subseed = keys.subseed_series[frame_idx]
+            args.subseed_strength = keys.subseed_strength_series[frame_idx]
+
         print(f"{args.prompt} {args.seed}")
         if not using_vid_init:
             print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
@@ -210,6 +222,7 @@ def render_animation(args, anim_args, animation_prompts, root):
                 args.mask_file = mask_frame
 
         # sample the diffusion model
+        logging.info(args)
         sample, image = generate(args, root, frame_idx, return_sample=True)
         if not using_vid_init:
             prev_sample = sample

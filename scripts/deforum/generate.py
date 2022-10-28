@@ -120,11 +120,9 @@ def generate(args, root, frame = 0, return_sample=False):
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = 1
     p.steps = args.steps
-    if opts.img2img_fix_steps:
-        p.denoising_strength = 1 / (1 - args.strength + 1.0/args.steps) #see https://github.com/deforum-art/deforum-for-automatic1111-webui/issues/3
-    else:
-        p.denoising_strength = 1 - args.strength
+    p.denoising_strength = 1 - args.strength
     p.cfg_scale = args.scale
+
     # FIXME better color corrections as match histograms doesn't seem to be fully working
     if root.color_corrections is not None:
         p.color_corrections = root.color_corrections
