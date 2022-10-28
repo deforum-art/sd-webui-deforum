@@ -8,8 +8,8 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 
 class ParseqAnimKeys():
-    def __init__(self, parseq_json_string):
-        
+    def __init__(self, parseq_json_string, deforum_anim=None):
+
         self.parseq_json = json.loads(parseq_json_string)
         self.rendered_frames = self.parseq_json['rendered_frames']
         
@@ -42,6 +42,28 @@ class ParseqAnimKeys():
         self.fov_series = self.parseq_to_anim_series('fov')
         self.near_series = self.parseq_to_anim_series('near')
         self.far_series = self.parseq_to_anim_series('far')
+
+        # Debug
+        # self.angle_series = deforum_anim.angle_series
+        # self.zoom_series = deforum_anim.zoom_series
+        # self.translation_x_series = deforum_anim.translation_x_series
+        # self.translation_y_series = deforum_anim.translation_y_series
+        # self.translation_z_series = deforum_anim.translation_z_series
+        # self.rotation_3d_x_series = deforum_anim.rotation_3d_x_series
+        # self.rotation_3d_y_series = deforum_anim.rotation_3d_y_series
+        # self.rotation_3d_z_series = deforum_anim.rotation_3d_z_series
+        # self.perspective_flip_theta_series = deforum_anim.perspective_flip_theta_series
+        # self.perspective_flip_phi_series = deforum_anim.perspective_flip_phi_series
+        # self.perspective_flip_gamma_series = deforum_anim.perspective_flip_gamma_series
+        # self.perspective_flip_fv_series = deforum_anim.perspective_flip_fv_series
+        # self.noise_schedule_series = deforum_anim.noise_schedule_series
+        # self.strength_schedule_series = deforum_anim.strength_schedule_series
+        # self.contrast_schedule_series = deforum_anim.contrast_schedule_series
+        # self.cfg_scale_schedule_series = deforum_anim.cfg_scale_schedule_series
+        # self.seed_schedule_series = deforum_anim.seed_schedule_series
+        # self.fov_series = deforum_anim.fov_series
+        # self.near_series = deforum_anim.near_series
+        # self.far_series = deforum_anim.far_series
 
         # Additional animation series
         self.prompts = self.parseq_to_anim_series('deforum_prompt') # formatted as "{positive} --neg {negative}"

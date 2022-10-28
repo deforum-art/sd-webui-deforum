@@ -38,7 +38,7 @@ def render_animation(args, anim_args, animation_prompts, root):
     use_parseq = args.parseq_manifest != None and args.parseq_manifest.strip()
 
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(args.parseq_manifest)
+    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(args.parseq_manifest, DeformAnimKeys(anim_args))
 
     # resume animation
     start_frame = 0
@@ -222,7 +222,6 @@ def render_animation(args, anim_args, animation_prompts, root):
                 args.mask_file = mask_frame
 
         # sample the diffusion model
-        logging.info(args)
         sample, image = generate(args, root, frame_idx, return_sample=True)
         if not using_vid_init:
             prev_sample = sample
