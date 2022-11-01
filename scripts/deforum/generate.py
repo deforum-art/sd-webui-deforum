@@ -22,7 +22,7 @@ from .callback import SamplerCallback
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
 from modules import processing
-from modules.shared import opts
+from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 import logging
 
@@ -116,6 +116,7 @@ def generate(args, root, frame = 0, return_sample=False):
     p.seed = args.seed
     p.do_not_save_samples = not args.save_sample_per_step
     p.do_not_save_grid = not args.make_grid
+    p.sd_model=sd_model
     p.sampler_index = int(args.sampler)
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
@@ -160,7 +161,7 @@ def generate(args, root, frame = 0, return_sample=False):
     else:
         # sometimes my genius... is almost frightening
         p_txt = StableDiffusionProcessingTxt2Img(
-                sd_model=p.sd_model,
+                sd_model=sd_model,
                 outpath_samples=p.outpath_samples,
                 outpath_grids=p.outpath_samples,
                 prompt=p.prompt,
