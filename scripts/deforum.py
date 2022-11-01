@@ -52,7 +52,8 @@ class DeforumScript(wscripts.Script):
         
         sys.path.extend([
             os.getcwd()+'/scripts/deforum/src',
-            os.getcwd()+'/extensions/deforum/scripts/deforum/src'
+            os.getcwd()+'/extensions/deforum/scripts/deforum/src',
+            os.getcwd()+'/extensions/deforum-for-automatic1111-webui/scripts/deforum/src',
         ])
         
         # clean up unused memory
