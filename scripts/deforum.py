@@ -287,6 +287,11 @@ def on_ui_tabs():
                 with gr.Group():
                     html_info = gr.HTML()
                     generation_info = gr.Textbox(visible=False)
+                # TODO either figure out how to relaunch the scripts from within
+                # or wait until Auto fixes it on their end
+                # https://github.com/AUTOMATIC1111/stable-diffusion-webui/issues/4066
+                with gr.Row():
+                    button_fix_notice = gr.HTML("<p>NOTE: If the 'Generate' button doesn't work, go in Settings and click 'Restart Gradio and Refresh...'.</p>")
                 with gr.Row():
                     save_settings_btn = gr.Button('Save Settings', elem_id='deforum_save_settings_btn')
                     load_settings_btn = gr.Button('Load Settings', elem_id='deforum_load_settings_btn')
