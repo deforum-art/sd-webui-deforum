@@ -1,4 +1,5 @@
 import torch
+import PIL #HOTFIXISSUE#33 needed for instruction to generate negative mask. 
 from PIL import Image, ImageOps
 import requests
 import numpy as np
