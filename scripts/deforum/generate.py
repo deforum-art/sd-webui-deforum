@@ -114,6 +114,8 @@ def generate(args, root, frame = 0, return_sample=False):
     p.width = args.W
     p.height = args.H
     p.seed = args.seed
+    p.subseed=args.subseed
+    p.subseed_strength=args.subseed_strength
     p.do_not_save_samples = not args.save_sample_per_step
     p.do_not_save_grid = not args.make_grid
     p.sd_model=sd_model
@@ -212,6 +214,18 @@ def generate(args, root, frame = 0, return_sample=False):
         p.init_images = [init_image]
         p.mask = mask
         
+        logging.info(f""" ----
+prompt={p.prompt},
+negative_prompt={p.negative_prompt},
+styles={p.styles},
+seed={p.seed},
+subseed={p.subseed},
+subseed_strength={p.subseed_strength},
+denoising_strength={p.denoising_strength},
+steps={p.steps},
+cfg_scale={p.cfg_scale}
+---- """)
+
         processed = processing.process_images(p)
     
     if root.initial_info == None:

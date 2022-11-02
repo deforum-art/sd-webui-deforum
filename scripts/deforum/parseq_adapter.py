@@ -68,7 +68,7 @@ class ParseqAnimKeys():
         # Additional animation series
         self.prompts = self.parseq_to_anim_series('deforum_prompt') # formatted as "{positive} --neg {negative}"
         self.subseed_series = self.parseq_to_anim_series('subseed')
-        self.subseed_strength_series = self.parseq_to_anim_series('subseed')
+        self.subseed_strength_series = self.parseq_to_anim_series('subseed_strength')
 
         # Config:
         # TODO this is currently ignored. User must ensure the output FPS set in parseq
@@ -94,3 +94,6 @@ class ParseqAnimKeys():
 # json_file = open("./test_data.json", "r")
 # parseq_json_string = json_file.read()
 # keys = ParseqAnimKeys(parseq_json_string)
+# logging.info(keys.seed_schedule_series)
+# logging.info(keys.subseed_series)
+# logging.info(keys.subseed_strength_series)

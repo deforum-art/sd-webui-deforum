@@ -203,7 +203,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             args.seed = int(keys.seed_schedule_series[frame_idx])
 
         if use_parseq:
-            args.subseed = keys.subseed_series[frame_idx]
+            args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
 
         print(f"{args.prompt} {args.seed}")
