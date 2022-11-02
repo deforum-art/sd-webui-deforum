@@ -194,16 +194,14 @@ def generate(args, root, frame = 0, return_sample=False):
         if args.use_mask:
             assert args.mask_file is not None or mask_image is not None, "use_mask==True: An mask image is required for a mask. Please enter a mask_file or use an init image with an alpha channel"
             assert args.use_init, "use_mask==True: use_init is required for a mask"
-
-            # this is meant to be a specific work around to tackle image and video masking not working at all
+            
+            # revert to using args instead of constants, still need to investigate shape argument. #MASKARGSFIX
             mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
                                 # should this be the shape of init_latent or latent diffuse? 
                                 #init_image.shape
                                 (args.W, args.H), #this is a workaround as mentioned by OP of issue #33. #HOTFIXISSUE#33
-                                1, # contrast mask needs to be addressed in args and other places. #HOTFIXISSUE#33
-                                1, # brightness also needs specification in order to work.#HOTFIXISSUE#33
-                                #args.mask_contrast_adjust, 
-                                #args.mask_brightness_adjust,
+                                args.mask_contrast_adjust, # Use the argument instead of constant #MASKARGSFIX
+                                args.mask_brightness_adjust, # Use the argument instead of constant #MASKARGSFIX
                                 args.invert_mask)
             
             #if (torch.all(mask == 0) or torch.all(mask == 1)) and args.use_alpha_as_mask:
