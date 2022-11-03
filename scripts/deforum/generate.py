@@ -26,6 +26,8 @@ from modules import processing
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
+#MASKARGSEXPANSION 
+#Add option to remove noise in relation to masking so that areas which are masked receive less noise
 def add_noise(sample: torch.Tensor, noise_amt: float) -> torch.Tensor:
     return sample + torch.randn(sample.shape, device=sample.device) * noise_amt
 
@@ -199,7 +201,7 @@ def generate(args, root, frame = 0, return_sample=False):
             mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
                                 # should this be the shape of init_latent or latent diffuse? 
                                 #init_image.shape
-                                (args.W, args.H), #this is a workaround as mentioned by OP of issue #33. #HOTFIXISSUE#33
+                                (1,4,args.W, args.H), #this is a workaround as mentioned by OP of issue #33. #HOTFIXISSUE#33
                                 args.mask_contrast_adjust, # Use the argument instead of constant #MASKARGSFIX
                                 args.mask_brightness_adjust, # Use the argument instead of constant #MASKARGSFIX
                                 args.invert_mask)
@@ -219,6 +221,9 @@ def generate(args, root, frame = 0, return_sample=False):
         # consequent issues found both image and video masking were not working.
         # p.mask = mask # what was being returned is an Image, take the image_mask pathway to masking =). 
         p.image_mask = mask #HOTFIXISSUE#33
+        p.inpainting_fill = args.fill # need to come up with better name. Its equal to fill mode in img2img except its in numeric format. #MASKARGSEXPANSION
+        p.inpaint_full_res= args.full_res_mask # another argumet that changes the outcome of the final render #MASKARGSEXPANSION
+        p.inpaint_full_res_padding = args.full_res_mask_padding # associated with above argument #MASKARGSEXPANSION
         processed = processing.process_images(p)
     
     if root.initial_info == None:
