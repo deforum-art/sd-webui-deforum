@@ -201,7 +201,7 @@ def generate(args, root, frame = 0, return_sample=False):
             mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
                                 # should this be the shape of init_latent or latent diffuse? 
                                 #init_image.shape
-                                (1,4,args.W, args.H), #this is a workaround as mentioned by OP of issue #33. #HOTFIXISSUE#33
+                                (args.W, args.H), #this is a workaround as mentioned by OP of issue #33. #HOTFIXISSUE#33
                                 args.mask_contrast_adjust, # Use the argument instead of constant #MASKARGSFIX
                                 args.mask_brightness_adjust, # Use the argument instead of constant #MASKARGSFIX
                                 args.invert_mask)
