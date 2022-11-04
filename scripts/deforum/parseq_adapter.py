@@ -83,10 +83,3 @@ class ParseqAnimKeys():
             frame_idx += 1
 
         return key_frame_series
-
-# json_file = open("./test_data.json", "r")
-# parseq_json_string = json_file.read()
-# keys = ParseqAnimKeys(parseq_json_string)
-# logging.info(keys.seed_schedule_series)
-# logging.info(keys.subseed_series)
-# logging.info(keys.subseed_strength_series)
