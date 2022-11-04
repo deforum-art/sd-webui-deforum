@@ -35,7 +35,6 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
     args.prompts = animation_prompts
 
     # use parseq if manifest is provided
-    print(f"===== Parseq args: {parseq_args}")
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
 
     # expand key frame strings to values
