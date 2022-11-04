@@ -177,6 +177,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             # apply scaling
             contrast_sample = prev_img * contrast
             # apply frame noising
+            #MASKARGSEXPANSION : Left comment as to where to enter for noise addition masking 
             noised_sample = add_noise(sample_from_cv2(contrast_sample), noise)
 
             # use transformed previous frame as init for current
@@ -199,6 +200,9 @@ def render_animation(args, anim_args, animation_prompts, root):
             print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
             print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")
             print(f"Rx: {keys.rotation_3d_x_series[frame_idx]} Ry: {keys.rotation_3d_y_series[frame_idx]} Rz: {keys.rotation_3d_z_series[frame_idx]}")
+            if anim_args.use_mask_video:
+                mask_frame = os.path.join(args.outdir, 'maskframes', f"{frame_idx+1:05}.jpg")
+                args.mask_file = mask_frame
 
         # grab init image for current frame
         if using_vid_init:
@@ -255,5 +259,24 @@ def render_input_video(args, anim_args, animation_prompts, root):
         vid2frames(anim_args.video_mask_path, mask_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
         args.use_mask = True
         args.overlay_mask = True
+
+    render_animation(args, anim_args, animation_prompts, root)
+
+# Modified a copy of the above to allow using masking video with out a init video.
+def render_animation_with_video_mask(args, anim_args, animation_prompts, root):
+    # create a folder for the video input frames to live in
+    mask_in_frame_path = os.path.join(args.outdir, 'maskframes') 
+    os.makedirs(mask_in_frame_path, exist_ok=True)
+
+    # save the video frames from mask video
+    print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
+    vid2frames(anim_args.video_mask_path, mask_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
+    args.use_mask = True
+    #args.overlay_mask = True
+
+    # determine max frames from length of input frames
+    anim_args.max_frames = len([f for f in pathlib.Path(mask_in_frame_path).glob('*.jpg')])
+    #args.use_init = True
+    print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
 
     render_animation(args, anim_args, animation_prompts, root)
