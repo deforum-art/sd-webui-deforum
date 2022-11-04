@@ -30,15 +30,16 @@ def next_seed(args):
         args.seed = random.randint(0, 2**32 - 1)
     return args.seed
 
-def render_animation(args, anim_args, animation_prompts, root):
+def render_animation(args, anim_args, parseq_args, animation_prompts, root):
     # animations use key framed prompts
     args.prompts = animation_prompts
 
-    # use everything with parseq if manifest is provided
-    use_parseq = args.parseq_manifest != None and args.parseq_manifest.strip()
+    # use parseq if manifest is provided
+    print(f"===== Parseq args: {parseq_args}")
+    use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
 
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(args.parseq_manifest, DeformAnimKeys(anim_args))
+    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args)
 
     # resume animation
     start_frame = 0
@@ -199,7 +200,7 @@ def render_animation(args, anim_args, animation_prompts, root):
         # grab prompt for current frame
         args.prompt = prompt_series[frame_idx]
         
-        if args.seed_behavior == 'schedule':
+        if args.seed_behavior == 'schedule' or use_parseq:
             args.seed = int(keys.seed_schedule_series[frame_idx])
 
         if use_parseq:
@@ -243,7 +244,7 @@ def render_animation(args, anim_args, animation_prompts, root):
 
         args.seed = next_seed(args)
 
-def render_input_video(args, anim_args, animation_prompts, root):
+def render_input_video(args, anim_args, parseq_args, animation_prompts, root):
     # create a folder for the video input frames to live in
     video_in_frame_path = os.path.join(args.outdir, 'inputframes') 
     os.makedirs(video_in_frame_path, exist_ok=True)
@@ -268,4 +269,4 @@ def render_input_video(args, anim_args, animation_prompts, root):
         args.use_mask = True
         args.overlay_mask = True
 
-    render_animation(args, anim_args, animation_prompts, root)
+    render_animation(args, anim_args, parseq_args, animation_prompts, root)

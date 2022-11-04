@@ -3,37 +3,49 @@ import json
 import logging
 import pandas as pd
 import numpy as np
+import operator
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 class ParseqAnimKeys():
-    def __init__(self, parseq_json_string, deforum_anim=None):
+    def __init__(self, parseq_args, anim_args):
 
-        self.parseq_json = json.loads(parseq_json_string)
+        self.parseq_json = json.loads(parseq_args.parseq_manifest)
         self.rendered_frames = self.parseq_json['rendered_frames']
         
         self.max_frame = self.get_max('frame')
         count_defined_frames = len(self.rendered_frames)        
         expected_defined_frames = self.max_frame+1 # frames are 0-indexed
+
+        self.required_frames = anim_args.max_frames
+
         if (expected_defined_frames != count_defined_frames): 
-            logging.warning(f"There may be duplicated or missing frame data in the Parseq input: expected {expected_defined_frames} framesincluding frame 0 because the highest frame number is {self.max_frame}, but there are {count_defined_frames} frames defined.")
+            logging.warning(f"There may be duplicated or missing frame data in the Parseq input: expected {expected_defined_frames} frames including frame 0 because the highest frame number is {self.max_frame}, but there are {count_defined_frames} frames defined.")
+
+        if (anim_args.max_frames > count_defined_frames):
+            logging.info(f"Parseq data defines {count_defined_frames} frames, but the requested animation is {anim_args.max_frames} frames. The last Parseq frame definition will be duplicated to match the expected frame count.")
+        if (anim_args.max_frames < count_defined_frames):
+            logging.info(f"Parseq data defines {count_defined_frames} frames, but the requested animation is {anim_args.max_frames} frames. The last Parseq frame definitions will be ignored.")
         else:
             logging.info(f"Parseq data defines {count_defined_frames} frames.")
 
-        # Existing deforum animation series
-        self.angle_series = self.parseq_to_anim_series('angle')
-        self.zoom_series = self.parseq_to_anim_series('zoom')
-        self.translation_x_series = self.parseq_to_anim_series('translation_x')
-        self.translation_y_series = self.parseq_to_anim_series('translation_y')
-        self.translation_z_series = self.parseq_to_anim_series('translation_z')
-        self.rotation_3d_x_series = self.parseq_to_anim_series('rotation_3d_x')
-        self.rotation_3d_y_series = self.parseq_to_anim_series('rotation_3d_y')
-        self.rotation_3d_z_series = self.parseq_to_anim_series('rotation_3d_z')
-        self.perspective_flip_theta_series = self.parseq_to_anim_series('perspective_flip_theta')
-        self.perspective_flip_phi_series = self.parseq_to_anim_series('perspective_flip_phi')
-        self.perspective_flip_gamma_series = self.parseq_to_anim_series('perspective_flip_gamma')
-        self.perspective_flip_fv_series = self.parseq_to_anim_series('perspective_flip_fv')
+        # Animation args relating to motion may optionally use the delta values.
+        optional_delta = '_delta' if parseq_args.parseq_use_deltas else ''
+        self.angle_series = self.parseq_to_anim_series('angle' + optional_delta)
+        self.zoom_series = self.parseq_to_anim_series('zoom' + optional_delta)
+        self.translation_x_series = self.parseq_to_anim_series('translation_x' + optional_delta)
+        self.translation_y_series = self.parseq_to_anim_series('translation_y' + optional_delta)
+        self.translation_z_series = self.parseq_to_anim_series('translation_z' + optional_delta)
+        self.rotation_3d_x_series = self.parseq_to_anim_series('rotation_3d_x' + optional_delta)
+        self.rotation_3d_y_series = self.parseq_to_anim_series('rotation_3d_y' + optional_delta)
+        self.rotation_3d_z_series = self.parseq_to_anim_series('rotation_3d_z' + optional_delta)
+        self.perspective_flip_theta_series = self.parseq_to_anim_series('perspective_flip_theta' + optional_delta)
+        self.perspective_flip_phi_series = self.parseq_to_anim_series('perspective_flip_phi' + optional_delta)
+        self.perspective_flip_gamma_series = self.parseq_to_anim_series('perspective_flip_gamma' + optional_delta)
+ 
+        # Non-motion animation args
+        self.perspective_flip_fv_series = self.parseq_to_anim_series('perspective_flip_fv' + optional_delta)
         self.noise_schedule_series = self.parseq_to_anim_series('noise')
         self.strength_schedule_series = self.parseq_to_anim_series('strength')
         self.contrast_schedule_series = self.parseq_to_anim_series('contrast')
@@ -42,30 +54,6 @@ class ParseqAnimKeys():
         self.fov_series = self.parseq_to_anim_series('fov')
         self.near_series = self.parseq_to_anim_series('near')
         self.far_series = self.parseq_to_anim_series('far')
-
-        # Debug
-        # self.angle_series = deforum_anim.angle_series
-        # self.zoom_series = deforum_anim.zoom_series
-        # self.translation_x_series = deforum_anim.translation_x_series
-        # self.translation_y_series = deforum_anim.translation_y_series
-        # self.translation_z_series = deforum_anim.translation_z_series
-        # self.rotation_3d_x_series = deforum_anim.rotation_3d_x_series
-        # self.rotation_3d_y_series = deforum_anim.rotation_3d_y_series
-        # self.rotation_3d_z_series = deforum_anim.rotation_3d_z_series
-        # self.perspective_flip_theta_series = deforum_anim.perspective_flip_theta_series
-        # self.perspective_flip_phi_series = deforum_anim.perspective_flip_phi_series
-        # self.perspective_flip_gamma_series = deforum_anim.perspective_flip_gamma_series
-        # self.perspective_flip_fv_series = deforum_anim.perspective_flip_fv_series
-        # self.noise_schedule_series = deforum_anim.noise_schedule_series
-        # self.strength_schedule_series = deforum_anim.strength_schedule_series
-        # self.contrast_schedule_series = deforum_anim.contrast_schedule_series
-        # self.cfg_scale_schedule_series = deforum_anim.cfg_scale_schedule_series
-        # self.seed_schedule_series = deforum_anim.seed_schedule_series
-        # self.fov_series = deforum_anim.fov_series
-        # self.near_series = deforum_anim.near_series
-        # self.far_series = deforum_anim.far_series
-
-        # Additional animation series
         self.prompts = self.parseq_to_anim_series('deforum_prompt') # formatted as "{positive} --neg {negative}"
         self.subseed_series = self.parseq_to_anim_series('subseed')
         self.subseed_strength_series = self.parseq_to_anim_series('subseed_strength')
@@ -79,17 +67,22 @@ class ParseqAnimKeys():
         return max(self.rendered_frames, key=itemgetter(seriesName))[seriesName]
 
     def parseq_to_anim_series(self, seriesName):
-        key_frame_series = pd.Series([np.nan for a in range(self.max_frame+1)])
+        key_frame_series = pd.Series([np.nan for a in range(self.required_frames)])
         
         for frame in self.rendered_frames:
             frame_idx = frame['frame']
-            if not np.isnan(key_frame_series[frame_idx]):
-                logging.warning(f"Duplicate frame definition {frame_idx} detected for data {seriesName}. Latest wins.")        
-            key_frame_series[frame_idx] = frame[seriesName]
+            if frame_idx < self.required_frames:                
+                if not np.isnan(key_frame_series[frame_idx]):
+                    logging.warning(f"Duplicate frame definition {frame_idx} detected for data {seriesName}. Latest wins.")        
+                key_frame_series[frame_idx] = frame[seriesName]
+
+        # If the animation will have more frames than Parseq defines,
+        # duplicate final value to match the required frame count.
+        while (frame_idx < self.required_frames):
+            key_frame_series[frame_idx] = operator.itemgetter(-1)(self.rendered_frames)[seriesName]
+            frame_idx += 1
 
         return key_frame_series
-
-
 
 # json_file = open("./test_data.json", "r")
 # parseq_json_string = json_file.read()

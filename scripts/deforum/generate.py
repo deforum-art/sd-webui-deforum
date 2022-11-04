@@ -1,4 +1,5 @@
 import torch
+import PIL #HOTFIXISSUE#33 needed for instruction to generate negative mask. 
 from PIL import Image, ImageOps
 import requests
 import numpy as np
@@ -194,12 +195,14 @@ def generate(args, root, frame = 0, return_sample=False):
         if args.use_mask:
             assert args.mask_file is not None or mask_image is not None, "use_mask==True: An mask image is required for a mask. Please enter a mask_file or use an init image with an alpha channel"
             assert args.use_init, "use_mask==True: use_init is required for a mask"
-
-
+            
+            # revert to using args instead of constants, still need to investigate shape argument. #MASKARGSFIX
             mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
-                                init_image.shape, 
-                                args.mask_contrast_adjust, 
-                                args.mask_brightness_adjust,
+                                # should this be the shape of init_latent or latent diffuse? 
+                                #init_image.shape
+                                (args.W, args.H), #this is a workaround as mentioned by OP of issue #33. #HOTFIXISSUE#33
+                                args.mask_contrast_adjust, # Use the argument instead of constant #MASKARGSFIX
+                                args.mask_brightness_adjust, # Use the argument instead of constant #MASKARGSFIX
                                 args.invert_mask)
             
             #if (torch.all(mask == 0) or torch.all(mask == 1)) and args.use_alpha_as_mask:
@@ -212,20 +215,13 @@ def generate(args, root, frame = 0, return_sample=False):
         assert not ( (args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
         
         p.init_images = [init_image]
-        p.mask = mask
         
-        logging.info(f""" ----
-prompt={p.prompt},
-negative_prompt={p.negative_prompt},
-styles={p.styles},
-seed={p.seed},
-subseed={p.subseed},
-subseed_strength={p.subseed_strength},
-denoising_strength={p.denoising_strength},
-steps={p.steps},
-cfg_scale={p.cfg_scale}
----- """)
+        # there may be more functionality that is availabe in other forms of masking such as latent space masking, however the issue #33 specified video mask not working.
+        # consequent issues found both image and video masking were not working.
+        # p.mask = mask # what was being returned is an Image, take the image_mask pathway to masking =). 
+        p.image_mask = mask #HOTFIXISSUE#33
 
+        print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}")
         processed = processing.process_images(p)
     
     if root.initial_info == None:
