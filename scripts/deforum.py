@@ -252,18 +252,35 @@ def on_ui_tabs():
                 with gr.Row():
                     btn = gr.Button("Click here after the generation to show the video")
                     components['btn'] = btn
+                    close_btn = gr.Button("Close the video", visible=False)
                 with gr.Row():
                     i1 = gr.HTML(deforum_args.i1_store, elem_id='deforum_header')
                     components['i1'] = i1
+                    # Show video
                     def show_vid():
                         return {
-                            i1: gr.update(value=deforum_args.i1_store, visible=True)
+                            i1: gr.update(value=deforum_args.i1_store, visible=True),
+                            close_btn: gr.update(visible=True),
+                            btn: gr.update(value="Update the video", visible=True),
                         }
                 
                     btn.click(
                         show_vid,
                         [],
-                        [i1]
+                        [i1, close_btn, btn],
+                        )
+                    # Close video
+                    def close_vid():
+                        return {
+                            i1: gr.update(value=deforum_args.i1_store_backup, visible=True),
+                            close_btn: gr.update(visible=False),
+                            btn: gr.update(value="Click here after the generation to show the video", visible=True),
+                        }
+                    
+                    close_btn.click(
+                        close_vid,
+                        [],
+                        [i1, close_btn, btn],
                         )
                 with gr.Row(elem_id='toprow'):
                     id_part = 'deforum'

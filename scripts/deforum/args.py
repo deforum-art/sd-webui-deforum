@@ -197,7 +197,9 @@ import os
 import time
 from types import SimpleNamespace
 
-i1_store = "<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>"
+i1_store_backup = "<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>"
+i1_store = i1_store_backup
+
 mask_fill_choices=['fill', 'original', 'latent noise', 'latent nothing']
 
 def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
