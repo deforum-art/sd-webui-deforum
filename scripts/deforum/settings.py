@@ -75,7 +75,7 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
             fill_val = jdata[key]
             if type(fill_val) == int:
                 from .args import mask_fill_choices
-                ret.append(mask_fill_choices[fill_val].name)
+                ret.append(mask_fill_choices[fill_val])
             else:
                 ret.append(fill_val)
 
