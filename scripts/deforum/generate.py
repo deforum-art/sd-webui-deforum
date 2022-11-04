@@ -131,7 +131,8 @@ def generate(args, root, frame = 0, return_sample=False):
     p.cfg_scale = args.scale
     # FIXME better color corrections as match histograms doesn't seem to be fully working
     if root.color_corrections is not None:
-        p.color_corrections = root.color_corrections
+        if opts.img2img_color_correction:
+            root.color_corrections = [processing.setup_color_correction(root.first_frame)] 
     p.outpath_samples = root.outpath_samples
     p.outpath_grids = root.outpath_samples
     
