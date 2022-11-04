@@ -70,6 +70,14 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
                 ret.append(samplers_for_img2img[sampler_val].name)
             else:
                 ret.append(sampler_val)
+        
+        elif key == 'fill':
+            fill_val = jdata[key]
+            if type(fill_val) == int:
+                from .args import mask_fill_choices
+                ret.append(mask_fill_choices[fill_val].name)
+            else:
+                ret.append(fill_val)
 
         elif key in jdata:
             ret.append(jdata[key])

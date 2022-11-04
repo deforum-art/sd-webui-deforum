@@ -198,6 +198,7 @@ import time
 from types import SimpleNamespace
 
 i1_store = "<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>"
+mask_fill_choices=['fill', 'original', 'latent noise', 'latent nothing']
 
 def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     d = SimpleNamespace(**DeforumArgs()) #default args
@@ -416,9 +417,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             mask_brightness_adjust = gr.Number(label="mask_brightness_adjust", value=d.mask_brightness_adjust, interactive=True)
             mask_overlay_blur = gr.Number(label="mask_overlay_blur", value=d.mask_overlay_blur, interactive=True)
         with gr.Row():
-            _choices=['fill', 'original', 'latent noise', 'latent nothing']
-            choice = _choices[d.fill]
-            fill = gr.Radio(label='mask_fill', choices=_choices, value=choice, type="index")
+            choice = mask_fill_choices[d.fill]
+            fill = gr.Radio(label='mask_fill', choices=mask_fill_choices, value=choice, type="index")
         with gr.Row():
             #fill = gr.Slider(minimum=0, maximum=3, step=1, label="mask_fill_type", value=d.fill, interactive=True)
             full_res_mask = gr.Checkbox(label="full_res_mask", value=d.full_res_mask, interactive=True)
