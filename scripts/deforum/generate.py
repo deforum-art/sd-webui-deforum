@@ -182,6 +182,7 @@ def generate(args, root, frame = 0, return_sample=False):
         init_image = processed.images[0].convert('RGB') 
 
         p.color_corrections = None
+        p.image_mask = None
         mask_image = None
         processed = None
 
