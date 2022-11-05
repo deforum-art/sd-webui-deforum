@@ -22,7 +22,7 @@ def DeforumAnimArgs():
     #@markdown ####**Animation:**
     animation_mode = '2D' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
     max_frames = 120 #@param {type:"number"}
-    border = 'zeroes' #@param ['wrap', 'replicate', 'zeroes'] {type:'string'}
+    border = 'zeros' #@param ['wrap', 'replicate', 'zeros'] {type:'string'}
 
     #@markdown ####**Motion Parameters:**
     angle = "0:(0)"#@param {type:"string"}
