@@ -22,7 +22,7 @@ from .callback import SamplerCallback
 #Webui
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
-from modules import processing
+from modules import processing, masking
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
@@ -166,25 +166,33 @@ def generate(args, root, frame = 0, return_sample=False):
                     mask_image.putpixel((x,y), 255 )
                 else:
                     mask_image.putpixel((x,y), 0 )
-                                
-        p.inpainting_fill = args.zeros_fill_mode # need to come up with better name. 
-        p.inpaint_full_res= args.full_res_mask 
-        p.inpaint_full_res_padding = args.full_res_mask_padding 
+        
+        # HACK: this is a hacky check to make the mask work with the new inpainting code
+        crop_region = masking.get_crop_region(np.array(mask_image), args.inpaint_full_res_padding)
+        crop_region = masking.expand_crop_region(crop_region, args.W, args.H, mask_image.width, mask_image.height)
+        x1, y1, x2, y2 = crop_region
 
-        p.init_images = [init_image]
-        p.image_mask = mask_image
+        too_small = (x2 - x1) < 1 or (y2 - y1) < 1
+        
+        if not too_small:            
+            p.inpainting_fill = args.zeros_fill_mode # need to come up with better name. 
+            p.inpaint_full_res= args.full_res_mask 
+            p.inpaint_full_res_padding = args.full_res_mask_padding 
 
-        #color correction for zeroes inpainting
-        p.color_corrections = [processing.setup_color_correction(init_image)]
+            p.init_images = [init_image]
+            p.image_mask = mask_image
 
-        processed = processing.process_images(p)
+            #color correction for zeroes inpainting
+            p.color_corrections = [processing.setup_color_correction(init_image)]
 
-        init_image = processed.images[0].convert('RGB') 
+            processed = processing.process_images(p)
 
-        p.color_corrections = None
-        p.image_mask = None
-        mask_image = None
-        processed = None
+            init_image = processed.images[0].convert('RGB') 
+
+            p.color_corrections = None
+            p.image_mask = None
+            mask_image = None
+            processed = None
 
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
