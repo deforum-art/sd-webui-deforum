@@ -187,12 +187,29 @@ def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
     else:
         xform = np.matmul(rot_mat, trans_mat)
 
-    return cv2.warpPerspective(
-        prev_img_cv2,
-        xform,
-        (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
-        borderMode=cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE
-    )
+    borderMode = cv2.BORDER_CONSTANT | cv2.BORDER_ISOLATED #zeros
+
+    if anim_args.border == 'wrap':
+        borderMode = cv2.BORDER_WRAP
+    elif anim_args.border == 'wrap':
+        borderMode = cv2.BORDER_REPLICATE
+
+    if borderMode == 'zeros':
+        return cv2.warpPerspective(
+            prev_img_cv2,
+            xform,
+            (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
+            borderMode=borderMode,
+            borderValue=(0, 0, 0,),
+        )
+    else:
+        return cv2.warpPerspective(
+            prev_img_cv2,
+            xform,
+            (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
+            borderMode=borderMode,
+        )
+    
 
 def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
     TRANSLATION_SCALE = 1.0/200.0 # matches Disco

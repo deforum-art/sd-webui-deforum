@@ -158,6 +158,37 @@ def generate(args, root, frame = 0, return_sample=False):
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
         init_image = Image.fromarray(img)
+
+        # Inpaint changed parts of the image
+        # that's, to say, zeros we got after the transformations
+
+        mask_image = init_image.convert('L')
+        for x in range(mask_image.width):
+            for y in range(mask_image.height):
+                if mask_image.getpixel((x,y)) < 1:
+                    mask_image.putpixel((x,y), 255 )
+                else:
+                    mask_image.putpixel((x,y), 0 )
+
+        mask = prepare_mask(mask_image, 
+                                (args.W, args.H), 
+                                args.mask_contrast_adjust, 
+                                args.mask_brightness_adjust, 
+                                invert_mask=False)
+                                
+        p.inpainting_fill = args.fill # need to come up with better name. 
+        p.inpaint_full_res= args.full_res_mask 
+        p.inpaint_full_res_padding = args.full_res_mask_padding 
+
+        p.init_images = [init_image]
+        p.image_mask = mask
+
+        processed = processing.process_images(p)
+
+        init_image = processed.images[0].convert('RGB') 
+
+        mask_image = None
+
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
@@ -226,7 +257,8 @@ def generate(args, root, frame = 0, return_sample=False):
     
     if root.first_frame == None:
         root.first_frame = processed.images[0]
-        root.color_corrections = [processing.setup_color_correction(root.first_frame)]
+        if opts.img2img_color_correction or args.force_color_with_webui:
+            root.color_corrections = [processing.setup_color_correction(root.first_frame)]
     
     if return_sample:
         pil_image = processed.images[0].convert('RGB') 
