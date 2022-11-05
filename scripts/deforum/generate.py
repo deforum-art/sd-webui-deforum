@@ -166,11 +166,6 @@ def generate(args, root, frame = 0, return_sample=False):
                     mask_image.putpixel((x,y), 255 )
                 else:
                     mask_image.putpixel((x,y), 0 )
-        
-        # DEBUG
-        root.debug_number = root.debug_number + 1
-        mask_image.save(f"mask_{root.debug_number}.png")
-        init_image.save(f"init_{root.debug_number}.png")
                                 
         p.inpainting_fill = args.zeros_fill_mode # need to come up with better name. 
         p.inpaint_full_res= args.full_res_mask 
@@ -185,7 +180,6 @@ def generate(args, root, frame = 0, return_sample=False):
         processed = processing.process_images(p)
 
         init_image = processed.images[0].convert('RGB') 
-        init_image.save(f"transf-init_{root.debug_number}.png")#DEBUG
 
         p.color_corrections = None
         mask_image = None

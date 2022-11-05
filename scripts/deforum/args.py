@@ -15,7 +15,6 @@ def Root():
     outpath_samples = ""
     animation_prompts = None
     color_corrections = None
-    debug_number = 0
     return locals()
 
 def DeforumAnimArgs():
