@@ -187,7 +187,7 @@ def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
     else:
         xform = np.matmul(rot_mat, trans_mat)
 
-    borderMode = cv2.BORDER_CONSTANT | cv2.BORDER_ISOLATED #zeros
+    borderMode = cv2.BORDER_CONSTANT #zeros
 
     if anim_args.border == 'wrap':
         borderMode = cv2.BORDER_WRAP
