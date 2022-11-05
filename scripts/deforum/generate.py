@@ -168,7 +168,7 @@ def generate(args, root, frame = 0, return_sample=False):
                     mask_image.putpixel((x,y), 0 )
         
         # HACK: this is a hacky check to make the mask work with the new inpainting code
-        crop_region = masking.get_crop_region(np.array(mask_image), args.inpaint_full_res_padding)
+        crop_region = masking.get_crop_region(np.array(mask_image), args.full_res_mask_padding)
         crop_region = masking.expand_crop_region(crop_region, args.W, args.H, mask_image.width, mask_image.height)
         x1, y1, x2, y2 = crop_region
 
