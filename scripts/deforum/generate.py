@@ -129,9 +129,6 @@ def generate(args, root, frame = 0, return_sample=False):
     else:
         p.denoising_strength = 1 - args.strength
     p.cfg_scale = args.scale
-    # FIXME better color corrections as match histograms doesn't seem to be fully working
-    if root.color_corrections is not None:
-        p.color_corrections = root.color_corrections
     p.outpath_samples = root.outpath_samples
     p.outpath_grids = root.outpath_samples
     
@@ -183,11 +180,16 @@ def generate(args, root, frame = 0, return_sample=False):
         p.init_images = [init_image]
         p.image_mask = mask
 
+        #color correction for zeroes inpainting
+        p.color_corrections = [processing.setup_color_correction(init_image)]
+
         processed = processing.process_images(p)
 
         init_image = processed.images[0].convert('RGB') 
 
+        p.color_corrections = None
         mask_image = None
+        processed = None
 
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
@@ -248,6 +250,9 @@ def generate(args, root, frame = 0, return_sample=False):
         
         p.init_images = [init_image]
         p.image_mask = mask
+
+        if root.color_corrections is not None:
+            p.color_corrections = root.color_corrections
 
         processed = processing.process_images(p)
     
