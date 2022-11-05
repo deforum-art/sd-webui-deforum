@@ -165,8 +165,8 @@ class DeforumTQDM:
                 deforum_total += self._args.steps
                 had_first = True
             else:
-                #duplicate steps from inpaint zeroes mode
-                if self._args.inpaint_zeroes:
+                #duplicate steps from inpaint zeros mode
+                if self._args.inpaint_zeros:
                     deforum_total += int(ceil(self._args.steps * (1-strength)))
                 deforum_total += int(ceil(self._args.steps * (1-strength)))
 
