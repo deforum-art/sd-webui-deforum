@@ -227,7 +227,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         <li>Join the <a style="color:blue" href="https://discord.gg/deforum">official Deforum Discord</a> to share your creations and suggestions.</li>
         <li>For general usage, see the <a style="color:blue" href="https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit">User guide for Deforum v0.5</a>.</li>
         <li>For advanced animations, see the <a style="color:blue" href="https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing">Math keyframing explanation</a>.</li>
-        <li>Alternatively, use <a style="color:blue" href="https://sd-parseq.web.app/deforum">sd-parseq</a> as a UI to define your animation schedules (see the Parseq tab).</li>
+        <li>Alternatively, use <a style="color:blue" href="https://sd-parseq.web.app/deforum">sd-parseq</a> as a UI to define your animation schedules (see the Parseq section in the Keyframes tab).</li>
         </ul>""")
         i4 = gr.HTML("")
         i5 = gr.HTML("")
@@ -389,6 +389,33 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             padding_mode = gr.Dropdown(label="padding_mode", choices=['border', 'reflection', 'zeros'], value=da.padding_mode, type="value", elem_id="padding_mode", interactive=True)
             sampling_mode = gr.Dropdown(label="sampling_mode", choices=['bicubic', 'bilinear', 'nearest'], value=da.sampling_mode, type="value", elem_id="sampling_mode", interactive=True)
             save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
+
+        with gr.Accordion('Parseq', open=False):
+            i37 = gr.HTML("""
+            Use an <a style='color:blue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
+            <p style="margin-top:1em">
+                Note that parseq overrides:
+                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                    <li>Run: seed, subseed, subseed strength.</li>
+                    <li>Keyframes: generation settings (noise, strength, contrast, scale).</li>
+                    <li>Keyframes: motion parameters for 2D and 3D (angle, zoom, translation, rotation, perspective flip).</li>
+                </ul>
+            </p>
+            <p">
+                Parseq does <strong><em>not</em></strong> override:
+                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                    <li>Run: Sampler, W, H, Restore faces, tiling, highres fix, resize seed.</li>
+                    <li>Keyframes: animation settings (animation mode, max_frames, border) </li>
+                    <li>Keyframes: coherence (color coherence & diffusion cadence) </li>
+                    <li>Keyframes: depth warping</li>
+                    <li>Video output settings: all settings (including fps and max frames)</li>
+                </ul>
+            </p>
+            """)
+            with gr.Row():
+                parseq_manifest = gr.Textbox(label="parseq_manifest", lines=4, value = dp.parseq_manifest, interactive=True)
+            with gr.Row():
+                parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
     
     # Animation settings END
     
@@ -457,33 +484,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             resume_from_timestring = gr.Checkbox(label="resume_from_timestring", value=da.resume_from_timestring, interactive=True)
             resume_timestring = gr.Textbox(label="resume_timestring", lines=1, value = da.resume_timestring, interactive=True)
         # Init settings END
-
-    with gr.Tab('Parseq'):
-        i37 = gr.HTML("""
-        Use an <a style='color:blue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
-        <p style="margin-top:1em">
-            Note that parseq overrides:
-            <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                <li>Run: seed, subseed, subseed strength.</li>
-                <li>Keyframes: generation settings (noise, strength, contrast, scale).</li>
-                <li>Keyframes: motion parameters for 2D and 3D (angle, zoom, translation, rotation, perspective flip).</li>
-            </ul>
-        </p>
-        <p">
-            Parseq does <strong><em>not</em></strong> override:
-            <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                <li>Run: Sampler, W, H, Restore faces, tiling, highres fix, resize seed.</li>
-                <li>Keyframes: animation settings (animation mode, max_frames, border) </li>
-                <li>Keyframes: coherence (color coherence & diffusion cadence) </li>
-                <li>Keyframes: depth warping</li>
-                <li>Video output settings: all settings (including fps and max frames)</li>
-            </ul>
-        </p>
-        """)
-        with gr.Row():
-            parseq_manifest = gr.Textbox(label="parseq_manifest", lines=4, value = dp.parseq_manifest, interactive=True)
-        with gr.Row():
-            parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)
 
     with gr.Tab('Video output'):
         # Video output settings START
