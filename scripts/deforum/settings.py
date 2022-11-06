@@ -1,6 +1,8 @@
 from math import ceil
 import os
 import json
+from .args import mask_fill_choices, DeforumArgs
+import logging
 
 def load_args(args_dict,anim_args_dict, parseq_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
@@ -76,13 +78,17 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
             else:
                 ret.append(sampler_val)
         
-        elif key == 'fill' and fill in jdata:
-            fill_val = jdata[key]
-            if type(fill_val) == int:
-                from .args import mask_fill_choices
-                ret.append(mask_fill_choices[fill_val])
+        elif key == 'fill':
+            if key in jdata:
+                fill_val = jdata[key]
+                if type(fill_val) == int:                    
+                    ret.append(mask_fill_choices[fill_val])
+                else:
+                    ret.append(fill_val)
             else:
-                ret.append(fill_val)
+                fill_default = DeforumArgs()['fill']
+                logging.debug(f"Fill not found in load file, using default value: {fill_default}")
+                ret.append(mask_fill_choices[fill_default])
 
         elif key in jdata:
             ret.append(jdata[key])
