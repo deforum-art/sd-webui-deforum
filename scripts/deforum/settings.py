@@ -76,7 +76,7 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
             else:
                 ret.append(sampler_val)
         
-        elif key == 'fill':
+        elif key == 'fill' and fill in jdata:
             fill_val = jdata[key]
             if type(fill_val) == int:
                 from .args import mask_fill_choices
