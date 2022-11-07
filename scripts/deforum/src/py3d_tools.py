@@ -1663,6 +1663,8 @@ def format_tensor(
     device_ = make_device(device)
     if not torch.is_tensor(input):
         input = torch.tensor(input, dtype=dtype, device=device_)
+    elif not input.device.type.startswith('mps'):
+        input = torch.tensor(input, dtype=torch.float32,device=device_)
 
     if input.dim() == 0:
         input = input.view(1)
