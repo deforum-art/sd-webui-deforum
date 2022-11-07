@@ -72,7 +72,11 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
                 ret.append(sampler_val)
         
         elif key == 'fill':
-            fill_val = jdata[key]
+            from .args import mask_fill_choices
+            if key in jdata:
+                fill_val = jdata[key]
+            else:
+                fill_val = mask_fill_choices[0]
             if type(fill_val) == int:
                 from .args import mask_fill_choices
                 ret.append(mask_fill_choices[fill_val])
@@ -80,9 +84,12 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
                 ret.append(fill_val)
         
         elif key == 'zeros_fill_mode':
-            fill_val = jdata[key]
+            from .args import mask_fill_choices
+            if key in jdata:
+                fill_val = jdata[key]
+            else:
+                fill_val = mask_fill_choices[0]
             if type(fill_val) == int:
-                from .args import mask_fill_choices
                 ret.append(mask_fill_choices[fill_val])
             else:
                 ret.append(fill_val)
