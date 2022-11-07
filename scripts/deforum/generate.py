@@ -195,6 +195,7 @@ def generate(args, root, frame = 0, return_sample=False):
 
             p.color_corrections = None
             p.image_mask = None
+            p.inpainting_fill = 0
             mask_image = None
             processed = None
         else:
