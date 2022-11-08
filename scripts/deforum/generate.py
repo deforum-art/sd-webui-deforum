@@ -271,6 +271,7 @@ def generate(args, root, frame = 0, return_sample=False):
             p.color_corrections = root.color_corrections
 
         processed = processing.process_images(p)
+        p.sd_model=sd_model
     
     if root.initial_info == None:
         root.initial_seed = processed.seed
