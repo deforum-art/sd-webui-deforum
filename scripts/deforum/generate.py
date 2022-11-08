@@ -198,6 +198,7 @@ def generate(args, root, frame = 0, return_sample=False):
             p.inpainting_fill = 0
             mask_image = None
             processed = None
+            p.sd_model=sd_model
         else:
             # fix tqdm total steps if we don't have to conduct a second pass
             tqdm_instance = shared.total_tqdm
