@@ -63,7 +63,7 @@ class DeforumScript(wscripts.Script):
         from scripts.deforum.render import render_animation, render_input_video, render_animation_with_video_mask
 
         tqdm_backup = shared.total_tqdm
-        shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args)
+        shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args)
         try:
             # dispatch to appropriate renderer
             if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':

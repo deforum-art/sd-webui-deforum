@@ -130,16 +130,20 @@ def load_video_settings(video_settings_path, skip_video_for_run_all, fps, output
 import tqdm
 from modules.shared import state, progress_print_out, opts, cmd_opts
 class DeforumTQDM:
-    def __init__(self, args, anim_args):
+    def __init__(self, args, anim_args, parseq_args):
         self._tqdm = None
         self._args = args
         self._anim_args = anim_args
+        self._parseq_args = parseq_args
 
     def reset(self):
         from .animation import DeformAnimKeys
+        from .parseq_adapter import ParseqAnimKeys
         deforum_total = 0
         # FIXME: get only amount of steps
-        keys = DeformAnimKeys(self._anim_args)
+        use_parseq = self._parseq_args.parseq_manifest != None and self._parseq_args.parseq_manifest.strip()
+        keys = DeformAnimKeys(self._anim_args) if not use_parseq else ParseqAnimKeys(self._parseq_args, self._anim_args)        
+        
         start_frame = 0
         if self._anim_args.resume_from_timestring:
             for tmp in os.listdir(self._args.outdir):
