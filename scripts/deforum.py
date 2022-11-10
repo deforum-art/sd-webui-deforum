@@ -1,5 +1,5 @@
-import scripts.deforum.args as deforum_args
-import scripts.deforum.settings as deforum_settings
+import scripts.deforum_helpers.args as deforum_args
+import scripts.deforum_helpers.settings as deforum_settings
 
 import modules.scripts as wscripts
 from modules import script_callbacks
@@ -51,16 +51,16 @@ class DeforumScript(wscripts.Script):
             run_pip("install numexpr", "numexpr")
         
         sys.path.extend([
-            os.getcwd()+'/scripts/deforum/src',
-            os.getcwd()+'/extensions/deforum/scripts/deforum/src',
-            os.getcwd()+'/extensions/deforum-for-automatic1111-webui/scripts/deforum/src',
+            os.getcwd()+'/scripts/deforum_helpers/src',
+            os.getcwd()+'/extensions/deforum/scripts/deforum_helpers/src',
+            os.getcwd()+'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
         ])
         
         # clean up unused memory
         gc.collect()
         torch.cuda.empty_cache()
         
-        from scripts.deforum.render import render_animation, render_input_video, render_animation_with_video_mask
+        from scripts.deforum_helpers.render import render_animation, render_input_video, render_animation_with_video_mask
 
         tqdm_backup = shared.total_tqdm
         shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args)

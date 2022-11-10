@@ -550,7 +550,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     #root.prompts = json.loads(prompts)#TODO make proper animation_mode=None handling
     root.animation_prompts = json.loads(animation_prompts)
     
-    from scripts.deforum.settings import load_args
+    from scripts.deforum_helpers.settings import load_args
     
     if override_settings_with_file:
         load_args(args_dict, anim_args_dict, parseq_args_dict, custom_settings_file, root)
