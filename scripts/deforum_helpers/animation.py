@@ -187,12 +187,29 @@ def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
     else:
         xform = np.matmul(rot_mat, trans_mat)
 
-    return cv2.warpPerspective(
-        prev_img_cv2,
-        xform,
-        (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
-        borderMode=cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE
-    )
+    borderMode = cv2.BORDER_CONSTANT #zeros
+
+    if anim_args.border == 'wrap':
+        borderMode = cv2.BORDER_WRAP
+    elif anim_args.border == 'wrap':
+        borderMode = cv2.BORDER_REPLICATE
+
+    if borderMode == 'zeros':
+        return cv2.warpPerspective(
+            prev_img_cv2,
+            xform,
+            (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
+            borderMode=borderMode,
+            borderValue=(0, 0, 0,),
+        )
+    else:
+        return cv2.warpPerspective(
+            prev_img_cv2,
+            xform,
+            (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
+            borderMode=borderMode,
+        )
+
 
 def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
     TRANSLATION_SCALE = 1.0/200.0 # matches Disco
@@ -272,6 +289,10 @@ class DeformAnimKeys():
         self.contrast_schedule_series = get_inbetweens(parse_key_frames(anim_args.contrast_schedule), anim_args.max_frames)
         self.cfg_scale_schedule_series = get_inbetweens(parse_key_frames(anim_args.cfg_scale_schedule), anim_args.max_frames)
         self.seed_schedule_series = get_inbetweens(parse_key_frames(anim_args.seed_schedule), anim_args.max_frames)
+        self.kernel_schedule_series = get_inbetweens(parse_key_frames(anim_args.kernel_schedule), anim_args.max_frames)
+        self.sigma_schedule_series = get_inbetweens(parse_key_frames(anim_args.sigma_schedule), anim_args.max_frames)
+        self.amount_schedule_series = get_inbetweens(parse_key_frames(anim_args.amount_schedule), anim_args.max_frames)
+        self.threshold_schedule_series = get_inbetweens(parse_key_frames(anim_args.threshold_schedule), anim_args.max_frames)
         self.fov_series = get_inbetweens(parse_key_frames(anim_args.fov_schedule), anim_args.max_frames)
         self.near_series = get_inbetweens(parse_key_frames(anim_args.near_schedule), anim_args.max_frames)
         self.far_series = get_inbetweens(parse_key_frames(anim_args.far_schedule), anim_args.max_frames)
