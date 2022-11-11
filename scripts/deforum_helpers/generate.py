@@ -93,7 +93,75 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
         mask = PIL.ImageOps.invert(mask)
     
     return mask
+
+# Resets the pipeline object as recomended by kabachuha to simplify resets for additional passes
+def reset_pipeline(args, root):
+    p = StableDiffusionProcessingImg2Img(
+        sd_model=sd_model,
+        outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
+        outpath_grids = opts.outdir_grids or opts.outdir_img2img_grids,
+        #prompt=prompt, 
+        #negative_prompt=negative_prompt,
+        #styles=[prompt_style, prompt_style2], 
+        seed=args.seed,
+        subseed=args.subseed,
+        subseed_strength=args.subseed_strength,
+        seed_resize_from_h=args.seed_resize_from_h,
+        seed_resize_from_w=args.seed_resize_from_w,
+        seed_enable_extras=args.seed_enable_extras,
+        sampler_index=int(args.sampler),
+        batch_size=args.n_samples,
+        n_iter=1,
+        cfg_scale=args.scale,
+        width=args.W,
+        height=args.H,
+        restore_faces=args.restore_faces,
+        tiling=args.tiling,
+        #init_images=[image], # Assigned during generation 
+        mask=None, # Assigned during generation 
+        mask_blur=args.mask_overlay_blur,
+        #resize_mode=resize_mode, #TODO There are several settings to this and it may 
+        #inpainting_fill=args.fill, # Assign during generation
+        #inpaint_full_res=args.full_res_mask, # Assign during generation
+        #inpaint_full_res_padding=inpaint_full_res_padding, # Assign during generation
+        #inpainting_mask_invert=inpainting_mask_invert, # Assign during generation
+        do_not_save_samples=not args.save_sample_per_step,
+        do_not_save_grid=not args.make_grid,
+    )
+    # Below settings which have conditions or symbols that dont work in the p object constructor
+    p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
+
+    p.steps = args.steps
+    if opts.img2img_fix_steps:
+        p.denoising_strength = 1 / (1 - args.strength + 1.0/args.steps) #see https://github.com/deforum-art/deforum-for-automatic1111-webui/issues/3
+    else:
+        p.denoising_strength = 1 - args.strength
+
+    # Prompt assignments
+    import re
+    assert args.prompt is not None
     
+    # Evaluate prompt math!
+    math_parser = re.compile("""
+            (?P<weight>(
+            `[\S\s]*?`# a math function wrapped in `-characters
+            ))
+            """, re.VERBOSE)
+    
+    parsed_prompt = re.sub(math_parser, lambda m: str(parse_weight(m, frame)), args.prompt)
+
+    prompt_split = parsed_prompt.split("--neg")
+    if len(prompt_split) > 1:
+        p.prompt, p.negative_prompt = parsed_prompt.split("--neg") #TODO: add --neg to vanilla Deforum for compat
+        print(f'Positive prompt:{p.prompt}')
+        print(f'Negative prompt:{p.negative_prompt}')
+    else:
+        p.prompt = prompt_split[0]
+        print(f'Positive prompt:{p.prompt}')
+        p.negative_prompt = ""
+
+    return p
+
 def generate(args, root, frame = 0, return_sample=False):
     import re
     assert args.prompt is not None
