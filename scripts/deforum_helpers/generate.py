@@ -222,10 +222,72 @@ def generate(args, root, frame = 0, return_sample=False):
     
     processed = None
     
-    if args.init_sample is not None:
+    args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
         init_image = Image.fromarray(img)
+
+        # Inpaint changed parts of the image
+        # that's, to say, zeros we got after the transformations
+        
+        # Its important to note that the loop below is creating a mask for inpainting 0's
+        # This mask however can mask areas that were intended to be black
+        # Suggest a fix to send the inpainting mask as an argument,
+        # before the add_noise and contrast_adjust is applied
+        mask_image = init_image.convert('L')
+        for x in range(mask_image.width):
+            for y in range(mask_image.height):
+                # Had to change the comparison, the init sample is noised 0s are not reliable.
+                if mask_image.getpixel((x,y)) < 3: 
+                    mask_image.putpixel((x,y), 255 )
+                else:
+                    mask_image.putpixel((x,y), 0 )
+        
+        # HACK: this is a hacky check to make the mask work with the new inpainting code
+        crop_region = masking.get_crop_region(np.array(mask_image), args.full_res_mask_padding)
+        crop_region = masking.expand_crop_region(crop_region, args.W, args.H, mask_image.width, mask_image.height)
+        x1, y1, x2, y2 = crop_region
+
+        too_small = (x2 - x1) < 1 or (y2 - y1) < 1
+        
+        if not too_small:            
+            p.inpainting_fill = args.zeros_fill_mode 
+            p.inpaint_full_res= args.full_res_mask 
+            p.inpaint_full_res_padding = args.full_res_mask_padding 
+            p.init_images = [init_image]
+            p.image_mask = mask_image
+
+            #color correction for zeroes inpainting
+            p.color_corrections = [processing.setup_color_correction(init_image)]
+
+            print("Inpainting zeros")
+            processed = processing.process_images(p) 
+            init_image = processed.images[0].convert('RGB') 
+
+            p = reset_pipeline(args, root) # This should reset as to not lose prompts and base args in next pass
+            p.init_images = [init_image] # preserve the init image that we just generated, as we reset the p object
+
+            processed = None # This needs to be none so that the normal pass will continue
+            mask_image = None # Could be using a standard mask in addition to this pass, so this needs to be reset also
+
+            # Below are the settings that started stacking up
+            #p.inpainting_mask_invert = False
+            #p.sd_model=sd_model
+            #p.color_corrections = None
+            #p.image_mask = None
+            #p.inpainting_fill = 1
+            #p.sd_model=sd_model
+            
+            # This setting allowed the diffusion to continue however we decided that resetting the p object 
+            # was safer
+            #p.mask = None
+
+        else:
+            # fix tqdm total steps if we don't have to conduct a second pass
+            tqdm_instance = shared.total_tqdm
+            current_total = tqdm_instance.getTotal()
+            if current_total != -1:
+                tqdm_instance.updateTotal(current_total - int(ceil(args.steps * (1-args.strength))))
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
