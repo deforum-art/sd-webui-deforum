@@ -109,7 +109,7 @@ def DeforumArgs():
     inpaint_zeros = True #@param {type:"boolean"}
     zeros_fill_mode = 2 #@param {type:"number"}
     force_color_with_webui = False #@param {type:"boolean"}
-    reroll_blank_frames = 'reroll' #@param {type:"boolean"}
+    reroll_blank_frames = 'reroll' #@param {type:"string"} 
 
     #@markdonw **Webui stuff**
     restore_faces = False
