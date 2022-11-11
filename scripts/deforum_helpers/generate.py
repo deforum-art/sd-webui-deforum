@@ -1,8 +1,9 @@
 import torch
-import PIL #HOTFIXISSUE#33 needed for instruction to generate negative mask. 
+import PIL 
 from PIL import Image, ImageOps
 import requests
 import numpy as np
+from math import ceil
 import torchvision.transforms.functional as TF
 from pytorch_lightning import seed_everything
 import os
@@ -22,9 +23,10 @@ from .callback import SamplerCallback
 #Webui
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
-from modules import processing
+from modules import processing, masking
+import modules.shared as shared
 from modules.shared import opts, sd_model
-from modules.processing import process_images, StableDiffusionProcessingTxt2Img
+from modules.processing import process_images, StableDiffusionProcessingTxt2Img, StableDiffusionProcessingImg2Img
 
 #MASKARGSEXPANSION 
 #Add option to remove noise in relation to masking so that areas which are masked receive less noise
@@ -95,7 +97,7 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
     return mask
 
 # Resets the pipeline object as recomended by kabachuha to simplify resets for additional passes
-def reset_pipeline(args, root):
+def reset_pipeline(args, root, frame):
     p = StableDiffusionProcessingImg2Img(
         sd_model=sd_model,
         outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
@@ -222,7 +224,7 @@ def generate(args, root, frame = 0, return_sample=False):
     
     processed = None
     
-    args.init_sample is not None:
+    if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
         init_image = Image.fromarray(img)
@@ -238,7 +240,7 @@ def generate(args, root, frame = 0, return_sample=False):
         for x in range(mask_image.width):
             for y in range(mask_image.height):
                 # Had to change the comparison, the init sample is noised 0s are not reliable.
-                if mask_image.getpixel((x,y)) < 3: 
+                if mask_image.getpixel((x,y)) < 4: 
                     mask_image.putpixel((x,y), 255 )
                 else:
                     mask_image.putpixel((x,y), 0 )
@@ -264,7 +266,7 @@ def generate(args, root, frame = 0, return_sample=False):
             processed = processing.process_images(p) 
             init_image = processed.images[0].convert('RGB') 
 
-            p = reset_pipeline(args, root) # This should reset as to not lose prompts and base args in next pass
+            p = reset_pipeline(args, root, frame) # This should reset as to not lose prompts and base args in next pass
             p.init_images = [init_image] # preserve the init image that we just generated, as we reset the p object
 
             processed = None # This needs to be none so that the normal pass will continue
