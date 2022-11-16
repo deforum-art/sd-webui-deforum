@@ -154,6 +154,8 @@ def generate(args, root, frame = 0, return_sample=False):
         print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
         print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
         args.strength = 0
+    
+    noise_mask_image = None
     mask_image = None
     init_image = None
     
@@ -222,7 +224,11 @@ def generate(args, root, frame = 0, return_sample=False):
         
         p.init_images = [init_image]
         p.image_mask = mask
-
+        
+        # supply mask for frame
+        if args.mask_frame_noise :
+            noise_mask_image = mask
+            
         processed = processing.process_images(p)
     
     if root.initial_info == None:
@@ -242,5 +248,9 @@ def generate(args, root, frame = 0, return_sample=False):
         results = [image, processed.images[0]]
     else:
         results = [processed.images[0]]
+    
+    # added option to mask frame noising
+    if noise_mask_image is not None :
+        results.append(noise_mask_image)
     
     return results
