@@ -10,7 +10,7 @@ from PIL import Image
 import pathlib
 import torchvision.transforms as T
 
-from .generate import generate, add_noise
+from .generate import generate, add_noise, prepare_mask
 from .prompt import sanitize
 from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp_2d, anim_frame_warp_3d, vid2frames
 from .depth import DepthModel
