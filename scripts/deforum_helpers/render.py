@@ -81,10 +81,14 @@ def render_animation(args, anim_args, animation_prompts, root):
     turbo_steps = 1 if using_vid_init else int(anim_args.diffusion_cadence)
     turbo_prev_image, turbo_prev_frame_idx = None, 0
     turbo_next_image, turbo_next_frame_idx = None, 0
-
+    
+    # frame noising mask 
+    frame_noise_mask = None
+    
     # resume animation
     prev_sample = None
     color_match_sample = None
+    
     if anim_args.resume_from_timestring:
         last_frame = start_frame-1
         if turbo_steps > 1:
@@ -177,8 +181,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             # apply scaling
             contrast_sample = prev_img * contrast
             # apply frame noising
-            #MASKARGSEXPANSION : Left comment as to where to enter for noise addition masking 
-            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise)
+            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise, frame_noise_mask)
 
             # use transformed previous frame as init for current
             args.use_init = True
@@ -214,7 +217,7 @@ def render_animation(args, anim_args, animation_prompts, root):
                 args.mask_file = mask_frame
 
         # sample the diffusion model
-        sample, image = generate(args, root, frame_idx, return_sample=True)
+        sample, image, frame_noise_mask = generate(args, root, frame_idx, return_sample=True)
         if not using_vid_init:
             prev_sample = sample
 
