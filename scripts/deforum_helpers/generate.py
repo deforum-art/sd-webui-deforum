@@ -26,10 +26,15 @@ from modules import processing
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
-#MASKARGSEXPANSION 
-#Add option to remove noise in relation to masking so that areas which are masked receive less noise
-def add_noise(sample: torch.Tensor, noise_amt: float) -> torch.Tensor:
-    return sample + torch.randn(sample.shape, device=sample.device) * noise_amt
+def add_noise(sample: torch.Tensor, noise_amt: float, noise_mask) -> torch.Tensor:
+    # apply masked noise to frame
+    if noise_mask is not None:
+        noise_mask = np.array(noise_mask.convert("L"))
+        noise_mask = noise_mask.astype(np.float32) / 255.0
+        noise_mask = torch.from_numpy(noise_mask)
+        return sample + (torch.randn(sample.shape, device=sample.device) * noise_mask) * noise_amt    
+    
+    return sample + (torch.randn(sample.shape, device=sample.device)) * noise_amt
 
 def load_img(path, shape, use_alpha_as_mask=False):
     # use_alpha_as_mask: Read the alpha channel of the image as the mask image
