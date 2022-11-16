@@ -217,7 +217,11 @@ def render_animation(args, anim_args, animation_prompts, root):
                 args.mask_file = mask_frame
 
         # sample the diffusion model
-        sample, image, frame_noise_mask = generate(args, root, frame_idx, return_sample=True)
+        if args.mask_frame_noise and frame_idx > 0: #noise mask is not supplied by generate(...) on frame 0
+            sample, image, frame_noise_mask = generate(args, root, frame_idx, return_sample=True)
+        else :
+            sample, image = generate(args, root, frame_idx, return_sample=True)
+            
         if not using_vid_init:
             prev_sample = sample
 
