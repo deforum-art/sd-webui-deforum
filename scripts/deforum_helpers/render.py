@@ -83,24 +83,26 @@ def render_animation(args, anim_args, animation_prompts, root):
     turbo_next_image, turbo_next_frame_idx = None, 0
     
     # frame noising mask 
+    #TODO: move this after resume animation and load video mask at current resume frame
     frame_noise_mask = None
-    #HACK adding frame 0 noise masking by loading the mask here only when frame is 0
-    #video mask
-    if anim_args.use_mask_video:
-        mask_frame = os.path.join(args.outdir, 'maskframes', f"{1:05}.jpg")
-        args.mask_file = mask_frame
-        frame_noise_mask = prepare_mask(args.mask_file, 
-                            (args.W, args.H), 
-                            args.mask_contrast_adjust, 
-                            args.mask_brightness_adjust, 
-                            args.invert_mask)
-    #static mask, since use_mask is set to true using video as mask, check that we are not using video mask and use static mask 
-    if not anim_args.use_mask_video and args.use_mask:
-        frame_noise_mask = prepare_mask(args.mask_file, 
-                            (args.W, args.H), 
-                            args.mask_contrast_adjust, 
-                            args.mask_brightness_adjust, 
-                            args.invert_mask)
+    if args.mask_frame_noise :
+        #HACK adding frame 0 noise masking by loading the mask here only when frame is 0
+        #video mask
+        if anim_args.use_mask_video:
+            mask_frame = os.path.join(args.outdir, 'maskframes', f"{1:05}.jpg")
+            args.mask_file = mask_frame
+            frame_noise_mask = prepare_mask(args.mask_file, 
+                                (args.W, args.H), 
+                                args.mask_contrast_adjust, 
+                                args.mask_brightness_adjust, 
+                                args.invert_mask)
+        #static mask, since use_mask is set to true using video as mask, check that we are not using video mask and use static mask 
+        if not anim_args.use_mask_video and args.use_mask:
+            frame_noise_mask = prepare_mask(args.mask_file, 
+                                (args.W, args.H), 
+                                args.mask_contrast_adjust, 
+                                args.mask_brightness_adjust, 
+                                args.invert_mask)
         
     # resume animation
     prev_sample = None
