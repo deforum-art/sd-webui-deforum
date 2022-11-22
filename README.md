@@ -32,7 +32,7 @@ git clone https://github.com/deforum-art/deforum-for-automatic1111-webui/ extens
 
 Or download this repository, locate the `extensions` folder within your WebUI installation, create folder named `deforum` in it and then put the contents of the archive inside. Then restart WebUI. **Warning: the extension folder has to be named 'deforum' or else it will fail to locate the 3D modules as the PATH addition is hardcoded**
 
-3. If you're on Windows and want to launch Deforum in 3D mode, you'll have to download the depths model manually. Download these files https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt and https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt and put them into the 'models/Deforum' folder of your webui installation. (if it doesn't exist, create it)
+3. ~~If you're on Windows and want to launch Deforum in 3D mode, you'll have to download the depths model manually. Download these files https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt and https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt and put them into the 'models/Deforum' folder of your webui installation. (if it doesn't exist, create it)~~ Since 2022-11-20 the depth models are downloaded automatically on any platform supported by the vanilla webui.
 
 4. Open the webui, find the Deforum tab at the top of the page.
 
@@ -63,7 +63,7 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 * Browsers often cannot load too big gifs, so try to use `ffmpeg` when possible. Make sure it's installed and linked in your PATH!
 
-* 3D mode doesn't work on resolutions when one of the dimensions is greater than 768 or less than 448. It's the limitation of the Adabins model
+* ~~3D mode doesn't work on resolutions when one of the dimensions is greater than 768 or less than 448.~~ has been fixed in [#84](https://github.com/deforum-art/deforum-for-automatic1111-webui/pull/84), so update!
 
 * If you encounter issues with the downloaded depth models failing to load, try launching the WebUI with the `--disable-safe-unpickle` option! [How to add it to the .bat file on Windows.](https://imgur.com/a/TJHglot)
 
