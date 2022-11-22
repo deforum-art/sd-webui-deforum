@@ -333,7 +333,7 @@ def render_interpolation(args, anim_args, animation_prompts, root):
 
 def interpolate_prompts(animation_prompts, max_frames):
     # Get prompts sorted by keyframe 
-    sorted_prompts = sorted(animation_prompts.items())
+    sorted_prompts = sorted(animation_prompts.items(), key=lambda item: int(item[0]))
 
     # Setup container for interpolated prompts
     prompt_series = pd.Series([np.nan for a in range(max_frames)])
