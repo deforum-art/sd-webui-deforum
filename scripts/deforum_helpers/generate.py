@@ -163,7 +163,7 @@ def generate(args, root, frame = 0, return_sample=False):
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
     else:
-        # sometimes my genius... is almost frightening
+        print(f"Not using an init image (doing pure txt2img) - seed:{p.seed}; subseed:{p.subseed}; subseed_strength:{p.subseed_strength}; cfg_scale:{p.cfg_scale}; steps:{p.steps}")
         p_txt = StableDiffusionProcessingTxt2Img(
                 sd_model=sd_model,
                 outpath_samples=p.outpath_samples,
@@ -187,7 +187,7 @@ def generate(args, root, frame = 0, return_sample=False):
                 restore_faces=p.restore_faces,
                 tiling=p.tiling,
                 enable_hr=None,
-                denoising_strength=None,#for initial image
+                denoising_strength=None,
             )
         processed = processing.process_images(p_txt)
     
