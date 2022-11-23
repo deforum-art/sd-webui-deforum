@@ -119,7 +119,7 @@ def generate(args, root, frame = 0, return_sample=False):
     p.do_not_save_samples = not args.save_sample_per_step
     p.do_not_save_grid = not args.make_grid
     p.sd_model=sd_model
-    p.sampler_index = int(args.sampler)
+    p.sampler_name = args.sampler
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = 1
@@ -177,7 +177,7 @@ def generate(args, root, frame = 0, return_sample=False):
                 seed_resize_from_h=p.seed_resize_from_h,
                 seed_resize_from_w=p.seed_resize_from_w,
                 seed_enable_extras=None,
-                sampler_index=p.sampler_index,
+                sampler_name=p.sampler_name,
                 batch_size=p.batch_size,
                 n_iter=p.n_iter,
                 steps=p.steps,
