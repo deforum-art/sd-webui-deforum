@@ -276,7 +276,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Row():
             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
             from modules.sd_samplers import samplers_for_img2img
-            sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="index", elem_id="sampler", interactive=True)
+            sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
         with gr.Row():
             seed_enable_extras = gr.Checkbox(label="Enable extras", value=False)
             subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
@@ -586,12 +586,12 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
         args.W, args.H = map(lambda x: x - x % 64, (args.W, args.H))
         args.steps = p.steps
         args.seed = p.seed
-        args.sampler = p.sampler_index
+        args.sampler = p.sampler_name
     else:
         p.width, p.height = map(lambda x: x - x % 64, (args.W, args.H))
         p.steps = args.steps
         p.seed = args.seed
-        p.sampler_index = args.sampler
+        p.sampler_name = args.sampler
         p.batch_size = args.n_batch
         p.restore_faces = args.restore_faces
         p.tiling = args.tiling
