@@ -318,7 +318,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         #TODO make a some sort of the original dictionary parsing
         i9 = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Animation settings</p>")
         with gr.Row():
-            animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
+            animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input', 'Interpolation'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
             max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0)
             border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
         

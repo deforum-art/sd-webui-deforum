@@ -60,7 +60,7 @@ class DeforumScript(wscripts.Script):
         gc.collect()
         torch.cuda.empty_cache()
         
-        from scripts.deforum_helpers.render import render_animation, render_input_video, render_animation_with_video_mask
+        from scripts.deforum_helpers.render import render_animation, render_input_video, render_animation_with_video_mask, render_interpolation
 
         tqdm_backup = shared.total_tqdm
         shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args)
@@ -73,6 +73,8 @@ class DeforumScript(wscripts.Script):
                     render_animation(args, anim_args, parseq_args, root.animation_prompts, root)
             elif anim_args.animation_mode == 'Video Input':
                 render_input_video(args, anim_args, parseq_args, root.animation_prompts, root)#TODO: prettify code
+            elif anim_args.animation_mode == 'Interpolation':
+                render_interpolation(args, anim_args, parseq_args, root.animation_prompts, root)
             else:
                 print('Other modes are not available yet!')
         finally:
