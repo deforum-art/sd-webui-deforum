@@ -129,6 +129,7 @@ def generate(args, root, frame = 0, return_sample=False):
     p.steps = args.steps
     p.denoising_strength = 1 - args.strength
     p.cfg_scale = args.scale
+    p.seed_enable_extras = args.seed_enable_extras
 
     # FIXME better color corrections as match histograms doesn't seem to be fully working
     if root.color_corrections is not None:
@@ -177,7 +178,7 @@ def generate(args, root, frame = 0, return_sample=False):
                 subseed_strength=p.subseed_strength,
                 seed_resize_from_h=p.seed_resize_from_h,
                 seed_resize_from_w=p.seed_resize_from_w,
-                seed_enable_extras=None,
+                seed_enable_extras=p.seed_enable_extras,
                 sampler_name=p.sampler_name,
                 batch_size=p.batch_size,
                 n_iter=p.n_iter,

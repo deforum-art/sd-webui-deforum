@@ -202,6 +202,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             args.seed = int(keys.seed_schedule_series[frame_idx])
 
         if use_parseq:
+            args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
 
@@ -334,6 +335,7 @@ def render_interpolation(args, anim_args, parseq_args, animation_prompts, root):
         args.prompt = prompt_series[frame_idx]
         args.scale = keys.cfg_scale_schedule_series[frame_idx]
         if use_parseq:
+            args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
 
