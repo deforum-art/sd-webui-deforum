@@ -333,6 +333,10 @@ def render_interpolation(args, anim_args, parseq_args, animation_prompts, root):
         args.n_samples = 1
         args.prompt = prompt_series[frame_idx]
         args.scale = keys.cfg_scale_schedule_series[frame_idx]
+        if use_parseq:
+            args.subseed = int(keys.subseed_series[frame_idx])
+            args.subseed_strength = keys.subseed_strength_series[frame_idx]
+
         if args.seed_behavior == 'schedule' or use_parseq:
             args.seed = int(keys.seed_schedule_series[frame_idx])
         
