@@ -26,7 +26,6 @@ from modules import processing
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
-#MASKARGSEXPANSION 
 #Add option to remove noise in relation to masking so that areas which are masked receive less noise
 def add_noise(sample: torch.Tensor, noise_amt: float) -> torch.Tensor:
     return sample + torch.randn(sample.shape, device=sample.device) * noise_amt
@@ -226,7 +225,8 @@ def generate(args, root, frame = 0, return_sample=False):
     
     if root.first_frame == None:
         root.first_frame = processed.images[0]
-        root.color_corrections = [processing.setup_color_correction(root.first_frame)]
+        if opts.img2img_color_correction: 
+            root.color_corrections = [processing.setup_color_correction(root.first_frame)]
     
     if return_sample:
         pil_image = processed.images[0].convert('RGB') 
