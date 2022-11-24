@@ -30,10 +30,14 @@ class ParseqAnimKeys():
         else:
             logging.info(f"Parseq data defines {count_defined_frames} frames.")
 
-        # Animation args relating to motion may optionally use the delta values.
+        # Parseq treats input values as absolute values. So if you want to 
+        # progressively rotate 180 degrees over 4 frames, you specify: 45, 90, 135, 180.
+        # However, many animation parameters are relative to the previous frame if there is enough
+        # loopback strength. So if you want to rotate 180 degrees over 5 frames, the animation engine expects:
+        # 45, 45, 45, 45. Therefore, for such parameter, we use the fact that Parseq supplies delta values.
         optional_delta = '_delta' if parseq_args.parseq_use_deltas else ''
         self.angle_series = self.parseq_to_anim_series('angle' + optional_delta)
-        self.zoom_series = self.parseq_to_anim_series('zoom' + optional_delta)
+        self.zoom_series = self.parseq_to_anim_series('zoom' + optional_delta)        
         self.translation_x_series = self.parseq_to_anim_series('translation_x' + optional_delta)
         self.translation_y_series = self.parseq_to_anim_series('translation_y' + optional_delta)
         self.translation_z_series = self.parseq_to_anim_series('translation_z' + optional_delta)
@@ -45,7 +49,7 @@ class ParseqAnimKeys():
         self.perspective_flip_gamma_series = self.parseq_to_anim_series('perspective_flip_gamma' + optional_delta)
  
         # Non-motion animation args
-        self.perspective_flip_fv_series = self.parseq_to_anim_series('perspective_flip_fv' + optional_delta)
+        self.perspective_flip_fv_series = self.parseq_to_anim_series('perspective_flip_fv')
         self.noise_schedule_series = self.parseq_to_anim_series('noise')
         self.strength_schedule_series = self.parseq_to_anim_series('strength')
         self.contrast_schedule_series = self.parseq_to_anim_series('contrast')
