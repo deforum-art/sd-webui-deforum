@@ -57,9 +57,7 @@ class DepthModel():
         if half_precision and self.device == torch.device("cuda"):
             self.midas_model = self.midas_model.to(memory_format=torch.channels_last)
             self.midas_model = self.midas_model.half()
-            self.midas_model.to(self.device)
-        else:
-            self.midas_model.to(self.device)
+        self.midas_model.to(self.device)
 
     def predict(self, prev_img_cv2, anim_args, half_precision) -> torch.Tensor:
         w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
