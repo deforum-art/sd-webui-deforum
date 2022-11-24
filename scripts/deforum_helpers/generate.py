@@ -26,7 +26,6 @@ from modules import processing
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
-#Add option to remove noise in relation to masking so that areas which are masked receive less noise
 def add_noise(sample: torch.Tensor, noise_amt: float) -> torch.Tensor:
     return sample + torch.randn(sample.shape, device=sample.device) * noise_amt
 
