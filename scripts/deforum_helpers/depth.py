@@ -94,6 +94,7 @@ class DepthModel():
                         torch.Size([h, w]),
                         interpolation=TF.InterpolationMode.BICUBIC
                     )
+                    adabins_depth = adabins_depth.cpu().numpy()
                 adabins_depth = adabins_depth.squeeze()
             except:
                 print(f"  exception encountered, falling back to pure MiDaS")
