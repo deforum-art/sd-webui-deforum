@@ -1,20 +1,17 @@
 import os
 import json
 import random
-from torchvision.utils import make_grid
-from einops import rearrange
 import pandas as pd
 import cv2
 import numpy as np
-from PIL import Image
 import pathlib
-import torchvision.transforms as T
 
 from .generate import generate, add_noise
-from .prompt import sanitize
-from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp_2d, anim_frame_warp_3d, vid2frames
+from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp, vid2frames
 from .depth import DepthModel
 from .colors import maintain_colors
+from .load_images import prepare_mask
+from .prompt import interpolate_prompts
 
 # Webui
 from modules.shared import opts, cmd_opts, state
@@ -65,12 +62,27 @@ def render_animation(args, anim_args, animation_prompts, root):
 
     # check for video inits
     using_vid_init = anim_args.animation_mode == 'Video Input'
+    
+    # load mask for first frame noise masking
+    if anim_args.use_mask_video:
+        mask_frame = os.path.join(args.outdir, 'maskframes', f"{1:05}.jpg")
+        args.mask_file = mask_frame
+    if args.use_mask:
+        args.mask_image = prepare_mask(args.mask_file, 
+                            (args.W, args.H), 
+                            args.mask_contrast_adjust, 
+                            args.mask_brightness_adjust)
+        extrema = args.mask_image.getextrema()
+        #prevent loaded mask from throwing errors in Image operations if completely black and crop and resize in pipeline
+        if extrema == (0,0): 
+            print("mask is blank. ignoriing mask")  
+            args.mask_image = None
 
     # load depth model for 3D
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
     if predict_depths:
         depth_model = DepthModel(root.device)
-        depth_model.load_midas(root.models_path)
+        depth_model.load_midas(root.models_path, root.half_precision)
         if anim_args.midas_weight < 1.0:
             depth_model.load_adabins(root.models_path)
     else:
@@ -132,18 +144,13 @@ def render_animation(args, anim_args, animation_prompts, root):
 
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
-                    depth = depth_model.predict(turbo_next_image, anim_args)
+                    depth = depth_model.predict(turbo_next_image, anim_args, root.half_precision)
 
-                if anim_args.animation_mode == '2D':
-                    if advance_prev:
-                        turbo_prev_image = anim_frame_warp_2d(turbo_prev_image, args, anim_args, keys, tween_frame_idx)
-                    if advance_next:
-                        turbo_next_image = anim_frame_warp_2d(turbo_next_image, args, anim_args, keys, tween_frame_idx)
-                else: # '3D'
-                    if advance_prev:
-                        turbo_prev_image = anim_frame_warp_3d(root.device, turbo_prev_image, depth, anim_args, keys, tween_frame_idx)
-                    if advance_next:
-                        turbo_next_image = anim_frame_warp_3d(root.device, turbo_next_image, depth, anim_args, keys, tween_frame_idx)
+                if advance_prev:
+                    turbo_prev_image, _ = anim_frame_warp(root, turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device)
+                if advance_next:
+                    turbo_next_image, _ = anim_frame_warp(root, turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device)
+                
                 turbo_prev_frame_idx = turbo_next_frame_idx = tween_frame_idx
 
                 if turbo_prev_image is not None and tween < 1.0:
@@ -160,12 +167,7 @@ def render_animation(args, anim_args, animation_prompts, root):
 
         # apply transforms to previous frame
         if prev_sample is not None:
-            if anim_args.animation_mode == '2D':
-                prev_img = anim_frame_warp_2d(sample_to_cv2(prev_sample), args, anim_args, keys, frame_idx)
-            else: # '3D'
-                prev_img_cv2 = sample_to_cv2(prev_sample)
-                depth = depth_model.predict(prev_img_cv2, anim_args) if depth_model else None
-                prev_img = anim_frame_warp_3d(root.device, prev_img_cv2, depth, anim_args, keys, frame_idx)
+            prev_img, depth = anim_frame_warp(root, prev_sample, args, anim_args, keys, frame_idx, depth_model, depth=None, device=root.device)
 
             # apply color matching
             if anim_args.color_coherence != 'None':
@@ -177,8 +179,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             # apply scaling
             contrast_sample = prev_img * contrast
             # apply frame noising
-            #MASKARGSEXPANSION : Left comment as to where to enter for noise addition masking 
-            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise)
+            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise, args.mask_image)
 
             # use transformed previous frame as init for current
             args.use_init = True
@@ -187,11 +188,11 @@ def render_animation(args, anim_args, animation_prompts, root):
             else:
                 args.init_sample = noised_sample.to(root.device)
             args.strength = max(0.0, min(1.0, strength))
-        args.scale = scale
+        args.scale = scale #TODO look into this a little deeper.
 
         # grab prompt for current frame
         args.prompt = prompt_series[frame_idx]
-        
+        #args.clip_prompt = args.prompt #TODO look into this a little deeper.
         if args.seed_behavior == 'schedule':
             args.seed = int(keys.seed_schedule_series[frame_idx])
         
@@ -227,7 +228,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             image.save(os.path.join(args.outdir, filename))
             if anim_args.save_depth_maps:
                 if depth is None:
-                    depth = depth_model.predict(sample_to_cv2(sample), anim_args)
+                    depth = depth_model.predict(sample_to_cv2(sample), anim_args, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
             frame_idx += 1
 
@@ -329,72 +330,3 @@ def render_interpolation(args, anim_args, animation_prompts, root):
             args.seed = next_seed(args)
 
         frame_idx += 1
-
-
-def interpolate_prompts(animation_prompts, max_frames):
-    # Get prompts sorted by keyframe 
-    sorted_prompts = sorted(animation_prompts.items(), key=lambda item: int(item[0]))
-
-    # Setup container for interpolated prompts
-    prompt_series = pd.Series([np.nan for a in range(max_frames)])
-
-    # For every keyframe prompt except the last
-    for i in range(0,len(sorted_prompts)-1):
-        
-        # Get current and next keyframe
-        current_frame = int(sorted_prompts[i][0])
-        next_frame = int(sorted_prompts[i+1][0])
-        
-        # Ensure there's no weird ordering issues or duplication in the animation prompts
-        # (unlikely because we sort above, and the json parser will strip dupes)
-        if current_frame>=next_frame:
-            print(f"WARNING: Sequential prompt keyframes {i}:{current_frame} and {i+1}:{next_frame} are not monotonously increasing; skipping interpolation.")
-            continue
-            
-        # Get current and next keyframes' positive and negative prompts (if any)
-        current_prompt = sorted_prompts[i][1]
-        next_prompt = sorted_prompts[i+1][1]
-        current_positive, current_negative, *_ = current_prompt.split("--neg") + [None]
-        next_positive, next_negative, *_ = next_prompt.split("--neg") + [None]
-        
-        # Calculate how much to shift the weight from current to next prompt at each frame
-        weight_step = 1/(next_frame-current_frame)
-        
-        # Apply weighted prompt interpolation for each frame between current and next keyframe
-        # using the syntax:  prompt1 :weight1 AND prompt1 :weight2 --neg nprompt1 :weight1 AND nprompt1 :weight2
-        # (See: https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#composable-diffusion )
-        for f in range(current_frame,next_frame):
-            next_weight = weight_step * (f-current_frame)
-            current_weight = 1 - next_weight
-            
-            # We will build the prompt incrementally depending on which prompts are present
-            prompt_series[f] = ''
-
-            # Cater for the case where neither, either or both current & next have positive prompts:
-            if current_positive:
-                prompt_series[f] += f"{current_positive} :{current_weight}"
-            if current_positive and next_positive:
-                prompt_series[f] += f" AND "
-            if next_positive:
-                prompt_series[f] += f"{next_positive} :{next_weight}"
-            
-            # Cater for the case where neither, either or both current & next have negative prompts:
-            if current_negative or next_negative:
-                prompt_series[f] += " --neg "
-                if current_negative:
-                    prompt_series[f] += f" {current_negative} :{current_weight}"
-                if current_negative and next_negative:
-                    prompt_series[f] += f" AND "
-                if next_negative:
-                    prompt_series[f] += f" {next_negative} :{next_weight}"
-    
-    # Set explicitly declared keyframe prompts (overwriting interpolated values at the keyframe idx). This ensures:
-    # - That final prompt is set, and
-    # - Gives us a chance to emit warnings if any keyframe prompts are already using composable diffusion
-    for i, prompt in animation_prompts.items():
-        prompt_series[int(i)] = prompt
-        if ' AND ' in prompt:
-            print(f"WARNING: keyframe {i}'s prompt is using composable diffusion (aka the 'AND' keyword). This will cause unexpected behaviour with interpolation.")
-    
-    # Return the filled series, in case max_frames is greater than the last keyframe or any ranges were skipped.
-    return prompt_series.ffill().bfill()
