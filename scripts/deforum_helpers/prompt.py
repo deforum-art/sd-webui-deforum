@@ -1,5 +1,19 @@
 import re
 
+def parse_weight(match, frame = 0)->float:
+    import numexpr
+    w_raw = match.group("weight")
+    if w_raw == None:
+        return 1
+    if check_is_number(w_raw):
+        return float(w_raw)
+    else:
+        t = frame
+        if len(w_raw) < 3:
+            print('the value inside `-characters cannot represent a math function')
+            return 1
+        return float(numexpr.evaluate(w_raw[1:-1]))
+
 def split_weighted_subprompts(text, frame = 0):
     """
     splits the prompt based on deforum webui implementation, moved from generate.py 
@@ -10,7 +24,7 @@ def split_weighted_subprompts(text, frame = 0):
             ))
             """, re.VERBOSE)
     
-    parsed_prompt = re.sub(math_parser, lambda m: str(parse_weight(m, frame)), text)
+    parsed_prompt = re.sub(math_parser, lambda m: str(text(m, frame)), text)
 
     negative_prompts = []
     positive_prompts = []
