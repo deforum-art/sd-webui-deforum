@@ -6,6 +6,7 @@ import py3d_tools as p3d
 import torch
 from einops import rearrange
 import re
+import requests
 import pathlib
 import os
 import pandas as pd
@@ -41,11 +42,15 @@ def get_frame_name(path):
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True): 
     #get the name of the video without the path and ext
     name = get_frame_name(video_path)
-    print(name)
-
     if n < 1: n = 1 #HACK Gradio interface does not currently allow min/max in gr.Number(...) 
-    if os.path.exists(video_path) != True :
-        raise RuntimeError('Video path does not exist')
+
+    if video_path.startswith('http://') or video_path.startswith('https://'):
+        response = requests.head(video_path)
+        if response.status_code == 404 or response.status_code != 200:
+            raise ConnectionError("Init video url or mask video url is not valid")
+    else:
+        if not os.path.exists():
+            raise RuntimeError("Init video path or mask video path is not valid")
 
     input_content = []
     if os.path.exists(video_in_frame_path) :
@@ -55,10 +60,8 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True):
     if len(input_content) > 0:
         #get the name of the existing frame
         content_name = get_frame_name(input_content[0])
-        print(content_name)
         if not content_name.startswith(name):
             overwrite = True
-
     vidcap = cv2.VideoCapture(video_path)
 
     # grab the frame count to check against existing directory len 
@@ -69,7 +72,6 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True):
         raise RuntimeError('Skipping more frames than input video contains. extract_nth_frames larger than input frames')
     
     expected_frame_count = math.ceil(frame_count / n) 
-
     # Check to see if the frame count is matches the number of files in path
     if overwrite or expected_frame_count != len(input_content):
         shutil.rmtree(video_in_frame_path)
