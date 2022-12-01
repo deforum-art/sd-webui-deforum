@@ -1,4 +1,5 @@
 import requests
+import os
 from PIL import Image
 import numpy as np
 import torchvision.transforms.functional as TF
@@ -31,10 +32,17 @@ def load_img(path : str, shape=None, use_alpha_as_mask=False):
     return image, mask_image
 
 def load_image(image_path :str):
+    image = None
     if image_path.startswith('http://') or image_path.startswith('https://'):
-        image = Image.open(requests.get(image_path, stream=True).raw).convert('RGB')
+        response = requests.get(image_path, stream=True)
+        if response.status_code == 404 or response.status_code != 200:
+            raise ConnectionError("Init image url or mask image url is not valid")
+        image = Image.open(response.raw).convert('RGB')
     else:
+        if not os.path.exists(image_path):
+            raise RuntimeError("Init image path or mask image path is not valid")
         image = Image.open(image_path).convert('RGB')
+        
     return image
 
 def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contrast_adjust=1.0):
