@@ -160,9 +160,9 @@ def DeforumArgs():
     # Blur edges of final overlay mask, if used. Minimum = 0 (no blur)
     mask_overlay_blur = 5 # {type:"number"}
 
-    fill = 1 #MASKARGSEXPANSION Todo : Rename and convert to same formatting as used in img2img masked content
-    full_res_mask = True
-    full_res_mask_padding = 4
+    fill = 1 #@param {type:"number"} 0-3
+    full_res_mask = True #@param {type:"boolean"}
+    full_res_mask_padding = 4 #@param {type:"number"}
 
     n_samples = 1 # doesnt do anything
     precision = 'autocast' 
@@ -173,6 +173,7 @@ def DeforumArgs():
     timestring = ""
     init_latent = None
     init_sample = None
+    mask_image = None
     init_c = None
 
     return locals()
@@ -445,7 +446,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             resume_from_timestring = gr.Checkbox(label="resume_from_timestring", value=da.resume_from_timestring, interactive=True)
             resume_timestring = gr.Textbox(label="resume_timestring", lines=1, value = da.resume_timestring, interactive=True)
         # Init settings END
-        
+   # with gr.Tab('Coherence'):
+     #   with gr.Row():
+
     with gr.Tab('Video output'):
         # Video output settings START
         i35 = gr.HTML("<p style=\"margin-bottom:0.75em\">Video output settings</p>")
@@ -488,6 +491,7 @@ def pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstpha
     timestring = ""
     init_latent = None
     init_sample = None
+    mask_image = None
     init_c = None
     return locals()
     
