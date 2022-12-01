@@ -59,7 +59,7 @@ class DepthModel():
             self.midas_model = self.midas_model.half()
         self.midas_model.to(self.device)
 
-    def predict(self, prev_img_cv2, anim_args) -> torch.Tensor:
+    def predict(self, prev_img_cv2, anim_args, half_precision) -> torch.Tensor:
         w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
 
         # predict depth with AdaBins    
@@ -94,6 +94,7 @@ class DepthModel():
                         torch.Size([h, w]),
                         interpolation=TF.InterpolationMode.BICUBIC
                     )
+                    adabins_depth = adabins_depth.cpu().numpy()
                 adabins_depth = adabins_depth.squeeze()
             except:
                 print(f"  exception encountered, falling back to pure MiDaS")
@@ -109,7 +110,8 @@ class DepthModel():
             sample = torch.from_numpy(img_midas_input).float().to(self.device).unsqueeze(0)
             if self.device == torch.device("cuda"):
                 sample = sample.to(memory_format=torch.channels_last)  
-                sample = sample.half()
+                if half_precision:
+                    sample = sample.half()
             with torch.no_grad():            
                 midas_depth = self.midas_model.forward(sample)
             midas_depth = torch.nn.functional.interpolate(
@@ -149,4 +151,3 @@ class DepthModel():
         temp = rearrange((depth - self.depth_min) / denom * 255, 'c h w -> h w c')
         temp = repeat(temp, 'h w 1 -> h w c', c=3)
         Image.fromarray(temp.astype(np.uint8)).save(filename)    
-
