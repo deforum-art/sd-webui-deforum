@@ -1,5 +1,9 @@
 import re
 
+def check_is_number(value):
+    float_pattern = r'^(?=.)([+-]?([0-9]*)(\.([0-9]+))?)$'
+    return re.match(float_pattern, value)
+
 def parse_weight(match, frame = 0)->float:
     import numexpr
     w_raw = match.group("weight")
@@ -24,7 +28,7 @@ def split_weighted_subprompts(text, frame = 0):
             ))
             """, re.VERBOSE)
     
-    parsed_prompt = re.sub(math_parser, lambda m: str(text(m, frame)), text)
+    parsed_prompt = re.sub(math_parser, lambda m: str(parse_weight(m, frame)), text)
 
     negative_prompts = []
     positive_prompts = []
