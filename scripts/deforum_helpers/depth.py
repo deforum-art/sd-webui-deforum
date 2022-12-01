@@ -129,7 +129,7 @@ class DepthModel():
 
             # blend between MiDaS and AdaBins predictions
             if use_adabins:
-                depth_map = torch.tensor(midas_depth)*anim_args.midas_weight + adabins_depth*(1.0-anim_args.midas_weight)
+                depth_map = midas_depth*anim_args.midas_weight + adabins_depth*(1.0-anim_args.midas_weight)
             else:
                 depth_map = midas_depth
 
