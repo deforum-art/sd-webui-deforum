@@ -49,7 +49,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True):
         if response.status_code == 404 or response.status_code != 200:
             raise ConnectionError("Init video url or mask video url is not valid")
     else:
-        if not os.path.exists():
+        if not os.path.exists(video_path):
             raise RuntimeError("Init video path or mask video path is not valid")
 
     input_content = []
