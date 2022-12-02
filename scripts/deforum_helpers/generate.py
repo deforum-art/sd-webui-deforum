@@ -15,9 +15,10 @@ from modules import processing
 from modules.shared import opts, sd_model
 from modules.processing import StableDiffusionProcessingTxt2Img
 
-def add_noise(sample: torch.Tensor, noise_amt: float, noise_mask = None) -> torch.Tensor:
+def add_noise(sample: torch.Tensor, noise_amt: float, noise_mask = None, invert_mask = False) -> torch.Tensor:
     if noise_mask is not None:
-        noise_mask = ImageOps.invert(noise_mask)
+        if invert_mask:
+            noise_mask = ImageOps.invert(noise_mask)
         noise_mask = np.array(noise_mask.convert("L"))
         noise_mask = noise_mask.astype(np.float32) / 255.0
         noise_mask = torch.from_numpy(noise_mask)
