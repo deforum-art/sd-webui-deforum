@@ -58,9 +58,8 @@ def generate(args, root, frame = 0, return_sample=False):
 
     mask_image = None
     init_image = None
-    
     processed = None
-    
+
     if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
@@ -112,7 +111,7 @@ def generate(args, root, frame = 0, return_sample=False):
             if extrema == (0,0): 
                 print("mask is blank. ignoriing mask")  
                 mask = None
-            #assing masking options to pipeline
+            #assign masking options to pipeline
             else:
                 p.inpainting_mask_invert = args.invert_mask
                 p.inpainting_fill = args.fill 
@@ -136,12 +135,12 @@ def generate(args, root, frame = 0, return_sample=False):
     
     if root.first_frame == None:
         root.first_frame = processed.images[0]
-        if args.enable_colormatch_image:
-            colormatch_image = load_img(args.colormatch_image)
-            if colormatch_image != None:
-                root.color_corrections = [processing.setup_color_correction(colormatch_image)]
-                p.color_corrections = root.color_corrections
-    
+
+        # Color correction based on last frame
+    if args.enable_colormatch_image:
+        root.color_corrections = [processing.setup_color_correction(processed.images[0])]
+        p.color_corrections = root.color_corrections
+
     if return_sample:
         pil_image = processed.images[0].convert('RGB') 
         open_cv_image = np.array(pil_image) 
