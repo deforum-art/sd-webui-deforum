@@ -18,7 +18,6 @@ def checksum(filename, hash_factory=hashlib.blake2b, chunk_num_blocks=128):
     with open(filename,'rb') as f: 
         while chunk := f.read(chunk_num_blocks*h.block_size): 
             h.update(chunk)
-    print(h.hexdigest())
     return h.hexdigest()
 
 class DepthModel():
