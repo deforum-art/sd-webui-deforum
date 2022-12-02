@@ -38,7 +38,7 @@ def generate(args, root, frame = 0, return_sample=False):
     p.do_not_save_grid = not args.make_grid
     p.sd_model=sd_model
     p.sampler_name = args.sampler
-    p.mask_blur = args.mask_overlay_blur
+    p.mask_blur = int(args.mask_overlay_blur)
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = 1
     p.steps = args.steps
@@ -47,9 +47,6 @@ def generate(args, root, frame = 0, return_sample=False):
     else:
         p.denoising_strength = 1 - args.strength
     p.cfg_scale = args.scale
-    # FIXME better color corrections as match histograms doesn't seem to be fully working
-    if root.color_corrections is not None:
-        p.color_corrections = root.color_corrections
     p.outpath_samples = root.outpath_samples
     p.outpath_grids = root.outpath_samples
     p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt)
@@ -139,7 +136,11 @@ def generate(args, root, frame = 0, return_sample=False):
     
     if root.first_frame == None:
         root.first_frame = processed.images[0]
-        root.color_corrections = [processing.setup_color_correction(root.first_frame)]
+        if args.enable_colormatch_image:
+            colormatch_image = load_img(args.colormatch_image)
+            if colormatch_image != None:
+                root.color_corrections = [processing.setup_color_correction(colormatch_image)]
+                p.color_corrections = root.color_corrections
     
     if return_sample:
         pil_image = processed.images[0].convert('RGB') 
