@@ -15,14 +15,19 @@ from modules import processing
 from modules.shared import opts, sd_model
 from modules.processing import StableDiffusionProcessingTxt2Img
 
+def condition_noise_mask(noise_mask, invert_mask = False):
+    if invert_mask:
+        noise_mask = ImageOps.invert(noise_mask)
+    noise_mask = np.array(noise_mask.convert("L"))
+    noise_mask = noise_mask.astype(np.float32) / 255.0
+    noise_mask = torch.from_numpy(noise_mask)
+    noise_mask = torch.round(noise_mask)
+    return noise_mask
+
 def add_noise(sample: torch.Tensor, noise_amt: float, noise_mask = None, invert_mask = False) -> torch.Tensor:
     if noise_mask is not None:
-        if invert_mask:
-            noise_mask = ImageOps.invert(noise_mask)
-        noise_mask = np.array(noise_mask.convert("L"))
-        noise_mask = noise_mask.astype(np.float32) / 255.0
-        noise_mask = torch.from_numpy(noise_mask)
-        return sample + torch.randn(sample.shape, device=sample.device) * noise_amt * noise_mask
+        noise_mask = condition_noise_mask(noise_mask, invert_mask)
+        return sample + ((torch.randn(sample.shape, device=sample.device) * noise_mask) * noise_amt) 
     return sample + torch.randn(sample.shape, device=sample.device) * noise_amt
    
 def generate(args, root, frame = 0, return_sample=False):
@@ -141,7 +146,11 @@ def generate(args, root, frame = 0, return_sample=False):
     if args.enable_colormatch_image:
         root.color_corrections = [processing.setup_color_correction(processed.images[0])]
         p.color_corrections = root.color_corrections
-
+    # May be unnecessary but was necessary to ensure not using webui color correction
+    else :
+        root.color_corrections = None
+        p.color_corrections = root.color_corrections
+        
     if return_sample:
         pil_image = processed.images[0].convert('RGB') 
         open_cv_image = np.array(pil_image) 
