@@ -179,7 +179,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             # apply scaling
             contrast_sample = prev_img * contrast
             # apply frame noising
-            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise, args.mask_image)
+            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise, args.mask_image, args.invert_mask)
 
             # use transformed previous frame as init for current
             args.use_init = True
