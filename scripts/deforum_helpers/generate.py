@@ -53,6 +53,8 @@ def generate(args, root, frame = 0, return_sample=False):
     else:
         p.denoising_strength = 1 - args.strength
     p.cfg_scale = args.scale
+    if root.color_corrections is not None:
+        p.color_corrections = root.color_corrections
     p.outpath_samples = root.outpath_samples
     p.outpath_grids = root.outpath_samples
     p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt)
@@ -141,15 +143,8 @@ def generate(args, root, frame = 0, return_sample=False):
     
     if root.first_frame == None:
         root.first_frame = processed.images[0]
-
-        # Color correction based on last frame
-    if args.enable_colormatch_image:
-        root.color_corrections = [processing.setup_color_correction(processed.images[0])]
-        p.color_corrections = root.color_corrections
-    # May be unnecessary but was necessary to ensure not using webui color correction
-    else :
-        root.color_corrections = None
-        p.color_corrections = root.color_corrections
+        if args.enable_colormatch_image:
+            root.color_corrections = [processing.setup_color_correction(processed.images[0])]
         
     if return_sample:
         pil_image = processed.images[0].convert('RGB') 
