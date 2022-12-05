@@ -214,7 +214,7 @@ def render_animation(args, anim_args, animation_prompts, root):
                 args.mask_file = mask_frame
 
         # sample the diffusion model
-        sample, image = generate(args, root, frame_idx, return_sample=True)
+        sample, image = generate(args, anim_args, root, frame_idx, return_sample=True)
         if not using_vid_init:
             prev_sample = sample
 
@@ -319,7 +319,7 @@ def render_interpolation(args, anim_args, animation_prompts, root):
         if args.seed_behavior == 'schedule':
             args.seed = int(keys.seed_schedule_series[frame_idx])
         
-        _, image = generate(args, root, frame_idx, return_sample=True)
+        _, image = generate(args, anim_args, root, frame_idx, return_sample=True)
         filename = f"{args.timestring}_{frame_idx:05}.png"
         image.save(os.path.join(args.outdir, filename))
 
