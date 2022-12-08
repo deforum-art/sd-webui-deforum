@@ -9,6 +9,7 @@ import re
 import pathlib
 import os
 import pandas as pd
+import shutil
 
 def check_is_number(value):
     float_pattern = r'^(?=.)([+-]?([0-9]*)(\.([0-9]+))?)$'
