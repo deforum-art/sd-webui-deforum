@@ -196,23 +196,23 @@ def render_animation(args, anim_args, animation_prompts, root):
             args.seed = int(keys.seed_schedule_series[frame_idx])
         
         print(f"{args.prompt} {args.seed}")
-        if not using_vid_init:
+         if not using_vid_init:
             print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
             print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")
             print(f"Rx: {keys.rotation_3d_x_series[frame_idx]} Ry: {keys.rotation_3d_y_series[frame_idx]} Rz: {keys.rotation_3d_z_series[frame_idx]}")
             if anim_args.use_mask_video:
-                mask_frame = os.path.join(args.outdir, 'maskframes', f"{frame_idx+1:05}.jpg")
+                mask_frame = os.path.join(args.outdir, 'maskframes', get_frame_name(anim_args.video_mask_path) + f"{frame_idx+1:05}.jpg")
                 args.mask_file = mask_frame
 
         # grab init image for current frame
         if using_vid_init:
-            init_frame = os.path.join(args.outdir, 'inputframes', f"{frame_idx+1:05}.jpg")            
+            init_frame = os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx+1:05}.jpg")            
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
             if anim_args.use_mask_video:
-                mask_frame = os.path.join(args.outdir, 'maskframes', f"{frame_idx+1:05}.jpg")
+                mask_frame = os.path.join(args.outdir, 'maskframes', get_frame_name(anim_args.video_mask_path) + f"{frame_idx+1:05}.jpg")
                 args.mask_file = mask_frame
-
+                
         # sample the diffusion model
         sample, image = generate(args, anim_args, root, frame_idx, return_sample=True)
         if not using_vid_init:
