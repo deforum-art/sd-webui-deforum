@@ -239,7 +239,7 @@ def render_input_video(args, anim_args, animation_prompts, root):
     # create a folder for the video input frames to live in
     video_in_frame_path = os.path.join(args.outdir, 'inputframes') 
     os.makedirs(video_in_frame_path, exist_ok=True)
-    
+
     # save the video frames from input video
     print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {video_in_frame_path}...")
     vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
@@ -257,6 +257,12 @@ def render_input_video(args, anim_args, animation_prompts, root):
         # save the video frames from mask video
         print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
         vid2frames(anim_args.video_mask_path, mask_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
+        max_mask_frames = len([f for f in pathlib.Path(mask_in_frame_path).glob('*.jpg')])
+
+        # limit max frames if there are less frames in the video mask compared to input video
+        if max_mask_frames < anim_args.max_frames :
+            anim_args.max_mask_frames
+            print ("Video mask contains less frames than init video, max frames limited to number of mask frames.")
         args.use_mask = True
         args.overlay_mask = True
 
