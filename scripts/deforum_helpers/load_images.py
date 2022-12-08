@@ -60,3 +60,15 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
         mask = TF.adjust_contrast(mask, mask_contrast_adjust)
     mask = mask.convert('L')
     return mask
+
+def check_mask_for_errors(mask_input, invert_mask=False):
+    extrema = mask_input.getextrema()
+    if (invert_mask):
+        if extrema == (255,255): 
+            print("after inverting mask will be blank. ignoring mask")  
+            return None
+    elif extrema == (0,0): 
+        print("mask is blank. ignoring mask")  
+        return None
+    else:
+        return mask_input    
