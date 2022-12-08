@@ -11,6 +11,9 @@ import os
 import pandas as pd
 import shutil
 
+# Webui
+from modules.shared import state
+
 def check_is_number(value):
     float_pattern = r'^(?=.)([+-]?([0-9]*)(\.([0-9]+))?)$'
     return re.match(float_pattern, value)
@@ -83,6 +86,8 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True):
         t=1
         success = True
         while success:
+            if state.interrupted:
+                return
             if count % n == 0:
                 cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}.jpg" , image)     # save frame as JPEG file
                 t += 1
