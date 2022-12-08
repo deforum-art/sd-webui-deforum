@@ -15,6 +15,7 @@ from .prompt import sanitize
 from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp_2d, anim_frame_warp_3d, vid2frames
 from .depth import DepthModel
 from .colors import maintain_colors
+from .load_images import prepare_mask
 
 # Webui
 from modules.shared import opts, cmd_opts, state
@@ -65,7 +66,19 @@ def render_animation(args, anim_args, animation_prompts, root):
 
     # check for video inits
     using_vid_init = anim_args.animation_mode == 'Video Input'
-
+    
+    # load mask for first frame noise masking
+    if anim_args.use_mask_video:
+        mask_frame = os.path.join(args.outdir, 'maskframes', get_frame_name(anim_args.video_mask_path) + f"{1:05}.jpg")
+        args.mask_file = mask_frame
+    if args.use_mask:
+        args.mask_image = prepare_mask(args.mask_file, 
+                            (args.W, args.H), 
+                            args.mask_contrast_adjust, 
+                            args.mask_brightness_adjust)
+        #prevent loaded mask from throwing errors in Image operations if completely black and crop and resize in webui pipeline
+        args.mask_image = check_mask_for_errors(args.mask_image, args.invert_mask)
+    
     # load depth model for 3D
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
     if predict_depths:
@@ -176,9 +189,9 @@ def render_animation(args, anim_args, animation_prompts, root):
 
             # apply scaling
             contrast_sample = prev_img * contrast
+            
             # apply frame noising
-            #MASKARGSEXPANSION : Left comment as to where to enter for noise addition masking 
-            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise)
+            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise, args.mask_image, args.invert_mask)
 
             # use transformed previous frame as init for current
             args.use_init = True
