@@ -135,7 +135,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
             )
         processed = processing.process_images(p_txt)
     
-   if processed is None:
+    if processed is None:
         # Mask functions
         if args.use_mask:
             assert args.mask_file is not None or mask_image is not None, "use_mask==True: An mask image is required for a mask. Please enter a mask_file or use an init image with an alpha channel"
