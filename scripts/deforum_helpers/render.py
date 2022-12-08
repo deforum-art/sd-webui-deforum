@@ -15,7 +15,7 @@ from .prompt import sanitize
 from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp_2d, anim_frame_warp_3d, vid2frames
 from .depth import DepthModel
 from .colors import maintain_colors
-from .load_images import prepare_mask
+from .load_images import prepare_mask, check_mask_for_errors
 
 # Webui
 from modules.shared import opts, cmd_opts, state
