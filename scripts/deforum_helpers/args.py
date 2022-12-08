@@ -175,6 +175,7 @@ def DeforumArgs():
     init_latent = None
     init_sample = None
     init_c = None
+    mask_image = None
 
     return locals()
     
@@ -492,6 +493,7 @@ def pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstpha
     init_latent = None
     init_sample = None
     init_c = None
+    mask_image = None
     return locals()
     
 def pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path):
