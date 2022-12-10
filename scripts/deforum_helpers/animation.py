@@ -10,6 +10,7 @@ import pathlib
 import os
 import pandas as pd
 import shutil
+import requests
 
 # Webui
 from modules.shared import state
