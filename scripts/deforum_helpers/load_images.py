@@ -58,7 +58,6 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
         mask = TF.adjust_brightness(mask, mask_brightness_adjust)
     if mask_contrast_adjust != 1:
         mask = TF.adjust_contrast(mask, mask_contrast_adjust)
-    mask = mask.convert('L')
     return mask
 
 def check_mask_for_errors(mask_input, invert_mask=False):
