@@ -12,7 +12,7 @@ import torchvision.transforms as T
 
 from .generate import generate, add_noise
 from .prompt import sanitize
-from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp_2d, anim_frame_warp_3d, vid2frames, get_frame_name
+from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp, vid2frames, get_frame_name
 from .depth import DepthModel
 from .colors import maintain_colors
 
@@ -66,13 +66,12 @@ def render_animation(args, anim_args, animation_prompts, root):
     # check for video inits
     using_vid_init = anim_args.animation_mode == 'Video Input'
 
-    # load depth model for 3D
+ # load depth model for 3D
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
     if predict_depths:
         depth_model = DepthModel(root.device)
-        if anim_args.midas_weight >= 1.0:
-            depth_model.load_midas(root.models_path, root.half_precision)
-        else:
+        depth_model.load_midas(root.models_path)
+        if anim_args.midas_weight < 1.0:
             depth_model.load_adabins(root.models_path)
     else:
         depth_model = None
@@ -92,6 +91,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             last_frame -= last_frame%turbo_steps
         path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:05}.png")
         img = cv2.imread(path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         prev_sample = sample_from_cv2(img)
         if anim_args.color_coherence != 'None':
             color_match_sample = img
@@ -107,14 +107,13 @@ def render_animation(args, anim_args, animation_prompts, root):
     state.job_count = anim_args.max_frames
     
     while frame_idx < anim_args.max_frames:
-        print(f"Rendering animation frame {frame_idx} of {anim_args.max_frames}")
+        #Webui
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
         state.job_no = frame_idx + 1
-        
-        #Webui
         if state.interrupted:
-                break
+            break
         
+        print(f"Rendering animation frame {frame_idx} of {anim_args.max_frames}")
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
         scale = keys.cfg_scale_schedule_series[frame_idx]
@@ -134,17 +133,12 @@ def render_animation(args, anim_args, animation_prompts, root):
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
                     depth = depth_model.predict(turbo_next_image, anim_args, root.half_precision)
+                
+                if advance_prev:
+                    turbo_prev_image, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+                if advance_next:
+                    turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
 
-                if anim_args.animation_mode == '2D':
-                    if advance_prev:
-                        turbo_prev_image = anim_frame_warp_2d(turbo_prev_image, args, anim_args, keys, tween_frame_idx)
-                    if advance_next:
-                        turbo_next_image = anim_frame_warp_2d(turbo_next_image, args, anim_args, keys, tween_frame_idx)
-                else: # '3D'
-                    if advance_prev:
-                        turbo_prev_image = anim_frame_warp_3d(root.device, turbo_prev_image, depth, anim_args, keys, tween_frame_idx)
-                    if advance_next:
-                        turbo_next_image = anim_frame_warp_3d(root.device, turbo_next_image, depth, anim_args, keys, tween_frame_idx)
                 turbo_prev_frame_idx = turbo_next_frame_idx = tween_frame_idx
 
                 if turbo_prev_image is not None and tween < 1.0:
@@ -161,12 +155,7 @@ def render_animation(args, anim_args, animation_prompts, root):
 
         # apply transforms to previous frame
         if prev_sample is not None:
-            if anim_args.animation_mode == '2D':
-                prev_img = anim_frame_warp_2d(sample_to_cv2(prev_sample), args, anim_args, keys, frame_idx)
-            else: # '3D'
-                prev_img_cv2 = sample_to_cv2(prev_sample)
-                depth = depth_model.predict(prev_img_cv2, anim_args, root.half_precision) if depth_model else None
-                prev_img = anim_frame_warp_3d(root.device, prev_img_cv2, depth, anim_args, keys, frame_idx)
+            prev_img, depth = anim_frame_warp(prev_sample, args, anim_args, keys, frame_idx, depth_model, depth=None, device=root.device, half_precision=root.half_precision)
 
             # apply color matching
             if anim_args.color_coherence != 'None':
@@ -178,7 +167,6 @@ def render_animation(args, anim_args, animation_prompts, root):
             # apply scaling
             contrast_sample = prev_img * contrast
             # apply frame noising
-            #MASKARGSEXPANSION : Left comment as to where to enter for noise addition masking 
             noised_sample = add_noise(sample_from_cv2(contrast_sample), noise)
 
             # use transformed previous frame as init for current
@@ -188,6 +176,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             else:
                 args.init_sample = noised_sample.to(root.device)
             args.strength = max(0.0, min(1.0, strength))
+        
         args.scale = scale
 
         # grab prompt for current frame
@@ -227,8 +216,7 @@ def render_animation(args, anim_args, animation_prompts, root):
             filename = f"{args.timestring}_{frame_idx:05}.png"
             image.save(os.path.join(args.outdir, filename))
             if anim_args.save_depth_maps:
-                if depth is None:
-                    depth = depth_model.predict(sample_to_cv2(sample), anim_args, root.half_precision)
+                depth = depth_model.predict(sample_to_cv2(sample), anim_args, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
             frame_idx += 1
 
