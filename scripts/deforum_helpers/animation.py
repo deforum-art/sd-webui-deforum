@@ -1,364 +1,395 @@
-import numpy as np
-import cv2
-from functools import reduce
-import math
-import py3d_tools as p3d
-import torch
-from einops import rearrange
-import re
-import pathlib
 import os
+import json
+import random
+from torchvision.utils import make_grid
+from einops import rearrange
 import pandas as pd
-import shutil
+import cv2
+import numpy as np
+from PIL import Image
+import pathlib
+import torchvision.transforms as T
+
+from .generate import generate, add_noise
+from .prompt import sanitize
+from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp, vid2frames, get_frame_name
+from .depth import DepthModel
+from .colors import maintain_colors
 
 # Webui
-from modules.shared import state
+from modules.shared import opts, cmd_opts, state
 
-def check_is_number(value):
-    float_pattern = r'^(?=.)([+-]?([0-9]*)(\.([0-9]+))?)$'
-    return re.match(float_pattern, value)
-
-def sample_from_cv2(sample: np.ndarray) -> torch.Tensor:
-    sample = ((sample.astype(float) / 255.0) * 2) - 1
-    sample = sample[None].transpose(0, 3, 1, 2).astype(np.float16)
-    sample = torch.from_numpy(sample)
-    return sample
-
-def sample_to_cv2(sample: torch.Tensor, type=np.uint8) -> np.ndarray:
-    sample_f32 = rearrange(sample.squeeze().cpu().numpy(), "c h w -> h w c").astype(np.float32)
-    sample_f32 = ((sample_f32 * 0.5) + 0.5).clip(0, 1)
-    sample_int8 = (sample_f32 * 255)
-    return sample_int8.astype(type)
-
-def construct_RotationMatrixHomogenous(rotation_angles):
-    assert(type(rotation_angles)==list and len(rotation_angles)==3)
-    RH = np.eye(4,4)
-    cv2.Rodrigues(np.array(rotation_angles), RH[0:3, 0:3])
-    return RH
-
-def get_frame_name(path):
-    name = os.path.basename(path)
-    name = os.path.splitext(name)[0]
-    return name
-
-def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True): 
-    #get the name of the video without the path and ext
-    name = get_frame_name(video_path)
-    if n < 1: n = 1 #HACK Gradio interface does not currently allow min/max in gr.Number(...) 
-
-    if video_path.startswith('http://') or video_path.startswith('https://'):
-        response = requests.head(video_path)
-        if response.status_code == 404 or response.status_code != 200:
-            raise ConnectionError("Init video url or mask video url is not valid")
+def next_seed(args):
+    if args.seed_behavior == 'iter':
+        args.seed += 1
+    elif args.seed_behavior == 'fixed':
+        pass # always keep seed the same
     else:
-        if not os.path.exists(video_path):
-            raise RuntimeError("Init video path or mask video path is not valid")
+        args.seed = random.randint(0, 2**32 - 1)
+    return args.seed
 
-    input_content = []
-    if os.path.exists(video_in_frame_path) :
-        input_content = os.listdir(video_in_frame_path)
+def render_animation(args, anim_args, animation_prompts, root):
+    # animations use key framed prompts
+    args.prompts = animation_prompts
 
-    # check if existing frame is the same video, if not we need to erase it and repopulate
-    if len(input_content) > 0:
-        #get the name of the existing frame
-        content_name = get_frame_name(input_content[0])
-        if not content_name.startswith(name):
-            overwrite = True
-    vidcap = cv2.VideoCapture(video_path)
+    # expand key frame strings to values
+    keys = DeformAnimKeys(anim_args)
 
-    # grab the frame count to check against existing directory len 
-    frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
-    
-    # raise error if the user wants to skip more frames than exist
-    if n >= frame_count : 
-        raise RuntimeError('Skipping more frames than input video contains. extract_nth_frames larger than input frames')
-    
-    expected_frame_count = math.ceil(frame_count / n) 
-    # Check to see if the frame count is matches the number of files in path
-    if overwrite or expected_frame_count != len(input_content):
-        shutil.rmtree(video_in_frame_path)
-        os.makedirs(video_in_frame_path, exist_ok=True) # just deleted the folder so we need to make it again
-        input_content = os.listdir(video_in_frame_path)
-    
-    if len(input_content) == 0:
-        success,image = vidcap.read()
-        count = 0
-        t=1
-        success = True
-        while success:
-            if state.interrupted:
-                return
-            if count % n == 0:
-                cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}.jpg" , image)     # save frame as JPEG file
-                t += 1
-            success,image = vidcap.read()
-            count += 1
-        print("Converted %d frames" % count)
-    else: print("Frames already unpacked")
+    # resume animation
+    start_frame = 0
+    if anim_args.resume_from_timestring:
+        for tmp in os.listdir(args.outdir):
+            if tmp.split("_")[0] == anim_args.resume_timestring:
+                start_frame += 1
+        start_frame = start_frame - 1
 
-# https://en.wikipedia.org/wiki/Rotation_matrix
-def getRotationMatrixManual(rotation_angles):
-	
-    rotation_angles = [np.deg2rad(x) for x in rotation_angles]
-    
-    phi         = rotation_angles[0] # around x
-    gamma       = rotation_angles[1] # around y
-    theta       = rotation_angles[2] # around z
-    
-    # X rotation
-    Rphi        = np.eye(4,4)
-    sp          = np.sin(phi)
-    cp          = np.cos(phi)
-    Rphi[1,1]   = cp
-    Rphi[2,2]   = Rphi[1,1]
-    Rphi[1,2]   = -sp
-    Rphi[2,1]   = sp
-    
-    # Y rotation
-    Rgamma        = np.eye(4,4)
-    sg            = np.sin(gamma)
-    cg            = np.cos(gamma)
-    Rgamma[0,0]   = cg
-    Rgamma[2,2]   = Rgamma[0,0]
-    Rgamma[0,2]   = sg
-    Rgamma[2,0]   = -sg
-    
-    # Z rotation (in-image-plane)
-    Rtheta      = np.eye(4,4)
-    st          = np.sin(theta)
-    ct          = np.cos(theta)
-    Rtheta[0,0] = ct
-    Rtheta[1,1] = Rtheta[0,0]
-    Rtheta[0,1] = -st
-    Rtheta[1,0] = st
-    
-    R           = reduce(lambda x,y : np.matmul(x,y), [Rphi, Rgamma, Rtheta]) 
-    
-    return R
+    # create output folder for the batch
+    os.makedirs(args.outdir, exist_ok=True)
+    print(f"Saving animation frames to {args.outdir}")
 
-def getPoints_for_PerspectiveTranformEstimation(ptsIn, ptsOut, W, H, sidelength):
-    
-    ptsIn2D      =  ptsIn[0,:]
-    ptsOut2D     =  ptsOut[0,:]
-    ptsOut2Dlist =  []
-    ptsIn2Dlist  =  []
-    
-    for i in range(0,4):
-        ptsOut2Dlist.append([ptsOut2D[i,0], ptsOut2D[i,1]])
-        ptsIn2Dlist.append([ptsIn2D[i,0], ptsIn2D[i,1]])
-    
-    pin  =  np.array(ptsIn2Dlist)   +  [W/2.,H/2.]
-    pout = (np.array(ptsOut2Dlist)  +  [1.,1.]) * (0.5*sidelength)
-    pin  = pin.astype(np.float32)
-    pout = pout.astype(np.float32)
-    
-    return pin, pout
+    # save settings for the batch
+    settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
+    with open(settings_filename, "w+", encoding="utf-8") as f:
+        s = {**dict(args.__dict__), **dict(anim_args.__dict__)}
+        json.dump(s, f, ensure_ascii=False, indent=4)
+        
+    # resume from timestring
+    if anim_args.resume_from_timestring:
+        args.timestring = anim_args.resume_timestring
 
+    # expand prompts out to per-frame
+    prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
+    for i, prompt in animation_prompts.items():
+        prompt_series[int(i)] = prompt
+    prompt_series = prompt_series.ffill().bfill()
 
-def warpMatrix(W, H, theta, phi, gamma, scale, fV):
-    
-    # M is to be estimated
-    M          = np.eye(4, 4)
-    
-    fVhalf     = np.deg2rad(fV/2.)
-    d          = np.sqrt(W*W+H*H)
-    sideLength = scale*d/np.cos(fVhalf)
-    h          = d/(2.0*np.sin(fVhalf))
-    n          = h-(d/2.0)
-    f          = h+(d/2.0)
-    
-    # Translation along Z-axis by -h
-    T       = np.eye(4,4)
-    T[2,3]  = -h
-    
-    # Rotation matrices around x,y,z
-    R = getRotationMatrixManual([phi, gamma, theta])
-    
-    
-    # Projection Matrix 
-    P       = np.eye(4,4)
-    P[0,0]  = 1.0/np.tan(fVhalf)
-    P[1,1]  = P[0,0]
-    P[2,2]  = -(f+n)/(f-n)
-    P[2,3]  = -(2.0*f*n)/(f-n)
-    P[3,2]  = -1.0
-    
-    # pythonic matrix multiplication
-    F       = reduce(lambda x,y : np.matmul(x,y), [P, T, R]) 
-    
-    # shape should be 1,4,3 for ptsIn and ptsOut since perspectiveTransform() expects data in this way. 
-    # In C++, this can be achieved by Mat ptsIn(1,4,CV_64FC3);
-    ptsIn = np.array([[
-                 [-W/2., H/2., 0.],[ W/2., H/2., 0.],[ W/2.,-H/2., 0.],[-W/2.,-H/2., 0.]
-                 ]])
-    ptsOut  = np.array(np.zeros((ptsIn.shape), dtype=ptsIn.dtype))
-    ptsOut  = cv2.perspectiveTransform(ptsIn, F)
-    
-    ptsInPt2f, ptsOutPt2f = getPoints_for_PerspectiveTranformEstimation(ptsIn, ptsOut, W, H, sideLength)
-    
-    # check float32 otherwise OpenCV throws an error
-    assert(ptsInPt2f.dtype  == np.float32)
-    assert(ptsOutPt2f.dtype == np.float32)
-    M33 = cv2.getPerspectiveTransform(ptsInPt2f,ptsOutPt2f)
+    # check for video inits
+    using_vid_init = anim_args.animation_mode == 'Video Input'
 
-    return M33, sideLength
-
-def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
-    angle = keys.angle_series[frame_idx]
-    zoom = keys.zoom_series[frame_idx]
-    translation_x = keys.translation_x_series[frame_idx]
-    translation_y = keys.translation_y_series[frame_idx]
-
-    center = (args.W // 2, args.H // 2)
-    trans_mat = np.float32([[1, 0, translation_x], [0, 1, translation_y]])
-    rot_mat = cv2.getRotationMatrix2D(center, angle, zoom)
-    trans_mat = np.vstack([trans_mat, [0,0,1]])
-    rot_mat = np.vstack([rot_mat, [0,0,1]])
-    if anim_args.flip_2d_perspective:
-        perspective_flip_theta = keys.perspective_flip_theta_series[frame_idx]
-        perspective_flip_phi = keys.perspective_flip_phi_series[frame_idx]
-        perspective_flip_gamma = keys.perspective_flip_gamma_series[frame_idx]
-        perspective_flip_fv = keys.perspective_flip_fv_series[frame_idx]
-        M,sl = warpMatrix(args.W, args.H, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, 1., perspective_flip_fv);
-        post_trans_mat = np.float32([[1, 0, (args.W-sl)/2], [0, 1, (args.H-sl)/2]])
-        post_trans_mat = np.vstack([post_trans_mat, [0,0,1]])
-        bM = np.matmul(M, post_trans_mat)
-        xform = np.matmul(bM, rot_mat, trans_mat)
+ # load depth model for 3D
+    predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
+    if predict_depths:
+        depth_model = DepthModel(root.device)
+        depth_model.load_midas(root.models_path)
+        if anim_args.midas_weight < 1.0:
+            depth_model.load_adabins(root.models_path)
     else:
-        xform = np.matmul(rot_mat, trans_mat)
+        depth_model = None
+        anim_args.save_depth_maps = False
 
-    return cv2.warpPerspective(
-        prev_img_cv2,
-        xform,
-        (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
-        borderMode=cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE
-    )
+    # state for interpolating between diffusion steps
+    turbo_steps = 1 if using_vid_init else int(anim_args.diffusion_cadence)
+    turbo_prev_image, turbo_prev_frame_idx = None, 0
+    turbo_next_image, turbo_next_frame_idx = None, 0
 
-def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
-    TRANSLATION_SCALE = 1.0/200.0 # matches Disco
-    translate_xyz = [
-        -keys.translation_x_series[frame_idx] * TRANSLATION_SCALE, 
-        keys.translation_y_series[frame_idx] * TRANSLATION_SCALE, 
-        -keys.translation_z_series[frame_idx] * TRANSLATION_SCALE
-    ]
-    rotate_xyz = [
-        math.radians(keys.rotation_3d_x_series[frame_idx]), 
-        math.radians(keys.rotation_3d_y_series[frame_idx]), 
-        math.radians(keys.rotation_3d_z_series[frame_idx])
-    ]
-    rot_mat = p3d.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
-    result = transform_image_3d(device if not device.type.startswith('mps') else torch.device('cpu'), prev_img_cv2, depth, rot_mat, translate_xyz, anim_args, keys, frame_idx)
-    torch.cuda.empty_cache()
-    return result
+    # resume animation
+    prev_sample = None
+    color_match_sample = None
+    if anim_args.resume_from_timestring:
+        last_frame = start_frame-1
+        if turbo_steps > 1:
+            last_frame -= last_frame%turbo_steps
+        path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:05}.png")
+        img = cv2.imread(path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        prev_sample = sample_from_cv2(img)
+        if anim_args.color_coherence != 'None':
+            color_match_sample = img
+        if turbo_steps > 1:
+            turbo_next_image, turbo_next_frame_idx = sample_to_cv2(prev_sample, type=np.float32), last_frame
+            turbo_prev_image, turbo_prev_frame_idx = turbo_next_image, turbo_next_frame_idx
+            start_frame = last_frame+turbo_steps
 
-def transform_image_3d(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx):
-    # adapted and optimized version of transform_image_3d from Disco Diffusion https://github.com/alembics/disco-diffusion 
-    w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
-
-    aspect_ratio = float(w)/float(h)
-    near = keys.near_series[frame_idx]
-    far = keys.far_series[frame_idx]
-    fov_deg = keys.fov_series[frame_idx]
-    persp_cam_old = p3d.FoVPerspectiveCameras(near, far, aspect_ratio, fov=fov_deg, degrees=True, device=device)
-    persp_cam_new = p3d.FoVPerspectiveCameras(near, far, aspect_ratio, fov=fov_deg, degrees=True, R=rot_mat, T=torch.tensor([translate]), device=device)
-
-    # range of [-1,1] is important to torch grid_sample's padding handling
-    y,x = torch.meshgrid(torch.linspace(-1.,1.,h,dtype=torch.float32,device=device),torch.linspace(-1.,1.,w,dtype=torch.float32,device=device))
-    z = torch.as_tensor(depth_tensor, dtype=torch.float32, device=device)
-    xyz_old_world = torch.stack((x.flatten(), y.flatten(), z.flatten()), dim=1)
-
-    xyz_old_cam_xy = persp_cam_old.get_full_projection_transform().transform_points(xyz_old_world)[:,0:2]
-    xyz_new_cam_xy = persp_cam_new.get_full_projection_transform().transform_points(xyz_old_world)[:,0:2]
-
-    offset_xy = xyz_new_cam_xy - xyz_old_cam_xy
-    # affine_grid theta param expects a batch of 2D mats. Each is 2x3 to do rotation+translation.
-    identity_2d_batch = torch.tensor([[1.,0.,0.],[0.,1.,0.]], device=device).unsqueeze(0)
-    # coords_2d will have shape (N,H,W,2).. which is also what grid_sample needs.
-    coords_2d = torch.nn.functional.affine_grid(identity_2d_batch, [1,1,h,w], align_corners=False)
-    offset_coords_2d = coords_2d - torch.reshape(offset_xy, (h,w,2)).unsqueeze(0)
-
-    image_tensor = rearrange(torch.from_numpy(prev_img_cv2.astype(np.float32)), 'h w c -> c h w').to(device)
-    new_image = torch.nn.functional.grid_sample(
-        image_tensor.add(1/512 - 0.0001).unsqueeze(0), 
-        offset_coords_2d, 
-        mode=anim_args.sampling_mode, 
-        padding_mode=anim_args.padding_mode, 
-        align_corners=False
-    )
-
-    # convert back to cv2 style numpy array
-    result = rearrange(
-        new_image.squeeze().clamp(0,255), 
-        'c h w -> h w c'
-    ).cpu().numpy().astype(prev_img_cv2.dtype)
-    return result
-
-class DeformAnimKeys():
-    def __init__(self, anim_args):
-        self.angle_series = get_inbetweens(parse_key_frames(anim_args.angle), anim_args.max_frames)
-        self.zoom_series = get_inbetweens(parse_key_frames(anim_args.zoom), anim_args.max_frames)
-        self.translation_x_series = get_inbetweens(parse_key_frames(anim_args.translation_x), anim_args.max_frames)
-        self.translation_y_series = get_inbetweens(parse_key_frames(anim_args.translation_y), anim_args.max_frames)
-        self.translation_z_series = get_inbetweens(parse_key_frames(anim_args.translation_z), anim_args.max_frames)
-        self.rotation_3d_x_series = get_inbetweens(parse_key_frames(anim_args.rotation_3d_x), anim_args.max_frames)
-        self.rotation_3d_y_series = get_inbetweens(parse_key_frames(anim_args.rotation_3d_y), anim_args.max_frames)
-        self.rotation_3d_z_series = get_inbetweens(parse_key_frames(anim_args.rotation_3d_z), anim_args.max_frames)
-        self.perspective_flip_theta_series = get_inbetweens(parse_key_frames(anim_args.perspective_flip_theta), anim_args.max_frames)
-        self.perspective_flip_phi_series = get_inbetweens(parse_key_frames(anim_args.perspective_flip_phi), anim_args.max_frames)
-        self.perspective_flip_gamma_series = get_inbetweens(parse_key_frames(anim_args.perspective_flip_gamma), anim_args.max_frames)
-        self.perspective_flip_fv_series = get_inbetweens(parse_key_frames(anim_args.perspective_flip_fv), anim_args.max_frames)
-        self.noise_schedule_series = get_inbetweens(parse_key_frames(anim_args.noise_schedule), anim_args.max_frames)
-        self.strength_schedule_series = get_inbetweens(parse_key_frames(anim_args.strength_schedule), anim_args.max_frames)
-        self.contrast_schedule_series = get_inbetweens(parse_key_frames(anim_args.contrast_schedule), anim_args.max_frames)
-        self.cfg_scale_schedule_series = get_inbetweens(parse_key_frames(anim_args.cfg_scale_schedule), anim_args.max_frames)
-        self.seed_schedule_series = get_inbetweens(parse_key_frames(anim_args.seed_schedule), anim_args.max_frames)
-        self.fov_series = get_inbetweens(parse_key_frames(anim_args.fov_schedule), anim_args.max_frames)
-        self.near_series = get_inbetweens(parse_key_frames(anim_args.near_schedule), anim_args.max_frames)
-        self.far_series = get_inbetweens(parse_key_frames(anim_args.far_schedule), anim_args.max_frames)
-
-def get_inbetweens(key_frames, max_frames, integer=False, interp_method='Linear'):
-    import numexpr
-    key_frame_series = pd.Series([np.nan for a in range(max_frames)])
+    args.n_samples = 1
+    frame_idx = start_frame
     
-    for i in range(0, max_frames):
-        if i in key_frames:
-            value = key_frames[i]
-            value_is_number = check_is_number(value)
-            # if it's only a number, leave the rest for the default interpolation
-            if value_is_number:
-                t = i
-                key_frame_series[i] = value
-        if not value_is_number:
-            t = i
-            key_frame_series[i] = numexpr.evaluate(value)
-    key_frame_series = key_frame_series.astype(float)
+    #Webui
+    state.job_count = anim_args.max_frames
     
-    if interp_method == 'Cubic' and len(key_frames.items()) <= 3:
-        interp_method = 'Quadratic'    
-    if interp_method == 'Quadratic' and len(key_frames.items()) <= 2:
-        interp_method = 'Linear'
-          
-    key_frame_series[0] = key_frame_series[key_frame_series.first_valid_index()]
-    key_frame_series[max_frames-1] = key_frame_series[key_frame_series.last_valid_index()]
-    key_frame_series = key_frame_series.interpolate(method=interp_method.lower(), limit_direction='both')
-    if integer:
-        return key_frame_series.astype(int)
-    return key_frame_series
+    while frame_idx < anim_args.max_frames:
+        #Webui
+        state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
+        state.job_no = frame_idx + 1
+        if state.interrupted:
+            break
+        
+        print(f"Rendering animation frame {frame_idx} of {anim_args.max_frames}")
+        noise = keys.noise_schedule_series[frame_idx]
+        strength = keys.strength_schedule_series[frame_idx]
+        scale = keys.cfg_scale_schedule_series[frame_idx]
+        contrast = keys.contrast_schedule_series[frame_idx]
+        depth = None
+        
+        # emit in-between frames
+        if turbo_steps > 1:
+            tween_frame_start_idx = max(0, frame_idx-turbo_steps)
+            for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
+                tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
+                print(f"  creating in between frame {tween_frame_idx} tween:{tween:0.2f}")
 
-def parse_key_frames(string, prompt_parser=None):
-    # because math functions (i.e. sin(t)) can utilize brackets 
-    # it extracts the value in form of some stuff
-    # which has previously been enclosed with brackets and
-    # with a comma or end of line existing after the closing one
-    pattern = r'((?P<frame>[0-9]+):[\s]*\((?P<param>[\S\s]*?)\)([,][\s]?|[\s]?$))'
-    frames = dict()
-    for match_object in re.finditer(pattern, string):
-        frame = int(match_object.groupdict()['frame'])
-        param = match_object.groupdict()['param']
-        if prompt_parser:
-            frames[frame] = prompt_parser(param)
-        else:
-            frames[frame] = param
-    if frames == {} and len(string) != 0:
-        raise RuntimeError('Key Frame string not correctly formatted')
-    return frames
+                advance_prev = turbo_prev_image is not None and tween_frame_idx > turbo_prev_frame_idx
+                advance_next = tween_frame_idx > turbo_next_frame_idx
+
+                if depth_model is not None:
+                    assert(turbo_next_image is not None)
+                    depth = depth_model.predict(turbo_next_image, anim_args, root.half_precision)
+                
+                if advance_prev:
+                    turbo_prev_image, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+                if advance_next:
+                    turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+
+                turbo_prev_frame_idx = turbo_next_frame_idx = tween_frame_idx
+
+                if turbo_prev_image is not None and tween < 1.0:
+                    img = turbo_prev_image*(1.0-tween) + turbo_next_image*tween
+                else:
+                    img = turbo_next_image
+
+                filename = f"{args.timestring}_{tween_frame_idx:05}.png"
+                cv2.imwrite(os.path.join(args.outdir, filename), img)
+                if anim_args.save_depth_maps:
+                    depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:05}.png"), depth)
+            if turbo_next_image is not None:
+                prev_sample = sample_from_cv2(turbo_next_image)
+
+        # apply transforms to previous frame
+        if prev_sample is not None:
+            prev_img, depth = anim_frame_warp(prev_sample, args, anim_args, keys, frame_idx, depth_model, depth=None, device=root.device, half_precision=root.half_precision)
+
+            # apply color matching
+            if anim_args.color_coherence != 'None':
+                if color_match_sample is None:
+                    color_match_sample = prev_img.copy()
+                else:
+                    prev_img = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)
+
+            # apply scaling
+            contrast_sample = prev_img * contrast
+            # apply frame noising
+            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise)
+
+            # use transformed previous frame as init for current
+            args.use_init = True
+            if root.half_precision:
+                args.init_sample = noised_sample.half().to(root.device)
+            else:
+                args.init_sample = noised_sample.to(root.device)
+            args.strength = max(0.0, min(1.0, strength))
+        
+        args.scale = scale
+
+        # grab prompt for current frame
+        args.prompt = prompt_series[frame_idx]
+        
+        if args.seed_behavior == 'schedule':
+            args.seed = int(keys.seed_schedule_series[frame_idx])
+        
+        print(f"{args.prompt} {args.seed}")
+        if not using_vid_init:
+            print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
+            print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")
+            print(f"Rx: {keys.rotation_3d_x_series[frame_idx]} Ry: {keys.rotation_3d_y_series[frame_idx]} Rz: {keys.rotation_3d_z_series[frame_idx]}")
+            if anim_args.use_mask_video:
+                mask_frame = os.path.join(args.outdir, 'maskframes', get_frame_name(anim_args.video_mask_path) + f"{frame_idx+1:05}.jpg")
+                args.mask_file = mask_frame
+
+        # grab init image for current frame
+        if using_vid_init:
+            init_frame = os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx+1:05}.jpg")            
+            print(f"Using video init frame {init_frame}")
+            args.init_image = init_frame
+            if anim_args.use_mask_video:
+                mask_frame = os.path.join(args.outdir, 'maskframes', get_frame_name(anim_args.video_mask_path) + f"{frame_idx+1:05}.jpg")
+                args.mask_file = mask_frame
+                
+        # sample the diffusion model
+        sample, image = generate(args, anim_args, root, frame_idx, return_sample=True)
+        if not using_vid_init:
+            prev_sample = sample
+
+        if turbo_steps > 1:
+            turbo_prev_image, turbo_prev_frame_idx = turbo_next_image, turbo_next_frame_idx
+            turbo_next_image, turbo_next_frame_idx = sample_to_cv2(sample, type=np.float32), frame_idx
+            frame_idx += turbo_steps
+        else:    
+            filename = f"{args.timestring}_{frame_idx:05}.png"
+            image.save(os.path.join(args.outdir, filename))
+            if anim_args.save_depth_maps:
+                depth = depth_model.predict(sample_to_cv2(sample), anim_args, root.half_precision)
+                depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
+            frame_idx += 1
+
+        state.current_image = image
+
+        args.seed = next_seed(args)
+
+def render_input_video(args, anim_args, animation_prompts, root):
+    # create a folder for the video input frames to live in
+    video_in_frame_path = os.path.join(args.outdir, 'inputframes') 
+    os.makedirs(video_in_frame_path, exist_ok=True)
+
+    # save the video frames from input video
+    print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {video_in_frame_path}...")
+    vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
+
+    # determine max frames from length of input frames
+    anim_args.max_frames = len([f for f in pathlib.Path(video_in_frame_path).glob('*.jpg')])
+    args.use_init = True
+    print(f"Loading {anim_args.max_frames} input frames from {video_in_frame_path} and saving video frames to {args.outdir}")
+
+    if anim_args.use_mask_video:
+        # create a folder for the mask video input frames to live in
+        mask_in_frame_path = os.path.join(args.outdir, 'maskframes') 
+        os.makedirs(mask_in_frame_path, exist_ok=True)
+
+        # save the video frames from mask video
+        print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
+        vid2frames(anim_args.video_mask_path, mask_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
+        max_mask_frames = len([f for f in pathlib.Path(mask_in_frame_path).glob('*.jpg')])
+
+        # limit max frames if there are less frames in the video mask compared to input video
+        if max_mask_frames < anim_args.max_frames :
+            anim_args.max_mask_frames
+            print ("Video mask contains less frames than init video, max frames limited to number of mask frames.")
+        args.use_mask = True
+        args.overlay_mask = True
+
+    render_animation(args, anim_args, animation_prompts, root)
+
+# Modified a copy of the above to allow using masking video with out a init video.
+def render_animation_with_video_mask(args, anim_args, animation_prompts, root):
+    # create a folder for the video input frames to live in
+    mask_in_frame_path = os.path.join(args.outdir, 'maskframes') 
+    os.makedirs(mask_in_frame_path, exist_ok=True)
+
+    # save the video frames from mask video
+    print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
+    vid2frames(anim_args.video_mask_path, mask_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
+    args.use_mask = True
+    #args.overlay_mask = True
+
+    # determine max frames from length of input frames
+    anim_args.max_frames = len([f for f in pathlib.Path(mask_in_frame_path).glob('*.jpg')])
+    #args.use_init = True
+    print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
+
+    render_animation(args, anim_args, animation_prompts, root)
+
+
+def render_interpolation(args, anim_args, animation_prompts, root):
+    # animations use key framed prompts
+    args.prompts = animation_prompts
+
+    # expand key frame strings to values
+    keys = DeformAnimKeys(anim_args)
+
+    # create output folder for the batch
+    os.makedirs(args.outdir, exist_ok=True)
+    print(f"Saving interpolation animation frames to {args.outdir}")
+
+    # save settings for the batch
+    settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
+    with open(settings_filename, "w+", encoding="utf-8") as f:
+        s = {**dict(args.__dict__), **dict(anim_args.__dict__)}
+        json.dump(s, f, ensure_ascii=False, indent=4)
+    
+    # Compute interpolated prompts
+    prompt_series = interpolate_prompts(animation_prompts, anim_args.max_frames)
+    
+    state.job_count = anim_args.max_frames
+    frame_idx = 0
+    while frame_idx < anim_args.max_frames:
+        print(f"Rendering interpolation animation frame {frame_idx} of {anim_args.max_frames}")
+        state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
+        state.job_no = frame_idx + 1
+        
+        if state.interrupted:
+                break
+        
+        # grab inputs for current frame generation
+        args.n_samples = 1
+        args.prompt = prompt_series[frame_idx]
+        args.scale = keys.cfg_scale_schedule_series[frame_idx]
+        if args.seed_behavior == 'schedule':
+            args.seed = int(keys.seed_schedule_series[frame_idx])
+        
+        _, image = generate(args, anim_args, root, frame_idx, return_sample=True)
+        filename = f"{args.timestring}_{frame_idx:05}.png"
+        image.save(os.path.join(args.outdir, filename))
+
+        state.current_image = image
+        
+        if args.seed_behavior != 'schedule':
+            args.seed = next_seed(args)
+
+        frame_idx += 1
+
+
+def interpolate_prompts(animation_prompts, max_frames):
+    # Get prompts sorted by keyframe 
+    sorted_prompts = sorted(animation_prompts.items(), key=lambda item: int(item[0]))
+
+    # Setup container for interpolated prompts
+    prompt_series = pd.Series([np.nan for a in range(max_frames)])
+
+    # For every keyframe prompt except the last
+    for i in range(0,len(sorted_prompts)-1):
+        
+        # Get current and next keyframe
+        current_frame = int(sorted_prompts[i][0])
+        next_frame = int(sorted_prompts[i+1][0])
+        
+        # Ensure there's no weird ordering issues or duplication in the animation prompts
+        # (unlikely because we sort above, and the json parser will strip dupes)
+        if current_frame>=next_frame:
+            print(f"WARNING: Sequential prompt keyframes {i}:{current_frame} and {i+1}:{next_frame} are not monotonously increasing; skipping interpolation.")
+            continue
+            
+        # Get current and next keyframes' positive and negative prompts (if any)
+        current_prompt = sorted_prompts[i][1]
+        next_prompt = sorted_prompts[i+1][1]
+        current_positive, current_negative, *_ = current_prompt.split("--neg") + [None]
+        next_positive, next_negative, *_ = next_prompt.split("--neg") + [None]
+        
+        # Calculate how much to shift the weight from current to next prompt at each frame
+        weight_step = 1/(next_frame-current_frame)
+        
+        # Apply weighted prompt interpolation for each frame between current and next keyframe
+        # using the syntax:  prompt1 :weight1 AND prompt1 :weight2 --neg nprompt1 :weight1 AND nprompt1 :weight2
+        # (See: https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#composable-diffusion )
+        for f in range(current_frame,next_frame):
+            next_weight = weight_step * (f-current_frame)
+            current_weight = 1 - next_weight
+            
+            # We will build the prompt incrementally depending on which prompts are present
+            prompt_series[f] = ''
+
+            # Cater for the case where neither, either or both current & next have positive prompts:
+            if current_positive:
+                prompt_series[f] += f"{current_positive} :{current_weight}"
+            if current_positive and next_positive:
+                prompt_series[f] += f" AND "
+            if next_positive:
+                prompt_series[f] += f"{next_positive} :{next_weight}"
+            
+            # Cater for the case where neither, either or both current & next have negative prompts:
+            if current_negative or next_negative:
+                prompt_series[f] += " --neg "
+                if current_negative:
+                    prompt_series[f] += f" {current_negative} :{current_weight}"
+                if current_negative and next_negative:
+                    prompt_series[f] += f" AND "
+                if next_negative:
+                    prompt_series[f] += f" {next_negative} :{next_weight}"
+    
+    # Set explicitly declared keyframe prompts (overwriting interpolated values at the keyframe idx). This ensures:
+    # - That final prompt is set, and
+    # - Gives us a chance to emit warnings if any keyframe prompts are already using composable diffusion
+    for i, prompt in animation_prompts.items():
+        prompt_series[int(i)] = prompt
+        if ' AND ' in prompt:
+            print(f"WARNING: keyframe {i}'s prompt is using composable diffusion (aka the 'AND' keyword). This will cause unexpected behaviour with interpolation.")
+    
+    # Return the filled series, in case max_frames is greater than the last keyframe or any ranges were skipped.
+    return prompt_series.ffill().bfill()
