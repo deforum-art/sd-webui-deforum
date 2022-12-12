@@ -26,6 +26,9 @@ from modules import processing
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
+
+import math, json
+
 #MASKARGSEXPANSION 
 #Add option to remove noise in relation to masking so that areas which are masked receive less noise
 def add_noise(sample: torch.Tensor, noise_amt: float) -> torch.Tensor:
@@ -93,7 +96,7 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
         mask = PIL.ImageOps.invert(mask)
     
     return mask
-    
+
 def generate(args, anim_args, root, frame = 0, return_sample=False):
     import re
     assert args.prompt is not None
@@ -154,14 +157,40 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
     
     processed = None
     
+    tweeningFrames = 20
+    blendFactor = .075
+    colorCorrectionFactor = .075
+    jsonImages = json.loads(args.init_image)
+    framesToTweenOn = list(jsonImages.keys())[1:]
+    frameToChoose = (frame >= int(framesToTweenOn[0])) + (frame >= int(framesToTweenOn[1])) + (frame >= int(framesToTweenOn[2])) + (frame >= int(framesToTweenOn[3]))
+    
+    if frame % 50 <= tweeningFrames: # number of tweening frames
+        blendFactor = .35 - .25*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
+    print(jsonImages.values())
+    print(f"\nframe: {frame} - blend factor: {blendFactor:.5f} - strength:{args.strength:.5f} - denoising: {p.denoising_strength:.5f}\n")
+    print(list(jsonImages.values())[frameToChoose])
+    init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
+                              shape=(args.W, args.H),
+                              use_alpha_as_mask=args.use_alpha_as_mask)
+
     if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
         init_image = Image.fromarray(img)
-    elif args.use_init and args.init_image != None and args.init_image != '':
-        init_image, mask_image = load_img(args.init_image, 
-                                          shape=(args.W, args.H),  
-                                          use_alpha_as_mask=args.use_alpha_as_mask)
+
+        init_image = Image.blend(init_image, init_image2, blendFactor)
+        correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
+        p.color_corrections = [processing.setup_color_correction(correction_colors)]
+
+        # need to do all the color correction still
+
+    elif args.use_init and ((args.init_image != None and args.init_image != '')):# or (anim_args.from_img2img_instead_of_link)):
+        # if anim_args.from_img2img_instead_of_link:
+        #     print("find out how to get the image from image_to_img or w.e")
+        # else: # using list of animations from init
+        init_image, mask_image = load_img(list(jsonImages.values())[0], # initial init image
+                                            shape=(args.W, args.H),  
+                                            use_alpha_as_mask=args.use_alpha_as_mask)
     else:
         print(f"Not using an init image (doing pure txt2img) - seed:{p.seed}; subseed:{p.subseed}; subseed_strength:{p.subseed_strength}; cfg_scale:{p.cfg_scale}; steps:{p.steps}")
         p_txt = StableDiffusionProcessingTxt2Img(
