@@ -152,11 +152,8 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
         print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
         print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
         args.strength = 0
-    mask_image = None
-    init_image = None
     
-    processed = None
-    
+    # some setup variables that should be broken out later
     tweeningFrames = 20
     blendFactor = .075
     colorCorrectionFactor = .075
@@ -168,9 +165,12 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
     
     if frame % 50 <= tweeningFrames: # number of tweening frames
         blendFactor = .35 - .25*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
-    print(jsonImages.values())
+    
     print(f"\nframe: {frame} - blend factor: {blendFactor:.5f} - strength:{args.strength:.5f} - denoising: {p.denoising_strength:.5f}\n")
-    print(list(jsonImages.values())[frameToChoose])
+    
+    processed = None
+    mask_image = None
+    init_image = None
     init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
                               shape=(args.W, args.H),
                               use_alpha_as_mask=args.use_alpha_as_mask)

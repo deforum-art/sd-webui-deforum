@@ -9,7 +9,7 @@ The method used is somewhat simple at the moment, using a blend factor that is b
 
 Currently tweeningFrames is hardcoded to 20 frames as to make the jump between images and color spaces a bit less jaring, but Ill break this out to the ui soon.
 
-The web ui changes I have implemented for this version are in the init_image that is parsed within [the generate script](scripts/deforum_helpers/generate.py#L163). This will allow for the init image to be a json, like the prompt from the previous tab, and should be a simple interface for injecting keyframes at specific keyframe intervals.
+The web ui changes I have implemented for this version are in the init_image that is parsed within [the generate script](scripts/deforum_helpers/generate.py#L160-L174). This will allow for the init image to be a json, like the prompt from the previous tab, and should be a simple interface for injecting keyframes at specific keyframe intervals.
 
 So this should look like the following 
 ```json
