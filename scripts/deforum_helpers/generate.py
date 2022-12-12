@@ -161,8 +161,10 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
     blendFactor = .075
     colorCorrectionFactor = .075
     jsonImages = json.loads(args.init_image)
-    framesToTweenOn = list(jsonImages.keys())[1:]
-    frameToChoose = (frame >= int(framesToTweenOn[0])) + (frame >= int(framesToTweenOn[1])) + (frame >= int(framesToTweenOn[2])) + (frame >= int(framesToTweenOn[3]))
+    framesToImageSwapOn = list(jsonImages.keys())[1:]
+    frameToChoose = 0
+    for swappingFrame in framesToImageSwapOn:
+        frameToChoose += (frame >= int(swappingFrame))# + (frame >= int(framesToTweenOn[1])) + (frame >= int(framesToTweenOn[2])) + (frame >= int(framesToTweenOn[3]))
     
     if frame % 50 <= tweeningFrames: # number of tweening frames
         blendFactor = .35 - .25*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
