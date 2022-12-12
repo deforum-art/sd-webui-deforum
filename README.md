@@ -21,6 +21,13 @@ So this should look like the following
     "200": "location of initial image"
 }
 ```
+
+# Getting started
+
+To enable the loop make sure to check `init_image` and to set your schedule. This should get you started.
+
+As for suggestions on values for a strength schedule, id suggest higher values for the keyframe frames.
+
 # Notes
 
 ## 1
