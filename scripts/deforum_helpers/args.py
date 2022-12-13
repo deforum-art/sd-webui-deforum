@@ -177,6 +177,11 @@ def DeforumArgs():
     init_c = None
 
     return locals()
+
+def ParseqArgs():
+    parseq_manifest = None
+    parseq_use_deltas = True
+    return locals()
     
 def DeforumOutputArgs():
     skip_video_for_run_all = False #@param {type: 'boolean'}
@@ -206,6 +211,7 @@ mask_fill_choices=['fill', 'original', 'latent noise', 'latent nothing']
 def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     d = SimpleNamespace(**DeforumArgs()) #default args
     da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
+    dp = SimpleNamespace(**ParseqArgs()) #default parseq ars
     dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
     if not is_extension:
         with gr.Row():
@@ -216,12 +222,18 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         btn = i1 = gr.HTML("")
     
     with gr.Accordion("Info and links", open=False):
-        i2 = gr.HTML("<p>Made by deforum.github.io, port for AUTOMATIC1111's webui maintained by kabachuha</p>")
-        i3 = gr.HTML("<p>Original Deforum Github repo  github.com/deforum/stable-diffusion</p>")
-        i4 = gr.HTML("<p>This fork for auto1111's webui github.com/deforum-art/deforum-for-automatic1111-webui</p>")
-        i5 = gr.HTML("<p>Join the official Deforum Discord discord.gg/deforum to share your creations and suggestions</p>")
-        i6 = gr.HTML("<p>User guide for v0.5 docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit</p>")
-        i7 = gr.HTML("<p>Math keyframing explanation docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing</p>")
+        i2 = gr.HTML("<strong>Made by deforum.github.io, port for AUTOMATIC1111's webui maintained by kabachuha</strong>")
+        i3 = gr.HTML("""<ul style="list-style-type:circle; margin-left:1em">
+        <li>The code for this extension: <a  style="color:blue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">Fork of deforum for auto1111's webui</a>.</li>
+        <li>Join the <a style="color:blue" href="https://discord.gg/deforum">official Deforum Discord</a> to share your creations and suggestions.</li>
+        <li>For general usage, see the <a style="color:blue" href="https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit">User guide for Deforum v0.5</a>.</li>
+        <li>For advanced animations, see the <a style="color:blue" href="https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing">Math keyframing explanation</a>.</li>
+        <li>Alternatively, use <a style="color:blue" href="https://sd-parseq.web.app/deforum">sd-parseq</a> as a UI to define your animation schedules (see the Parseq section in the Keyframes tab).</li>
+        </ul>""")
+        i4 = gr.HTML("")
+        i5 = gr.HTML("")
+        i6 = gr.HTML("")
+        i7 = gr.HTML("")
     
     if not is_extension:
         def show_vid():
@@ -380,6 +392,33 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             padding_mode = gr.Dropdown(label="padding_mode", choices=['border', 'reflection', 'zeros'], value=da.padding_mode, type="value", elem_id="padding_mode", interactive=True)
             sampling_mode = gr.Dropdown(label="sampling_mode", choices=['bicubic', 'bilinear', 'nearest'], value=da.sampling_mode, type="value", elem_id="sampling_mode", interactive=True)
             save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
+
+        with gr.Accordion('Parseq', open=False):
+            i37 = gr.HTML("""
+            Use an <a style='color:blue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
+            <p style="margin-top:1em">
+                Note that parseq overrides:
+                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                    <li>Run: seed, subseed, subseed strength.</li>
+                    <li>Keyframes: generation settings (noise, strength, contrast, scale).</li>
+                    <li>Keyframes: motion parameters for 2D and 3D (angle, zoom, translation, rotation, perspective flip).</li>
+                </ul>
+            </p>
+            <p">
+                Parseq does <strong><em>not</em></strong> override:
+                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                    <li>Run: Sampler, W, H, Restore faces, tiling, highres fix, resize seed.</li>
+                    <li>Keyframes: animation settings (animation mode, max_frames, border) </li>
+                    <li>Keyframes: coherence (color coherence & diffusion cadence) </li>
+                    <li>Keyframes: depth warping</li>
+                    <li>Video output settings: all settings (including fps and max frames)</li>
+                </ul>
+            </p>
+            """)
+            with gr.Row():
+                parseq_manifest = gr.Textbox(label="parseq_manifest", lines=4, value = dp.parseq_manifest, interactive=True)
+            with gr.Row():
+                parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
     
     # Animation settings END
     
@@ -448,7 +487,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             resume_from_timestring = gr.Checkbox(label="resume_from_timestring", value=da.resume_from_timestring, interactive=True)
             resume_timestring = gr.Textbox(label="resume_timestring", lines=1, value = da.resume_timestring, interactive=True)
         # Init settings END
-        
+
     with gr.Tab('Video output'):
         # Video output settings START
         i35 = gr.HTML("<p style=\"margin-bottom:0.75em\">Video output settings</p>")
@@ -477,7 +516,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
     ds = SimpleNamespace(**setup_deforum_setting_dictionary(self, is_img2img, is_extension))
-    return [ds.btn, ds.override_settings_with_file, ds.custom_settings_file, ds.animation_mode, ds.max_frames, ds.border, ds.angle, ds.zoom, ds.translation_x, ds.translation_y, ds.translation_z, ds.rotation_3d_x, ds.rotation_3d_y, ds.rotation_3d_z, ds.flip_2d_perspective, ds.perspective_flip_theta, ds.perspective_flip_phi, ds.perspective_flip_gamma, ds.perspective_flip_fv, ds.noise_schedule, ds.strength_schedule, ds.contrast_schedule, ds.cfg_scale_schedule, ds.fov_schedule, ds.near_schedule, ds.far_schedule, ds.seed_schedule, ds.histogram_matching, ds.color_coherence, ds.diffusion_cadence, ds.use_depth_warping, ds.midas_weight, ds.near_plane, ds.far_plane, ds.fov, ds.padding_mode, ds.sampling_mode, ds.save_depth_maps, ds.video_init_path, ds.extract_nth_frame, ds.overwrite_extracted_frames, ds.use_mask_video, ds.video_mask_path, ds.interpolate_key_frames, ds.interpolate_x_frames, ds.resume_from_timestring, ds.resume_timestring, ds.prompts, ds.animation_prompts, ds.W, ds.H, ds.restore_faces, ds.tiling, ds.enable_hr, ds.firstphase_width, ds.firstphase_height, ds.seed, ds.sampler, ds.seed_enable_extras, ds.subseed, ds.subseed_strength, ds.seed_resize_from_w, ds.seed_resize_from_h, ds.steps, ds.ddim_eta, ds.n_batch, ds.make_grid, ds.grid_rows, ds.save_settings, ds.save_samples, ds.display_samples, ds.save_sample_per_step, ds.show_sample_per_step, ds.override_these_with_webui, ds.batch_name, ds.filename_format, ds.seed_behavior, ds.use_init, ds.from_img2img_instead_of_link, ds.strength_0_no_init, ds.strength, ds.init_image, ds.use_mask, ds.use_alpha_as_mask, ds.invert_mask, ds.overlay_mask, ds.mask_file, ds.mask_contrast_adjust, ds.mask_brightness_adjust, ds.mask_overlay_blur, ds.fill, ds.full_res_mask, ds.full_res_mask_padding, ds.skip_video_for_run_all, ds.fps, ds.output_format, ds.ffmpeg_location, ds.add_soundtrack, ds.soundtrack_path, ds.use_manual_settings, ds.render_steps, ds.max_video_frames, ds.path_name_modifier, ds.image_path, ds.mp4_path, ds.i1, ds.i2, ds.i3, ds.i4, ds.i5, ds.i6, ds.i7, ds.i8, ds.i9, ds.i10, ds.i11, ds.i12, ds.i13, ds.i14, ds.i15, ds.i16, ds.i17, ds.i18, ds.i19, ds.i20, ds.i21, ds.i22, ds.i23, ds.i24, ds.i25, ds.i26, ds.i27, ds.i28, ds.i29, ds.i30, ds.i31, ds.i32, ds.i33, ds.i34, ds.i35, ds.i36]
+    return [ds.btn, ds.override_settings_with_file, ds.custom_settings_file, ds.animation_mode, ds.max_frames, ds.border, ds.angle, ds.zoom, ds.translation_x, ds.translation_y, ds.translation_z, ds.rotation_3d_x, ds.rotation_3d_y, ds.rotation_3d_z, ds.flip_2d_perspective, ds.perspective_flip_theta, ds.perspective_flip_phi, ds.perspective_flip_gamma, ds.perspective_flip_fv, ds.noise_schedule, ds.strength_schedule, ds.contrast_schedule, ds.cfg_scale_schedule, ds.fov_schedule, ds.near_schedule, ds.far_schedule, ds.seed_schedule, ds.histogram_matching, ds.color_coherence, ds.diffusion_cadence, ds.use_depth_warping, ds.midas_weight, ds.near_plane, ds.far_plane, ds.fov, ds.padding_mode, ds.sampling_mode, ds.save_depth_maps, ds.video_init_path, ds.extract_nth_frame, ds.overwrite_extracted_frames, ds.use_mask_video, ds.video_mask_path, ds.interpolate_key_frames, ds.interpolate_x_frames, ds.resume_from_timestring, ds.resume_timestring, ds.prompts, ds.animation_prompts, ds.W, ds.H, ds.restore_faces, ds.tiling, ds.enable_hr, ds.firstphase_width, ds.firstphase_height, ds.seed, ds.sampler, ds.seed_enable_extras, ds.subseed, ds.subseed_strength, ds.seed_resize_from_w, ds.seed_resize_from_h, ds.steps, ds.ddim_eta, ds.n_batch, ds.make_grid, ds.grid_rows, ds.save_settings, ds.save_samples, ds.display_samples, ds.save_sample_per_step, ds.show_sample_per_step, ds.override_these_with_webui, ds.batch_name, ds.filename_format, ds.seed_behavior, ds.use_init, ds.from_img2img_instead_of_link, ds.strength_0_no_init, ds.strength, ds.init_image, ds.use_mask, ds.use_alpha_as_mask, ds.invert_mask, ds.overlay_mask, ds.mask_file, ds.mask_contrast_adjust, ds.mask_brightness_adjust, ds.mask_overlay_blur, ds.fill, ds.full_res_mask, ds.full_res_mask_padding, ds.skip_video_for_run_all, ds.fps, ds.output_format, ds.ffmpeg_location, ds.add_soundtrack, ds.soundtrack_path, ds.use_manual_settings, ds.render_steps, ds.max_video_frames, ds.path_name_modifier, ds.image_path, ds.mp4_path, ds.parseq_manifest, ds.parseq_use_deltas, ds.i1, ds.i2, ds.i3, ds.i4, ds.i5, ds.i6, ds.i7, ds.i8, ds.i9, ds.i10, ds.i11, ds.i12, ds.i13, ds.i14, ds.i15, ds.i16, ds.i17, ds.i18, ds.i19, ds.i20, ds.i21, ds.i22, ds.i23, ds.i24, ds.i25, ds.i26, ds.i27, ds.i28, ds.i29, ds.i30, ds.i31, ds.i32, ds.i33, ds.i34, ds.i35, ds.i36, ds.i37]
 
 def pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, histogram_matching, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring):
     return locals()
@@ -496,13 +535,17 @@ def pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstpha
     
 def pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path):
     return locals()
-    
-def process_args(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, histogram_matching, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36):
+
+def pack_parseq_args(parseq_manifest, parseq_use_deltas):
+    return locals()
+
+def process_args(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, histogram_matching, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, parseq_manifest, parseq_use_deltas, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37):
 
     args_dict = pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding)
     anim_args_dict = pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, histogram_matching, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring)
     video_args_dict = pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path)
-    
+    parseq_args_dict = pack_parseq_args(parseq_manifest, parseq_use_deltas)
+
     import json
     
     root = SimpleNamespace(**Root())
@@ -513,7 +556,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     from scripts.deforum_helpers.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict, anim_args_dict, custom_settings_file, root)
+        load_args(args_dict, anim_args_dict, parseq_args_dict, custom_settings_file, root)
     
     print(f"Additional models path: {root.models_path}")
     if not os.path.exists(root.models_path):
@@ -522,6 +565,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     args = SimpleNamespace(**args_dict)
     anim_args = SimpleNamespace(**anim_args_dict)
     video_args = SimpleNamespace(**video_args_dict)
+    parseq_args = SimpleNamespace(**parseq_args_dict)
 
     # TODO handle webui sampler settings override
     
@@ -585,4 +629,4 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
     
-    return root, args, anim_args, video_args
+    return root, args, anim_args, video_args, parseq_args
