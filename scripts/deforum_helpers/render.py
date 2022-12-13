@@ -9,10 +9,12 @@ import numpy as np
 from PIL import Image
 import pathlib
 import torchvision.transforms as T
+import logging
 
 from .generate import generate, add_noise
 from .prompt import sanitize
 from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp_2d, anim_frame_warp_3d, vid2frames, get_frame_name
+from .parseq_adapter import ParseqAnimKeys
 from .depth import DepthModel
 from .colors import maintain_colors
 
@@ -28,12 +30,13 @@ def next_seed(args):
         args.seed = random.randint(0, 2**32 - 1)
     return args.seed
 
-def render_animation(args, anim_args, animation_prompts, root):
-    # animations use key framed prompts
-    args.prompts = animation_prompts
+def render_animation(args, anim_args, parseq_args, animation_prompts, root):
+
+    # use parseq if manifest is provided
+    use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
 
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args)
+    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args)
 
     # resume animation
     start_frame = 0
@@ -57,11 +60,19 @@ def render_animation(args, anim_args, animation_prompts, root):
     if anim_args.resume_from_timestring:
         args.timestring = anim_args.resume_timestring
 
+    # Always enable pseudo-3d with parseq. No need for an extra toggle:
+    # Whether it's used or not in practice is defined by the schedules
+    if use_parseq:
+        anim_args.flip_2d_perspective = True        
+
     # expand prompts out to per-frame
-    prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
-    for i, prompt in animation_prompts.items():
-        prompt_series[int(i)] = prompt
-    prompt_series = prompt_series.ffill().bfill()
+    if use_parseq:
+        prompt_series = keys.prompts
+    else:
+        prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
+        for i, prompt in animation_prompts.items():
+            prompt_series[int(i)] = prompt
+        prompt_series = prompt_series.ffill().bfill()
 
     # check for video inits
     using_vid_init = anim_args.animation_mode == 'Video Input'
@@ -193,9 +204,14 @@ def render_animation(args, anim_args, animation_prompts, root):
         # grab prompt for current frame
         args.prompt = prompt_series[frame_idx]
         
-        if args.seed_behavior == 'schedule':
+        if args.seed_behavior == 'schedule' or use_parseq:
             args.seed = int(keys.seed_schedule_series[frame_idx])
-        
+
+        if use_parseq:
+            args.seed_enable_extras = True
+            args.subseed = int(keys.subseed_series[frame_idx])
+            args.subseed_strength = keys.subseed_strength_series[frame_idx]
+
         print(f"{args.prompt} {args.seed}")
         if not using_vid_init:
             print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
@@ -236,7 +252,7 @@ def render_animation(args, anim_args, animation_prompts, root):
 
         args.seed = next_seed(args)
 
-def render_input_video(args, anim_args, animation_prompts, root):
+def render_input_video(args, anim_args, parseq_args, animation_prompts, root):
     # create a folder for the video input frames to live in
     video_in_frame_path = os.path.join(args.outdir, 'inputframes') 
     os.makedirs(video_in_frame_path, exist_ok=True)
@@ -267,10 +283,11 @@ def render_input_video(args, anim_args, animation_prompts, root):
         args.use_mask = True
         args.overlay_mask = True
 
-    render_animation(args, anim_args, animation_prompts, root)
+
+    render_animation(args, anim_args, parseq_args, animation_prompts, root)
 
 # Modified a copy of the above to allow using masking video with out a init video.
-def render_animation_with_video_mask(args, anim_args, animation_prompts, root):
+def render_animation_with_video_mask(args, anim_args, parseq_args, animation_prompts, root):
     # create a folder for the video input frames to live in
     mask_in_frame_path = os.path.join(args.outdir, 'maskframes') 
     os.makedirs(mask_in_frame_path, exist_ok=True)
@@ -286,15 +303,16 @@ def render_animation_with_video_mask(args, anim_args, animation_prompts, root):
     #args.use_init = True
     print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
 
-    render_animation(args, anim_args, animation_prompts, root)
+    render_animation(args, anim_args, parseq_args, animation_prompts, root)
 
 
-def render_interpolation(args, anim_args, animation_prompts, root):
-    # animations use key framed prompts
-    args.prompts = animation_prompts
+def render_interpolation(args, anim_args, parseq_args, animation_prompts, root):
+
+    # use parseq if manifest is provided
+    use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
 
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args)
+    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args)
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
@@ -307,7 +325,12 @@ def render_interpolation(args, anim_args, animation_prompts, root):
         json.dump(s, f, ensure_ascii=False, indent=4)
     
     # Compute interpolated prompts
-    prompt_series = interpolate_prompts(animation_prompts, anim_args.max_frames)
+    if use_parseq:
+        print("Parseq prompts are assumed to already be interpolated - not doing any additional prompt interpolation")
+        prompt_series = keys.prompts
+    else: 
+        print("Generating interpolated prompts for all frames")
+        prompt_series = interpolate_prompts(animation_prompts, anim_args.max_frames)
     
     state.job_count = anim_args.max_frames
     frame_idx = 0
@@ -323,7 +346,12 @@ def render_interpolation(args, anim_args, animation_prompts, root):
         args.n_samples = 1
         args.prompt = prompt_series[frame_idx]
         args.scale = keys.cfg_scale_schedule_series[frame_idx]
-        if args.seed_behavior == 'schedule':
+        if use_parseq:
+            args.seed_enable_extras = True
+            args.subseed = int(keys.subseed_series[frame_idx])
+            args.subseed_strength = keys.subseed_strength_series[frame_idx]
+
+        if args.seed_behavior == 'schedule' or use_parseq:
             args.seed = int(keys.seed_schedule_series[frame_idx])
         
         _, image = generate(args, anim_args, root, frame_idx, return_sample=True)
