@@ -95,7 +95,7 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
     
     return mask
     
-def generate(args, root, frame = 0, return_sample=False):
+def generate(args, anim_args, root, frame = 0, return_sample=False):
     import re
     assert args.prompt is not None
     
@@ -229,8 +229,9 @@ def generate(args, root, frame = 0, return_sample=False):
     
     if root.first_frame == None:
         root.first_frame = processed.images[0]
-        if opts.img2img_color_correction:
-            root.color_corrections = [processing.setup_color_correction(root.first_frame)] 
+        ### TODO: put the correct arg here.
+        if anim_args.histogram_matching:
+            root.color_corrections = [processing.setup_color_correction(root.first_frame)]
     
     if return_sample:
         pil_image = processed.images[0].convert('RGB') 

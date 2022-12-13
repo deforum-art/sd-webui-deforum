@@ -61,6 +61,7 @@ deforum_titles = {
     //"near_schedule": "",
     //"far_schedule":  "",
     "seed_schedule": "allows you to specify seeds at a specific schedule, if seed_behavior is set to schedule.",
+    "histogram_matching": "Whether to use a1111's histogram matching color correction algorithm. Overrides the value in the a1111 settings screen. Enabled by default for backwards compatility, but disabling is stronlgy recommended.",
     "color_coherence": "The color coherence will attempt to sample the overall pixel color information, and trend those values analyzed in the first frame to be applied to future frames.",
         "None": "Disable color coherence",
         "Match Frame 0 HSV": "HSV is a good method for balancing presence of vibrant colors, but may produce unrealistic results - (ie.blue apples)",
