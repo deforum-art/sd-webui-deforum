@@ -27,8 +27,7 @@ from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 import logging
 
-
-import math, json
+import math, json, itertools
 
 #MASKARGSEXPANSION 
 #Add option to remove noise in relation to masking so that areas which are masked receive less noise
@@ -160,15 +159,23 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
     blendFactor = .075
     colorCorrectionFactor = .075
     jsonImages = json.loads(args.init_image)
-    framesToImageSwapOn = list(jsonImages.keys())[1:]
-    frameToChoose = 0
-    for swappingFrame in framesToImageSwapOn:
-        frameToChoose += (frame >= int(swappingFrame))# + (frame >= int(framesToTweenOn[1])) + (frame >= int(framesToTweenOn[2])) + (frame >= int(framesToTweenOn[3]))
+    framesToImageSwapOn = list(map(int, list(jsonImages.keys())))
     
-    if frame % 50 <= tweeningFrames: # number of tweening frames
+    # find which image to show
+    frameToChoose = 0
+    for swappingFrame in framesToImageSwapOn[1:]:
+        frameToChoose += (frame >= int(swappingFrame))
+    
+    #find which frame to do our swapping on for tweening
+    skipFrame = 25
+    for fs, fe in itertools.pairwise(framesToImageSwapOn):
+        if fs <= frame <= fe:
+            skipFrame = fe - fs
+
+    if frame % skipFrame <= tweeningFrames: # number of tweening frames
         blendFactor = .35 - .25*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
     
-    print(f"\nframe: {frame} - blend factor: {blendFactor:.5f} - strength:{args.strength:.5f} - denoising: {p.denoising_strength:.5f}\n")
+    print(f"\nframe: {frame} - blend factor: {blendFactor:.5f} - strength:{args.strength:.5f} - denoising: {p.denoising_strength:.5f} - skipFrame: {skipFrame}\n")
     
     processed = None
     mask_image = None
@@ -186,12 +193,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
         correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
         p.color_corrections = [processing.setup_color_correction(correction_colors)]
 
-        # need to do all the color correction still
-
-    elif args.use_init and ((args.init_image != None and args.init_image != '')):# or (anim_args.from_img2img_instead_of_link)):
-        # if anim_args.from_img2img_instead_of_link:
-        #     print("find out how to get the image from image_to_img or w.e")
-        # else: # using list of animations from init
+    elif args.use_init and ((args.init_image != None and args.init_image != '')):
         init_image, mask_image = load_img(list(jsonImages.values())[0], # initial init image
                                             shape=(args.W, args.H),  
                                             use_alpha_as_mask=args.use_alpha_as_mask)
