@@ -23,7 +23,7 @@ So the `init_image` should look something like the following
 ```
 #### this has only been tested with web images, local images may work, not sure. Let me know if they do!
 
-You will want 
+You will want to make sure that your images are at least 20 frames appart currently, Ill work on breaking this math out to the ui soon.
 
 
 # Notes
