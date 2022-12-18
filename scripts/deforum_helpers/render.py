@@ -42,7 +42,9 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
     start_frame = 0
     if anim_args.resume_from_timestring:
         for tmp in os.listdir(args.outdir):
-            if tmp.split("_")[0] == anim_args.resume_timestring:
+            filename = tmp.split("_")
+            # don't use saved depth maps to count number of frames
+            if anim_args.resume_timestring in filename and "depth" not in filename:
                 start_frame += 1
         start_frame = start_frame - 1
 
