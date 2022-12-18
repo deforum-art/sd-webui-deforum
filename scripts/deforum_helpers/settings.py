@@ -147,7 +147,9 @@ class DeforumTQDM:
         start_frame = 0
         if self._anim_args.resume_from_timestring:
             for tmp in os.listdir(self._args.outdir):
-                if tmp.split("_")[0] == self._anim_args.resume_timestring:
+                filename = tmp.split("_")
+                # don't use saved depth maps to count number of frames
+                if self._anim_args.resume_timestring in filename and "depth" not in filename:
                     start_frame += 1
             start_frame = start_frame - 1
         using_vid_init = self._anim_args.animation_mode == 'Video Input'
