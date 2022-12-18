@@ -1,13 +1,11 @@
 # Detach 'deforum_helpers' from 'scripts' to prevent "No module named 'scripts.deforum_helpers'"  error 
 # causing Deforum's tab not show up in some cases when you've might've broken the environment with webui packages updates
 import sys, os
-deforum_scripts_path_fix = os.getcwd() + '/extensions/deforum-for-automatic1111-webui/scripts'
-deforum_scripts_path_fix_short = os.getcwd() + '/extensions/deforum/scripts'
+deforum_paths_to_ensure = [os.getcwd() + '/extensions/deforum-for-automatic1111-webui/scripts', os.getcwd() + '/extensions/deforum/scripts', os.getcwd()+'/scripts/deforum_helpers/src', os.getcwd()+'/extensions/deforum/scripts/deforum_helpers/src', os.getcwd()+'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',]
 
-if not deforum_scripts_path_fix in sys.path:
-    sys.path.extend([deforum_scripts_path_fix])
-if not deforum_scripts_path_fix_short in sys.path:
-    sys.path.extend([deforum_scripts_path_fix_short])
+for deforum_scripts_path_fix in deforum_paths_to_ensure:
+    if not deforum_scripts_path_fix in sys.path:
+        sys.path.extend([deforum_scripts_path_fix])
 
 # Main deforum stuff
 
