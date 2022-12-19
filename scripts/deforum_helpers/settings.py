@@ -89,6 +89,15 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
                 fill_default = DeforumArgs()['fill']
                 logging.debug(f"Fill not found in load file, using default value: {fill_default}")
                 ret.append(mask_fill_choices[fill_default])
+        
+        elif key == 'reroll_blank_frames':
+            if key in jdata:
+                reroll_blank_frames_val = jdata[key]
+                ret.append(reroll_blank_frames_val)
+            else:
+                reroll_blank_frames_default = DeforumArgs()['reroll_blank_frames']
+                logging.debug(f"Reroll blank frames not found in load file, using default value: {reroll_blank_frames_default}")
+                ret.append(reroll_blank_frames_default)
 
         elif key in jdata:
             ret.append(jdata[key])
