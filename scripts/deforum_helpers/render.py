@@ -233,6 +233,27 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
                 
         # sample the diffusion model
         sample, image = generate(args, anim_args, root, frame_idx, return_sample=True)
+        patience = 10
+
+        if not image.getbbox():
+            print("Blank frame detected! If you don't have the NSFW filter enabled, this may be due to a glitch!")
+            if args.reroll_blank_frames == 'reroll':
+                while not image.getbbox():
+                    print("Rerolling with +1 seed...")
+                    args.seed += 1
+                    sample, image = generate(args, root, frame_idx, return_sample=True)
+                    patience -= 1
+                    if patience == 0:
+                        print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
+                        state.interrupted = True
+                        state.current_image = image
+                        return
+            elif args.reroll_blank_frames == 'interrupt':
+                print("Interrupting to save your eyes...")
+                state.interrupted = True
+                state.current_image = image
+                return
+
         if not using_vid_init:
             prev_sample = sample
 
