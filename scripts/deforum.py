@@ -1,5 +1,16 @@
-import scripts.deforum_helpers.args as deforum_args
-import scripts.deforum_helpers.settings as deforum_settings
+# Detach 'deforum_helpers' from 'scripts' to prevent "No module named 'scripts.deforum_helpers'"  error 
+# causing Deforum's tab not show up in some cases when you've might've broken the environment with webui packages updates
+import sys, os
+deforum_paths_to_ensure = [os.getcwd() + '/extensions/deforum-for-automatic1111-webui/scripts', os.getcwd() + '/extensions/deforum/scripts', os.getcwd()+'/scripts/deforum_helpers/src', os.getcwd()+'/extensions/deforum/scripts/deforum_helpers/src', os.getcwd()+'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',]
+
+for deforum_scripts_path_fix in deforum_paths_to_ensure:
+    if not deforum_scripts_path_fix in sys.path:
+        sys.path.extend([deforum_scripts_path_fix])
+
+# Main deforum stuff
+
+import deforum_helpers.args as deforum_args
+import deforum_helpers.settings as deforum_settings
 
 import modules.scripts as wscripts
 from modules import script_callbacks
@@ -10,7 +21,6 @@ from modules.processing import Processed, StableDiffusionProcessingImg2Img, proc
 from PIL import Image
 import gc
 import torch
-import os, sys
 from webui import wrap_gradio_gpu_call
 import modules.shared as shared
 from modules.shared import opts, cmd_opts, state
@@ -60,7 +70,7 @@ class DeforumScript(wscripts.Script):
         gc.collect()
         torch.cuda.empty_cache()
         
-        from scripts.deforum_helpers.render import render_animation, render_input_video, render_animation_with_video_mask, render_interpolation
+        from deforum_helpers.render import render_animation, render_input_video, render_animation_with_video_mask, render_interpolation
 
         tqdm_backup = shared.total_tqdm
         shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args)

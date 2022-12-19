@@ -42,7 +42,9 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
     start_frame = 0
     if anim_args.resume_from_timestring:
         for tmp in os.listdir(args.outdir):
-            if tmp.split("_")[0] == anim_args.resume_timestring:
+            filename = tmp.split("_")
+            # don't use saved depth maps to count number of frames
+            if anim_args.resume_timestring in filename and "depth" not in filename:
                 start_frame += 1
         start_frame = start_frame - 1
 
@@ -81,9 +83,8 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
     if predict_depths:
         depth_model = DepthModel(root.device)
-        if anim_args.midas_weight >= 1.0:
-            depth_model.load_midas(root.models_path, root.half_precision)
-        else:
+        depth_model.load_midas(root.models_path, root.half_precision)
+        if anim_args.midas_weight < 1.0:
             depth_model.load_adabins(root.models_path)
     else:
         depth_model = None
