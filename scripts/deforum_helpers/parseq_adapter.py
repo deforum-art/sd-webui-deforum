@@ -4,6 +4,7 @@ import logging
 import pandas as pd
 import numpy as np
 import operator
+import requests
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -11,9 +12,22 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 class ParseqAnimKeys():
     def __init__(self, parseq_args, anim_args):
 
-        self.parseq_json = json.loads(parseq_args.parseq_manifest)
-        self.rendered_frames = self.parseq_json['rendered_frames']
-        
+        # Resolve manifest either directly from supplied value
+        # or via supplied URL
+        manifestOrUrl = parseq_args.parseq_manifest.strip()
+        if (manifestOrUrl.startswith('http')):
+            logging.info(f"Loading Parseq manifest from URL: {manifestOrUrl}")
+            try:
+                body = requests.get(manifestOrUrl).text
+                logging.debug(f"Loaded remote manifest: {body}")
+                self.parseq_json = json.loads(body)
+            except Exception as e:
+                logging.error(f"Unable to load Parseq manifest from URL: {manifestOrUrl}")
+                raise e
+        else:
+            self.parseq_json = json.loads(manifestOrUrl)
+
+        self.rendered_frames = self.parseq_json['rendered_frames']       
         self.max_frame = self.get_max('frame')
         count_defined_frames = len(self.rendered_frames)        
         expected_defined_frames = self.max_frame+1 # frames are 0-indexed
