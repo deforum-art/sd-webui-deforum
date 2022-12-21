@@ -416,7 +416,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             </p>
             """)
             with gr.Row():
-                parseq_manifest = gr.Textbox(label="parseq_manifest", lines=4, value = dp.parseq_manifest, interactive=True)
+                parseq_manifest = gr.Textbox(label="Parseq Manifest (JSON or URL)", lines=4, value = dp.parseq_manifest, interactive=True)
             with gr.Row():
                 parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
     
