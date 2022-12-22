@@ -1,11 +1,17 @@
 # Detach 'deforum_helpers' from 'scripts' to prevent "No module named 'scripts.deforum_helpers'"  error 
 # causing Deforum's tab not show up in some cases when you've might've broken the environment with webui packages updates
 import sys, os
-deforum_paths_to_ensure = [os.getcwd() + '/extensions/deforum-for-automatic1111-webui/scripts', os.getcwd() + '/extensions/deforum/scripts', os.getcwd()+'/scripts/deforum_helpers/src', os.getcwd()+'/extensions/deforum/scripts/deforum_helpers/src', os.getcwd()+'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',]
 
-for deforum_scripts_path_fix in deforum_paths_to_ensure:
-    if not deforum_scripts_path_fix in sys.path:
-        sys.path.extend([deforum_scripts_path_fix])
+basedirs = [os.getcwd()]
+if 'google.colab' in sys.modules:
+    basedirs.append('/content/gdrive/MyDrive/sd/stable-diffusion-webui') #hardcode as TheLastBen's colab seems to be the primal source
+
+for basedir in basedirs:
+    deforum_paths_to_ensure = [basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',]
+
+    for deforum_scripts_path_fix in deforum_paths_to_ensure:
+        if not deforum_scripts_path_fix in sys.path:
+            sys.path.extend([deforum_scripts_path_fix])
 
 # Main deforum stuff
 
@@ -60,11 +66,12 @@ class DeforumScript(wscripts.Script):
         if not is_installed("numexpr"):
             run_pip("install numexpr", "numexpr")
         
-        sys.path.extend([
-            os.getcwd()+'/scripts/deforum_helpers/src',
-            os.getcwd()+'/extensions/deforum/scripts/deforum_helpers/src',
-            os.getcwd()+'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
-        ])
+        for basedir in basedirs:
+            sys.path.extend([
+                basedir + '/scripts/deforum_helpers/src',
+                basedir + '/extensions/deforum/scripts/deforum_helpers/src',
+                basedir + '/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
+            ])
         
         # clean up unused memory
         gc.collect()
