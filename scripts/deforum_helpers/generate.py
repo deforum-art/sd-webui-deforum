@@ -25,6 +25,7 @@ from .animation import sample_from_cv2, sample_to_cv2
 from modules import processing
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
+import logging
 
 #MASKARGSEXPANSION 
 #Add option to remove noise in relation to masking so that areas which are masked receive less noise
@@ -116,6 +117,8 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
     p.width = args.W
     p.height = args.H
     p.seed = args.seed
+    p.subseed=args.subseed
+    p.subseed_strength=args.subseed_strength
     p.do_not_save_samples = not args.save_sample_per_step
     p.do_not_save_grid = not args.make_grid
     p.sd_model=sd_model
@@ -124,11 +127,10 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
     p.n_iter = 1
     p.steps = args.steps
-    if opts.img2img_fix_steps:
-        p.denoising_strength = 1 / (1 - args.strength + 1.0/args.steps) #see https://github.com/deforum-art/deforum-for-automatic1111-webui/issues/3
-    else:
-        p.denoising_strength = 1 - args.strength
+    p.denoising_strength = 1 - args.strength
     p.cfg_scale = args.scale
+    p.seed_enable_extras = args.seed_enable_extras
+
     # FIXME better color corrections as match histograms doesn't seem to be fully working
     if root.color_corrections is not None:
         p.color_corrections = root.color_corrections
@@ -176,7 +178,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
                 subseed_strength=p.subseed_strength,
                 seed_resize_from_h=p.seed_resize_from_h,
                 seed_resize_from_w=p.seed_resize_from_w,
-                seed_enable_extras=None,
+                seed_enable_extras=p.seed_enable_extras,
                 sampler_name=p.sampler_name,
                 batch_size=p.batch_size,
                 n_iter=p.n_iter,
@@ -218,7 +220,9 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
         p.init_images = [init_image]
         p.image_mask = mask
 
+        print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}")
         processed = processing.process_images(p)
+        p.sd_model=sd_model
     
     if root.initial_info == None:
         root.initial_seed = processed.seed
