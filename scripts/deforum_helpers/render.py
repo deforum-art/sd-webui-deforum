@@ -54,11 +54,14 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
     start_frame = 0
     if anim_args.resume_from_timestring:
         for tmp in os.listdir(args.outdir):
-            filename = tmp.split("_")
-            # don't use saved depth maps to count number of frames
-            if anim_args.resume_timestring in filename and "depth" not in filename:
-                start_frame += 1
-        start_frame = start_frame - 1
+            if ".txt" in tmp : 
+                pass
+            else:
+                filename = tmp.split("_")
+                # don't use saved depth maps to count number of frames
+                if anim_args.resume_timestring in filename and "depth" not in filename:
+                    start_frame += 1
+        #start_frame = start_frame - 1
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
@@ -117,7 +120,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             last_frame -= last_frame%turbo_steps
         path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:05}.png")
         img = cv2.imread(path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Changed the colors on resume
         prev_sample = sample_from_cv2(img)
         if anim_args.color_coherence != 'None':
             color_match_sample = img
