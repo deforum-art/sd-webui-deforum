@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import operator
 import requests
+from .animation import DeformAnimKeys
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -27,6 +28,7 @@ class ParseqAnimKeys():
         else:
             self.parseq_json = json.loads(manifestOrUrl)
 
+        self.default_anim_keys = DeformAnimKeys(anim_args)
         self.rendered_frames = self.parseq_json['rendered_frames']       
         self.max_frame = self.get_max('frame')
         count_defined_frames = len(self.rendered_frames)        
@@ -75,6 +77,10 @@ class ParseqAnimKeys():
         self.prompts = self.parseq_to_anim_series('deforum_prompt') # formatted as "{positive} --neg {negative}"
         self.subseed_series = self.parseq_to_anim_series('subseed')
         self.subseed_strength_series = self.parseq_to_anim_series('subseed_strength')
+        self.kernel_schedule_series = self.parseq_to_anim_series('antiblur_kernel')
+        self.sigma_schedule_series = self.parseq_to_anim_series('antiblur_sigma')
+        self.amount_schedule_series = self.parseq_to_anim_series('antiblur_amount')
+        self.threshold_schedule_series = self.parseq_to_anim_series('antiblur_threshold')
 
         # Config:
         # TODO this is currently ignored. User must ensure the output FPS set in parseq
@@ -85,6 +91,17 @@ class ParseqAnimKeys():
         return max(self.rendered_frames, key=itemgetter(seriesName))[seriesName]
 
     def parseq_to_anim_series(self, seriesName):
+        
+        # Check if valus is present in first frame of JSON data. If not, assume it's undefined.
+        # The Parseq contract is that the first frame (at least) must define values for all fields.
+        try:
+            if self.rendered_frames[0][seriesName] is not None:
+                logging.info(f"Found {seriesName} in first frame of Parseq data. Assuming it's defined.")
+        except KeyError:
+            logging.info(f"{seriesName} not found in first frame of Parseq data. Assuming it's undefined, will use standard Deforum values.")
+            return None
+            
+
         key_frame_series = pd.Series([np.nan for a in range(self.required_frames)])
         
         for frame in self.rendered_frames:
@@ -101,3 +118,17 @@ class ParseqAnimKeys():
             frame_idx += 1
 
         return key_frame_series
+
+    # fallback to anim_args if the series is not defined in the Parseq data
+    def __getattribute__(inst, name):
+        try:
+            definedField = super(ParseqAnimKeys, inst).__getattribute__(name)
+        except AttributeError:
+            definedField = None
+
+        if (definedField is not None):
+            return definedField
+        else:
+            logging.info(f"Data for {name} not defined in Parseq data. Falling back to stanard Deforum values.")
+            return getattr(inst.default_anim_keys, name)
+
