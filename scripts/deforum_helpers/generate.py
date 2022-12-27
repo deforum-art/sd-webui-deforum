@@ -221,15 +221,17 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
                 processed = processing.process_images(p)
                 init_image = processed.images[0].convert('RGB')
                 p = reset_pipeline(root, args, prompt, negative_prompt)
+                p.image_mask = None
                 processed = None
-                mask = None
-                mask_image = None
             else:
                 # fix tqdm total steps if we don't have to conduct a second pass
                 tqdm_instance = shared.total_tqdm
                 current_total = tqdm_instance.getTotal()
                 if current_total != -1:
                     tqdm_instance.updateTotal(current_total - int(ceil(args.steps * (1-args.strength))))
+            
+            mask = None
+            mask_image = None
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
