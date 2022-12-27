@@ -96,21 +96,8 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
         mask = PIL.ImageOps.invert(mask)
     
     return mask
-    
-def generate(args, anim_args, root, frame = 0, return_sample=False):
-    import re
-    assert args.prompt is not None
-    
-    # Evaluate prompt math!
-    
-    math_parser = re.compile("""
-            (?P<weight>(
-            `[\S\s]*?`# a math function wrapped in `-characters
-            ))
-            """, re.VERBOSE)
-    
-    parsed_prompt = re.sub(math_parser, lambda m: str(parse_weight(m, frame)), args.prompt)
-    
+
+def reset_pipeline(root, args, prompt, negative_prompt):
     # Setup the pipeline
     p = root.p
     
@@ -139,15 +126,34 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
     p.outpath_samples = root.outpath_samples
     p.outpath_grids = root.outpath_samples
     
+    p.prompt = prompt
+    p.negative_prompt = negative_prompt
+
+def generate(args, anim_args, root, frame = 0, return_sample=False):
+    import re
+    assert args.prompt is not None
+    
+    # Evaluate prompt math!
+    
+    math_parser = re.compile("""
+            (?P<weight>(
+            `[\S\s]*?`# a math function wrapped in `-characters
+            ))
+            """, re.VERBOSE)
+    
+    parsed_prompt = re.sub(math_parser, lambda m: str(parse_weight(m, frame)), args.prompt)
+
     prompt_split = parsed_prompt.split("--neg")
     if len(prompt_split) > 1:
-        p.prompt, p.negative_prompt = parsed_prompt.split("--neg") #TODO: add --neg to vanilla Deforum for compat
-        print(f'Positive prompt:{p.prompt}')
-        print(f'Negative prompt:{p.negative_prompt}')
+        prompt, negative_prompt = parsed_prompt.split("--neg") #TODO: add --neg to vanilla Deforum for compat
+        print(f'Positive prompt:{prompt}')
+        print(f'Negative prompt:{negative_prompt}')
     else:
-        p.prompt = prompt_split[0]
-        print(f'Positive prompt:{p.prompt}')
-        p.negative_prompt = ""
+        prompt = prompt_split[0]
+        print(f'Positive prompt:{prompt}')
+        negative_prompt = ""
+    
+    p = reset_pipeline(root, args, prompt, negative_prompt)
     
     if not args.use_init and args.strength > 0 and args.strength_0_no_init:
         print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
@@ -212,20 +218,17 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
                 print("Smart mode: inpainting border")
 
                 processed = processing.process_images(p)
-
                 init_image = processed.images[0].convert('RGB')
+                p = reset_pipeline(root, args, prompt, negative_prompt)
+                processed = None
+                mask = None
+                mask_image = None
             else:
                 # fix tqdm total steps if we don't have to conduct a second pass
                 tqdm_instance = shared.total_tqdm
                 current_total = tqdm_instance.getTotal()
                 if current_total != -1:
                     tqdm_instance.updateTotal(current_total - int(ceil(args.steps * (1-args.strength))))
-            p.image_mask = None
-            p.inpainting_fill = 0
-            mask_image = None
-            mask = None
-            processed = None
-            p.sd_model=sd_model
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
