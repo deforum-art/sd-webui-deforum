@@ -213,6 +213,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
             mask_image = None
             mask = None
             processed = None
+            p.sd_model=sd_model
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
