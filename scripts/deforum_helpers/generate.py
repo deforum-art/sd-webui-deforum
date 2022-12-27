@@ -179,7 +179,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
             # blend the two masks
             if root.warp_mask is not None:
                 # TODO: I guess there is some built-in function for this
-                warp_mask_image = Image.fromarray(cv2.cvtColor(sample_to_cv2(root.warp_mask), cv2.COLOR_BGR2RGB)).convert('L')
+                warp_mask_image = Image.fromarray(root.warp_mask).convert('L')
                 for x in range(mask_image.width):
                     for y in range(mask_image.height):
                         if mask_image.getpixel((x,y)) > 0 or warp_mask_image.getpixel((x,y)) > 0:
