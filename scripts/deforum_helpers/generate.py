@@ -3,6 +3,7 @@ import PIL #HOTFIXISSUE#33 needed for instruction to generate negative mask.
 from PIL import Image, ImageOps
 import requests
 import numpy as np
+from math import ceil
 import torchvision.transforms.functional as TF
 from pytorch_lightning import seed_everything
 import os
@@ -23,6 +24,7 @@ from .callback import SamplerCallback
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
 from modules import processing, masking
+from modules import shared
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 import logging
@@ -195,9 +197,17 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
                 p.init_images = [init_image]
                 p.image_mask = mask
 
+                print("Smart mode: inpainting border")
+
                 processed = processing.process_images(p)
 
-                init_image = processed.images[0].convert('RGB') 
+                init_image = processed.images[0].convert('RGB')
+            else:
+                # fix tqdm total steps if we don't have to conduct a second pass
+                tqdm_instance = shared.total_tqdm
+                current_total = tqdm_instance.getTotal()
+                if current_total != -1:
+                    tqdm_instance.updateTotal(current_total - int(ceil(args.steps * (1-args.strength))))
             p.image_mask = None
             p.inpainting_fill = 0
             mask_image = None

@@ -230,3 +230,10 @@ class DeforumTQDM:
         if self._tqdm is not None:
             self._tqdm.close()
             self._tqdm = None
+    
+    def getTotal(self):
+        if not opts.multiple_tqdm or cmd_opts.disable_console_progressbars:
+            return -1
+        if self._tqdm is None:
+            self.reset()
+        return self._tqdm.total
