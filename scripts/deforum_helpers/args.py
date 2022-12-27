@@ -398,9 +398,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
             reroll_blank_frames = gr.Dropdown(label="reroll_blank_frames", choices=['reroll', 'interrupt', 'ignore'], value=d.reroll_blank_frames, type="value", elem_id="reroll_blank_frames", interactive=True)
         with gr.Row():
-            choice = mask_fill_choices[d.smart_border_fill_mode]
-            smart_border_fill_mode = gr.Radio(label='smart_border_fill_mode', choices=mask_fill_choices, value=choice, type="index")
-        with gr.Row():
             histogram_matching = gr.Checkbox(label="Force all frames to match initial frame's colors. Overrides a1111 settings. NOT RECOMMENDED, enable only for backwards compatibility.", value=da.histogram_matching, interactive=True)
         with gr.Row():            
             color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
@@ -488,6 +485,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Row():
             choice = mask_fill_choices[d.fill]
             fill = gr.Radio(label='mask_fill', choices=mask_fill_choices, value=choice, type="index")
+        with gr.Row():
+            choice = mask_fill_choices[d.smart_border_fill_mode]
+            smart_border_fill_mode = gr.Radio(label='smart_border_fill_mode', choices=mask_fill_choices, value=choice, type="index")
         with gr.Row():
             #fill = gr.Slider(minimum=0, maximum=3, step=1, label="mask_fill_type", value=d.fill, interactive=True)
             full_res_mask = gr.Checkbox(label="full_res_mask", value=d.full_res_mask, interactive=True)
