@@ -183,6 +183,9 @@ class DeforumTQDM:
                 deforum_total += self._args.steps
                 had_first = True
             else:
+                #duplicate steps count in smart border mode
+                if self._anim_args.border == 'smart':
+                    deforum_total += int(ceil(self._args.steps * (1-strength)))
                 deforum_total += int(ceil(self._args.steps * (1-strength)))
 
             if turbo_steps > 1:
