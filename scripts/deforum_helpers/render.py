@@ -188,7 +188,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
 
         # apply transforms to previous frame
         if prev_sample is not None:
-            prev_img, depth = anim_frame_warp(prev_sample, args, anim_args, keys, frame_idx, depth_model, depth=None, device=root.device, half_precision=root.half_precision)
+            prev_img, depth, warp_mask = anim_frame_warp(prev_sample, args, anim_args, keys, frame_idx, depth_model, depth=None, device=root.device, half_precision=root.half_precision)
 
             # apply color matching
             if anim_args.color_coherence != 'None':
@@ -211,6 +211,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             else:
                 args.init_sample = noised_sample.to(root.device)
             args.strength = max(0.0, min(1.0, strength))
+            root.warp_mask = warp_mask
         
         args.scale = scale
 

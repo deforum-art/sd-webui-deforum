@@ -210,6 +210,8 @@ def anim_frame_warp(prev, args, anim_args, keys, frame_idx, depth_model=None, de
     else:
         prev_img_cv2 = sample_to_cv2(prev)
 
+    warp_mask = None
+
     if anim_args.use_depth_warping:
         if depth is None and depth_model is not None:
             depth = depth_model.predict(prev_img_cv2, anim_args, half_precision)
@@ -219,9 +221,8 @@ def anim_frame_warp(prev, args, anim_args, keys, frame_idx, depth_model=None, de
     if anim_args.animation_mode == '2D':
         prev_img = anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx)
     else: # '3D'
-        prev_img = anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx)
-                
-    return prev_img, depth
+        prev_img, warp_mask = anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx)        
+    return prev_img, depth, warp_mask
 
 def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
     angle = keys.angle_series[frame_idx]
@@ -330,7 +331,22 @@ def transform_image_3d(device, prev_img_cv2, depth_tensor, rot_mat, translate, a
         new_image.squeeze().clamp(0,255), 
         'c h w -> h w c'
     ).cpu().numpy().astype(prev_img_cv2.dtype)
-    return result
+
+    warp_mask = torch.ones_like(image_tensor) * 255
+    warp_mask_image = torch.nn.functional.grid_sample(
+        warp_mask.add(1/512 - 0.0001).unsqueeze(0), 
+        offset_coords_2d, 
+        mode="nearest", 
+        padding_mode="zeros", 
+        align_corners=False
+    )
+
+    result_mask = rearrange(
+        warp_mask_image.squeeze().clamp(0,255), 
+        'c h w -> h w c'
+    ).cpu().numpy().astype(prev_img_cv2.dtype)
+
+    return result, result_mask
 
 class DeformAnimKeys():
     def __init__(self, anim_args):
