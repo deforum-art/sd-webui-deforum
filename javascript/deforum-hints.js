@@ -40,6 +40,7 @@ deforum_titles = {
     "border": "controls handling method of pixels to be generated when the image is smaller than the frame.",
         "wrap": "pulls pixels from the opposite edge of the image",
         "replicate": "repeats the edge of the pixels, and extends them. Animations with quick motion may yield lines where this border function was attempting to populate pixels into the empty space created.",
+        "smart": "makes a second 'inpaint' pass to fill empty space when zooming out or shifting the frame; useful to fix the 'border stripes' and make the 'sidespace' feel more open; overrides padding_mode",
     "angle": "2D operator to rotate canvas clockwise/anticlockwise in degrees per frame",
     "zoom": "2D operator that scales the canvas size, multiplicatively. [static = 1.0]",
     "translation_x": "2D & 3D operator to move canvas left/right in pixels per frame",
