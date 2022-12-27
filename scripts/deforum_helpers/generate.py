@@ -22,7 +22,7 @@ from .callback import SamplerCallback
 #Webui
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
-from modules import processing
+from modules import processing, masking
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 import logging
@@ -179,19 +179,29 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
                                     args.mask_contrast_adjust, 
                                     args.mask_brightness_adjust, 
                                     invert_mask=False)
+            
+            # HACK: this is a hacky check to make the mask work with the new inpainting code
+            crop_region = masking.get_crop_region(np.array(mask_image), args.full_res_mask_padding)
+            crop_region = masking.expand_crop_region(crop_region, args.W, args.H, mask_image.width, mask_image.height)
+            x1, y1, x2, y2 = crop_region
 
-            p.inpainting_fill = args.fill # need to come up with better name. 
-            p.inpaint_full_res= args.full_res_mask 
-            p.inpaint_full_res_padding = args.full_res_mask_padding 
+            too_small = (x2 - x1) < 1 or (y2 - y1) < 1
 
-            p.init_images = [init_image]
-            p.image_mask = mask
+            if not too_small:
+                p.inpainting_fill = args.fill # need to come up with better name. 
+                p.inpaint_full_res= args.full_res_mask 
+                p.inpaint_full_res_padding = args.full_res_mask_padding 
 
-            processed = processing.process_images(p)
+                p.init_images = [init_image]
+                p.image_mask = mask
 
-            init_image = processed.images[0].convert('RGB') 
+                processed = processing.process_images(p)
+
+                init_image = processed.images[0].convert('RGB') 
             p.image_mask = None
+            p.inpainting_fill = 0
             mask_image = None
+            mask = None
             processed = None
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
