@@ -128,6 +128,7 @@ def reset_pipeline(root, args, prompt, negative_prompt):
     
     p.prompt = prompt
     p.negative_prompt = negative_prompt
+    return p
 
 def generate(args, anim_args, root, frame = 0, return_sample=False):
     import re
