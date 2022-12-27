@@ -142,7 +142,6 @@ def reset_pipeline(args, prompt, negative_prompt):
     p.subseed_strength = args.subseed_strength
     p.seed_resize_from_w = args.seed_resize_from_w
     p.seed_resize_from_h = args.seed_resize_from_h
-    p.fill = args.fill
     p.ddim_eta = args.ddim_eta
 
     # Below settings which have conditions or symbols that dont work in the p object constructor
