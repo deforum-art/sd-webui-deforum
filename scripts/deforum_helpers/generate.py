@@ -160,6 +160,39 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
         init_image = Image.fromarray(img)
+
+        if anim_args.border == 'smart':
+            
+            # Inpaint changed parts of the image
+            # that's, to say, zeros we got after the transformations
+
+            mask_image = init_image.convert('L')
+            for x in range(mask_image.width):
+                for y in range(mask_image.height):
+                    if mask_image.getpixel((x,y)) < 1:
+                        mask_image.putpixel((x,y), 255)
+                    else:
+                        mask_image.putpixel((x,y), 0)
+            
+            mask = prepare_mask(mask_image, 
+                                    (args.W, args.H), 
+                                    args.mask_contrast_adjust, 
+                                    args.mask_brightness_adjust, 
+                                    invert_mask=False)
+
+            p.inpainting_fill = args.fill # need to come up with better name. 
+            p.inpaint_full_res= args.full_res_mask 
+            p.inpaint_full_res_padding = args.full_res_mask_padding 
+
+            p.init_images = [init_image]
+            p.image_mask = mask
+
+            processed = processing.process_images(p)
+
+            init_image = processed.images[0].convert('RGB') 
+            p.image_mask = None
+            mask_image = None
+            processed = None
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
@@ -218,7 +251,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
         assert not ( (args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
         
         p.init_images = [init_image]
-        p.image_mask = mask
+        p.image_mask = mask_image
 
         print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}")
         processed = processing.process_images(p)

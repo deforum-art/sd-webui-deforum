@@ -22,7 +22,7 @@ def DeforumAnimArgs():
     #@markdown ####**Animation:**
     animation_mode = '2D' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
     max_frames = 120 #@param {type:"number"}
-    border = 'replicate' #@param ['wrap', 'replicate', 'smart'] {type:'string'}
+    border = 'smart' #@param ['wrap', 'replicate', 'smart'] {type:'string'}
 
     #@markdown ####**Motion Parameters:**
     angle = "0:(0)"#@param {type:"string"}
@@ -327,7 +327,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Row():
             animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input', 'Interpolation'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
             max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0)
-            border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
+            border = gr.Dropdown(label="border", choices=['replicate', 'wrap', 'smart'], value=da.border, type="value", elem_id="border", interactive=True)
         
         
         i10 = gr.HTML("<p style=\"margin-bottom:0.75em\">Motion parameters:</p>")

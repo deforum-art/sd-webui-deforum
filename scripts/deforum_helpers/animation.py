@@ -247,12 +247,28 @@ def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
     else:
         xform = np.matmul(rot_mat, trans_mat)
 
-    return cv2.warpPerspective(
-        prev_img_cv2,
-        xform,
-        (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
-        borderMode=cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE
-    )
+    borderMode = cv2.BORDER_CONSTANT #zeros
+
+    if anim_args.border == 'wrap':
+        borderMode = cv2.BORDER_WRAP
+    elif anim_args.border == 'replicate':
+        borderMode = cv2.BORDER_REPLICATE
+
+    if borderMode == 'smart':
+        return cv2.warpPerspective(
+            prev_img_cv2,
+            xform,
+            (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
+            borderMode=borderMode,
+            borderValue=(0, 0, 0,),
+        )
+    else:
+        return cv2.warpPerspective(
+            prev_img_cv2,
+            xform,
+            (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
+            borderMode=borderMode,
+        )
 
 def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
     TRANSLATION_SCALE = 1.0/200.0 # matches Disco
@@ -305,7 +321,7 @@ def transform_image_3d(device, prev_img_cv2, depth_tensor, rot_mat, translate, a
         image_tensor.add(1/512 - 0.0001).unsqueeze(0), 
         offset_coords_2d, 
         mode=anim_args.sampling_mode, 
-        padding_mode=anim_args.padding_mode, 
+        padding_mode=anim_args.padding_mode if anim_args.border is not 'smart' else 'zeros', # border overrides padding_mode without changing the settings saved
         align_corners=False
     )
 
