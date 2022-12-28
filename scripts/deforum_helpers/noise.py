@@ -38,6 +38,6 @@ def add_noise(sample: torch.Tensor, noise_amt: float, seed: int, noise_type: str
     noise = torch.randn(sample.shape, device=sample.device) # White noise
     if noise_type == 'perlin':
         # rand_perlin_2d_octaves is between -1 and 1, so we need to shift it to be between 0 and 1
-        noise = noise * (rand_perlin_2d_octaves(sample.shape, (noise_args.shape[0], noise_args.shape[1]), octaves=noise_args.octaves, persistence=noise_args.persistance) + torch.ones_like(noise)) / 2
+        noise = noise * (rand_perlin_2d_octaves(sample.shape, (noise_args[0], noise_args[1]), octaves=noise_args[2], persistence=noise_args[3]) + torch.ones_like(noise)) / 2
     yield sample + noise * noise_amt
     torch.manual_seed(seed_store)
