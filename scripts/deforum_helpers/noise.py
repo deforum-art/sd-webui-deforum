@@ -24,7 +24,7 @@ def rand_perlin_2d_octaves(shape, res, octaves=1, persistence=0.5):
     noise = torch.zeros(shape)
     frequency = 1
     amplitude = 1
-    for _ in range(octaves):
+    for _ in range(int(octaves)):
         noise += amplitude * rand_perlin_2d(shape, (frequency*res[0], frequency*res[1]))
         frequency *= 2
         amplitude *= persistence
@@ -33,11 +33,14 @@ def rand_perlin_2d_octaves(shape, res, octaves=1, persistence=0.5):
 #MASKARGSEXPANSION 
 #Add option to remove noise in relation to masking so that areas which are masked receive less noise
 def add_noise(sample: torch.Tensor, noise_amt: float, seed: int, noise_type: str, noise_args) -> torch.Tensor:
-    seed_store = torch.random.get_rng_state()
+    seed_store = torch.seed()
     torch.manual_seed(seed) # Reproducibility
     noise = torch.randn(sample.shape, device=sample.device) # White noise
     if noise_type == 'perlin':
         # rand_perlin_2d_octaves is between -1 and 1, so we need to shift it to be between 0 and 1
-        noise = noise * (rand_perlin_2d_octaves(sample.shape, (noise_args[0], noise_args[1]), octaves=noise_args[2], persistence=noise_args[3]) + torch.ones_like(noise)) / 2
-    yield sample + noise * noise_amt
+        # print(sample.shape)
+        sample2dshape = (sample.shape[2], sample.shape[3])
+        noise = noise * ((rand_perlin_2d_octaves(sample2dshape, (int(noise_args[0]), int(noise_args[1])), octaves=noise_args[2], persistence=noise_args[3]) + torch.ones(sample2dshape)) / 2)
+    sample = sample + noise * noise_amt
     torch.manual_seed(seed_store)
+    return sample
