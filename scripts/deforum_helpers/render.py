@@ -11,7 +11,8 @@ import pathlib
 import torchvision.transforms as T
 import logging
 
-from .generate import generate, add_noise
+from .generate import generate
+from .noise import add_noise
 from .prompt import sanitize
 from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp, vid2frames, get_frame_name
 from .parseq_adapter import ParseqAnimKeys
