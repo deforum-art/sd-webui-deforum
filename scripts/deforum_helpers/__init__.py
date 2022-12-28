@@ -1,5 +1,5 @@
 """
-from .save_images import save_samples, get_output_folder
+from .save_images import get_output_folder
 from .k_samplers import sampler_fn
 from .depth import DepthModel
 from .prompt import sanitize
