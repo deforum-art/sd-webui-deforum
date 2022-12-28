@@ -203,7 +203,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             # anti-blur
             contrast_sample = unsharp_mask(contrast_sample, (kernel, kernel), sigma, amount, threshold)
             # apply frame noising
-            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise, args.seed, anim_args.noise_type, (anim_args.perlin_w, anim_args.perlin_h, anim_args.perlin_octaves, anim_args.perlin_persistance))
+            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise, args.seed, anim_args.noise_type, (anim_args.perlin_w, anim_args.perlin_h, anim_args.perlin_octaves, anim_args.perlin_persistence))
 
             # use transformed previous frame as init for current
             args.use_init = True
