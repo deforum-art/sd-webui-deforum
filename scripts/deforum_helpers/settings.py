@@ -98,7 +98,16 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
                 reroll_blank_frames_default = DeforumArgs()['reroll_blank_frames']
                 logging.debug(f"Reroll blank frames not found in load file, using default value: {reroll_blank_frames_default}")
                 ret.append(reroll_blank_frames_default)
-
+        
+        elif key == 'noise_type':
+            if key in jdata:
+                noise_type_val = jdata[key]
+                ret.append(noise_type_val)
+            else:
+                noise_type_default = DeforumArgs()['noise_type']
+                logging.debug(f"Noise type not found in load file, using default value: {noise_type_default}")
+                ret.append(noise_type_default)
+            
         elif key in jdata:
             ret.append(jdata[key])
         else:
