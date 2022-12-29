@@ -97,6 +97,13 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
     
     return mask
 
+def isJson(myjson):
+    try:
+        json.loads(myjson)
+    except ValueError as e:
+        return False
+    return True
+
 def generate(args, anim_args, root, frame = 0, return_sample=False):
     import re
     assert args.prompt is not None
@@ -154,49 +161,57 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
         print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
         args.strength = 0
     
-    # some setup variables that should be broken out later
-    tweeningFrames = 20
-    blendFactor = .075
-    colorCorrectionFactor = .075
-    jsonImages = json.loads(args.init_image)
-    framesToImageSwapOn = list(map(int, list(jsonImages.keys())))
-    
-    # find which image to show
-    frameToChoose = 0
-    for swappingFrame in framesToImageSwapOn[1:]:
-        frameToChoose += (frame >= int(swappingFrame))
-    
-    #find which frame to do our swapping on for tweening
-    skipFrame = 25
-    for fs, fe in itertools.pairwise(framesToImageSwapOn):
-        if fs <= frame <= fe:
-            skipFrame = fe - fs
-
-    if frame % skipFrame <= tweeningFrames: # number of tweening frames
-        blendFactor = .35 - .25*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
-    
-    print(f"\nframe: {frame} - blend factor: {blendFactor:.5f} - strength:{args.strength:.5f} - denoising: {p.denoising_strength:.5f} - skipFrame: {skipFrame}\n")
-    
     processed = None
     mask_image = None
     init_image = None
-    init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
-                              shape=(args.W, args.H),
-                              use_alpha_as_mask=args.use_alpha_as_mask)
+    image_init0 = None
+
+    # some setup variables that should be broken out later
+    if args.init_image != None and isJson(args.init_image):
+        tweeningFrames = 20
+        blendFactor = .07
+        colorCorrectionFactor = .075
+        jsonImages = json.loads(args.init_image)
+        framesToImageSwapOn = list(map(int, list(jsonImages.keys())))
+        
+        # find which image to show
+        frameToChoose = 0
+        for swappingFrame in framesToImageSwapOn[1:]:
+            frameToChoose += (frame >= int(swappingFrame))
+        
+        #find which frame to do our swapping on for tweening
+        skipFrame = 25
+        for fs, fe in itertools.pairwise(framesToImageSwapOn):
+            if fs <= frame <= fe:
+                skipFrame = fe - fs
+
+        if frame % skipFrame <= tweeningFrames: # number of tweening frames
+            blendFactor = .35 - .25*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
+        
+        print(f"\nframe: {frame} - blend factor: {blendFactor:.5f} - strength:{args.strength:.5f} - denoising: {p.denoising_strength:.5f} - skipFrame: {skipFrame}\n")
+        init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
+                                shape=(args.W, args.H),
+                                use_alpha_as_mask=args.use_alpha_as_mask)
+        image_init0 = list(jsonImages.values())[0]
+    else: # they passed in a single init image
+        image_init0 = args.init_image
+
 
     if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
         init_image = Image.fromarray(img)
+        image_init0 = Image.fromarray(img)
+        if args.init_image is not None and isJson(args.init_image):
+            init_image = Image.blend(init_image, init_image2, blendFactor)
+            correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
+            p.color_corrections = [processing.setup_color_correction(correction_colors)]
 
-        init_image = Image.blend(init_image, init_image2, blendFactor)
-        correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
-        p.color_corrections = [processing.setup_color_correction(correction_colors)]
-
+    # this is the first pass
     elif args.use_init and ((args.init_image != None and args.init_image != '')):
-        init_image, mask_image = load_img(list(jsonImages.values())[0], # initial init image
-                                            shape=(args.W, args.H),  
-                                            use_alpha_as_mask=args.use_alpha_as_mask)
+        init_image, mask_image = load_img(image_init0, # initial init image
+                                          shape=(args.W, args.H),  
+                                          use_alpha_as_mask=args.use_alpha_as_mask)
     else:
         print(f"Not using an init image (doing pure txt2img) - seed:{p.seed}; subseed:{p.subseed}; subseed_strength:{p.subseed_strength}; cfg_scale:{p.cfg_scale}; steps:{p.steps}")
         p_txt = StableDiffusionProcessingTxt2Img(
