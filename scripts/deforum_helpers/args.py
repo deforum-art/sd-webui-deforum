@@ -245,7 +245,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         <li>Alternatively, use <a style="color:blue" href="https://sd-parseq.web.app/deforum">sd-parseq</a> as a UI to define your animation schedules (see the Parseq section in the Keyframes tab).</li>
         <li><a style="color:blue" href="https://www.framesync.xyz/">framesync.xyz</a> is also a good option, it makes compact math formulae for Deforum keyframes by selecting various waveforms.</li>
         <li>The other site allows for making keyframes using <a style="color:blue" href="https://www.chigozie.co.uk/keyframe-string-generator/">interactive splines and Bezier curves</a> (select Disco output format).</li>
-        <li>After the 2022-12-30 update, the default noise type is Perlin due to its great frame coherence improvements. If you want to use the old noise and replicate the previous settings, set the type to "uniform" in the Keyframes tab.</li>
+        <li>After the 2022-12-30 update, the default noise type is <a style="color:blue" href="https://en.wikipedia.org/wiki/Perlin_noise">Perlin noise</a> due to its great frame coherence improvements. If you want to use the old noise and replicate the previous settings, set the type to "uniform" in the Keyframes tab.</li>
         </ul>
         <italic>If you liked this extension, please <a style="color:blue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">give it a star on GitHub</a>!</italic> 😊""")
         i4 = gr.HTML("")
