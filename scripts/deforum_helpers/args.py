@@ -244,6 +244,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         <li>For advanced animations, see the <a style="color:blue" href="https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing">Math keyframing explanation</a>.</li>
         <li>Alternatively, use <a style="color:blue" href="https://sd-parseq.web.app/deforum">sd-parseq</a> as a UI to define your animation schedules (see the Parseq section in the Keyframes tab).</li>
         </ul>""")
+        <li>After the 2022-12-30 update, the default noise type is Perlin due to its great frame coherence improvements. If you want to use the old noise and replicate the previous settings, set the type to "uniform" in the Keyframes tab.</li>
         i4 = gr.HTML("")
         i5 = gr.HTML("")
         i6 = gr.HTML("")
