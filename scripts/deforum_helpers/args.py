@@ -58,7 +58,7 @@ def DeforumAnimArgs():
     diffusion_cadence = '1' #@param ['1','2','3','4','5','6','7','8'] {type:'string'}
 
     #@markdown ####**Noise settings:**
-    noise_type = 'uniform' #@param ['uniform', 'perlin'] {type:'string'}
+    noise_type = 'perlin' #@param ['uniform', 'perlin'] {type:'string'}
     # Perlin params
     perlin_w = 8 #@param {type:"number"}
     perlin_h = 8 #@param {type:"number"}
