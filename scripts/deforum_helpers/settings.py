@@ -1,7 +1,7 @@
 from math import ceil
 import os
 import json
-from .args import mask_fill_choices, DeforumArgs
+from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 import logging
 
 def load_args(args_dict,anim_args_dict, parseq_args_dict, custom_settings_file, root):
@@ -104,7 +104,7 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
                 noise_type_val = jdata[key]
                 ret.append(noise_type_val)
             else:
-                noise_type_default = DeforumArgs()['noise_type']
+                noise_type_default = DeforumAnimArgs()['noise_type']
                 logging.debug(f"Noise type not found in load file, using default value: {noise_type_default}")
                 ret.append(noise_type_default)
             
