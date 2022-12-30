@@ -414,11 +414,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             noise_type = gr.Dropdown(label="noise_type", choices=['uniform', 'perlin'], value=da.noise_type, type="value", elem_id="noise_type", interactive=True)
         i39 = gr.HTML("<p style=\"margin-bottom:0.75em\">Perlin noise params, if selected.</p>")
         with gr.Row():
-            # Perlin params
             perlin_w = gr.Number(label="perlin_w", value=da.perlin_w, interactive=True)
             perlin_h = gr.Number(label="perlin_h", value=da.perlin_h, interactive=True)
-            perlin_octaves = gr.Number(label="perlin_octaves", value=da.perlin_octaves, interactive=True)
-            perlin_persistence = gr.Slider(label="perlin_persistence", min=0, max=1, value=da.perlin_persistence, step=0.02, interactive=True)
+        with gr.Row():
+            perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
+            perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
             
         i14 = gr.HTML("<p style=\"margin-bottom:0.75em\">3D Depth Warping:</p>")
         with gr.Row():
