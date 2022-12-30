@@ -236,15 +236,18 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         btn = i1 = gr.HTML("")
     
     with gr.Accordion("Info and links", open=False):
-        i2 = gr.HTML("<strong>Made by deforum.github.io, port for AUTOMATIC1111's webui maintained by kabachuha</strong>")
+        i2 = gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
         i3 = gr.HTML("""<ul style="list-style-type:circle; margin-left:1em">
         <li>The code for this extension: <a  style="color:blue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">Fork of deforum for auto1111's webui</a>.</li>
         <li>Join the <a style="color:blue" href="https://discord.gg/deforum">official Deforum Discord</a> to share your creations and suggestions.</li>
         <li>For general usage, see the <a style="color:blue" href="https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit">User guide for Deforum v0.5</a>.</li>
         <li>For advanced animations, see the <a style="color:blue" href="https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing">Math keyframing explanation</a>.</li>
         <li>Alternatively, use <a style="color:blue" href="https://sd-parseq.web.app/deforum">sd-parseq</a> as a UI to define your animation schedules (see the Parseq section in the Keyframes tab).</li>
-        </ul>""")
+        <li><a style="color:blue" href="https://www.framesync.xyz/">framesync.xyz</a> is also a good option, it makes compact math formulae for Deforum keyframes by selecting various waveforms.</li>
+        <li>The other site allows for making keyframes using <a style="color:blue" href="https://www.chigozie.co.uk/keyframe-string-generator/">interactive splines and Bezier curves</a> (select Disco output format).</li>
         <li>After the 2022-12-30 update, the default noise type is Perlin due to its great frame coherence improvements. If you want to use the old noise and replicate the previous settings, set the type to "uniform" in the Keyframes tab.</li>
+        </ul>
+        <italic>If you liked this extension, please <a style="color:blue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">give it a star on GitHub</a>!</italic> 😊""")
         i4 = gr.HTML("")
         i5 = gr.HTML("")
         i6 = gr.HTML("")
