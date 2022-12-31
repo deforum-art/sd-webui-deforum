@@ -1,4 +1,4 @@
-from generate import generate
+from .generate import generate
 #WebUI
 from modules.shared import opts, cmd_opts, state
 
