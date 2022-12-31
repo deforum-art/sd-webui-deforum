@@ -77,7 +77,8 @@ class DeforumScript(wscripts.Script):
         gc.collect()
         torch.cuda.empty_cache()
         
-        from deforum_helpers.render import render_animation, render_input_video, render_animation_with_video_mask, render_interpolation
+        from deforum_helpers.render import render_animation
+        from deforum_helpers.render_modes import render_input_video, render_animation_with_video_mask, render_interpolation
 
         tqdm_backup = shared.total_tqdm
         shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args)
