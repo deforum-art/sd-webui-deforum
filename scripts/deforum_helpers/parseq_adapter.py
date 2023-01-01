@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import operator
 import requests
-from .animation import DeformAnimKeys
+from .animation_key_frames import DeformAnimKeys
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
