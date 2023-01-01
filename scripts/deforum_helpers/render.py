@@ -42,11 +42,11 @@ def unsharp_mask(img, kernel_size=(5, 5), sigma=1.0, amount=1.0, threshold=0):
         np.copyto(sharpened, img, where=low_contrast_mask)
     return sharpened
 
-def render_animation(args, anim_args, parseq_args, animation_prompts, root):
+def render_animation(args, anim_args, parseq_args, animation_prompts, root, loop_args):
 
+    print(loop_args)
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
-
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args)
 
