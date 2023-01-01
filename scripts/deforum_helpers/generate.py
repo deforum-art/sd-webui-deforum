@@ -78,7 +78,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
             #prevent loaded mask from throwing errors in Image operations if completely black and crop and resize in webui pipeline
             #doing this after contrast and brightness adjustments to ensure that mask is not passed as black or blank
             mask = check_mask_for_errors(mask, args.invert_mask)
-
+            args.noise_mask = mask
             #assign masking options to pipeline
             if mask is not None:
                 p.inpainting_mask_invert = args.invert_mask

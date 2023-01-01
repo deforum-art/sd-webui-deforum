@@ -73,4 +73,8 @@ def check_mask_for_errors(mask_input, invert_mask=False):
         return None
     else:
         return mask_input    
-    
+
+def get_mask(args):
+    return check_mask_for_errors(
+         prepare_mask(args.mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
+    )

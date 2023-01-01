@@ -9,13 +9,14 @@ from .generate import generate
 from .noise import add_noise
 from .animation import sample_from_cv2, sample_to_cv2, anim_frame_warp
 from .animation_key_frames import DeformAnimKeys
-from .vid2frames import get_frame_name
+from .vid2frames import get_frame_name, get_next_frame
 from .depth import DepthModel
 from .colors import maintain_colors
 from .parseq_adapter import ParseqAnimKeys
 from .seed import next_seed
 from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
+from .load_images import get_mask
 # Webui
 from modules.shared import opts, cmd_opts, state
 
@@ -110,6 +111,13 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
     args.n_samples = 1
     frame_idx = start_frame
     
+    # Grab the first frame noise mask since it wont be provided until next frame
+    if args.use_mask and not anim_args.use_mask_video:
+        args.noise_mask = get_mask(args)
+    elif args.use_mask and anim_args.use_mask_video:
+        args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+        args.noise_mask = get_mask(args)
+
     #Webui
     state.job_count = anim_args.max_frames
     
@@ -211,17 +219,15 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")
             print(f"Rx: {keys.rotation_3d_x_series[frame_idx]} Ry: {keys.rotation_3d_y_series[frame_idx]} Rz: {keys.rotation_3d_z_series[frame_idx]}")
             if anim_args.use_mask_video:
-                mask_frame = os.path.join(args.outdir, 'maskframes', get_frame_name(anim_args.video_mask_path) + f"{frame_idx+1:05}.jpg")
-                args.mask_file = mask_frame
+                args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
 
         # grab init image for current frame
         if using_vid_init:
-            init_frame = os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx+1:05}.jpg")            
+            init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
             if anim_args.use_mask_video:
-                mask_frame = os.path.join(args.outdir, 'maskframes', get_frame_name(anim_args.video_mask_path) + f"{frame_idx+1:05}.jpg")
-                args.mask_file = mask_frame
+                args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
                 
         # sample the diffusion model
         sample, image = generate(args, anim_args, root, frame_idx, return_sample=True)

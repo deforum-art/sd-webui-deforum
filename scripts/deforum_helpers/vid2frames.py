@@ -3,6 +3,7 @@ import cv2
 import shutil
 import math
 import requests
+from modules.shared import state
 
 def get_frame_name(path):
     name = os.path.basename(path)
@@ -63,3 +64,8 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True):
             count += 1
         print("Converted %d frames" % count)
     else: print("Frames already unpacked")
+
+def get_next_frame(outdir, video_path, frame_idx, mask=False):
+    frame_path = 'inputframes'
+    if (mask): frame_path = 'maskframes'
+    return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:05}.jpg")
