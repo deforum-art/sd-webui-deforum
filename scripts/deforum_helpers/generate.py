@@ -29,11 +29,6 @@ import logging
 
 import math, json, itertools
 
-#MASKARGSEXPANSION 
-#Add option to remove noise in relation to masking so that areas which are masked receive less noise
-def add_noise(sample: torch.Tensor, noise_amt: float) -> torch.Tensor:
-    return sample + torch.randn(sample.shape, device=sample.device) * noise_amt
-
 def load_img(path, shape, use_alpha_as_mask=False):
     # use_alpha_as_mask: Read the alpha channel of the image as the mask image
     if path.startswith('http://') or path.startswith('https://'):

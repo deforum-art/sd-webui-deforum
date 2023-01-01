@@ -11,7 +11,8 @@ import pathlib
 import torchvision.transforms as T
 import logging
 
-from .generate import generate, add_noise
+from .generate import generate
+from .noise import add_noise
 from .prompt import sanitize
 from .animation import DeformAnimKeys, sample_from_cv2, sample_to_cv2, anim_frame_warp, vid2frames, get_frame_name
 from .parseq_adapter import ParseqAnimKeys
@@ -202,7 +203,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root, loop
             # anti-blur
             contrast_sample = unsharp_mask(contrast_sample, (kernel, kernel), sigma, amount, threshold)
             # apply frame noising
-            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise)
+            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise, args.seed, anim_args.noise_type, (anim_args.perlin_w, anim_args.perlin_h, anim_args.perlin_octaves, anim_args.perlin_persistence))
 
             # use transformed previous frame as init for current
             args.use_init = True
