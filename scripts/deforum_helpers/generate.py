@@ -16,7 +16,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
     
     # Setup the pipeline
     p = get_webui_sd_pipeline(args, root, frame)
-    p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt)
+    p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame)
     
     if not args.use_init and args.strength > 0 and args.strength_0_no_init:
         print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
