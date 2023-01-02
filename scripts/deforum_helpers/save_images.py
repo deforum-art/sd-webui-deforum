@@ -58,3 +58,22 @@ def save_samples(
 
     # return grid_image and individual sample images
     return grid_image, images
+
+def save_image(image, image_type, filename, args, video_args, root):
+    if video_args.store_frames_in_ram:
+        root.frames_cache.append({'path':os.path.join(args.outdir, filename), 'image':image, 'image_type':image_type})
+    else:
+        image.save(os.path.join(args.outdir, filename))
+
+import cv2
+
+def reset_frames_cache(root):
+    root.frames_cache = []
+
+def dump_frames_cache(root):
+    for image_cache in root.frames_cache:
+        if image_cache['image_type'] == 'cv2':
+            cv2.imwrite(image_cache['path'], image_cache['image'])
+        elif image_cache['image_type'] == 'PIL':
+            image_cache['image'].save(image_cache['path'])
+    # do not reset the cache since we're going to add frame erasing later function #TODO 

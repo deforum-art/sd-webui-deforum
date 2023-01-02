@@ -17,11 +17,12 @@ from .seed import next_seed
 from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
 from .load_images import get_mask
+from .save_images import save_image
 # Webui
 from modules.shared import opts, cmd_opts, state
 
 
-def render_animation(args, anim_args, parseq_args, animation_prompts, root):
+def render_animation(args, anim_args, video_args, parseq_args, animation_prompts, root):
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
@@ -247,7 +248,8 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             frame_idx += turbo_steps
         else:    
             filename = f"{args.timestring}_{frame_idx:05}.png"
-            image.save(os.path.join(args.outdir, filename))
+            save_image(image, 'PIL', filename, args, video_args, root)
+
             if anim_args.save_depth_maps:
                 depth = depth_model.predict(sample_to_cv2(sample), anim_args, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
