@@ -69,6 +69,7 @@ import cv2
 
 def reset_frames_cache(root):
     root.frames_cache = []
+    gc.collect()
 
 def dump_frames_cache(root):
     for image_cache in root.frames_cache:
