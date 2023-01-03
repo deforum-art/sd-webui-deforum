@@ -65,7 +65,7 @@ def save_image(image, image_type, filename, args, video_args, root):
     else:
         image.save(os.path.join(args.outdir, filename))
 
-import cv2
+import cv2, gc
 
 def reset_frames_cache(root):
     root.frames_cache = []
