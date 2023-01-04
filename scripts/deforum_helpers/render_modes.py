@@ -81,7 +81,7 @@ def render_interpolation(args, anim_args, parseq_args, animation_prompts, root):
     # save settings for the batch
     settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
-        s = {**dict(args.__dict__), **dict(anim_args.__dict__)}
+        s = {**dict(args.__dict__), **dict(anim_args.__dict__), **dict(parseq_args.__dict__)}
         json.dump(s, f, ensure_ascii=False, indent=4)
     
     # Compute interpolated prompts

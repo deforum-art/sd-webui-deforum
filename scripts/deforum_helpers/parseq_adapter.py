@@ -1,10 +1,13 @@
-from operator import itemgetter
+import copy
 import json
 import logging
-import pandas as pd
-import numpy as np
 import operator
+from operator import itemgetter
+
+import numpy as np
+import pandas as pd
 import requests
+
 from .animation_key_frames import DeformAnimKeys
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -22,6 +25,17 @@ class ParseqAnimKeys():
                 body = requests.get(manifestOrUrl).text
                 logging.debug(f"Loaded remote manifest: {body}")
                 self.parseq_json = json.loads(body)
+
+                # Add the parseq manifest without the detailed frame data to parseq_args.
+                # This ensures it will be saved in the settings file, so that you can always
+                # see exactly what parseq prompts and keyframes were used, even if what the URL
+                # points to changes.
+                parseq_args.fetched_parseq_manifest_summary = copy.deepcopy(self.parseq_json)
+                if parseq_args.fetched_parseq_manifest_summary['rendered_frames']:
+                    del parseq_args.fetched_parseq_manifest_summary['rendered_frames']
+                if parseq_args.fetched_parseq_manifest_summary['rendered_frames_meta']:
+                    del parseq_args.fetched_parseq_manifest_summary['rendered_frames_meta']
+
             except Exception as e:
                 logging.error(f"Unable to load Parseq manifest from URL: {manifestOrUrl}")
                 raise e
