@@ -7,7 +7,7 @@ kornia
 numexpr
 matplotlib
 omegaconf
-opencv-python
+opencv-contrib-python-headless
 pandas
 pytorch_lightning
 resize-right
