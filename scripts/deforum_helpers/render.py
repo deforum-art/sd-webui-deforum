@@ -50,7 +50,7 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
     settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         args.__dict__["prompts"] = animation_prompts
-        s = {**dict(args.__dict__), **dict(anim_args.__dict__)}
+        s = {**dict(args.__dict__), **dict(anim_args.__dict__), **dict(parseq_args.__dict__)}
         json.dump(s, f, ensure_ascii=False, indent=4)
         
     # resume from timestring
