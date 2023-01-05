@@ -155,7 +155,7 @@ class DeforumTQDM:
         self._parseq_args = parseq_args
 
     def reset(self):
-        from .animation import DeformAnimKeys
+        from .animation_key_frames import DeformAnimKeys
         from .parseq_adapter import ParseqAnimKeys
         deforum_total = 0
         # FIXME: get only amount of steps

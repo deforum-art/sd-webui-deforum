@@ -1,7 +1,3 @@
-import torch
-import PIL #HOTFIXISSUE#33 needed for instruction to generate negative mask. 
-from PIL import Image, ImageOps
-import requests
 import numpy as np
 import torchvision.transforms.functional as TF
 from pytorch_lightning import seed_everything
@@ -21,90 +17,24 @@ from .callback import SamplerCallback
 
 #Webui
 import cv2
+from PIL import Image
+from .prompt import split_weighted_subprompts
+from .load_images import load_img, prepare_mask, check_mask_for_errors
+from .webui_sd_pipeline import get_webui_sd_pipeline
 from .animation import sample_from_cv2, sample_to_cv2
+
+#Webui
 from modules import processing
-from modules.shared import opts, sd_model
-from modules.processing import process_images, StableDiffusionProcessingTxt2Img
-import logging
-
-def load_img(path, shape, use_alpha_as_mask=False):
-    # use_alpha_as_mask: Read the alpha channel of the image as the mask image
-    if path.startswith('http://') or path.startswith('https://'):
-        image = Image.open(requests.get(path, stream=True).raw)
-    else:
-        image = Image.open(path)
-
-    if use_alpha_as_mask:
-        image = image.convert('RGBA')
-    else:
-        image = image.convert('RGB')
-
-    image = image.resize(shape, resample=Image.LANCZOS)
-
-    mask_image = None
-    if use_alpha_as_mask:
-        # Split alpha channel into a mask_image
-        red, green, blue, alpha = Image.Image.split(image)
-        mask_image = alpha.convert('L')
-        image = image.convert('RGB')
-
-    return image, mask_image #PIL image for auto's pipeline
-
-def load_mask_latent(mask_input, shape):
-    # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
-    # shape (list-like len(4)): shape of the image to match, usually latent_image.shape
-    
-    if isinstance(mask_input, str): # mask input is probably a file name
-        if mask_input.startswith('http://') or mask_input.startswith('https://'):
-            mask_image = Image.open(requests.get(mask_input, stream=True).raw).convert('RGBA')
-        else:
-            mask_image = Image.open(mask_input).convert('RGBA')
-    elif isinstance(mask_input, Image.Image):
-        mask_image = mask_input
-    else:
-        raise Exception("mask_input must be a PIL image or a file name")
-
-    mask_w_h = (shape[-1], shape[-2])
-    mask = mask_image.resize(mask_w_h, resample=Image.LANCZOS)
-    mask = mask.convert("L")
-    return mask
-
-def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contrast_adjust=1.0, invert_mask=False):
-    # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
-    # shape (list-like len(4)): shape of the image to match, usually latent_image.shape
-    # mask_brightness_adjust (non-negative float): amount to adjust brightness of the iamge, 
-    #     0 is black, 1 is no adjustment, >1 is brighter
-    # mask_contrast_adjust (non-negative float): amount to adjust contrast of the image, 
-    #     0 is a flat grey image, 1 is no adjustment, >1 is more contrast
-    
-    mask = load_mask_latent(mask_input, mask_shape)
-
-    # Mask brightness/contrast adjustments
-    if mask_brightness_adjust != 1:
-        mask = TF.adjust_brightness(mask, mask_brightness_adjust)
-    if mask_contrast_adjust != 1:
-        mask = TF.adjust_contrast(mask, mask_contrast_adjust)
-
-    if invert_mask:
-        mask = PIL.ImageOps.invert(mask)
-    
-    return mask
+from modules.shared import sd_model
+from modules.processing import StableDiffusionProcessingTxt2Img
     
 def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name=None):
     import re
     assert args.prompt is not None
     
-    # Evaluate prompt math!
-    
-    math_parser = re.compile("""
-            (?P<weight>(
-            `[\S\s]*?`# a math function wrapped in `-characters
-            ))
-            """, re.VERBOSE)
-    
-    parsed_prompt = re.sub(math_parser, lambda m: str(parse_weight(m, frame)), args.prompt)
-    
     # Setup the pipeline
+    p = get_webui_sd_pipeline(args, root, frame)
+    p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame)
     p = root.p
     available_samplers = {
         'euler a':'Euler a',
@@ -168,19 +98,21 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
         print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
         print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
         args.strength = 0
+
     mask_image = None
     init_image = None
-    
     processed = None
     
     if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
         init_image = Image.fromarray(img)
+
     elif args.use_init and args.init_image != None and args.init_image != '':
         init_image, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
+                                          
     else:
         print(f"Not using an init image (doing pure txt2img) - seed:{p.seed}; subseed:{p.subseed}; subseed_strength:{p.subseed_strength}; cfg_scale:{p.cfg_scale}; steps:{p.steps}")
         p_txt = StableDiffusionProcessingTxt2Img(
@@ -216,19 +148,19 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
             assert args.mask_file is not None or mask_image is not None, "use_mask==True: An mask image is required for a mask. Please enter a mask_file or use an init image with an alpha channel"
             assert args.use_init, "use_mask==True: use_init is required for a mask"
             mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
-                                (args.W, args.H), 
+                                (args.W, args.H),
                                 args.mask_contrast_adjust, 
-                                args.mask_brightness_adjust, 
-                                args.invert_mask)
-                                
-            p.inpainting_fill = args.fill # need to come up with better name. 
-            p.inpaint_full_res= args.full_res_mask 
-            p.inpaint_full_res_padding = args.full_res_mask_padding 
-
-            #if (torch.all(mask == 0) or torch.all(mask == 1)) and args.use_alpha_as_mask:
-            #    raise Warning("use_alpha_as_mask==True: Using the alpha channel from the init image as a mask, but the alpha channel is blank.")
-            
-            #mask = repeat(mask, '1 ... -> b ...', b=batch_size)
+                                args.mask_brightness_adjust)
+            #prevent loaded mask from throwing errors in Image operations if completely black and crop and resize in webui pipeline
+            #doing this after contrast and brightness adjustments to ensure that mask is not passed as black or blank
+            mask = check_mask_for_errors(mask, args.invert_mask)
+            args.noise_mask = mask
+            #assign masking options to pipeline
+            if mask is not None:
+                p.inpainting_mask_invert = args.invert_mask
+                p.inpainting_fill = args.fill 
+                p.inpaint_full_res= args.full_res_mask 
+                p.inpaint_full_res_padding = args.full_res_mask_padding
         else:
             mask = None
 
