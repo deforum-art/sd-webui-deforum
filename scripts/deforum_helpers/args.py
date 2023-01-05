@@ -51,10 +51,17 @@ def DeforumAnimArgs():
     sigma_schedule = "0: (1.0)"
     amount_schedule = "0: (0.2)"
     threshold_schedule = "0: (0.0)"
+    # Hybrid video
+    hybrid_comp_alpha_schedule = "0:(1)" #@param {type:"string"}
+    hybrid_comp_mask_blend_alpha_schedule = "0:(0.5)" #@param {type:"string"}
+    hybrid_comp_mask_contrast_schedule = "0:(1)" #@param {type:"string"}
+    hybrid_comp_mask_auto_contrast_cutoff_high_schedule =  "0:(100)" #@param {type:"string"}
+    hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" #@param {type:"string"}
 
     #@markdown ####**Coherence:**
     histogram_matching = True #@param {type:"boolean"}
-    color_coherence = 'Match Frame 0 LAB' #@param ['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB'] {type:'string'}
+    color_coherence = 'Match Frame 0 LAB' #@param ['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'] {type:'string'}
+    color_coherence_video_every_N_frames = 1 #@param {type:"integer"}
     diffusion_cadence = '1' #@param ['1','2','3','4','5','6','7','8'] {type:'string'}
 
     #@markdown ####**Noise settings:**
@@ -81,6 +88,18 @@ def DeforumAnimArgs():
     overwrite_extracted_frames = True #@param {type:"boolean"}
     use_mask_video = False #@param {type:"boolean"}
     video_mask_path ='/content/video_in.mp4'#@param {type:"string"}
+
+    #@markdown ####**Hybrid Video for 2D/3D Animation Mode:**
+    hybrid_generate_inputframes = False #@param {type:"boolean"}
+    hybrid_use_first_frame_as_init_image = True #@param {type:"boolean"}
+    hybrid_motion = "None" #@param ['None','Optical Flow','Perspective','Affine']
+    hybrid_flow_method = "Farneback" #@param ['Farneback','DenseRLOF','SF']
+    hybrid_composite = False #@param {type:"boolean"}
+    hybrid_comp_mask_type = "None" #@param ['None', 'Depth', 'Video Depth', 'Blend', 'Difference']
+    hybrid_comp_mask_inverse = False #@param {type:"boolean"}
+    hybrid_comp_mask_equalize = "None" #@param  ['None','Before','After','Both']
+    hybrid_comp_mask_auto_contrast = False #@param {type:"boolean"}
+    hybrid_comp_save_extra_frames = False #@param {type:"boolean"}
 
     #@markdown ####**Interpolation:**
     interpolate_key_frames = False #@param {type:"boolean"}
@@ -151,7 +170,8 @@ def DeforumArgs():
     n_batch = 1 #@param
     batch_name = "Deforum" #@param {type:"string"}
     filename_format = "{timestring}_{index}_{prompt}.png" #@param ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
-    seed_behavior = "iter" #@param ["iter","fixed","random", "schedule"]
+    seed_behavior = "iter" #@param ["iter","fixed","random","ladder","alternate","schedule"]
+    seed_iter_N = 1 #@param {type:'integer'}
     make_grid = False #@param {type:"boolean"}
     grid_rows = 2 #@param 
     outdir = ""#get_output_folder(output_path, batch_name)
@@ -190,6 +210,7 @@ def DeforumArgs():
     init_sample = None
     init_c = None
     noise_mask = None
+    seed_internal = 0
 
     return locals()
 
@@ -329,7 +350,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Row():    
             filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format)
         with gr.Row():
-            seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
+            seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
+            seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
         # output - made in run
         # Batch settings END
             
@@ -410,8 +432,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             reroll_blank_frames = gr.Dropdown(label="reroll_blank_frames", choices=['reroll', 'interrupt', 'ignore'], value=d.reroll_blank_frames, type="value", elem_id="reroll_blank_frames", interactive=True)
         with gr.Row():
             histogram_matching = gr.Checkbox(label="Force all frames to match initial frame's colors. Overrides a1111 settings. NOT RECOMMENDED, enable only for backwards compatibility.", value=da.histogram_matching, interactive=True)
-        with gr.Row():            
-            color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
+        with gr.Row():
+            color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
+            color_coherence_video_every_N_frames = gr.Number(label="color_coherence_video_every_N_frames", value=1, interactive=True)
             diffusion_cadence = gr.Number(label="diffusion_cadence", value=1, interactive=True)
         
         i39 = gr.HTML("<p style=\"margin-bottom:0.75em\">Noise settings:</p>")
@@ -532,6 +555,59 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             resume_timestring = gr.Textbox(label="resume_timestring", lines=1, value = da.resume_timestring, interactive=True)
         # Init settings END
 
+    with gr.Tab('Hybrid Video'):
+        hybrid_html = "<p style=\"padding-bottom:0\"><b style=\"text-shadow: blue -1px -1px;\">Hybrid Video Compositing in 2D/3D Mode</b><span style=\"color:#DDD;font-size:0.7rem;text-shadow: black -1px -1px;margin-left:10px;\">by reallybigname</span></p>"
+        i40 = gr.HTML(hybrid_html)
+        with gr.Accordion("More Info", open=False):
+            hybrid_html = "<ul style=\"list-style-type:circle; margin-left:1em; margin-bottom:1em;\"><li>Composite video with previous frame init image in <b>2D or 3D animation_mode</b> <i>(not for Video Input mode)</i></li>"
+            hybrid_html += "<li>Uses your <b>Init</b> settings for <b>video_init_path, extract_nth_frame, overwrite_extracted_frames</b></li>"
+            hybrid_html += "<li>In Keyframes tab, you can also set <b>color_coherence</b> = '<b>Video Input</b>'</li>"
+            hybrid_html += "<li><b>color_coherence_video_every_N_frames</b> lets you only match every N frames</li>"
+            hybrid_html += "<li>Color coherence may be used with hybrid composite off, to just use video color.</li>"
+            hybrid_html += "<li>Hybrid motion may be used with hybrid composite off, to just use video motion.</li></ul>"
+            hybrid_html += "Hybrid Video Schedules"
+            hybrid_html += "<ul style=\"list-style-type:circle; margin-left:1em; margin-bottom:1em;\"><li>The alpha schedule controls overall alpha for video mix, whether using a composite mask or not.</li>"
+            hybrid_html += "<li>The <b>hybrid_comp_mask_blend_alpha_schedule</b> only affects the 'Blend' <b>hybrid_comp_mask_type</b>.</li>"
+            hybrid_html += "<li>Mask contrast schedule is from 0-255. Normal is 1. Affects all masks.</li>"
+            hybrid_html += "<li>Autocontrast low/high cutoff schedules 0-100. Low 0 High 100 is full range. <br>(<i><b>hybrid_comp_mask_auto_contrast</b> must be enabled</i>)</li></ul>"            
+            hybrid_html += "See main Deforum document for more details."            
+            i41 = gr.HTML(hybrid_html)
+        with gr.Row():
+            with gr.Column(variant="compact"):
+                hybrid_generate_inputframes = gr.Checkbox(label="hybrid_generate_inputframes", value=False, interactive=True)
+            with gr.Column(variant="compact"):
+                hybrid_use_first_frame_as_init_image = gr.Checkbox(label="hybrid_use_first_frame_as_init_image", value=False, interactive=True)
+        with gr.Row():
+            with gr.Column(variant="compact"):
+                hybrid_motion = gr.Dropdown(label="hybrid_motion", choices=['None', 'Optical Flow', 'Perspective', 'Affine'], value=da.hybrid_motion, type="value", elem_id="hybrid_motion", interactive=True)
+            with gr.Column(variant="compact"):
+                hybrid_flow_method = gr.Dropdown(label="hybrid_flow_method", choices=['Farneback', 'DenseRLOF', 'SF'], value=da.hybrid_flow_method, type="value", elem_id="hybrid_flow_method", interactive=True)
+        with gr.Row():
+            hybrid_composite = gr.Checkbox(label="hybrid_composite", value=False, interactive=True)
+            hybrid_comp_mask_type = gr.Dropdown(label="hybrid_comp_mask_type", choices=['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], value=da.hybrid_comp_mask_type, type="value", elem_id="hybrid_comp_mask_type", interactive=True)
+        with gr.Row():
+            with gr.Column(variant="compact"):
+                hybrid_comp_mask_auto_contrast = gr.Checkbox(label="hybrid_comp_mask_auto_contrast", value=False, interactive=True)
+            with gr.Column(variant="compact"):
+                hybrid_comp_mask_inverse = gr.Checkbox(label="hybrid_comp_mask_inverse", value=False, interactive=True)
+        with gr.Row():
+            hybrid_comp_mask_equalize = gr.Dropdown(label="hybrid_comp_mask_equalize", choices=['None', 'Before', 'After', 'Both'], value=da.hybrid_comp_mask_equalize, type="value", elem_id="hybrid_comp_mask_equalize", interactive=True)
+            with gr.Column(variant="compact"):
+                hybrid_comp_save_extra_frames = gr.Checkbox(label="hybrid_comp_save_extra_frames", value=False, interactive=True)
+
+        hybrid_html = "<p style=\"margin-bottom:0.75em\"><b>Hybrid Video Schedules</b></p>"
+        i42 = gr.HTML(hybrid_html)
+        with gr.Row():
+            hybrid_comp_alpha_schedule = gr.Textbox(label="hybrid_comp_alpha_schedule", lines=1, value = da.hybrid_comp_alpha_schedule, interactive=True)
+        with gr.Row():
+            hybrid_comp_mask_blend_alpha_schedule = gr.Textbox(label="hybrid_comp_mask_blend_alpha_schedule", lines=1, value = da.hybrid_comp_mask_blend_alpha_schedule, interactive=True)
+        with gr.Row():
+            hybrid_comp_mask_contrast_schedule = gr.Textbox(label="hybrid_comp_mask_contrast_schedule", lines=1, value = da.hybrid_comp_mask_contrast_schedule, interactive=True)
+        with gr.Row():
+            hybrid_comp_mask_auto_contrast_cutoff_high_schedule = gr.Textbox(label="hybrid_comp_mask_auto_contrast_cutoff_high_schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, interactive=True)
+        with gr.Row():
+            hybrid_comp_mask_auto_contrast_cutoff_low_schedule = gr.Textbox(label="hybrid_comp_mask_auto_contrast_cutoff_low_schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, interactive=True)
+
     with gr.Tab('Video output'):
         # Video output settings START
         i35 = gr.HTML("<p style=\"margin-bottom:0.75em\">Video output settings</p>")
@@ -560,12 +636,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
     ds = SimpleNamespace(**setup_deforum_setting_dictionary(self, is_img2img, is_extension))
-    return [ds.btn, ds.override_settings_with_file, ds.custom_settings_file, ds.animation_mode, ds.max_frames, ds.border, ds.angle, ds.zoom, ds.translation_x, ds.translation_y, ds.translation_z, ds.rotation_3d_x, ds.rotation_3d_y, ds.rotation_3d_z, ds.flip_2d_perspective, ds.perspective_flip_theta, ds.perspective_flip_phi, ds.perspective_flip_gamma, ds.perspective_flip_fv, ds.noise_schedule, ds.strength_schedule, ds.contrast_schedule, ds.cfg_scale_schedule, ds.fov_schedule, ds.near_schedule, ds.far_schedule, ds.seed_schedule, ds.kernel_schedule, ds.sigma_schedule, ds.amount_schedule, ds.threshold_schedule, ds.histogram_matching, ds.color_coherence, ds.diffusion_cadence, ds.noise_type, ds.perlin_w, ds.perlin_h, ds.perlin_octaves, ds.perlin_persistence, ds.use_depth_warping, ds.midas_weight, ds.near_plane, ds.far_plane, ds.fov, ds.padding_mode, ds.sampling_mode, ds.save_depth_maps, ds.video_init_path, ds.extract_nth_frame, ds.overwrite_extracted_frames, ds.use_mask_video, ds.video_mask_path, ds.interpolate_key_frames, ds.interpolate_x_frames, ds.resume_from_timestring, ds.resume_timestring, ds.prompts, ds.animation_prompts, ds.W, ds.H, ds.restore_faces, ds.tiling, ds.enable_hr, ds.firstphase_width, ds.firstphase_height, ds.seed, ds.sampler, ds.seed_enable_extras, ds.subseed, ds.subseed_strength, ds.seed_resize_from_w, ds.seed_resize_from_h, ds.steps, ds.ddim_eta, ds.n_batch, ds.make_grid, ds.grid_rows, ds.save_settings, ds.save_samples, ds.display_samples, ds.save_sample_per_step, ds.show_sample_per_step, ds.override_these_with_webui, ds.batch_name, ds.filename_format, ds.seed_behavior, ds.use_init, ds.from_img2img_instead_of_link, ds.strength_0_no_init, ds.strength, ds.init_image, ds.use_mask, ds.use_alpha_as_mask, ds.invert_mask, ds.overlay_mask, ds.mask_file, ds.mask_contrast_adjust, ds.mask_brightness_adjust, ds.mask_overlay_blur, ds.fill, ds.full_res_mask, ds.full_res_mask_padding, ds.reroll_blank_frames, ds.skip_video_for_run_all, ds.fps, ds.output_format, ds.ffmpeg_location, ds.add_soundtrack, ds.soundtrack_path, ds.use_manual_settings, ds.render_steps, ds.max_video_frames, ds.path_name_modifier, ds.image_path, ds.mp4_path, ds.parseq_manifest, ds.parseq_use_deltas, ds.i1, ds.i2, ds.i3, ds.i4, ds.i5, ds.i6, ds.i7, ds.i8, ds.i9, ds.i10, ds.i11, ds.i12, ds.i13, ds.i14, ds.i15, ds.i16, ds.i17, ds.i18, ds.i19, ds.i20, ds.i21, ds.i22, ds.i23, ds.i24, ds.i25, ds.i26, ds.i27, ds.i28, ds.i29, ds.i30, ds.i31, ds.i32, ds.i33, ds.i34, ds.i35, ds.i36, ds.i37, ds.i38, ds.i39]
+    return [ds.btn, ds.override_settings_with_file, ds.custom_settings_file, ds.animation_mode, ds.max_frames, ds.border, ds.angle, ds.zoom, ds.translation_x, ds.translation_y, ds.translation_z, ds.rotation_3d_x, ds.rotation_3d_y, ds.rotation_3d_z, ds.flip_2d_perspective, ds.perspective_flip_theta, ds.perspective_flip_phi, ds.perspective_flip_gamma, ds.perspective_flip_fv, ds.noise_schedule, ds.strength_schedule, ds.contrast_schedule, ds.cfg_scale_schedule, ds.fov_schedule, ds.near_schedule, ds.far_schedule, ds.seed_schedule, ds.kernel_schedule, ds.sigma_schedule, ds.amount_schedule, ds.threshold_schedule, ds.histogram_matching, ds.color_coherence, ds.color_coherence_video_every_N_frames, ds.diffusion_cadence, ds.noise_type, ds.perlin_w, ds.perlin_h, ds.perlin_octaves, ds.perlin_persistence, ds.use_depth_warping, ds.midas_weight, ds.near_plane, ds.far_plane, ds.fov, ds.padding_mode, ds.sampling_mode, ds.save_depth_maps, ds.video_init_path, ds.extract_nth_frame, ds.overwrite_extracted_frames, ds.use_mask_video, ds.video_mask_path, ds.interpolate_key_frames, ds.interpolate_x_frames, ds.resume_from_timestring, ds.resume_timestring, ds.prompts, ds.animation_prompts, ds.W, ds.H, ds.restore_faces, ds.tiling, ds.enable_hr, ds.firstphase_width, ds.firstphase_height, ds.seed, ds.sampler, ds.seed_enable_extras, ds.subseed, ds.subseed_strength, ds.seed_resize_from_w, ds.seed_resize_from_h, ds.steps, ds.ddim_eta, ds.n_batch, ds.make_grid, ds.grid_rows, ds.save_settings, ds.save_samples, ds.display_samples, ds.save_sample_per_step, ds.show_sample_per_step, ds.override_these_with_webui, ds.batch_name, ds.filename_format, ds.seed_behavior, ds.seed_iter_N, ds.use_init, ds.from_img2img_instead_of_link, ds.strength_0_no_init, ds.strength, ds.init_image, ds.use_mask, ds.use_alpha_as_mask, ds.invert_mask, ds.overlay_mask, ds.mask_file, ds.mask_contrast_adjust, ds.mask_brightness_adjust, ds.mask_overlay_blur, ds.fill, ds.full_res_mask, ds.full_res_mask_padding, ds.reroll_blank_frames, ds.skip_video_for_run_all, ds.fps, ds.output_format, ds.ffmpeg_location, ds.add_soundtrack, ds.soundtrack_path, ds.use_manual_settings, ds.render_steps, ds.max_video_frames, ds.path_name_modifier, ds.image_path, ds.mp4_path, ds.parseq_manifest, ds.parseq_use_deltas, ds.hybrid_generate_inputframes, ds.hybrid_use_first_frame_as_init_image, ds.hybrid_motion, ds.hybrid_flow_method, ds.hybrid_composite, ds.hybrid_comp_mask_type, ds.hybrid_comp_mask_inverse, ds.hybrid_comp_mask_equalize, ds.hybrid_comp_mask_auto_contrast, ds.hybrid_comp_save_extra_frames, ds.hybrid_comp_alpha_schedule, ds.hybrid_comp_mask_blend_alpha_schedule, ds.hybrid_comp_mask_contrast_schedule, ds.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, ds.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, ds.i1, ds.i2, ds.i3, ds.i4, ds.i5, ds.i6, ds.i7, ds.i8, ds.i9, ds.i10, ds.i11, ds.i12, ds.i13, ds.i14, ds.i15, ds.i16, ds.i17, ds.i18, ds.i19, ds.i20, ds.i21, ds.i22, ds.i23, ds.i24, ds.i25, ds.i26, ds.i27, ds.i28, ds.i29, ds.i30, ds.i31, ds.i32, ds.i33, ds.i34, ds.i35, ds.i36, ds.i37, ds.i38, ds.i39, ds.i40, ds.i41, ds.i42]
 
-def pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring):
+def pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, hybrid_generate_inputframes, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule):
     return locals()
 
-def pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask,  mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames):
+def pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask,  mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames):
     precision = 'autocast' 
     scale = 7
     C = 4
@@ -576,6 +652,7 @@ def pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstpha
     init_sample = None
     init_c = None
     noise_mask = None
+    seed_internal = 0
     return locals()
     
 def pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path):
@@ -584,10 +661,10 @@ def pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location,
 def pack_parseq_args(parseq_manifest, parseq_use_deltas):
     return locals()
 
-def process_args(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, parseq_manifest, parseq_use_deltas, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39):
+def process_args(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, parseq_manifest, parseq_use_deltas, hybrid_generate_inputframes, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42):
 
-    args_dict = pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames)
-    anim_args_dict = pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring)
+    args_dict = pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames)
+    anim_args_dict = pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, hybrid_generate_inputframes, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule)
     video_args_dict = pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path)
     parseq_args_dict = pack_parseq_args(parseq_manifest, parseq_use_deltas)
 

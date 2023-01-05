@@ -30,7 +30,11 @@ class DeformAnimKeys():
         self.fov_series = get_inbetweens(parse_key_frames(anim_args.fov_schedule), anim_args.max_frames)
         self.near_series = get_inbetweens(parse_key_frames(anim_args.near_schedule), anim_args.max_frames)
         self.far_series = get_inbetweens(parse_key_frames(anim_args.far_schedule), anim_args.max_frames)
-
+        self.hybrid_comp_alpha_schedule_series = get_inbetweens(parse_key_frames(anim_args.hybrid_comp_alpha_schedule), anim_args.max_frames)
+        self.hybrid_comp_mask_blend_alpha_schedule_series = get_inbetweens(parse_key_frames(anim_args.hybrid_comp_mask_blend_alpha_schedule), anim_args.max_frames)
+        self.hybrid_comp_mask_contrast_schedule_series = get_inbetweens(parse_key_frames(anim_args.hybrid_comp_mask_contrast_schedule), anim_args.max_frames)
+        self.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series = get_inbetweens(parse_key_frames(anim_args.hybrid_comp_mask_auto_contrast_cutoff_high_schedule), anim_args.max_frames)
+        self.hybrid_comp_mask_auto_contrast_cutoff_low_schedule_series = get_inbetweens(parse_key_frames(anim_args.hybrid_comp_mask_auto_contrast_cutoff_low_schedule), anim_args.max_frames)
 
 def get_inbetweens(key_frames, max_frames, integer=False, interp_method='Linear'):
     key_frame_series = pd.Series([np.nan for a in range(max_frames)])
