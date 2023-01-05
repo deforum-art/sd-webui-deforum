@@ -106,28 +106,28 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
     
     # Setup the pipeline
     p = root.p
-    available_samplers = [
-        'Euler a',
-        'Euler',
-        'LMS',
-        'Heun',
-        'DPM2',
-        'DPM2 a',
-        'DPM++ 2S a',
-        'DPM++ 2M',
-        'DPM++ SDE',
-        'DPM fast',
-        'DPM adaptive',
-        'LMS Karras' ,
-        'DPM2 Karras',
-        'DPM2 a Karras',
-        'DPM++ 2S a Karras',
-        'DPM++ 2M Karras',
-        'DPM++ SDE Karras'
-    ]
+    available_samplers = {
+        'euler a':'Euler a',
+        'euler':'Euler',
+        'lms':'LMS',
+        'heun':'Heun',
+        'dpm2':'DPM2',
+        'dpm2 a':'DPM2 a',
+        'dpm++ 2s a':'DPM++ 2S a',
+        'dpm++ 2m':'DPM++ 2M',
+        'dpm++ sde':'DPM++ SDE',
+        'dpm fase':'DPM fast',
+        'dpm adaptive':'DPM adaptive',
+        'lms karras':'LMS Karras' ,
+        'dpm2 karras':'DPM2 Karras',
+        'dpm2 a karras':'DPM2 a Karras',
+        'dpm++ 2s a karras':'DPM++ 2S a Karras',
+        'dpm++ 2m karras':'DPM++ 2M Karras',
+        'dpm++ sde karras':'DPM++ SDE Karras'
+    }
 
-    if sampler_name in available_samplers:
-        args.sampler = sampler_name
+    if sampler_name in available_samplers.keys():
+        args.sampler = available_samplers[sampler_name]
 
     os.makedirs(args.outdir, exist_ok=True)
     p.batch_size = args.n_samples
