@@ -1,21 +1,4 @@
 import numpy as np
-import torchvision.transforms.functional as TF
-from pytorch_lightning import seed_everything
-import os
-from ldm.models.diffusion.plms import PLMSSampler
-from ldm.models.diffusion.ddim import DDIMSampler
-from k_diffusion.external import CompVisDenoiser
-from torch import autocast
-from contextlib import nullcontext
-from einops import rearrange
-import random
-from .prompt import get_uc_and_c, parse_weight
-from .k_samplers import sampler_fn
-from scipy.ndimage import gaussian_filter
-
-from .callback import SamplerCallback
-
-#Webui
 import cv2
 from PIL import Image
 from .prompt import split_weighted_subprompts
@@ -29,13 +12,20 @@ from modules.shared import sd_model
 from modules.processing import StableDiffusionProcessingTxt2Img
     
 def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name=None):
-    import re
     assert args.prompt is not None
     
     # Setup the pipeline
     p = get_webui_sd_pipeline(args, root, frame)
     p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame)
-    p = root.p
+    
+    if not args.use_init and args.strength > 0 and args.strength_0_no_init:
+        print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
+        print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
+        args.strength = 0
+
+    mask_image = None
+    init_image = None
+    processed = None
     available_samplers = {
         'euler a':'Euler a',
         'euler':'Euler',
@@ -55,54 +45,10 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
         'dpm++ 2m karras':'DPM++ 2M Karras',
         'dpm++ sde karras':'DPM++ SDE Karras'
     }
+    if sampler_name is not None:
+        if sampler_name in available_samplers.keys():
+            args.sampler = available_samplers[sampler_name]
 
-    if sampler_name in available_samplers.keys():
-        args.sampler = available_samplers[sampler_name]
-
-    os.makedirs(args.outdir, exist_ok=True)
-    p.batch_size = args.n_samples
-    p.width = args.W
-    p.height = args.H
-    p.seed = args.seed
-    p.subseed=args.subseed
-    p.subseed_strength=args.subseed_strength
-    p.do_not_save_samples = not args.save_sample_per_step
-    p.do_not_save_grid = not args.make_grid
-    p.sd_model=sd_model
-    p.sampler_name = args.sampler
-    p.mask_blur = args.mask_overlay_blur
-    p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
-    p.n_iter = 1
-    p.steps = args.steps
-    p.denoising_strength = 1 - args.strength
-    p.cfg_scale = args.scale
-    p.seed_enable_extras = args.seed_enable_extras
-
-    # FIXME better color corrections as match histograms doesn't seem to be fully working
-    if root.color_corrections is not None:
-        p.color_corrections = root.color_corrections
-    p.outpath_samples = root.outpath_samples
-    p.outpath_grids = root.outpath_samples
-
-    prompt_split = parsed_prompt.split("--neg")
-    if len(prompt_split) > 1:
-        p.prompt, p.negative_prompt = parsed_prompt.split("--neg") #TODO: add --neg to vanilla Deforum for compat
-        print(f'Positive prompt:{p.prompt}')
-        print(f'Negative prompt:{p.negative_prompt}')
-    else:
-        p.prompt = prompt_split[0]
-        print(f'Positive prompt:{p.prompt}')
-        p.negative_prompt = ""
-    
-    if not args.use_init and args.strength > 0 and args.strength_0_no_init:
-        print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
-        print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
-        args.strength = 0
-
-    mask_image = None
-    init_image = None
-    processed = None
-    
     if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
