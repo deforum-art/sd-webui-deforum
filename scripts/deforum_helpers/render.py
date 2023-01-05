@@ -155,6 +155,10 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             "mask_auto_contrast_cutoff_low": int(keys.hybrid_comp_mask_auto_contrast_cutoff_low_schedule_series[frame_idx]),
             "mask_auto_contrast_cutoff_high": int(keys.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx]),
         }        
+        scheduled_sampler_name = None
+        if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
+            scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
+        
         depth = None
         
         # emit in-between frames
@@ -285,10 +289,27 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
                 args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
                 
         # sample the diffusion model
-        sample, image = generate(args, anim_args, root, frame_idx, return_sample=True)
+        sample, image = generate(args, anim_args, root, frame_idx, return_sample=True, sampler_name=scheduled_sampler_name)
+        patience = 10
 
         # reroll blank frame 
         if not image.getbbox():
+            print("Blank frame detected! If you don't have the NSFW filter enabled, this may be due to a glitch!")
+            if args.reroll_blank_frames == 'reroll':
+                while not image.getbbox():
+                    print("Rerolling with +1 seed...")
+                    args.seed += 1
+                    sample, image = generate(args, root, frame_idx, return_sample=True, sampler_name=scheduled_sampler_name)
+                    patience -= 1
+                    if patience == 0:
+                        print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
+                        state.interrupted = True
+                        state.current_image = image
+                        return
+            elif args.reroll_blank_frames == 'interrupt':
+                print("Interrupting to save your eyes...")
+                state.interrupted = True
+                state.current_image = image
             image = blank_frame_reroll(image, args, root, frame_idx)
             if image == None:
                 return

@@ -11,7 +11,7 @@ from modules import processing
 from modules.shared import sd_model
 from modules.processing import StableDiffusionProcessingTxt2Img
     
-def generate(args, anim_args, root, frame = 0, return_sample=False):
+def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name=None):
     assert args.prompt is not None
     
     # Setup the pipeline
@@ -26,7 +26,29 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
     mask_image = None
     init_image = None
     processed = None
-    
+    available_samplers = {
+        'euler a':'Euler a',
+        'euler':'Euler',
+        'lms':'LMS',
+        'heun':'Heun',
+        'dpm2':'DPM2',
+        'dpm2 a':'DPM2 a',
+        'dpm++ 2s a':'DPM++ 2S a',
+        'dpm++ 2m':'DPM++ 2M',
+        'dpm++ sde':'DPM++ SDE',
+        'dpm fase':'DPM fast',
+        'dpm adaptive':'DPM adaptive',
+        'lms karras':'LMS Karras' ,
+        'dpm2 karras':'DPM2 Karras',
+        'dpm2 a karras':'DPM2 a Karras',
+        'dpm++ 2s a karras':'DPM++ 2S a Karras',
+        'dpm++ 2m karras':'DPM++ 2M Karras',
+        'dpm++ sde karras':'DPM++ SDE Karras'
+    }
+    if sampler_name is not None:
+        if sampler_name in available_samplers.keys():
+            args.sampler = available_samplers[sampler_name]
+
     if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
@@ -93,7 +115,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
         p.init_images = [init_image]
         p.image_mask = mask
 
-        print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}")
+        print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}; sampler={p.sampler_name}")
         processed = processing.process_images(p)
         p.sd_model=sd_model
     
