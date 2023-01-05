@@ -36,7 +36,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
         'dpm++ 2s a':'DPM++ 2S a',
         'dpm++ 2m':'DPM++ 2M',
         'dpm++ sde':'DPM++ SDE',
-        'dpm fase':'DPM fast',
+        'dpm fast':'DPM fast',
         'dpm adaptive':'DPM adaptive',
         'lms karras':'LMS Karras' ,
         'dpm2 karras':'DPM2 Karras',
