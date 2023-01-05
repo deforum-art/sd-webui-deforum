@@ -55,6 +55,7 @@ deforum_titles = {
     "perspective_flip_fv": "the 2D vanishing point of perspective (recommended range 30-160)",
     "noise_schedule": "amount of graininess to add per frame for diffusion diversity",
     "strength_schedule": "amount of presence of previous frame to influence next frame, also controls steps in the following formula [steps - (strength_schedule * steps)]",
+    "sampler_schedule": "controls which sampler to use at a specific scheduled frame",
     "contrast_schedule": "adjusts the overall contrast per frame [default neutral at 1.0]",
     "cfg_scale_schedule": "how closely the image should conform to the prompt. Lower values produce more creative results. (recommended range 5-15)",
     "fov_schedule": "adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]",

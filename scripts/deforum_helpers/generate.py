@@ -12,7 +12,7 @@ from k_diffusion.external import CompVisDenoiser
 from torch import autocast
 from contextlib import nullcontext
 from einops import rearrange
-
+import random
 from .prompt import get_uc_and_c, parse_weight
 from .k_samplers import sampler_fn
 from scipy.ndimage import gaussian_filter
@@ -90,7 +90,7 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
     
     return mask
     
-def generate(args, anim_args, root, frame = 0, return_sample=False):
+def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name=None):
     import re
     assert args.prompt is not None
     
@@ -106,7 +106,29 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
     
     # Setup the pipeline
     p = root.p
-    
+    available_samplers = [
+        'Euler a',
+        'Euler',
+        'LMS',
+        'Heun',
+        'DPM2',
+        'DPM2 a',
+        'DPM++ 2S a',
+        'DPM++ 2M',
+        'DPM++ SDE',
+        'DPM fast',
+        'DPM adaptive',
+        'LMS Karras' ,
+        'DPM2 Karras',
+        'DPM2 a Karras',
+        'DPM++ 2S a Karras',
+        'DPM++ 2M Karras',
+        'DPM++ SDE Karras'
+    ]
+
+    if sampler_name in available_samplers:
+        args.sampler = sampler_name
+
     os.makedirs(args.outdir, exist_ok=True)
     p.batch_size = args.n_samples
     p.width = args.W
@@ -131,7 +153,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
         p.color_corrections = root.color_corrections
     p.outpath_samples = root.outpath_samples
     p.outpath_grids = root.outpath_samples
-    
+
     prompt_split = parsed_prompt.split("--neg")
     if len(prompt_split) > 1:
         p.prompt, p.negative_prompt = parsed_prompt.split("--neg") #TODO: add --neg to vanilla Deforum for compat
@@ -215,7 +237,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
         p.init_images = [init_image]
         p.image_mask = mask
 
-        print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}")
+        print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}; sampler={p.sampler_name}")
         processed = processing.process_images(p)
         p.sd_model=sd_model
     

@@ -68,6 +68,7 @@ class ParseqAnimKeys():
         self.perspective_flip_fv_series = self.parseq_to_anim_series('perspective_flip_fv')
         self.noise_schedule_series = self.parseq_to_anim_series('noise')
         self.strength_schedule_series = self.parseq_to_anim_series('strength')
+        self.sampler_schedule_series = self.parseq_to_anim_series('sampler_schedule')
         self.contrast_schedule_series = self.parseq_to_anim_series('contrast')
         self.cfg_scale_schedule_series = self.parseq_to_anim_series('scale')
         self.seed_schedule_series = self.parseq_to_anim_series('seed')
@@ -81,7 +82,7 @@ class ParseqAnimKeys():
         self.sigma_schedule_series = self.parseq_to_anim_series('antiblur_sigma')
         self.amount_schedule_series = self.parseq_to_anim_series('antiblur_amount')
         self.threshold_schedule_series = self.parseq_to_anim_series('antiblur_threshold')
-
+        
         # Config:
         # TODO this is currently ignored. User must ensure the output FPS set in parseq
         # matches the one set in Deforum to avoid unexpected results.
@@ -129,6 +130,6 @@ class ParseqAnimKeys():
         if (definedField is not None):
             return definedField
         else:
-            logging.info(f"Data for {name} not defined in Parseq data. Falling back to stanard Deforum values.")
+            logging.info(f"Data for {name} not defined in Parseq data. Falling back to standard Deforum values.")
             return getattr(inst.default_anim_keys, name)
 
