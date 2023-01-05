@@ -18,11 +18,12 @@ from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
 from .load_images import get_mask
 from .hybrid_video import hybrid_generation, hybrid_composite, get_matrix_for_hybrid_motion, get_flow_for_hybrid_motion, image_transform_ransac, image_transform_optical_flow
+from .save_images import save_image
 # Webui
 from modules.shared import opts, cmd_opts, state
 
 
-def render_animation(args, anim_args, parseq_args, animation_prompts, root):
+def render_animation(args, anim_args, video_args, parseq_args, animation_prompts, root):
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         if anim_args.hybrid_composite or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
@@ -323,7 +324,8 @@ def render_animation(args, anim_args, parseq_args, animation_prompts, root):
             frame_idx += turbo_steps
         else:    
             filename = f"{args.timestring}_{frame_idx:05}.png"
-            image.save(os.path.join(args.outdir, filename))
+            save_image(image, 'PIL', filename, args, video_args, root)
+
             if anim_args.save_depth_maps:
                 depth = depth_model.predict(sample_to_cv2(sample), anim_args, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
