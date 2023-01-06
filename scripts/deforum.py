@@ -151,7 +151,7 @@ class DeforumScript(wscripts.Script):
                 f'fps={int(fps)}',
                 '-pix_fmt', 'yuv420p',
                 '-crf', '17',
-                '-preset', 'veryfast',
+                '-preset', 'veryslow',
                 '-pattern_type', 'sequence',
                 mp4_path
             ]
