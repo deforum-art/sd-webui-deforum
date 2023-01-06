@@ -26,7 +26,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
     mask_image = None
     init_image = None
     processed = None
-    available_samplers = {
+    available_samplers = { 
         'euler a':'Euler a',
         'euler':'Euler',
         'lms':'LMS',
