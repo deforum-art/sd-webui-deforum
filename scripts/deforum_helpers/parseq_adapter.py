@@ -85,6 +85,7 @@ class ParseqAnimKeys():
         self.sampler_schedule_series = self.parseq_to_anim_series('sampler_schedule')
         self.contrast_schedule_series = self.parseq_to_anim_series('contrast')
         self.cfg_scale_schedule_series = self.parseq_to_anim_series('scale')
+        self.steps_schedule_series = self.parseq_to_anim_series("steps_schedule")
         self.seed_schedule_series = self.parseq_to_anim_series('seed')
         self.fov_series = self.parseq_to_anim_series('fov')
         self.near_series = self.parseq_to_anim_series('near')

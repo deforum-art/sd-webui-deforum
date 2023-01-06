@@ -157,6 +157,8 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
             "mask_auto_contrast_cutoff_high": int(keys.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx]),
         }        
         scheduled_sampler_name = None
+        if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
+            args.steps = keys.steps_schedule_series[frame_idx]
         if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
             scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
         
