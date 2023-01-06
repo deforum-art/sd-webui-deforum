@@ -107,8 +107,6 @@ def render_interpolation(args, anim_args, video_args, parseq_args, animation_pro
         args.n_samples = 1
         args.prompt = prompt_series[frame_idx]
         args.scale = keys.cfg_scale_schedule_series[frame_idx]
-        if anim_args.enable_steps_scheduling[frame_idx]:
-            args.steps = keys.steps_schedule_series[frame_idx]
         if use_parseq:
             args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
