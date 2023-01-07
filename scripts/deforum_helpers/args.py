@@ -57,7 +57,7 @@ def DeforumAnimArgs():
     # Anti-blur
     kernel_schedule = "0: (5)"
     sigma_schedule = "0: (1.0)"
-    amount_schedule = "0: (0.2)"
+    amount_schedule = "0: (0.1)"
     threshold_schedule = "0: (0.0)"
     # Hybrid video
     hybrid_comp_alpha_schedule = "0:(1)" #@param {type:"string"}
