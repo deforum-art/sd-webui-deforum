@@ -46,6 +46,8 @@ def split_weighted_subprompts(text, frame = 0):
     return positive_prompts, negative_prompts
 
 def interpolate_prompts(animation_prompts, max_frames):
+    import numpy as np
+    import pandas as pd
     # Get prompts sorted by keyframe 
     sorted_prompts = sorted(animation_prompts.items(), key=lambda item: int(item[0]))
 
