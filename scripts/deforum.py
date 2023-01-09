@@ -160,14 +160,14 @@ class DeforumScript(wscripts.Script):
             if process.returncode != 0:
                 print(stderr)
                 raise RuntimeError(stderr)
-                
-            if video_args.add_soundtrack:
+            
+            if video_args.add_soundtrack != 'None':
                 cmd = [
                     video_args.ffmpeg_location,
                     '-i',
                     mp4_path,
                     '-i',
-                    video_args.soundtrack_path,
+                    anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path,
                     '-map', '0:v',
                     '-map', '1:a',
                     '-c:v', 'copy',

@@ -135,7 +135,13 @@ def load_video_settings(video_settings_path, skip_video_for_run_all, fps, output
     ret = []
 
     for key in data:
-        if key in jdata:
+        if key == 'add_soundtrack':
+            add_soundtrack_val = jdata[key]
+            if type(add_soundtrack_val) == bool:
+                ret.append('File' if add_soundtrack_val else 'None')
+            else:
+                ret.append(add_soundtrack_val)
+        elif key in jdata:
             ret.append(jdata[key])
         else:
             ret.append(data[key])

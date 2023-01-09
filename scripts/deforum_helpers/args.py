@@ -235,7 +235,7 @@ def DeforumOutputArgs():
     image_path = "/content/drive/MyDrive/AI/StableDiffusion/2022-09/20220903000939_%05d.png" #@param {type:"string"}
     mp4_path = "/content/drive/MyDrive/AI/StableDiffusion/content/drive/MyDrive/AI/StableDiffusion/2022-09/kabachuha/2022-09/20220903000939.mp4" #@param {type:"string"}
     ffmpeg_location = "ffmpeg"
-    add_soundtrack = False
+    add_soundtrack = 'None' #@param ["File","Init Video"]
     soundtrack_path = "snowfall.mp3"
     render_steps = False  #@param {type: 'boolean'}
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
@@ -640,7 +640,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='PIL gif', type="value", elem_id="output_format", interactive=True)
         with gr.Row():
             ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
-            add_soundtrack = gr.Checkbox(label="add_soundtrack", value=dv.add_soundtrack, interactive=True)
+            add_soundtrack = gr.Dropdown(label="add_soundtrack", choices=['None', 'File', 'Init Video'], value=dv.add_soundtrack, interactive=True, type="value")
             soundtrack_path = gr.Textbox(label="soundtrack_path", lines=1, interactive=True, value = dv.soundtrack_path)
         with gr.Row():
             use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
