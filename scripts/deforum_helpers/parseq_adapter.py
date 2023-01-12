@@ -114,9 +114,7 @@ class ParseqAnimKeys():
             if self.rendered_frames[0][seriesName] is not None:
                 logging.info(f"Found {seriesName} in first frame of Parseq data. Assuming it's defined.")
         except KeyError:
-            logging.info(f"{seriesName} not found in first frame of Parseq data. Assuming it's undefined, will use standard Deforum values.")
             return None
-            
 
         key_frame_series = pd.Series([np.nan for a in range(self.required_frames)])
         
@@ -140,11 +138,27 @@ class ParseqAnimKeys():
         try:
             definedField = super(ParseqAnimKeys, inst).__getattribute__(name)
         except AttributeError:
-            definedField = None
+            # No field with this name has been explicitly extracted from the JSON data.
+            # It must be a new parameter. Let's see if it's in the raw JSON.
+
+            # parseq doesn't use _series, _schedule or _schedule_series suffixes in the
+            # JSON data - remove them.
+            strippableSuffixes = ['_series', '_schedule']
+            parseqName = name
+            while any(parseqName.endswith(suffix) for suffix in strippableSuffixes):
+                for suffix in strippableSuffixes:
+                    if parseqName.endswith(suffix):
+                        parseqName = parseqName[:-len(suffix)]            
+            
+            # returns None if not defined in Parseq JSON data
+            definedField = inst.parseq_to_anim_series(parseqName)
+            if (definedField is not None):
+                # add the field to the instance so we don't compute it again.
+                setattr(inst, name, definedField)
 
         if (definedField is not None):
             return definedField
         else:
-            logging.info(f"Data for {name} not defined in Parseq data. Falling back to standard Deforum values.")
+            logging.info(f"Data for {name} not defined in Parseq data (looked for: '{parseqName}'). Falling back to standard Deforum values.")
             return getattr(inst.default_anim_keys, name)
 
