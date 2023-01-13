@@ -75,7 +75,7 @@ deforum_titles = {
     "perlin_w": "The width of the Perlin sample. Lower values will make larger noise regions. Think of it as inverse brush stroke width. The greater this setting, the smaller details it will affect.",
     "perlin_h": "The height of the Perlin sample. Lower values will make larger noise regions. Think of it as inverse brush stroke width. The greater this setting, the smaller details it will affect.",
     "perlin_octaves": "The number of Perlin noise octaves, that is the count of P-noise iterations. Higher values will make the noise more soft and smoke-like, whereas lower values will make it look more organic and spotty. It is limited by 8 octaves as the resulting gain will run out of bounds.",
-    "perlin_persistence": "How much of noise from each octave is added on each iteration. Higher values will make it more straighter and sharper, while lover values will make it rounder and smoother. It is limited by 1.0 as the resulting gain fill the frame completely with noise.",
+    "perlin_persistence": "How much of noise from each octave is added on each iteration. Higher values will make it more straighter and sharper, while lower values will make it rounder and smoother. It is limited by 1.0 as the resulting gain fill the frame completely with noise.",
     "use_depth_warping": "enables instructions to warp an image dynamically in 3D mode only.",
     "midas_weight": "sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]",
     "padding_mode": "instructs the handling of pixels outside the field of view as they come into the scene.",
