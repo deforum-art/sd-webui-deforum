@@ -1,4 +1,4 @@
-import os, time, cv2
+import os, cv2
 import torch
 from multiprocessing import freeze_support
 
