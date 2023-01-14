@@ -28,13 +28,22 @@ def hybrid_generation(args, anim_args, root):
         print(f"Extracting video (1 every {anim_args.extract_nth_frame}) frames to {video_in_frame_path}...")
         vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
     
-    # extract alpha masks of humans from the init video
+    # extract alpha masks of humans from the extracted input video imgs
     if anim_args.hybrid_generate_human_masks:
-        # create a folder for the human masks to live in
+        # create a folder for the human masks imgs to live in
+        print(f"Checking /creating a folder for the human masks")
         os.makedirs(human_masks_path, exist_ok=True)
         
-        # call a function to generate the alpha? need to only pass the input vid and output folder name?
-        video2humanmasks(anim_args.video_init_path, human_masks_path)
+        if anim_args.overwrite_extracted_frames:
+            # delete human alpha masks (they will now be generated again anyway)
+            files = pathlib.Path(human_masks_path).glob('*.jpg')
+            for f in files: os.remove(f)
+            files = pathlib.Path(human_masks_path).glob('*.png')
+            for f in files: os.remove(f)
+        
+        # generate the actual alpha masks from the input imgs
+        print(f"Extracting alpha humans masks from the input frames")
+        video2humanmasks(video_in_frame_path, human_masks_path)
         
     # determine max frames from length of input frames
     anim_args.max_frames = len([f for f in pathlib.Path(video_in_frame_path).glob('*.jpg')])
