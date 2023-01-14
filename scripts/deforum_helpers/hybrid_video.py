@@ -4,10 +4,12 @@ import pathlib
 import numpy as np
 from PIL import Image, ImageChops, ImageOps, ImageEnhance
 from .vid2frames import vid2frames, get_frame_name, get_next_frame
+from .human_masking import video2humanmasks
 
 def hybrid_generation(args, anim_args, root):
     video_in_frame_path = os.path.join(args.outdir, 'inputframes')
     hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
+    human_masks_path = os.path.join(args.outdir, 'human_masks')
 
     if anim_args.hybrid_generate_inputframes:
         # create folders for the video input frames and optional hybrid frames to live in
@@ -25,7 +27,15 @@ def hybrid_generation(args, anim_args, root):
         print(f"Video to extract: {anim_args.video_init_path}")
         print(f"Extracting video (1 every {anim_args.extract_nth_frame}) frames to {video_in_frame_path}...")
         vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
-
+    
+    # extract alpha masks of humans from the init video
+    if anim_args.hybrid_generate_human_masks:
+        # create a folder for the human masks to live in
+        os.makedirs(human_masks_path, exist_ok=True)
+        
+        # call a function to generate the alpha? need to only pass the input vid and output folder name?
+        video2humanmasks(anim_args.video_init_path, human_masks_path)
+        
     # determine max frames from length of input frames
     anim_args.max_frames = len([f for f in pathlib.Path(video_in_frame_path).glob('*.jpg')])
     print(f"Using {anim_args.max_frames} input frames from {video_in_frame_path}...")
