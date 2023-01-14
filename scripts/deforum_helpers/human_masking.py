@@ -23,6 +23,8 @@ def extract_frames(input_video_path, output_imgs_path):
 def video2humanmasks(input_frames_path, output_folder_path, output_type, fps):
     # freeze support is needed for video outputting
     freeze_support()
+    
+    #load model from custom forked repo of RobustVideoMatting 
     model = torch.hub.load("hithereai/RobustVideoMatting", "mobilenetv3").cuda() 
     convert_video = torch.hub.load("hithereai/RobustVideoMatting", "converter")
     
