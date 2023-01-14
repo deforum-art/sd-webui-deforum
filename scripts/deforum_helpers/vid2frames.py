@@ -34,6 +34,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True):
         if not content_name.startswith(name):
             overwrite = True
     vidcap = cv2.VideoCapture(video_path)
+    video_fps = vidcap.get(cv2.CAP_PROP_FPS)
 
     # grab the frame count to check against existing directory len 
     frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
@@ -64,6 +65,10 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True):
             count += 1
         print("Converted %d frames" % count)
     else: print("Frames already unpacked")
+    
+    vidcap.release()
+    
+    return video_fps
 
 def get_next_frame(outdir, video_path, frame_idx, mask=False):
     frame_path = 'inputframes'

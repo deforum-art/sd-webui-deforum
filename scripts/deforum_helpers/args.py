@@ -99,7 +99,7 @@ def DeforumAnimArgs():
 
     #@markdown ####**Hybrid Video for 2D/3D Animation Mode:**
     hybrid_generate_inputframes = False #@param {type:"boolean"}
-    hybrid_generate_human_masks = False #@param {type:"boolean"}
+    hybrid_generate_human_masks = "None" #@param ['None','PNGs','Video', 'Both']
     hybrid_use_first_frame_as_init_image = True #@param {type:"boolean"}
     hybrid_motion = "None" #@param ['None','Optical Flow','Perspective','Affine']
     hybrid_flow_method = "Farneback" #@param ['Farneback','DenseRLOF','SF']
@@ -599,7 +599,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Column(variant="compact"):
                 hybrid_generate_inputframes = gr.Checkbox(label="hybrid_generate_inputframes", value=False, interactive=True)
             with gr.Column(variant="compact"):
-                hybrid_generate_human_masks = gr.Checkbox(label="hybrid_generate_human_masks", value=False, interactive=True)
+                #hybrid_generate_human_masks = gr.Checkbox(label="hybrid_generate_human_masks", value=False, interactive=True)
+                hybrid_generate_human_masks = gr.Dropdown(label="hybrid_generate_human_masks", choices=['None', 'PNGs', 'Video', 'Both'], value=da.hybrid_generate_human_masks, type="value", elem_id="hybrid_generate_human_masks", interactive=True)
             with gr.Column(variant="compact"):
                 hybrid_use_first_frame_as_init_image = gr.Checkbox(label="hybrid_use_first_frame_as_init_image", value=False, interactive=True)
         with gr.Row():
