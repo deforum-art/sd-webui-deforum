@@ -3,8 +3,8 @@ from RobustVideoMatting.model import MattingNetwork
 from RobustVideoMatting.inference import convert_video
 
 def video2humanmasks(input_frames_path, output_folder_path):
-    # load the the RVM model - options are: resnet50 or mobilenetv3
-    model = torch.hub.load("PeterL1n/RobustVideoMatting", "resnet50").cuda() 
+    # load the the RVM model - options are: resnet50 or mobilenetv3 (default; quiker and performs almost the same as resnet)
+    model = torch.hub.load("PeterL1n/RobustVideoMatting", "mobilenetv3").cuda() 
     convert_video = torch.hub.load("PeterL1n/RobustVideoMatting", "converter")
 
     # extract humans masks from the input folder with out PNGs
