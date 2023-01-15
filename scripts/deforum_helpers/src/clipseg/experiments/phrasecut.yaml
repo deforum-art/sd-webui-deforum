@@ -1,0 +1,80 @@
+configuration:
+  batch_size: 64
+  optimizer: torch.optim.AdamW
+
+  lr: 0.001
+
+  trainer: experiment_setup.train_loop
+  scorer: experiment_setup.score
+  model: models.clipseg.CLIPDensePredT
+
+  lr_scheduler: cosine
+  T_max: 20000
+  eta_min: 0.0001
+
+  max_iterations: 20000
+  val_interval: null
+
+  # dataset
+  dataset: datasets.phrasecut.PhraseCut   # <-----------------
+  split_mode: pascal_test
+  split: train
+  mask: text_and_crop_blur_highlight352
+  image_size: 352
+  normalize: True
+  pre_crop_image_size: [sample, 1, 1.5]
+  aug: 1new
+
+  # general
+  mix: False # <-----------------
+  prompt: shuffle+
+  norm_cond: True
+  mix_text_min: 0.0
+  
+  # model
+  out: 1
+  extract_layers: [3, 7, 9]
+  reduce_dim: 64
+  depth: 3
+  fix_shift: False
+
+  loss: torch.nn.functional.binary_cross_entropy_with_logits
+  amp: True
+
+test_configuration_common:
+  normalize: True
+  image_size: 352
+  batch_size: 32
+  # max_iterations: 5
+  # max_iterations: 150
+  
+test_configuration: 
+
+  -
+    name: pc  # old: phrasecut
+    metric: metrics.FixedIntervalMetrics
+    test_dataset: phrasecut
+    split: test
+    mask: text
+    label_support: True
+    sigmoid: True
+
+
+columns: [i, name, pc_miou_0.3, pc_fgiou_0.3, pc_fgiou_0.5, pc_ap, duration, date]
+
+
+individual_configurations:
+
+# important ones
+
+
+- {name: rd64-uni, version: 'ViT-B/16', reduce_dim: 64, with_visual: True, negative_prob: 0.2, mix: True, mix_text_max: 0.5}
+
+# this was accedentally trained using old mask
+- {name: rd128-vit16-phrasecut, version: 'ViT-B/16', reduce_dim: 128, mask: text_and_blur3_highlight01}
+- {name: rd64-uni-novis, version: 'ViT-B/16', reduce_dim: 64, with_visual: False, negative_prob: 0.2, mix: False}
+# this was accedentally trained using old mask
+- {name: baseline3-vit16-phrasecut, model: models.clipseg.CLIPDenseBaseline, version: 'ViT-B/16', reduce_dim: 64, reduce2_dim: 64, mask: text_and_blur3_highlight01}
+
+- {name: vit64-uni, version: 'ViT-B/16', model: models.vitseg.VITDensePredT, reduce_dim: 64, with_visual: True, only_visual: True, negative_prob: 0.2, mask: crop_blur_highlight352, lr: 0.0003}
+- {name: vit64-uni-novis, version: 'ViT-B/16', model: models.vitseg.VITDensePredT, with_visual: False, reduce_dim: 64, lr: 0.0001}
