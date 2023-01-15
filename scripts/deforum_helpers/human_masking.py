@@ -1,6 +1,5 @@
 import os, cv2
 import torch
-from pathlib import Path
 from multiprocessing import freeze_support
 
 def extract_frames(input_video_path, output_imgs_path):
