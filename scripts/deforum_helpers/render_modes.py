@@ -20,7 +20,7 @@ def render_input_video(args, anim_args, video_args, parseq_args, animation_promp
 
     # save the video frames from input video
     print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {video_in_frame_path}...")
-    vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
+    vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames, False)
 
     # determine max frames from length of input frames
     anim_args.max_frames = len([f for f in pathlib.Path(video_in_frame_path).glob('*.jpg')])
@@ -34,7 +34,7 @@ def render_input_video(args, anim_args, video_args, parseq_args, animation_promp
 
         # save the video frames from mask video
         print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
-        vid2frames(anim_args.video_mask_path, mask_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
+        vid2frames(anim_args.video_mask_path, mask_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames, False)
         max_mask_frames = len([f for f in pathlib.Path(mask_in_frame_path).glob('*.jpg')])
 
         # limit max frames if there are less frames in the video mask compared to input video
@@ -55,7 +55,7 @@ def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, a
 
     # save the video frames from mask video
     print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
-    vid2frames(anim_args.video_mask_path, mask_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
+    vid2frames(anim_args.video_mask_path, mask_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames, False)
     args.use_mask = True
     #args.overlay_mask = True
 
