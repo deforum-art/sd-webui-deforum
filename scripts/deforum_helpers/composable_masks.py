@@ -14,6 +14,7 @@
 # Writing the parser for the boolean sequence
 # using regex and PIL operations
 import re
+from .word_masking import get_word_mask
 from PIL import Image, ImageChops
 
 # val_masks: name, PIL Image mask
@@ -54,7 +55,7 @@ def compose_mask(mask_seq:string, val_masks:dict[string, Image], frame_image:Ima
     def parse(var):
         inner_idx += 1
         content = match_object.groupdict()['inner']
-        val_masks[f'\{{inner_idx}\}'] = clipseg(content, frame_image).convert('1') # FIXME: Load from CLIPseg
+        val_masks[f'\{{inner_idx}\}'] = get_word_mask(root, frame_image, content).convert('1') # FIXME: Load from CLIPseg
         return f'\{{inner_idx}\}'
     
     mask_seq = re.sub(pattern, parse, mask_seq)
