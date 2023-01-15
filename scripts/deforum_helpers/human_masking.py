@@ -1,5 +1,6 @@
 import os, cv2
 import torch
+from pathlib import Path
 from multiprocessing import freeze_support
 
 def extract_frames(input_video_path, output_imgs_path):
@@ -25,9 +26,17 @@ def video2humanmasks(input_frames_path, output_folder_path, output_type, fps):
     freeze_support()
     
     #load model from custom forked repo of RobustVideoMatting 
-    model = torch.hub.load("hithereai/RobustVideoMatting", "mobilenetv3").cuda() 
-    convert_video = torch.hub.load("hithereai/RobustVideoMatting", "converter")
-    
+    predicted_torch_model_cache_path = str(Path.home()) + '\\.cache\\torch\\hub\\hithereai_RobustVideoMatting_master' 
+    predicted_rvm_cache_testilfe = Path(predicted_torch_model_cache_path + '\\hubconf.py')
+    print(f"predicted_rvm_cache_testilfe:  {predicted_rvm_cache_testilfe}")
+    # try to fetch the models from cache, and only if it can't be find, download from the internet (to enable offline usage)
+    if os.path.isfile(predicted_rvm_cache_testilfe):
+        convert_video = torch.hub.load(predicted_torch_model_cache_path, "converter", source = 'local')
+        model = torch.hub.load(predicted_torch_model_cache_path, "mobilenetv3", source = 'local').cuda()
+    else:
+        convert_video = torch.hub.load("hithereai/RobustVideoMatting", "converter")
+        model = torch.hub.load("hithereai/RobustVideoMatting", "mobilenetv3").cuda()
+
     output_alpha_vid_path = os.path.join(output_folder_path, "human_masked_video.mp4")
     # extract humans masks from the input folder' imgs.
     # in this step PNGs will be extracted only if output_type is set to PNGs. Otherwise a video will be made, and in the case of Both, the video will be extracted in the next step to PNGs
