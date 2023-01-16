@@ -218,6 +218,7 @@ def DeforumArgs():
     init_latent = None
     init_sample = None
     init_c = None
+    mask_image = None
     noise_mask = None
     seed_internal = 0
 
@@ -679,6 +680,7 @@ def pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstpha
     init_latent = None
     init_sample = None
     init_c = None
+    mask_image = None
     noise_mask = None
     seed_internal = 0
     return locals()

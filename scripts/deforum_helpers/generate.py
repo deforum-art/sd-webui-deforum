@@ -23,7 +23,6 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
         print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
         args.strength = 0
 
-    mask_image = None
     init_image = None
     processed = None
     available_samplers = { 
@@ -55,7 +54,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
         init_image = Image.fromarray(img)
 
     elif args.use_init and args.init_image != None and args.init_image != '':
-        init_image, mask_image = load_img(args.init_image, 
+        init_image, _ = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
                                           
@@ -91,16 +90,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
     if processed is None:
         # Mask functions
         if args.use_mask:
-            assert args.mask_file is not None or mask_image is not None, "use_mask==True: An mask image is required for a mask. Please enter a mask_file or use an init image with an alpha channel"
-            assert args.use_init, "use_mask==True: use_init is required for a mask"
-            mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
-                                (args.W, args.H),
-                                args.mask_contrast_adjust, 
-                                args.mask_brightness_adjust)
-            #prevent loaded mask from throwing errors in Image operations if completely black and crop and resize in webui pipeline
-            #doing this after contrast and brightness adjustments to ensure that mask is not passed as black or blank
-            mask = check_mask_for_errors(mask, args.invert_mask)
-            args.noise_mask = mask
+            mask = args.mask_image
             #assign masking options to pipeline
             if mask is not None:
                 p.inpainting_mask_invert = args.invert_mask
@@ -110,7 +100,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
         else:
             mask = None
 
-        assert not ( (args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
+        assert not ( (mask is not None and args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
         
         p.init_images = [init_image]
         p.image_mask = mask

@@ -78,3 +78,14 @@ def get_mask(args):
     return check_mask_for_errors(
          prepare_mask(args.mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
     )
+
+def get_mask_from_file(mask_file, args):
+    return check_mask_for_errors(
+         prepare_mask(mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
+    )
+
+def blank_if_none(mask, w, h, mode):
+    return PIL.Image.new(mode, (w, h), (0)) if mask is None else mask
+
+def none_if_blank(mask):
+    return None if mask.getextrema() == (0,0) else mask

@@ -14,12 +14,14 @@
 # Writing the parser for the boolean sequence
 # using regex and PIL operations
 import re
+from .load_images import get_mask_from_file, check_mask_for_errors
 from .word_masking import get_word_mask
+from torch import Tensor
 from PIL import Image, ImageChops
 
 # val_masks: name, PIL Image mask
 # Returns an image in mode '1' (needed for bool ops), convert to 'L' in the sender function
-def compose_mask(mask_seq:string, val_masks:dict[string, Image], frame_image:Image, inner_idx:int = 0) -> Image:
+def compose_mask(args, mask_seq:string, val_masks:dict[string, Image], frame_image:Tensor, inner_idx:int = 0) -> Image:
     # Compose_mask recursively: go to inner brackets, then b-op it and go upstack
     # pattern = r'((?P<frame>[0-9]+):[\s]*\((?P<param>[\S\s]*?)\)([,][\s]?[\s]?$))'
     
@@ -44,7 +46,7 @@ def compose_mask(mask_seq:string, val_masks:dict[string, Image], frame_image:Ima
     def parse(var):
         inner_idx += 1
         content = match_object.groupdict()['inner']
-        val_masks[f'\{{inner_idx}\}'] = Image.open(content).convert('1')# FIXME: Load from file # TODO: add caching
+        val_masks[f'\{{inner_idx}\}'] = get_mask_from_file(content, args) # TODO: add caching
         return f'\{{inner_idx}\}'
     
     mask_seq = re.sub(pattern, parse, mask_seq)
@@ -55,7 +57,7 @@ def compose_mask(mask_seq:string, val_masks:dict[string, Image], frame_image:Ima
     def parse(var):
         inner_idx += 1
         content = match_object.groupdict()['inner']
-        val_masks[f'\{{inner_idx}\}'] = get_word_mask(root, frame_image, content).convert('1') # FIXME: Load from CLIPseg
+        val_masks[f'\{{inner_idx}\}'] = get_word_mask(root, frame_image, content).convert('1')
         return f'\{{inner_idx}\}'
     
     mask_seq = re.sub(pattern, parse, mask_seq)
@@ -138,3 +140,6 @@ def compose_mask(mask_seq:string, val_masks:dict[string, Image], frame_image:Ima
         raise Exception(f'Wrong composable mask expression format! Broken mask sequence: {mask_seq}')
     
     return matches[0].groupdict()['inner']
+
+def compose_mask_with_check(args, mask_seq:string, val_masks:dict[string, Image], frame_image:Tensor) -> Image:
+    return check_mask_for_errors(compose_mask(mask_seq, val_masks, frame_image, 0))
