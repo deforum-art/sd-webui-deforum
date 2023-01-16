@@ -143,5 +143,5 @@ def compose_mask(args, mask_seq:string, val_masks:dict[string, Image], frame_ima
 
 def compose_mask_with_check(args, mask_seq:string, val_masks:dict[string, Image], frame_image:Tensor) -> Image:
     for k, v in val_masks:
-        val_masks[k] = blank_if_none(v)
+        val_masks[k] = blank_if_none(v, args.W, args.H, '1').convert('1')
     return check_mask_for_errors(compose_mask(mask_seq, val_masks, frame_image, 0))
