@@ -100,6 +100,8 @@ deforum_titles = {
     "mask_overlay_blur": "Blur edges of final overlay mask, if used. Minimum = 0 (no blur)",
     "video_init_path": "the directory at which your video file is located for Video Input mode only.",
     "extract_nth_frame": "during the run sequence, only frames specified by this value will be extracted, saved, and diffused upon. A value of 1 indicates that every frame is to be accounted for. Values of 2 will use every other frame for the sequence. Higher values will skip that number of frames respectively.",
+	"extract_from_frame":"start extracting the input video only from this frame number",
+	"extract_to_frame": "stop the extraction of the video at this frame number. -1 for no limits",
     "overwrite_extracted_frames": "when enabled, will re-extract video frames each run. When using video_input mode, the run will be instructed to write video frames to the drive. If you’ve already populated the frames needed, uncheck this box to skip past redundant extraction, and immediately start the render. If you have not extracted frames, you must run at least once with this box checked to write the necessary frames.",
     "use_mask_video": "video_input mode only, enables the extraction and use of a separate video file intended for use as a mask. White areas of the extracted video frames will not be affected by diffusion, while black areas will be fully effected. Lighter/darker areas are affected dynamically.",
     "video_mask_path": "the directory in which your mask video is located.",
