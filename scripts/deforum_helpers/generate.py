@@ -117,7 +117,6 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
 
         print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}; sampler={p.sampler_name}")
         processed = processing.process_images(p)
-        p.sd_model=sd_model
     
     if root.initial_info == None:
         root.initial_seed = processed.seed
