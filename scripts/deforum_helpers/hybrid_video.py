@@ -15,33 +15,31 @@ def hybrid_generation(args, anim_args, root):
         # create folders for the video input frames and optional hybrid frames to live in
         os.makedirs(video_in_frame_path, exist_ok=True)
         os.makedirs(hybrid_frame_path, exist_ok=True)
-
+        
+        # delete frames if overwrite = true
         if anim_args.overwrite_extracted_frames:
-            # delete hybridframes (they will now be generated again anyway)
-            files = pathlib.Path(hybrid_frame_path).glob('*.jpg')
-            for f in files: os.remove(f)
-            files = pathlib.Path(hybrid_frame_path).glob('*.png')
-            for f in files: os.remove(f)
+            delete_all_imgs_in_folder(hybrid_frame_path)
 
         # save the video frames from input video
         print(f"Video to extract: {anim_args.video_init_path}")
         print(f"Extracting video (1 every {anim_args.extract_nth_frame}) frames to {video_in_frame_path}...")
-        video_fps = vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames)
+        video_fps = vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames, False)
     
     # extract alpha masks of humans from the extracted input video imgs
     if anim_args.hybrid_generate_human_masks != "None":
         # create a folder for the human masks imgs to live in
         print(f"Checking /creating a folder for the human masks")
         os.makedirs(human_masks_path, exist_ok=True)
-        
+            
+        # delete frames if overwrite = true
         if anim_args.overwrite_extracted_frames:
-            # delete human alpha masks (they will now be generated again anyway)
-            files = pathlib.Path(human_masks_path).glob('*.jpg')
-            for f in files: os.remove(f)
-            files = pathlib.Path(human_masks_path).glob('*.png')
-            for f in files: os.remove(f)
+            delete_all_imgs_in_folder(human_masks_path)
         
-        # calculate fps of the masked video according to the original video fps and 'extract_nth_frame'
+        # in case that generate_input_frames isn't selected, we won't get the video fps rate as vid2frames isn't called, So we'll check the video fps in here instead
+        if not anim_args.hybrid_generate_inputframes:
+            video_fps = vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames, True)
+            
+        # calculate the correct fps of the masked video according to the original video fps and 'extract_nth_frame'
         output_fps = video_fps/anim_args.extract_nth_frame
         
         # generate the actual alpha masks from the input imgs
@@ -299,3 +297,8 @@ def autocontrast_grayscale(image, low_cutoff=0, high_cutoff=100):
     image = np.clip(image, 0, 255)
 
     return image
+    
+def delete_all_imgs_in_folder(folder_path):
+        files = list(pathlib.Path(folder_path).glob('*.jpg'))
+        files.extend(list(pathlib.Path(folder_path).glob('*.png')))
+        for f in files: os.remove(f)
