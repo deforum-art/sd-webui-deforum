@@ -46,7 +46,7 @@ def compose_mask(args, mask_seq:string, val_masks:dict[string, Image], frame_ima
     def parse(var):
         inner_idx += 1
         content = match_object.groupdict()['inner']
-        val_masks[f'\{{inner_idx}\}'] = get_mask_from_file(content, args) # TODO: add caching
+        val_masks[f'\{{inner_idx}\}'] = get_mask_from_file(content, args).convert('1') # TODO: add caching
         return f'\{{inner_idx}\}'
     
     mask_seq = re.sub(pattern, parse, mask_seq)
@@ -144,4 +144,4 @@ def compose_mask(args, mask_seq:string, val_masks:dict[string, Image], frame_ima
 def compose_mask_with_check(args, mask_seq:string, val_masks:dict[string, Image], frame_image:Tensor) -> Image:
     for k, v in val_masks:
         val_masks[k] = blank_if_none(v, args.W, args.H, '1').convert('1')
-    return check_mask_for_errors(compose_mask(mask_seq, val_masks, frame_image, 0))
+    return check_mask_for_errors(compose_mask(mask_seq, val_masks, frame_image, 0).convert('L'))
