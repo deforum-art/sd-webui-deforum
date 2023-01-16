@@ -14,7 +14,7 @@
 # Writing the parser for the boolean sequence
 # using regex and PIL operations
 import re
-from .load_images import get_mask_from_file, check_mask_for_errors
+from .load_images import get_mask_from_file, check_mask_for_errors, blank_if_none
 from .word_masking import get_word_mask
 from torch import Tensor
 from PIL import Image, ImageChops
@@ -142,4 +142,6 @@ def compose_mask(args, mask_seq:string, val_masks:dict[string, Image], frame_ima
     return matches[0].groupdict()['inner']
 
 def compose_mask_with_check(args, mask_seq:string, val_masks:dict[string, Image], frame_image:Tensor) -> Image:
+    for k, v in val_masks:
+        val_masks[k] = blank_if_none(v)
     return check_mask_for_errors(compose_mask(mask_seq, val_masks, frame_image, 0))
