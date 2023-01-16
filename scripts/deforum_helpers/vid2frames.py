@@ -10,9 +10,12 @@ def get_frame_name(path):
     name = os.path.splitext(name)[0]
     return name
 
-def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=100000, only_get_fps=False): 
+def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, only_get_fps=False): 
     # n = extract_nth_frame 
     #get the name of the video without the path and ext
+    
+    if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
+        raise RuntimeError('extract_to_frame can not be highher than extract_from_frame')
     name = get_frame_name(video_path)
     if n < 1: n = 1 #HACK Gradio interface does not currently allow min/max in gr.Number(...) 
 
@@ -62,7 +65,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
             while success:
                 if state.interrupted:
                     return
-                if count <= extract_to_frame and count % n == 0:
+                if (count <= extract_to_frame or extract_to_frame == -1) and count % n == 0:
                     cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}.jpg" , image)     # save frame as JPEG file
                     t += 1
                 success,image = vidcap.read()

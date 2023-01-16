@@ -94,7 +94,7 @@ def DeforumAnimArgs():
     video_init_path ='/content/video_in.mp4'#@param {type:"string"}
     extract_nth_frame = 1#@param {type:"number"}
     extract_from_frame = 0 #@param {type:"number"}
-    extract_to_frame = 1000000 #@param {type:"number"}
+    extract_to_frame = -1 #@param {type:"number"} minus 1 for unlimited frames
     overwrite_extracted_frames = True #@param {type:"boolean"}
     use_mask_video = False #@param {type:"boolean"}
     video_mask_path ='/content/video_in.mp4'#@param {type:"string"}

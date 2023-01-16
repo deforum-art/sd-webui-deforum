@@ -37,7 +37,7 @@ def hybrid_generation(args, anim_args, root):
         
         # in case that generate_input_frames isn't selected, we won't get the video fps rate as vid2frames isn't called, So we'll check the video fps in here instead
         if not anim_args.hybrid_generate_inputframes:
-            video_fps = vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames, 0, 1000000, True)
+            video_fps = vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames, 0, -1, True)
             
         # calculate the correct fps of the masked video according to the original video fps and 'extract_nth_frame'
         output_fps = video_fps/anim_args.extract_nth_frame
