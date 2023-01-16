@@ -131,6 +131,8 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
         _, mask_image = load_img(args.init_image, 
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
+        mask_vals['init_mask'] = mask_image
+        noise_mask_vals['init_mask'] = mask_image
     
     # Grab the first frame masks since they wont be provided until next frame
     if mask_image is None:
@@ -140,6 +142,9 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
     if anim_args.use_mask_video:
         mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
         noise_mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+    else:
+        mask_vals['video_mask'] = None
+        noise_mask_vals['video_mask'] = None
 
     #Webui
     state.job_count = anim_args.max_frames
