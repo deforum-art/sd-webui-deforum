@@ -120,11 +120,11 @@ def compose_mask(args, mask_seq:string, val_masks:dict[string, Image], frame_ima
     # Set-difference the regions with '\'
     prev_mask_seq = mask_seq
     while mask_seq is not prev_mask_seq:
-        pattern = r'\{(?P<inner1>?)\}[\S\s]*\^[\S\s]*\{(?P<inner2>?)\}'
+        pattern = r'\{(?P<inner1>?)\}[\S\s]*\\[\S\s]*\{(?P<inner2>?)\}'
         def parse(var):
             content = match_object.groupdict()['inner1']
             content_second = match_object.groupdict()['inner2']
-            val_masks[content] = ImageChops.logical_xor(val_masks[content], val_masks[content_second])
+            val_masks[content] = ImageChops.logical_and(val_masks[content], ImageChops.invert(val_masks[content_second]))
             return f'\{{content}\}'
         
         prev_mask_seq = mask_seq
