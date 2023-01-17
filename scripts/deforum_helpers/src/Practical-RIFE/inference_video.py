@@ -90,6 +90,7 @@ if torch.cuda.is_available():
         torch.set_default_tensor_type(torch.cuda.HalfTensor)
 
 try:
+    #from arch.RIFE_HDv3 import Model
     from train_log.RIFE_HDv3 import Model
 except:
     print("Please download our model from model list")
