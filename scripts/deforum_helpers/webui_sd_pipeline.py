@@ -38,7 +38,6 @@ def get_webui_sd_pipeline(args, root, frame):
     p.seed = args.seed
     p.do_not_save_samples = not args.save_sample_per_step
     p.do_not_save_grid = not args.make_grid
-    p.sd_model=sd_model
     p.sampler_name = args.sampler
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
