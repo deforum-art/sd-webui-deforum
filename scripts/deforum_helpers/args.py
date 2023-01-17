@@ -701,6 +701,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
 
     import json
     
+    args_dict["prompts"] = json.loads(animation_prompts)
     root = SimpleNamespace(**Root())
     root.p = p
     #root.prompts = json.loads(prompts)#TODO make proper animation_mode=None handling
