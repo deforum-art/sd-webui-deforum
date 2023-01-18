@@ -672,13 +672,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             <p style="margin-top:1em">
                 Currently supported engines:
                 <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                    <li>RIFE v4.6</li>
-                    <li>More RIFE versions and other interpolation models might come in the future.</li>
+                    <li>RIFE v4.6 / v4.3</li>
+                    <li>RIFE v2.3 and other interpolation models might come in the future.</li>
                 </ul>
             </p>
             """)
             with gr.Row():
-                frame_interpolation_engine = gr.Dropdown(label="frame_interpolation_engine", choices=['RIFE-v4.6'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
+                frame_interpolation_engine = gr.Dropdown(label="frame_interpolation_engine", choices=['RIFE-v4.6',['RIFE-v.4.3'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
             with gr.Row():
                 frame_interpolation_x_amount = gr.Dropdown(label="frame_interpolation_x_amount", choices=['2x','3x','4x','5x','6x','7x','8x','9x','10x'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frame_interpolation_x_amount", interactive=True)
             with gr.Row():

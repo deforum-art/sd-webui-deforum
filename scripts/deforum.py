@@ -185,7 +185,10 @@ class DeforumScript(wscripts.Script):
             data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
             
             deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
+            
+            # TODO: handle frame interpolation of mp4 vid only if vid was created!
         else:
+            # TODO: add support for custom frame interpolation vid location?
             if video_args.use_manual_settings:
                 max_video_frames = video_args.max_video_frames #@param {type:"string"}
                 image_path = video_args.image_path
