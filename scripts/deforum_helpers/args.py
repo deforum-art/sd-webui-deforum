@@ -704,7 +704,10 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     root = SimpleNamespace(**Root())
     root.p = p
     #root.prompts = json.loads(prompts)#TODO make proper animation_mode=None handling
-    root.animation_prompts = json.loads(animation_prompts)
+    try:
+        root.animation_prompts = json.loads(animation_prompts)
+    except json.decoder.JSONDecodeError as e:
+        raise Exception("Failed to parse prompts string. You either have a missing trailing comma (,) after any of the prompts BUT the last one. OR you have a trailing comma after your last propmt, which should have no comma after it at all. Original error: " + str(e)) from e
     
     from deforum_helpers.settings import load_args
     
