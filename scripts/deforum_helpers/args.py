@@ -244,8 +244,8 @@ def DeforumOutputArgs():
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
     max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False
-    frame_interpolation_engine = "RIFE-v4.6" #@param ["File","Init Video"]
-    frame_interpolation_x_amount = "2x" #@param [all values from 2x to 8x]
+    frame_interpolation_engine = "RIFE46" #@param ["File","Init Video"]
+    frame_interpolation_x_amount = "Disabled" #@param [Disabled + all values from 2x to 8x]
     frame_interpolation_slow_mo_amount = "Disabled" #@param [Disabled, 2x, 4x, 8x]
     return locals()
     
@@ -678,9 +678,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             </p>
             """)
             with gr.Row():
-                frame_interpolation_engine = gr.Dropdown(label="frame_interpolation_engine", choices=['RIFE-v4.6',['RIFE-v.4.3'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
+                frame_interpolation_engine = gr.Dropdown(label="frame_interpolation_engine", choices=['RIFE46','RIFE43'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
             with gr.Row():
-                frame_interpolation_x_amount = gr.Dropdown(label="frame_interpolation_x_amount", choices=['2x','3x','4x','5x','6x','7x','8x','9x','10x'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frame_interpolation_x_amount", interactive=True)
+                frame_interpolation_x_amount = gr.Dropdown(label="frame_interpolation_x_amount", choices=['Disabled','2x','3x','4x','5x','6x','7x','8x','9x','10x'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frame_interpolation_x_amount", interactive=True)
             with gr.Row():
                 frame_interpolation_slow_mo_amount = gr.Dropdown(label="frame_interpolation_slow_mo_amount", choices=['Disabled','2x','4x','8x'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
 
@@ -786,7 +786,7 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
 
     # TODO: Handle batch name dynamically?
     current_arg_list = [args, anim_args, video_args, parseq_args]
-    batch_name = replace_args(batch_name, current_arg_list)
+    #batch_name = replace_args(batch_name, current_arg_list)
     #print_args(args)
     args.outdir = os.path.join(p.outpath_samples, batch_name)
     root.outpath_samples = args.outdir
@@ -820,13 +820,13 @@ def print_args(args):
         print(f"{key}: {value}")
         
         
-def replace_args(text, args_list):
-    for args_dict in args_list:
-        print(f"Arg list: {args_dict}")
-        args_dict = vars(args_dict)
-        for key, value in args_dict.items():
-            print(f"{key}: {value}")
-        text = text.format_map(args_dict)
-    return text
+# def replace_args(text, args_list):
+    # for args_dict in args_list:
+        # #print(f"Arg list: {args_dict}")
+        # args_dict = vars(args_dict)
+        # for key, value in args_dict.items():
+            # print(f"{key}: {value}")
+        # text = text.format_map(args_dict)
+    # return text
 
 

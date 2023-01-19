@@ -10,3 +10,5 @@ outputs
 cc-outputs.log
 *.mp4
 scripts/deforum_helpers/src/rife/inference_video - latestnotworkingpy
+*.png
+scripts/deforum_helpers/src/rife/test.py
