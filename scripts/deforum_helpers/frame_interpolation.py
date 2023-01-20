@@ -17,7 +17,7 @@ def extract_rife_name(string):
     return "RIFE"+parts[1][1:].replace('.','')
 
    
-def video_infer_wrap(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_path=None, orig_vid_fps=None, deforum_models_path='Deforum/models', add_soundtrack=None):
+def video_infer_wrap(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_path=None, orig_vid_fps=None, deforum_models_path='models/Deforum', add_soundtrack=None):
     
     if frame_interpolation_x_amount != "Disabled":
         
