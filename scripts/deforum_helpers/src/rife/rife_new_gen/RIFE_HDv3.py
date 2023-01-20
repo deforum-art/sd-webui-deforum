@@ -67,9 +67,9 @@ class Model:
                 return param
         if rank <= 0:
             if torch.cuda.is_available():
-                self.flownet.load_state_dict(convert(torch.load(os.path.join(deforum_models_path,'RIFE46.pkl').format(path))), False)
+                self.flownet.load_state_dict(convert(torch.load(os.path.join(deforum_models_path,'{}.pkl').format(path))), False)
             else:
-                self.flownet.load_state_dict(convert(torch.load(os.path.join(deforum_models_path,'RIFE46.pkl').format(path), map_location ='cpu')), False)
+                self.flownet.load_state_dict(convert(torch.load(os.path.join(deforum_models_path,'{}.pkl').format(path), map_location ='cpu')), False)
 
     def inference(self, img0, img1, timestep=0.5, scale=1.0):
         imgs = torch.cat((img0, img1), 1)
