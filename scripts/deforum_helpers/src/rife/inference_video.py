@@ -72,7 +72,7 @@ def run_rife_new_video_infer(video=None,
             torch.set_default_tensor_type(torch.cuda.HalfTensor)
     if args.modelDir is not None:
         try:
-            from .RIFE.RIFE_HDv3 import Model
+            from .rife_new_gen.RIFE_HDv3 import Model
             print(f"{args.modelDir} has been successfully imported.")
         except ImportError as e:
             raise ValueError(f"{args.modelDir} could not be found. Please contact deforum support. {e}")
