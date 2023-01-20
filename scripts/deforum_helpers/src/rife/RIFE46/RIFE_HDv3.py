@@ -1,14 +1,16 @@
+import os
 import torch
 import torch.nn as nn
 import numpy as np
 from torch.optim import AdamW
 import torch.optim as optim
 import itertools
-from model.warplayer import warp
+from ..model.warplayer import warp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from .IFNet_HDv3 import *
 import torch.nn.functional as F
-from model.loss import *
+from ..model.loss import *
+from ..model.checksum import *
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -32,8 +34,15 @@ class Model:
 
     def device(self):
         self.flownet.to(device)
-
-    def load_model(self, path, rank=0):
+        
+         
+    def load_model(self, path, rank, deforum_models_path):
+        if not os.path.exists(os.path.join(deforum_models_path,'RIFE46.pkl')):
+            from basicsr.utils.download_util import load_file_from_url
+            load_file_from_url(r"https://github.com/hithereai/Practical-RIFE/releases/download/rife46/RIFE46.pkl", deforum_models_path)
+            if checksum(os.path.join(deforum_models_path,'RIFE46.pkl')) != 'af6f0b4bed96dea2c9f0624b449216c7adfaf7f0b722fba0c8f5c6e20b2ec39559cf33f3d238d53b160c22f00c6eaa47dc54a6e4f8aa4f59a6e4a9e90e1a808a':
+                raise Exception(r"Error while downloading RIFE46.pkl. Please download from here: https://github.com/hithereai/Practical-RIFE/releases/download/rife46/RIFE46.pkl and place in: " + deforum_models_path)
+            
         def convert(param):
             if rank == -1:
                 return {
@@ -45,13 +54,9 @@ class Model:
                 return param
         if rank <= 0:
             if torch.cuda.is_available():
-                self.flownet.load_state_dict(convert(torch.load('{}/flownet.pkl'.format(path))), False)
+                self.flownet.load_state_dict(convert(torch.load(os.path.join(deforum_models_path,'RIFE46.pkl').format(path))), False)
             else:
-                self.flownet.load_state_dict(convert(torch.load('{}/flownet.pkl'.format(path), map_location ='cpu')), False)
-        
-    def save_model(self, path, rank=0):
-        if rank == 0:
-            torch.save(self.flownet.state_dict(),'{}/flownet.pkl'.format(path))
+                self.flownet.load_state_dict(convert(torch.load(os.path.join(deforum_models_path,'RIFE46.pkl').format(path), map_location ='cpu')), False)
 
     def inference(self, img0, img1, timestep=0.5, scale=1.0):
         imgs = torch.cat((img0, img1), 1)

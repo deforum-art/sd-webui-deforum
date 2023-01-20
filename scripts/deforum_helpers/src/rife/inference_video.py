@@ -16,10 +16,10 @@ from .model.pytorch_msssim import ssim_matlab
 warnings.filterwarnings("ignore")
 
 # TODO: FIX fp16 issues if this file fails and fp16 is enabled
-def run_video_infer(video=None,
+def run_rife_new_video_infer(video=None,
         output=None,
         img=None,
-        montage=True,
+        montage=False,
         model='RIFE46',
         fp16=False,
         UHD=False,
@@ -29,7 +29,9 @@ def run_video_infer(video=None,
         png=False,
         ext='mp4',
         exp=1,
-        multi=2):
+        multi=2,
+        deforum_models_path='models/Deforum',
+        add_soundtrack=None):
 
     args = SimpleNamespace()
     args.video = video
@@ -47,7 +49,9 @@ def run_video_infer(video=None,
     args.ext = ext
     args.exp = exp
     args.multi = multi
-    
+    args.deforum_models_path = deforum_models_path
+    args.add_soundtrack = add_soundtrack
+   
     if args.exp != 1:
         args.multi = (2 ** args.exp)
     assert (not args.video is None or not args.img is None)
@@ -64,45 +68,41 @@ def run_video_infer(video=None,
     if torch.cuda.is_available():
         torch.backends.cudnn.enabled = True
         torch.backends.cudnn.benchmark = True
-        # NEED TO FIX THIS:
-        previous_torch_tensor_type = torch.get_default_dtype()
+        # TODO: Can handle this? currently it's always False and give errors if True but faster speeds on tensortcore equipped gpus?
         if (args.fp16):
             torch.set_default_tensor_type(torch.cuda.HalfTensor)
 
-    if args.modelDir == "RIFE40":
+    if args.modelDir == "RIFE31":
         try:
-            # JUST A TEST GONNA BE REMOVED
-            print("TRYING TO RUN RIFE 4.0!!!!!!!!!!!!!!!!!!!!!!")
-            from .RIFE40.arch.RIFE_HDv3 import Model
-        except:
-            #print(os.getcwd())
-            print("RIFE V4.0 could not be found. Please contact deforum support.")
-            #torch.set_default_tensor_type(previous_torch_tensor_type)
-    elif args.modelDir == "RIFE46":
-        try:
-            #print(os.getcwd())
-            print("TRYING TO RUN RIFE 4.6!!!!!!!!!!!!!!!!!!!!!!")
-            from .RIFE46.RIFE_HDv3 import Model
-            #torch.set_default_tensor_type(previous_torch_tensor_type)
-        except:
-            #print(os.getcwd())
-            print("RIFE V4.6 could not be found. Please contact deforum support.")
-            #torch.set_default_tensor_type(previous_torch_tensor_type)
+            from .RIFE31.RIFE_HDv3 import Model
+            print("RIFE v3.1 has been successfully imported.")
+        except ImportError as e:
+            raise ValueError(f"RIFE v3.1 could not be found. Please contact deforum support. {e}")
+        except Exception as e:
+            raise ValueError(f"An error occured while trying to import RIFE v3.1: {e}")
     elif args.modelDir == "RIFE43":
         try:
             from .RIFE43.RIFE_HDv3 import Model
-        except:
-            print("RIFE V4.3 could not be found. Please contact deforum support.")
-            #torch.set_default_tensor_type(previous_torch_tensor_type)
+            print("RIFE v4.3 has been successfully imported.")
+        except ImportError as e:
+            raise ValueError(f"RIFE v4.3 could not be found. Please contact deforum support. {e}")
+        except Exception as e:
+            raise ValueError(f"An error occured while trying to import RIFE v4.3: {e}")
+    elif args.modelDir == "RIFE46":
+        try:
+            from .RIFE46.RIFE_HDv3 import Model
+            print("RIFE v4.6 has been successfully imported.")
+        except ImportError as e:
+            raise ValueError(f"RIFE v4.6 could not be found. Please contact deforum support. {e}")
+        except Exception as e:
+            raise ValueError(f"An error occured while trying to import RIFE v4.6: {e}")
     else:
         print("Got a request to frame-interpolate but no valid frame interpolation engine value provided. Doing... nothing.")
-        #torch.set_default_tensor_type(previous_torch_tensor_type)
         return
     model = Model()
     if not hasattr(model, 'version'):
         model.version = 0
-    model.load_model(args.modelDir, -1)
-    print("Loaded 3.x/4.x HD model.")
+    model.load_model(args.modelDir, -1, deforum_models_path)
     model.eval()
     model.device()
 
@@ -121,10 +121,10 @@ def run_video_infer(video=None,
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
         video_path_wo_ext, ext = os.path.splitext(args.video)
         print('{}.{}, {} frames in total, {}FPS to {}FPS'.format(video_path_wo_ext, args.ext, tot_frame, fps, args.fps))
-        if args.png == False and fpsNotAssigned == True:
-            print("The audio will be merged after interpolation process")
-        else:
-            print("Will not merge audio because using png or fps flag!")
+        if args.png == False and fpsNotAssigned == True and args.add_soundtrack != 'None':
+            print("The audio will be merged after the interpolation process")
+        #else:
+        #    print("Will not merge audio because using png or fps flag!")
     else:
         videogen = []
         for f in os.listdir(args.img):
@@ -159,7 +159,8 @@ def run_video_infer(video=None,
         lastframe = lastframe[:, left: left + w]
     write_buffer = Queue(maxsize=500)
     read_buffer = Queue(maxsize=500)
-    _thread.start_new_thread(build_read_buffer, (args, read_buffer, videogen, left, w))
+    
+    _thread.start_new_thread(build_read_buffer, (args, read_buffer, videogen))
     _thread.start_new_thread(clear_write_buffer, (args, write_buffer, vid_out))
 
     I1 = torch.from_numpy(np.transpose(lastframe, (2, 0, 1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.
@@ -229,15 +230,18 @@ def run_video_infer(video=None,
     pbar.close()
     if not vid_out is None:
         vid_out.release()
-
+    
     # move audio to new video file if appropriate
-    if args.png == False and fpsNotAssigned == True and not args.video is None:
+    if args.add_soundtrack != 'None' and args.png == False and fpsNotAssigned == True and not args.video is None:
         try:
+            print (f"Trying to transfer audio from source video to final interpolated video")
             transferAudio(args.video, vid_out_name)
         except:
             print("Audio transfer failed. Interpolated video will have no audio")
             targetNoAudio = os.path.splitext(vid_out_name)[0] + "_noaudio" + os.path.splitext(vid_out_name)[1]
             os.rename(targetNoAudio, vid_out_name)
+            
+    print(f"Frame interpolation *DONE*. Interpolated video name/ path: {vid_out_name}")
 
 def clear_write_buffer(user_args, write_buffer, vid_out):
     cnt = 0
@@ -252,13 +256,11 @@ def clear_write_buffer(user_args, write_buffer, vid_out):
             vid_out.write(item[:, :, ::-1])
 
 
-def build_read_buffer(user_args, read_buffer, videogen, left, w):
+def build_read_buffer(user_args, read_buffer, videogen):
     try:
         for frame in videogen:
             if not user_args.img is None:
                 frame = cv2.imread(os.path.join(user_args.img, frame), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
-            if user_args.montage:
-                frame = frame[:, left: left + w]
             read_buffer.put(frame)
     except:
         pass

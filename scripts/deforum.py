@@ -7,7 +7,7 @@ if 'google.colab' in sys.modules:
     basedirs.append('/content/gdrive/MyDrive/sd/stable-diffusion-webui') #hardcode as TheLastBen's colab seems to be the primal source
 
 for basedir in basedirs:
-    deforum_paths_to_ensure = [basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',basedir + '/scripts/deforum_helpers/src/rife']
+    deforum_paths_to_ensure = [basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',basedir]# + '/scripts/deforum_helpers/src/rife']
 
     for deforum_scripts_path_fix in deforum_paths_to_ensure:
         if not deforum_scripts_path_fix in sys.path:
@@ -192,7 +192,7 @@ class DeforumScript(wscripts.Script):
             # TODO: handle frame interpolation of mp4 vid only if vid was created!
             if ffmpeg_success == 0 and video_args.frame_interpolation_x_amount != "Disabled":
                 print(f"output .mp4 video found. Trying to *Frame Interpolate* using {frame_interpolation_engine}")
-                video_infer_wrap(video_args.frame_interpolation_engine, video_args.frame_interpolation_x_amount, video_args.frame_interpolation_slow_mo_amount, mp4_path, fps)
+                video_infer_wrap(video_args.frame_interpolation_engine, video_args.frame_interpolation_x_amount, video_args.frame_interpolation_slow_mo_amount, mp4_path, fps, 'Deforum/models', video_args.add_soundtrack)
                 
         else:
             # TODO: add support for custom frame interpolation vid location?
