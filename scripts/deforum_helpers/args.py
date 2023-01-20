@@ -668,13 +668,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
         with gr.Accordion('Frame Interpolation', open=False):
             i43 = gr.HTML("""
+            <b>**Frame Interpolation only works when output_format=FFMPEG mp4**</b> <br>
             Use RIFE and other Video Frame Interpolation methods to smooth out, slow-mo (or both) your output videos.</p>
             <p style="margin-top:1em">
-                Currently supported engines:
+                Supported engines:
                 <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                    <li>RIFE v4.6 / v4.3</li>
-                    <li>RIFE v2.3 and other interpolation models might come in the future.</li>
+                    <li>RIFE v4.6, v4.3 and v4.0</li>
+                    <li>RIFE v2.3 and other interpolation engines might come in the future.</li>
                 </ul>
+                * Please note that currently, using Slow-mo mode will make it that the interpolated video has no sound even if you have add_soundtrack enabled. Slow-mo audio coming soon.
             </p>
             """)
             with gr.Row():
