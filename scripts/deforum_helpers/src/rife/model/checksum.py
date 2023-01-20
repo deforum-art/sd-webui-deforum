@@ -7,5 +7,3 @@ def checksum(filename, hash_factory=hashlib.blake2b, chunk_num_blocks=128):
         while chunk := f.read(chunk_num_blocks*h.block_size): 
             h.update(chunk)
     return h.hexdigest()
-
-#print(checksum('TEST_PATH'))
