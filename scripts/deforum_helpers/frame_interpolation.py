@@ -17,13 +17,14 @@ def extract_rife_name(string):
     return "RIFE"+parts[1][1:].replace('.','')
 
    
-def video_infer_wrap(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_path=None, orig_vid_fps=None, deforum_models_path='models/Deforum', add_soundtrack=None):
+def video_infer_wrap(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_path=None, orig_vid_fps=None, deforum_models_path=None, add_soundtrack=None):
     
     if frame_interpolation_x_amount != "Disabled":
         
         # for future, other models, check if the interpolation model is rife or something else
         actual_model_folder_name = None
-        # HANDLE RIFE INTERPOLATIONS. Other models might come in the future
+        
+        # **HANDLE RIFE INTERPOLATIONS** Other models might come in the future
         if frame_interpolation_engine.startswith("RIFE"):
             # handle rife model name. e.g: 'RIFE v4.3' becomes 'RIFE43' 
             actual_model_folder_name = extract_rife_name(frame_interpolation_engine)

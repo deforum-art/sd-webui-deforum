@@ -1,4 +1,4 @@
-# Special thanks for https://github.com/XmYx for fixing this chaotic script
+# Special thanks for https://github.com/XmYx for the initial reorganization of this script
 import os
 from types import SimpleNamespace
 import cv2
@@ -15,12 +15,11 @@ from .model.pytorch_msssim import ssim_matlab
 
 warnings.filterwarnings("ignore")
 
-# TODO: FIX fp16 issues if this file fails and fp16 is enabled
 def run_rife_new_video_infer(video=None,
         output=None,
         img=None,
         montage=False,
-        model='RIFE46',
+        model=None,
         fp16=False,
         UHD=False,
         scale=1.0,
@@ -30,7 +29,7 @@ def run_rife_new_video_infer(video=None,
         ext='mp4',
         exp=1,
         multi=2,
-        deforum_models_path='models/Deforum',
+        deforum_models_path=None,
         add_soundtrack=None):
 
     args = SimpleNamespace()
@@ -71,34 +70,18 @@ def run_rife_new_video_infer(video=None,
         # TODO: Can handle this? currently it's always False and give errors if True but faster speeds on tensortcore equipped gpus?
         if (args.fp16):
             torch.set_default_tensor_type(torch.cuda.HalfTensor)
-
-    if args.modelDir == "RIFE31":
+    if args.modelDir is not None:
         try:
-            from .RIFE31.RIFE_HDv3 import Model
-            print("RIFE v3.1 has been successfully imported.")
+            from .RIFE.RIFE_HDv3 import Model
+            print(f"{args.modelDir} has been successfully imported.")
         except ImportError as e:
-            raise ValueError(f"RIFE v3.1 could not be found. Please contact deforum support. {e}")
+            raise ValueError(f"{args.modelDir} could not be found. Please contact deforum support. {e}")
         except Exception as e:
-            raise ValueError(f"An error occured while trying to import RIFE v3.1: {e}")
-    elif args.modelDir == "RIFE43":
-        try:
-            from .RIFE43.RIFE_HDv3 import Model
-            print("RIFE v4.3 has been successfully imported.")
-        except ImportError as e:
-            raise ValueError(f"RIFE v4.3 could not be found. Please contact deforum support. {e}")
-        except Exception as e:
-            raise ValueError(f"An error occured while trying to import RIFE v4.3: {e}")
-    elif args.modelDir == "RIFE46":
-        try:
-            from .RIFE46.RIFE_HDv3 import Model
-            print("RIFE v4.6 has been successfully imported.")
-        except ImportError as e:
-            raise ValueError(f"RIFE v4.6 could not be found. Please contact deforum support. {e}")
-        except Exception as e:
-            raise ValueError(f"An error occured while trying to import RIFE v4.6: {e}")
+            raise ValueError(f"An error occured while trying to import {args.modelDir}: {e}")
     else:
         print("Got a request to frame-interpolate but no valid frame interpolation engine value provided. Doing... nothing.")
         return
+   
     model = Model()
     if not hasattr(model, 'version'):
         model.version = 0
@@ -122,9 +105,12 @@ def run_rife_new_video_infer(video=None,
         video_path_wo_ext, ext = os.path.splitext(args.video)
         print('{}.{}, {} frames in total, {}FPS to {}FPS'.format(video_path_wo_ext, args.ext, tot_frame, fps, args.fps))
         if args.png == False and fpsNotAssigned == True and args.add_soundtrack != 'None':
-            print("The audio will be merged after the interpolation process")
-        #else:
-        #    print("Will not merge audio because using png or fps flag!")
+            print("The audio will be transferred from source video to interpolated video *after* the interpolation process")
+        # TODO: Slow down the audio as well!
+        elif args.add_soundtrack != 'None' and args.fps is not None:
+            print("Will not transfer audio because Slow-Mo mode is activated!")
+        print("RIFE Progress (it's OK if it finishes before 100%): ")
+    # handle png imagees - NOT IN USE AS OF 20-01-23
     else:
         videogen = []
         for f in os.listdir(args.img):
@@ -166,7 +152,7 @@ def run_rife_new_video_infer(video=None,
     I1 = torch.from_numpy(np.transpose(lastframe, (2, 0, 1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.
     I1 = pad_image(I1, args.fp16, padding)
     temp = None  # save lastframe when processing static frame
-
+    
     while True:
         if temp is not None:
             frame = temp
@@ -308,18 +294,18 @@ def transferAudio(sourceVideo, targetVideo):
         # create new "temp" directory
         os.makedirs("temp")
         # extract audio from video
-        os.system('ffmpeg -y -i "{}" -c:a copy -vn {}'.format(sourceVideo, tempAudioFileName))
+        os.system('ffmpeg -y -loglevel warning -i "{}" -c:a copy -vn {}'.format(sourceVideo, tempAudioFileName))
 
     targetNoAudio = os.path.splitext(targetVideo)[0] + "_noaudio" + os.path.splitext(targetVideo)[1]
     os.rename(targetVideo, targetNoAudio)
     # combine audio file and new video file
-    os.system('ffmpeg -y -i "{}" -i {} -c copy "{}"'.format(targetNoAudio, tempAudioFileName, targetVideo))
+    os.system('ffmpeg -y -loglevel warning -i "{}" -i {} -c copy "{}"'.format(targetNoAudio, tempAudioFileName, targetVideo))
 
     if os.path.getsize(
             targetVideo) == 0:  # if ffmpeg failed to merge the video and audio together try converting the audio to aac
         tempAudioFileName = "./temp/audio.m4a"
-        os.system('ffmpeg -y -i "{}" -c:a aac -b:a 160k -vn {}'.format(sourceVideo, tempAudioFileName))
-        os.system('ffmpeg -y -i "{}" -i {} -c copy "{}"'.format(targetNoAudio, tempAudioFileName, targetVideo))
+        os.system('ffmpeg -y -loglevel warning -i "{}" -c:a aac -b:a 192k -vn {}'.format(sourceVideo, tempAudioFileName))
+        os.system('ffmpeg -y -loglevel warning -i "{}" -i {} -c copy "{}"'.format(targetNoAudio, tempAudioFileName, targetVideo))
         if (os.path.getsize(targetVideo) == 0):  # if aac is not supported by selected format
             os.rename(targetNoAudio, targetVideo)
             print("Audio transfer failed. Interpolated video will have no audio")
@@ -333,3 +319,5 @@ def transferAudio(sourceVideo, targetVideo):
 
     # remove temp directory
     shutil.rmtree("temp")
+    
+    print("RIFE successfully transferred audio from source video to interpolated video")

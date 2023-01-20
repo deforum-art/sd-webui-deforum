@@ -37,12 +37,25 @@ class Model:
         
          
     def load_model(self, path, rank, deforum_models_path):
-        if not os.path.exists(os.path.join(deforum_models_path,'RIFE46.pkl')):
-            from basicsr.utils.download_util import load_file_from_url
-            load_file_from_url(r"https://github.com/hithereai/Practical-RIFE/releases/download/rife46/RIFE46.pkl", deforum_models_path)
-            if checksum(os.path.join(deforum_models_path,'RIFE46.pkl')) != 'af6f0b4bed96dea2c9f0624b449216c7adfaf7f0b722fba0c8f5c6e20b2ec39559cf33f3d238d53b160c22f00c6eaa47dc54a6e4f8aa4f59a6e4a9e90e1a808a':
-                raise Exception(r"Error while downloading RIFE46.pkl. Please download from here: https://github.com/hithereai/Practical-RIFE/releases/download/rife46/RIFE46.pkl and place in: " + deforum_models_path)
-            
+        
+        if path == 'RIFE46':
+            if not os.path.exists(os.path.join(deforum_models_path,'RIFE46.pkl')):
+                from basicsr.utils.download_util import load_file_from_url
+                load_file_from_url(r"https://github.com/hithereai/Practical-RIFE/releases/download/rife46/RIFE46.pkl", deforum_models_path)
+                if checksum(os.path.join(deforum_models_path,'RIFE46.pkl')) != 'af6f0b4bed96dea2c9f0624b449216c7adfaf7f0b722fba0c8f5c6e20b2ec39559cf33f3d238d53b160c22f00c6eaa47dc54a6e4f8aa4f59a6e4a9e90e1a808a':
+                    raise Exception(r"Error while downloading RIFE46.pkl. Please download from here: https://github.com/hithereai/Practical-RIFE/releases/download/rife46/RIFE46.pkl and place in: " + deforum_models_path)
+        elif path == 'RIFE43':
+            if not os.path.exists(os.path.join(deforum_models_path,'RIFE43.pkl')):
+                from basicsr.utils.download_util import load_file_from_url
+                load_file_from_url(r"https://github.com/hithereai/Practical-RIFE/releases/download/rife43/RIFE43.pkl", deforum_models_path)
+                if checksum(os.path.join(deforum_models_path,'RIFE43.pkl')) != 'ed660f58708ee369a0b3855f64d2d07a6997d949f33067faae51d740123c5ee015901cc57553594f2df8ec08131a1c5f7c883c481eac0f9addd84379acea90c8':
+                    raise Exception(r"Error while downloading RIFE43.pkl. Please download from here: https://github.com/hithereai/Practical-RIFE/releases/download/rife43/RIFE43.pkl and place in: " + deforum_models_path)
+        elif path == 'RIFE40':
+            if not os.path.exists(os.path.join(deforum_models_path,'RIFE40.pkl')):
+                from basicsr.utils.download_util import load_file_from_url
+                load_file_from_url(r"https://github.com/hithereai/Practical-RIFE/releases/download/rife40/RIFE40.pkl", deforum_models_path)
+                if checksum(os.path.join(deforum_models_path,'RIFE40.pkl')) != '0baf0bed23597cda402a97a80a7d14c26a9ed797d2fc0790aac93b19ca5b0f50676ba07aa9f8423cf061ed881ece6e67922f001ea402bfced83ef67675142ce7':
+                    raise Exception(r"Error while downloading RIFE40.pkl. Please download from here: https://github.com/hithereai/Practical-RIFE/releases/download/rife40/RIFE40.pkl and place in: " + deforum_models_path)
         def convert(param):
             if rank == -1:
                 return {

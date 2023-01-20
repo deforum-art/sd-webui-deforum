@@ -22,7 +22,7 @@ def DeforumAnimArgs():
 
     #@markdown ####**Animation:**
     animation_mode = '2D' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
-    max_frames = 2 #@param {type:"number"}
+    max_frames = 120 #@param {type:"number"}
     border = 'replicate' #@param ['wrap', 'replicate'] {type:'string'}
 
     #@markdown ####**Motion Parameters:**
@@ -244,9 +244,9 @@ def DeforumOutputArgs():
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
     max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False
-    frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.3","RIFE v4.6"]
-    frame_interpolation_x_amount = "x2" #@param [Disabled + all values from x2 to x10]
-    frame_interpolation_slow_mo_amount = "Disabled" #@param [Disabled, x2, x4, x8]
+    frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
+    frame_interpolation_x_amount = "Disabled" #@param [Disabled + all values from x2 to x10]
+    frame_interpolation_slow_mo_amount = "Disabled" #@param ["Disabled","x2","x4","x8"]
     return locals()
     
 import gradio as gr
@@ -648,7 +648,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Row():
             skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
             fps = gr.Number(label="fps", value=dv.fps, interactive=True)
-            output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
+            output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='PIL gif', type="value", elem_id="output_format", interactive=True)
         with gr.Row():
             ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
             add_soundtrack = gr.Dropdown(label="add_soundtrack", choices=['None', 'File', 'Init Video'], value=dv.add_soundtrack, interactive=True, type="value")
@@ -678,7 +678,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             </p>
             """)
             with gr.Row():
-                frame_interpolation_engine = gr.Dropdown(label="frame_interpolation_engine", choices=['RIFE v4.6','RIFE v4.3'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
+                frame_interpolation_engine = gr.Dropdown(label="frame_interpolation_engine", choices=['RIFE v4.0','RIFE v4.3','RIFE v4.6'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
             with gr.Row():
                 frame_interpolation_x_amount = gr.Dropdown(label="frame_interpolation_x_amount", choices=['Disabled','x2','x3','x4','x5','x6','x7','x8','x9','x10'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frame_interpolation_x_amount", interactive=True)
             with gr.Row():
