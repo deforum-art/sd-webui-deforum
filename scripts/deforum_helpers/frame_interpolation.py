@@ -1,3 +1,4 @@
+import os
 from rife.inference_video import run_rife_new_video_infer #*
 
 def extract_number(string):
@@ -15,9 +16,16 @@ def extract_rife_name(string):
     if parts[1][0] != "v" or not parts[1][1:].replace('.','').isdigit():
         raise ValueError("Second word should start with 'v' followed by 2 numbers")
     return "RIFE"+parts[1][1:].replace('.','')
+    
+def extract_folder_and_file(path):
+    folder, file = os.path.split(path)
+    file = file.split("_")[0]
+    return folder, file
 
    
-def video_infer_wrap(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_path=None, orig_vid_fps=None, deforum_models_path=None, add_soundtrack=None):
+def video_infer_wrap(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_path=None, orig_vid_fps=None, deforum_models_path=None, add_soundtrack=None, imgs_path=None):
+    
+    raw_output_imgs_path, img_batch_id = extract_folder_and_file(imgs_path)
     
     if frame_interpolation_x_amount != "Disabled":
         
@@ -43,4 +51,4 @@ def video_infer_wrap(frame_interpolation_engine=None, frame_interpolation_x_amou
                 fps = orig_vid_fps * multi / x_slow_mo
             # run actual interpo
             if actual_model_folder_name is not None:
-                run_rife_new_video_infer(video=orig_vid_path, output=None, model=actual_model_folder_name, fps=fps, multi=multi, deforum_models_path=deforum_models_path, add_soundtrack=add_soundtrack)
+                run_rife_new_video_infer(video=orig_vid_path, output=None, model=actual_model_folder_name, fps=fps, multi=multi, deforum_models_path=deforum_models_path, add_soundtrack=add_soundtrack, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id)
