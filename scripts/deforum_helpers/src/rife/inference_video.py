@@ -17,50 +17,43 @@ warnings.filterwarnings("ignore")
 
 def run_rife_new_video_infer(video=None,
         output=None,
-        img=None,
-        montage=False,
         model=None,
         fp16=False,
         UHD=False,
         scale=1.0,
-        skip=False,
         fps=None,
-        png=False,
+        png=True,
         ext='mp4',
         exp=1,
         multi=2,
         deforum_models_path=None,
-        add_soundtrack=None):
+        add_soundtrack=None,
+        raw_output_imgs_path=None,
+        img_batch_id=None):
 
     args = SimpleNamespace()
     args.video = video
     args.output = output
-    args.img = img
-    args.montage = montage
     args.modelDir = model
     args.fp16 = fp16
     args.UHD = UHD
     args.scale = scale
-    args.skip = skip
     args.fps = fps
     args.png = png
-    args.ext = ext
     args.ext = ext
     args.exp = exp
     args.multi = multi
     args.deforum_models_path = deforum_models_path
     args.add_soundtrack = add_soundtrack
+    args.raw_output_imgs_path = raw_output_imgs_path
+    args.img_batch_id = img_batch_id
    
     if args.exp != 1:
         args.multi = (2 ** args.exp)
-    assert (not args.video is None or not args.img is None)
-    if args.skip:
-        print("skip flag is abandoned, please refer to issue #207.")
+    #assert (not args.video is None or not args.img is None)
     if args.UHD and args.scale == 1.0:
         args.scale = 0.5
     assert args.scale in [0.25, 0.5, 1.0, 2.0, 4.0]
-    if not args.img is None:
-        args.png = True
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.set_grad_enabled(False)
@@ -88,6 +81,8 @@ def run_rife_new_video_infer(video=None,
     model.load_model(args.modelDir, -1, deforum_models_path)
     model.eval()
     model.device()
+    interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames')
+    custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
 
     if not args.video is None:
         videoCapture = cv2.VideoCapture(args.video)
@@ -101,53 +96,32 @@ def run_rife_new_video_infer(video=None,
             fpsNotAssigned = False
         videogen = skvideo.io.vreader(args.video)
         lastframe = next(videogen)
-        fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
         video_path_wo_ext, ext = os.path.splitext(args.video)
         print('{}.{}, {} frames in total, {}FPS to {}FPS'.format(video_path_wo_ext, args.ext, tot_frame, fps, args.fps))
-        if args.png == False and fpsNotAssigned == True and args.add_soundtrack != 'None':
+        if args.add_soundtrack != 'None' and fpsNotAssigned:
             print("The audio will be transferred from source video to interpolated video *after* the interpolation process")
-        # TODO: Slow down the audio as well!
-        elif args.add_soundtrack != 'None' and args.fps is not None:
+        if not fpsNotAssigned and args.add_soundtrack != 'None':
             print("Will not transfer audio because Slow-Mo mode is activated!")
-        print("RIFE Progress (it's OK if it finishes before 100%): ")
-    # handle png imagees - NOT IN USE AS OF 20-01-23
-    else:
-        videogen = []
-        for f in os.listdir(args.img):
-            if 'png' in f:
-                videogen.append(f)
-        tot_frame = len(videogen)
-        videogen.sort(key=lambda x: int(x[:-4]))
-        lastframe = cv2.imread(os.path.join(args.img, videogen[0]), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
-        videogen = videogen[1:]
+
+
     h, w, _ = lastframe.shape
     vid_out_name = None
     vid_out = None
     if args.png:
-        if not os.path.exists('vid_out'):
-            os.mkdir('vid_out')
-    else:
-        if args.output is not None:
-            vid_out_name = args.output
-        else:
-            vid_out_name = '{}_{}X_{}fps.{}'.format(video_path_wo_ext, args.multi, int(np.round(args.fps)), args.ext)
-        vid_out = cv2.VideoWriter(vid_out_name, fourcc, args.fps, (w, h))
+        if not os.path.exists(custom_interp_path):
+            os.mkdir(custom_interp_path)
 
-    if args.montage:
-        left = w // 4
-        w = w // 2
     tmp = max(128, int(128 / args.scale))
     ph = ((h - 1) // tmp + 1) * tmp
     pw = ((w - 1) // tmp + 1) * tmp
     padding = (0, pw - w, 0, ph - h)
     pbar = tqdm(total=tot_frame)
-    if args.montage:
-        lastframe = lastframe[:, left: left + w]
+
     write_buffer = Queue(maxsize=500)
     read_buffer = Queue(maxsize=500)
     
     _thread.start_new_thread(build_read_buffer, (args, read_buffer, videogen))
-    _thread.start_new_thread(clear_write_buffer, (args, write_buffer, vid_out))
+    _thread.start_new_thread(clear_write_buffer, (args, write_buffer, custom_interp_path))
 
     I1 = torch.from_numpy(np.transpose(lastframe, (2, 0, 1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.
     I1 = pad_image(I1, args.fp16, padding)
@@ -190,32 +164,22 @@ def run_rife_new_video_infer(video=None,
         else:
             output = make_inference(model, I0, I1, args.multi - 1, scale)
 
-        if args.montage:
-            write_buffer.put(np.concatenate((lastframe, lastframe), 1))
-            for mid in output:
-                mid = (((mid[0] * 255.).byte().cpu().numpy().transpose(1, 2, 0)))
-                write_buffer.put(np.concatenate((lastframe, mid[:h, :w]), 1))
-        else:
-            write_buffer.put(lastframe)
-            for mid in output:
-                mid = (((mid[0] * 255.).byte().cpu().numpy().transpose(1, 2, 0)))
-                write_buffer.put(mid[:h, :w])
+        
+        write_buffer.put(lastframe)
+        for mid in output:
+            mid = (((mid[0] * 255.).byte().cpu().numpy().transpose(1, 2, 0)))
+            write_buffer.put(mid[:h, :w])
         pbar.update(1)
         lastframe = frame
         if break_flag:
             break
 
-    if args.montage:
-        write_buffer.put(np.concatenate((lastframe, lastframe), 1))
-    else:
-        write_buffer.put(lastframe)
+    write_buffer.put(lastframe)
     import time
 
     while (not write_buffer.empty()):
         time.sleep(0.1)
     pbar.close()
-    if not vid_out is None:
-        vid_out.release()
     
     # move audio to new video file if appropriate
     if args.add_soundtrack != 'None' and args.png == False and fpsNotAssigned == True and not args.video is None:
@@ -229,24 +193,22 @@ def run_rife_new_video_infer(video=None,
             
     print(f"Frame interpolation *DONE*. Interpolated video name/ path: {vid_out_name}")
 
-def clear_write_buffer(user_args, write_buffer, vid_out):
+def clear_write_buffer(user_args, write_buffer, custom_interp_path):
     cnt = 0
+
     while True:
         item = write_buffer.get()
         if item is None:
             break
         if user_args.png:
-            cv2.imwrite('vid_out/{:0>7d}.png'.format(cnt), item[:, :, ::-1])
+            filename = '{}/{:0>7d}.png'.format(custom_interp_path, cnt)
+            cv2.imwrite(filename, item[:, :, ::-1])
             cnt += 1
-        else:
-            vid_out.write(item[:, :, ::-1])
 
 
 def build_read_buffer(user_args, read_buffer, videogen):
     try:
         for frame in videogen:
-            if not user_args.img is None:
-                frame = cv2.imread(os.path.join(user_args.img, frame), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
             read_buffer.put(frame)
     except:
         pass
