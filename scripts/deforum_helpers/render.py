@@ -16,7 +16,7 @@ from .parseq_adapter import ParseqAnimKeys
 from .seed import next_seed
 from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
-from .load_images import get_mask, check_mask_for_errors
+from .load_images import get_mask, load_img
 from .hybrid_video import hybrid_generation, hybrid_composite, get_matrix_for_hybrid_motion, get_flow_for_hybrid_motion, image_transform_ransac, image_transform_optical_flow
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
@@ -310,7 +310,7 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
             print(f"Rx: {keys.rotation_3d_x_series[frame_idx]} Ry: {keys.rotation_3d_y_series[frame_idx]} Rz: {keys.rotation_3d_z_series[frame_idx]}")
         
         # grab init image for current frame
-        else using_vid_init:
+        elif using_vid_init:
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
@@ -320,7 +320,7 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
                 
         # sample the diffusion model
         if args.use_mask:
-            args.mask_image = compose_mask_with_check(args, mask_seq, mask_vals, init_sample) if init_sample is not None else None # we need it only after the first frame anyway
+            args.mask_image = compose_mask_with_check(args, mask_seq, mask_vals, args.init_sample) if args.init_sample is not None else None # we need it only after the first frame anyway
         sample, image = generate(args, anim_args, root, frame_idx, return_sample=True, sampler_name=scheduled_sampler_name)
         patience = 10
 

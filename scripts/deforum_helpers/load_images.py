@@ -85,7 +85,7 @@ def get_mask_from_file(mask_file, args):
     )
 
 def blank_if_none(mask, w, h, mode):
-    return PIL.Image.new(mode, (w, h), (0)) if mask is None else mask
+    return Image.new(mode, (w, h), (0)) if mask is None else mask
 
 def none_if_blank(mask):
     return None if mask.getextrema() == (0,0) else mask
