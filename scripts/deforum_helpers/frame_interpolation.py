@@ -16,17 +16,10 @@ def extract_rife_name(string):
     if parts[1][0] != "v" or not parts[1][1:].replace('.','').isdigit():
         raise ValueError("Second word should start with 'v' followed by 2 numbers")
     return "RIFE"+parts[1][1:].replace('.','')
-    
-def extract_folder_and_file(path):
-    folder, file = os.path.split(path)
-    file = file.split("_")[0]
-    return folder, file
 
    
-def video_infer_wrap(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_path=None, orig_vid_fps=None, deforum_models_path=None, add_soundtrack=None, imgs_path=None):
-    
-    raw_output_imgs_path, img_batch_id = extract_folder_and_file(imgs_path)
-    
+def video_infer_wrap(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_path=None, orig_vid_fps=None, deforum_models_path=None, real_audio_track=None, raw_output_imgs_path=None, img_batch_id=None, slow_mo_enabled=False):
+
     if frame_interpolation_x_amount != "Disabled":
         
         # for future, other models, check if the interpolation model is rife or something else
@@ -42,13 +35,15 @@ def video_infer_wrap(frame_interpolation_engine=None, frame_interpolation_x_amou
             if multi not in range(2, 11):
                 raise Error("frame_interpolation_x_amount must be between 2x and 10x")
                     
-            fps = None
+            fps = orig_vid_fps * extract_number(frame_interpolation_x_amount)
             # calculate fps param to pass if slow_mo is not disabled
             if frame_interpolation_slow_mo_amount != 'Disabled':
+                slow_mo_enabled = True
                 x_slow_mo = extract_number(frame_interpolation_slow_mo_amount)
                 if x_slow_mo not in [2,4,8]:
                     raise Error("frame_interpolation_slow_mo_amount must be 2x, 4x or 8x")
                 fps = orig_vid_fps * multi / x_slow_mo
             # run actual interpo
             if actual_model_folder_name is not None:
-                run_rife_new_video_infer(video=orig_vid_path, output=None, model=actual_model_folder_name, fps=fps, multi=multi, deforum_models_path=deforum_models_path, add_soundtrack=add_soundtrack, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id)
+                run_rife_new_video_infer(output=None, model=actual_model_folder_name, fps=fps, multi=multi, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, slow_mo_enabled=slow_mo_enabled)
+             

@@ -189,10 +189,14 @@ class DeforumScript(wscripts.Script):
             
             deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
             
-            # TODO: handle frame interpolation of mp4 vid only if vid was created!
-            if ffmpeg_success == 0 and video_args.frame_interpolation_x_amount != "Disabled":
-                print(f"output .mp4 video found. Trying to *Frame Interpolate* using {frame_interpolation_engine}")
-                video_infer_wrap(video_args.frame_interpolation_engine, video_args.frame_interpolation_x_amount, video_args.frame_interpolation_slow_mo_amount, mp4_path, fps, root.models_path, video_args.add_soundtrack, imgs_path=image_path)
+            # handle frame interpolation
+            if video_args.frame_interpolation_x_amount != "Disabled":
+                print(f"Got a request to *frame interpolate* using {frame_interpolation_engine}")
+                real_audio_track = None
+                if video_args.add_soundtrack != 'None':
+                    real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
+                print(f"!!!!!!!!!!!!!!!!!! image_path: {image_path}")
+                video_infer_wrap(video_args.frame_interpolation_engine, video_args.frame_interpolation_x_amount, video_args.frame_interpolation_slow_mo_amount, mp4_path, fps, root.models_path, real_audio_track, args.outdir, args.timestring)
                 
         else:
             # TODO: add support for custom frame interpolation vid location?

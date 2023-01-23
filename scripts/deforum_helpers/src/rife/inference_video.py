@@ -11,11 +11,12 @@ import warnings
 import _thread
 import skvideo.io
 from queue import Queue, Empty
+import subprocess
 from .model.pytorch_msssim import ssim_matlab
 
 warnings.filterwarnings("ignore")
 
-def run_rife_new_video_infer(video=None,
+def run_rife_new_video_infer(
         output=None,
         model=None,
         fp16=False,
@@ -27,12 +28,13 @@ def run_rife_new_video_infer(video=None,
         exp=1,
         multi=2,
         deforum_models_path=None,
-        add_soundtrack=None,
         raw_output_imgs_path=None,
-        img_batch_id=None):
+        img_batch_id=None,
+        ffmpeg_location='ffmpeg',
+        audio_track=None,
+        slow_mo_enabled=False):
 
     args = SimpleNamespace()
-    args.video = video
     args.output = output
     args.modelDir = model
     args.fp16 = fp16
@@ -44,9 +46,11 @@ def run_rife_new_video_infer(video=None,
     args.exp = exp
     args.multi = multi
     args.deforum_models_path = deforum_models_path
-    args.add_soundtrack = add_soundtrack
     args.raw_output_imgs_path = raw_output_imgs_path
     args.img_batch_id = img_batch_id
+    args.ffmpeg_location = ffmpeg_location
+    args.audio_track = audio_track
+    args.slow_mo_enabled = slow_mo_enabled
    
     if args.exp != 1:
         args.multi = (2 ** args.exp)
@@ -86,10 +90,12 @@ def run_rife_new_video_infer(video=None,
     else:
         fpsNotAssigned = False
     
-    if args.add_soundtrack != 'None' and fpsNotAssigned:
-        print("The audio will be transferred from source video to interpolated video *after* the interpolation process")
-    if not fpsNotAssigned and args.add_soundtrack != 'None':
-        print("Will not transfer audio because Slow-Mo mode is activated!")
+    if not args.audio_track is None and args.slow_mo_enabled == False:
+        print("Got a request to add audio. The audio will be added to the interpolated video as it is!")
+    
+    # Keep for future update: add options to not move audio if slow mode is enabled + add option to slow-down the audio 
+    # if slow_mo_enabled and args.add_soundtrack != 'None':
+        # print("Will not transfer audio because Slow-Mo mode is activated!")
         
     interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames')
     custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
@@ -179,18 +185,13 @@ def run_rife_new_video_infer(video=None,
         time.sleep(0.1)
     pbar.close()
     
-    # move audio to new video file if appropriate
-    if args.add_soundtrack != 'None' and args.png == False and fpsNotAssigned == True and not args.video is None:
-        try:
-            print (f"Trying to transfer audio from source video to final interpolated video")
-            #transferAudio(args.video, vid_out_name)
-        except:
-            print("Audio transfer failed. Interpolated video will have no audio")
-            #targetNoAudio = os.path.splitext(vid_out_name)[0] + "_noaudio" + os.path.splitext(vid_out_name)[1]
-            #os.rename(targetNoAudio, vid_out_name)
-    
-    #print(f"Frame interpolation *DONE*. Interpolated video name/ path: {vid_out_name}")
-    stitch_video(args.fps, custom_interp_path, 'testtt.mp4', None)
+    # stitch video from interpolated frames, and add audio if needed
+    try:
+        print (f"Trying to stitch video from interpolated PNG frames")
+        stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location)
+    except:
+        print("Video stitching gone wrong.")
+
     
 def clear_write_buffer(user_args, write_buffer, custom_interp_path):
     cnt = 0
@@ -239,11 +240,6 @@ def pad_image(img, fp16, padding):
         return F.pad(img, padding)
 
 
-import os
-import numpy as np
-import cv2
-import av
-
 def get_filename(i, path):
     s = str(i)
     while len(s) < 7:
@@ -251,6 +247,55 @@ def get_filename(i, path):
     #return path + '/' + s + '.png'
     return path + s + '.png'
   
-def stitch_video(fps, img_folder_path, video_name, audio_path):
-    print("DO SOME STUFF HERE")
-    # print("RIFE successfully transferred audio from source video to interpolated video")
+def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location):
+    parent_folder = os.path.dirname(img_folder_path)
+    mp4_path = os.path.join(parent_folder, 'RIFE_' + img_batch_id + '.mp4')
+    t = os.path.join(img_folder_path, "%07d.png")
+    try:
+        cmd = [
+                ffmpeg_location,
+                '-y',
+                '-vcodec', 'png',
+                '-r', str(int(fps)),
+                '-start_number', str(0),
+                '-i', t,
+                '-frames:v', str(1000000),
+                '-c:v', 'libx264',
+                '-vf',
+                f'fps={int(fps)}',
+                '-pix_fmt', 'yuv420p',
+                '-crf', '17',
+                '-preset', 'veryslow',
+                '-pattern_type', 'sequence',
+                mp4_path
+        ]
+        # print(" ".join(cmd))
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            raise RuntimeError(stderr)
+    except Exception as e:
+        print(f'Error: {e}')
+
+    if not audio_path is None:
+        try:
+            cmd = [
+                ffmpeg_location,
+                '-i',
+                mp4_path, 
+                '-i',
+                audio_path,
+                '-map', '0:v',
+                '-map', '1:a',
+                '-c:v', 'copy',
+                '-shortest',
+                mp4_path+'.temp.mp4'
+            ]
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode != 0:
+                print(stderr)
+                raise RuntimeError(stderr)
+            os.replace(mp4_path+'.temp.mp4', mp4_path)
+        except Exception as e:
+            print(f'Error: {e}')
