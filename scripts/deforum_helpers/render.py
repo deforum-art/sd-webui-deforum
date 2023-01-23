@@ -126,6 +126,9 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
     
     mask_vals = {}
     noise_mask_vals = {}
+
+    mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
+    noise_mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
     
     if args.use_init and args.init_image != None and args.init_image != '':
         _, mask_image = load_img(args.init_image, 
