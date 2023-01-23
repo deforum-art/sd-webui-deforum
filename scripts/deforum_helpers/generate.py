@@ -7,7 +7,7 @@ from .webui_sd_pipeline import get_webui_sd_pipeline
 from .animation import sample_from_cv2, sample_to_cv2
 
 #Webui
-from modules import processing
+from modules import processing, sd_models
 from modules.shared import sd_model
 from modules.processing import StableDiffusionProcessingTxt2Img
     
@@ -48,6 +48,12 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
     if sampler_name is not None:
         if sampler_name in available_samplers.keys():
             args.sampler = available_samplers[sampler_name]
+
+    if args.checkpoint is not None:
+        info = sd_models.get_closet_checkpoint_match(args.checkpoint)
+        if info is None:
+            raise RuntimeError(f"Unknown checkpoint: {args.checkpoint}")
+        sd_models.reload_model_weights(info=info)
 
     if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
