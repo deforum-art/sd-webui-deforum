@@ -56,7 +56,7 @@ def DeforumAnimArgs():
 
     # Checkpoint Scheduling
     enable_checkpoint_scheduling = False#@param {type:"boolean"}
-    checkpoint_schedule = "0: (model1.ckpt), 100: (model2.ckpt)"
+    checkpoint_schedule = '0: ("model1.ckpt"), 100: ("model2.ckpt")'
 
     # Anti-blur
     kernel_schedule = "0: (5)"
