@@ -129,6 +129,8 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
 
     mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
     noise_mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
+
+    mask_image = None
     
     if args.use_init and args.init_image != None and args.init_image != '':
         _, mask_image = load_img(args.init_image, 
@@ -279,8 +281,8 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
             contrast_sample = unsharp_mask(contrast_sample, (kernel, kernel), sigma, amount, threshold)
             # apply frame noising
             sample_torch = sample_from_cv2(contrast_sample)
-            if args.use_mask or args.use_noise_mask:
-                args.noise_mask = compose_mask_with_check(args, noise_mask_seq, noise_mask_vals, sample_torch)
+            if args.use_mask or anim_args.use_noise_mask:
+                args.noise_mask = compose_mask_with_check(root, args, noise_mask_seq, noise_mask_vals, sample_torch)
             noised_sample = add_noise(sample_torch, noise, args.seed, anim_args.noise_type,
                             (anim_args.perlin_w, anim_args.perlin_h, anim_args.perlin_octaves, anim_args.perlin_persistence),
                              args.noise_mask, args.invert_mask)
@@ -323,7 +325,7 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
                 
         # sample the diffusion model
         if args.use_mask:
-            args.mask_image = compose_mask_with_check(args, mask_seq, mask_vals, args.init_sample) if args.init_sample is not None else None # we need it only after the first frame anyway
+            args.mask_image = compose_mask_with_check(root, args, mask_seq, mask_vals, args.init_sample) if args.init_sample is not None else None # we need it only after the first frame anyway
         sample, image = generate(args, anim_args, root, frame_idx, return_sample=True, sampler_name=scheduled_sampler_name)
         patience = 10
 
