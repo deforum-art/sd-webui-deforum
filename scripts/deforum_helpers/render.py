@@ -123,33 +123,6 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
 
     args.n_samples = 1
     frame_idx = start_frame
-    
-    mask_vals = {}
-    noise_mask_vals = {}
-
-    mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
-    noise_mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
-
-    mask_image = None
-    
-    if args.use_init and args.init_image != None and args.init_image != '':
-        _, mask_image = load_img(args.init_image, 
-                                          shape=(args.W, args.H),  
-                                          use_alpha_as_mask=args.use_alpha_as_mask)
-        mask_vals['init_mask'] = mask_image
-        noise_mask_vals['init_mask'] = mask_image
-    
-    # Grab the first frame masks since they wont be provided until next frame
-    if mask_image is None:
-        mask_vals['init_mask'] = get_mask(args)
-        noise_mask_vals['init_mask'] = get_mask(args) # TODO?: add a different default noise mask
-
-    if anim_args.use_mask_video:
-        mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
-        noise_mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
-    else:
-        mask_vals['video_mask'] = None
-        noise_mask_vals['video_mask'] = None
 
     #Webui
     state.job_count = anim_args.max_frames
@@ -162,6 +135,35 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
             break
         
         print(f"Rendering animation frame {frame_idx} of {anim_args.max_frames}")
+
+        # reset the mask vals as they are overwritten in the compose_mask algorithm
+        mask_vals = {}
+        noise_mask_vals = {}
+
+        mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
+        noise_mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
+
+        mask_image = None
+        
+        if args.use_init and args.init_image != None and args.init_image != '':
+            _, mask_image = load_img(args.init_image, 
+                                            shape=(args.W, args.H),  
+                                            use_alpha_as_mask=args.use_alpha_as_mask)
+            mask_vals['init_mask'] = mask_image
+            noise_mask_vals['init_mask'] = mask_image
+        
+        # Grab the first frame masks since they wont be provided until next frame
+        if mask_image is None:
+            mask_vals['init_mask'] = get_mask(args)
+            noise_mask_vals['init_mask'] = get_mask(args) # TODO?: add a different default noise mask
+
+        if anim_args.use_mask_video:
+            mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+            noise_mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+        else:
+            mask_vals['video_mask'] = None
+            noise_mask_vals['video_mask'] = None
+
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
         scale = keys.cfg_scale_schedule_series[frame_idx]
