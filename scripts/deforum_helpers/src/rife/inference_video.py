@@ -1,4 +1,4 @@
-# Special thanks for https://github.com/XmYx for the initial reorganization of this script
+# thanks to https://github.com/n00mkrad for the inspiration and a bit of code. Also thanks for https://github.com/XmYx for the initial reorganization of this script
 import os
 from types import SimpleNamespace
 import cv2
@@ -60,19 +60,18 @@ def run_rife_new_video_infer(
     if torch.cuda.is_available():
         torch.backends.cudnn.enabled = True
         torch.backends.cudnn.benchmark = True
-        # TODO: Can handle this? currently it's always False and give errors if True but faster speeds on tensortcore equipped gpus?
+        # TODO: Can/ need to handle this? currently it's always False and give errors if True but faster speeds on tensortcore equipped gpus?
         if (args.fp16):
             torch.set_default_tensor_type(torch.cuda.HalfTensor)
     if args.modelDir is not None:
         try:
             from .rife_new_gen.RIFE_HDv3 import Model
-            print(f"{args.modelDir} has been successfully imported.")
         except ImportError as e:
-            raise ValueError(f"{args.modelDir} could not be found. Please contact deforum support. {e}")
+            raise ValueError(f"{args.modelDir} could not be found. Please contact deforum support {e}")
         except Exception as e:
             raise ValueError(f"An error occured while trying to import {args.modelDir}: {e}")
     else:
-        print("Got a request to frame-interpolate but no valid frame interpolation engine value provided. Doing... nothing.")
+        print("Got a request to frame-interpolate but no valid frame interpolation engine value provided. Doing... nothing")
         return
    
     model = Model()
@@ -82,13 +81,14 @@ def run_rife_new_video_infer(
     model.eval()
     model.device()
     
+    print(f"{args.modelDir}.pkl model successfully loaded into memory")
+    print("Interpolation progress (it's OK if it finishes before 100%):")
+    
     if not args.audio_track is None and args.slow_mo_x_amount >= 2:
         print("Got a request to add audio. The audio will be added to the interpolated video as it is!")
     
-    # Keep for future update: add options to not move audio if slow mode is enabled + add option to slow-down the audio 
-    # if slow_mo_enabled and args.add_soundtrack != 'None':
-        # print("Will not transfer audio because Slow-Mo mode is activated!")
-        
+    # TODO: add options to not move audio if slow mode is enabled + add option to slow-down the audio 
+
     interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames')
     custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
 
@@ -179,13 +179,11 @@ def run_rife_new_video_infer(
     
     # stitch video from interpolated frames, and add audio if needed
     try:
-        print (f"Trying to stitch video from interpolated PNG frames")
+        print (f"Trying to stitch video from interpolated PNG frames...")
         stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset)
         print("Interpolated video created!")
     except Exception as e:
         print(f'Video stitching gone wrong. Error: {e}')
-        
-
     
 def clear_write_buffer(user_args, write_buffer, custom_interp_path):
     cnt = 0
@@ -233,7 +231,6 @@ def pad_image(img, fp16, padding):
     else:
         return F.pad(img, padding)
 
-
 def get_filename(i, path):
     s = str(i)
     while len(s) < 7:
@@ -274,7 +271,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
         if process.returncode != 0:
             raise RuntimeError(stderr)
     except Exception as e:
-        print(f'Error: {e}')
+        print(f'Error stitching interpolation video. Actual error: {e}')
 
     if not audio_path is None:
         try:
@@ -297,4 +294,4 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
                 raise RuntimeError(stderr)
             os.replace(mp4_path+'.temp.mp4', mp4_path)
         except Exception as e:
-            print(f'Error: {e}')
+            print(f'Error adding audio to interpolated video. Actual error: {e}')

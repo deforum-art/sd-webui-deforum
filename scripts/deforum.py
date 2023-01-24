@@ -18,7 +18,7 @@ for basedir in basedirs:
 import deforum_helpers.args as deforum_args
 import deforum_helpers.settings as deforum_settings
 from deforum_helpers.save_images import dump_frames_cache, reset_frames_cache
-from deforum_helpers.frame_interpolation import video_infer_wrap
+from deforum_helpers.frame_interpolation import process_video_interpolation
 
 import modules.scripts as wscripts
 from modules import script_callbacks
@@ -106,6 +106,10 @@ class DeforumScript(wscripts.Script):
         
         from base64 import b64encode
         
+        real_audio_track = None
+        if video_args.add_soundtrack != 'None':
+            real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
+        
         if video_args.skip_video_for_run_all:
             print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
         elif video_args.output_format == 'FFMPEG mp4':
@@ -170,7 +174,7 @@ class DeforumScript(wscripts.Script):
                     '-i',
                     mp4_path,
                     '-i',
-                    anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path,
+                    real_audio_track,
                     '-map', '0:v',
                     '-map', '1:a',
                     '-c:v', 'copy',
@@ -188,16 +192,8 @@ class DeforumScript(wscripts.Script):
             data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
             
             deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
-            
-            #  Need to do Frame Interpolation magic
-            if video_args.frame_interpolation_x_amount != "Disabled":
-                print(f"Got a request to *frame interpolate* using {frame_interpolation_engine}")
-                real_audio_track = None
-                if video_args.add_soundtrack != 'None':
-                    real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
-                video_infer_wrap(video_args.frame_interpolation_engine, video_args.frame_interpolation_x_amount, video_args.frame_interpolation_slow_mo_amount, mp4_path, fps, root.models_path, real_audio_track, args.outdir, args.timestring, video_args.ffmpeg_crf, video_args.ffmpeg_preset)
-                
-        else:
+
+        else: # *GIF* TIME!
             # TODO: add support for custom frame interpolation vid location?
             if video_args.use_manual_settings:
                 max_video_frames = video_args.max_video_frames #@param {type:"string"}
@@ -249,6 +245,11 @@ class DeforumScript(wscripts.Script):
             a = np.random.rand(args.W, args.H, 3)*255
             root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
             root.initial_seed = 6934
+        # FRMAE INTERPOLATION TIME
+        if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all:
+            print(f"Got a request to *frame interpolate* using {frame_interpolation_engine}")
+            process_video_interpolation(video_args.frame_interpolation_engine, video_args.frame_interpolation_x_amount, video_args.frame_interpolation_slow_mo_amount, fps, root.models_path, real_audio_track, args.outdir, args.timestring, video_args.ffmpeg_crf, video_args.ffmpeg_preset)
+            
         root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
         root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
         reset_frames_cache(root) # cleanup the RAM in any case

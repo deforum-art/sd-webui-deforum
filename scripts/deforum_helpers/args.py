@@ -22,7 +22,7 @@ def DeforumAnimArgs():
 
     #@markdown ####**Animation:**
     animation_mode = '2D' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
-    max_frames = 2 #@param {type:"number"}
+    max_frames = 120 #@param {type:"number"}
     border = 'replicate' #@param ['wrap', 'replicate'] {type:'string'}
 
     #@markdown ####**Motion Parameters:**
@@ -247,7 +247,7 @@ def DeforumOutputArgs():
     max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False
     frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
-    frame_interpolation_x_amount = "x2" #@param [Disabled + all values from x2 to x10]
+    frame_interpolation_x_amount = "Disabled" #@param ["Disabled" + all values from x2 to x10]
     frame_interpolation_slow_mo_amount = "Disabled" #@param ["Disabled","x2","x4","x8"]
     return locals()
     
@@ -650,7 +650,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Row():
             skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
             fps = gr.Number(label="fps", value=dv.fps, interactive=True)
-            output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
+            output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='PIL gif', type="value", elem_id="output_format", interactive=True)
         with gr.Row():
             ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
             ffmpeg_crf = gr.Number(label="ffmpeg_crf", interactive=True, value = dv.ffmpeg_crf)
@@ -672,15 +672,21 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
         with gr.Accordion('Frame Interpolation', open=False):
             i43 = gr.HTML("""
-            <b>**Frame Interpolation only works when output_format=FFMPEG mp4**</b> <br>
             Use RIFE and other Video Frame Interpolation methods to smooth out, slow-mo (or both) your output videos.</p>
-            <p style="margin-top:1em">
+             <p style="margin-top:1em">
                 Supported engines:
-                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                    <li>RIFE v4.6, v4.3 and v4.0</li>
+                <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
+                    <li>RIFE v4.6, v4.3 and v4.0. Recommended for now: v4.6.</li>
                     <li>RIFE v2.3 and other interpolation engines might come in the future.</li>
                 </ul>
-                * Please note that currently, using Slow-mo mode will make it that the interpolated video has no sound even if you have add_soundtrack enabled. Slow-mo audio coming soon.
+            </p>
+             <p style="margin-top:1em">
+                Important notes:
+                <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
+                    <li>RIFE will not run if 'store_frames_in_ram' is enabled.</li>
+                    <li>Audio (if provided) will be transferred to the interpolated video even if Slow-Mo is enabled.</li>
+                    <li>Frame Interpolation will always save an .mp4 video even if you used GIF for the raw video.</li>
+                </ul>
             </p>
             """)
             with gr.Row():
