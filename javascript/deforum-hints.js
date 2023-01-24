@@ -55,6 +55,7 @@ deforum_titles = {
     "perspective_flip_fv": "the 2D vanishing point of perspective (recommended range 30-160)",
     "noise_schedule": "amount of graininess to add per frame for diffusion diversity",
     "strength_schedule": "amount of presence of previous frame to influence next frame, also controls steps in the following formula [steps - (strength_schedule * steps)]",
+    "sampler_schedule": "controls which sampler to use at a specific scheduled frame",
     "contrast_schedule": "adjusts the overall contrast per frame [default neutral at 1.0]",
     "cfg_scale_schedule": "how closely the image should conform to the prompt. Lower values produce more creative results. (recommended range 5-15)",
     "fov_schedule": "adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]",
@@ -74,7 +75,7 @@ deforum_titles = {
     "perlin_w": "The width of the Perlin sample. Lower values will make larger noise regions. Think of it as inverse brush stroke width. The greater this setting, the smaller details it will affect.",
     "perlin_h": "The height of the Perlin sample. Lower values will make larger noise regions. Think of it as inverse brush stroke width. The greater this setting, the smaller details it will affect.",
     "perlin_octaves": "The number of Perlin noise octaves, that is the count of P-noise iterations. Higher values will make the noise more soft and smoke-like, whereas lower values will make it look more organic and spotty. It is limited by 8 octaves as the resulting gain will run out of bounds.",
-    "perlin_persistence": "How much of noise from each octave is added on each iteration. Higher values will make it more straighter and sharper, while lover values will make it rounder and smoother. It is limited by 1.0 as the resulting gain fill the frame completely with noise.",
+    "perlin_persistence": "How much of noise from each octave is added on each iteration. Higher values will make it more straighter and sharper, while lower values will make it rounder and smoother. It is limited by 1.0 as the resulting gain fill the frame completely with noise.",
     "use_depth_warping": "enables instructions to warp an image dynamically in 3D mode only.",
     "midas_weight": "sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]",
     "padding_mode": "instructs the handling of pixels outside the field of view as they come into the scene.",
@@ -99,6 +100,8 @@ deforum_titles = {
     "mask_overlay_blur": "Blur edges of final overlay mask, if used. Minimum = 0 (no blur)",
     "video_init_path": "the directory at which your video file is located for Video Input mode only.",
     "extract_nth_frame": "during the run sequence, only frames specified by this value will be extracted, saved, and diffused upon. A value of 1 indicates that every frame is to be accounted for. Values of 2 will use every other frame for the sequence. Higher values will skip that number of frames respectively.",
+	"extract_from_frame":"start extracting the input video only from this frame number",
+	"extract_to_frame": "stop the extraction of the video at this frame number. -1 for no limits",
     "overwrite_extracted_frames": "when enabled, will re-extract video frames each run. When using video_input mode, the run will be instructed to write video frames to the drive. If you’ve already populated the frames needed, uncheck this box to skip past redundant extraction, and immediately start the render. If you have not extracted frames, you must run at least once with this box checked to write the necessary frames.",
     "use_mask_video": "video_input mode only, enables the extraction and use of a separate video file intended for use as a mask. White areas of the extracted video frames will not be affected by diffusion, while black areas will be fully effected. Lighter/darker areas are affected dynamically.",
     "video_mask_path": "the directory in which your mask video is located.",
@@ -113,7 +116,9 @@ deforum_titles = {
     "output_format": "select the type of video file to output",
         "PIL gif": "create an animated GIF",
         "FFMPEG mp4": "create an MP4 video file",
-    "ffmpeg_location": "the path to where ffmpeg is located",
+    "ffmpeg_location": "the path to where ffmpeg is located. Leave at default 'ffmpeg' if ffmpeg is in your PATH!",
+	"ffmpeg_crf": "controls quality where lower is better, less compressed. values: 0 to 51, default 17",
+	"ffmpeg_preset": "controls how good the compression is, and the operation speed. If you're not in a rush keep it at 'veryslow'",
     "add_soundtrack": "when this box is checked, and FFMPEG mp4 is selected as the output format, an audio file will be multiplexed with the video.",
     "soundtrack_path": "the path to an audio file to accompany the video",
     "use_manual_settings": "when this is unchecked, the video will automatically be created in the same output folder as the images. Check this box to specify different settings for the creation of the video, specified by the following options",
@@ -121,7 +126,11 @@ deforum_titles = {
     "max_video_frames": "the maximum number of frames to include in the video, when use_manual_settings is checked",
     //"path_name_modifier": "",
     "image_path": "the location of images to create the video from, when use_manual_settings is checked",
-    "mp4_path": "the output location of the mp4 file, when use_manual_settings is checked"
+    "mp4_path": "the output location of the mp4 file, when use_manual_settings is checked",
+	"frame_interpolation_engine": "chhoose the frame interpolation engine and version",
+	"frame_interpolation_x_amount":"how many times to interpolate the source video. e.g source video fps of 12 and a value of x2 will yield a 24fps interpolated video",
+	"frame_interpolation_slow_mo_amount":"how many times to slow-down the video. *Naturally affects output fps as well",
+	"frame_interpolation_keep_imgs": "delete or keep raw interpolated png imgs. Default: False which means delete"
 
 }
 

@@ -5,19 +5,10 @@ import math
 import py3d_tools as p3d
 import torch
 from einops import rearrange
-import re
-import pathlib
-import os
-import pandas as pd
-import shutil
-import requests
+from .prompt import check_is_number
 
 # Webui
 from modules.shared import state
-
-def check_is_number(value):
-    float_pattern = r'^(?=.)([+-]?([0-9]*)(\.([0-9]+))?)$'
-    return re.match(float_pattern, value)
 
 def sample_from_cv2(sample: np.ndarray) -> torch.Tensor:
     sample = ((sample.astype(float) / 255.0) * 2) - 1
@@ -36,66 +27,6 @@ def construct_RotationMatrixHomogenous(rotation_angles):
     RH = np.eye(4,4)
     cv2.Rodrigues(np.array(rotation_angles), RH[0:3, 0:3])
     return RH
-
-def get_frame_name(path):
-    name = os.path.basename(path)
-    name = os.path.splitext(name)[0]
-    return name
-
-def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True): 
-    #get the name of the video without the path and ext
-    name = get_frame_name(video_path)
-    if n < 1: n = 1 #HACK Gradio interface does not currently allow min/max in gr.Number(...) 
-
-    if video_path.startswith('http://') or video_path.startswith('https://'):
-        response = requests.head(video_path)
-        if response.status_code == 404 or response.status_code != 200:
-            raise ConnectionError("Init video url or mask video url is not valid")
-    else:
-        if not os.path.exists(video_path):
-            raise RuntimeError("Init video path or mask video path is not valid")
-
-    input_content = []
-    if os.path.exists(video_in_frame_path) :
-        input_content = os.listdir(video_in_frame_path)
-
-    # check if existing frame is the same video, if not we need to erase it and repopulate
-    if len(input_content) > 0:
-        #get the name of the existing frame
-        content_name = get_frame_name(input_content[0])
-        if not content_name.startswith(name):
-            overwrite = True
-    vidcap = cv2.VideoCapture(video_path)
-
-    # grab the frame count to check against existing directory len 
-    frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
-    
-    # raise error if the user wants to skip more frames than exist
-    if n >= frame_count : 
-        raise RuntimeError('Skipping more frames than input video contains. extract_nth_frames larger than input frames')
-    
-    expected_frame_count = math.ceil(frame_count / n) 
-    # Check to see if the frame count is matches the number of files in path
-    if overwrite or expected_frame_count != len(input_content):
-        shutil.rmtree(video_in_frame_path)
-        os.makedirs(video_in_frame_path, exist_ok=True) # just deleted the folder so we need to make it again
-        input_content = os.listdir(video_in_frame_path)
-    
-    if len(input_content) == 0:
-        success,image = vidcap.read()
-        count = 0
-        t=1
-        success = True
-        while success:
-            if state.interrupted:
-                return
-            if count % n == 0:
-                cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}.jpg" , image)     # save frame as JPEG file
-                t += 1
-            success,image = vidcap.read()
-            count += 1
-        print("Converted %d frames" % count)
-    else: print("Frames already unpacked")
 
 # https://en.wikipedia.org/wiki/Rotation_matrix
 def getRotationMatrixManual(rotation_angles):
@@ -334,7 +265,9 @@ class DeformAnimKeys():
         self.strength_schedule_series = get_inbetweens(parse_key_frames(anim_args.strength_schedule), anim_args.max_frames)
         self.contrast_schedule_series = get_inbetweens(parse_key_frames(anim_args.contrast_schedule), anim_args.max_frames)
         self.cfg_scale_schedule_series = get_inbetweens(parse_key_frames(anim_args.cfg_scale_schedule), anim_args.max_frames)
+        self.steps_schedule_series = get_inbetweens(parse_key_frames(anim_args.steps_schedule), anim_args.max_frames)
         self.seed_schedule_series = get_inbetweens(parse_key_frames(anim_args.seed_schedule), anim_args.max_frames)
+        self.sampler_schedule_series = get_inbetweens(parse_key_frames(anim_args.sampler_schedule), anim_args.max_frames, is_single_string = True)
         self.kernel_schedule_series = get_inbetweens(parse_key_frames(anim_args.kernel_schedule), anim_args.max_frames)
         self.sigma_schedule_series = get_inbetweens(parse_key_frames(anim_args.sigma_schedule), anim_args.max_frames)
         self.amount_schedule_series = get_inbetweens(parse_key_frames(anim_args.amount_schedule), anim_args.max_frames)
@@ -343,10 +276,9 @@ class DeformAnimKeys():
         self.near_series = get_inbetweens(parse_key_frames(anim_args.near_schedule), anim_args.max_frames)
         self.far_series = get_inbetweens(parse_key_frames(anim_args.far_schedule), anim_args.max_frames)
 
-def get_inbetweens(key_frames, max_frames, integer=False, interp_method='Linear'):
+def get_inbetweens(key_frames, max_frames, integer=False, interp_method='Linear', is_single_string = False):
     import numexpr
     key_frame_series = pd.Series([np.nan for a in range(max_frames)])
-    
     for i in range(0, max_frames):
         if i in key_frames:
             value = key_frames[i]
@@ -357,8 +289,13 @@ def get_inbetweens(key_frames, max_frames, integer=False, interp_method='Linear'
                 key_frame_series[i] = value
         if not value_is_number:
             t = i
-            key_frame_series[i] = numexpr.evaluate(value)
-    key_frame_series = key_frame_series.astype(float)
+            if is_single_string:
+                if value.find("'") > -1:
+                    value = value.replace("'","")
+                if value.find('"') > -1:
+                    value = value.replace('"',"")
+            key_frame_series[i] = numexpr.evaluate(value) if not is_single_string else value # workaround for values formatted like 0:("Euler A") //used for sampler schedules
+    key_frame_series = key_frame_series.astype(float) if not is_single_string else key_frame_series # as string
     
     if interp_method == 'Cubic' and len(key_frames.items()) <= 3:
         interp_method = 'Quadratic'    

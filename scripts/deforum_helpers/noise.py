@@ -1,5 +1,9 @@
 import torch
+import numpy as np
+from PIL import ImageOps
 import math
+from .animation import sample_to_cv2
+import cv2
 
 # 2D Perlin noise in PyTorch https://gist.github.com/vadimkantorov/ac1b097753f217c5c11bc2ff396e0a57
 def rand_perlin_2d(shape, res, fade = lambda t: 6*t**5 - 15*t**4 + 10*t**3):
@@ -30,9 +34,17 @@ def rand_perlin_2d_octaves(shape, res, octaves=1, persistence=0.5):
         amplitude *= persistence
     return noise
 
-#MASKARGSEXPANSION 
-#Add option to remove noise in relation to masking so that areas which are masked receive less noise
-def add_noise(sample: torch.Tensor, noise_amt: float, seed: int, noise_type: str, noise_args) -> torch.Tensor:
+def condition_noise_mask(noise_mask, invert_mask = False):
+    if invert_mask:
+        noise_mask = ImageOps.invert(noise_mask)
+    noise_mask = np.array(noise_mask.convert("L"))
+    noise_mask = noise_mask.astype(np.float32) / 255.0
+    noise_mask = np.around(noise_mask, decimals=0)
+    noise_mask = torch.from_numpy(noise_mask)
+    #noise_mask = torch.round(noise_mask)
+    return noise_mask
+
+def add_noise(sample: torch.Tensor, noise_amt: float, seed: int, noise_type: str, noise_args, noise_mask = None, invert_mask = False) -> torch.Tensor:
     seed_store = torch.seed()
     torch.manual_seed(seed) # Reproducibility
     noise = torch.randn(sample.shape, device=sample.device) # White noise
@@ -41,6 +53,10 @@ def add_noise(sample: torch.Tensor, noise_amt: float, seed: int, noise_type: str
         # print(sample.shape)
         sample2dshape = (sample.shape[2], sample.shape[3])
         noise = noise * ((rand_perlin_2d_octaves(sample2dshape, (int(noise_args[0]), int(noise_args[1])), octaves=noise_args[2], persistence=noise_args[3]) + torch.ones(sample2dshape)) / 2)
-    sample = sample + noise * noise_amt
+    if noise_mask is not None:
+        noise_mask = condition_noise_mask(noise_mask, invert_mask)
+        sample = sample + (noise * noise_mask) * noise_amt
+    else:
+        sample = sample + noise * noise_amt
     torch.manual_seed(seed_store)
     return sample

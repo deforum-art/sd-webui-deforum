@@ -1,9 +1,21 @@
 function submit_deforum(){
-    requestProgress('deforum')
+	// alert('Hello, Deforum!')
+    rememberGallerySelection('deforum_gallery')
+    showSubmitButtons('deforum', false)
 
-    return create_submit_args(arguments)
+    var id = randomId()
+    requestProgress(id, gradioApp().getElementById('deforum_gallery_container'), gradioApp().getElementById('deforum_gallery'), function(){
+        showSubmitButtons('deforum', true)
+    })
+
+    var res = create_submit_args(arguments)
+
+    res[0] = id
+	// res[1] = get_tab_index('deforum')
+
+    return res
 }
 
 onUiUpdate(function(){
-    check_progressbar('deforum', 'deforum_progressbar', 'deforum_progress_span', 'deforum_skip', 'deforum_interrupt', 'deforum_preview', 'deforum_gallery')
+    check_gallery('deforum_gallery')
 })
