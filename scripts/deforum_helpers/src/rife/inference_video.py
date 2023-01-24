@@ -24,15 +24,15 @@ def run_rife_new_video_infer(
         scale=1.0,
         fps=None,
         png=True,
-        ext='mp4',
-        exp=1,
-        multi=2,
         deforum_models_path=None,
         raw_output_imgs_path=None,
         img_batch_id=None,
         ffmpeg_location='ffmpeg',
         audio_track=None,
-        slow_mo_enabled=False):
+        interp_x_amount=2,
+        slow_mo_x_amount=-1,
+        ffmpeg_crf=17,
+        ffmpeg_preset='veryslow'):
 
     args = SimpleNamespace()
     args.output = output
@@ -42,18 +42,16 @@ def run_rife_new_video_infer(
     args.scale = scale
     args.fps = fps
     args.png = png
-    args.ext = ext
-    args.exp = exp
-    args.multi = multi
     args.deforum_models_path = deforum_models_path
     args.raw_output_imgs_path = raw_output_imgs_path
     args.img_batch_id = img_batch_id
     args.ffmpeg_location = ffmpeg_location
     args.audio_track = audio_track
-    args.slow_mo_enabled = slow_mo_enabled
+    args.interp_x_amount = interp_x_amount
+    args.slow_mo_x_amount = slow_mo_x_amount
+    args.ffmpeg_crf = ffmpeg_crf
+    args.ffmpeg_preset = ffmpeg_preset
    
-    if args.exp != 1:
-        args.multi = (2 ** args.exp)
     if args.UHD and args.scale == 1.0:
         args.scale = 0.5
 
@@ -84,13 +82,7 @@ def run_rife_new_video_infer(
     model.eval()
     model.device()
     
-    if args.fps is None:
-        fpsNotAssigned = True
-        args.fps = args.multi
-    else:
-        fpsNotAssigned = False
-    
-    if not args.audio_track is None and args.slow_mo_enabled == False:
+    if not args.audio_track is None and args.slow_mo_x_amount >= 2:
         print("Got a request to add audio. The audio will be added to the interpolated video as it is!")
     
     # Keep for future update: add options to not move audio if slow mode is enabled + add option to slow-down the audio 
@@ -164,10 +156,10 @@ def run_rife_new_video_infer(
 
         if ssim < 0.2:
             output = []
-            for i in range(args.multi - 1):
+            for i in range(args.interp_x_amount - 1):
                 output.append(I0)
         else:
-            output = make_inference(model, I0, I1, args.multi - 1, scale)
+            output = make_inference(model, I0, I1, args.interp_x_amount - 1, scale)
         
         write_buffer.put(lastframe)
         for mid in output:
@@ -188,9 +180,11 @@ def run_rife_new_video_infer(
     # stitch video from interpolated frames, and add audio if needed
     try:
         print (f"Trying to stitch video from interpolated PNG frames")
-        stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location)
-    except:
-        print("Video stitching gone wrong.")
+        stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset)
+        print("Interpolated video created!")
+    except Exception as e:
+        print(f'Video stitching gone wrong. Error: {e}')
+        
 
     
 def clear_write_buffer(user_args, write_buffer, custom_interp_path):
@@ -247,9 +241,14 @@ def get_filename(i, path):
     #return path + '/' + s + '.png'
     return path + s + '.png'
   
-def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location):
+def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset):
     parent_folder = os.path.dirname(img_folder_path)
-    mp4_path = os.path.join(parent_folder, 'RIFE_' + img_batch_id + '.mp4')
+    mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
+    if slow_mo_x_amount != -1:
+        mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)
+    mp4_path = mp4_path + '.mp4'
+
+    # mp4_path = os.path.join(parent_folder, 'RIFE_' + img_batch_id + '.mp4')
     t = os.path.join(img_folder_path, "%07d.png")
     try:
         cmd = [
@@ -264,8 +263,8 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
                 '-vf',
                 f'fps={int(fps)}',
                 '-pix_fmt', 'yuv420p',
-                '-crf', '17',
-                '-preset', 'veryslow',
+                '-crf', str(f_crf),
+                '-preset', f_preset,
                 '-pattern_type', 'sequence',
                 mp4_path
         ]
