@@ -29,7 +29,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     # Step 1:
     # recursive parenthesis pass
     # regex is not powerful here
-    # pattern = r'[\(](?P<inner>)[\)]'
 
     seq = ""
     inner_seq = ""
@@ -55,14 +54,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
 
     mask_seq = seq
 
-    #def parse(match_object):
-    #    inner_idx += 1
-    #    content = match_object.groupdict()['inner']
-    #    val_masks[f"{{inner_idx}}"] = compose_mask(root, args, content, val_masks, frame_image, inner_idx)
-    #    return f"{{inner_idx}}"
-    
-    #mask_seq = re.sub(pattern, parse, mask_seq)
-    
     # Step 2:
     # Load the word masks and file masks as vars
     
