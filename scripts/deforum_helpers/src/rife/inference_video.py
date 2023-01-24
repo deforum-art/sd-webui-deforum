@@ -245,7 +245,6 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
         mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)
     mp4_path = mp4_path + '.mp4'
 
-    # mp4_path = os.path.join(parent_folder, 'RIFE_' + img_batch_id + '.mp4')
     t = os.path.join(img_folder_path, "%07d.png")
     try:
         cmd = [
@@ -265,7 +264,6 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
                 '-pattern_type', 'sequence',
                 mp4_path
         ]
-        # print(" ".join(cmd))
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
         if process.returncode != 0:
