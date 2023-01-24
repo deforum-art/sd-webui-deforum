@@ -98,7 +98,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
         content = match_object.groupdict()['inner']
         savename = content
         if content in root.mask_preset_names:
-            nonlocal inner_idx
             inner_idx += 1
             savename = str(inner_idx)
         val_masks[savename] = ImageChops.invert(val_masks[content])
@@ -118,7 +117,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
             content_second = match_object.groupdict()['inner2']
             savename = content
             if content in root.mask_preset_names:
-                nonlocal inner_idx
                 inner_idx += 1
                 savename = str(inner_idx)
             val_masks[savename] = ImageChops.logical_and(val_masks[content], val_masks[content_second])
@@ -143,7 +141,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
             print(content_second)
             savename = content
             if content in root.mask_preset_names:
-                nonlocal inner_idx
                 inner_idx += 1
                 savename = str(inner_idx)
             val_masks[savename] = ImageChops.logical_or(val_masks[content], val_masks[content_second])
@@ -165,7 +162,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
             content_second = match_object.groupdict()['inner2']
             savename = content
             if content in root.mask_preset_names:
-                nonlocal inner_idx
                 inner_idx += 1
                 savename = str(inner_idx)
             val_masks[savename] = ImageChops.logical_xor(val_masks[content], val_masks[content_second])
