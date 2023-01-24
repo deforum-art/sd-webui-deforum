@@ -62,7 +62,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     
     def parse(match_object):
         nonlocal inner_idx
-        print('lol')
         inner_idx += 1
         content = match_object.groupdict()['inner']
         val_masks[str(inner_idx)] = get_mask_from_file(content, args).convert('1') # TODO: add caching
@@ -75,7 +74,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     
     def parse(match_object):
         nonlocal inner_idx
-        print('kek')
         inner_idx += 1
         content = match_object.groupdict()['inner']
         val_masks[str(inner_idx)] = get_word_mask(root, frame_image, content).convert('1')
@@ -92,7 +90,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     # Invert vars with '!'
     pattern = r'![\S\s]*{(?P<inner>[\S\s]*?)}'
     def parse(match_object):
-        print('cheburek')
         nonlocal inner_idx
         inner_idx += 1
         content = match_object.groupdict()['inner']
@@ -110,7 +107,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     while True:
         pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*&[\s]*{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
-            print('kyk')
             nonlocal inner_idx
             inner_idx += 1
             content = match_object.groupdict()['inner1']
@@ -131,14 +127,10 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     while True:
         pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*?\|[\s]*?{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
-            print('tyk')
             nonlocal inner_idx
             inner_idx += 1
-            print(match_object)
             content = match_object.groupdict()['inner1']
-            print(content)
             content_second = match_object.groupdict()['inner2']
-            print(content_second)
             savename = content
             if content in root.mask_preset_names:
                 inner_idx += 1
@@ -155,7 +147,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     while True:
         pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*\^[\s]*{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
-            print('dyk')
             nonlocal inner_idx
             inner_idx += 1
             content = match_object.groupdict()['inner1']
@@ -176,7 +167,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     while True:
         pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*\\[\s]*{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
-            print('efe')
             content = match_object.groupdict()['inner1']
             content_second = match_object.groupdict()['inner2']
             savename = content
