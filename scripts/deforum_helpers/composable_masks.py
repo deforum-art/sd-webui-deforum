@@ -24,19 +24,43 @@ from PIL import Image, ImageChops
 # Returns an image in mode '1' (needed for bool ops), convert to 'L' in the sender function
 def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0):
     # Compose_mask recursively: go to inner brackets, then b-op it and go upstack
-    # pattern = r'((?P<frame>[0-9]+):[\s]*\((?P<param>[\S\s]*?)\)([,][\s]?[\s]?$))'
     
     # Step 1:
     # recursive parenthesis pass
-    pattern = r'[\(](?P<inner>)[\)]'
+    # regex is not powerful here
+    # pattern = r'[\(](?P<inner>)[\)]'
+
+    seq = ""
+    inner_seq = ""
+    parentheses_counter = 0
+
+    for c in mask_seq:
+        if c == '(':
+            parentheses_counter = parentheses_counter + 1
+        elif c == ')':
+            parentheses_counter = parentheses_counter - 1
+        elif parentheses_counter > 0:
+            inner_seq += c
+        if parentheses_counter == 0:
+            if len(inner_seq) > 0:
+                inner_idx += 1
+                seq += compose_mask(root, args, inner_seq, val_masks, frame_image, inner_idx)
+                inner_seq = ""
+        else:
+            seq += c
     
-    def parse(match_object):
-        inner_idx += 1
-        content = match_object.groupdict()['inner']
-        val_masks[f"{{inner_idx}}"] = compose_mask(content, val_masks, frame_image, inner_idx)
-        return f"{{inner_idx}}"
+    if parentheses_counter != 0:
+        raise Exception('Mismatched parentheses in {mask_seq}!')
+
+    mask_seq = seq
+
+    #def parse(match_object):
+    #    inner_idx += 1
+    #    content = match_object.groupdict()['inner']
+    #    val_masks[f"{{inner_idx}}"] = compose_mask(root, args, content, val_masks, frame_image, inner_idx)
+    #    return f"{{inner_idx}}"
     
-    mask_seq = re.sub(pattern, parse, mask_seq)
+    #mask_seq = re.sub(pattern, parse, mask_seq)
     
     # Step 2:
     # Load the word masks and file masks as vars
