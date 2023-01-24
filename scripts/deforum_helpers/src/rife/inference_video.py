@@ -9,7 +9,6 @@ from tqdm import tqdm
 from torch.nn import functional as F
 import warnings
 import _thread
-import skvideo.io
 from queue import Queue, Empty
 import subprocess
 from .model.pytorch_msssim import ssim_matlab
