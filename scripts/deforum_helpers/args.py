@@ -7,6 +7,7 @@ def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
     half_precision = not cmd_opts.no_half
+    mask_preset_names = ['everywhere','init_mask','video_mask']
     p = None
     frames_cache = []
     initial_seed = None

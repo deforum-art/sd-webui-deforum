@@ -93,9 +93,16 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     pattern = r'![\S\s]*{(?P<inner>[\S\s]*?)}'
     def parse(match_object):
         print('cheburek')
+        nonlocal inner_idx
+        inner_idx += 1
         content = match_object.groupdict()['inner']
-        val_masks[content] = ImageChops.invert(val_masks[content])
-        return f"{{{content}}}"
+        savename = content
+        if content in root.mask_preset_names:
+            nonlocal inner_idx
+            inner_idx += 1
+            savename = str(inner_idx)
+        val_masks[savename] = ImageChops.invert(val_masks[content])
+        return f"{{{savename}}}"
     
     mask_seq = re.sub(pattern, parse, mask_seq)
     
@@ -105,10 +112,17 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
         pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*&[\s]*{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
             print('kyk')
+            nonlocal inner_idx
+            inner_idx += 1
             content = match_object.groupdict()['inner']
             content_second = match_object.groupdict()['inner2']
-            val_masks[content] = ImageChops.logical_and(val_masks[content], val_masks[content_second])
-            return f"{{{content}}}"
+            savename = content
+            if content in root.mask_preset_names:
+                nonlocal inner_idx
+                inner_idx += 1
+                savename = str(inner_idx)
+            val_masks[savename] = ImageChops.logical_and(val_masks[content], val_masks[content_second])
+            return f"{{{savename}}}"
         
         prev_mask_seq = mask_seq
         mask_seq = re.sub(pattern, parse, mask_seq)
@@ -120,13 +134,20 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
         pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*?\|[\s]*?{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
             print('tyk')
+            nonlocal inner_idx
+            inner_idx += 1
             print(match_object)
             content = match_object.groupdict()['inner1']
             print(content)
             content_second = match_object.groupdict()['inner2']
             print(content_second)
-            val_masks[content] = ImageChops.logical_or(val_masks[content], val_masks[content_second])
-            return f"{{{content}}}"
+            savename = content
+            if content in root.mask_preset_names:
+                nonlocal inner_idx
+                inner_idx += 1
+                savename = str(inner_idx)
+            val_masks[savename] = ImageChops.logical_or(val_masks[content], val_masks[content_second])
+            return f"{{{savename}}}"
         
         prev_mask_seq = mask_seq
         mask_seq = re.sub(pattern, parse, mask_seq)
@@ -138,10 +159,17 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
         pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*\^[\s]*{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
             print('dyk')
+            nonlocal inner_idx
+            inner_idx += 1
             content = match_object.groupdict()['inner1']
             content_second = match_object.groupdict()['inner2']
-            val_masks[content] = ImageChops.logical_xor(val_masks[content], val_masks[content_second])
-            return f"{{{content}}}"
+            savename = content
+            if content in root.mask_preset_names:
+                nonlocal inner_idx
+                inner_idx += 1
+                savename = str(inner_idx)
+            val_masks[savename] = ImageChops.logical_xor(val_masks[content], val_masks[content_second])
+            return f"{{{savename}}}"
         
         prev_mask_seq = mask_seq
         mask_seq = re.sub(pattern, parse, mask_seq)
@@ -155,8 +183,13 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
             print('efe')
             content = match_object.groupdict()['inner1']
             content_second = match_object.groupdict()['inner2']
-            val_masks[content] = ImageChops.logical_and(val_masks[content], ImageChops.invert(val_masks[content_second]))
-            return f"{{{content}}}"
+            savename = content
+            if content in root.mask_preset_names:
+                nonlocal inner_idx
+                inner_idx += 1
+                savename = str(inner_idx)
+            val_masks[savename] = ImageChops.logical_and(val_masks[content], ImageChops.invert(val_masks[content_second]))
+            return f"{{{savename}}}"
         
         prev_mask_seq = mask_seq
         mask_seq = re.sub(pattern, parse, mask_seq)
