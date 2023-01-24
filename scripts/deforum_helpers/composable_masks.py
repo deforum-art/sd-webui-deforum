@@ -65,7 +65,7 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
         print('lol')
         inner_idx += 1
         content = match_object.groupdict()['inner']
-        val_masks[f"{{{inner_idx}}}"] = get_mask_from_file(content, args).convert('1') # TODO: add caching
+        val_masks[str(inner_idx)] = get_mask_from_file(content, args).convert('1') # TODO: add caching
         return f"{{{inner_idx}}}"
     
     mask_seq = re.sub(pattern, parse, mask_seq)
@@ -78,7 +78,7 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
         print('kek')
         inner_idx += 1
         content = match_object.groupdict()['inner']
-        val_masks[f"{{{inner_idx}}}"] = get_word_mask(root, frame_image, content).convert('1')
+        val_masks[str(inner_idx)] = get_word_mask(root, frame_image, content).convert('1')
         return f"{{{inner_idx}}}"
     
     mask_seq = re.sub(pattern, parse, mask_seq)
