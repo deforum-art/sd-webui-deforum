@@ -177,13 +177,14 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     matches = re.findall(pattern, mask_seq)
 
     print(mask_seq)
+    print(matches)
     
     if len(matches) != 1:
         raise Exception(f'Wrong composable mask expression format! Broken mask sequence: {mask_seq}')
     
-    return matches[0].groupdict()['inner']
+    return f"{{{matches[0]}}}"
 
 def compose_mask_with_check(root, args, mask_seq, val_masks, frame_image):
     for k, v in val_masks.items():
         val_masks[k] = blank_if_none(v, args.W, args.H, '1').convert('1')
-    return check_mask_for_errors(compose_mask(root, args, mask_seq, val_masks, frame_image, 0).convert('L'))
+    return check_mask_for_errors(val_masks[compose_mask(root, args, mask_seq, val_masks, frame_image, 0)].convert('L'))
