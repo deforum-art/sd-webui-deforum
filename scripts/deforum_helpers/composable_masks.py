@@ -187,4 +187,4 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
 def compose_mask_with_check(root, args, mask_seq, val_masks, frame_image):
     for k, v in val_masks.items():
         val_masks[k] = blank_if_none(v, args.W, args.H, '1').convert('1')
-    return check_mask_for_errors(val_masks[compose_mask(root, args, mask_seq, val_masks, frame_image, 0)].convert('L'))
+    return check_mask_for_errors(val_masks[compose_mask(root, args, mask_seq, val_masks, frame_image, 0)[1:-1]].convert('L'))
