@@ -21,6 +21,7 @@ import logging
 
 import math, json, itertools
 import re
+import requests
 
 def load_img(path, shape, use_alpha_as_mask=False):
     # use_alpha_as_mask: Read the alpha channel of the image as the mask image
