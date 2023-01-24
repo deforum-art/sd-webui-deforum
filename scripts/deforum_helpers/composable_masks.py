@@ -23,6 +23,7 @@ from PIL import Image, ImageChops
 # val_masks: name, PIL Image mask
 # Returns an image in mode '1' (needed for bool ops), convert to 'L' in the sender function
 def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0):
+    print(mask_seq)
     # Compose_mask recursively: go to inner brackets, then b-op it and go upstack
     
     # Step 1:
@@ -35,19 +36,19 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     parentheses_counter = 0
 
     for c in mask_seq:
+        if c == ')':
+            parentheses_counter = parentheses_counter - 1
+        if parentheses_counter > 0:
+            inner_seq += c
         if c == '(':
             parentheses_counter = parentheses_counter + 1
-        elif c == ')':
-            parentheses_counter = parentheses_counter - 1
-        elif parentheses_counter > 0:
-            inner_seq += c
         if parentheses_counter == 0:
             if len(inner_seq) > 0:
                 inner_idx += 1
                 seq += compose_mask(root, args, inner_seq, val_masks, frame_image, inner_idx)
                 inner_seq = ""
-        else:
-            seq += c
+            else:
+                seq += c
     
     if parentheses_counter != 0:
         raise Exception('Mismatched parentheses in {mask_seq}!')
@@ -69,6 +70,7 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     pattern = r'\[(?P<inner>[\S\s]*?)\]'
     
     def parse(match_object):
+        print('lol')
         inner_idx += 1
         content = match_object.groupdict()['inner']
         val_masks[f"{{{inner_idx}}}"] = get_mask_from_file(content, args).convert('1') # TODO: add caching
@@ -77,9 +79,10 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     mask_seq = re.sub(pattern, parse, mask_seq)
     
     # Word masks
-    pattern = r'\<(?P<inner>[\S\s]*?)\>'
+    pattern = r'<(?P<inner>[\S\s]*?)>'
     
     def parse(match_object):
+        print('kek')
         inner_idx += 1
         content = match_object.groupdict()['inner']
         val_masks[f"{{{inner_idx}}}"] = get_word_mask(root, frame_image, content).convert('1')
@@ -94,8 +97,9 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     # Operators: invert !, and &, or |, xor ^, difference \
     
     # Invert vars with '!'
-    pattern = r'![\S\s]*{(?P<inner>[\s]*)}'
+    pattern = r'![\S\s]*{(?P<inner>[\S\s]*?)}'
     def parse(match_object):
+        print('cheburek')
         content = match_object.groupdict()['inner']
         val_masks[content] = ImageChops.invert(val_masks[content])
         return f"{{{content}}}"
@@ -104,10 +108,10 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     
     # Multiply neighbouring vars with '&'
     # Wait for replacements stall (like in Markov chains)
-    prev_mask_seq = mask_seq
-    while mask_seq is not prev_mask_seq:
-        pattern = r'{(?P<inner1>)}[\s]*&[\s]*{(?P<inner2>)}'
+    while True:
+        pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*&[\s]*{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
+            print('kyk')
             content = match_object.groupdict()['inner']
             content_second = match_object.groupdict()['inner2']
             val_masks[content] = ImageChops.logical_and(val_masks[content], val_masks[content_second])
@@ -115,25 +119,32 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
         
         prev_mask_seq = mask_seq
         mask_seq = re.sub(pattern, parse, mask_seq)
+        if mask_seq is prev_mask_seq:
+            break
     
     # Add neighbouring vars with '|'
-    prev_mask_seq = mask_seq
-    while mask_seq is not prev_mask_seq:
-        pattern = r'{(?P<inner1>)}[\s]*\|[\s]*{(?P<inner2>)}'
+    while True:
+        pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*?\|[\s]*?{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
+            print('tyk')
+            print(match_object)
             content = match_object.groupdict()['inner1']
+            print(content)
             content_second = match_object.groupdict()['inner2']
+            print(content_second)
             val_masks[content] = ImageChops.logical_or(val_masks[content], val_masks[content_second])
             return f"{{{content}}}"
         
         prev_mask_seq = mask_seq
         mask_seq = re.sub(pattern, parse, mask_seq)
+        if mask_seq is prev_mask_seq:
+            break
     
     # Mutually exclude neighbouring vars with '^'
-    prev_mask_seq = mask_seq
-    while mask_seq is not prev_mask_seq:
-        pattern = r'{(?P<inner1>)}[\s]*\^[\s]*{(?P<inner2>)}'
+    while True:
+        pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*\^[\s]*{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
+            print('dyk')
             content = match_object.groupdict()['inner1']
             content_second = match_object.groupdict()['inner2']
             val_masks[content] = ImageChops.logical_xor(val_masks[content], val_masks[content_second])
@@ -141,12 +152,14 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
         
         prev_mask_seq = mask_seq
         mask_seq = re.sub(pattern, parse, mask_seq)
+        if mask_seq is prev_mask_seq:
+            break
     
     # Set-difference the regions with '\'
-    prev_mask_seq = mask_seq
-    while mask_seq is not prev_mask_seq:
-        pattern = r'{(?P<inner1>)}[\s]*\\[\s]*{(?P<inner2>)}'
+    while True:
+        pattern = r'{(?P<inner1>[\S\s]*?)}[\s]*\\[\s]*{(?P<inner2>[\S\s]*?)}'
         def parse(match_object):
+            print('efe')
             content = match_object.groupdict()['inner1']
             content_second = match_object.groupdict()['inner2']
             val_masks[content] = ImageChops.logical_and(val_masks[content], ImageChops.invert(val_masks[content_second]))
@@ -154,12 +167,16 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
         
         prev_mask_seq = mask_seq
         mask_seq = re.sub(pattern, parse, mask_seq)
+        if mask_seq is prev_mask_seq:
+            break
     
     # Step 4:
     # Output
     # Now we should have a single var left to return. If not, raise an error message
-    pattern = r'{(?P<inner>)}'
+    pattern = r'{(?P<inner>[\S\s]*?)}'
     matches = re.findall(pattern, mask_seq)
+
+    print(mask_seq)
     
     if len(matches) != 1:
         raise Exception(f'Wrong composable mask expression format! Broken mask sequence: {mask_seq}')
