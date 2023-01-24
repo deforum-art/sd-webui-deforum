@@ -684,6 +684,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
              <p style="margin-top:1em">
                 Important notes:
                 <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
+                    <li>ffmpeg has to be installed for this feature to work properly. If you can't have it, make sure to check the "keep_imgs" tab so that your interpolated frames are saved into HD'
                     <li>Frame Interpolation will *not* run if 'store_frames_in_ram' is enabled.</li>
                     <li>Audio (if provided) will be transferred to the interpolated video even if Slow-Mo is enabled.</li>
                     <li>Frame Interpolation will always save an .mp4 video even if you used GIF for the raw video.</li>
