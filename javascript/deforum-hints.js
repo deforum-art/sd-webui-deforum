@@ -116,7 +116,9 @@ deforum_titles = {
     "output_format": "select the type of video file to output",
         "PIL gif": "create an animated GIF",
         "FFMPEG mp4": "create an MP4 video file",
-    "ffmpeg_location": "the path to where ffmpeg is located",
+    "ffmpeg_location": "the path to where ffmpeg is located. Leave at default 'ffmpeg' if ffmpeg is in your PATH!",
+	"ffmpeg_crf": "controls quality where lower is better, less compressed. values: 0 to 51, default 17",
+	"ffmpeg_preset": "controls how good the compression is, and the operation speed. If you're not in a rush keep it at 'veryslow'",
     "add_soundtrack": "when this box is checked, and FFMPEG mp4 is selected as the output format, an audio file will be multiplexed with the video.",
     "soundtrack_path": "the path to an audio file to accompany the video",
     "use_manual_settings": "when this is unchecked, the video will automatically be created in the same output folder as the images. Check this box to specify different settings for the creation of the video, specified by the following options",
@@ -124,7 +126,11 @@ deforum_titles = {
     "max_video_frames": "the maximum number of frames to include in the video, when use_manual_settings is checked",
     //"path_name_modifier": "",
     "image_path": "the location of images to create the video from, when use_manual_settings is checked",
-    "mp4_path": "the output location of the mp4 file, when use_manual_settings is checked"
+    "mp4_path": "the output location of the mp4 file, when use_manual_settings is checked",
+	"frame_interpolation_engine": "chhoose the frame interpolation engine and version",
+	"frame_interpolation_x_amount":"how many times to interpolate the source video. e.g source video fps of 12 and a value of x2 will yield a 24fps interpolated video",
+	"frame_interpolation_slow_mo_amount":"how many times to slow-down the video. *Naturally affects output fps as well",
+	"frame_interpolation_keep_imgs": "delete or keep raw interpolated png imgs. Default: False which means delete"
 
 }
 

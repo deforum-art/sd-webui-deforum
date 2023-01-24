@@ -45,9 +45,9 @@ def save_settings(settings_path, override_settings_with_file, custom_settings_fi
         f.write(json.dumps({**args_dict, **anim_args_dict, **parseq_dict}, ensure_ascii=False, indent=4))
     return [""]
 
-def save_video_settings(video_settings_path, skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram):
+def save_video_settings(video_settings_path, skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs):
     from deforum_helpers.args import pack_video_args
-    video_args_dict = pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram)
+    video_args_dict = pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs)
     print(f"saving video settings to {video_settings_path}")
     with open(video_settings_path, "w") as f:
         f.write(json.dumps(video_args_dict, ensure_ascii=False, indent=4))
@@ -121,14 +121,14 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
 
     return ret
 
-def load_video_settings(video_settings_path, skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram):  
+def load_video_settings(video_settings_path, skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs):  
     print(f"reading custom video settings from {video_settings_path}")
     data = locals()
     data.pop("video_settings_path")
     jdata = {}
     if not os.path.isfile(video_settings_path):
         print('The custom video settings file does not exist. The values will be unchanged.')
-        return [skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, ""]
+        return [skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram,frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ""]
     else:
         with open(video_settings_path, "r") as f:
             jdata = json.loads(f.read())
