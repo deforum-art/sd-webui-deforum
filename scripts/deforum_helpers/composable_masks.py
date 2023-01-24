@@ -70,6 +70,7 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     pattern = r'\[(?P<inner>[\S\s]*?)\]'
     
     def parse(match_object):
+        nonlocal inner_idx
         print('lol')
         inner_idx += 1
         content = match_object.groupdict()['inner']
@@ -82,6 +83,7 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     pattern = r'<(?P<inner>[\S\s]*?)>'
     
     def parse(match_object):
+        nonlocal inner_idx
         print('kek')
         inner_idx += 1
         content = match_object.groupdict()['inner']
