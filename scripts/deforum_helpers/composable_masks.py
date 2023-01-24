@@ -113,7 +113,7 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
             print('kyk')
             nonlocal inner_idx
             inner_idx += 1
-            content = match_object.groupdict()['inner']
+            content = match_object.groupdict()['inner1']
             content_second = match_object.groupdict()['inner2']
             savename = content
             if content in root.mask_preset_names:
