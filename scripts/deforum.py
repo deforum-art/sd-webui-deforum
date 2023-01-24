@@ -246,7 +246,7 @@ class DeforumScript(wscripts.Script):
             root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
             root.initial_seed = 6934
         # FRMAE INTERPOLATION TIME
-        if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all:
+        if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not store_frames_in_ram:
             print(f"Got a request to *frame interpolate* using {frame_interpolation_engine}")
             process_video_interpolation(video_args.frame_interpolation_engine, video_args.frame_interpolation_x_amount, video_args.frame_interpolation_slow_mo_amount, fps, root.models_path, real_audio_track, args.outdir, args.timestring, video_args.ffmpeg_crf, video_args.ffmpeg_preset)
             
