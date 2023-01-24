@@ -129,7 +129,8 @@ deforum_titles = {
     "mp4_path": "the output location of the mp4 file, when use_manual_settings is checked",
 	"frame_interpolation_engine": "chhoose the frame interpolation engine and version",
 	"frame_interpolation_x_amount":"how many times to interpolate the source video. e.g source video fps of 12 and a value of x2 will yield a 24fps interpolated video",
-	"frame_interpolation_slow_mo_amount":"how many times to slow-down the video. *Naturally affects output fps as well"
+	"frame_interpolation_slow_mo_amount":"how many times to slow-down the video. *Naturally affects output fps as well",
+	"frame_interpolation_keep_imgs": "delete or keep raw interpolated png imgs. Default: False which means delete"
 
 }
 
