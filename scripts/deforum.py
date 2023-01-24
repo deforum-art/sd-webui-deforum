@@ -155,8 +155,8 @@ class DeforumScript(wscripts.Script):
                 '-vf',
                 f'fps={int(fps)}',
                 '-pix_fmt', 'yuv420p',
-                '-crf', '17',
-                '-preset', 'veryslow',
+                '-crf', str(video_args.ffmpeg_crf),
+                '-preset', video_args.ffmpeg_preset,
                 '-pattern_type', 'sequence',
                 mp4_path
             ]
