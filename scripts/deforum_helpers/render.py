@@ -305,6 +305,12 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
         if args.seed_behavior == 'schedule' or use_parseq:
             args.seed = int(keys.seed_schedule_series[frame_idx])
 
+        if anim_args.enable_checkpoint_scheduling:
+            args.checkpoint = keys.checkpoint_schedule_series[frame_idx]
+            print(f"Checkpoint: {args.checkpoint}")
+        else:
+            args.checkpoint = None
+
         if use_parseq:
             args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
