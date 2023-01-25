@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import cv2
 import torch
 import argparse
+import shutil
 import numpy as np
 from tqdm import tqdm
 from torch.nn import functional as F
@@ -92,14 +93,16 @@ def run_rife_new_video_infer(
 
     interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames')
     custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
-
+    temp_convert_raw_png_path = os.path.join(args.raw_output_imgs_path, "tmp_rife_folder")
+    
+    duplicate_pngs_from_folder(args.raw_output_imgs_path, temp_convert_raw_png_path, args.img_batch_id)
+    
     videogen = []
-    for f in os.listdir(args.raw_output_imgs_path):
-        if ('png' in f or 'jpg' in f) and '-' not in f and f.startswith(args.img_batch_id):
-            videogen.append(f)
+    for f in os.listdir(temp_convert_raw_png_path):
+        videogen.append(f)
     tot_frame = len(videogen)
     videogen.sort(key= lambda x:int(x[:-4]))
-    img_path = os.path.join(args.raw_output_imgs_path, videogen[0])
+    img_path = os.path.join(temp_convert_raw_png_path, videogen[0])
     lastframe = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
     videogen = videogen[1:]    
     h, w, _ = lastframe.shape
@@ -118,7 +121,7 @@ def run_rife_new_video_infer(
     write_buffer = Queue(maxsize=500)
     read_buffer  = Queue(maxsize=500)
     
-    _thread.start_new_thread(build_read_buffer, (args, read_buffer, videogen))
+    _thread.start_new_thread(build_read_buffer, (args, read_buffer, videogen, temp_convert_raw_png_path))
     _thread.start_new_thread(clear_write_buffer, (args, write_buffer, custom_interp_path))
 
     I1 = torch.from_numpy(np.transpose(lastframe, (2, 0, 1))).to(device, non_blocking=True).unsqueeze(0).float() / 255.
@@ -177,6 +180,7 @@ def run_rife_new_video_infer(
     while (not write_buffer.empty()):
         time.sleep(0.1)
     pbar.close()
+    shutil.rmtree(temp_convert_raw_png_path)
     
     # stitch video from interpolated frames, and add audio if needed
     try:
@@ -185,6 +189,18 @@ def run_rife_new_video_infer(
         print("Interpolated video created!")
     except Exception as e:
         print(f'Video stitching gone wrong. Error: {e}')
+
+def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id):
+    temp_convert_raw_png_path = os.path.join(from_folder, to_folder) #"tmp_rife_folder")
+    if not os.path.exists(temp_convert_raw_png_path):
+                os.makedirs(temp_convert_raw_png_path)
+                
+    for f in os.listdir(from_folder):
+        if ('png' in f or 'jpg' in f) and '-' not in f and f.startswith(img_batch_id):
+            original_img_path = os.path.join(from_folder, f)
+            image = cv2.imread(original_img_path)
+            new_path = os.path.join(temp_convert_raw_png_path, f)
+            cv2.imwrite(new_path, image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
     
 def clear_write_buffer(user_args, write_buffer, custom_interp_path):
     cnt = 0
@@ -200,10 +216,10 @@ def clear_write_buffer(user_args, write_buffer, custom_interp_path):
 
             cnt += 1
 
-def build_read_buffer(user_args, read_buffer, videogen):
+def build_read_buffer(user_args, read_buffer, videogen, temp_convert_raw_png_path):
     for frame in videogen:
-        if not user_args.raw_output_imgs_path is None:
-            img_path = os.path.join(user_args.raw_output_imgs_path, frame)
+        if not temp_convert_raw_png_path is None:
+            img_path = os.path.join(temp_convert_raw_png_path, frame)
             frame = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
         read_buffer.put(frame)
     read_buffer.put(None)
@@ -238,14 +254,6 @@ def get_filename(i, path):
         s = '0' + s
     #return path + '/' + s + '.png'
     return path + s + '.png'
-
-def delete_folder(folder_path):
-    for root, dirs, files in os.walk(folder_path, topdown=False):
-        for name in files:
-            os.remove(os.path.join(root, name))
-        for name in dirs:
-            os.rmdir(os.path.join(root, name))
-    os.rmdir(folder_path)
 
 def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs):
     parent_folder = os.path.dirname(img_folder_path)
@@ -304,4 +312,4 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
             print(f'Error adding audio to interpolated video. Actual error: {e}')
     # delete temp folder with interpolated frames if requested
     if not keep_imgs:
-        delete_folder(img_folder_path)
+        shutil.rmtree(img_folder_path)
