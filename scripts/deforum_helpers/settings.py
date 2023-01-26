@@ -65,7 +65,6 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
     print(f"reading custom settings from {settings_path}")
     data = locals()
     data.pop("settings_path")
-    print(f"Looper args: {use_looper, init_images, image_strength_schedule, blendFactorMax, blendFactorSlope, tweening_frames_schedule, color_correction_factor}")
     jdata = {}
     if not os.path.isfile(settings_path):
         print('The custom settings file does not exist. The values will be unchanged.')

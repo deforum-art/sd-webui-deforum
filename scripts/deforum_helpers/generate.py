@@ -106,8 +106,6 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     mask_image = None
     init_image = None
     image_init0 = None
-    print("in the generate loop")
-    print(loop_args)
     # some setup variables that should be broken out later
     if loop_args.useLooper and isJson(loop_args.imagesToKeyframe):
         tweeningFrames = loop_args.tweening_frames_schedule
@@ -130,7 +128,6 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         if frame % skipFrame <= tweeningFrames: # number of tweening frames
             blendFactor = loop_args.blendFactorMax - loop_args.blendFactorSlope*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
         
-        print(f"\nframe: {frame} - blend factor: {blendFactor:.5f} - strength:{args.strength:.5f} - denoising: {p.denoising_strength:.5f} - skipFrame: {skipFrame}\n")
         init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
                                 shape=(args.W, args.H),
                                 use_alpha_as_mask=args.use_alpha_as_mask)
