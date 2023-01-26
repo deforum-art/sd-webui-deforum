@@ -2,6 +2,7 @@ from modules.shared import cmd_opts
 from modules.processing import get_fixed_seed
 import modules.shared as sh
 import modules.paths as ph
+import os, pkg_resources
 
 def Root():
     device = sh.device
@@ -241,7 +242,7 @@ def DeforumOutputArgs():
     use_manual_settings = False #@param {type:"boolean"}
     image_path = "/content/drive/MyDrive/AI/StableDiffusion/2022-09/20220903000939_%05d.png" #@param {type:"string"}
     mp4_path = "/content/drive/MyDrive/AI/StableDiffusion/content/drive/MyDrive/AI/StableDiffusion/2022-09/kabachuha/2022-09/20220903000939.mp4" #@param {type:"string"}
-    ffmpeg_location = "ffmpeg"
+    ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
     ffmpeg_preset = 'veryslow'
     add_soundtrack = 'None' #@param ["File","Init Video"]
@@ -662,9 +663,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Row():
             skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
             fps = gr.Number(label="fps", value=dv.fps, interactive=True)
-            output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='PIL gif', type="value", elem_id="output_format", interactive=True)
+            output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
         with gr.Row():
-            ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
+            ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location, visible = False)
             ffmpeg_crf = gr.Number(label="ffmpeg_crf", interactive=True, value = dv.ffmpeg_crf)
             ffmpeg_preset = gr.Dropdown(label="ffmpeg_preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
             add_soundtrack = gr.Dropdown(label="add_soundtrack", choices=['None', 'File', 'Init Video'], value=dv.add_soundtrack, interactive=True, type="value")
@@ -847,7 +848,16 @@ def print_args(args):
     for key, value in args.__dict__.items():
         print(f"{key}: {value}")
         
-        
+def find_ffmpeg_binary():
+    package_path = pkg_resources.resource_filename('imageio_ffmpeg', '')
+    binaries_path = os.path.join(package_path, 'binaries')
+    if not os.path.exists(binaries_path):
+        return None
+    for file in os.listdir(binaries_path):
+        if file.startswith("ffmpeg-"):
+            return os.path.join(binaries_path, file)
+    return None
+    
 # def replace_args(text, args_list):
     # for args_dict in args_list:
         # #print(f"Arg list: {args_dict}")
