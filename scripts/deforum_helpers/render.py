@@ -22,7 +22,7 @@ from .save_images import save_image
 # Webui
 from modules.shared import opts, cmd_opts, state
 
-def render_animation(args, anim_args, video_args, parseq_args, animation_prompts, root, loop_args):
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root):
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         if anim_args.hybrid_composite or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
