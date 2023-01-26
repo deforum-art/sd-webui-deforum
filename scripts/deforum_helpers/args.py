@@ -553,6 +553,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                        on your settings. If you want this to be used to guide the frames and use specific images you need to fill out the images to
                        use for keyframe guidance but dont have the last and first match. If you want it to loop, have them match. Lastly you are
                        going to want to have your total number of keyframes be 20 more than the last inserted image. so 220 in the example""")
+            gr.HTML("""In order to use the tool you must set in the init tab an initial strength for the image. In later versions this should be also
+                       in the strength schedule, but for now you need to set it. I use around .75""")
             with gr.Row():
                 use_looper = gr.Checkbox(label="Use looper for the next run", value=False, interactive=True)
             with gr.Row():

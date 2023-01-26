@@ -106,14 +106,14 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     mask_image = None
     init_image = None
     image_init0 = None
-    # some setup variables that should be broken out later
+
     if loop_args.useLooper and isJson(loop_args.imagesToKeyframe):
-        tweeningFrames = loop_args.tweening_frames_schedule
+        args.strength = loop_args.imageStrength
+        tweeningFrames = loop_args.tweeningFrameSchedule
         blendFactor = .07
-        colorCorrectionFactor = loop_args.color_correction_factor
+        colorCorrectionFactor = loop_args.colorCorrectionFactor
         jsonImages = json.loads(loop_args.imagesToKeyframe)
         framesToImageSwapOn = list(map(int, list(jsonImages.keys())))
-        
         # find which image to show
         frameToChoose = 0
         for swappingFrame in framesToImageSwapOn[1:]:
@@ -165,8 +165,6 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
             raise RuntimeError(f"Unknown checkpoint: {args.checkpoint}")
         sd_models.reload_model_weights(info=info)
 
-
-
     if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
@@ -178,7 +176,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
             p.color_corrections = [processing.setup_color_correction(correction_colors)]
 
     # this is the first pass
-    elif args.use_init and ((args.init_image != None and args.init_image != '')):
+    elif loop_args.useLooper or (args.use_init and ((args.init_image != None and args.init_image != ''))):
         init_image, mask_image = load_img(image_init0, # initial init image
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
