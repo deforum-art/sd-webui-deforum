@@ -17,10 +17,7 @@ from modules import processing, sd_models
 from modules.shared import sd_model
 from modules.processing import StableDiffusionProcessingTxt2Img
 
-import logging
-
 import math, json, itertools
-import re
 import requests
 
 def load_img(path, shape, use_alpha_as_mask=False):
@@ -93,7 +90,7 @@ def isJson(myjson):
         return False
     return True
 
-def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name=None):
+def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, sampler_name=None):
     assert args.prompt is not None
     
     # Setup the pipeline
@@ -109,13 +106,14 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
     mask_image = None
     init_image = None
     image_init0 = None
-
+    print("in the generate loop")
+    print(loop_args)
     # some setup variables that should be broken out later
-    if args.init_image != None and isJson(args.init_image):
-        tweeningFrames = 20
+    if loop_args.useLooper and isJson(loop_args.imagesToKeyframe):
+        tweeningFrames = loop_args.tweening_frames_schedule
         blendFactor = .07
-        colorCorrectionFactor = .075
-        jsonImages = json.loads(args.init_image)
+        colorCorrectionFactor = loop_args.color_correction_factor
+        jsonImages = json.loads(loop_args.imagesToKeyframe)
         framesToImageSwapOn = list(map(int, list(jsonImages.keys())))
         
         # find which image to show
@@ -130,7 +128,7 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
                 skipFrame = fe - fs
 
         if frame % skipFrame <= tweeningFrames: # number of tweening frames
-            blendFactor = .35 - .25*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
+            blendFactor = loop_args.blendFactorMax - loop_args.blendFactorSlope*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
         
         print(f"\nframe: {frame} - blend factor: {blendFactor:.5f} - strength:{args.strength:.5f} - denoising: {p.denoising_strength:.5f} - skipFrame: {skipFrame}\n")
         init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
