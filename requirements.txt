@@ -18,3 +18,4 @@ transformers==4.19.2
 av
 pims
 moviepy
+imageio-ffmpeg

@@ -2,6 +2,8 @@ from modules.shared import cmd_opts
 from modules.processing import get_fixed_seed
 import modules.shared as sh
 import modules.paths as ph
+import os
+from pkg_resources import resource_filename
 
 def Root():
     device = sh.device
@@ -247,7 +249,7 @@ def DeforumOutputArgs():
     use_manual_settings = False #@param {type:"boolean"}
     image_path = "/content/drive/MyDrive/AI/StableDiffusion/2022-09/20220903000939_%05d.png" #@param {type:"string"}
     mp4_path = "/content/drive/MyDrive/AI/StableDiffusion/content/drive/MyDrive/AI/StableDiffusion/2022-09/kabachuha/2022-09/20220903000939.mp4" #@param {type:"string"}
-    ffmpeg_location = "ffmpeg"
+    ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
     ffmpeg_preset = 'veryslow'
     add_soundtrack = 'None' #@param ["File","Init Video"]
@@ -469,7 +471,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # Checkpoint Scheduling
         i38 = gr.HTML("<p style=\"margin-bottom:0.75em\">Checkpoint scheduling:</p>")
         with gr.Row():
-            enable_checkpoint_scheduling = gr.Checkbox(label="enable checkpoint scheduling.", value=da.enable_checkpoint_scheduling, interactive=True)
+            enable_checkpoint_scheduling = gr.Checkbox(label="enable_checkpoint_scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
         with gr.Row():
             checkpoint_schedule = gr.Textbox(label="checkpoint_schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
 
@@ -678,7 +680,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Row():
             skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
             fps = gr.Number(label="fps", value=dv.fps, interactive=True)
-            output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='PIL gif', type="value", elem_id="output_format", interactive=True)
+            output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
         with gr.Row():
             ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
             ffmpeg_crf = gr.Number(label="ffmpeg_crf", interactive=True, value = dv.ffmpeg_crf)
@@ -729,47 +731,121 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 
         # Video output settings END
     return locals()
-    
+
+### SETTINGS STORAGE UPDATE! 2023-01-27
+### To Reduce The Number Of Settings Overrides,
+### They Are Being Passed As Dictionaries
+### It Would Have Been Also Nice To Retrieve Them
+### From Functions Like Deforumoutputargs(),
+### But Over Time There Was Some Cross-Polination,
+### So They Are Now Hardcoded As 'List'-Strings Below
+### If you're adding a new setting, add it to one of the lists
+### besides writing it in the setup functions above
+
+anim_args_names =   str(r'''animation_mode, max_frames, border,
+                        angle, zoom, translation_x, translation_y, translation_z,
+                        rotation_3d_x, rotation_3d_y, rotation_3d_z,
+                        flip_2d_perspective,
+                        perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
+                        noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule,
+                        enable_steps_scheduling, steps_schedule,
+                        fov_schedule, near_schedule, far_schedule,
+                        seed_schedule,
+                        enable_sampler_scheduling, sampler_schedule,
+                        mask_schedule, use_noise_mask, noise_mask_schedule,
+                        enable_checkpoint_scheduling, checkpoint_schedule,
+                        kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
+                        histogram_matching, color_coherence, color_coherence_video_every_N_frames,
+                        diffusion_cadence,
+                        noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
+                        use_depth_warping, midas_weight,
+                        near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps,
+                        video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames,
+                        use_mask_video, video_mask_path,
+                        interpolate_key_frames, interpolate_x_frames,
+                        resume_from_timestring, resume_timestring'''
+                    ).replace("\n", "").replace(" ", "").split(',')
+hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
+                        hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
+                        hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames,
+                        hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
+                        hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
+                    ).replace("\n", "").replace(" ", "").split(',')
+args_names =    str(r'''W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height,
+                        seed, sampler,
+                        seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h,
+                        steps, ddim_eta,
+                        n_batch, make_grid, grid_rows,
+                        save_settings, save_samples, display_samples,
+                        save_sample_per_step, show_sample_per_step, override_these_with_webui,
+                        batch_name, filename_format,
+                        seed_behavior, seed_iter_N,
+                        use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image,
+                        use_mask, use_alpha_as_mask, invert_mask, overlay_mask,
+                        mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
+                        fill, full_res_mask, full_res_mask_padding,
+                        reroll_blank_frames'''
+                    ).replace("\n", "").replace(" ", "").split(',')
+video_args_names =  str(r'''skip_video_for_run_all,
+                            fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
+                            add_soundtrack, soundtrack_path,
+                            use_manual_settings,
+                            render_steps, max_video_frames,
+                            path_name_modifier, image_path, mp4_path, store_frames_in_ram,
+                            frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount,
+                            frame_interpolation_keep_imgs'''
+                    ).replace("\n", "").replace(" ", "").split(',')
+parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
+                    ).replace("\n", "").replace(" ", "").split(',')
+html_count = 43
+
+
+html_trash = [f"i{n}" for n in range(1, html_count+1)]
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['prompts', 'animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + html_trash
+settings_component_names = [name for name in component_names if name not in video_args_names and name not in html_trash]
+
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
-    ds = SimpleNamespace(**setup_deforum_setting_dictionary(self, is_img2img, is_extension))
-    return [ds.btn, ds.override_settings_with_file, ds.custom_settings_file, ds.animation_mode, ds.max_frames, ds.border, ds.angle, ds.zoom, ds.translation_x, ds.translation_y, ds.translation_z, ds.rotation_3d_x, ds.rotation_3d_y, ds.rotation_3d_z, ds.flip_2d_perspective, ds.perspective_flip_theta, ds.perspective_flip_phi, ds.perspective_flip_gamma, ds.perspective_flip_fv, ds.noise_schedule, ds.strength_schedule, ds.contrast_schedule, ds.cfg_scale_schedule, ds.enable_checkpoint_scheduling, ds.checkpoint_schedule, ds.enable_steps_scheduling, ds.steps_schedule, ds.fov_schedule, ds.near_schedule, ds.far_schedule, ds.seed_schedule, ds.enable_sampler_scheduling, ds.sampler_schedule, ds.mask_schedule, ds.use_noise_mask, ds.noise_mask_schedule, ds.kernel_schedule, ds.sigma_schedule, ds.amount_schedule, ds.threshold_schedule, ds.histogram_matching, ds.color_coherence, ds.color_coherence_video_every_N_frames, ds.diffusion_cadence, ds.noise_type, ds.perlin_w, ds.perlin_h, ds.perlin_octaves, ds.perlin_persistence, ds.use_depth_warping, ds.midas_weight, ds.near_plane, ds.far_plane, ds.fov, ds.padding_mode, ds.sampling_mode, ds.save_depth_maps, ds.video_init_path, ds.extract_nth_frame, ds.extract_from_frame, ds.extract_to_frame, ds.overwrite_extracted_frames, ds.use_mask_video, ds.video_mask_path, ds.interpolate_key_frames, ds.interpolate_x_frames, ds.resume_from_timestring, ds.resume_timestring, ds.prompts, ds.animation_prompts, ds.W, ds.H, ds.restore_faces, ds.tiling, ds.enable_hr, ds.firstphase_width, ds.firstphase_height, ds.seed, ds.sampler, ds.seed_enable_extras, ds.subseed, ds.subseed_strength, ds.seed_resize_from_w, ds.seed_resize_from_h, ds.steps, ds.ddim_eta, ds.n_batch, ds.make_grid, ds.grid_rows, ds.save_settings, ds.save_samples, ds.display_samples, ds.save_sample_per_step, ds.show_sample_per_step, ds.override_these_with_webui, ds.batch_name, ds.filename_format, ds.seed_behavior, ds.seed_iter_N, ds.use_init, ds.from_img2img_instead_of_link, ds.strength_0_no_init, ds.strength, ds.init_image, ds.use_mask, ds.use_alpha_as_mask, ds.invert_mask, ds.overlay_mask, ds.mask_file, ds.mask_contrast_adjust, ds.mask_brightness_adjust, ds.mask_overlay_blur, ds.fill, ds.full_res_mask, ds.full_res_mask_padding, ds.reroll_blank_frames, ds.skip_video_for_run_all, ds.fps, ds.output_format, ds.ffmpeg_location, ds.ffmpeg_crf, ds.ffmpeg_preset, ds.add_soundtrack, ds.soundtrack_path, ds.use_manual_settings, ds.render_steps, ds.max_video_frames, ds.path_name_modifier, ds.image_path, ds.mp4_path, ds.store_frames_in_ram, ds.frame_interpolation_engine, ds.frame_interpolation_x_amount, ds.frame_interpolation_slow_mo_amount, ds.frame_interpolation_keep_imgs, ds.parseq_manifest, ds.parseq_use_deltas, ds.hybrid_generate_inputframes, ds.hybrid_generate_human_masks,ds.hybrid_use_first_frame_as_init_image, ds.hybrid_motion, ds.hybrid_flow_method, ds.hybrid_composite, ds.hybrid_comp_mask_type, ds.hybrid_comp_mask_inverse, ds.hybrid_comp_mask_equalize, ds.hybrid_comp_mask_auto_contrast, ds.hybrid_comp_save_extra_frames, ds.hybrid_comp_alpha_schedule, ds.hybrid_comp_mask_blend_alpha_schedule, ds.hybrid_comp_mask_contrast_schedule, ds.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, ds.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, ds.i1, ds.i2, ds.i3, ds.i4, ds.i5, ds.i6, ds.i7, ds.i8, ds.i9, ds.i10, ds.i11, ds.i12, ds.i13, ds.i14, ds.i15, ds.i16, ds.i17, ds.i18, ds.i19, ds.i20, ds.i21, ds.i22, ds.i23, ds.i24, ds.i25, ds.i26, ds.i27, ds.i28, ds.i29, ds.i30, ds.i31, ds.i32, ds.i33, ds.i34, ds.i35, ds.i36, ds.i37, ds.i38, ds.i39, ds.i40, ds.i41, ds.i42, ds.i43, ds.i44]
+    ds = setup_deforum_setting_dictionary(self, is_img2img, is_extension)
+    return [ds[name] for name in (['btn'] + component_names)]
 
-def pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, enable_checkpoint_scheduling, checkpoint_schedule, enable_steps_scheduling, steps_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, enable_sampler_scheduling, sampler_schedule, mask_schedule, use_noise_mask, noise_mask_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule):
-    return locals()
+def pack_anim_args(args_dict):
+    return {name: args_dict[name] for name in (anim_args_names + hybrid_args_names)}
 
-def pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask,  mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames):
-    precision = 'autocast' 
-    scale = 7
-    C = 4
-    f = 8
-    prompt = ""
-    timestring = ""
-    init_latent = None
-    init_sample = None
-    init_c = None
-    mask_image = None
-    noise_mask = None
-    seed_internal = 0
-    return locals()
+def pack_args(args_dict):
+    args_dict = {name: args_dict[name] for name in args_names}
+    args_dict['precision'] = 'autocast' 
+    args_dict['scale'] = 7
+    args_dict['C'] = 4
+    args_dict['f'] = 8
+    args_dict['prompt'] = ""
+    args_dict['timestring'] = ""
+    args_dict['init_latent'] = None
+    args_dict['init_sample'] = None
+    args_dict['init_c'] = None
+    args_dict['noise_mask'] = None
+    args_dict['seed_internal'] = 0
+    return args_dict
     
-def pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs):
-    return locals()
+def pack_video_args(args_dict):
+    return {name: args_dict[name] for name in video_args_names}
 
-def pack_parseq_args(parseq_manifest, parseq_use_deltas):
-    return locals()
+def pack_parseq_args(args_dict):
+    return {name: args_dict[name] for name in parseq_args_names}
 
-def process_args(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, enable_checkpoint_scheduling, checkpoint_schedule, enable_steps_scheduling, steps_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, enable_sampler_scheduling, sampler_schedule, mask_schedule, use_noise_mask, noise_mask_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, parseq_manifest, parseq_use_deltas, hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44):
-    args_dict = pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames)
-    anim_args_dict = pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, enable_steps_scheduling, steps_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, enable_sampler_scheduling, sampler_schedule, mask_schedule, use_noise_mask, noise_mask_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule)
-    video_args_dict = pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs)
-    parseq_args_dict = pack_parseq_args(parseq_manifest, parseq_use_deltas)
+def process_args(args_dict_main):
+    override_settings_with_file = args_dict_main['override_settings_with_file']
+    custom_settings_file = args_dict_main['custom_settings_file']
+    args_dict = pack_args(args_dict_main)
+    anim_args_dict = pack_anim_args(args_dict_main)
+    video_args_dict = pack_video_args(args_dict_main)
+    parseq_args_dict = pack_parseq_args(args_dict_main)
 
     import json
     
     root = SimpleNamespace(**Root())
-    root.p = p
-    #root.prompts = json.loads(prompts)#TODO make proper animation_mode=None handling
-    root.animation_prompts = json.loads(animation_prompts)
+    root.p = args_dict_main['p']
+    p = root.p
+    root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
     
     from deforum_helpers.settings import load_args
     
@@ -785,54 +861,29 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     video_args = SimpleNamespace(**video_args_dict)
     parseq_args = SimpleNamespace(**parseq_args_dict)
 
-    # TODO handle webui sampler settings override
-    
-    if override_these_with_webui:
-        args.n_batch = p.batch_size
-        args.W = p.width
-        args.H = p.height
-        args.restore_faces = p.restore_faces
-        args.tiling = p.tiling
-        args.enable_hr = p.enable_hr
-        args.firstphase_width = p.firstphase_width
-        args.firstphase_height = p.firstphase_height
-        args.seed = p.seed
-        args.seed_enable_extras = p.seed_enable_extras
-        args.subseed = p.subseed
-        args.subseed_strength = p.subseed_strength
-        args.seed_resize_from_w = p.seed_resize_from_w
-        args.seed_resize_from_h = p.seed_resize_from_h
-        args.steps = p.steps        
-        args.ddim_eta = p.ddim_eta
-        args.W, args.H = map(lambda x: x - x % 64, (args.W, args.H))
-        args.steps = p.steps
-        args.seed = p.seed
-        args.sampler = p.sampler_name
-    else:
-        p.width, p.height = map(lambda x: x - x % 64, (args.W, args.H))
-        p.steps = args.steps
-        p.seed = args.seed
-        p.sampler_name = args.sampler
-        p.batch_size = args.n_batch
-        p.restore_faces = args.restore_faces
-        p.tiling = args.tiling
-        p.enable_hr = args.enable_hr
-        p.firstphase_width = args.firstphase_width
-        p.firstphase_height = args.firstphase_height
-        p.seed_enable_extras = args.seed_enable_extras
-        p.subseed = args.subseed
-        p.subseed_strength = args.subseed_strength
-        p.seed_resize_from_w = args.seed_resize_from_w
-        p.seed_resize_from_h = args.seed_resize_from_h
-        p.fill = args.fill
-        p.ddim_eta = args.ddim_eta
-
+    p.width, p.height = map(lambda x: x - x % 64, (args.W, args.H))
+    p.steps = args.steps
+    p.seed = args.seed
+    p.sampler_name = args.sampler
+    p.batch_size = args.n_batch
+    p.restore_faces = args.restore_faces
+    p.tiling = args.tiling
+    p.enable_hr = args.enable_hr
+    p.firstphase_width = args.firstphase_width
+    p.firstphase_height = args.firstphase_height
+    p.seed_enable_extras = args.seed_enable_extras
+    p.subseed = args.subseed
+    p.subseed_strength = args.subseed_strength
+    p.seed_resize_from_w = args.seed_resize_from_w
+    p.seed_resize_from_h = args.seed_resize_from_h
+    p.fill = args.fill
+    p.ddim_eta = args.ddim_eta
 
     # TODO: Handle batch name dynamically?
     current_arg_list = [args, anim_args, video_args, parseq_args]
     #batch_name = replace_args(batch_name, current_arg_list)
     #print_args(args)
-    args.outdir = os.path.join(p.outpath_samples, batch_name)
+    args.outdir = os.path.join(p.outpath_samples, args.batch_name)
     root.outpath_samples = args.outdir
     args.outdir = os.path.join(os.getcwd(), args.outdir)
     if not os.path.exists(args.outdir):
@@ -853,24 +904,25 @@ def process_args(self, p, override_settings_with_file, custom_settings_file, ani
     
     return root, args, anim_args, video_args, parseq_args
 
-
-#def replace_args(text, args_dict):
-#  return text.format(**args_dict.__dict__)
- 
-
 def print_args(args):
     print("ARGS: /n")
     for key, value in args.__dict__.items():
         print(f"{key}: {value}")
         
-        
-# def replace_args(text, args_list):
-    # for args_dict in args_list:
-        # #print(f"Arg list: {args_dict}")
-        # args_dict = vars(args_dict)
-        # for key, value in args_dict.items():
-            # print(f"{key}: {value}")
-        # text = text.format_map(args_dict)
-    # return text
+def find_ffmpeg_binary():
+    package_path = None
+    for package in ['imageio_ffmpeg', 'imageio-ffmpeg']:
+        try:
+            package_path = resource_filename(package, '')
+            break
+        except:
+            pass
 
+    if package_path:
+        binaries_path = os.path.join(package_path, 'binaries')
+        if os.path.exists(binaries_path):
+            files = [os.path.join(binaries_path, f) for f in os.listdir(binaries_path) if f.startswith("ffmpeg-")]
+            files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+            return files[0] if files else 'ffmpeg'
+    return 'ffmpeg'
 
