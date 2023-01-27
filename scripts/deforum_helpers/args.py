@@ -816,6 +816,8 @@ def pack_parseq_args(args_dict):
     return {name: args_dict[name] for name in parseq_args_names}
 
 def process_args(args_dict_main):
+    override_settings_with_file = args_dict_main['override_settings_with_file']
+    custom_settings_file = args_dict_main['custom_settings_file']
     args_dict = pack_args(args_dict_main)
     anim_args_dict = pack_anim_args(args_dict_main)
     video_args_dict = pack_video_args(args_dict_main)
@@ -824,7 +826,8 @@ def process_args(args_dict_main):
     import json
     
     root = SimpleNamespace(**Root())
-    root.p = p
+    root.p = args_dict_main['p']
+    p = root.p
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
     
     from deforum_helpers.settings import load_args

@@ -140,13 +140,13 @@ def run_deforum(*args, **kwargs):
             video_args.ffmpeg_location,
             '-y',
             '-vcodec', 'png',
-            '-r', str(int(fps)),
+            '-r', str(int(video_args.fps)),
             '-start_number', str(0),
             '-i', image_path,
             '-frames:v', str(max_video_frames),
             '-c:v', 'libx264',
             '-vf',
-            f'fps={int(fps)}',
+            f'fps={int(video_args.fps)}',
             '-pix_fmt', 'yuv420p',
             '-crf', str(video_args.ffmpeg_crf),
             '-preset', video_args.ffmpeg_preset,
@@ -246,7 +246,7 @@ def run_deforum(*args, **kwargs):
     root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
     root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
     reset_frames_cache(root) # cleanup the RAM in any case
-    processed = processed(p, [root.first_frame], root.initial_seed, root.initial_info)
+    processed = Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
     
     if processed is None:
         processed = process_images(p)
