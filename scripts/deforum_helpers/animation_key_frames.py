@@ -41,13 +41,13 @@ class DeformAnimKeys():
 
 class LooperAnimKeys():
     def __init__(self, loop_args, anim_args):
-        self.useLooper = loop_args.useLooper
-        self.imagesToKeyframe = loop_args.imagesToKeyframe
-        self.image_strength_schedule_series = get_inbetweens(parse_key_frames(loop_args.imageStrength), anim_args.max_frames)
+        self.useLooper = loop_args.use_looper
+        self.imagesToKeyframe = loop_args.init_images
+        self.image_strength_schedule_series = get_inbetweens(parse_key_frames(loop_args.image_strength_schedule), anim_args.max_frames)
         self.blendFactorMax_series = get_inbetweens(parse_key_frames(loop_args.blendFactorMax), anim_args.max_frames)
         self.blendFactorSlope_series = get_inbetweens(parse_key_frames(loop_args.blendFactorSlope), anim_args.max_frames)
-        self.tweening_frames_schedule_series = get_inbetweens(parse_key_frames(loop_args.tweeningFrameSchedule), anim_args.max_frames)
-        self.color_correction_factor_series = get_inbetweens(parse_key_frames(loop_args.colorCorrectionFactor), anim_args.max_frames)
+        self.tweening_frames_schedule_series = get_inbetweens(parse_key_frames(loop_args.tweening_frames_schedule), anim_args.max_frames)
+        self.color_correction_factor_series = get_inbetweens(parse_key_frames(loop_args.color_correction_factor), anim_args.max_frames)
 
 def get_inbetweens(key_frames, max_frames, integer=False, interp_method='Linear', is_single_string = False):
     key_frame_series = pd.Series([np.nan for a in range(max_frames)])

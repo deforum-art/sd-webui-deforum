@@ -53,7 +53,6 @@ def run_deforum(*args, **kwargs):
     
     root, args, anim_args, video_args, parseq_args, loop_args = deforum_args.process_args(args_dict)
 
-
     # Install numexpr as it's the thing most people are having problems with
     from launch import is_installed, run_pip
     if not is_installed("numexpr"):
