@@ -52,7 +52,7 @@ def save_video_settings(*args, **kwargs):
     video_settings_path = args[0]
     data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
     from deforum_helpers.args import pack_video_args
-    video_args_dict = pack_video_args(video_settings_dict)
+    video_args_dict = pack_video_args(data)
     print(f"saving video settings to {video_settings_path}")
     with open(video_settings_path, "w") as f:
         f.write(json.dumps(video_args_dict, ensure_ascii=False, indent=4))
@@ -128,7 +128,7 @@ def load_settings(*args, **kwargs):
 
 def load_video_settings(*args, **kwargs):
     video_settings_path = args[0]
-    data = {deforum_args.component_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
+    data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
     print(f"reading custom video settings from {video_settings_path}")
     jdata = {}
     if not os.path.isfile(video_settings_path):
