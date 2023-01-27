@@ -1,7 +1,7 @@
 from math import ceil
 import os
 import json
-import .args as deforum_args
+import deforum_helpers.args as deforum_args
 from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 import logging
 
@@ -65,7 +65,7 @@ def load_settings(**kwargs):
     jdata = {}
     if not os.path.isfile(settings_path):
         print('The custom settings file does not exist. The values will be unchanged.')
-        return [data[name] for name in deforum_args.component_names if name not in deforum_args.video_args_names and name not in html_trash] + [""]
+        return [data[name] for name in deforum_args.component_names if name not in deforum_args.video_args_names and name not in deforum_args.html_trash] + [""]
     else:
         with open(settings_path, "r") as f:
             jdata = json.loads(f.read())

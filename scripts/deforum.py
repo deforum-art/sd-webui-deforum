@@ -371,7 +371,7 @@ def on_ui_tabs():
                 )
         
         
-        settings_component_list = [components[name] for name in deforum_args.component_names if name not in deforum_args.video_args_names and name not in html_trash]
+        settings_component_list = [components[name] for name in deforum_args.component_names if name not in deforum_args.video_args_names and name not in deforum_args.html_trash]
         video_settings_component_list = [components[name] for name in deforum_args.video_args_names]
         stuff = gr.HTML("") # wrap gradio call garbage
         stuff.visible = False

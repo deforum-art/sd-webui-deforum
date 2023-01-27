@@ -748,7 +748,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         interpolate_key_frames, interpolate_x_frames,
                         resume_from_timestring, resume_timestring'''
                     ).replace("\n", "").replace(" ", "").split(',')
-hybrid_args_names =   srt(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
+hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
                         hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
                         hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames,
                         hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
@@ -784,14 +784,7 @@ html_count = 43
 
 
 html_trash = [f"i{n}" for n in range(1, html_count+1)]
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + 
-                    anim_args_names +
-                    ['prompts', 'animation_prompts'] +
-                    args_names +
-                    video_args_names +
-                    parseq_args_names +
-                    hybrid_args_names +
-                    html_trash
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['prompts', 'animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + html_trash
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
     ds = setup_deforum_setting_dictionary(self, is_img2img, is_extension)
