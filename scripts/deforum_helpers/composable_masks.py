@@ -23,7 +23,6 @@ from PIL import Image, ImageChops
 # val_masks: name, PIL Image mask
 # Returns an image in mode '1' (needed for bool ops), convert to 'L' in the sender function
 def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0):
-    print(mask_seq)
     # Compose_mask recursively: go to inner brackets, then b-op it and go upstack
     
     # Step 1:
@@ -187,9 +186,6 @@ def compose_mask(root, args, mask_seq, val_masks, frame_image, inner_idx:int = 0
     # Now we should have a single var left to return. If not, raise an error message
     pattern = r'{(?P<inner>[\S\s]*?)}'
     matches = re.findall(pattern, mask_seq)
-
-    print(mask_seq)
-    print(matches)
     
     if len(matches) != 1:
         raise Exception(f'Wrong composable mask expression format! Broken mask sequence: {mask_seq}')
