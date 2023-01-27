@@ -45,7 +45,7 @@ import gradio as gr
 def save_settings(*args, **kwargs):
     settings_path = args[0]
     data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
-    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args
+    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args
     args_dict = pack_args(data)
     anim_args_dict = pack_anim_args(data)
     parseq_dict = pack_parseq_args(data)
