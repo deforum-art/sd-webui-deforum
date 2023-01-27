@@ -551,12 +551,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
         with gr.Accordion('Guided Images', open=False):
-            gr.HTML("""to use the guided image tool you need to do a bit of work. You can use this as a guided image tool or as a looper depending 
-                       on your settings. If you want this to be used to guide the frames and use specific images you need to fill out the images to
-                       use for keyframe guidance but dont have the last and first match. If you want it to loop, have them match. Lastly you are
-                       going to want to have your total number of keyframes be 20 more than the last inserted image. so 220 in the example""")
+            gr.HTML("""To use the guided image tool you need to do a bit of work. You can use this as a guided image tool or as a looper depending 
+                       on your settings in the images to use. For this to work you set the keyframes and images you want them to show up, it likely should 
+                       be at closest every tweening frames to look best. If you want this to loop, have the 1st and last frames match. Lastly you are
+                       going to want to have your total number of keyframes be 21 more than the last inserted image for it to move there. so 221 in the example""")
             gr.HTML("""In order to use the tool you must set in the init tab an initial strength for the image. In later versions this should be also
                        in the strength schedule, but for now you need to set it. I use around .75""")
+            gr.HTML("""You need to set your seed to schedule and schedule the seed to move in a specific way. you want to have a schedule that starts 
+                       and ends on the same seed. (using the example of 220 frames) """)
+            gr.HTML("""0:(5), 1:(-1), 219:(-1), 220:(5)  could be a good schedule, sometimes having a few more frames match is good too""")
             with gr.Row():
                 use_looper = gr.Checkbox(label="Use looper for the next run", value=False, interactive=True)
             with gr.Row():
