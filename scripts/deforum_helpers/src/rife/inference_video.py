@@ -27,7 +27,7 @@ def run_rife_new_video_infer(
         deforum_models_path=None,
         raw_output_imgs_path=None,
         img_batch_id=None,
-        ffmpeg_location='ffmpeg',
+        ffmpeg_location=None,
         audio_track=None,
         interp_x_amount=2,
         slow_mo_x_amount=-1,
@@ -285,8 +285,10 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
         stdout, stderr = process.communicate()
         if process.returncode != 0:
             raise RuntimeError(stderr)
+    except FileNotFoundError:
+        raise FileNotFoundError("FFmpeg not found. Plesae make sure you have a working ffmpeg path under 'ffmpeg_location' parameter. \n*Interpolated frames were SAVED as backup!*")
     except Exception as e:
-        print(f'Error stitching interpolation video. Actual error: {e}')
+        raise Exception(f'Error stitching interpolation video. Actual error: {e}')
 
     if not audio_path is None:
         try:
@@ -310,6 +312,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
             os.replace(mp4_path+'.temp.mp4', mp4_path)
         except Exception as e:
             print(f'Error adding audio to interpolated video. Actual error: {e}')
-    # delete temp folder with interpolated frames if requested
+    # delete temp folder with interpolated frames if requested 
+    #If ffmpeg was not found we won't reach this line - and the images will be left in the interpolated folder for the user to stitch later
     if not keep_imgs:
         shutil.rmtree(img_folder_path)
