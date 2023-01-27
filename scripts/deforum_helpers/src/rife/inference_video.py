@@ -27,7 +27,7 @@ def run_rife_new_video_infer(
         deforum_models_path=None,
         raw_output_imgs_path=None,
         img_batch_id=None,
-        ffmpeg_location='ffmpeg',
+        ffmpeg_location=None,
         audio_track=None,
         interp_x_amount=2,
         slow_mo_x_amount=-1,
