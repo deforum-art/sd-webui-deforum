@@ -103,7 +103,7 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
     turbo_next_image, turbo_next_frame_idx = None, 0
 
     # resume animation
-    prev_sample = None
+    prev_img = None
     color_match_sample = None
     if anim_args.resume_from_timestring:
         last_frame = start_frame-1
@@ -112,11 +112,11 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
         path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:05}.png")
         img = cv2.imread(path)
         #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Changed the colors on resume
-        prev_sample = sample_from_cv2(img)
+        prev_img = img
         if anim_args.color_coherence != 'None':
             color_match_sample = img
         if turbo_steps > 1:
-            turbo_next_image, turbo_next_frame_idx = sample_to_cv2(prev_sample, type=np.float32), last_frame
+            turbo_next_image, turbo_next_frame_idx = prev_img, last_frame
             turbo_prev_image, turbo_prev_frame_idx = turbo_next_image, turbo_next_frame_idx
             start_frame = last_frame+turbo_steps
 
@@ -210,11 +210,11 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
                 if anim_args.save_depth_maps:
                     depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:05}.png"), depth)
             if turbo_next_image is not None:
-                prev_sample = sample_from_cv2(turbo_next_image)
+                prev_img = turbo_next_image
 
         # apply transforms to previous frame
-        if prev_sample is not None:
-            prev_img, depth = anim_frame_warp(prev_sample, args, anim_args, keys, frame_idx, depth_model, depth=None, device=root.device, half_precision=root.half_precision)
+        if prev_img is not None:
+            prev_img, depth = anim_frame_warp(prev_img, args, anim_args, keys, frame_idx, depth_model, depth=None, device=root.device, half_precision=root.half_precision)
 
             # hybrid video motion - warps prev_img to match motion, usually to prepare for compositing
             if frame_idx > 0:
@@ -246,20 +246,17 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
                     prev_img = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)
 
             # apply scaling
-            contrast_sample = prev_img * contrast
+            contrast_image = prev_img * contrast
             # anti-blur
-            contrast_sample = unsharp_mask(contrast_sample, (kernel, kernel), sigma, amount, threshold)
+            contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold)
             # apply frame noising
-            noised_sample = add_noise(sample_from_cv2(contrast_sample), noise, args.seed, anim_args.noise_type,
+            noised_image = add_noise(contrast_image, noise, args.seed, anim_args.noise_type,
                             (anim_args.perlin_w, anim_args.perlin_h, anim_args.perlin_octaves, anim_args.perlin_persistence),
                              args.noise_mask, args.invert_mask)
 
             # use transformed previous frame as init for current
             args.use_init = True
-            if root.half_precision:
-                args.init_sample = noised_sample.half().to(root.device)
-            else:
-                args.init_sample = noised_sample.to(root.device)
+            args.init_image = noised_image
             args.strength = max(0.0, min(1.0, strength))
         
         args.scale = scale
@@ -323,19 +320,20 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
             if image == None:
                 return
 
+        opencv_image = cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
         if not using_vid_init:
-            prev_img = sample
+            prev_img = opencv_image
 
         if turbo_steps > 1:
             turbo_prev_image, turbo_prev_frame_idx = turbo_next_image, turbo_next_frame_idx
-            turbo_next_image, turbo_next_frame_idx = opencvImage = cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR), frame_idx
+            turbo_next_image, turbo_next_frame_idx = opencv_image, frame_idx
             frame_idx += turbo_steps
         else:    
             filename = f"{args.timestring}_{frame_idx:05}.png"
             save_image(image, 'PIL', filename, args, video_args, root)
 
             if anim_args.save_depth_maps:
-                depth = depth_model.predict(sample_to_cv2(sample), anim_args, root.half_precision)
+                depth = depth_model.predict(opencv_image, anim_args, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
             frame_idx += 1
 
