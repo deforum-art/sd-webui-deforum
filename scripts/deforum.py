@@ -35,230 +35,7 @@ from modules.shared import opts, cmd_opts, state
 from modules.ui import create_output_panel, plaintext_to_html, wrap_gradio_call
 from types import SimpleNamespace
 
-class DeforumScript(wscripts.Script):
-
-    SCRIPT_DEPRECATED = True
-    AS_SCRIPT_DEPRECATION_WARNING = "This script is deprecated. Please use the full Deforum extension instead.\nUpdate instructions:"
-    GITHUB_LINK = "github.com/deforum-art/deforum-for-automatic1111-webui/blob/automatic1111-webui/README.md"
-    DISCORD_LINK = "discord.gg/deforum"
-
-    def title(self):
-        return "Deforum-webui (use tab extension instead!)"
-
-    def ui(self, is_img2img):
-        if not self.SCRIPT_DEPRECATED:
-            return deforum_args.setup_deforum_setting_ui(self, is_img2img, is_extension = False)
-        i_x = gr.HTML("<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p>")
-        i_y = gr.HTML(plaintext_to_html(self.AS_SCRIPT_DEPRECATION_WARNING))  
-        i_z = gr.HTML(plaintext_to_html(self.GITHUB_LINK))  
-        i_i = gr.HTML(plaintext_to_html(self.DISCORD_LINK))
-        return [i_x, i_y, i_z, i_i]
-        
-    def show(self, is_img2img):
-        return is_img2img
-
-    def run(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, enable_steps_scheduling, steps_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, enable_sampler_scheduling, sampler_schedule, enable_checkpoint_scheduling, checkpoint_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, parseq_manifest, parseq_use_deltas, hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43):
-        print('Deforum script for 2D, pseudo-2D and 3D animations')
-        print('v0.5-webui-beta')
-        
-        root, args, anim_args, video_args, parseq_args = deforum_args.process_args(self, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, enable_steps_scheduling, steps_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, enable_sampler_scheduling, sampler_schedule, enable_checkpoint_scheduling, checkpoint_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, parseq_manifest,  parseq_use_deltas, hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43)
-
-
-        # Install numexpr as it's the thing most people are having problems with
-        from launch import is_installed, run_pip
-        if not is_installed("numexpr"):
-            run_pip("install numexpr", "numexpr")
-        
-        for basedir in basedirs:
-            sys.path.extend([
-                basedir + '/scripts/deforum_helpers/src',
-                basedir + '/extensions/deforum/scripts/deforum_helpers/src',
-                basedir + '/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
-            ])
-        
-        # clean up unused memory
-        reset_frames_cache(root)
-        gc.collect()
-        torch.cuda.empty_cache()
-        
-        from deforum_helpers.render import render_animation
-        from deforum_helpers.render_modes import render_input_video, render_animation_with_video_mask, render_interpolation
-
-        tqdm_backup = shared.total_tqdm
-        shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args)
-        try:
-            # dispatch to appropriate renderer
-            if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
-                if anim_args.use_mask_video: 
-                    render_animation_with_video_mask(args, anim_args, video_args, parseq_args, root.animation_prompts, root) # allow mask video without an input video
-                else:    
-                    render_animation(args, anim_args, video_args, parseq_args, root.animation_prompts, root)
-            elif anim_args.animation_mode == 'Video Input':
-                render_input_video(args, anim_args, video_args, parseq_args, root.animation_prompts, root)#TODO: prettify code
-            elif anim_args.animation_mode == 'Interpolation':
-                render_interpolation(args, anim_args, video_args, parseq_args, root.animation_prompts, root)
-            else:
-                print('Other modes are not available yet!')
-        finally:
-            shared.total_tqdm = tqdm_backup
-        
-        if video_args.store_frames_in_ram:
-            dump_frames_cache(root)
-        
-        from base64 import b64encode
-        
-        real_audio_track = None
-        if video_args.add_soundtrack != 'None':
-            real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
-        
-        if video_args.skip_video_for_run_all:
-            print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
-        elif video_args.output_format == 'FFMPEG mp4':
-            import subprocess
-
-            if video_args.use_manual_settings:
-                max_video_frames = video_args.max_video_frames #@param {type:"string"}
-                image_path = video_args.image_path
-                mp4_path = video_args.mp4_path
-            else:
-                path_name_modifier = video_args.path_name_modifier
-                if video_args.render_steps: # render steps from a single image
-                    fname = f"{path_name_modifier}_%05d.png"
-                    all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
-                    newest_dir = max(all_step_dirs, key=os.path.getmtime)
-                    image_path = os.path.join(newest_dir, fname)
-                    print(f"Reading images from {image_path}")
-                    mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
-                    max_video_frames = args.steps
-                else: # render images for a video
-                    image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
-                    mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
-                    max_video_frames = anim_args.max_frames
-
-            print(f"{image_path} -> {mp4_path}")
-
-            #save settings for the video
-            video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
-            with open(video_settings_filename, "w+", encoding="utf-8") as f:
-                s = {**dict(video_args.__dict__)}
-                json.dump(s, f, ensure_ascii=False, indent=4)
-            ffmpeg_success = -1
-            # make video
-            cmd = [
-                video_args.ffmpeg_location,
-                '-y',
-                '-vcodec', 'png',
-                '-r', str(int(fps)),
-                '-start_number', str(0),
-                '-i', image_path,
-                '-frames:v', str(max_video_frames),
-                '-c:v', 'libx264',
-                '-vf',
-                f'fps={int(fps)}',
-                '-pix_fmt', 'yuv420p',
-                '-crf', str(video_args.ffmpeg_crf),
-                '-preset', video_args.ffmpeg_preset,
-                '-pattern_type', 'sequence',
-                mp4_path
-            ]
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            # will change from -1 to 0 if ffmpeg video was created successfully 
-            ffmpeg_success = process.returncode
-            if process.returncode != 0:
-                print(stderr)
-                raise RuntimeError(stderr)
-            
-            if video_args.add_soundtrack != 'None':
-                cmd = [
-                    video_args.ffmpeg_location,
-                    '-i',
-                    mp4_path,
-                    '-i',
-                    real_audio_track,
-                    '-map', '0:v',
-                    '-map', '1:a',
-                    '-c:v', 'copy',
-                    '-shortest',
-                    mp4_path+'.temp.mp4'
-                ]
-                process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = process.communicate()
-                if process.returncode != 0:
-                    print(stderr)
-                    raise RuntimeError(stderr)
-                os.replace(mp4_path+'.temp.mp4', mp4_path)
-
-            mp4 = open(mp4_path,'rb').read()
-            data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-            
-            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
-
-        else: # *GIF* TIME!
-            # TODO: add support for custom frame interpolation vid location?
-            if video_args.use_manual_settings:
-                max_video_frames = video_args.max_video_frames #@param {type:"string"}
-                image_path = video_args.image_path
-                mp4_path = video_args.mp4_path
-            else:
-                path_name_modifier = video_args.path_name_modifier
-                if video_args.render_steps: # render steps from a single image
-                    fname = f"{path_name_modifier}_%05d.png"
-                    all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
-                    newest_dir = max(all_step_dirs, key=os.path.getmtime)
-                    image_path = os.path.join(newest_dir, fname)
-                    print(f"Reading images from {image_path}")
-                    mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.gif")
-                    max_video_frames = args.steps
-                else: # render images for a video
-                    image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
-                    mp4_path = os.path.join(args.outdir, f"{args.timestring}.gif")
-                    max_video_frames = anim_args.max_frames
-
-            print(f"{image_path} -> {mp4_path}")
-
-            #save settings for the video
-            video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
-            with open(video_settings_filename, "w+", encoding="utf-8") as f:
-                s = {**dict(video_args.__dict__)}
-                json.dump(s, f, ensure_ascii=False, indent=4)
-            
-            imagelist = [Image.open(os.path.join(args.outdir, image_path%d)) for d in range(max_video_frames) if os.path.exists(os.path.join(args.outdir, image_path%d))]
-            
-            imagelist[0].save(
-                mp4_path,#gif here
-                save_all=True,
-                append_images=imagelist[1:],
-                optimize=True,
-                duration=1000/fps,
-                loop=0
-            )
-            
-            mp4 = open(mp4_path,'rb').read()
-            data_url = "data:image/gif;base64," + b64encode(mp4).decode()
-            
-            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><img src="{data_url}" type="image/gif"></img>'
-    
-        if root.initial_info is None:
-            root.initial_info = "An error has occured and nothing has been generated!"
-            root.initial_info += "\nPlease, report the bug to https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"
-            import numpy as np
-            a = np.random.rand(args.W, args.H, 3)*255
-            root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
-            root.initial_seed = 6934
-        # FRMAE INTERPOLATION TIME
-        if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not store_frames_in_ram:
-            print(f"Got a request to *frame interpolate* using {frame_interpolation_engine}")
-            process_video_interpolation(video_args.frame_interpolation_engine, video_args.frame_interpolation_x_amount, video_args.frame_interpolation_slow_mo_amount, fps, root.models_path, real_audio_track, args.outdir, args.timestring, video_args.ffmpeg_location, video_args.ffmpeg_crf, video_args.ffmpeg_preset, video_args.frame_interpolation_keep_imgs)
-            
-        root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
-        root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
-        reset_frames_cache(root) # cleanup the RAM in any case
-        return Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
-
 def run_deforum(dummy1, dummy2, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, enable_steps_scheduling, steps_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, enable_sampler_scheduling, sampler_schedule, enable_checkpoint_scheduling, checkpoint_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, parseq_manifest, parseq_use_deltas, hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43):
-
-
     p = StableDiffusionProcessingImg2Img(
         sd_model=shared.sd_model,
         outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
@@ -268,9 +45,203 @@ def run_deforum(dummy1, dummy2, override_settings_with_file, custom_settings_fil
 
     override_these_with_webui = False
 
-    processed = DeforumScript.run(None, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, enable_steps_scheduling, steps_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, enable_sampler_scheduling, sampler_schedule, enable_checkpoint_scheduling, checkpoint_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, parseq_manifest, parseq_use_deltas, hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43)
+    print('Deforum script for 2D, pseudo-2D and 3D animations')
+    print('v0.5-webui-beta')
+    
+    root, args, anim_args, video_args, parseq_args = deforum_args.process_args(None, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, enable_steps_scheduling, steps_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, enable_sampler_scheduling, sampler_schedule, enable_checkpoint_scheduling, checkpoint_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, parseq_manifest,  parseq_use_deltas, hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43)
 
 
+    # Install numexpr as it's the thing most people are having problems with
+    from launch import is_installed, run_pip
+    if not is_installed("numexpr"):
+        run_pip("install numexpr", "numexpr")
+    
+    for basedir in basedirs:
+        sys.path.extend([
+            basedir + '/scripts/deforum_helpers/src',
+            basedir + '/extensions/deforum/scripts/deforum_helpers/src',
+            basedir + '/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
+        ])
+    
+    # clean up unused memory
+    reset_frames_cache(root)
+    gc.collect()
+    torch.cuda.empty_cache()
+    
+    from deforum_helpers.render import render_animation
+    from deforum_helpers.render_modes import render_input_video, render_animation_with_video_mask, render_interpolation
+
+    tqdm_backup = shared.total_tqdm
+    shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args)
+    try:
+        # dispatch to appropriate renderer
+        if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
+            if anim_args.use_mask_video: 
+                render_animation_with_video_mask(args, anim_args, video_args, parseq_args, root.animation_prompts, root) # allow mask video without an input video
+            else:    
+                render_animation(args, anim_args, video_args, parseq_args, root.animation_prompts, root)
+        elif anim_args.animation_mode == 'Video Input':
+            render_input_video(args, anim_args, video_args, parseq_args, root.animation_prompts, root)#TODO: prettify code
+        elif anim_args.animation_mode == 'Interpolation':
+            render_interpolation(args, anim_args, video_args, parseq_args, root.animation_prompts, root)
+        else:
+            print('Other modes are not available yet!')
+    finally:
+        shared.total_tqdm = tqdm_backup
+    
+    if video_args.store_frames_in_ram:
+        dump_frames_cache(root)
+    
+    from base64 import b64encode
+    
+    real_audio_track = None
+    if video_args.add_soundtrack != 'None':
+        real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
+    
+    if video_args.skip_video_for_run_all:
+        print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
+    elif video_args.output_format == 'FFMPEG mp4':
+        import subprocess
+
+        if video_args.use_manual_settings:
+            max_video_frames = video_args.max_video_frames #@param {type:"string"}
+            image_path = video_args.image_path
+            mp4_path = video_args.mp4_path
+        else:
+            path_name_modifier = video_args.path_name_modifier
+            if video_args.render_steps: # render steps from a single image
+                fname = f"{path_name_modifier}_%05d.png"
+                all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
+                newest_dir = max(all_step_dirs, key=os.path.getmtime)
+                image_path = os.path.join(newest_dir, fname)
+                print(f"Reading images from {image_path}")
+                mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
+                max_video_frames = args.steps
+            else: # render images for a video
+                image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
+                mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
+                max_video_frames = anim_args.max_frames
+
+        print(f"{image_path} -> {mp4_path}")
+
+        #save settings for the video
+        video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
+        with open(video_settings_filename, "w+", encoding="utf-8") as f:
+            s = {**dict(video_args.__dict__)}
+            json.dump(s, f, ensure_ascii=False, indent=4)
+        ffmpeg_success = -1
+        # make video
+        cmd = [
+            video_args.ffmpeg_location,
+            '-y',
+            '-vcodec', 'png',
+            '-r', str(int(fps)),
+            '-start_number', str(0),
+            '-i', image_path,
+            '-frames:v', str(max_video_frames),
+            '-c:v', 'libx264',
+            '-vf',
+            f'fps={int(fps)}',
+            '-pix_fmt', 'yuv420p',
+            '-crf', str(video_args.ffmpeg_crf),
+            '-preset', video_args.ffmpeg_preset,
+            '-pattern_type', 'sequence',
+            mp4_path
+        ]
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        # will change from -1 to 0 if ffmpeg video was created successfully 
+        ffmpeg_success = process.returncode
+        if process.returncode != 0:
+            print(stderr)
+            raise RuntimeError(stderr)
+        
+        if video_args.add_soundtrack != 'None':
+            cmd = [
+                video_args.ffmpeg_location,
+                '-i',
+                mp4_path,
+                '-i',
+                real_audio_track,
+                '-map', '0:v',
+                '-map', '1:a',
+                '-c:v', 'copy',
+                '-shortest',
+                mp4_path+'.temp.mp4'
+            ]
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode != 0:
+                print(stderr)
+                raise RuntimeError(stderr)
+            os.replace(mp4_path+'.temp.mp4', mp4_path)
+
+        mp4 = open(mp4_path,'rb').read()
+        data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
+        
+        deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
+
+    else: # *GIF* TIME!
+        # TODO: add support for custom frame interpolation vid location?
+        if video_args.use_manual_settings:
+            max_video_frames = video_args.max_video_frames #@param {type:"string"}
+            image_path = video_args.image_path
+            mp4_path = video_args.mp4_path
+        else:
+            path_name_modifier = video_args.path_name_modifier
+            if video_args.render_steps: # render steps from a single image
+                fname = f"{path_name_modifier}_%05d.png"
+                all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
+                newest_dir = max(all_step_dirs, key=os.path.getmtime)
+                image_path = os.path.join(newest_dir, fname)
+                print(f"Reading images from {image_path}")
+                mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.gif")
+                max_video_frames = args.steps
+            else: # render images for a video
+                image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
+                mp4_path = os.path.join(args.outdir, f"{args.timestring}.gif")
+                max_video_frames = anim_args.max_frames
+
+        print(f"{image_path} -> {mp4_path}")
+
+        #save settings for the video
+        video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
+        with open(video_settings_filename, "w+", encoding="utf-8") as f:
+            s = {**dict(video_args.__dict__)}
+            json.dump(s, f, ensure_ascii=False, indent=4)
+        
+        imagelist = [Image.open(os.path.join(args.outdir, image_path%d)) for d in range(max_video_frames) if os.path.exists(os.path.join(args.outdir, image_path%d))]
+        
+        imagelist[0].save(
+            mp4_path,#gif here
+            save_all=True,
+            append_images=imagelist[1:],
+            optimize=True,
+            duration=1000/fps,
+            loop=0
+        )
+        
+        mp4 = open(mp4_path,'rb').read()
+        data_url = "data:image/gif;base64," + b64encode(mp4).decode()
+        
+        deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><img src="{data_url}" type="image/gif"></img>'
+
+    if root.initial_info is None:
+        root.initial_info = "An error has occured and nothing has been generated!"
+        root.initial_info += "\nPlease, report the bug to https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"
+        import numpy as np
+        a = np.random.rand(args.W, args.H, 3)*255
+        root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
+        root.initial_seed = 6934
+    # FRMAE INTERPOLATION TIME
+    if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not store_frames_in_ram:
+        print(f"Got a request to *frame interpolate* using {frame_interpolation_engine}")
+        process_video_interpolation(video_args.frame_interpolation_engine, video_args.frame_interpolation_x_amount, video_args.frame_interpolation_slow_mo_amount, fps, root.models_path, real_audio_track, args.outdir, args.timestring, video_args.ffmpeg_location, video_args.ffmpeg_crf, video_args.ffmpeg_preset, video_args.frame_interpolation_keep_imgs)
+        
+    root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
+    root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
+    reset_frames_cache(root) # cleanup the RAM in any case
+    processed = processed(p, [root.first_frame], root.initial_seed, root.initial_info)
     
     if processed is None:
         processed = process_images(p)
