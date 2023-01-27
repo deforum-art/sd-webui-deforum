@@ -53,6 +53,8 @@ def run_deforum(*args, **kwargs):
     args_dict['p'] = p
     
     root, args, anim_args, video_args, parseq_args = deforum_args.process_args(args_dict)
+    root.clipseg_model = None
+    root.basedirs = basedirs
 
     # Install numexpr as it's the thing most people are having problems with
     from launch import is_installed, run_pip
