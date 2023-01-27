@@ -797,7 +797,7 @@ video_args_names =  str(r'''skip_video_for_run_all,
                     ).replace("\n", "").replace(" ", "").split(',')
 parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
                     ).replace("\n", "").replace(" ", "").split(',')
-html_count = 43
+html_count = 44
 
 
 html_trash = [f"i{n}" for n in range(1, html_count+1)]
