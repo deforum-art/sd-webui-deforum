@@ -42,13 +42,16 @@ def run_deforum(dummy1, dummy2, override_settings_with_file, custom_settings_fil
         outpath_grids = opts.outdir_grids or opts.outdir_img2img_grids,
         #we'll setup the rest later
     )
-
-    override_these_with_webui = False
-
+    
     print('Deforum script for 2D, pseudo-2D and 3D animations')
     print('v0.5-webui-beta')
     
-    root, args, anim_args, video_args, parseq_args = deforum_args.process_args(None, p, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, enable_steps_scheduling, steps_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, enable_sampler_scheduling, sampler_schedule, enable_checkpoint_scheduling, checkpoint_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, color_coherence_video_every_N_frames, diffusion_cadence, noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, seed_iter_N, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, skip_video_for_run_all, fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, parseq_manifest,  parseq_use_deltas, hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image, hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse, hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames, hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule, hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43)
+    args_dict = locals()
+    args_dict.pop('dummy1')
+    args_dict.pop('dummy2')
+    args_dict['self'] = None
+    
+    root, args, anim_args, video_args, parseq_args = deforum_args.process_args(**args_dict)
 
 
     # Install numexpr as it's the thing most people are having problems with
