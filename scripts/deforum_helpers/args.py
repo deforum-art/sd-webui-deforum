@@ -561,14 +561,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 init_images = gr.Textbox(label="Images to use for keyframe guidance", lines=13, value = keyframeExamples(), interactive=True)
             gr.HTML("""strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on""")
             with gr.Row():
-                image_strength_schedule = gr.Textbox(label="Image strength schedule", lines=1, value = "0:(.6)", interactive=True)
+                image_strength_schedule = gr.Textbox(label="Image strength schedule", lines=1, value = "0:(.75)", interactive=True)
             gr.HTML("""blendFactor = blendFactorMax - blendFactorSlope * cos((frame & tweening_frames_schedule) / (tweening_frames_schedule / 2))""")
             with gr.Row():
-                blendFactorMax = gr.Textbox(label="blendFactorMax", lines=1, value = "0:(.6)", interactive=True)
+                blendFactorMax = gr.Textbox(label="blendFactorMax", lines=1, value = "0:(.35)", interactive=True)
             with gr.Row():
                 blendFactorSlope = gr.Textbox(label="blendFactorSlope", lines=1, value = "0:(.25)", interactive=True)
             with gr.Row():
-                tweening_frames_schedule = gr.Textbox(label="tweening frames schedule", lines=1, value = "0:(.25)", interactive=True)
+                tweening_frames_schedule = gr.Textbox(label="tweening frames schedule", lines=1, value = "0:(20)", interactive=True)
             with gr.Row():
                 color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
         # loopArgs
