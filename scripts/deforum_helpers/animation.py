@@ -135,11 +135,7 @@ def warpMatrix(W, H, theta, phi, gamma, scale, fV):
 
     return M33, sideLength
 
-def anim_frame_warp(prev, args, anim_args, keys, frame_idx, depth_model=None, depth=None, device='cuda', half_precision = False):
-    if isinstance(prev, np.ndarray):
-        prev_img_cv2 = prev
-    else:
-        prev_img_cv2 = sample_to_cv2(prev)
+def anim_frame_warp(prev_img_cv2, args, anim_args, keys, frame_idx, depth_model=None, depth=None, device='cuda', half_precision = False):
 
     if anim_args.use_depth_warping:
         if depth is None and depth_model is not None:

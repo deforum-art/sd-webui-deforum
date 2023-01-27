@@ -298,7 +298,7 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
                 args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
                 
         # sample the diffusion model
-        sample, image = generate(args, anim_args, root, frame_idx, return_sample=True, sampler_name=scheduled_sampler_name)
+        image = generate(args, anim_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
         # reroll blank frame 
@@ -308,7 +308,7 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
                 while not image.getbbox():
                     print("Rerolling with +1 seed...")
                     args.seed += 1
-                    sample, image = generate(args, root, frame_idx, return_sample=True, sampler_name=scheduled_sampler_name)
+                    image = generate(args, root, frame_idx, sampler_name=scheduled_sampler_name)
                     patience -= 1
                     if patience == 0:
                         print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
@@ -324,11 +324,11 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
                 return
 
         if not using_vid_init:
-            prev_sample = sample
+            prev_img = sample
 
         if turbo_steps > 1:
             turbo_prev_image, turbo_prev_frame_idx = turbo_next_image, turbo_next_frame_idx
-            turbo_next_image, turbo_next_frame_idx = sample_to_cv2(sample, type=np.float32), frame_idx
+            turbo_next_image, turbo_next_frame_idx = opencvImage = cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR), frame_idx
             frame_idx += turbo_steps
         else:    
             filename = f"{args.timestring}_{frame_idx:05}.png"

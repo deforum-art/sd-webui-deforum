@@ -11,7 +11,7 @@ from modules import processing, sd_models
 from modules.shared import sd_model
 from modules.processing import StableDiffusionProcessingTxt2Img
     
-def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name=None):
+def generate(args, anim_args, root, frame = 0, sampler_name=None):
     assert args.prompt is not None
     
     # Setup the pipeline
@@ -54,8 +54,11 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
         if info is None:
             raise RuntimeError(f"Unknown checkpoint: {args.checkpoint}")
         sd_models.reload_model_weights(info=info)
+    
+    if args.init_image is not None and not isinstance(args.init_image, str):
+        pass
 
-    if args.init_sample is not None:
+    else if args.init_sample is not None:
         open_cv_image = sample_to_cv2(args.init_sample)
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
         init_image = Image.fromarray(img)
@@ -134,14 +137,6 @@ def generate(args, anim_args, root, frame = 0, return_sample=False, sampler_name
         if anim_args.histogram_matching:
             root.color_corrections = [processing.setup_color_correction(root.first_frame)]
     
-    if return_sample:
-        pil_image = processed.images[0].convert('RGB') 
-        open_cv_image = np.array(pil_image) 
-        # Convert RGB to BGR 
-        open_cv_image = open_cv_image[:, :, ::-1].copy() 
-        image = sample_from_cv2(open_cv_image)
-        results = [image, processed.images[0]]
-    else:
-        results = [processed.images[0]]
+    results = [processed.images[0]]
     
     return results
