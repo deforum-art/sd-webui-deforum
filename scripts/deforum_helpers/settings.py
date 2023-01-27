@@ -5,7 +5,7 @@ import deforum_helpers.args as deforum_args
 from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 import logging
 
-def load_args(args_dict,anim_args_dict, parseq_args_dict, custom_settings_file, root):
+def load_args(args_dict, anim_args_dict, parseq_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
     if not os.path.isfile(custom_settings_file):
         print('The custom settings file does not exist. The in-notebook settings will be used instead')
@@ -35,22 +35,22 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, custom_settings_file, 
 import gradio as gr
  
 # In gradio gui settings save/load
-def save_settings(**kwargs):
-    settings_dict = kwargs
-    settings_path = settings_dict.pop('settings_path')
+def save_settings(*args, **kwargs):
+    settings_path = args[0]
+    data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
     from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args
-    args_dict = pack_args(settings_dict)
-    anim_args_dict = pack_anim_args(settings_dict)
-    parseq_dict = pack_parseq_args(settings_dict)
-    args_dict["prompts"] = json.loads(settings_dict['animation_prompts'])
+    args_dict = pack_args(data)
+    anim_args_dict = pack_anim_args(data)
+    parseq_dict = pack_parseq_args(data)
+    args_dict["prompts"] = json.loads(data['animation_prompts'])
     print(f"saving custom settings to {settings_path}")
     with open(settings_path, "w") as f:
         f.write(json.dumps({**args_dict, **anim_args_dict, **parseq_dict}, ensure_ascii=False, indent=4))
     return [""]
 
-def save_video_settings(**kwargs):
-    video_settings_dict = kwargs
-    video_settings_path = video_settings_dict.pop('video_settings_path')
+def save_video_settings(*args, **kwargs):
+    video_settings_path = args[0]
+    data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
     from deforum_helpers.args import pack_video_args
     video_args_dict = pack_video_args(video_settings_dict)
     print(f"saving video settings to {video_settings_path}")
@@ -58,14 +58,14 @@ def save_video_settings(**kwargs):
         f.write(json.dumps(video_args_dict, ensure_ascii=False, indent=4))
     return [""]
 
-def load_settings(**kwargs):
-    data = kwargs
-    settings_path = data.pop('settings_path')
+def load_settings(*args, **kwargs):
+    settings_path = args[0]
+    data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
     print(f"reading custom settings from {settings_path}")
     jdata = {}
     if not os.path.isfile(settings_path):
         print('The custom settings file does not exist. The values will be unchanged.')
-        return [data[name] for name in deforum_args.component_names if name not in deforum_args.video_args_names and name not in deforum_args.html_trash] + [""]
+        return [data[name] for name in deforum_args.settings_component_names] + [""]
     else:
         with open(settings_path, "r") as f:
             jdata = json.loads(f.read())
@@ -126,9 +126,9 @@ def load_settings(**kwargs):
 
     return ret
 
-def load_video_settings(**kwargs):
-    data = kwargs
-    video_settings_path = data.pop('video_settings_path')
+def load_video_settings(*args, **kwargs):
+    video_settings_path = args[0]
+    data = {deforum_args.component_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
     print(f"reading custom video settings from {video_settings_path}")
     jdata = {}
     if not os.path.isfile(video_settings_path):

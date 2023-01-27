@@ -36,7 +36,10 @@ from modules.ui import create_output_panel, plaintext_to_html, wrap_gradio_call
 from types import SimpleNamespace
 
 # TODO: test if gradio passes its stuff as named kwargs and if so, replace the args to **kwargs
-def run_deforum(**kwargs):
+def run_deforum(*args, **kwargs):
+
+    args_dict = {deforum_args.component_names[i]: args[i+2] for i in range(0, len(deforum_args.component_names))}
+
     p = StableDiffusionProcessingImg2Img(
         sd_model=shared.sd_model,
         outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
@@ -47,9 +50,6 @@ def run_deforum(**kwargs):
     print('Deforum script for 2D, pseudo-2D and 3D animations')
     print('v0.5-webui-beta')
     
-    args_dict = kwargs
-    args_dict.pop('dummy1')
-    args_dict.pop('dummy2')
     args_dict['self'] = None
     args_dict['p'] = p
     
@@ -371,7 +371,7 @@ def on_ui_tabs():
                 )
         
         
-        settings_component_list = [components[name] for name in deforum_args.component_names if name not in deforum_args.video_args_names and name not in deforum_args.html_trash]
+        settings_component_list = [components[name] for name in deforum_args.settings_component_names]
         video_settings_component_list = [components[name] for name in deforum_args.video_args_names]
         stuff = gr.HTML("") # wrap gradio call garbage
         stuff.visible = False
