@@ -723,6 +723,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 ### From Functions Like Deforumoutputargs(),
 ### But Over Time There Was Some Cross-Polination,
 ### So They Are Now Hardcoded As 'List'-Strings Below
+### If you're adding a new setting, add it to one of the lists
+### besides writing it in the setup functions above
 
 anim_args_names =   str(r'''animation_mode, max_frames, border,
                         angle, zoom, translation_x, translation_y, translation_z,
@@ -744,8 +746,9 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames,
                         use_mask_video, video_mask_path,
                         interpolate_key_frames, interpolate_x_frames,
-                        resume_from_timestring, resume_timestring,
-                        hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
+                        resume_from_timestring, resume_timestring'''
+                    )
+hybrid_args_names =   srt(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
                         hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
                         hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames,
                         hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
@@ -773,17 +776,29 @@ video_args_names =  str(r'''skip_video_for_run_all,
                             render_steps, max_video_frames,
                             path_name_modifier, image_path, mp4_path, store_frames_in_ram,
                             frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount,
-                            frame_interpolation_keep_imgs''').replace("\n", "").replace(" ", "").split(',')
-parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas''').replace("\n", "").replace(" ", "").split(',')
+                            frame_interpolation_keep_imgs'''
+                    ).replace("\n", "").replace(" ", "").split(',')
+parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
+                    ).replace("\n", "").replace(" ", "").split(',')
 html_count = 43
 
+
+html_trash = [f"i{n}" for n in range(1, html_count+1)]
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + 
+                    anim_args_names +
+                    ['prompts', 'animation_prompts'] +
+                    args_names +
+                    video_args_names +
+                    parseq_args_names +
+                    hybrid_args_names +
+                    html_trash
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
     ds = SimpleNamespace(**setup_deforum_setting_dictionary(self, is_img2img, is_extension))
     return [ds.btn, ds.override_settings_with_file, ds.custom_settings_file, ds.animation_mode, ds.max_frames, ds.border, ds.angle, ds.zoom, ds.translation_x, ds.translation_y, ds.translation_z, ds.rotation_3d_x, ds.rotation_3d_y, ds.rotation_3d_z, ds.flip_2d_perspective, ds.perspective_flip_theta, ds.perspective_flip_phi, ds.perspective_flip_gamma, ds.perspective_flip_fv, ds.noise_schedule, ds.strength_schedule, ds.contrast_schedule, ds.cfg_scale_schedule, ds.enable_steps_scheduling, ds.steps_schedule, ds.fov_schedule, ds.near_schedule, ds.far_schedule, ds.seed_schedule, ds.enable_sampler_scheduling, ds.sampler_schedule, ds.enable_checkpoint_scheduling, ds.checkpoint_schedule, ds.kernel_schedule, ds.sigma_schedule, ds.amount_schedule, ds.threshold_schedule, ds.histogram_matching, ds.color_coherence, ds.color_coherence_video_every_N_frames, ds.diffusion_cadence, ds.noise_type, ds.perlin_w, ds.perlin_h, ds.perlin_octaves, ds.perlin_persistence, ds.use_depth_warping, ds.midas_weight, ds.near_plane, ds.far_plane, ds.fov, ds.padding_mode, ds.sampling_mode, ds.save_depth_maps, ds.video_init_path, ds.extract_nth_frame, ds.extract_from_frame, ds.extract_to_frame, ds.overwrite_extracted_frames, ds.use_mask_video, ds.video_mask_path, ds.interpolate_key_frames, ds.interpolate_x_frames, ds.resume_from_timestring, ds.resume_timestring, ds.prompts, ds.animation_prompts, ds.W, ds.H, ds.restore_faces, ds.tiling, ds.enable_hr, ds.firstphase_width, ds.firstphase_height, ds.seed, ds.sampler, ds.seed_enable_extras, ds.subseed, ds.subseed_strength, ds.seed_resize_from_w, ds.seed_resize_from_h, ds.steps, ds.ddim_eta, ds.n_batch, ds.make_grid, ds.grid_rows, ds.save_settings, ds.save_samples, ds.display_samples, ds.save_sample_per_step, ds.show_sample_per_step, ds.override_these_with_webui, ds.batch_name, ds.filename_format, ds.seed_behavior, ds.seed_iter_N, ds.use_init, ds.from_img2img_instead_of_link, ds.strength_0_no_init, ds.strength, ds.init_image, ds.use_mask, ds.use_alpha_as_mask, ds.invert_mask, ds.overlay_mask, ds.mask_file, ds.mask_contrast_adjust, ds.mask_brightness_adjust, ds.mask_overlay_blur, ds.fill, ds.full_res_mask, ds.full_res_mask_padding, ds.reroll_blank_frames, ds.skip_video_for_run_all, ds.fps, ds.output_format, ds.ffmpeg_location, ds.ffmpeg_crf, ds.ffmpeg_preset, ds.add_soundtrack, ds.soundtrack_path, ds.use_manual_settings, ds.render_steps, ds.max_video_frames, ds.path_name_modifier, ds.image_path, ds.mp4_path, ds.store_frames_in_ram, ds.frame_interpolation_engine, ds.frame_interpolation_x_amount, ds.frame_interpolation_slow_mo_amount, ds.frame_interpolation_keep_imgs, ds.parseq_manifest, ds.parseq_use_deltas, ds.hybrid_generate_inputframes, ds.hybrid_generate_human_masks, ds.hybrid_use_first_frame_as_init_image, ds.hybrid_motion, ds.hybrid_flow_method, ds.hybrid_composite, ds.hybrid_comp_mask_type, ds.hybrid_comp_mask_inverse, ds.hybrid_comp_mask_equalize, ds.hybrid_comp_mask_auto_contrast, ds.hybrid_comp_save_extra_frames, ds.hybrid_comp_alpha_schedule, ds.hybrid_comp_mask_blend_alpha_schedule, ds.hybrid_comp_mask_contrast_schedule, ds.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, ds.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, ds.i1, ds.i2, ds.i3, ds.i4, ds.i5, ds.i6, ds.i7, ds.i8, ds.i9, ds.i10, ds.i11, ds.i12, ds.i13, ds.i14, ds.i15, ds.i16, ds.i17, ds.i18, ds.i19, ds.i20, ds.i21, ds.i22, ds.i23, ds.i24, ds.i25, ds.i26, ds.i27, ds.i28, ds.i29, ds.i30, ds.i31, ds.i32, ds.i33, ds.i34, ds.i35, ds.i36, ds.i37, ds.i38, ds.i39, ds.i40, ds.i41, ds.i42, ds.i43]
 
 def pack_anim_args(args_dict):
-    return {name: args_dict[name] for name in anim_args_names}
+    return {name: args_dict[name] for name in (anim_args_names + hybrid_args_names)}
 
 def pack_args(args_dict):
     args_dict = {name: args_dict[name] for name in args_names}
