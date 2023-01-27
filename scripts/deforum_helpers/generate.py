@@ -20,29 +20,6 @@ from modules.processing import StableDiffusionProcessingTxt2Img
 import math, json, itertools
 import requests
 
-def load_img(path, shape, use_alpha_as_mask=False):
-    # use_alpha_as_mask: Read the alpha channel of the image as the mask image
-    if path.startswith('http://') or path.startswith('https://'):
-        image = Image.open(requests.get(path, stream=True).raw)
-    else:
-        image = Image.open(path)
-
-    if use_alpha_as_mask:
-        image = image.convert('RGBA')
-    else:
-        image = image.convert('RGB')
-
-    image = image.resize(shape, resample=Image.LANCZOS)
-
-    mask_image = None
-    if use_alpha_as_mask:
-        # Split alpha channel into a mask_image
-        red, green, blue, alpha = Image.Image.split(image)
-        mask_image = alpha.convert('L')
-        image = image.convert('RGB')
-
-    return image, mask_image #PIL image for auto's pipeline
-
 def load_mask_latent(mask_input, shape):
     # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
     # shape (list-like len(4)): shape of the image to match, usually latent_image.shape
@@ -127,7 +104,6 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
 
         if frame % skipFrame <= tweeningFrames: # number of tweening frames
             blendFactor = loop_args.blendFactorMax - loop_args.blendFactorSlope*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
-        
         init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
                                 shape=(args.W, args.H),
                                 use_alpha_as_mask=args.use_alpha_as_mask)
