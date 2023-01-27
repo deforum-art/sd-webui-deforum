@@ -170,7 +170,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
         init_image = Image.fromarray(img)
         image_init0 = Image.fromarray(img)
-        if args.init_image is not None and isJson(args.init_image):
+        if loop_args.useLooper and isJson(loop_args.imagesToKeyframe):
             init_image = Image.blend(init_image, init_image2, blendFactor)
             correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
             p.color_corrections = [processing.setup_color_correction(correction_colors)]
