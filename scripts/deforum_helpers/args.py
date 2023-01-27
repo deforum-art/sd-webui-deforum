@@ -863,7 +863,7 @@ def find_ffmpeg_binary():
         if os.path.exists(binaries_path):
             files = [os.path.join(binaries_path, f) for f in os.listdir(binaries_path) if f.startswith("ffmpeg-")]
             files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
-            return files[0] if files else None
+            return files[0] if files else 'ffmpeg'
     return 'ffmpeg'
 
 
