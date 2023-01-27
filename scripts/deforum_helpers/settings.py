@@ -58,7 +58,7 @@ def save_video_settings(**kwargs):
         f.write(json.dumps(video_args_dict, ensure_ascii=False, indent=4))
     return [""]
 
-def load_settings(settings_path, data):
+def load_settings(**kwargs):
     data = kwargs
     settings_path = data.pop('settings_path')
     print(f"reading custom settings from {settings_path}")
