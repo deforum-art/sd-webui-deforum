@@ -747,7 +747,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         use_mask_video, video_mask_path,
                         interpolate_key_frames, interpolate_x_frames,
                         resume_from_timestring, resume_timestring'''
-                    )
+                    ).replace("\n", "").replace(" ", "").split(',')
 hybrid_args_names =   srt(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
                         hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
                         hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames,
