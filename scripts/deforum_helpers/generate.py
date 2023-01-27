@@ -39,27 +39,6 @@ def load_mask_latent(mask_input, shape):
     mask = mask.convert("L")
     return mask
 
-def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contrast_adjust=1.0, invert_mask=False):
-    # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
-    # shape (list-like len(4)): shape of the image to match, usually latent_image.shape
-    # mask_brightness_adjust (non-negative float): amount to adjust brightness of the iamge, 
-    #     0 is black, 1 is no adjustment, >1 is brighter
-    # mask_contrast_adjust (non-negative float): amount to adjust contrast of the image, 
-    #     0 is a flat grey image, 1 is no adjustment, >1 is more contrast
-    
-    mask = load_mask_latent(mask_input, mask_shape)
-
-    # Mask brightness/contrast adjustments
-    if mask_brightness_adjust != 1:
-        mask = TF.adjust_brightness(mask, mask_brightness_adjust)
-    if mask_contrast_adjust != 1:
-        mask = TF.adjust_contrast(mask, mask_contrast_adjust)
-
-    if invert_mask:
-        mask = PIL.ImageOps.invert(mask)
-    
-    return mask
-
 def isJson(myjson):
     try:
         json.loads(myjson)
