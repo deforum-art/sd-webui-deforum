@@ -344,6 +344,7 @@ def on_ui_tabs():
                 components['save_sample_per_step'].visible = False
                 components['show_sample_per_step'].visible = False
                 components['display_samples'].visible = False
+
                
         component_list = [components[name] for name in deforum_args.component_names]
 

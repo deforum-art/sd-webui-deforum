@@ -276,8 +276,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         btn = i1 = gr.HTML("")
     
     with gr.Accordion("Info and links", open=False):
-        i2 = gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
-        i3 = gr.HTML("""<ul style="list-style-type:circle; margin-left:1em">
+        gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
+        gr.HTML("""<ul style="list-style-type:circle; margin-left:1em">
         <li>The code for this extension: <a  style="color:blue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">Fork of deforum for auto1111's webui</a>.</li>
         <li>Join the <a style="color:blue" href="https://discord.gg/deforum">official Deforum Discord</a> to share your creations and suggestions.</li>
         <li>For general usage, see the <a style="color:blue" href="https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit">User guide for Deforum v0.5</a>.</li>
@@ -291,7 +291,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         
         #TODO cleanup
         
-        i4,i5,i6,i7,i8,i9,i10,i11,i12,i13,i14,i15,i16,i17,i18,i19,i20,i21,i22,i23,i24,i25,i26,i27,i28,i29,i30,i31,i32,i33,i34,i36,i37,i38,i39,i40,i42 = [gr.HTML("", visible=False) for _ in range(37)]
+        i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13,i14,i15,i16,i17,i18,i19,i20,i21,i22,i23,i24,i25,i26,i27,i28,i29,i30,i31,i32,i33,i34,i35,i36,i37,i38,i39,i40,i41,i42,i43 = [gr.HTML("", visible=False) for _ in range(42)]
 
         
         
@@ -596,7 +596,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             hybrid_html += "<li>Mask contrast schedule is from 0-255. Normal is 1. Affects all masks.</li>"
             hybrid_html += "<li>Autocontrast low/high cutoff schedules 0-100. Low 0 High 100 is full range. <br>(<i><b>hybrid_comp_mask_auto_contrast</b> must be enabled</i>)</li></ul>"            
             hybrid_html += "See main Deforum document for more details."            
-            i41 = gr.HTML(hybrid_html)
         with gr.Accordion("Hybrid Settings", open=True):
             with gr.Row():
                 with gr.Column(variant="compact"):
@@ -642,7 +641,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 
     with gr.Tab('Video output'):
         # Video output settings START
-        i35 = gr.HTML("<p style=\"margin-bottom:0.75em\">Video output settings</p>", visible=False)
         with gr.Accordion('Video Output Settings', open=True):
             with gr.Row():
                 skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
@@ -668,7 +666,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
         with gr.Accordion('Frame Interpolation', open=False):
-            i43 = gr.HTML("""
+            gr.HTML("""
             Use RIFE and other Video Frame Interpolation methods to smooth out, slow-mo (or both) your output videos.</p>
              <p style="margin-top:1em">
                 Supported engines:
