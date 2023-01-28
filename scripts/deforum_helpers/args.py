@@ -337,13 +337,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(scale=4):
                             steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
-                    with gr.Row():
-                        seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
-                        subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
-                        subseed_strength = gr.Slider(label="subseed_strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
-                    with gr.Row():
-                        seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
-                        seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
+                    with gr.Accordion('Seed extras', open=False):
+                        with gr.Row():
+                            seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
+                            subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
+                            subseed_strength = gr.Slider(label="subseed_strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
+                        with gr.Row():
+                            seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
+                            seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
                     with gr.Row():
                         ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
                         tiling = gr.Checkbox(label='Tiling', value=False)
