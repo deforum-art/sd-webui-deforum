@@ -132,7 +132,6 @@ def run_deforum(*args, **kwargs):
         with open(video_settings_filename, "w+", encoding="utf-8") as f:
             s = {**dict(video_args.__dict__)}
             json.dump(s, f, ensure_ascii=False, indent=4)
-        ffmpeg_success = -1
         # make video
         cmd = [
             video_args.ffmpeg_location,
@@ -153,8 +152,6 @@ def run_deforum(*args, **kwargs):
         ]
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        # will change from -1 to 0 if ffmpeg video was created successfully 
-        ffmpeg_success = process.returncode
         if process.returncode != 0:
             print(stderr)
             raise RuntimeError(stderr)
