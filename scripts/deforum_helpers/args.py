@@ -320,10 +320,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             )
     
     with gr.Tab('Run'):
-        with gr.Accordion('Run from Settings file', open=False):
-            with gr.Row():
-                override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
-                custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
+        # with gr.Accordion('Run from Settings file', open=False):
+            # with gr.Row():
+                # override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
+                # custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
         # Sampling settings START
         with gr.Accordion('General Image Sampling Settings', open=True):
             with gr.Row().style(equal_height=False):
@@ -365,6 +365,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(visible=False):
                         save_sample_per_step = gr.Checkbox(label="save_sample_per_step", value=d.save_sample_per_step, interactive=True)
                         show_sample_per_step = gr.Checkbox(label="show_sample_per_step", value=False, interactive=False)
+        with gr.Accordion('Run from Settings file', open=False):
+            with gr.Row():
+                override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
+                custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
         # Batch settings 
         # with gr.Accordion('Batch Settings', open=True):
             # with gr.Row():
