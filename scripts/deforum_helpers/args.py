@@ -473,7 +473,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                 perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
         # 3D Depth Warping
-        with gr.Accordion('3D Depth Warping', open=True):
+        with gr.Accordion('3D Depth Warping', open=False):
             with gr.Row():
                 use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
             with gr.Row():
@@ -482,7 +482,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 sampling_mode = gr.Dropdown(label="sampling_mode", choices=['bicubic', 'bilinear', 'nearest'], value=da.sampling_mode, type="value", elem_id="sampling_mode", interactive=True)
                 save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
         # 3D FOV
-        with gr.Accordion('3D Field Of View (FOV)', open=True):
+        with gr.Accordion('3D Field Of View (FOV)', open=False):
             with gr.Row():
                 fov_schedule = gr.Textbox(label="fov_schedule", lines=1, value = da.fov_schedule, interactive=True)
             with gr.Row():
