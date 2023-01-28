@@ -68,11 +68,11 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     if loop_args.useLooper:
         # TODO find out why we need to set this in the init tab
         if args.strength == 0:
-            raise RuntimeError("Strength needs to be set greater than 0 in Init tab and strength_0_no_init should not be checked")
+            raise RuntimeError("Strength needs to be greater than 0 in Init tab and strength_0_no_init should *not* be checked")
         if args.seed_behavior != "schedule":
-            raise RuntimeError("seed_behavior needs to be set to schedule in Run tab")
+            raise RuntimeError("seed_behavior needs to be set to schedule in under 'Keyframes' tab --> 'Seed scheduling'")
         if not isJson(loop_args.imagesToKeyframe):
-            raise RuntimeError("Images to use for keyframe guidance is not proper json")
+            raise RuntimeError("The images set for use with keyframe-guidance are not in a proper JSON format")
         args.strength = loop_args.imageStrength
         tweeningFrames = loop_args.tweeningFrameSchedule
         blendFactor = .07

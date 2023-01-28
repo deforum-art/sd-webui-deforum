@@ -132,7 +132,6 @@ def run_deforum(*args, **kwargs):
         with open(video_settings_filename, "w+", encoding="utf-8") as f:
             s = {**dict(video_args.__dict__)}
             json.dump(s, f, ensure_ascii=False, indent=4)
-        ffmpeg_success = -1
         # make video
         cmd = [
             video_args.ffmpeg_location,
@@ -153,8 +152,6 @@ def run_deforum(*args, **kwargs):
         ]
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        # will change from -1 to 0 if ffmpeg video was created successfully 
-        ffmpeg_success = process.returncode
         if process.returncode != 0:
             print(stderr)
             raise RuntimeError(stderr)
@@ -220,7 +217,7 @@ def run_deforum(*args, **kwargs):
             save_all=True,
             append_images=imagelist[1:],
             optimize=True,
-            duration=1000/fps,
+            duration=1000/video_args.fps, #????
             loop=0
         )
         
@@ -321,39 +318,29 @@ def on_ui_tabs():
                     )
                 
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
-                # TODO either figure out how to relaunch the scripts from within
-                # or wait until Auto fixes it on their end
-                # https://github.com/AUTOMATIC1111/stable-diffusion-webui/issues/4066
+
+                
+                gr.HTML("<p>* Paths can be relative to webui folder OR full - absolute </p>")
                 with gr.Row():
-                    button_fix_notice = gr.HTML("<p>NOTE: If the 'Generate' button doesn't work, go in Settings and click 'Restart Gradio and Refresh...'.</p>")
+                    settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="General Settings File")
+                    #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
                 with gr.Row():
                     save_settings_btn = gr.Button('Save Settings', elem_id='deforum_save_settings_btn')
                     load_settings_btn = gr.Button('Load Settings', elem_id='deforum_load_settings_btn')
-                path_info = gr.HTML("<p>Path relative to the webui folder</p>")
                 with gr.Row():
-                    settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path')
-                    #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
+                    video_settings_path = gr.Textbox("deforum_video-settings.txt", elem_id='deforum_video_settings_path', label="Video Settings File")
+                    #reuse_latest_video_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_video_settings_btn')#TODO
                 with gr.Row():
                     save_video_settings_btn = gr.Button('Save Video Settings', elem_id='deforum_save_video_settings_btn')
                     load_video_settings_btn = gr.Button('Load Video Settings', elem_id='deforum_load_video_settings_btn')
-                path_info = gr.HTML("<p>Path relative to the webui folder</p>")
-                with gr.Row():
-                    video_settings_path = gr.Textbox("deforum_video-settings.txt", elem_id='deforum_video_settings_path')
-                    #reuse_latest_video_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_video_settings_btn')#TODO
 
-                components['override_these_with_webui'].visible = False
-                components['prompts'].visible = False#hide prompts for the time being
+                # components['prompts'].visible = False#hide prompts for the time being
                 #TODO clean up the code
                 components['save_sample_per_step'].visible = False
                 components['show_sample_per_step'].visible = False
                 components['display_samples'].visible = False
-                components['i28'].visible = False
-                components['i29'].visible = False
-                components['i30'].visible = False
-                components['fov'].visible = False
-                components['near_plane'].visible = False
-                components['far_plane'].visible = False
 
+               
         component_list = [components[name] for name in deforum_args.component_names]
 
         submit.click(

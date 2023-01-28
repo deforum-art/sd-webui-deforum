@@ -3,6 +3,7 @@ import os
 from PIL import Image, ImageOps
 import cv2
 import numpy as np
+import socket
 import torchvision.transforms.functional as TF
 
 def load_img(path : str, shape=None, use_alpha_as_mask=False):
@@ -35,7 +36,17 @@ def load_img(path : str, shape=None, use_alpha_as_mask=False):
 def load_image(image_path :str):
     image = None
     if image_path.startswith('http://') or image_path.startswith('https://'):
-        response = requests.get(image_path, stream=True)
+        try:
+            host = socket.gethostbyname("www.google.com")
+            s = socket.create_connection((host, 80), 2)
+            s.close()
+        except:
+            raise ConnectionError("There is no active internet connection available - please use local masks and init files only.")
+        
+        try:
+            response = requests.get(image_path, stream=True)
+        except requests.exceptions.RequestException as e:
+            raise ConnectionError("Failed to download image due to no internet connection. Error: {}".format(e))
         if response.status_code == 404 or response.status_code != 200:
             raise ConnectionError("Init image url or mask image url is not valid")
         image = Image.open(response.raw).convert('RGB')

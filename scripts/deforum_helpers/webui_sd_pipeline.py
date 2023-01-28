@@ -10,7 +10,6 @@ def get_webui_sd_pipeline(args, root, frame):
     p = StableDiffusionProcessingImg2Img(
         sd_model=sd_model,
         outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
-        outpath_grids = opts.outdir_grids or opts.outdir_img2img_grids,
         #we'll setup the rest later
     )
     
@@ -20,11 +19,9 @@ def get_webui_sd_pipeline(args, root, frame):
     p.seed = args.seed
     p.sampler_name = args.sampler
     p.batch_size = args.n_batch
-    p.restore_faces = args.restore_faces
     p.tiling = args.tiling
-    p.enable_hr = args.enable_hr
-    p.firstphase_width = args.firstphase_width
-    p.firstphase_height = args.firstphase_height
+    # p.firstphase_width = args.firstphase_width
+    # p.firstphase_height = args.firstphase_height
     p.seed_enable_extras = args.seed_enable_extras
     p.subseed = args.subseed
     p.subseed_strength = args.subseed_strength
@@ -37,7 +34,6 @@ def get_webui_sd_pipeline(args, root, frame):
     p.height = args.H
     p.seed = args.seed
     p.do_not_save_samples = not args.save_sample_per_step
-    p.do_not_save_grid = not args.make_grid
     p.sampler_name = args.sampler
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
@@ -52,6 +48,5 @@ def get_webui_sd_pipeline(args, root, frame):
     if root.color_corrections is not None:
         p.color_corrections = root.color_corrections
     p.outpath_samples = root.outpath_samples
-    p.outpath_grids = root.outpath_samples
 
     return p
