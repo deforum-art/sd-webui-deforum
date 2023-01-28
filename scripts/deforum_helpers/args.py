@@ -865,7 +865,7 @@ html_count = 44
 
 
 html_trash = [f"i{n}" for n in range(1, html_count+1)]
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['prompts', 'animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + html_trash + loop_args_names
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['prompts', 'animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names + html_trash
 settings_component_names = [name for name in component_names if name not in video_args_names and name not in html_trash]
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
