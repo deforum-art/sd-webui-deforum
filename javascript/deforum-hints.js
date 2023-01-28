@@ -98,7 +98,7 @@ deforum_titles = {
     "mask_contrast_adjust": "adjust the brightness of the mask. Should be a positive number, with 1.0 meaning no adjustment.",
     "overlay_mask": "Overlay the masked image at the end of the generation so it does not get degraded by encoding and decoding",
     "mask_overlay_blur": "Blur edges of final overlay mask, if used. Minimum = 0 (no blur)",
-    "video_init_path": "the directory at which your video file is located for Video Input mode only.",
+    "video_init_path": "the directory \/ URL at which your video file is located for Video Input mode only",
     "extract_nth_frame": "during the run sequence, only frames specified by this value will be extracted, saved, and diffused upon. A value of 1 indicates that every frame is to be accounted for. Values of 2 will use every other frame for the sequence. Higher values will skip that number of frames respectively.",
 	"extract_from_frame":"start extracting the input video only from this frame number",
 	"extract_to_frame": "stop the extraction of the video at this frame number. -1 for no limits",
