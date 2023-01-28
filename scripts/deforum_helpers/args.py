@@ -176,8 +176,8 @@ def DeforumArgs():
     filename_format = "{timestring}_{index}_{prompt}.png" #@param ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
     seed_behavior = "iter" #@param ["iter","fixed","random","ladder","alternate","schedule"]
     seed_iter_N = 1 #@param {type:'integer'}
-    make_grid = False #@param {type:"boolean"}
-    grid_rows = 2 #@param 
+    # make_grid = False #@param {type:"boolean"}
+    # grid_rows = 2 #@param 
     outdir = ""#get_output_folder(output_path, batch_name)
 
     #@markdown **Init Settings**
@@ -325,8 +325,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
                 n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0)
-                make_grid = gr.Checkbox(label="make_grid", value=d.make_grid, interactive=True)
-                grid_rows = gr.Number(label="grid_rows", value=d.n_batch, interactive=True, precision=0)
             with gr.Row():
                 tiling = gr.Checkbox(label='Tiling', value=False)
             with gr.Row():
@@ -719,7 +717,7 @@ args_names =    str(r'''W, H, tiling, firstphase_width, firstphase_height,
                         seed, sampler,
                         seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h,
                         steps, ddim_eta,
-                        n_batch, make_grid, grid_rows,
+                        n_batch,
                         save_settings, save_samples, display_samples,
                         save_sample_per_step, show_sample_per_step, override_these_with_webui,
                         batch_name, filename_format,
