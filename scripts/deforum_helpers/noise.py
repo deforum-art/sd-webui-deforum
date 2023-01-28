@@ -48,8 +48,8 @@ def condition_noise_mask(noise_mask, invert_mask = False):
 
 def add_noise(sample, noise_amt: float, seed: int, noise_type: str, noise_args, noise_mask = None, invert_mask = False):
     deforum_noise_gen.manual_seed(seed) # Reproducibility
-    sample2dshape = (sample.shape[1], sample.shape[0]) #sample is cv2, so height - width
-    noise = torch.randn((sample.shape[2], sample.shape[1], sample.shape[0]), generator=deforum_noise_gen) # White noise
+    sample2dshape = (sample.shape[0], sample.shape[1]) #sample is cv2, so height - width
+    noise = torch.randn((sample.shape[2], sample.shape[0], sample.shape[1]), generator=deforum_noise_gen) # White noise
     if noise_type == 'perlin':
         # rand_perlin_2d_octaves is between -1 and 1, so we need to shift it to be between 0 and 1
         # print(sample.shape)
