@@ -26,7 +26,6 @@ def DeforumAnimArgs():
     animation_mode = '2D' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
     max_frames = 120 #@param {type:"number"}
     border = 'replicate' #@param ['wrap', 'replicate'] {type:'string'}
-
     #@markdown ####**Motion Parameters:**
     angle = "0:(0)"#@param {type:"string"}
     zoom = "0:(1.02+0.02*sin(2*3.14*t/20))"#@param {type:"string"}
@@ -47,7 +46,7 @@ def DeforumAnimArgs():
     cfg_scale_schedule = "0: (7)"
     enable_steps_scheduling = False#@param {type:"boolean"}
     steps_schedule = "0: (25)"#@param {type:"string"}
-    fov_schedule = "0: (40)"
+    fov_schedule = "0: (70)"
     near_schedule = "0: (200)"
     far_schedule = "0: (10000)"
     seed_schedule = "0: (t%4294967293)"
@@ -428,7 +427,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
             with gr.Row():
                 midas_weight = gr.Number(label="midas_weight", value=da.midas_weight, interactive=True)
-
                 padding_mode = gr.Dropdown(label="padding_mode", choices=['border', 'reflection', 'zeros'], value=da.padding_mode, type="value", elem_id="padding_mode", interactive=True)
                 sampling_mode = gr.Dropdown(label="sampling_mode", choices=['bicubic', 'bilinear', 'nearest'], value=da.sampling_mode, type="value", elem_id="sampling_mode", interactive=True)
                 save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
@@ -470,7 +468,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 steps_schedule = gr.Textbox(label="steps_schedule", lines=1, value = da.steps_schedule, interactive=True)
         with gr.Accordion('Seed Scheduling', open=False):
             with gr.Row():
-                
+                gr.HTML("Please set seed_behavior (under run->batch settings) to 'Schedule' for this option to become active")
+            with gr.Row():
                 seed_schedule = gr.Textbox(label="seed_schedule", lines=1, value = da.seed_schedule, interactive=True)
         # Sampler Scheduling
         with gr.Accordion('Sampler Scheduling', open=False):
@@ -484,7 +483,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 enable_checkpoint_scheduling = gr.Checkbox(label="enable_checkpoint_scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
             with gr.Row():
                 checkpoint_schedule = gr.Textbox(label="checkpoint_schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
-        
         # Parseq
         with gr.Accordion('Parseq', open=False):
             gr.HTML("""
