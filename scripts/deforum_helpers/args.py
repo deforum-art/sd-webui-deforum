@@ -761,14 +761,10 @@ video_args_names =  str(r'''skip_video_for_run_all,
                     ).replace("\n", "").replace(" ", "").split(',')
 parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
                     ).replace("\n", "").replace(" ", "").split(',')
-html_count = 43
 
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names
 
-html_trash = [f"i{n}" for n in range(1, html_count+1)]
-# component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['prompts', 'animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + html_trash
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + html_trash
-
-settings_component_names = [name for name in component_names if name not in video_args_names and name not in html_trash]
+settings_component_names = [name for name in component_names if name not in video_args_names]
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
     ds = setup_deforum_setting_dictionary(self, is_img2img, is_extension)
