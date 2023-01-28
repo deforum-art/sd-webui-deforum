@@ -398,6 +398,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             <li>The 1st and last keyframe images should match.</li>
                             <li>Set your total number of keyframes to be 21 more than the last inserted keyframe image. <br />
                                 Example: Default args should use 221 as total keyframes.</li>
+                            <li>Prompts are stored in JSON format. If you've got an error, check it in validator, <a style="color:SteelBlue" href="https://odu.github.io/slingjsonlint/">like here</a></li>
                         </ul>
                     """)
             with gr.Row():
@@ -548,6 +549,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 <li>Please always keep values in math functions above 0.</li>
                 <li>There is *no* Batch mode like in vanilla deforum. Please Use the txt2img tab for that.</li>
                 <li>For negative prompts, please write your positive prompt, then --neg ugly, text, assymetric, or any other negative tokens of your choice.</li>
+                <li>Prompts are stored in JSON format. If you've got an error, check it in validator, <a style="color:SteelBlue" href="https://odu.github.io/slingjsonlint/">like here</a></li>
                 </ul>
                 """)
             with gr.Row():
