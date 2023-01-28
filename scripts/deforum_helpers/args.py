@@ -339,6 +339,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                         with gr.Column(scale=4):
                             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
+                            batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
+                            with gr.Row(visible=False):
+                                # batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
+                                filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format, visible=False)
                     with gr.Accordion('Subseed controls & More', open=False):
                         with gr.Row():
                             seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
@@ -362,11 +366,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         save_sample_per_step = gr.Checkbox(label="save_sample_per_step", value=d.save_sample_per_step, interactive=True)
                         show_sample_per_step = gr.Checkbox(label="show_sample_per_step", value=False, interactive=False)
         # Batch settings 
-        with gr.Accordion('Batch Settings', open=True):
-            with gr.Row():
-                batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
-            with gr.Row():    
-                filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format)
+        # with gr.Accordion('Batch Settings', open=True):
+            # with gr.Row():
+                # batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
+            # with gr.Row(visible=False):    
+                # filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format, visible=False)
         # output - made in run
     # Animation settings 'Key' tab
     with gr.Tab('Keyframes'):
