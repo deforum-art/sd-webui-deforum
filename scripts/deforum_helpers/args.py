@@ -325,9 +325,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0)
             with gr.Row():
                 tiling = gr.Checkbox(label='Tiling', value=False)
-            with gr.Row():
+            # NOT VISIBLE IN THE UI!
+            with gr.Row(visible=False):
                 save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
-            with gr.Row():
+            # NOT VISIBLE IN THE UI!
+            with gr.Row(visible=False):
                 save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
                 display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
             with gr.Row():
