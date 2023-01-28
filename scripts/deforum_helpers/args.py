@@ -379,6 +379,47 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input', 'Interpolation'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
                 max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0)
                 border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
+        # loopArgs
+        with gr.Accordion('Guided Images', open=False):
+            gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
+                       Set the keyframes and the images that you want to show up. 
+                       Note: the number of frames between each keyframe should be greater than the tweening frames.""")
+            #    In later versions this should be also in the strength schedule, but for now you need to set it.
+            gr.HTML("""Prerequisites: 
+                       <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                           <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
+                           <li>Set Run tab's seed_behavior to schedule.</li>
+                        </ul>
+                    """)
+            gr.HTML("""Looping recommendations: 
+                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                            <li>seed_schedule should start and end on the same seed. <br />
+                                Example: seed_schedule could use 0:(5), 1:(-1), 219:(-1), 220:(5)</li>
+                            <li>The 1st and last keyframe images should match.</li>
+                            <li>Set your total number of keyframes to be 21 more than the last inserted keyframe image. <br />
+                                Example: Default args should use 221 as total keyframes.</li>
+                        </ul>
+                    """)
+            with gr.Row():
+                use_looper = gr.Checkbox(label="Use guided images for the next run", value=False, interactive=True)
+            with gr.Row():
+                init_images = gr.Textbox(label="Images to use for keyframe guidance", lines=13, value = keyframeExamples(), interactive=True)
+            gr.HTML("""strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on""")
+            with gr.Row():
+                image_strength_schedule = gr.Textbox(label="Image strength schedule", lines=1, value = "0:(.75)", interactive=True)
+            gr.HTML("""blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))""")
+            with gr.Row():
+                blendFactorMax = gr.Textbox(label="blendFactorMax", lines=1, value = "0:(.35)", interactive=True)
+            with gr.Row():
+                blendFactorSlope = gr.Textbox(label="blendFactorSlope", lines=1, value = "0:(.25)", interactive=True)
+            with gr.Row():
+                gr.HTML("""number of frames this will calculated over. After each insersion frame.""")
+            with gr.Row():
+                tweening_frames_schedule = gr.Textbox(label="tweening frames schedule", lines=1, value = "0:(20)", interactive=True)
+            with gr.Row():
+                gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
+            with gr.Row():
+                color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
         # 2D + 3D Motion
         with gr.Accordion('2D + 3D Motion', open=True):
             with gr.Row():
@@ -530,47 +571,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 parseq_manifest = gr.Textbox(label="Parseq Manifest (JSON or URL)", lines=4, value = dp.parseq_manifest, interactive=True)
             with gr.Row():
                 parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
-        # loopArgs
-        with gr.Accordion('Guided Images', open=False):
-            gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
-                       Set the keyframes and the images that you want to show up. 
-                       Note: the number of frames between each keyframe should be greater than the tweening frames.""")
-            #    In later versions this should be also in the strength schedule, but for now you need to set it.
-            gr.HTML("""Prerequisites: 
-                       <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                           <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
-                           <li>Set Run tab's seed_behavior to schedule.</li>
-                        </ul>
-                    """)
-            gr.HTML("""Looping recommendations: 
-                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                            <li>seed_schedule should start and end on the same seed. <br />
-                                Example: seed_schedule could use 0:(5), 1:(-1), 219:(-1), 220:(5)</li>
-                            <li>The 1st and last keyframe images should match.</li>
-                            <li>Set your total number of keyframes to be 21 more than the last inserted keyframe image. <br />
-                                Example: Default args should use 221 as total keyframes.</li>
-                        </ul>
-                    """)
-            with gr.Row():
-                use_looper = gr.Checkbox(label="Use guided images for the next run", value=False, interactive=True)
-            with gr.Row():
-                init_images = gr.Textbox(label="Images to use for keyframe guidance", lines=13, value = keyframeExamples(), interactive=True)
-            gr.HTML("""strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on""")
-            with gr.Row():
-                image_strength_schedule = gr.Textbox(label="Image strength schedule", lines=1, value = "0:(.75)", interactive=True)
-            gr.HTML("""blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))""")
-            with gr.Row():
-                blendFactorMax = gr.Textbox(label="blendFactorMax", lines=1, value = "0:(.35)", interactive=True)
-            with gr.Row():
-                blendFactorSlope = gr.Textbox(label="blendFactorSlope", lines=1, value = "0:(.25)", interactive=True)
-            with gr.Row():
-                gr.HTML("""number of frames this will calculated over. After each insersion frame.""")
-            with gr.Row():
-                tweening_frames_schedule = gr.Textbox(label="tweening frames schedule", lines=1, value = "0:(20)", interactive=True)
-            with gr.Row():
-                gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
-            with gr.Row():
-                color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
     # Animation settings END
     
     # Prompts settings START    
