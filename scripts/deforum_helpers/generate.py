@@ -42,6 +42,13 @@ def isJson(myjson):
         return False
     return True
 
+# Add pairwise implementation here not to upgrade
+# the whole python to 3.10 just for one function
+def pairwise_repl(iterable):
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
 def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, sampler_name=None):
     assert args.prompt is not None
     
@@ -80,7 +87,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         
         #find which frame to do our swapping on for tweening
         skipFrame = 25
-        for fs, fe in itertools.pairwise(framesToImageSwapOn):
+        for fs, fe in pairwise_repl(framesToImageSwapOn):
             if fs <= frame <= fe:
                 skipFrame = fe - fs
 
