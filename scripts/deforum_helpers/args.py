@@ -402,15 +402,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # General Settings
         with gr.Accordion('General Settings', open=True):
             with gr.Row():
-                noise_schedule = gr.Textbox(label="noise_schedule", lines=1, value = da.noise_schedule, interactive=True)
-            with gr.Row():
                 strength_schedule = gr.Textbox(label="strength_schedule", lines=1, value = da.strength_schedule, interactive=True)
             with gr.Row():
                 contrast_schedule = gr.Textbox(label="contrast_schedule", lines=1, value = da.contrast_schedule, interactive=True)
             with gr.Row():
                 cfg_scale_schedule = gr.Textbox(label="cfg_scale_schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
         # Coherence
-        with gr.Accordion('Cohherence', open=True):
+        with gr.Accordion('Coherence', open=True):
             with gr.Row():
                 # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                 reroll_blank_frames = gr.Dropdown(label="reroll_blank_frames", choices=['reroll', 'interrupt', 'ignore'], value=d.reroll_blank_frames, type="value", elem_id="reroll_blank_frames", interactive=True)
@@ -422,6 +420,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 diffusion_cadence = gr.Number(label="diffusion_cadence", value=1, interactive=True)
         # Noise
         with gr.Accordion('Noise', open=True):
+            with gr.Row():
+                noise_schedule = gr.Textbox(label="noise_schedule", lines=1, value = da.noise_schedule, interactive=True)
             with gr.Row():
                 noise_type = gr.Dropdown(label="noise_type", choices=['uniform', 'perlin'], value=da.noise_type, type="value", elem_id="noise_type", interactive=True)
             with gr.Row():
