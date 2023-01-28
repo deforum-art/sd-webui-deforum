@@ -115,10 +115,6 @@ def DeforumAnimArgs():
     hybrid_comp_mask_auto_contrast = False #@param {type:"boolean"}
     hybrid_comp_save_extra_frames = False #@param {type:"boolean"}
 
-    #@markdown ####**Interpolation:**
-    interpolate_key_frames = False #@param {type:"boolean"}
-    interpolate_x_frames = 4 #@param {type:"number"}
-    
     #@markdown ####**Resume Animation:**
     resume_from_timestring = False #@param {type:"boolean"}
     resume_timestring = "20220829210106" #@param {type:"string"}
@@ -274,19 +270,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     else:
         btn = i1 = gr.HTML("")
     
-    with gr.Accordion("Info and links", open=False):
+    with gr.Accordion("Info, Link and Help", open=False):
         gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
         gr.HTML("""<ul style="list-style-type:circle; margin-left:1em">
-        <li>The code for this extension: <a  style="color:blue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">Fork of deforum for auto1111's webui</a>.</li>
-        <li>Join the <a style="color:blue" href="https://discord.gg/deforum">official Deforum Discord</a> to share your creations and suggestions.</li>
-        <li>For general usage, see the <a style="color:blue" href="https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit">User guide for Deforum v0.5</a>.</li>
-        <li>For advanced animations, see the <a style="color:blue" href="https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing">Math keyframing explanation</a>.</li>
-        <li>Alternatively, use <a style="color:blue" href="https://sd-parseq.web.app/deforum">sd-parseq</a> as a UI to define your animation schedules (see the Parseq section in the Keyframes tab).</li>
-        <li><a style="color:blue" href="https://www.framesync.xyz/">framesync.xyz</a> is also a good option, it makes compact math formulae for Deforum keyframes by selecting various waveforms.</li>
-        <li>The other site allows for making keyframes using <a style="color:blue" href="https://www.chigozie.co.uk/keyframe-string-generator/">interactive splines and Bezier curves</a> (select Disco output format).</li>
-        <li>After the 2022-12-30 update, the default noise type is <a style="color:blue" href="https://en.wikipedia.org/wiki/Perlin_noise">Perlin noise</a> due to its great frame coherence improvements. If you want to use the old noise and replicate the previous settings, set the type to "uniform" in the Keyframes tab.</li>
+        <li>The code for this extension: <a  style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">Here</a>.</li>
+        <li>Join the <a style="color:SteelBlue" href="https://discord.gg/deforum">official Deforum Discord</a> to share your creations and suggestions.</li>
+        <li>Official Deforum Wiki for FAQ and guides: <a style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki">here</a>.</li>
+        <li>For advanced keyframing with Math functions, see <a style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/Maths-in-Deforum">here</a>.</li>
+        <li>Alternatively, use <a style="color:SteelBlue" href="https://sd-parseq.web.app/deforum">sd-parseq</a> as a UI to define your animation schedules (see the Parseq section in the Keyframes tab).</li>
+        <li><a style="color:SteelBlue" href="https://www.framesync.xyz/">framesync.xyz</a> is also a good option, it makes compact math formulae for Deforum keyframes by selecting various waveforms.</li>
+        <li>The other site allows for making keyframes using <a style="color:SteelBlue" href="https://www.chigozie.co.uk/keyframe-string-generator/">interactive splines and Bezier curves</a> (select Disco output format).</li>
+        <li>After the 2022-12-30 update, the default noise type is <a style="color:SteelBlue" href="https://en.wikipedia.org/wiki/Perlin_noise">Perlin noise</a> due to its great frame coherence improvements. If you want to use the old noise and replicate the previous settings, set the type to "uniform" in the Keyframes tab.</li>
         </ul>
-        <italic>If you liked this extension, please <a style="color:blue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">give it a star on GitHub</a>!</italic> 😊""")
+        <italic>If you liked this extension, please <a style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">give it a star on GitHub</a>!</italic> 😊""")
   
     if not is_extension:
         def show_vid():
@@ -346,9 +342,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 save_sample_per_step = gr.Checkbox(label="save_sample_per_step", value=d.save_sample_per_step, interactive=True)
                 show_sample_per_step = gr.Checkbox(label="show_sample_per_step", value=False, interactive=False)
-        # Sampling settings END
-        
-        # Batch settings START
+        # Batch settings 
         with gr.Accordion('Batch Settings', open=True):
             with gr.Row():
                 batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
@@ -358,9 +352,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
                 seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
         # output - made in run
-        # Batch settings END
-        
-    # Animation settings START
+    # Animation settings 'Key' tab
     with gr.Tab('Keyframes'):
         #TODO make a some sort of the original dictionary parsing
         # Main top animation settings
@@ -463,7 +455,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # Steps Scheduling
         with gr.Accordion('Steps Scheduling', open=False):
             with gr.Row():
-                enable_steps_scheduling = gr.Checkbox(label="enable steps scheduling.", value=da.enable_steps_scheduling, interactive=True)
+                enable_steps_scheduling = gr.Checkbox(label="enable steps scheduling", value=da.enable_steps_scheduling, interactive=True)
             with gr.Row():
                 steps_schedule = gr.Textbox(label="steps_schedule", lines=1, value = da.steps_schedule, interactive=True)
         with gr.Accordion('Seed Scheduling', open=False):
@@ -516,7 +508,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     with gr.Tab('Prompts'):
             gr.HTML("""
                 <p><b>Important notes and changes from regular vanilla deforum:</b></p>
-                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0.2em">
                 <li>Please always keep values in math functions above 0.</li>
                 <li>There is *no* Batch mode like in vanilla deforum. Please Use the txt2img tab for that.</li>
                 <li>For negative prompts, please write your positive prompt, then --neg ugly, text, assymetric, or any other negative tokens of your choice.</li>
@@ -532,7 +524,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Accordion('Image Init', open=True):
             with gr.Row():
                 use_init = gr.Checkbox(label="use_init", value=d.use_init, interactive=True, visible=True)
-                from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=True)
+                # Need to REMOVE?
+                from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
             with gr.Row():
                 strength_0_no_init = gr.Checkbox(label="strength_0_no_init", value=True, interactive=True)
                 strength = gr.Slider(label="strength", minimum=0, maximum=1, step=0.02, value=0, interactive=True)
@@ -568,18 +561,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 use_mask_video = gr.Checkbox(label="use_mask_video", value=False, interactive=True)
             with gr.Row():
                 video_mask_path = gr.Textbox(label="video_mask_path", lines=1, value = da.video_mask_path, interactive=True)
-        gr.HTML("<p style=\"margin-bottom:0.75em\">Interpolation (turned off atm)</p>", visible=False)
-        with gr.Accordion('Interpolation Mode', open=False, visible=False):
-            with gr.Row():
-                interpolate_key_frames = gr.Checkbox(label="interpolate_key_frames", value=da.interpolate_key_frames, interactive=False, visible = False)
-                interpolate_x_frames = gr.Number(label="interpolate_x_frames", value=da.interpolate_x_frames, interactive=False, precision=0, visible = False)#TODO
-        # THIS IS NOT VISIBLE BUT IN USE IN OTHER TAB?
-        with gr.Accordion('Interpolation Mode', open=True, visible=False):
+        with gr.Accordion('Resume Animation', open=False):
             with gr.Row():
                 resume_from_timestring = gr.Checkbox(label="resume_from_timestring", value=da.resume_from_timestring, interactive=True)
                 resume_timestring = gr.Textbox(label="resume_timestring", lines=1, value = da.resume_timestring, interactive=True)
-        # Init settings END
-
+    # HYBRID VIDEO tab
     with gr.Tab('Hybrid Video'):
         
         # gr.HTML(hybrid_html)
@@ -596,7 +582,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             hybrid_html += "<li>The <b>hybrid_comp_mask_blend_alpha_schedule</b> only affects the 'Blend' <b>hybrid_comp_mask_type</b>.</li>"
             hybrid_html += "<li>Mask contrast schedule is from 0-255. Normal is 1. Affects all masks.</li>"
             hybrid_html += "<li>Autocontrast low/high cutoff schedules 0-100. Low 0 High 100 is full range. <br>(<i><b>hybrid_comp_mask_auto_contrast</b> must be enabled</i>)</li></ul>"            
-            hybrid_html += "<a style='color:blue;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/Animation-Settings#hybrid-video-mode-for-2d3d-animations'>Click Here</a> for more info/ a Guide."      
+            hybrid_html += "<a style='color:SteelBlue;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/Animation-Settings#hybrid-video-mode-for-2d3d-animations'>Click Here</a> for more info/ a Guide."      
             gr.HTML(hybrid_html)
         with gr.Accordion("Hybrid Settings", open=True):
             with gr.Row():
@@ -628,7 +614,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Column(variant="compact"):
                     hybrid_comp_save_extra_frames = gr.Checkbox(label="hybrid_comp_save_extra_frames", value=False, interactive=True)
 
-        # hybrid_html = "<p style=\"margin-bottom:0.75em\"><b>Hybrid Video Schedules</b></p>"
         with gr.Accordion("Hybrid Schedules", open=False):
             with gr.Row():
                 hybrid_comp_alpha_schedule = gr.Textbox(label="hybrid_comp_alpha_schedule", lines=1, value = da.hybrid_comp_alpha_schedule, interactive=True)
@@ -640,9 +625,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 hybrid_comp_mask_auto_contrast_cutoff_high_schedule = gr.Textbox(label="hybrid_comp_mask_auto_contrast_cutoff_high_schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, interactive=True)
             with gr.Row():
                 hybrid_comp_mask_auto_contrast_cutoff_low_schedule = gr.Textbox(label="hybrid_comp_mask_auto_contrast_cutoff_low_schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, interactive=True)
-
+    # VIDEO OUTPUT TAB
     with gr.Tab('Video output'):
-        # Video output settings START
         with gr.Accordion('Video Output Settings', open=True):
             with gr.Row():
                 skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
@@ -656,7 +640,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 soundtrack_path = gr.Textbox(label="soundtrack_path", lines=1, interactive=True, value = dv.soundtrack_path)
             with gr.Row():
                 use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
-                render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True)
+                # rend_step Never worked - set to visible false 28-1-23
+                render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True, visible=False)
             with gr.Row():
                 max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
                 path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True)
@@ -695,7 +680,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 frame_interpolation_slow_mo_amount = gr.Dropdown(label="frame_interpolation_slow_mo_amount", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
             with gr.Row():
                 frame_interpolation_keep_imgs = gr.Checkbox(label="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)       
-        # Video output settings END
+    # END OF UI TABS
     return locals()
 
 ### SETTINGS STORAGE UPDATE! 2023-01-27
@@ -727,7 +712,6 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         padding_mode, sampling_mode, save_depth_maps,
                         video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames,
                         use_mask_video, video_mask_path,
-                        interpolate_key_frames, interpolate_x_frames,
                         resume_from_timestring, resume_timestring'''
                     ).replace("\n", "").replace(" ", "").split(',')
 hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
