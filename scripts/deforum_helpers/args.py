@@ -314,7 +314,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 from modules.sd_samplers import samplers_for_img2img
                 sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
             with gr.Row():
-                seed_enable_extras = gr.Checkbox(label="Enable extras", value=False)
+                seed_enable_extras = gr.Checkbox(label="Enable subseed controls:", value=False)
                 subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
                 subseed_strength = gr.Slider(label="subseed_strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
             with gr.Row():
