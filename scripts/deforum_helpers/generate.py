@@ -59,7 +59,14 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     init_image = None
     image_init0 = None
 
-    if loop_args.useLooper and isJson(loop_args.imagesToKeyframe):
+    if loop_args.useLooper:
+        # TODO find out why we need to set this in the init tab
+        if args.strength == 0:
+            raise RuntimeError("Strength needs to be set greater than 0 in Init tab and strength_0_no_init should not be checked")
+        if args.seed_behavior != "schedule":
+            raise RuntimeError("seed_behavior needs to be set to schedule in Run tab")
+        if not isJson(loop_args.imagesToKeyframe):
+            raise RuntimeError("Images to use for keyframe guidance is not proper json")
         args.strength = loop_args.imageStrength
         tweeningFrames = loop_args.tweeningFrameSchedule
         blendFactor = .07
@@ -83,6 +90,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                                 shape=(args.W, args.H),
                                 use_alpha_as_mask=args.use_alpha_as_mask)
         image_init0 = list(jsonImages.values())[0]
+            
     else: # they passed in a single init image
         image_init0 = args.init_image
 
