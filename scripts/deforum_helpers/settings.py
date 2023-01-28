@@ -5,7 +5,7 @@ import deforum_helpers.args as deforum_args
 from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 import logging
 
-def load_args(args_dict,anim_args_dict, parseq_args_dict, custom_settings_file, root, loop_args_dict):
+def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
     if not os.path.isfile(custom_settings_file):
         print('The custom settings file does not exist. The in-notebook settings will be used instead')
