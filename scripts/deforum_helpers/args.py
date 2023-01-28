@@ -366,9 +366,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
             with gr.Row():    
                 filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format)
-            with gr.Row():
-                seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
-                seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
         # output - made in run
     # Animation settings 'Key' tab
     with gr.Tab('Keyframes'):
@@ -530,7 +527,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 steps_schedule = gr.Textbox(label="steps_schedule", lines=1, value = da.steps_schedule, interactive=True)
         with gr.Accordion('Seed Scheduling', open=False):
             with gr.Row():
-                gr.HTML("Please set seed_behavior (under run->batch settings) to 'Schedule' for this option to become active")
+                seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
+                seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
+            with gr.Row():
+                gr.HTML("Please set seed_behavior to 'Schedule' for this option to become active")
             with gr.Row():
                 seed_schedule = gr.Textbox(label="seed_schedule", lines=1, value = da.seed_schedule, interactive=True)
         # Sampler Scheduling
@@ -599,6 +599,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 strength = gr.Slider(label="strength", minimum=0, maximum=1, step=0.02, value=0, interactive=True)
             with gr.Row():
                 init_image = gr.Textbox(label="init_image", lines=1, interactive=True, value = d.init_image)
+        with gr.Accordion('Mask Init', open=True):
             with gr.Row():
                 use_mask = gr.Checkbox(label="use_mask", value=d.use_mask, interactive=True)
                 use_alpha_as_mask = gr.Checkbox(label="use_alpha_as_mask", value=d.use_alpha_as_mask, interactive=True)
@@ -618,7 +619,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 full_res_mask = gr.Checkbox(label="full_res_mask", value=d.full_res_mask, interactive=True)
                 full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="full_res_mask_padding", value=d.full_res_mask_padding, interactive=True)
         # Video Init
-        with gr.Accordion('Video Init', open=False):
+        with gr.Accordion('Video Init', open=True):
             with gr.Row():
                 video_init_path = gr.Textbox(label="video_init_path", lines=1, value = da.video_init_path, interactive=True)
             with gr.Row():
