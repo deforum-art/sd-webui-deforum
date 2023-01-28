@@ -314,14 +314,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 from modules.sd_samplers import samplers_for_img2img
                 sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
             with gr.Row():
+                steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
+            with gr.Row():
                 seed_enable_extras = gr.Checkbox(label="Enable subseed controls:", value=False)
                 subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
                 subseed_strength = gr.Slider(label="subseed_strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
             with gr.Row():
                 seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
                 seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
-            with gr.Row():
-                steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
             with gr.Row():
                 ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
                 n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0)
