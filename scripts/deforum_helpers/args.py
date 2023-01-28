@@ -49,7 +49,7 @@ def DeforumAnimArgs():
     fov_schedule = "0: (70)"
     near_schedule = "0: (200)"
     far_schedule = "0: (10000)"
-    seed_schedule = "0: (t%4294967293)"
+    seed_schedule = "0:(5), 1:(-1), 219:(-1), 220:(5)"
     
     # Sampler Scheduling
     enable_sampler_scheduling = False #@param {type:"boolean"}
