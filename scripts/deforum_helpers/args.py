@@ -724,7 +724,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     mp4_path = gr.Textbox(label="mp4_path", lines=1, interactive=True, value = dv.mp4_path)
             with gr.Row():
                 store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
-        with gr.Accordion('Frame Interpolation (RIFE)', open=False):
+        with gr.Accordion('Frame Interpolation (RIFE)', open=True):
             gr.HTML("""
             Use RIFE and other Video Frame Interpolation methods to smooth out, slow-mo (or both) your output videos.</p>
              <p style="margin-top:1em">
