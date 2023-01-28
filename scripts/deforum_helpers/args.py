@@ -300,8 +300,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
         # Sampling settings START
         with gr.Accordion('General Image Sampling Settings', open=True):
-            # NEED THIS?!
-            override_these_with_webui = gr.Checkbox(label="override_these_with_webui", value=False, interactive=True, visible=False)
             with gr.Row():
                 W = gr.Slider(label="W", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
             with gr.Row():
@@ -719,7 +717,7 @@ args_names =    str(r'''W, H, tiling, firstphase_width, firstphase_height,
                         steps, ddim_eta,
                         n_batch,
                         save_settings, save_samples, display_samples,
-                        save_sample_per_step, show_sample_per_step, override_these_with_webui,
+                        save_sample_per_step, show_sample_per_step, 
                         batch_name, filename_format,
                         seed_behavior, seed_iter_N,
                         use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image,
