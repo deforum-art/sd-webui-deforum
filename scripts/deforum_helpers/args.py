@@ -225,11 +225,11 @@ def DeforumArgs():
 
 def keyframeExamples():
     return '''{
-    "0": "https://cdn.discordapp.com/attachments/1047760262637297664/1049851726200578058/a_dragon_flying_over_a_futuristic_city_dramatic_sky_cinematic_view_seed-1703716904ts-1670374556_idx-0.png",
-    "50": "https://cdn.discordapp.com/attachments/1047760262637297664/1049901219004555274/a_digital_painting_of_a_fox_standing_in_the_grass_on_a_hill__trees_beh_t_outpaint_from-down_seed-1205071278ts-1670386356_idx-0.png",
-    "100": "https://cdn.discordapp.com/attachments/745415989633482882/1048084925359857704/00024-2977479109-wings_hubble_images_jwst_images_6.png",
-    "150": "https://cdn.discordapp.com/attachments/1011355905490694355/1047133257097031680/31_0031_31.jpg",
-    "200": "https://cdn.discordapp.com/attachments/1047760262637297664/1049851726200578058/a_dragon_flying_over_a_futuristic_city_dramatic_sky_cinematic_view_seed-1703716904ts-1670374556_idx-0.png"
+    "0": "https://user-images.githubusercontent.com/121192995/215279228-1673df8a-f919-4380-b04c-19379b2041ff.png",
+    "50": "https://user-images.githubusercontent.com/121192995/215279281-7989fd6f-4b9b-4d90-9887-b7960edd59f8.png",
+    "100": "https://user-images.githubusercontent.com/121192995/215279284-afc14543-d220-4142-bbf4-503776ca2b8b.png",
+    "150": "https://user-images.githubusercontent.com/121192995/215279286-23378635-85b3-4457-b248-23e62c048049.jpg",
+    "200": "https://user-images.githubusercontent.com/121192995/215279228-1673df8a-f919-4380-b04c-19379b2041ff.png"
 }'''
 
 def LoopArgs():
