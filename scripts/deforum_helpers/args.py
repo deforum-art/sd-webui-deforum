@@ -192,7 +192,7 @@ def DeforumArgs():
     # Whiter areas of the mask are areas that change more
     use_mask = False #@param {type:"boolean"}
     use_alpha_as_mask = False # use the alpha channel of the init image as the mask
-    mask_file = "https://www.filterforge.com/wiki/images/archive/b/b7/20080927223728%21Polygonal_gradient_thumb.jpg" #@param {type:"string"}
+    mask_file = "https://github.com/hithereai/d/releases/download/m/mask.jpg" #@param {type:"string"}
     invert_mask = False #@param {type:"boolean"}
     # Adjust mask image, 1.0 is no adjustment. Should be positive numbers.
     mask_contrast_adjust = 1.0  #@param {type:"number"}
