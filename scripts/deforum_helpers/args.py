@@ -9,6 +9,7 @@ def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
     half_precision = not cmd_opts.no_half
+    mask_preset_names = ['everywhere','init_mask','video_mask']
     p = None
     frames_cache = []
     initial_seed = None
@@ -56,6 +57,10 @@ def DeforumAnimArgs():
     enable_sampler_scheduling = False #@param {type:"boolean"}
     sampler_schedule = '0: ("Euler a")'
 
+    # Composable mask scheduling
+    use_noise_mask = False
+    mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
+    noise_mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
     # Checkpoint Scheduling
     enable_checkpoint_scheduling = False#@param {type:"boolean"}
     checkpoint_schedule = '0: ("model1.ckpt"), 100: ("model2.ckpt")'
@@ -226,6 +231,7 @@ def DeforumArgs():
     init_latent = None
     init_sample = None
     init_c = None
+    mask_image = None
     noise_mask = None
     seed_internal = 0
 
@@ -471,6 +477,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             enable_sampler_scheduling = gr.Checkbox(label="enable sampler scheduling.", value=da.enable_sampler_scheduling, interactive=True)
         with gr.Row():
             sampler_schedule = gr.Textbox(label="sampler_schedule", lines=1, value = da.sampler_schedule, interactive=True)
+        
+        # Model Scheduling
+        i43 = gr.HTML("<p style=\"margin-bottom:0.75em\">Composable Mask scheduling.</p>")
+        i44 = gr.HTML("Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; masks from files in [], like [mask1.png]; description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
+        with gr.Row():
+            mask_schedule = gr.Textbox(label="mask_schedule", lines=1, value = da.mask_schedule, interactive=True)
+        with gr.Row():
+            use_noise_mask = gr.Checkbox(label="use_noise_mask", value=da.use_noise_mask, interactive=True)
+        with gr.Row():
+            noise_mask_schedule = gr.Textbox(label="noise_mask_schedule", lines=1, value = da.noise_mask_schedule, interactive=True)
 
         # Checkpoint Scheduling
         i38 = gr.HTML("<p style=\"margin-bottom:0.75em\">Checkpoint scheduling:</p>")
@@ -796,6 +812,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         fov_schedule, near_schedule, far_schedule,
                         seed_schedule,
                         enable_sampler_scheduling, sampler_schedule,
+                        mask_schedule, use_noise_mask, noise_mask_schedule,
                         enable_checkpoint_scheduling, checkpoint_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         histogram_matching, color_coherence, color_coherence_video_every_N_frames,
@@ -844,7 +861,7 @@ loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blen
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace(" ", "").split(',')
                     
-html_count = 43
+html_count = 44
 
 
 html_trash = [f"i{n}" for n in range(1, html_count+1)]
