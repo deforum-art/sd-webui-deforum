@@ -203,7 +203,6 @@ class DeforumTQDM:
         had_first = False
         while frame_idx < self._anim_args.max_frames:
             strength = keys.strength_schedule_series[frame_idx]
-            #sample, image = generate(args, root, frame_idx, return_sample=True)
             if not had_first and self._args.use_init and self._args.init_image != None and self._args.init_image != '':
                 deforum_total += int(ceil(self._args.steps * (1-strength)))
                 had_first = True
