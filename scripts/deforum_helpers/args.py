@@ -474,8 +474,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 perspective_flip_fv = gr.Textbox(label="perspective_flip_fv", lines=1, value = da.perspective_flip_fv, interactive=True)
         # Composable Mask scheduling
         with gr.Accordion('Composable Mask scheduling', open=False):
-            gr.HTML("<p style=\"margin-bottom:0.75em\">Composable Mask scheduling.</p>")
-            gr.HTML("Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; masks from files in [], like [mask1.png]; description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
+            gr.HTML("Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); <br>default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; <br>masks from files in [], like [mask1.png]; <br>description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
             with gr.Row():
                 mask_schedule = gr.Textbox(label="mask_schedule", lines=1, value = da.mask_schedule, interactive=True)
             with gr.Row():
