@@ -145,8 +145,8 @@ def DeforumArgs():
 
     #@markdonw **Webui stuff**
     tiling = False
-    firstphase_width = 0
-    firstphase_height = 0
+    # firstphase_width = 0
+    # firstphase_height = 0
     seed_enable_extras = False
     subseed = -1
     subseed_strength = 0
@@ -325,41 +325,54 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
         # Sampling settings START
         with gr.Accordion('General Image Sampling Settings', open=True):
-            with gr.Row():
-                W = gr.Slider(label="W", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
-            with gr.Row():
-                H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
-            with gr.Row(visible=False) as hr_options:
-                firstphase_width = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass width", value=0)
-                firstphase_height = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass height", value=0)
-            with gr.Row():
-                seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
-                from modules.sd_samplers import samplers_for_img2img
-                sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
-            with gr.Row():
-                steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
-            with gr.Row():
-                seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
-                subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
-                subseed_strength = gr.Slider(label="subseed_strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
-            with gr.Row():
-                seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
-                seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
-            with gr.Row():
-                ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
-                n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0)
-            with gr.Row():
-                tiling = gr.Checkbox(label='Tiling', value=False)
-            # NOT VISIBLE IN THE UI!
-            with gr.Row(visible=False):
-                save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
-            # NOT VISIBLE IN THE UI!
-            with gr.Row(visible=False):
-                save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
-                display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
-            with gr.Row(visible=False):
-                save_sample_per_step = gr.Checkbox(label="save_sample_per_step", value=d.save_sample_per_step, interactive=True)
-                show_sample_per_step = gr.Checkbox(label="show_sample_per_step", value=False, interactive=False)
+            with gr.Row().style(equal_height=False):
+                with gr.Column(variant='compact'):
+                    from modules.sd_samplers import samplers_for_img2img
+                    sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
+                    # with gr.Column(elem_id="txt2img_column_size", scale=4):
+                    with gr.Row(variant='compat'):
+                        with gr.Column(scale=4):
+                            W = gr.Slider(label="W", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                            H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                        with gr.Column(scale=4):
+                            # from modules.sd_samplers import samplers_for_img2img
+                            # sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
+                            steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
+                            seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
+                            # seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
+                    # with gr.Row():
+                        # H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                    # with gr.Row(visible=False) as hr_options:
+                        # firstphase_width = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass width", value=0)
+                        # firstphase_height = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass height", value=0)
+                    # with gr.Row():
+                        # seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
+                        # from modules.sd_samplers import samplers_for_img2img
+                        # sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
+                    # with gr.Row():
+                        # steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
+                    with gr.Row():
+                        seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
+                        subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
+                        subseed_strength = gr.Slider(label="subseed_strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
+                    with gr.Row():
+                        seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
+                        seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
+                    with gr.Row():
+                        ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
+                        n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0, visible=False)
+                    with gr.Row():
+                        tiling = gr.Checkbox(label='Tiling', value=False)
+                    # NOT VISIBLE IN THE UI!
+                    with gr.Row(visible=False):
+                        save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
+                    # NOT VISIBLE IN THE UI!
+                    with gr.Row(visible=False):
+                        save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
+                        display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
+                    with gr.Row(visible=False):
+                        save_sample_per_step = gr.Checkbox(label="save_sample_per_step", value=d.save_sample_per_step, interactive=True)
+                        show_sample_per_step = gr.Checkbox(label="show_sample_per_step", value=False, interactive=False)
         # Batch settings 
         with gr.Accordion('Batch Settings', open=True):
             with gr.Row():
@@ -789,7 +802,7 @@ hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human
                         hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
                         hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
                     ).replace("\n", "").replace(" ", "").split(',')
-args_names =    str(r'''W, H, tiling, firstphase_width, firstphase_height,
+args_names =    str(r'''W, H, tiling,
                         seed, sampler,
                         seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h,
                         steps, ddim_eta,
@@ -891,8 +904,8 @@ def process_args(args_dict_main):
     p.sampler_name = args.sampler
     p.batch_size = args.n_batch
     p.tiling = args.tiling
-    p.firstphase_width = args.firstphase_width
-    p.firstphase_height = args.firstphase_height
+    # p.firstphase_width = args.firstphase_width
+    # p.firstphase_height = args.firstphase_height
     p.seed_enable_extras = args.seed_enable_extras
     p.subseed = args.subseed
     p.subseed_strength = args.subseed_strength
@@ -945,4 +958,3 @@ def find_ffmpeg_binary():
             files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
             return files[0] if files else 'ffmpeg'
     return 'ffmpeg'
-
