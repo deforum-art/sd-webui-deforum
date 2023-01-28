@@ -269,7 +269,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             i1 = gr.HTML(i1_store, elem_id='deforum_header')
     else:
         btn = i1 = gr.HTML("")
-    
     with gr.Accordion("Info, Link and Help", open=False):
         gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
         gr.HTML("""<ul style="list-style-type:circle; margin-left:1em">
@@ -407,7 +406,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 noise_type = gr.Dropdown(label="noise_type", choices=['uniform', 'perlin'], value=da.noise_type, type="value", elem_id="noise_type", interactive=True)
             with gr.Row():
-                gr.HTML("<p style=\"margin-bottom:0.75em\">Perlin noise params, if selected.</p>")
+                gr.HTML("<p style=\"margin-bottom:0.75em\">Perlin noise params, if selected:</p>")
                 perlin_w = gr.Number(label="perlin_w", value=da.perlin_w, interactive=True)
                 perlin_h = gr.Number(label="perlin_h", value=da.perlin_h, interactive=True)
             with gr.Row():
@@ -570,7 +569,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         
         # gr.HTML(hybrid_html)
         with gr.Accordion("Info & Help", open=False):
-            hybrid_html = "<p style=\"padding-bottom:0\"><b style=\"text-shadow: blue -1px -1px;\">Hybrid Video Compositing in 2D/3D Mode</b><span style=\"color:#DDD;font-size:0.7rem;text-shadow: black -1px -1px;margin-left:10px;\">by reallybigname</span></p>"
+            hybrid_html = "<p style=\"padding-bottom:0\"><b style=\"text-shadow: blue -1px -1px;\">Hybrid Video Compositing in 2D/3D Mode</b><span style=\"color:#DDD;font-size:0.7rem;text-shadow: black -1px -1px;margin-left:10px;\">by <a href=\"https://github.com/reallybigname\">reallybigname</a></span></p>"
             hybrid_html += "<ul style=\"list-style-type:circle; margin-left:1em; margin-bottom:1em;\"><li>Composite video with previous frame init image in <b>2D or 3D animation_mode</b> <i>(not for Video Input mode)</i></li>"
             hybrid_html += "<li>Uses your <b>Init</b> settings for <b>video_init_path, extract_nth_frame, overwrite_extracted_frames</b></li>"
             hybrid_html += "<li>In Keyframes tab, you can also set <b>color_coherence</b> = '<b>Video Input</b>'</li>"
