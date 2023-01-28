@@ -46,7 +46,7 @@ def condition_noise_mask(noise_mask, invert_mask = False):
     #noise_mask = torch.round(noise_mask)
     return noise_mask
 
-def add_noise(sample, noise_amt: float, seed: int, noise_type: str, noise_args, noise_mask = None, invert_mask = False) -> torch.Tensor:
+def add_noise(sample, noise_amt: float, seed: int, noise_type: str, noise_args, noise_mask = None, invert_mask = False):
     deforum_noise_gen.manual_seed(seed) # Reproducibility
     sample2dshape = (sample.shape[1], sample.shape[0]) #sample is cv2, so height - width
     noise = torch.randn((sample.shape[2], sample.shape[1], sample.shape[0]), generator=deforum_noise_gen) # White noise
