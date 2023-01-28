@@ -288,7 +288,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
     except FileNotFoundError:
         raise FileNotFoundError("FFmpeg not found. Plesae make sure you have a working ffmpeg path under 'ffmpeg_location' parameter. \n*Interpolated frames were SAVED as backup!*")
     except Exception as e:
-        raise Exception(f'Error stitching interpolation video. Actual error: {e}')
+        raise Exception(f'Error stitching interpolation video. Actual runtime error:{e}\n*Interpolated frames were SAVED as backup!*')
 
     if not audio_path is None:
         try:
