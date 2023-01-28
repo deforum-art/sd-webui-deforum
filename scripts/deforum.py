@@ -220,7 +220,7 @@ def run_deforum(*args, **kwargs):
             save_all=True,
             append_images=imagelist[1:],
             optimize=True,
-            duration=1000/fps,
+            duration=1000/video_args.fps, #????
             loop=0
         )
         
