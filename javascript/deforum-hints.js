@@ -120,7 +120,7 @@ deforum_titles = {
 	"ffmpeg_crf": "controls quality where lower is better, less compressed. values: 0 to 51, default 17",
 	"ffmpeg_preset": "controls how good the compression is, and the operation speed. If you're not in a rush keep it at 'veryslow'",
     "add_soundtrack": "when this box is checked, and FFMPEG mp4 is selected as the output format, an audio file will be multiplexed with the video.",
-    "soundtrack_path": "the path/ URL to an audio file to accompany the video",
+    "soundtrack_path": "the path\/ URL to an audio file to accompany the video",
     "use_manual_settings": "when this is unchecked, the video will automatically be created in the same output folder as the images. Check this box to specify different settings for the creation of the video, specified by the following options",
     "render_steps": "render each step of diffusion as a separate frame",
     "max_video_frames": "the maximum number of frames to include in the video, when use_manual_settings is checked",
