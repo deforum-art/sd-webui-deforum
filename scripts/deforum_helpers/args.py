@@ -545,33 +545,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 enable_checkpoint_scheduling = gr.Checkbox(label="enable_checkpoint_scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
             with gr.Row():
                 checkpoint_schedule = gr.Textbox(label="checkpoint_schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
-        # Parseq
-        with gr.Accordion('Parseq', open=False):
-            gr.HTML("""
-            Use an <a style='color:blue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
-            <p style="margin-top:1em">
-                Note that parseq overrides:
-                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                    <li>Run: seed, subseed, subseed strength.</li>
-                    <li>Keyframes: generation settings (noise, strength, contrast, scale).</li>
-                    <li>Keyframes: motion parameters for 2D and 3D (angle, zoom, translation, rotation, perspective flip).</li>
-                </ul>
-            </p>
-            <p">
-                Parseq does <strong><em>not</em></strong> override:
-                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                    <li>Run: Sampler, W, H, Restore faces, tiling, highres fix, resize seed.</li>
-                    <li>Keyframes: animation settings (animation mode, max_frames, border) </li>
-                    <li>Keyframes: coherence (color coherence & diffusion cadence) </li>
-                    <li>Keyframes: depth warping</li>
-                    <li>Video output settings: all settings (including fps and max frames)</li>
-                </ul>
-            </p>
-            """)
-            with gr.Row():
-                parseq_manifest = gr.Textbox(label="Parseq Manifest (JSON or URL)", lines=4, value = dp.parseq_manifest, interactive=True)
-            with gr.Row():
-                parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
     # Animation settings END
     
     # Prompts settings START    
@@ -634,6 +607,33 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 resume_from_timestring = gr.Checkbox(label="resume_from_timestring", value=da.resume_from_timestring, interactive=True)
                 resume_timestring = gr.Textbox(label="resume_timestring", lines=1, value = da.resume_timestring, interactive=True)
+        # Parseq
+        with gr.Accordion('Parseq', open=False):
+            gr.HTML("""
+            Use an <a style='color:blue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
+            <p style="margin-top:1em">
+                Note that parseq overrides:
+                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                    <li>Run: seed, subseed, subseed strength.</li>
+                    <li>Keyframes: generation settings (noise, strength, contrast, scale).</li>
+                    <li>Keyframes: motion parameters for 2D and 3D (angle, zoom, translation, rotation, perspective flip).</li>
+                </ul>
+            </p>
+            <p">
+                Parseq does <strong><em>not</em></strong> override:
+                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                    <li>Run: Sampler, W, H, Restore faces, tiling, highres fix, resize seed.</li>
+                    <li>Keyframes: animation settings (animation mode, max_frames, border) </li>
+                    <li>Keyframes: coherence (color coherence & diffusion cadence) </li>
+                    <li>Keyframes: depth warping</li>
+                    <li>Video output settings: all settings (including fps and max frames)</li>
+                </ul>
+            </p>
+            """)
+            with gr.Row():
+                parseq_manifest = gr.Textbox(label="Parseq Manifest (JSON or URL)", lines=4, value = dp.parseq_manifest, interactive=True)
+            with gr.Row():
+                parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
     # HYBRID VIDEO tab
     with gr.Tab('Hybrid Video'):
         
