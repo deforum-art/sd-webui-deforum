@@ -9,6 +9,7 @@ def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
     half_precision = not cmd_opts.no_half
+    mask_preset_names = ['everywhere','init_mask','video_mask']
     p = None
     frames_cache = []
     initial_seed = None
@@ -54,6 +55,10 @@ def DeforumAnimArgs():
     enable_sampler_scheduling = False #@param {type:"boolean"}
     sampler_schedule = '0: ("Euler a")'
 
+    # Composable mask scheduling
+    use_noise_mask = False
+    mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
+    noise_mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
     # Checkpoint Scheduling
     enable_checkpoint_scheduling = False#@param {type:"boolean"}
     checkpoint_schedule = '0: ("model1.ckpt"), 100: ("model2.ckpt")'
@@ -212,6 +217,7 @@ def DeforumArgs():
     init_latent = None
     init_sample = None
     init_c = None
+    mask_image = None
     noise_mask = None
     seed_internal = 0
 
@@ -367,6 +373,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     # Animation settings 'Key' tab
     with gr.Tab('Keyframes'):
         #TODO make a some sort of the original dictionary parsing
+
         # Main top animation settings
         with gr.Accordion('Animation Mode, Max Frames and Border', open=True):
             with gr.Row():
@@ -442,6 +449,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
             with gr.Row():
                 far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
+
         # Anti-blur
         with gr.Accordion('Anti Blur', open=True):
             with gr.Row():
@@ -464,6 +472,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 perspective_flip_gamma = gr.Textbox(label="perspective_flip_gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
             with gr.Row():
                 perspective_flip_fv = gr.Textbox(label="perspective_flip_fv", lines=1, value = da.perspective_flip_fv, interactive=True)
+        # Composable Mask scheduling
+        with gr.Accordion('Composable Mask scheduling', open=False):
+            gr.HTML("<p style=\"margin-bottom:0.75em\">Composable Mask scheduling.</p>")
+            gr.HTML("Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; masks from files in [], like [mask1.png]; description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
+            with gr.Row():
+                mask_schedule = gr.Textbox(label="mask_schedule", lines=1, value = da.mask_schedule, interactive=True)
+            with gr.Row():
+                use_noise_mask = gr.Checkbox(label="use_noise_mask", value=da.use_noise_mask, interactive=True)
+            with gr.Row():
+                noise_mask_schedule = gr.Textbox(label="noise_mask_schedule", lines=1, value = da.noise_mask_schedule, interactive=True)
         # Steps Scheduling
         with gr.Accordion('Steps Scheduling', open=False):
             with gr.Row():
@@ -754,6 +772,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         fov_schedule, near_schedule, far_schedule,
                         seed_schedule,
                         enable_sampler_scheduling, sampler_schedule,
+                        mask_schedule, use_noise_mask, noise_mask_schedule,
                         enable_checkpoint_scheduling, checkpoint_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         histogram_matching, color_coherence, color_coherence_video_every_N_frames,
@@ -800,7 +819,7 @@ parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
 loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blendFactorMax, blendFactorSlope, 
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace(" ", "").split(',')
-                    
+
 component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
 settings_component_names = [name for name in component_names if name not in video_args_names]
 

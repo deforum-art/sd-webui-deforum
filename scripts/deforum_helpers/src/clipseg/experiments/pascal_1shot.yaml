@@ -1,0 +1,101 @@
+configuration:
+  batch_size: 64
+  optimizer: torch.optim.AdamW
+
+  lr: 0.001
+
+  trainer: experiment_setup.train_loop
+  scorer: experiment_setup.score
+  model: models.clipseg.CLIPDensePredT
+
+  lr_scheduler: cosine
+  T_max: 20000
+  eta_min: 0.0001
+
+  max_iterations: 20000    #  <-##########################################
+  val_interval: null
+
+  # dataset
+  dataset: datasets.phrasecut.PhraseCut
+  split_mode: pascal_test
+  mode: train
+  mask: text_and_crop_blur_highlight352
+  image_size: 352
+  normalize: True
+  pre_crop_image_size: [sample, 1, 1.5]
+  aug: 1new
+  with_visual: True
+  split: train
+
+  # general
+  mix: True
+  prompt: shuffle+
+  norm_cond: True
+  mix_text_min: 0.0
+  
+  # model
+  out: 1
+  version: 'ViT-B/16'
+  extract_layers: [3, 7, 9]
+  reduce_dim: 64
+  depth: 3
+
+  loss: torch.nn.functional.binary_cross_entropy_with_logits
+  amp: True
+
+test_configuration_common:
+  normalize: True
+  image_size: 352
+  metric: metrics.FixedIntervalMetrics
+  batch_size: 1
+  test_dataset: pascal
+  sigmoid: True
+  # max_iterations: 250
+
+test_configuration: 
+
+  -
+    name: pas_t
+    mask: text
+
+  -
+    name: pas_h
+    mask: blur3_highlight01
+
+  -
+    name: pas_h2
+    mask: crop_blur_highlight352
+
+
+columns: [name,
+pas_t_fgiou_best, pas_t_miou_best,  pas_t_fgiou_ct,
+pas_h_fgiou_best, pas_h_miou_best,  pas_h_fgiou_ct,
+pas_h2_fgiou_best, pas_h2_miou_best,  pas_h2_fgiou_ct, pas_h2_fgiou_best_t,
+train_loss, duration, date
+]
+
+individual_configurations:
+
+- {name: rd64-uni-phrasepas5i-0, remove_classes: [pas5i, 0], negative_prob: 0.2, mix_text_max: 0.5, test_configuration: {splits: [0], custom_threshold: 0.24}}
+- {name: rd64-uni-phrasepas5i-1, remove_classes: [pas5i, 1], negative_prob: 0.2, mix_text_max: 0.5, test_configuration: {splits: [1], custom_threshold: 0.24}}
+- {name: rd64-uni-phrasepas5i-2, remove_classes: [pas5i, 2], negative_prob: 0.2, mix_text_max: 0.5, test_configuration: {splits: [2], custom_threshold: 0.24}}
+- {name: rd64-uni-phrasepas5i-3, remove_classes: [pas5i, 3], negative_prob: 0.2, mix_text_max: 0.5, test_configuration: {splits: [3], custom_threshold: 0.24}}
+
+
+- {name: rd64-phrasepas5i-0, remove_classes: [pas5i, 0], negative_prob: 0.0, test_configuration: {splits: [0], custom_threshold: 0.28}}
+- {name: rd64-phrasepas5i-1, remove_classes: [pas5i, 1], negative_prob: 0.0, test_configuration: {splits: [1], custom_threshold: 0.28}}
+- {name: rd64-phrasepas5i-2, remove_classes: [pas5i, 2], negative_prob: 0.0, test_configuration: {splits: [2], custom_threshold: 0.28}}
+- {name: rd64-phrasepas5i-3, remove_classes: [pas5i, 3], negative_prob: 0.0, test_configuration: {splits: [3], custom_threshold: 0.28}}
+
+
+# baseline
+- {name: bl64-phrasepas5i-0, model: models.clipseg.CLIPDenseBaseline, remove_classes: [pas5i, 0], reduce2_dim: 64, negative_prob: 0.0, test_configuration: {splits: [0], custom_threshold: 0.24}}
+- {name: bl64-phrasepas5i-1, model: models.clipseg.CLIPDenseBaseline, remove_classes: [pas5i, 1], reduce2_dim: 64, negative_prob: 0.0, test_configuration: {splits: [1], custom_threshold: 0.24}}
+- {name: bl64-phrasepas5i-2, model: models.clipseg.CLIPDenseBaseline, remove_classes: [pas5i, 2], reduce2_dim: 64, negative_prob: 0.0, test_configuration: {splits: [2], custom_threshold: 0.24}}
+- {name: bl64-phrasepas5i-3, model: models.clipseg.CLIPDenseBaseline, remove_classes: [pas5i, 3], reduce2_dim: 64, negative_prob: 0.0, test_configuration: {splits: [3], custom_threshold: 0.24}}
+
+# ViT
+- {name: vit64-uni-phrasepas5i-0, remove_classes: [pas5i, 0], model: models.vitseg.VITDensePredT, negative_prob: 0.2, mix_text_max: 0.5, lr: 0.0001, test_configuration: {splits: [0], custom_threshold: 0.02}}
+- {name: vit64-uni-phrasepas5i-1, remove_classes: [pas5i, 1], model: models.vitseg.VITDensePredT, negative_prob: 0.2, mix_text_max: 0.5, lr: 0.0001, test_configuration: {splits: [1], custom_threshold: 0.02}}
+- {name: vit64-uni-phrasepas5i-2, remove_classes: [pas5i, 2], model: models.vitseg.VITDensePredT, negative_prob: 0.2, mix_text_max: 0.5, lr: 0.0001, test_configuration: {splits: [2], custom_threshold: 0.02}}
+- {name: vit64-uni-phrasepas5i-3, remove_classes: [pas5i, 3], model: models.vitseg.VITDensePredT, negative_prob: 0.2, mix_text_max: 0.5, lr: 0.0001, test_configuration: {splits: [3], custom_threshold: 0.02}}

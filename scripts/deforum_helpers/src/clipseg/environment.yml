@@ -1,0 +1,15 @@
+name: clipseg-environment
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - numpy
+  - scipy
+  - matplotlib-base
+  - pip
+  - pip:
+    - --find-links https://download.pytorch.org/whl/torch_stable.html
+    - torch==1.10.0+cpu
+    - torchvision==0.11.1+cpu    
+    - opencv-python
+    - git+https://github.com/openai/CLIP.git
