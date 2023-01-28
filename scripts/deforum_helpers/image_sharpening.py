@@ -13,5 +13,8 @@ def unsharp_mask(img, kernel_size=(5, 5), sigma=1.0, amount=1.0, threshold=0, ma
         low_contrast_mask = np.absolute(img - blurred) < threshold
         np.copyto(sharpened, img, where=low_contrast_mask)
     if mask is not None:
-        np.copyto(sharpened, img, where=np.array(mask.convert('1')) < 1)
+        mask = np.array(mask)
+        masked_sharpened = cv2.bitwise_and(sharpened, sharpened, mask=mask)
+        masked_img = cv2.bitwise_and(img, img, mask=255-mask)
+        sharpened = cv2.add(masked_img, masked_sharpened)
     return sharpened

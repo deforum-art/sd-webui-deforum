@@ -276,7 +276,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
                     prev_img = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)
 
             # apply scaling
-            contrast_image = prev_img * contrast
+            contrast_image = (prev_img * contrast).round().astype(np.uint8)
             # anti-blur
             contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold, args.mask_image if args.use_mask else None)
             # apply frame noising
