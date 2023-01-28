@@ -185,8 +185,8 @@ def run_rife_new_video_infer(
     # stitch video from interpolated frames, and add audio if needed
     try:
         print (f"Trying to stitch video from interpolated PNG frames...")
-        stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs)
-        print("Interpolated video created!")
+        vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs)
+        print(f"Interpolated video created at: \n{vid_out_path}")
     except Exception as e:
         print(f'Video stitching gone wrong. Error: {e}')
 
@@ -283,8 +283,8 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
         ]
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        if process.returncode != 0:
-            raise RuntimeError(stderr)
+        # if process.returncode != 0:
+            # raise RuntimeError(stderr)
     except FileNotFoundError:
         raise FileNotFoundError("FFmpeg not found. Plesae make sure you have a working ffmpeg path under 'ffmpeg_location' parameter. \n*Interpolated frames were SAVED as backup!*")
     except Exception as e:
@@ -316,3 +316,4 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
     #If ffmpeg was not found we won't reach this line - and the images will be left in the interpolated folder for the user to stitch later
     if not keep_imgs:
         shutil.rmtree(img_folder_path)
+    return mp4_path
