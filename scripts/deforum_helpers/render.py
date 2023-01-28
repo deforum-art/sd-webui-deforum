@@ -8,7 +8,7 @@ from PIL import Image
 from .generate import generate
 from .noise import add_noise
 from .animation import sample_from_cv2, sample_to_cv2, anim_frame_warp
-from .animation_key_frames import DeformAnimKeys
+from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
 from .vid2frames import get_frame_name, get_next_frame
 from .depth import DepthModel
 from .colors import maintain_colors
@@ -16,14 +16,14 @@ from .parseq_adapter import ParseqAnimKeys
 from .seed import next_seed
 from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
-from .load_images import get_mask
+from .load_images import get_mask, load_img
 from .hybrid_video import hybrid_generation, hybrid_composite, get_matrix_for_hybrid_motion, get_flow_for_hybrid_motion, image_transform_ransac, image_transform_optical_flow
 from .save_images import save_image
+from .composable_masks import compose_mask_with_check
 # Webui
 from modules.shared import opts, cmd_opts, state
 
-
-def render_animation(args, anim_args, video_args, parseq_args, animation_prompts, root):
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root):
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         if anim_args.hybrid_composite or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
@@ -33,10 +33,9 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
-
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args)
-
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args)
     # resume animation
     start_frame = 0
     if anim_args.resume_from_timestring:
@@ -122,13 +121,34 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
 
     args.n_samples = 1
     frame_idx = start_frame
+
+    # reset the mask vals as they are overwritten in the compose_mask algorithm
+    mask_vals = {}
+    noise_mask_vals = {}
+
+    mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
+    noise_mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
+
+    mask_image = None
     
-    # Grab the first frame noise mask since it wont be provided until next frame
-    if args.use_mask and not anim_args.use_mask_video:
-        args.noise_mask = get_mask(args)
-    elif args.use_mask and anim_args.use_mask_video:
-        args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
-        args.noise_mask = get_mask(args)
+    if args.use_init and args.init_image != None and args.init_image != '':
+        _, mask_image = load_img(args.init_image, 
+                                        shape=(args.W, args.H),  
+                                        use_alpha_as_mask=args.use_alpha_as_mask)
+        mask_vals['init_mask'] = mask_image
+        noise_mask_vals['init_mask'] = mask_image
+    
+    # Grab the first frame masks since they wont be provided until next frame
+    if mask_image is None:
+        mask_vals['init_mask'] = get_mask(args)
+        noise_mask_vals['init_mask'] = get_mask(args) # TODO?: add a different default noise mask
+
+    if anim_args.use_mask_video:
+        mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+        noise_mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+    else:
+        mask_vals['video_mask'] = None
+        noise_mask_vals['video_mask'] = None
 
     #Webui
     state.job_count = anim_args.max_frames
@@ -141,6 +161,7 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
             break
         
         print(f"Rendering animation frame {frame_idx} of {anim_args.max_frames}")
+
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
         scale = keys.cfg_scale_schedule_series[frame_idx]
@@ -157,10 +178,19 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
             "mask_auto_contrast_cutoff_high": int(keys.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx]),
         }        
         scheduled_sampler_name = None
+        mask_seq = None
+        noise_mask_seq = None
         if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
             args.steps = int(keys.steps_schedule_series[frame_idx])
         if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
             scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
+        if args.use_mask and keys.mask_schedule_series[frame_idx] is not None:
+            mask_seq = keys.mask_schedule_series[frame_idx]
+        if anim_args.use_noise_mask and keys.noise_mask_schedule_series[frame_idx] is not None:
+            noise_mask_seq = keys.noise_mask_schedule_series[frame_idx]
+        
+        if args.use_mask and not anim_args.use_noise_mask:
+            noise_mask_seq = mask_seq
         
         depth = None
         
@@ -250,7 +280,9 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
             # anti-blur
             contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold)
             # apply frame noising
-            noised_image = add_noise(contrast_image, noise, args.seed, anim_args.noise_type,
+            if args.use_mask or anim_args.use_noise_mask:
+                args.noise_mask = compose_mask_with_check(root, args, noise_mask_seq, noise_mask_vals, sample_from_cv2(contrast_sample))
+            noised_sample = add_noise(contrast_image, noise, args.seed, anim_args.noise_type,
                             (anim_args.perlin_w, anim_args.perlin_h, anim_args.perlin_octaves, anim_args.perlin_persistence),
                              args.noise_mask, args.invert_mask)
 
@@ -283,19 +315,28 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
             print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
             print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")
             print(f"Rx: {keys.rotation_3d_x_series[frame_idx]} Ry: {keys.rotation_3d_y_series[frame_idx]} Rz: {keys.rotation_3d_z_series[frame_idx]}")
-            if anim_args.use_mask_video:
-                args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
-
+        
         # grab init image for current frame
-        if using_vid_init:
+        elif using_vid_init:
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
-            if anim_args.use_mask_video:
-                args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
-                
+        if anim_args.use_mask_video:
+            mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+
+        if args.use_mask:
+            args.mask_image = compose_mask_with_check(root, args, mask_seq, mask_vals, args.init_sample) if args.init_sample is not None else None # we need it only after the first frame anyway
+
+        # setting up some arguments for the looper
+        loop_args.imageStrength = loopSchedulesAndData.image_strength_schedule_series[frame_idx]
+        loop_args.blendFactorMax = loopSchedulesAndData.blendFactorMax_series[frame_idx]
+        loop_args.blendFactorSlope = loopSchedulesAndData.blendFactorSlope_series[frame_idx]
+        loop_args.tweeningFrameSchedule = loopSchedulesAndData.tweening_frames_schedule_series[frame_idx]
+        loop_args.colorCorrectionFactor = loopSchedulesAndData.color_correction_factor_series[frame_idx]
+        loop_args.useLooper = loopSchedulesAndData.useLooper
+        loop_args.imagesToKeyframe = loopSchedulesAndData.imagesToKeyframe
         # sample the diffusion model
-        image = generate(args, anim_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
         # reroll blank frame 
@@ -305,7 +346,7 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
                 while not image.getbbox():
                     print("Rerolling with +1 seed...")
                     args.seed += 1
-                    image = generate(args, root, frame_idx, sampler_name=scheduled_sampler_name)
+                    image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                     patience -= 1
                     if patience == 0:
                         print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")

@@ -1,0 +1,84 @@
+configuration:
+  batch_size: 64
+  optimizer: torch.optim.AdamW
+
+  lr: 0.001
+
+  trainer: experiment_setup.train_loop
+  scorer: experiment_setup.score
+  model: models.clipseg.CLIPDensePredT
+
+  lr_scheduler: cosine
+  T_max: 20000
+  eta_min: 0.0001
+
+  max_iterations: 20000    #  <-##########################################
+  val_interval: null
+
+  # dataset
+  dataset: datasets.phrasecut.PhraseCut   # <-----------------
+  split_mode: pascal_test
+  split: train
+  mask: text_and_crop_blur_highlight352
+  image_size: 352
+  negative_prob: 0.2
+  mix_text_max: 0.5
+
+  # general
+  mix: True # <-----------------
+  prompt: shuffle+
+  norm_cond: True
+  mix_text_min: 0.0
+  with_visual: True
+  
+  # model
+  version: 'ViT-B/16'
+  extract_layers: [3, 7, 9]
+  reduce_dim: 64
+  depth: 3
+  fix_shift: False            #  <-##########################################
+
+  loss: torch.nn.functional.binary_cross_entropy_with_logits
+  amp: True
+
+test_configuration_common:
+  normalize: True
+  image_size: 352
+  batch_size: 32
+  sigmoid: True
+  split: test
+  label_support: True
+  
+test_configuration: 
+
+  -
+    name: pc
+    metric: metrics.FixedIntervalMetrics
+    test_dataset: phrasecut
+    mask: text
+
+  -
+    name: pc-vis
+    metric: metrics.FixedIntervalMetrics
+    test_dataset: phrasecut
+    mask: crop_blur_highlight352
+    with_visual: True
+    visual_only: True
+
+
+columns: [name, 
+pc_fgiou_best, pc_miou_best,  pc_fgiou_0.5, 
+pc-vis_fgiou_best, pc-vis_miou_best,  pc-vis_fgiou_0.5, 
+duration]
+
+
+individual_configurations:
+
+- {name: rd64-uni}
+- {name: rd64-no-pretrain, not_pretrained: True, lr: 0.0003}
+- {name: rd64-no-negatives, negative_prob: 0.0}
+- {name: rd64-neg0.5, negative_prob: 0.5}
+- {name: rd64-no-visual, with_visual: False, mix: False}
+- {name: rd16-uni, reduce_dim: 16}
+- {name: rd64-layer3, extract_layers: [3], depth: 1}
+- {name: rd64-blur-highlight, mask: text_and_blur_highlight, test_configuration: {mask: blur_highlight}}
