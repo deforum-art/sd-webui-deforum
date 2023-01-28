@@ -129,12 +129,12 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         if info is None:
             raise RuntimeError(f"Unknown checkpoint: {args.checkpoint}")
         sd_models.reload_model_weights(info=info)
-
+    
     if args.init_sample is not None:
-        open_cv_image = sample_to_cv2(args.init_sample)
-        img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
-        init_image = Image.fromarray(img)
-        image_init0 = Image.fromarray(img)
+        # TODO: cleanup init_sample remains later
+        img = args.init_sample
+        init_image = img
+        image_init0 = img
         if loop_args.useLooper and isJson(loop_args.imagesToKeyframe):
             init_image = Image.blend(init_image, init_image2, blendFactor)
             correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
@@ -206,14 +206,6 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         if anim_args.histogram_matching:
             root.color_corrections = [processing.setup_color_correction(root.first_frame)]
     
-    if return_sample:
-        pil_image = processed.images[0].convert('RGB') 
-        open_cv_image = np.array(pil_image) 
-        # Convert RGB to BGR 
-        open_cv_image = open_cv_image[:, :, ::-1].copy() 
-        image = sample_from_cv2(open_cv_image)
-        results = [image, processed.images[0]]
-    else:
-        results = [processed.images[0]]
+    results = processed.images[0]
     
     return results

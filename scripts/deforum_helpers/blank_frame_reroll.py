@@ -9,7 +9,7 @@ def blank_frame_reroll(image, args, root, frame_idx):
         while not image.getbbox():
             print("Rerolling with +1 seed...")
             args.seed += 1
-            sample, image = generate(args, root, frame_idx, return_sample=True)
+            image = generate(args, root, frame_idx)
             patience -= 1
             if patience == 0:
                 print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
