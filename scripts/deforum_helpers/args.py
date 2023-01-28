@@ -388,7 +388,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             gr.HTML("""Prerequisites: 
                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
                            <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
-                           <li>Set Run tab's seed_behavior to schedule.</li>
+                           <li>Set 'seed_behavior' to 'schedule' under the Seed Scheduling section below.</li>
                         </ul>
                     """)
             gr.HTML("""Looping recommendations: 
@@ -421,6 +421,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
             with gr.Row():
                 color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
+        with gr.Accordion('Seed Scheduling', open=False):
+            with gr.Row():
+                seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
+                seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
+            with gr.Row():
+                gr.HTML("Please set seed_behavior to 'Schedule' for this option to become active")
+            with gr.Row():
+                seed_schedule = gr.Textbox(label="seed_schedule", lines=1, value = da.seed_schedule, interactive=True)
         # 2D + 3D Motion
         with gr.Accordion('2D + 3D Motion', open=True):
             with gr.Row():
@@ -519,14 +527,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 enable_steps_scheduling = gr.Checkbox(label="enable steps scheduling", value=da.enable_steps_scheduling, interactive=True)
             with gr.Row():
                 steps_schedule = gr.Textbox(label="steps_schedule", lines=1, value = da.steps_schedule, interactive=True)
-        with gr.Accordion('Seed Scheduling', open=True):
-            with gr.Row():
-                seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
-                seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
-            with gr.Row():
-                gr.HTML("Please set seed_behavior to 'Schedule' for this option to become active")
-            with gr.Row():
-                seed_schedule = gr.Textbox(label="seed_schedule", lines=1, value = da.seed_schedule, interactive=True)
         # Sampler Scheduling
         with gr.Accordion('Sampler Scheduling', open=False):
             with gr.Row():
