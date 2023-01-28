@@ -258,7 +258,7 @@ def DeforumOutputArgs():
     ffmpeg_crf = '17'
     ffmpeg_preset = 'veryslow'
     add_soundtrack = 'None' #@param ["File","Init Video"]
-    soundtrack_path = "snowfall.mp3"
+    soundtrack_path = "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_1MB_MP3.mp3"
     render_steps = False  #@param {type: 'boolean'}
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
     max_video_frames = 200 #@param {type:"string"}
