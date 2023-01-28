@@ -130,8 +130,17 @@ deforum_titles = {
 	"frame_interpolation_engine": "chhoose the frame interpolation engine and version",
 	"frame_interpolation_x_amount":"how many times to interpolate the source video. e.g source video fps of 12 and a value of x2 will yield a 24fps interpolated video",
 	"frame_interpolation_slow_mo_amount":"how many times to slow-down the video. *Naturally affects output fps as well",
-	"frame_interpolation_keep_imgs": "delete or keep raw interpolated png imgs. Default: False which means delete"
+	"frame_interpolation_keep_imgs": "delete or keep raw interpolated png imgs. Default: False which means delete",
 
+
+    // Looper Args
+    // "use_looper": "",
+    "Images to use for keyframe guidance": "images you iterate over, you can do local or web paths",
+    "Image strength schedule": "schedule for how much the image should look like previous and new image frame init",
+    // "blendFactorMax": "",
+    // "blendFactorSlope": "",
+    "tweening frames schedule": "number of the frames that we will blend between current imagined image and input frame image",
+    "color correction factor": "how close to get to the colors of the input frame image"
 }
 
 

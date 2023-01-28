@@ -5,7 +5,7 @@ import deforum_helpers.args as deforum_args
 from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 import logging
 
-def load_args(args_dict, anim_args_dict, parseq_args_dict, custom_settings_file, root):
+def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
     if not os.path.isfile(custom_settings_file):
         print('The custom settings file does not exist. The in-notebook settings will be used instead')
@@ -28,9 +28,16 @@ def load_args(args_dict, anim_args_dict, parseq_args_dict, custom_settings_file,
                     parseq_args_dict[k] = jdata[k]
                 else:
                     print(f"key {k} doesn't exist in the custom settings data! using the default value of {parseq_args_dict[k]}")                    
+            for i, k in enumerate(loop_args_dict):
+                if k in jdata:
+                    loop_args_dict[k] = jdata[k]
+                else:
+                    print(f"key {k} doesn't exist in the custom settings data! using the default value of {loop_args_dict[k]}")                    
             print(args_dict)
             print(anim_args_dict)
             print(parseq_args_dict)
+            print(loop_args_dict)
+            
 
 import gradio as gr
  
@@ -38,14 +45,15 @@ import gradio as gr
 def save_settings(*args, **kwargs):
     settings_path = args[0]
     data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
-    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args
+    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args
     args_dict = pack_args(data)
     anim_args_dict = pack_anim_args(data)
     parseq_dict = pack_parseq_args(data)
     args_dict["prompts"] = json.loads(data['animation_prompts'])
+    loop_dict = pack_loop_args(data)
     print(f"saving custom settings to {settings_path}")
     with open(settings_path, "w") as f:
-        f.write(json.dumps({**args_dict, **anim_args_dict, **parseq_dict}, ensure_ascii=False, indent=4))
+        f.write(json.dumps({**args_dict, **anim_args_dict, **parseq_dict, **loop_dict}, ensure_ascii=False, indent=4))
     return [""]
 
 def save_video_settings(*args, **kwargs):
