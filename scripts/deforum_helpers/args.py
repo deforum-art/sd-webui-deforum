@@ -484,6 +484,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                 perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
+        # Anti-blur
+        with gr.Accordion('Anti Blur', open=True):
+            with gr.Row():
+                kernel_schedule = gr.Textbox(label="kernel_schedule", lines=1, value = da.kernel_schedule, interactive=True)
+            with gr.Row():
+                sigma_schedule = gr.Textbox(label="sigma_schedule", lines=1, value = da.sigma_schedule, interactive=True)
+            with gr.Row():
+                amount_schedule = gr.Textbox(label="amount_schedule", lines=1, value = da.amount_schedule, interactive=True)
+            with gr.Row():
+                threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
         # 3D Depth Warping
         with gr.Accordion('3D Depth Warping', open=False):
             with gr.Row():
@@ -501,17 +511,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
             with gr.Row():
                 far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
-
-        # Anti-blur
-        with gr.Accordion('Anti Blur', open=True):
-            with gr.Row():
-                kernel_schedule = gr.Textbox(label="kernel_schedule", lines=1, value = da.kernel_schedule, interactive=True)
-            with gr.Row():
-                sigma_schedule = gr.Textbox(label="sigma_schedule", lines=1, value = da.sigma_schedule, interactive=True)
-            with gr.Row():
-                amount_schedule = gr.Textbox(label="amount_schedule", lines=1, value = da.amount_schedule, interactive=True)
-            with gr.Row():
-                threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
         # 2D Perspective Flip
         with gr.Accordion('2D Perspective Flip', open=False):
             with gr.Row():
