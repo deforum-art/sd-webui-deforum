@@ -360,15 +360,17 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
         # output - made in run
         # Batch settings END
-            
+        
+    # Animation settings START
     with gr.Tab('Keyframes'):
-        # Animation settings START
         #TODO make a some sort of the original dictionary parsing
+        # Main top animation settings
         with gr.Accordion('Animation Mode, Max Frames and Border', open=True):
             with gr.Row():
                 animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input', 'Interpolation'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
                 max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0)
                 border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
+        # 2D + 3D Motion
         with gr.Accordion('2D + 3D Motion', open=True):
             with gr.Row():
                 angle = gr.Textbox(label="angle", lines=1, value = da.angle, interactive=True)
@@ -378,6 +380,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 translation_x = gr.Textbox(label="translation_x", lines=1, value = da.translation_x, interactive=True)
             with gr.Row():
                 translation_y = gr.Textbox(label="translation_y", lines=1, value = da.translation_y, interactive=True)
+        # 3D-only Motion
         with gr.Accordion('3D-Only Motion', open=True):
             with gr.Row():
                 translation_z = gr.Textbox(label="translation_z", lines=1, value = da.translation_z, interactive=True)
@@ -387,17 +390,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 rotation_3d_y = gr.Textbox(label="rotation_3d_y", lines=1, value = da.rotation_3d_y, interactive=True)
             with gr.Row():
                 rotation_3d_z = gr.Textbox(label="rotation_3d_z", lines=1, value = da.rotation_3d_z, interactive=True)
-        with gr.Accordion('2D Perspective Flip', open=False):
-            with gr.Row():
-                flip_2d_perspective = gr.Checkbox(label="flip_2d_perspective", value=da.flip_2d_perspective, interactive=True)
-            with gr.Row():
-                perspective_flip_theta = gr.Textbox(label="perspective_flip_theta", lines=1, value = da.perspective_flip_theta, interactive=True)
-            with gr.Row():
-                perspective_flip_phi = gr.Textbox(label="perspective_flip_phi", lines=1, value = da.perspective_flip_phi, interactive=True)
-            with gr.Row():
-                perspective_flip_gamma = gr.Textbox(label="perspective_flip_gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
-            with gr.Row():
-                perspective_flip_fv = gr.Textbox(label="perspective_flip_fv", lines=1, value = da.perspective_flip_fv, interactive=True)
+        # General Settings
         with gr.Accordion('General Settings', open=True):
             with gr.Row():
                 noise_schedule = gr.Textbox(label="noise_schedule", lines=1, value = da.noise_schedule, interactive=True)
@@ -407,44 +400,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 contrast_schedule = gr.Textbox(label="contrast_schedule", lines=1, value = da.contrast_schedule, interactive=True)
             with gr.Row():
                 cfg_scale_schedule = gr.Textbox(label="cfg_scale_schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
-        # Sampler Scheduling
-        with gr.Accordion('3D Field Of View (FOV)', open=True):
-            with gr.Row():
-                fov_schedule = gr.Textbox(label="fov_schedule", lines=1, value = da.fov_schedule, interactive=True)
-            with gr.Row():
-                near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
-            with gr.Row():
-                far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
-        with gr.Accordion('Steps Scheduling', open=False):
-            with gr.Row():
-                enable_steps_scheduling = gr.Checkbox(label="enable steps scheduling.", value=da.enable_steps_scheduling, interactive=True)
-            with gr.Row():
-                steps_schedule = gr.Textbox(label="steps_schedule", lines=1, value = da.steps_schedule, interactive=True)
-        with gr.Accordion('Seed Scheduling', open=False):
-            with gr.Row():
-                seed_schedule = gr.Textbox(label="seed_schedule", lines=1, value = da.seed_schedule, interactive=True)
-        # Sampler Scheduling
-        with gr.Accordion('Sampler Scheduling', open=False):
-            with gr.Row():
-                enable_sampler_scheduling = gr.Checkbox(label="enable sampler scheduling.", value=da.enable_sampler_scheduling, interactive=True)
-            with gr.Row():
-                sampler_schedule = gr.Textbox(label="sampler_schedule", lines=1, value = da.sampler_schedule, interactive=True)
-        # Checkpoint Scheduling
-        with gr.Accordion('Checkpoint Scheduling', open=False):
-            with gr.Row():
-                enable_checkpoint_scheduling = gr.Checkbox(label="enable_checkpoint_scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
-            with gr.Row():
-                checkpoint_schedule = gr.Textbox(label="checkpoint_schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
-        # Anti-blur
-        with gr.Accordion('Anti Blur', open=True):
-            with gr.Row():
-                kernel_schedule = gr.Textbox(label="kernel_schedule", lines=1, value = da.kernel_schedule, interactive=True)
-            with gr.Row():
-                sigma_schedule = gr.Textbox(label="sigma_schedule", lines=1, value = da.sigma_schedule, interactive=True)
-            with gr.Row():
-                amount_schedule = gr.Textbox(label="amount_schedule", lines=1, value = da.amount_schedule, interactive=True)
-            with gr.Row():
-                threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
         # Coherence
         with gr.Accordion('Cohherence', open=True):
             with gr.Row():
@@ -460,14 +415,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Accordion('Noise', open=True):
             with gr.Row():
                 noise_type = gr.Dropdown(label="noise_type", choices=['uniform', 'perlin'], value=da.noise_type, type="value", elem_id="noise_type", interactive=True)
-                gr.HTML("<p style=\"margin-bottom:0.75em\">Perlin noise params, if selected.</p>")
             with gr.Row():
+                gr.HTML("<p style=\"margin-bottom:0.75em\">Perlin noise params, if selected.</p>")
                 perlin_w = gr.Number(label="perlin_w", value=da.perlin_w, interactive=True)
                 perlin_h = gr.Number(label="perlin_h", value=da.perlin_h, interactive=True)
             with gr.Row():
                 perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                 perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
-        # Depth Warping
+        # 3D Depth Warping
         with gr.Accordion('3D Depth Warping', open=True):
             with gr.Row():
                 use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
@@ -477,7 +432,60 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 padding_mode = gr.Dropdown(label="padding_mode", choices=['border', 'reflection', 'zeros'], value=da.padding_mode, type="value", elem_id="padding_mode", interactive=True)
                 sampling_mode = gr.Dropdown(label="sampling_mode", choices=['bicubic', 'bilinear', 'nearest'], value=da.sampling_mode, type="value", elem_id="sampling_mode", interactive=True)
                 save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
-
+        # 3D FOV
+        with gr.Accordion('3D Field Of View (FOV)', open=True):
+            with gr.Row():
+                fov_schedule = gr.Textbox(label="fov_schedule", lines=1, value = da.fov_schedule, interactive=True)
+            with gr.Row():
+                near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
+            with gr.Row():
+                far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
+        # Anti-blur
+        with gr.Accordion('Anti Blur', open=True):
+            with gr.Row():
+                kernel_schedule = gr.Textbox(label="kernel_schedule", lines=1, value = da.kernel_schedule, interactive=True)
+            with gr.Row():
+                sigma_schedule = gr.Textbox(label="sigma_schedule", lines=1, value = da.sigma_schedule, interactive=True)
+            with gr.Row():
+                amount_schedule = gr.Textbox(label="amount_schedule", lines=1, value = da.amount_schedule, interactive=True)
+            with gr.Row():
+                threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
+        # 2D Perspective Flip
+        with gr.Accordion('2D Perspective Flip', open=False):
+            with gr.Row():
+                flip_2d_perspective = gr.Checkbox(label="flip_2d_perspective", value=da.flip_2d_perspective, interactive=True)
+            with gr.Row():
+                perspective_flip_theta = gr.Textbox(label="perspective_flip_theta", lines=1, value = da.perspective_flip_theta, interactive=True)
+            with gr.Row():
+                perspective_flip_phi = gr.Textbox(label="perspective_flip_phi", lines=1, value = da.perspective_flip_phi, interactive=True)
+            with gr.Row():
+                perspective_flip_gamma = gr.Textbox(label="perspective_flip_gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
+            with gr.Row():
+                perspective_flip_fv = gr.Textbox(label="perspective_flip_fv", lines=1, value = da.perspective_flip_fv, interactive=True)
+        # Steps Scheduling
+        with gr.Accordion('Steps Scheduling', open=False):
+            with gr.Row():
+                enable_steps_scheduling = gr.Checkbox(label="enable steps scheduling.", value=da.enable_steps_scheduling, interactive=True)
+            with gr.Row():
+                steps_schedule = gr.Textbox(label="steps_schedule", lines=1, value = da.steps_schedule, interactive=True)
+        with gr.Accordion('Seed Scheduling', open=False):
+            with gr.Row():
+                
+                seed_schedule = gr.Textbox(label="seed_schedule", lines=1, value = da.seed_schedule, interactive=True)
+        # Sampler Scheduling
+        with gr.Accordion('Sampler Scheduling', open=False):
+            with gr.Row():
+                enable_sampler_scheduling = gr.Checkbox(label="enable sampler scheduling.", value=da.enable_sampler_scheduling, interactive=True)
+            with gr.Row():
+                sampler_schedule = gr.Textbox(label="sampler_schedule", lines=1, value = da.sampler_schedule, interactive=True)
+        # Checkpoint Scheduling
+        with gr.Accordion('Checkpoint Scheduling', open=False):
+            with gr.Row():
+                enable_checkpoint_scheduling = gr.Checkbox(label="enable_checkpoint_scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
+            with gr.Row():
+                checkpoint_schedule = gr.Textbox(label="checkpoint_schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
+        
+        # Parseq
         with gr.Accordion('Parseq', open=False):
             gr.HTML("""
             Use an <a style='color:blue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
@@ -504,7 +512,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 parseq_manifest = gr.Textbox(label="Parseq Manifest (JSON or URL)", lines=4, value = dp.parseq_manifest, interactive=True)
             with gr.Row():
                 parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
-    
     # Animation settings END
     
     # Prompts settings START    
@@ -523,7 +530,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 animation_prompts = gr.Textbox(label="animation_prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
     # Prompts settings END
     with gr.Tab('Init'):
-        # Init settings START
+        # Image Init
         with gr.Accordion('Image Init', open=True):
             with gr.Row():
                 use_init = gr.Checkbox(label="use_init", value=d.use_init, interactive=True, visible=True)
@@ -551,7 +558,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 #fill = gr.Slider(minimum=0, maximum=3, step=1, label="mask_fill_type", value=d.fill, interactive=True)
                 full_res_mask = gr.Checkbox(label="full_res_mask", value=d.full_res_mask, interactive=True)
                 full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="full_res_mask_padding", value=d.full_res_mask_padding, interactive=True)
-        with gr.Accordion('Video Init', open=True):
+        # Video Init
+        with gr.Accordion('Video Init', open=False):
             with gr.Row():
                 video_init_path = gr.Textbox(label="video_init_path", lines=1, value = da.video_init_path, interactive=True)
             with gr.Row():
@@ -575,10 +583,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # Init settings END
 
     with gr.Tab('Hybrid Video'):
-        hybrid_html = "<p style=\"padding-bottom:0\"><b style=\"text-shadow: blue -1px -1px;\">Hybrid Video Compositing in 2D/3D Mode</b><span style=\"color:#DDD;font-size:0.7rem;text-shadow: black -1px -1px;margin-left:10px;\">by reallybigname</span></p>"
-        gr.HTML(hybrid_html)
+        
+        # gr.HTML(hybrid_html)
         with gr.Accordion("Info & Help", open=False):
-            hybrid_html = "<ul style=\"list-style-type:circle; margin-left:1em; margin-bottom:1em;\"><li>Composite video with previous frame init image in <b>2D or 3D animation_mode</b> <i>(not for Video Input mode)</i></li>"
+            hybrid_html = "<p style=\"padding-bottom:0\"><b style=\"text-shadow: blue -1px -1px;\">Hybrid Video Compositing in 2D/3D Mode</b><span style=\"color:#DDD;font-size:0.7rem;text-shadow: black -1px -1px;margin-left:10px;\">by reallybigname</span></p>"
+            hybrid_html += "<ul style=\"list-style-type:circle; margin-left:1em; margin-bottom:1em;\"><li>Composite video with previous frame init image in <b>2D or 3D animation_mode</b> <i>(not for Video Input mode)</i></li>"
             hybrid_html += "<li>Uses your <b>Init</b> settings for <b>video_init_path, extract_nth_frame, overwrite_extracted_frames</b></li>"
             hybrid_html += "<li>In Keyframes tab, you can also set <b>color_coherence</b> = '<b>Video Input</b>'</li>"
             hybrid_html += "<li><b>color_coherence_video_every_N_frames</b> lets you only match every N frames</li>"
@@ -589,7 +598,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             hybrid_html += "<li>The <b>hybrid_comp_mask_blend_alpha_schedule</b> only affects the 'Blend' <b>hybrid_comp_mask_type</b>.</li>"
             hybrid_html += "<li>Mask contrast schedule is from 0-255. Normal is 1. Affects all masks.</li>"
             hybrid_html += "<li>Autocontrast low/high cutoff schedules 0-100. Low 0 High 100 is full range. <br>(<i><b>hybrid_comp_mask_auto_contrast</b> must be enabled</i>)</li></ul>"            
-            hybrid_html += "See main Deforum document for more details."            
+            hybrid_html += "<a style='color:blue;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/Animation-Settings#hybrid-video-mode-for-2d3d-animations'>Click Here</a> for more info/ a Guide."      
+            gr.HTML(hybrid_html)
         with gr.Accordion("Hybrid Settings", open=True):
             with gr.Row():
                 with gr.Column(variant="compact"):
@@ -621,7 +631,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     hybrid_comp_save_extra_frames = gr.Checkbox(label="hybrid_comp_save_extra_frames", value=False, interactive=True)
 
         # hybrid_html = "<p style=\"margin-bottom:0.75em\"><b>Hybrid Video Schedules</b></p>"
-        with gr.Accordion("Hybrid Schedules", open=True):
+        with gr.Accordion("Hybrid Schedules", open=False):
             with gr.Row():
                 hybrid_comp_alpha_schedule = gr.Textbox(label="hybrid_comp_alpha_schedule", lines=1, value = da.hybrid_comp_alpha_schedule, interactive=True)
             with gr.Row():
@@ -687,7 +697,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 frame_interpolation_slow_mo_amount = gr.Dropdown(label="frame_interpolation_slow_mo_amount", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
             with gr.Row():
                 frame_interpolation_keep_imgs = gr.Checkbox(label="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)       
-
         # Video output settings END
     return locals()
 
@@ -837,8 +846,6 @@ def process_args(args_dict_main):
 
     # TODO: Handle batch name dynamically?
     current_arg_list = [args, anim_args, video_args, parseq_args]
-    #batch_name = replace_args(batch_name, current_arg_list)
-    #print_args(args)
     args.outdir = os.path.join(p.outpath_samples, args.batch_name)
     root.outpath_samples = args.outdir
     args.outdir = os.path.join(os.getcwd(), args.outdir)
