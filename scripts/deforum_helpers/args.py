@@ -329,13 +329,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row().style(equal_height=False):
                 with gr.Column(variant='compact'):
                     from modules.sd_samplers import samplers_for_img2img
-                    sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
+                    with gr.Row():
+                        sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
+                        steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                     with gr.Row(variant='compat'):
                         with gr.Column(scale=4):
                             W = gr.Slider(label="W", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                             H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                         with gr.Column(scale=4):
-                            steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
                     with gr.Accordion('Seed extras', open=False):
                         with gr.Row():
