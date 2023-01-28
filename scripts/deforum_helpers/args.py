@@ -294,7 +294,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             )
     
     with gr.Tab('Run'):
-        with gr.Accordion('Run from Settings file', open=True):
+        with gr.Accordion('Run from Settings file', open=False):
             with gr.Row():
                 override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
                 custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
@@ -332,7 +332,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row(visible=False):
                 save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
                 display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
-            with gr.Row():
+            with gr.Row(visible=False):
                 save_sample_per_step = gr.Checkbox(label="save_sample_per_step", value=d.save_sample_per_step, interactive=True)
                 show_sample_per_step = gr.Checkbox(label="show_sample_per_step", value=False, interactive=False)
         # Batch settings 
