@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 
 def unsharp_mask(img, kernel_size=(5, 5), sigma=1.0, amount=1.0, threshold=0, mask=None):
+    if amount == 0:
+        return img
     # Return a sharpened version of the image, using an unsharp mask.
     # If mask is not None, only areas under mask are handled
     blurred = cv2.GaussianBlur(img, kernel_size, sigma)
