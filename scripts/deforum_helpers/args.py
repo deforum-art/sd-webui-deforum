@@ -314,7 +314,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
             with gr.Row():
-                seed_enable_extras = gr.Checkbox(label="Enable subseed controls:", value=False)
+                seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
                 subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
                 subseed_strength = gr.Slider(label="subseed_strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
             with gr.Row():
