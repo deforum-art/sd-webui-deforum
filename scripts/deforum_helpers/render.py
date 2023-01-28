@@ -139,7 +139,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         noise_mask_vals['init_mask'] = mask_image
     
     # Grab the first frame masks since they wont be provided until next frame
-    if mask_image is None:
+    if mask_image is None and args.use_mask:
         mask_vals['init_mask'] = get_mask(args)
         noise_mask_vals['init_mask'] = get_mask(args) # TODO?: add a different default noise mask
 
