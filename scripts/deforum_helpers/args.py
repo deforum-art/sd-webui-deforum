@@ -551,17 +551,27 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
         with gr.Accordion('Guided Images', open=False):
-            gr.HTML("""To use the guided image tool you need to do a bit of work. You can use this as a guided image tool or as a looper depending 
-                       on your settings in the images to use. For this to work you set the keyframes and images you want them to show up, it likely should 
-                       be at closest every tweening frames to look best. If you want this to loop, have the 1st and last frames match. Lastly you are
-                       going to want to have your total number of keyframes be 21 more than the last inserted image for it to move there. so 221 in the example""")
-            gr.HTML("""In order to use the tool you must set in the init tab an initial strength for the image. In later versions this should be also
-                       in the strength schedule, but for now you need to set it. I use around .75""")
-            gr.HTML("""You need to set your seed to schedule and schedule the seed to move in a specific way. you want to have a schedule that starts 
-                       and ends on the same seed. (using the example of 220 frames) """)
-            gr.HTML("""0:(5), 1:(-1), 219:(-1), 220:(5)  could be a good schedule, sometimes having a few more frames match is good too""")
+            gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
+                       Set the keyframes and the images that you want to show up. 
+                       Note: the number of frames between each keyframe should be greater than the tweening frames.""")
+            #    In later versions this should be also in the strength schedule, but for now you need to set it.
+            gr.HTML("""Prerequisites: 
+                       <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                           <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
+                           <li>Set Run tab's seed_behavior to schedule.</li>
+                        </ul>
+                    """)
+            gr.HTML("""Looping recommendations: 
+                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                            <li>seed_schedule should start and end on the same seed. <br />
+                                Example: seed_schedule could use 0:(5), 1:(-1), 219:(-1), 220:(5)</li>
+                            <li>The 1st and last keyframe images should match.</li>
+                            <li>Set your total number of keyframes to be 21 more than the last inserted keyframe image. <br />
+                                Example: Default args should use 221 as total keyframes.</li>
+                        </ul>
+                    """)
             with gr.Row():
-                use_looper = gr.Checkbox(label="Use looper for the next run", value=False, interactive=True)
+                use_looper = gr.Checkbox(label="Use guided images for the next run", value=False, interactive=True)
             with gr.Row():
                 init_images = gr.Textbox(label="Images to use for keyframe guidance", lines=13, value = keyframeExamples(), interactive=True)
             gr.HTML("""strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on""")
