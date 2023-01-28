@@ -267,7 +267,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             i1 = gr.HTML(i1_store, elem_id='deforum_header')
     else:
         btn = i1 = gr.HTML("")
-    with gr.Accordion("Info, Link and Help", open=False):
+    with gr.Accordion("Info, Links and Help", open=False):
         gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
         gr.HTML("""<ul style="list-style-type:circle; margin-left:1em">
         <li>The code for this extension: <a  style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">Here</a>.</li>
