@@ -56,9 +56,9 @@ def add_noise(sample, noise_amt: float, seed: int, noise_type: str, noise_args, 
         noise = noise * ((rand_perlin_2d_octaves(sample2dshape, (int(noise_args[0]), int(noise_args[1])), octaves=noise_args[2], persistence=noise_args[3]) + torch.ones(sample2dshape)) / 2)
     if noise_mask is not None:
         noise_mask = condition_noise_mask(noise_mask, invert_mask)
-        noise_to_add = sample_to_cv2((noise * noise_mask) * noise_amt)
+        noise_to_add = sample_to_cv2(noise * noise_mask)
     else:
-        noise_to_add = sample_to_cv2(noise * noise_amt)
-    sample = cv2.add(sample, noise_to_add)
+        noise_to_add = sample_to_cv2(noise)
+    sample = cv2.addWeighted(sample, 1-noise_amt, noise_to_add, noise_amt, 0) 
     
     return sample
