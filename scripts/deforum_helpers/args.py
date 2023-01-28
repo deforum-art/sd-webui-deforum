@@ -155,8 +155,8 @@ def DeforumArgs():
     
     #@markdown **Sampling Settings**
     seed = -1 #@param
-    sampler = 'klms' #@param ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
-    steps = 21 #@param
+    sampler = 'euler_ancestral' #@param ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
+    steps = 25 #@param
     scale = 7 #@param
     ddim_eta = 0.0 #@param
     dynamic_threshold = None
@@ -225,11 +225,11 @@ def DeforumArgs():
 
 def keyframeExamples():
     return '''{
-    "0": "https://cdn.discordapp.com/attachments/1047760262637297664/1049851726200578058/a_dragon_flying_over_a_futuristic_city_dramatic_sky_cinematic_view_seed-1703716904ts-1670374556_idx-0.png",
-    "50": "https://cdn.discordapp.com/attachments/1047760262637297664/1049901219004555274/a_digital_painting_of_a_fox_standing_in_the_grass_on_a_hill__trees_beh_t_outpaint_from-down_seed-1205071278ts-1670386356_idx-0.png",
-    "100": "https://cdn.discordapp.com/attachments/745415989633482882/1048084925359857704/00024-2977479109-wings_hubble_images_jwst_images_6.png",
-    "150": "https://cdn.discordapp.com/attachments/1011355905490694355/1047133257097031680/31_0031_31.jpg",
-    "200": "https://cdn.discordapp.com/attachments/1047760262637297664/1049851726200578058/a_dragon_flying_over_a_futuristic_city_dramatic_sky_cinematic_view_seed-1703716904ts-1670374556_idx-0.png"
+    "0": "https://user-images.githubusercontent.com/121192995/215279228-1673df8a-f919-4380-b04c-19379b2041ff.png",
+    "50": "https://user-images.githubusercontent.com/121192995/215279281-7989fd6f-4b9b-4d90-9887-b7960edd59f8.png",
+    "100": "https://user-images.githubusercontent.com/121192995/215279284-afc14543-d220-4142-bbf4-503776ca2b8b.png",
+    "150": "https://user-images.githubusercontent.com/121192995/215279286-23378635-85b3-4457-b248-23e62c048049.jpg",
+    "200": "https://user-images.githubusercontent.com/121192995/215279228-1673df8a-f919-4380-b04c-19379b2041ff.png"
 }'''
 
 def LoopArgs():
@@ -320,14 +320,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             )
     
     with gr.Tab('Run'):
-        with gr.Accordion('Run from Settings file', open=False):
-            with gr.Row():
-                override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
-                custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
         # Sampling settings START
         with gr.Accordion('General Image Sampling Settings', open=True):
             with gr.Row().style(equal_height=False):
-                with gr.Column(variant='compact'):
+                # with gr.Column(variant='compact'):
+                with gr.Column():
                     from modules.sd_samplers import samplers_for_img2img
                     with gr.Row():
                         sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
@@ -338,7 +335,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                         with gr.Column(scale=4):
                             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
-                    with gr.Accordion('Seed extras', open=False):
+                            batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
+                            with gr.Row(visible=False):
+                                # batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
+                                filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format, visible=False)
+                    with gr.Accordion('Subseed controls & More', open=False):
                         with gr.Row():
                             seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
                             subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
@@ -346,12 +347,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Row():
                             seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
                             seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
-                    with gr.Row():
-                        ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
-                        tiling = gr.Checkbox(label='Tiling', value=False)
-                        n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0, visible=False)
-                    # with gr.Row():
-                        # tiling = gr.Checkbox(label='Tiling', value=False)
+                        with gr.Row():
+                            ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
+                            tiling = gr.Checkbox(label='Tiling', value=False)
+                            n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0, visible=False)
                     # NOT VISIBLE IN THE UI!
                     with gr.Row(visible=False):
                         save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
@@ -362,13 +361,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(visible=False):
                         save_sample_per_step = gr.Checkbox(label="save_sample_per_step", value=d.save_sample_per_step, interactive=True)
                         show_sample_per_step = gr.Checkbox(label="show_sample_per_step", value=False, interactive=False)
-        # Batch settings 
-        with gr.Accordion('Batch Settings', open=True):
+        with gr.Accordion('Run from Settings file', open=False):
             with gr.Row():
-                batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
-            with gr.Row():    
-                filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format)
-        # output - made in run
+                override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
+                custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
     # Animation settings 'Key' tab
     with gr.Tab('Keyframes'):
         #TODO make a some sort of the original dictionary parsing
@@ -388,7 +384,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             gr.HTML("""Prerequisites: 
                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
                            <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
-                           <li>Set Run tab's seed_behavior to schedule.</li>
+                           <li>Set 'seed_behavior' to 'schedule' under the Seed Scheduling section below.</li>
                         </ul>
                     """)
             gr.HTML("""Looping recommendations: 
@@ -421,6 +417,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
             with gr.Row():
                 color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
+        with gr.Accordion('Seed Scheduling', open=False):
+            with gr.Row():
+                seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
+                seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
+            with gr.Row():
+                gr.HTML("Please set seed_behavior to 'Schedule' for this option to become active")
+            with gr.Row():
+                seed_schedule = gr.Textbox(label="seed_schedule", lines=1, value = da.seed_schedule, interactive=True)
         # 2D + 3D Motion
         with gr.Accordion('2D + 3D Motion', open=True):
             with gr.Row():
@@ -473,6 +477,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                 perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
+        # Anti-blur
+        with gr.Accordion('Anti Blur', open=True):
+            with gr.Row():
+                kernel_schedule = gr.Textbox(label="kernel_schedule", lines=1, value = da.kernel_schedule, interactive=True)
+            with gr.Row():
+                sigma_schedule = gr.Textbox(label="sigma_schedule", lines=1, value = da.sigma_schedule, interactive=True)
+            with gr.Row():
+                amount_schedule = gr.Textbox(label="amount_schedule", lines=1, value = da.amount_schedule, interactive=True)
+            with gr.Row():
+                threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
         # 3D Depth Warping
         with gr.Accordion('3D Depth Warping', open=False):
             with gr.Row():
@@ -490,17 +504,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
             with gr.Row():
                 far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
-
-        # Anti-blur
-        with gr.Accordion('Anti Blur', open=True):
-            with gr.Row():
-                kernel_schedule = gr.Textbox(label="kernel_schedule", lines=1, value = da.kernel_schedule, interactive=True)
-            with gr.Row():
-                sigma_schedule = gr.Textbox(label="sigma_schedule", lines=1, value = da.sigma_schedule, interactive=True)
-            with gr.Row():
-                amount_schedule = gr.Textbox(label="amount_schedule", lines=1, value = da.amount_schedule, interactive=True)
-            with gr.Row():
-                threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
         # 2D Perspective Flip
         with gr.Accordion('2D Perspective Flip', open=False):
             with gr.Row():
@@ -519,14 +522,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 enable_steps_scheduling = gr.Checkbox(label="enable steps scheduling", value=da.enable_steps_scheduling, interactive=True)
             with gr.Row():
                 steps_schedule = gr.Textbox(label="steps_schedule", lines=1, value = da.steps_schedule, interactive=True)
-        with gr.Accordion('Seed Scheduling', open=True):
-            with gr.Row():
-                seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
-                seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
-            with gr.Row():
-                gr.HTML("Please set seed_behavior to 'Schedule' for this option to become active")
-            with gr.Row():
-                seed_schedule = gr.Textbox(label="seed_schedule", lines=1, value = da.seed_schedule, interactive=True)
         # Sampler Scheduling
         with gr.Accordion('Sampler Scheduling', open=False):
             with gr.Row():
