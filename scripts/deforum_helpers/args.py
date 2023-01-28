@@ -14,7 +14,6 @@ def Root():
     initial_seed = None
     initial_info = None
     first_frame = None
-    # prompts = None
     outpath_samples = ""
     animation_prompts = None
     color_corrections = None 
@@ -218,6 +217,25 @@ def DeforumArgs():
 
     return locals()
 
+def keyframeExamples():
+    return '''{
+    "0": "https://cdn.discordapp.com/attachments/1047760262637297664/1049851726200578058/a_dragon_flying_over_a_futuristic_city_dramatic_sky_cinematic_view_seed-1703716904ts-1670374556_idx-0.png",
+    "50": "https://cdn.discordapp.com/attachments/1047760262637297664/1049901219004555274/a_digital_painting_of_a_fox_standing_in_the_grass_on_a_hill__trees_beh_t_outpaint_from-down_seed-1205071278ts-1670386356_idx-0.png",
+    "100": "https://cdn.discordapp.com/attachments/745415989633482882/1048084925359857704/00024-2977479109-wings_hubble_images_jwst_images_6.png",
+    "150": "https://cdn.discordapp.com/attachments/1011355905490694355/1047133257097031680/31_0031_31.jpg",
+    "200": "https://cdn.discordapp.com/attachments/1047760262637297664/1049851726200578058/a_dragon_flying_over_a_futuristic_city_dramatic_sky_cinematic_view_seed-1703716904ts-1670374556_idx-0.png"
+}'''
+
+def LoopArgs():
+    use_looper = False
+    init_images = keyframeExamples()
+    image_strength_schedule = "0:(0.6)"
+    blendFactorMax = "0:(0.6)"
+    blendFactorSlope = "0:(0.25)"
+    tweening_frames_schedule = "0:(0.25)"
+    color_correction_factor = "0:(0.075)"
+    return locals()
+
 def ParseqArgs():
     parseq_manifest = None
     parseq_use_deltas = True
@@ -260,6 +278,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
     dp = SimpleNamespace(**ParseqArgs()) #default parseq ars
     dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
+    dloopArgs = SimpleNamespace(**LoopArgs())
     if not is_extension:
         with gr.Row():
             btn = gr.Button("Click here after the generation to show the video")
@@ -495,6 +514,47 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 parseq_manifest = gr.Textbox(label="Parseq Manifest (JSON or URL)", lines=4, value = dp.parseq_manifest, interactive=True)
             with gr.Row():
                 parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
+        # loopArgs
+        with gr.Accordion('Guided Images', open=False):
+            gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
+                       Set the keyframes and the images that you want to show up. 
+                       Note: the number of frames between each keyframe should be greater than the tweening frames.""")
+            #    In later versions this should be also in the strength schedule, but for now you need to set it.
+            gr.HTML("""Prerequisites: 
+                       <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                           <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
+                           <li>Set Run tab's seed_behavior to schedule.</li>
+                        </ul>
+                    """)
+            gr.HTML("""Looping recommendations: 
+                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                            <li>seed_schedule should start and end on the same seed. <br />
+                                Example: seed_schedule could use 0:(5), 1:(-1), 219:(-1), 220:(5)</li>
+                            <li>The 1st and last keyframe images should match.</li>
+                            <li>Set your total number of keyframes to be 21 more than the last inserted keyframe image. <br />
+                                Example: Default args should use 221 as total keyframes.</li>
+                        </ul>
+                    """)
+            with gr.Row():
+                use_looper = gr.Checkbox(label="Use guided images for the next run", value=False, interactive=True)
+            with gr.Row():
+                init_images = gr.Textbox(label="Images to use for keyframe guidance", lines=13, value = keyframeExamples(), interactive=True)
+            gr.HTML("""strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on""")
+            with gr.Row():
+                image_strength_schedule = gr.Textbox(label="Image strength schedule", lines=1, value = "0:(.75)", interactive=True)
+            gr.HTML("""blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))""")
+            with gr.Row():
+                blendFactorMax = gr.Textbox(label="blendFactorMax", lines=1, value = "0:(.35)", interactive=True)
+            with gr.Row():
+                blendFactorSlope = gr.Textbox(label="blendFactorSlope", lines=1, value = "0:(.25)", interactive=True)
+            with gr.Row():
+                gr.HTML("""number of frames this will calculated over. After each insersion frame.""")
+            with gr.Row():
+                tweening_frames_schedule = gr.Textbox(label="tweening frames schedule", lines=1, value = "0:(20)", interactive=True)
+            with gr.Row():
+                gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
+            with gr.Row():
+                color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
     # Animation settings END
     
     # Prompts settings START    
@@ -507,8 +567,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 <li>For negative prompts, please write your positive prompt, then --neg ugly, text, assymetric, or any other negative tokens of your choice.</li>
                 </ul>
                 """)
-            # with gr.Row():
-                # prompts = gr.Textbox(label="batch_prompts (disabled atm)", lines=8, interactive=False, value = DeforumPrompts(), visible = False) # TODO
             with gr.Row():
                 animation_prompts = gr.Textbox(label="animation_prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
     # Prompts settings END
@@ -739,10 +797,13 @@ video_args_names =  str(r'''skip_video_for_run_all,
                     ).replace("\n", "").replace(" ", "").split(',')
 parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
                     ).replace("\n", "").replace(" ", "").split(',')
-
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names
-
+loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blendFactorMax, blendFactorSlope, 
+                          tweening_frames_schedule, color_correction_factor'''
+                    ).replace("\n", "").replace(" ", "").split(',')
+                    
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
 settings_component_names = [name for name in component_names if name not in video_args_names]
+
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
     ds = setup_deforum_setting_dictionary(self, is_img2img, is_extension)
@@ -771,6 +832,9 @@ def pack_video_args(args_dict):
 
 def pack_parseq_args(args_dict):
     return {name: args_dict[name] for name in parseq_args_names}
+    
+def pack_loop_args(args_dict):
+    return {name: args_dict[name] for name in loop_args_names}
 
 def process_args(args_dict_main):
     override_settings_with_file = args_dict_main['override_settings_with_file']
@@ -779,6 +843,7 @@ def process_args(args_dict_main):
     anim_args_dict = pack_anim_args(args_dict_main)
     video_args_dict = pack_video_args(args_dict_main)
     parseq_args_dict = pack_parseq_args(args_dict_main)
+    loop_args_dict = pack_loop_args(args_dict_main)
 
     import json
     
@@ -790,7 +855,7 @@ def process_args(args_dict_main):
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict, anim_args_dict, parseq_args_dict, custom_settings_file, root)
+        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root)
     
     print(f"Additional models path: {root.models_path}")
     if not os.path.exists(root.models_path):
@@ -800,6 +865,7 @@ def process_args(args_dict_main):
     anim_args = SimpleNamespace(**anim_args_dict)
     video_args = SimpleNamespace(**video_args_dict)
     parseq_args = SimpleNamespace(**parseq_args_dict)
+    loop_args = SimpleNamespace(**loop_args_dict)
 
     p.width, p.height = map(lambda x: x - x % 64, (args.W, args.H))
     p.steps = args.steps
@@ -838,7 +904,7 @@ def process_args(args_dict_main):
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
     
-    return root, args, anim_args, video_args, parseq_args
+    return root, args, anim_args, video_args, parseq_args, loop_args
 
 def print_args(args):
     print("ARGS: /n")

@@ -8,7 +8,7 @@ from PIL import Image
 from .generate import generate
 from .noise import add_noise
 from .animation import sample_from_cv2, sample_to_cv2, anim_frame_warp
-from .animation_key_frames import DeformAnimKeys
+from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
 from .vid2frames import get_frame_name, get_next_frame
 from .depth import DepthModel
 from .colors import maintain_colors
@@ -22,8 +22,7 @@ from .save_images import save_image
 # Webui
 from modules.shared import opts, cmd_opts, state
 
-
-def render_animation(args, anim_args, video_args, parseq_args, animation_prompts, root):
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root):
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         if anim_args.hybrid_composite or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
@@ -33,10 +32,9 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
-
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args)
-
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args)
     # resume animation
     start_frame = 0
     if anim_args.resume_from_timestring:
@@ -296,9 +294,17 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
             args.init_image = init_frame
             if anim_args.use_mask_video:
                 args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
-                
+
+        # setting up some arguments for the looper
+        loop_args.imageStrength = loopSchedulesAndData.image_strength_schedule_series[frame_idx]
+        loop_args.blendFactorMax = loopSchedulesAndData.blendFactorMax_series[frame_idx]
+        loop_args.blendFactorSlope = loopSchedulesAndData.blendFactorSlope_series[frame_idx]
+        loop_args.tweeningFrameSchedule = loopSchedulesAndData.tweening_frames_schedule_series[frame_idx]
+        loop_args.colorCorrectionFactor = loopSchedulesAndData.color_correction_factor_series[frame_idx]
+        loop_args.useLooper = loopSchedulesAndData.useLooper
+        loop_args.imagesToKeyframe = loopSchedulesAndData.imagesToKeyframe
         # sample the diffusion model
-        sample, image = generate(args, anim_args, root, frame_idx, return_sample=True, sampler_name=scheduled_sampler_name)
+        sample, image = generate(args, anim_args, loop_args, root, frame_idx, return_sample=True, sampler_name=scheduled_sampler_name)
         patience = 10
 
         # reroll blank frame 
@@ -308,7 +314,7 @@ def render_animation(args, anim_args, video_args, parseq_args, animation_prompts
                 while not image.getbbox():
                     print("Rerolling with +1 seed...")
                     args.seed += 1
-                    sample, image = generate(args, root, frame_idx, return_sample=True, sampler_name=scheduled_sampler_name)
+                    sample, image = generate(args, anim_args, loop_args,  root, frame_idx, return_sample=True, sampler_name=scheduled_sampler_name)
                     patience -= 1
                     if patience == 0:
                         print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
