@@ -140,7 +140,6 @@ def DeforumArgs():
     W, H = map(lambda x: x - x % 64, (W, H))  # resize to integer multiple of 64
 
     #@markdonw **Webui stuff**
-    restore_faces = False
     tiling = False
     firstphase_width = 0
     firstphase_height = 0
@@ -308,7 +307,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
             with gr.Row():
-                restore_faces = gr.Checkbox(label='Restore faces', value=False, visible=len(sh.face_restorers) > 1)
                 tiling = gr.Checkbox(label='Tiling', value=False)
             with gr.Row(visible=False) as hr_options:
                 firstphase_width = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass width", value=0)
@@ -717,7 +715,7 @@ hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human
                         hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
                         hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
                     ).replace("\n", "").replace(" ", "").split(',')
-args_names =    str(r'''W, H, restore_faces, tiling, firstphase_width, firstphase_height,
+args_names =    str(r'''W, H, tiling, firstphase_width, firstphase_height,
                         seed, sampler,
                         seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h,
                         steps, ddim_eta,
@@ -810,7 +808,6 @@ def process_args(args_dict_main):
     p.seed = args.seed
     p.sampler_name = args.sampler
     p.batch_size = args.n_batch
-    p.restore_faces = args.restore_faces
     p.tiling = args.tiling
     p.firstphase_width = args.firstphase_width
     p.firstphase_height = args.firstphase_height
