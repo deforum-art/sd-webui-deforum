@@ -306,8 +306,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 W = gr.Slider(label="W", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
             with gr.Row():
                 H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
-            with gr.Row():
-                tiling = gr.Checkbox(label='Tiling', value=False)
             with gr.Row(visible=False) as hr_options:
                 firstphase_width = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass width", value=0)
                 firstphase_height = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass height", value=0)
@@ -329,6 +327,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0)
                 make_grid = gr.Checkbox(label="make_grid", value=d.make_grid, interactive=True)
                 grid_rows = gr.Number(label="grid_rows", value=d.n_batch, interactive=True, precision=0)
+            with gr.Row():
+                tiling = gr.Checkbox(label='Tiling', value=False)
             with gr.Row():
                 save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
             with gr.Row():
