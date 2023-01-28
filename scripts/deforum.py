@@ -36,9 +36,7 @@ from modules.ui import create_output_panel, plaintext_to_html, wrap_gradio_call
 from types import SimpleNamespace
 
 def run_deforum(*args, **kwargs):
-
     args_dict = {deforum_args.component_names[i]: args[i+2] for i in range(0, len(deforum_args.component_names))}
-
     p = StableDiffusionProcessingImg2Img(
         sd_model=shared.sd_model,
         outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
@@ -52,7 +50,7 @@ def run_deforum(*args, **kwargs):
     args_dict['self'] = None
     args_dict['p'] = p
     
-    root, args, anim_args, video_args, parseq_args = deforum_args.process_args(args_dict)
+    root, args, anim_args, video_args, parseq_args, loop_args = deforum_args.process_args(args_dict)
     root.clipseg_model = None
     root.basedirs = basedirs
 
@@ -82,13 +80,13 @@ def run_deforum(*args, **kwargs):
         # dispatch to appropriate renderer
         if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
             if anim_args.use_mask_video: 
-                render_animation_with_video_mask(args, anim_args, video_args, parseq_args, root.animation_prompts, root) # allow mask video without an input video
+                render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root) # allow mask video without an input video
             else:    
-                render_animation(args, anim_args, video_args, parseq_args, root.animation_prompts, root)
+                render_animation(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root)
         elif anim_args.animation_mode == 'Video Input':
-            render_input_video(args, anim_args, video_args, parseq_args, root.animation_prompts, root)#TODO: prettify code
+            render_input_video(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root)#TODO: prettify code
         elif anim_args.animation_mode == 'Interpolation':
-            render_interpolation(args, anim_args, video_args, parseq_args, root.animation_prompts, root)
+            render_interpolation(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root)
         else:
             print('Other modes are not available yet!')
     finally:
