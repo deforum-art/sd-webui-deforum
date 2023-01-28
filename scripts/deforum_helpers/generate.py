@@ -9,13 +9,9 @@ from .animation import sample_from_cv2, sample_to_cv2
 #Webui
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
-from modules import processing
+from modules import processing, sd_models
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
-
-from modules import processing, sd_models
-from modules.shared import sd_model
-from modules.processing import StableDiffusionProcessingTxt2Img
 
 import math, json, itertools
 import requests
