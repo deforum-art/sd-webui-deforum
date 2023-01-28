@@ -188,7 +188,7 @@ def DeforumArgs():
     use_init = False #@param {type:"boolean"}
     strength = 0.0 #@param {type:"number"}
     strength_0_no_init = True # Set the strength to 0 automatically when no init image is used
-    init_image = "https://user-images.githubusercontent.com/14872007/195867706-d067cdc6-28cd-450b-a61e-55e25bc67010.png" #@param {type:"string"}
+    init_image = "https://github.com/hithereai/d/releases/download/m/kaba.png" #@param {type:"string"}
     # Whiter areas of the mask are areas that change more
     use_mask = False #@param {type:"boolean"}
     use_alpha_as_mask = False # use the alpha channel of the init image as the mask
@@ -470,6 +470,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 noise_schedule = gr.Textbox(label="noise_schedule", lines=1, value = da.noise_schedule, interactive=True)
             with gr.Row():
                 noise_type = gr.Dropdown(label="noise_type", choices=['uniform', 'perlin'], value=da.noise_type, type="value", elem_id="noise_type", interactive=True)
+            gr.HTML("<p style=\"margin-bottom:0.75em\">Perlin noise params, if selected:</p>")
             with gr.Row():
                 gr.HTML("<p style=\"margin-bottom:0.75em\">Perlin noise params, if selected:</p>")
                 perlin_w = gr.Number(label="perlin_w", value=da.perlin_w, interactive=True)
