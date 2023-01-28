@@ -288,13 +288,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         <li>After the 2022-12-30 update, the default noise type is <a style="color:blue" href="https://en.wikipedia.org/wiki/Perlin_noise">Perlin noise</a> due to its great frame coherence improvements. If you want to use the old noise and replicate the previous settings, set the type to "uniform" in the Keyframes tab.</li>
         </ul>
         <italic>If you liked this extension, please <a style="color:blue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">give it a star on GitHub</a>!</italic> 😊""")
-        
-        #TODO cleanup
-        
-        i2,i3,i4,i5,i6,i7,i8,i9,i10,i11,i12,i13,i14,i15,i16,i17,i18,i19,i20,i21,i22,i23,i24,i25,i26,i27,i28,i29,i30,i31,i32,i33,i34,i35,i36,i37,i38,i39,i40,i41,i42,i43 = [gr.HTML("", visible=False) for _ in range(42)]
-
-        
-        
+  
     if not is_extension:
         def show_vid():
             return {
