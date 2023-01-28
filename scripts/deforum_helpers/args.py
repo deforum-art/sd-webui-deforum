@@ -338,6 +338,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                         with gr.Column(scale=4):
                             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
+                    with gr.Row():
+                        ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
+                        tiling = gr.Checkbox(label='Tiling', value=False)
+                        n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0, visible=False)
                     with gr.Accordion('Seed extras', open=False):
                         with gr.Row():
                             seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
@@ -346,12 +350,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Row():
                             seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
                             seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
-                    with gr.Row():
-                        ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
-                        tiling = gr.Checkbox(label='Tiling', value=False)
-                        n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0, visible=False)
-                    # with gr.Row():
-                        # tiling = gr.Checkbox(label='Tiling', value=False)
                     # NOT VISIBLE IN THE UI!
                     with gr.Row(visible=False):
                         save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
