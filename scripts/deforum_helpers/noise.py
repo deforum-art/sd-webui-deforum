@@ -44,19 +44,21 @@ def condition_noise_mask(noise_mask, invert_mask = False):
     #noise_mask = torch.round(noise_mask)
     return noise_mask
 
-def add_noise(sample: torch.Tensor, noise_amt: float, seed: int, noise_type: str, noise_args, noise_mask = None, invert_mask = False) -> torch.Tensor:
+def add_noise(sample, noise_amt: float, seed: int, noise_type: str, noise_args, noise_mask = None, invert_mask = False) -> torch.Tensor:
     seed_store = torch.seed()
     torch.manual_seed(seed) # Reproducibility
-    noise = torch.randn(sample.shape, device=sample.device) # White noise
+    sample2dshape = (sample.shape[1], sample.shape[0]) #sample is cv2, so height - width
+    noise = torch.randn(sample2dshape) # White noise
     if noise_type == 'perlin':
         # rand_perlin_2d_octaves is between -1 and 1, so we need to shift it to be between 0 and 1
         # print(sample.shape)
-        sample2dshape = (sample.shape[2], sample.shape[3])
         noise = noise * ((rand_perlin_2d_octaves(sample2dshape, (int(noise_args[0]), int(noise_args[1])), octaves=noise_args[2], persistence=noise_args[3]) + torch.ones(sample2dshape)) / 2)
     if noise_mask is not None:
-        noise_mask = condition_noise_mask(noise_mask, invert_mask)
-        sample = sample + (noise * noise_mask) * noise_amt
+        noise_mask = condition_noise_mask(noise_mask, invert_mask)# FIXME REST OF THE CONVS
+        noise_to_add = sample_to_cv2((noise * noise_mask) * noise_amt)
     else:
-        sample = sample + noise * noise_amt
+        noise_to_add = sample_to_cv2(noise * noise_amt)
+    sample = cv2.add(sample, noise_to_add)
     torch.manual_seed(seed_store)
+    
     return sample
