@@ -281,14 +281,14 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold)
             # apply frame noising
             if args.use_mask or anim_args.use_noise_mask:
-                args.noise_mask = compose_mask_with_check(root, args, noise_mask_seq, noise_mask_vals, sample_from_cv2(contrast_sample))
-            noised_sample = add_noise(contrast_image, noise, args.seed, anim_args.noise_type,
+                args.noise_mask = compose_mask_with_check(root, args, noise_mask_seq, noise_mask_vals, sample_from_cv2(contrast_image))
+            noised_image = add_noise(contrast_image, noise, args.seed, anim_args.noise_type,
                             (anim_args.perlin_w, anim_args.perlin_h, anim_args.perlin_octaves, anim_args.perlin_persistence),
                              args.noise_mask, args.invert_mask)
 
             # use transformed previous frame as init for current
             args.use_init = True
-            args.init_image = noised_image
+            args.init_sample = Image.fromarray(cv2.cvtColor(noised_image, cv2.COLOR_BGR2RGB))
             args.strength = max(0.0, min(1.0, strength))
         
         args.scale = scale
@@ -361,7 +361,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             if image == None:
                 return
 
-        opencv_image = cv2.cvtColor(numpy.array(image), cv2.COLOR_RGB2BGR)
+        opencv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
         if not using_vid_init:
             prev_img = opencv_image
 

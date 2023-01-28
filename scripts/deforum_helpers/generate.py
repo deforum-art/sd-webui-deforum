@@ -130,14 +130,11 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
             raise RuntimeError(f"Unknown checkpoint: {args.checkpoint}")
         sd_models.reload_model_weights(info=info)
     
-    if args.init_image is not None and not isinstance(args.init_image, str):
-        pass
-
-    else if args.init_sample is not None:
-        open_cv_image = sample_to_cv2(args.init_sample)
-        img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
-        init_image = Image.fromarray(img)
-        image_init0 = Image.fromarray(img)
+    if args.init_sample is not None:
+        # TODO: cleanup init_sample remains later
+        img = args.init_sample
+        init_image = img
+        image_init0 = img
         if loop_args.useLooper and isJson(loop_args.imagesToKeyframe):
             init_image = Image.blend(init_image, init_image2, blendFactor)
             correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
@@ -209,6 +206,6 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         if anim_args.histogram_matching:
             root.color_corrections = [processing.setup_color_correction(root.first_frame)]
     
-    results = [processed.images[0]]
+    results = processed.images[0]
     
     return results
