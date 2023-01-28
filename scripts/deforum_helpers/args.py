@@ -274,6 +274,12 @@ import os
 import time
 from types import SimpleNamespace
 
+def combine(a, b):
+    return a + " " + b
+
+def t_func(a):
+    print("HELLO!")
+
 i1_store_backup = "<p style=\"font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.0b</p>"
 i1_store = i1_store_backup
 
@@ -753,6 +759,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 frame_interpolation_slow_mo_amount = gr.Dropdown(label="frame_interpolation_slow_mo_amount", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
             with gr.Row():
                 frame_interpolation_keep_imgs = gr.Checkbox(label="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)       
+            # with gr.Blocks() as test:
+            with gr.Row():
+                test_rife = gr.Textbox(value="", label="Output")
+            with gr.Row():
+                rife_btn = gr.Button(value="RIFE!")
+                # rife_btn.click(combine, inputs=[frame_interpolation_engine, frame_interpolation_x_amount], outputs=[test_rife])
+                rife_btn.click(t_func, inputs=[frame_interpolation_engine], outputs=[test_rife])
     # END OF UI TABS
     return locals()
 
