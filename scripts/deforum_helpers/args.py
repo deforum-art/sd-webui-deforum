@@ -329,28 +329,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Column(variant='compact'):
                     from modules.sd_samplers import samplers_for_img2img
                     sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
-                    # with gr.Column(elem_id="txt2img_column_size", scale=4):
                     with gr.Row(variant='compat'):
                         with gr.Column(scale=4):
                             W = gr.Slider(label="W", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                             H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                         with gr.Column(scale=4):
-                            # from modules.sd_samplers import samplers_for_img2img
-                            # sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
                             steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
-                            # seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
-                    # with gr.Row():
-                        # H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
-                    # with gr.Row(visible=False) as hr_options:
-                        # firstphase_width = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass width", value=0)
-                        # firstphase_height = gr.Slider(minimum=0, maximum=1024, step=64, label="Firstpass height", value=0)
-                    # with gr.Row():
-                        # seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
-                        # from modules.sd_samplers import samplers_for_img2img
-                        # sampler = gr.Dropdown(label="sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
-                    # with gr.Row():
-                        # steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                     with gr.Row():
                         seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
                         subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
@@ -360,9 +345,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
                     with gr.Row():
                         ddim_eta = gr.Number(label="ddim_eta", value=d.ddim_eta, interactive=True)
-                        n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0, visible=False)
-                    with gr.Row():
                         tiling = gr.Checkbox(label='Tiling', value=False)
+                        n_batch = gr.Number(label="n_batch", value=d.n_batch, interactive=True, precision=0, visible=False)
+                    # with gr.Row():
+                        # tiling = gr.Checkbox(label='Tiling', value=False)
                     # NOT VISIBLE IN THE UI!
                     with gr.Row(visible=False):
                         save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
