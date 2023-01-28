@@ -697,15 +697,21 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     with gr.Tab('Video output'):
         with gr.Accordion('Video Output Settings', open=True):
             with gr.Row():
-                skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
                 fps = gr.Number(label="fps", value=dv.fps, interactive=True)
                 output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
-            with gr.Row():
-                ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
-                ffmpeg_crf = gr.Number(label="ffmpeg_crf", interactive=True, value = dv.ffmpeg_crf)
-                ffmpeg_preset = gr.Dropdown(label="ffmpeg_preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
-                add_soundtrack = gr.Dropdown(label="add_soundtrack", choices=['None', 'File', 'Init Video'], value=dv.add_soundtrack, interactive=True, type="value")
-                soundtrack_path = gr.Textbox(label="soundtrack_path", lines=1, interactive=True, value = dv.soundtrack_path)
+            with gr.Column():
+                with gr.Row():
+                    ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
+                    ffmpeg_crf = gr.Number(label="ffmpeg_crf", interactive=True, value = dv.ffmpeg_crf)
+                    ffmpeg_preset = gr.Dropdown(label="ffmpeg_preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
+            with gr.Column():
+                with gr.Row():
+                    add_soundtrack = gr.Dropdown(label="add_soundtrack", choices=['None', 'File', 'Init Video'], value=dv.add_soundtrack, interactive=True, type="value")
+                    soundtrack_path = gr.Textbox(label="soundtrack_path", lines=1, interactive=True, value = dv.soundtrack_path)
+                with gr.Row():
+                    skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
+                with gr.Row():
+                    store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
             with gr.Accordion('Manual Settings', open=False):
                 with gr.Row():
                     use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
@@ -714,13 +720,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
                     path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True)
-                    
                 with gr.Row():
                     image_path = gr.Textbox(label="image_path", lines=1, interactive=True, value = dv.image_path)
                 with gr.Row():
                     mp4_path = gr.Textbox(label="mp4_path", lines=1, interactive=True, value = dv.mp4_path)
-            with gr.Row():
-                store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
+            
         with gr.Accordion('Frame Interpolation (RIFE)', open=True):
             gr.HTML("""
             Use RIFE and other Video Frame Interpolation methods to smooth out, slow-mo (or both) your output videos.</p>
