@@ -707,8 +707,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     soundtrack_path = gr.Textbox(label="soundtrack_path", lines=1, interactive=True, value = dv.soundtrack_path)
                 with gr.Row():
                     skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
-                with gr.Row():
                     store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
+                # with gr.Row():
+                    # store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
             with gr.Accordion('Manual Settings', open=False):
                 with gr.Row():
                     use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
