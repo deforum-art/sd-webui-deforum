@@ -761,7 +761,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         # handle video to frames with vid2frames or ffmpeg - need to check implemn
                         vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
                         rife_btn = gr.Button(value="Start Interpolation!")
-                        gr.HTML("* check your CLI for outputs!")
+                        gr.HTML("* check your CLI for outputs")
                         rife_btn.click(upload_file,[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs])
     # END OF UI TABS
     return locals()
