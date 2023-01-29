@@ -8,8 +8,7 @@ For now, video-input, 2D, pseudo-2D and 3D animation modes are available. Interp
     <a href="https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/deforum-art/deforum-for-automatic1111-webui"></a>
     <a href="https://github.com/deforum-art/deforum-for-automatic1111-webui/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/deforum-art/deforum-for-automatic1111-webui"></a>
     <a href="https://github.com/deforum-art/deforum-for-automatic1111-webui/network"><img alt="GitHub forks" src="https://img.shields.io/github/forks/deforum-art/deforum-for-automatic1111-webui"></a>
-    <a href="https://colab.research.google.com/github/deforum/stable-diffusion/blob/main/Deforum_Stable_Diffusion.ipynb"><img alt="Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>  
-    <a href="https://replicate.com/deforum/deforum_stable_diffusion"><img alt="Replicate" src="https://replicate.com/deforum/deforum_stable_diffusion/badge"></a>
+    </a>
 </p>
 
 ## Before Starting
@@ -62,10 +61,6 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 * Color correction is quite forced atm.
 
 * Browsers often cannot load too big gifs, so try to use `ffmpeg` when possible. Make sure it's installed and linked in your PATH!
-
-* ~~3D mode doesn't work on resolutions when one of the dimensions is greater than 768 or less than 448.~~ has been fixed in [#84](https://github.com/deforum-art/deforum-for-automatic1111-webui/pull/84), so update!
-
-* If you encounter issues with the downloaded depth models failing to load, try launching the WebUI with the `--disable-safe-unpickle` option! [How to add it to the .bat file on Windows.](https://imgur.com/a/TJHglot)
 
 ## Screenshots
 
