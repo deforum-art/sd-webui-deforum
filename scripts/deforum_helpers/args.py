@@ -746,10 +746,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             """)
             with gr.Row():
                 frame_interpolation_engine = gr.Dropdown(label="frame_interpolation_engine", choices=['RIFE v4.0','RIFE v4.3','RIFE v4.6'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
-            with gr.Row():
-                frame_interpolation_x_amount = gr.Dropdown(label="frame_interpolation_x_amount", choices=['Disabled','x2','x3','x4','x5','x6','x7','x8','x9','x10'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frame_interpolation_x_amount", interactive=True)
-            with gr.Row():
-                frame_interpolation_slow_mo_amount = gr.Dropdown(label="frame_interpolation_slow_mo_amount", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
+            with gr.Column():
+                with gr.Row():
+                    frame_interpolation_x_amount = gr.Dropdown(label="frame_interpolation_x_amount", choices=['Disabled','x2','x3','x4','x5','x6','x7','x8','x9','x10'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frae_interpolation_x_amount", interactive=True)
+                    frame_interpolation_slow_mo_amount = gr.Dropdown(label="frame_interpolation_slow_mo_amount", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
             with gr.Row():
                 frame_interpolation_keep_imgs = gr.Checkbox(label="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)       
     # END OF UI TABS
