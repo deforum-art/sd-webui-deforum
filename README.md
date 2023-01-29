@@ -64,8 +64,6 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 * ~~3D mode doesn't work on resolutions when one of the dimensions is greater than 768 or less than 448.~~ has been fixed in [#84](https://github.com/deforum-art/deforum-for-automatic1111-webui/pull/84), so update!
 
-* If you encounter issues with the downloaded depth models failing to load, try launching the WebUI with the `--disable-safe-unpickle` option! [How to add it to the .bat file on Windows.](https://imgur.com/a/TJHglot)
-
 ## Screenshots
 
 Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing and prompt-weighting enabled in 3D mode
