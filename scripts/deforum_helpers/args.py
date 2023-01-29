@@ -382,13 +382,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                        Note: the number of frames between each keyframe should be greater than the tweening frames.""")
             #    In later versions this should be also in the strength schedule, but for now you need to set it.
             gr.HTML("""Prerequisites: 
-                       <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                       <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0em">
                            <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
                            <li>Set 'seed_behavior' to 'schedule' under the Seed Scheduling section below.</li>
                         </ul>
                     """)
             gr.HTML("""Looping recommendations: 
-                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
+                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0em">
                             <li>seed_schedule should start and end on the same seed. <br />
                                 Example: seed_schedule could use 0:(5), 1:(-1), 219:(-1), 220:(5)</li>
                             <li>The 1st and last keyframe images should match.</li>
@@ -400,7 +400,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 use_looper = gr.Checkbox(label="Use guided images for the next run", value=False, interactive=True)
             with gr.Row():
-                init_images = gr.Textbox(label="Images to use for keyframe guidance", lines=13, value = keyframeExamples(), interactive=True)
+                init_images = gr.Textbox(label="Images to use for keyframe guidance", lines=9, value = keyframeExamples(), interactive=True)
             gr.HTML("""strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on""")
             with gr.Row():
                 image_strength_schedule = gr.Textbox(label="Image strength schedule", lines=1, value = "0:(.75)", interactive=True)
@@ -417,6 +417,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
             with gr.Row():
                 color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
+        # Seed Scheduling
         with gr.Accordion('Seed Scheduling', open=False):
             with gr.Row():
                 seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
@@ -536,7 +537,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 checkpoint_schedule = gr.Textbox(label="checkpoint_schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
     # Animation settings END
     
-    # Prompts settings START    
+    # Prompts tab START    
     with gr.Tab('Prompts'):
             gr.HTML("""
                 <p><b>Important notes and changes from regular vanilla deforum:</b></p>
@@ -587,7 +588,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 choice = mask_fill_choices[d.fill]
                 fill = gr.Radio(label='mask_fill', choices=mask_fill_choices, value=choice, type="index")
             with gr.Row():
-                #fill = gr.Slider(minimum=0, maximum=3, step=1, label="mask_fill_type", value=d.fill, interactive=True)
                 full_res_mask = gr.Checkbox(label="full_res_mask", value=d.full_res_mask, interactive=True)
                 full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="full_res_mask_padding", value=d.full_res_mask_padding, interactive=True)
         # Video Init
@@ -635,8 +635,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
     # HYBRID VIDEO tab
     with gr.Tab('Hybrid Video'):
-        
-        # gr.HTML(hybrid_html)
         with gr.Accordion("Info & Help", open=False):
             hybrid_html = "<p style=\"padding-bottom:0\"><b style=\"text-shadow: blue -1px -1px;\">Hybrid Video Compositing in 2D/3D Mode</b><span style=\"color:#DDD;font-size:0.7rem;text-shadow: black -1px -1px;margin-left:10px;\">by <a href=\"https://github.com/reallybigname\">reallybigname</a></span></p>"
             hybrid_html += "<ul style=\"list-style-type:circle; margin-left:1em; margin-bottom:1em;\"><li>Composite video with previous frame init image in <b>2D or 3D animation_mode</b> <i>(not for Video Input mode)</i></li>"
@@ -654,32 +652,31 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             gr.HTML(hybrid_html)
         with gr.Accordion("Hybrid Settings", open=True):
             with gr.Row():
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_generate_inputframes = gr.Checkbox(label="hybrid_generate_inputframes", value=False, interactive=True)
-                with gr.Column(variant="compact"):
-                    #hybrid_generate_human_masks = gr.Checkbox(label="hybrid_generate_human_masks", value=False, interactive=True)
+                with gr.Column():
                     hybrid_generate_human_masks = gr.Dropdown(label="hybrid_generate_human_masks", choices=['None', 'PNGs', 'Video', 'Both'], value=da.hybrid_generate_human_masks, type="value", elem_id="hybrid_generate_human_masks", interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_use_first_frame_as_init_image = gr.Checkbox(label="hybrid_use_first_frame_as_init_image", value=False, interactive=True)
             with gr.Row():
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_motion = gr.Dropdown(label="hybrid_motion", choices=['None', 'Optical Flow', 'Perspective', 'Affine'], value=da.hybrid_motion, type="value", elem_id="hybrid_motion", interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_flow_method = gr.Dropdown(label="hybrid_flow_method", choices=['Farneback', 'DenseRLOF', 'SF'], value=da.hybrid_flow_method, type="value", elem_id="hybrid_flow_method", interactive=True)
             with gr.Row():
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_composite = gr.Checkbox(label="hybrid_composite", value=False, interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_comp_mask_type = gr.Dropdown(label="hybrid_comp_mask_type", choices=['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], value=da.hybrid_comp_mask_type, type="value", elem_id="hybrid_comp_mask_type", interactive=True)
             with gr.Row():
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_comp_mask_auto_contrast = gr.Checkbox(label="hybrid_comp_mask_auto_contrast", value=False, interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_comp_mask_inverse = gr.Checkbox(label="hybrid_comp_mask_inverse", value=False, interactive=True)
             with gr.Row():
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_comp_mask_equalize = gr.Dropdown(label="hybrid_comp_mask_equalize", choices=['None', 'Before', 'After', 'Both'], value=da.hybrid_comp_mask_equalize, type="value", elem_id="hybrid_comp_mask_equalize", interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_comp_save_extra_frames = gr.Checkbox(label="hybrid_comp_save_extra_frames", value=False, interactive=True)
 
         with gr.Accordion("Hybrid Schedules", open=False):
@@ -710,8 +707,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     soundtrack_path = gr.Textbox(label="soundtrack_path", lines=1, interactive=True, value = dv.soundtrack_path)
                 with gr.Row():
                     skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
-                with gr.Row():
                     store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
+                # with gr.Row():
+                    # store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
             with gr.Accordion('Manual Settings', open=False):
                 with gr.Row():
                     use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
