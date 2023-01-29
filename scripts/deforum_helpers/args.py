@@ -550,6 +550,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 """)
             with gr.Row():
                 animation_prompts = gr.Textbox(label="animation_prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
+            gr.HTML("Positive prompt to be appended to all animation prompts")
+            with gr.Row():
+                animation_prompts_positive = gr.Textbox(label="animation_prompts_positive", lines=1, interactive=True, value = "hq")
+            gr.HTML("Negative prompt to be appended to all animation prompts, dont add --neg here")
+            with gr.Row():
+                animation_prompts_negative = gr.Textbox(label="animation_prompts_negative", lines=1, interactive=True, value = "blurry")
             # Composable Mask scheduling
             with gr.Accordion('Composable Mask scheduling', open=True):
                 gr.HTML("To enable, check use_mask in the Init tab.<br>Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); <br>default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; <br>masks from files in [], like [mask1.png]; <br>description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
@@ -819,7 +825,7 @@ loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blen
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace(" ", "").split(',')
 
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
 settings_component_names = [name for name in component_names if name not in video_args_names]
 
 
@@ -869,7 +875,11 @@ def process_args(args_dict_main):
     root.p = args_dict_main['p']
     p = root.p
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
-    
+    positive_prompts = args_dict_main['animation_prompts_positive']
+    negative_prompts = args_dict_main['animation_prompts_negative']
+    for key in root.animation_prompts:
+        animationPromptCurr = root.animation_prompts[key]
+        root.animation_prompts[key] = f"{positive_prompts} {animationPromptCurr} {'' if '--neg' in animationPromptCurr else '--neg'} {negative_prompts}"
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
