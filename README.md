@@ -62,8 +62,6 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 * Browsers often cannot load too big gifs, so try to use `ffmpeg` when possible. Make sure it's installed and linked in your PATH!
 
-* ~~3D mode doesn't work on resolutions when one of the dimensions is greater than 768 or less than 448.~~ has been fixed in [#84](https://github.com/deforum-art/deforum-for-automatic1111-webui/pull/84), so update!
-
 ## Screenshots
 
 Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing and prompt-weighting enabled in 3D mode
