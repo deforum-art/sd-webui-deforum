@@ -749,14 +749,20 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     frame_interpolation_slow_mo_amount = gr.Dropdown(label="Slow-Mo x", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
                     frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
                 with gr.Row():
-                    with gr.Accordion('Interpolate existing pics/ vids', open=False):
-                        def upload_file(files):
-                            file_paths = [file.name for file in files]
-                            print(file_paths)
-                        vid_to_rife_button = gr.UploadButton("Click here to upload .mp4 vid to interpolate", file_types=["video"])
-                        vid_to_rife_button.upload(upload_file, vid_to_rife_button)
+                    with gr.Accordion('Interpolate an existing video', open=False):
+                        def upload_file(file, engine, x_am, sl_am, keep_imgs):
+                            if not file is None:
+                                if x_am == 'Disabled':
+                                    print("Please set a proper value for 'Interp x'. Can't interpolate x0 times :)")
+                                else:
+                                    print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}.")
+                            else:
+                                print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
+                        # handle video to frames with vid2frames or ffmpeg - need to check implemn
+                        vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
                         rife_btn = gr.Button(value="Start Interpolation!")
-                        # rife_btn.click(t_func,[fps])
+                        gr.HTML("* check your CLI for outputs!")
+                        rife_btn.click(upload_file,[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs])
     # END OF UI TABS
     return locals()
 
