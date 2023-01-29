@@ -652,31 +652,31 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             gr.HTML(hybrid_html)
         with gr.Accordion("Hybrid Settings", open=True):
             with gr.Row():
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_generate_inputframes = gr.Checkbox(label="hybrid_generate_inputframes", value=False, interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_generate_human_masks = gr.Dropdown(label="hybrid_generate_human_masks", choices=['None', 'PNGs', 'Video', 'Both'], value=da.hybrid_generate_human_masks, type="value", elem_id="hybrid_generate_human_masks", interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_use_first_frame_as_init_image = gr.Checkbox(label="hybrid_use_first_frame_as_init_image", value=False, interactive=True)
             with gr.Row():
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_motion = gr.Dropdown(label="hybrid_motion", choices=['None', 'Optical Flow', 'Perspective', 'Affine'], value=da.hybrid_motion, type="value", elem_id="hybrid_motion", interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_flow_method = gr.Dropdown(label="hybrid_flow_method", choices=['Farneback', 'DenseRLOF', 'SF'], value=da.hybrid_flow_method, type="value", elem_id="hybrid_flow_method", interactive=True)
             with gr.Row():
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_composite = gr.Checkbox(label="hybrid_composite", value=False, interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_comp_mask_type = gr.Dropdown(label="hybrid_comp_mask_type", choices=['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], value=da.hybrid_comp_mask_type, type="value", elem_id="hybrid_comp_mask_type", interactive=True)
             with gr.Row():
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_comp_mask_auto_contrast = gr.Checkbox(label="hybrid_comp_mask_auto_contrast", value=False, interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_comp_mask_inverse = gr.Checkbox(label="hybrid_comp_mask_inverse", value=False, interactive=True)
             with gr.Row():
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_comp_mask_equalize = gr.Dropdown(label="hybrid_comp_mask_equalize", choices=['None', 'Before', 'After', 'Both'], value=da.hybrid_comp_mask_equalize, type="value", elem_id="hybrid_comp_mask_equalize", interactive=True)
-                with gr.Column(variant="compact"):
+                with gr.Column():
                     hybrid_comp_save_extra_frames = gr.Checkbox(label="hybrid_comp_save_extra_frames", value=False, interactive=True)
 
         with gr.Accordion("Hybrid Schedules", open=False):
