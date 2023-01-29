@@ -64,15 +64,16 @@ https://user-images.githubusercontent.com/14872007/197588218-6c42c54f-6874-46df-
 
 Main extension tab:
 
-![image](https://user-images.githubusercontent.com/121192995/215362176-4e5599c1-9cb6-4bf9-964d-0ff882661993.png)
+![maintab](https://user-images.githubusercontent.com/121192995/215362176-4e5599c1-9cb6-4bf9-964d-0ff882661993.png)
 
 Keyframes tab:
 
-![image](https://user-images.githubusercontent.com/121192995/215362228-c239c43a-d565-4862-b490-d18b19eaaaa5.png)
+![keyframes](https://user-images.githubusercontent.com/121192995/215362228-c239c43a-d565-4862-b490-d18b19eaaaa5.png)
 
 Math evaluation:
 
-![math-eval](https://user-images.githubusercontent.com/14872007/195957601-3c3fecab-5ef2-4a2f-9eba-3bb0c70bd4b8.png)
+![math-eval](https://user-images.githubusercontent.com/121192995/215362467-481127a4-247a-4b0d-924a-d10719aa4c01.png)
+
 
 ## Benchmarks
 
