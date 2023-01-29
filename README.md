@@ -45,9 +45,7 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 8. Join our Discord where you can post generated stuff, ask questions and more: https://discord.gg/deforum. <br>
 * There's also the 'Issues' tab in the repo, for well... reporting issues ;) 
 
-9. In case the overhauled version is too unusable for you or you cannot update AUTOMATIC1111's webui, roll back to this script-only version https://github.com/deforum-art/deforum-for-automatic1111-webui/tree/000deeeef69016612fe3cdec9234f97d87d30748
-
-10. Profit!
+9. Profit!
 
 ## Known issues
 
