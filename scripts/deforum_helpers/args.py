@@ -750,8 +750,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
                 with gr.Row():
                     with gr.Accordion('Interpolate existing pics/ vids', open=False):
-                        rife_btn = gr.Button(value="Interpolate!")
-                        # rife_btn = gr.Button(value="RIFE!")
+                        def upload_file(files):
+                            file_paths = [file.name for file in files]
+                            print(file_paths)
+                        vid_to_rife_button = gr.UploadButton("Click here to upload .mp4 vid to interpolate", file_types=["video"])
+                        vid_to_rife_button.upload(upload_file, vid_to_rife_button)
+                        rife_btn = gr.Button(value="Start Interpolation!")
                         # rife_btn.click(t_func,[fps])
     # END OF UI TABS
     return locals()
