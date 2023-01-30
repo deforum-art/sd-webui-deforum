@@ -4,7 +4,7 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from pkg_resources import resource_filename
-from .vid2frames import vid2frames
+from .video_audio_utilities import vid2frames
 
 def Root():
     device = sh.device
