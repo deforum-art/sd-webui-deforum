@@ -4,7 +4,7 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from pkg_resources import resource_filename
-from .video_audio_utilities import vid2frames
+from .video_audio_utilities import vid2frames, ffmpegvid2frames
 
 def Root():
     device = sh.device
@@ -265,7 +265,7 @@ def DeforumOutputArgs():
     max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False #@param {type: 'boolean'}
     frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
-    frame_interpolation_x_amount = "Disabled" #@param ["Disabled" + all values from x2 to x10]
+    frame_interpolation_x_amount = "x2" #"Disabled" #@param ["Disabled" + all values from x2 to x10]
     frame_interpolation_slow_mo_amount = "Disabled" #@param ["Disabled","x2","x4","x8"]
     frame_interpolation_keep_imgs = False #@param {type: 'boolean'}
     return locals()
@@ -750,7 +750,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     frame_interpolation_slow_mo_amount = gr.Dropdown(label="Slow-Mo x", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
                     frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
                 with gr.Row():
-                    with gr.Accordion('Interpolate an existing video', open=False):
+                    with gr.Accordion('Interpolate an existing video', open=True):
                         def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs):
                             if not file is None:
                                 if x_am == 'Disabled':
@@ -761,11 +761,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     f_models_path = root_params['models_path']
                                     print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}. models_path: {f_models_path}")
                                     outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
-                                    vid_to_interp_pngs_tmp_folder = os.path.join(outdir, 'TEST_INTERP')
-                                    if not os.path.exists(vid_to_interp_pngs_tmp_folder):
-                                        os.makedirs(vid_to_interp_pngs_tmp_folder)
-                                    vid_to_interp_fps = vid2frames(file.name, vid_to_interp_pngs_tmp_folder, 1, True, 0, -1, False)
-                                    print(f"input vid fps: {vid_to_interp_fps}")
+                                    vid_to_interp_imgs_tmp_folder = os.path.join(outdir, 'TEST_INTERP')
+                                    if not os.path.exists(vid_to_interp_imgs_tmp_folder):
+                                        os.makedirs(vid_to_interp_imgs_tmp_folder)
+                                    ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=vid_to_interp_imgs_tmp_folder, out_img_format = 'jpg', ffmpeg_location=dv.ffmpeg_location)
+                                    # vid_to_interp_fps = vid2frames(file.name, vid_to_interp_imgs_tmp_folder, 1, True, 0, -1, False)
+                                    # print(f"input vid fps: {vid_to_interp_fps}")
                             else:
                                 print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
                         # handle video to frames with vid2frames or ffmpeg - need to check implemn
