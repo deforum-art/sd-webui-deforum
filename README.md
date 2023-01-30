@@ -15,7 +15,7 @@
 As auto's webui is getting updated multiple times a day, every day, things tend to break with regards to extensions compatability.
 Therefore, it is best recommended to keep two folders:
 1. "Stable" folder that you don't regularly update, with versions that you know *work* together (we will provide info on this soon). 
-2. "Experimantal" folder in which you can add 'git pull' to you webui-user.bat, update deforum every day, etc. Keep it wild - but be prepared for bugs. 
+2. "Experimental" folder in which you can add 'git pull' to you webui-user.bat, update deforum every day, etc. Keep it wild - but be prepared for bugs. 
 
 
 ## Getting Started
