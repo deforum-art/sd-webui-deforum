@@ -13,6 +13,8 @@ def process_video_interpolation(frame_interpolation_engine=None, frame_interpola
 
     if frame_interpolation_x_amount != "Disabled":
         
+        
+        # return
         # extract clean numbers from values of 'x2' etc'
         interp_amount_clean_num = extract_number(frame_interpolation_x_amount)
         interp_slow_mo_clean_num = extract_number(frame_interpolation_slow_mo_amount)
@@ -27,7 +29,7 @@ def process_video_interpolation(frame_interpolation_engine=None, frame_interpola
                 raise Error("frame_interpolation_x_amount must be between 2x and 10x")
             
             # set initial output vid fps
-            fps = orig_vid_fps * interp_amount_clean_num
+            fps = float(orig_vid_fps) * interp_amount_clean_num
             # re-calculate fps param to pass if slow_mo mode is enabled
             if interp_slow_mo_clean_num != -1:
                 if int(interp_slow_mo_clean_num) not in [2,4,8]:
@@ -36,5 +38,7 @@ def process_video_interpolation(frame_interpolation_engine=None, frame_interpola
                 
             # run actual interpolation and video stitching etc - the whole suite
             if actual_model_folder_name:
+                print(f"orig_vid_fps: {orig_vid_fps},fps: {fps} interp_amount_clean_num: {interp_amount_clean_num}, interp_slow_mo_clean_num: {interp_slow_mo_clean_num}")
+                # return
                 run_rife_new_video_infer(interp_x_amount=interp_amount_clean_num, slow_mo_x_amount=interp_slow_mo_clean_num, output=None, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs)
              

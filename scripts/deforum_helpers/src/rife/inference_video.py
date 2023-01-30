@@ -53,7 +53,7 @@ def run_rife_new_video_infer(
     args.ffmpeg_crf = ffmpeg_crf
     args.ffmpeg_preset = ffmpeg_preset
     args.keep_imgs = keep_imgs
-   
+
     if args.UHD and args.scale == 1.0:
         args.scale = 0.5
 
@@ -196,7 +196,7 @@ def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id):
                 os.makedirs(temp_convert_raw_png_path)
                 
     for f in os.listdir(from_folder):
-        if ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and f.startswith(img_batch_id):
+        if ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and ((img_batch_id is not None and f.startswith(img_batch_id) or img_batch_id is None)):
             original_img_path = os.path.join(from_folder, f)
             image = cv2.imread(original_img_path)
             new_path = os.path.join(temp_convert_raw_png_path, f)
@@ -256,7 +256,10 @@ def get_filename(i, path):
     return path + s + '.png'
 
 def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs):
+    print(f"stitching video with fps of: {fps}")
     parent_folder = os.path.dirname(img_folder_path)
+    if img_batch_id is None:
+        img_batch_id = 'testvid'
     mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
     if slow_mo_x_amount != -1:
         mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)

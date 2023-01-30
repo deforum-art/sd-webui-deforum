@@ -6,7 +6,15 @@ import os
 from pkg_resources import resource_filename
 from .video_audio_utilities import vid2frames, ffmpegvid2frames, get_vid_fps_and_frame_count
 from .frame_interpolation import process_video_interpolation
+from pathlib import Path
 
+
+def clean_folder_name(string):
+    illegal_chars = ["/", "\\", "<", ">", ":", "\"", "|", "?", "*"]
+    for char in illegal_chars:
+        string = string.replace(char, "_")
+    return string
+    
 def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
@@ -286,6 +294,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
     dp = SimpleNamespace(**ParseqArgs()) #default parseq ars
     dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
+    # dr = SimpleNamespace(**Root()) #Root Args
     dloopArgs = SimpleNamespace(**LoopArgs())
     if not is_extension:
         with gr.Row():
@@ -755,7 +764,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         def local_get_fps_and_fcount(x):
                             a, b = get_vid_fps_and_frame_count(x.name)
                             return(a,b)
-                        def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location):
+                        def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
                             if not file is None:
                                 if x_am == 'Disabled':
                                     print("Please set a proper value for 'Interp x'. Can't interpolate x0 times :)")
@@ -763,19 +772,28 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     # TODO: handle wrong folder/ create folder/ decide on location logic
                                     root_params = Root()
                                     f_models_path = root_params['models_path']
+                                    outdir = os.path.join(os.getcwd(),'outputs', 'frame-interpolation', clean_folder_name(Path(file.orig_name).stem))
+                                    if not os.path.exists(outdir):
+                                         os.makedirs(outdir)
                                     print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}.")
-                                    outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
-                                    vid_to_interp_imgs_tmp_folder = os.path.join(outdir, 'TEST_INTERP')
+                                    print(f"outdir: {outdir}")
+                                    # return #!!!!!!
+                                    # outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
+                                    vid_to_interp_imgs_tmp_folder = os.path.join(outdir, Path(file.orig_name).stem)
                                     # create folder for extracted imgs to live in if not already exist
-                                    if not os.path.exists(vid_to_interp_imgs_tmp_folder):
-                                        os.makedirs(vid_to_interp_imgs_tmp_folder)
+                                    # if not os.path.exists(vid_to_interp_imgs_tmp_folder):
+                                        # os.makedirs(vid_to_interp_imgs_tmp_folder)
                                     # todo: check if we want to use the reg vid2frames instead
-                                    extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=vid_to_interp_imgs_tmp_folder, out_img_format = 'png', ffmpeg_location=dv.ffmpeg_location)
-                                    outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/OUTDIR'
+                                    extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=outdir, out_img_format = 'png', ffmpeg_location=dv.ffmpeg_location)
+                                    # outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/OUTDIR'
+                                    # print(outdir)
                                     # test quality of extracted imgs!?!?!
                                     # todo: make sure we don't convert again the imgs when we ask to rife from *here*
                                     # RIFE the video!
-                                    # process_video_interpolation(engine, x_am, sl_am, 20, f_models_path, None, vid_to_interp_imgs_tmp_folder, '0000', f_location, 17, 'veryfast', keep_imgs)                                  
+                                    print("in vid fps:   ", in_vid_fps)
+                                    print("outdir:     ", outdir)
+                                    # return
+                                    process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs)                                  
                             else:
                                 print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
                                 
@@ -789,7 +807,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         
                         rife_btn = gr.Button(value="Start Interpolation!")
                         gr.HTML("* check your CLI for outputs")
-                        rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location])
+                        rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, in_vid_fps_ui_window])
     # END OF UI TABS
     return locals()
 
