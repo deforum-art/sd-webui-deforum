@@ -14,6 +14,9 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
     # n = extract_nth_frame 
     #get the name of the video without the path and ext
     
+    # TODO: add optional out file format (png or jpg?)
+    img_format = 'png'
+    
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
         raise RuntimeError('extract_to_frame can not be highher than extract_from_frame')
     name = get_frame_name(video_path)
@@ -45,6 +48,8 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
         # grab the frame count to check against existing directory len 
         frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
         
+        print(f"Extracting {frame_count} frames from video... Please wait.")
+        
         # raise error if the user wants to skip more frames than exist
         if n >= frame_count : 
             raise RuntimeError('Skipping more frames than input video contains. extract_nth_frames larger than input frames')
@@ -66,11 +71,11 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
                 if state.interrupted:
                     return
                 if (count <= extract_to_frame or extract_to_frame == -1) and count % n == 0:
-                    cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}.jpg" , image)     # save frame as JPEG file
+                    cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}." + img_format , image)     # save frame as JPEG file
                     t += 1
                 success,image = vidcap.read()
                 count += 1
-            print("Converted %d frames" % count)
+            print("Extracted %d frames" % count)
         else:
             print("Frames already unpacked")
     vidcap.release()
@@ -80,4 +85,4 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
 def get_next_frame(outdir, video_path, frame_idx, mask=False):
     frame_path = 'inputframes'
     if (mask): frame_path = 'maskframes'
-    return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:05}.jpg")
+    return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:05}" + img_format)
