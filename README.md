@@ -1,7 +1,5 @@
 
-# Deforum Stable Diffusion — official extension script for AUTOMATIC1111's webui
-
-For now, video-input, 2D, pseudo-2D and 3D animation modes are available. Interpolation and render image batch temporary excluded for simplicity
+# Deforum Stable Diffusion — official extension for AUTOMATIC1111's webui
 
 <p align="left">
     <a href="https://github.com/deforum-art/deforum-for-automatic1111-webui/commits"><img alt="Last Commit" src="https://img.shields.io/github/last-commit/deforum-art/deforum-for-automatic1111-webui"></a>
@@ -13,9 +11,12 @@ For now, video-input, 2D, pseudo-2D and 3D animation modes are available. Interp
 
 ## Before Starting
 
-Read the README file at the original Deforum repo
+**Important note about versions updating:** <br>
+As auto's webui is getting updated multiple times a day, every day, things tend to break with regards to extensions compatability.
+Therefore, it is best recommended to keep two folders:
+1. "Stable" folder that you don't regularly update, with versions that you know *work* together (we will provide info on this soon). 
+2. "Experimantal" folder in which you can add 'git pull' to you webui-user.bat, update deforum every day, etc. Keep it wild - but be prepared for bugs. 
 
-https://github.com/deforum/stable-diffusion
 
 ## Getting Started
 
