@@ -3,6 +3,7 @@ import cv2
 import shutil
 import math
 import requests
+import subprocess
 from modules.shared import state
 
 def get_frame_name(path):
@@ -81,24 +82,23 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
     vidcap.release()
     return video_fps
 
-
-def get_next_frame(outdir, video_path, frame_idx, mask=False):
-    frame_path = 'inputframes'
-    if (mask): frame_path = 'maskframes'
-    return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:05}" + img_format)
+def count_files(folder_path):
+    return len(os.listdir(folder_path))
     
 def ffmpegvid2frames(full_vid_path = None, full_out_imgs_path = None, out_img_format = 'jpg', ffmpeg_location = None):
     try:
+        print(f"ffmpeg path: {ffmpeg_location}, full vid path: {full_vid_path}, output imgs folder: {full_out_imgs_path}")
+        # return
+        print("Trying to extract frames from video... please wait.")
         cmd = [
                 ffmpeg_location,
                 '-i', full_vid_path,
-                os.path.join(full_out_imgs_path,'%08d')
+                os.path.join(full_out_imgs_path,'%08d.' + out_img_format)
         ]
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        # if process.returncode != 0:
-            # raise RuntimeError(stderr)
     except FileNotFoundError:
-        raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under 'ffmpeg_location' parameter. \n*Interpolated frames were SAVED as backup!*")
+        raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under the 'ffmpeg_location' parameter.")
     except Exception as e:
-        raise Exception(f'Error stitching interpolation video. Actual runtime error:{e}\n*Interpolated frames were SAVED as backup!*')   
+        raise Exception(f'Error extracting frames from video. Actual runtime error:{e}.')   
+    print("DONE")
