@@ -755,22 +755,31 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             """)
             with gr.Column():
                 with gr.Row():
+                    # Interpolation Engine
                     frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['RIFE v4.0','RIFE v4.3','RIFE v4.6'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
+                    # How many times to interpolate (interp x)
                     frame_interpolation_x_amount = gr.Dropdown(label="Interp x", choices=['Disabled','x2','x3','x4','x5','x6','x7','x8','x9','x10'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frae_interpolation_x_amount", interactive=True)
+                    # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE)
                     frame_interpolation_slow_mo_amount = gr.Dropdown(label="Slow-Mo x", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
+                    # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
                     frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
                 with gr.Row():
+                    # Intrpolate any existing video from the local PC
                     with gr.Accordion('Interpolate an existing video', open=True):
-                        # handle video to frames with vid2frames or ffmpeg - need to check implemn
+                        
+                        #
                         vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
                         with gr.Row():
+                            # Non interactive textbox showing uploaded input vid FPS
                             in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing uploaded input vid total Frame Count
                             in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
-
+                        # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
                         vid_to_rife_chosen_file.change(local_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file],outputs=[in_vid_frame_count_window,in_vid_fps_ui_window])
                         
                         rife_btn = gr.Button(value="Start Interpolation!")
                         gr.HTML("* check your CLI for outputs")
+                        # TODO: pass crf and preset too?
                         rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, in_vid_fps_ui_window])
     # END OF UI TABS
     return locals()
@@ -795,16 +804,14 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_
             # return #!!!!!!
             # outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
             vid_to_interp_imgs_tmp_folder = os.path.join(outdir, Path(file.orig_name).stem)
-            # todo: check if we want to use the reg vid2frames instead
-            # extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=outdir, out_img_format = 'png', ffmpeg_location=dv.ffmpeg_location)
+            # todo: check if we want to use the reg vid2frames instead / handle video to frames with vid2frames or ffmpeg - need to check implemn
             extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=outdir, out_img_format = 'png', ffmpeg_location=f_location)
             
             # test quality of extracted imgs!?!?!
             # todo: make sure we don't convert again the imgs when we ask to rife from *here*
-            # RIFE the video!
             print("in vid fps:   ", in_vid_fps)
             print("outdir:     ", outdir)
-            # return
+            # RIFE the video!
             process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, clean_folder_name(Path(file.orig_name).stem))                                  
     else:
         print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
