@@ -762,11 +762,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}. models_path: {f_models_path}")
                                     outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
                                     vid_to_interp_imgs_tmp_folder = os.path.join(outdir, 'TEST_INTERP')
+                                    # create folder for extracted imgs to live in if not already exist
                                     if not os.path.exists(vid_to_interp_imgs_tmp_folder):
                                         os.makedirs(vid_to_interp_imgs_tmp_folder)
-                                    ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=vid_to_interp_imgs_tmp_folder, out_img_format = 'jpg', ffmpeg_location=dv.ffmpeg_location)
-                                    # vid_to_interp_fps = vid2frames(file.name, vid_to_interp_imgs_tmp_folder, 1, True, 0, -1, False)
-                                    # print(f"input vid fps: {vid_to_interp_fps}")
+                                    extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=vid_to_interp_imgs_tmp_folder, out_img_format = 'jpg', ffmpeg_location=dv.ffmpeg_location)
                             else:
                                 print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
                         # handle video to frames with vid2frames or ffmpeg - need to check implemn

@@ -15,7 +15,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
     # n = extract_nth_frame 
     #get the name of the video without the path and ext
     
-    # TODO: add optional out file format (png or jpg?)
+    # TODO: add optional out/ in file format (png or jpg?)
     img_format = 'png'
     
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
@@ -72,7 +72,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
                 if state.interrupted:
                     return
                 if (count <= extract_to_frame or extract_to_frame == -1) and count % n == 0:
-                    cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}." + img_format , image)     # save frame as JPEG file
+                    cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}." + img_format , image) # save frame as JPEG file
                     t += 1
                 success,image = vidcap.read()
                 count += 1
@@ -85,11 +85,22 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
 def count_files(folder_path):
     return len(os.listdir(folder_path))
     
+def get_vid_fps_and_frame_count(vid_local_path):
+    vidcap = cv2.VideoCapture(vid_local_path)
+    video_fps = vidcap.get(cv2.CAP_PROP_FPS)
+    video_frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
+    vidcap.release()
+    if video_fps == int(video_fps):
+            video_fps = int(video_fps)
+    
+    return video_frame_count, video_fps
+
 def ffmpegvid2frames(full_vid_path = None, full_out_imgs_path = None, out_img_format = 'jpg', ffmpeg_location = None):
     try:
-        print(f"ffmpeg path: {ffmpeg_location}, full vid path: {full_vid_path}, output imgs folder: {full_out_imgs_path}")
-        # return
-        print("Trying to extract frames from video... please wait.")
+
+        vid_to_interp_input_frame_count, vid_to_interp_input_fps = get_vid_fps_and_frame_count(full_vid_path)
+        
+        print(f"Trying to extract {vid_to_interp_input_frame_count} frames from video with input FPS of {vid_to_interp_input_fps}. Please wait patiently.")
         cmd = [
                 ffmpeg_location,
                 '-i', full_vid_path,
@@ -100,5 +111,7 @@ def ffmpegvid2frames(full_vid_path = None, full_out_imgs_path = None, out_img_fo
     except FileNotFoundError:
         raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under the 'ffmpeg_location' parameter.")
     except Exception as e:
-        raise Exception(f'Error extracting frames from video. Actual runtime error:{e}.')   
-    print("DONE")
+        raise Exception(f'Error extracting frames from video. Actual runtime error:{e}.')
+    extracted_frame_count = count_files(full_out_imgs_path)
+    print(f"Extracted a total of {extracted_frame_count}/{vid_to_interp_input_frame_count} frames from video:\n{full_vid_path}\nTo folder:\n{full_out_imgs_path}")
+    return extracted_frame_count
