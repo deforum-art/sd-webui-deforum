@@ -11,7 +11,7 @@ def get_frame_name(path):
     name = os.path.splitext(name)[0]
     return name
 
-def is_vid_path_valid(video_path) --> bool:
+def is_vid_path_valid(video_path) -> bool:
     if video_path.startswith('http://') or video_path.startswith('https://'):
         response = requests.head(video_path)
         if response.status_code == 404 or response.status_code != 200:
@@ -117,5 +117,10 @@ def ffmpegvid2frames(full_vid_path = None, full_out_imgs_path = None, out_img_fo
     except Exception as e:
         raise Exception(f'Error extracting frames from video. Actual runtime error:{e}.')
     extracted_frame_count = count_files(full_out_imgs_path)
-    print(f"Extracted a total of {extracted_frame_count}/{vid_to_interp_input_frame_count} frames from video:\n{full_vid_path}\nTo folder:\n{full_out_imgs_path}")
+    print(f"Extracted {extracted_frame_count} out of {vid_to_interp_input_frame_count} frames from video:\n{full_vid_path}\nTo folder:\n{full_out_imgs_path}")
     return extracted_frame_count
+
+def get_next_frame(outdir, video_path, frame_idx, mask=False):
+    frame_path = 'inputframes'
+    if (mask): frame_path = 'maskframes'
+    return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:05}.jpg")
