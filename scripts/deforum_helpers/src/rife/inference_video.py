@@ -20,7 +20,7 @@ def run_rife_new_video_infer(
         output=None,
         model=None,
         fp16=False,
-        UHD=True,
+        UHD=False, # Handle this before by resolution!
         scale=1.0,
         fps=None,
         png=True,
@@ -33,7 +33,8 @@ def run_rife_new_video_infer(
         slow_mo_x_amount=-1,
         ffmpeg_crf=17,
         ffmpeg_preset='veryslow',
-        keep_imgs=False):
+        keep_imgs=False,
+        orig_vid_name = None):
 
     args = SimpleNamespace()
     args.output = output
@@ -53,6 +54,7 @@ def run_rife_new_video_infer(
     args.ffmpeg_crf = ffmpeg_crf
     args.ffmpeg_preset = ffmpeg_preset
     args.keep_imgs = keep_imgs
+    args.orig_vid_name = orig_vid_name
 
     if args.UHD and args.scale == 1.0:
         args.scale = 0.5
@@ -95,6 +97,7 @@ def run_rife_new_video_infer(
     custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
     temp_convert_raw_png_path = os.path.join(args.raw_output_imgs_path, "tmp_rife_folder")
     
+    # CRITICAL TODO: dynamically use it only if we interpolate straight after generation of a deforum video! otherwise don't run it
     duplicate_pngs_from_folder(args.raw_output_imgs_path, temp_convert_raw_png_path, args.img_batch_id)
     
     videogen = []
@@ -185,7 +188,7 @@ def run_rife_new_video_infer(
     # stitch video from interpolated frames, and add audio if needed
     try:
         print (f"Trying to stitch video from interpolated PNG frames...")
-        vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs)
+        vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs, args.orig_vid_name)
         print(f"Interpolated video created at: \n{vid_out_path}")
     except Exception as e:
         print(f'Video stitching gone wrong. Error: {e}')
@@ -255,12 +258,14 @@ def get_filename(i, path):
     #return path + '/' + s + '.png'
     return path + s + '.png'
 
-def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs):
+def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):
     print(f"stitching video with fps of: {fps}")
     parent_folder = os.path.dirname(img_folder_path)
-    if img_batch_id is None:
-        img_batch_id = 'testvid'
-    mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
+    if orig_vid_name is not None:
+        mp4_path = os.path.join(parent_folder, str(orig_vid_name) +'_RIFE_' + 'x' + str(interp_x_amount))
+    else:
+        mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
+    
     if slow_mo_x_amount != -1:
         mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)
     mp4_path = mp4_path + '.mp4'

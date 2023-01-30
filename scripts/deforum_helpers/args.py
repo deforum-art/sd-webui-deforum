@@ -772,7 +772,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     # TODO: handle wrong folder/ create folder/ decide on location logic
                                     root_params = Root()
                                     f_models_path = root_params['models_path']
-                                    outdir = os.path.join(os.getcwd(),'outputs', 'frame-interpolation', clean_folder_name(Path(file.orig_name).stem))
+                                    outdir = os.path.join(os.getcwd(),'outputs', 'frame-interpolation', clean_folder_name(Path(file.orig_name).stem)) # todo take this to static param
                                     if not os.path.exists(outdir):
                                          os.makedirs(outdir)
                                     print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}.")
@@ -793,7 +793,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     print("in vid fps:   ", in_vid_fps)
                                     print("outdir:     ", outdir)
                                     # return
-                                    process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs)                                  
+                                    process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, clean_folder_name(Path(file.orig_name).stem))                                  
                             else:
                                 print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
                                 
