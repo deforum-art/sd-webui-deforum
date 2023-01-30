@@ -196,7 +196,7 @@ def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id):
                 os.makedirs(temp_convert_raw_png_path)
                 
     for f in os.listdir(from_folder):
-        if ('png' in f or 'jpg' in f) and '-' not in f and f.startswith(img_batch_id):
+        if ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and f.startswith(img_batch_id):
             original_img_path = os.path.join(from_folder, f)
             image = cv2.imread(original_img_path)
             new_path = os.path.join(temp_convert_raw_png_path, f)
