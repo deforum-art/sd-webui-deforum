@@ -52,8 +52,6 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 * This port is not fully backward-compatible with the notebook and the local version both due to the changes in how AUTOMATIC1111's webui handles Stable Diffusion models and the changes in this script to get it to work in the new environment. *Expect* that you may not get exactly the same result or that the thing may break down because of the older settings.
 
-* Color correction is quite forced atm.
-
 ## Screenshots
 
 Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing and prompt-weighting enabled in 3D mode
