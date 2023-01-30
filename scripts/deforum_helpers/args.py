@@ -4,7 +4,7 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from pkg_resources import resource_filename
-from .video_audio_utilities import vid2frames, ffmpegvid2frames
+from .video_audio_utilities import vid2frames, ffmpegvid2frames, get_vid_fps_and_frame_count
 
 def Root():
     device = sh.device
@@ -751,6 +751,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
                 with gr.Row():
                     with gr.Accordion('Interpolate an existing video', open=True):
+                        def local_get_fps_and_fcount(x):
+                            a, b = get_vid_fps_and_frame_count(x.name)
+                            return(a,b)
                         def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs):
                             if not file is None:
                                 if x_am == 'Disabled':
@@ -768,11 +771,18 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=vid_to_interp_imgs_tmp_folder, out_img_format = 'jpg', ffmpeg_location=dv.ffmpeg_location)
                             else:
                                 print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
+                                
                         # handle video to frames with vid2frames or ffmpeg - need to check implemn
                         vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
+                        with gr.Row():
+                            in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
+                            in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='--- ^')
+
+                        vid_to_rife_chosen_file.change(local_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file],outputs=[in_vid_frame_count_window,in_vid_fps_ui_window])
+                        
                         rife_btn = gr.Button(value="Start Interpolation!")
                         gr.HTML("* check your CLI for outputs")
-                        rife_btn.click(upload_vid_to_rife,[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs])
+                        rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs])
     # END OF UI TABS
     return locals()
 

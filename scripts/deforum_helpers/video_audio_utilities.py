@@ -11,7 +11,7 @@ def get_frame_name(path):
     name = os.path.splitext(name)[0]
     return name
 
-# this functions makes sure the video_path provided is an existing local file or a web URL
+# this function makes sure the video_path provided is an existing local file or a web URL
 # todo: check file extensions!
 def is_vid_path_valid(video_path):
     if video_path.startswith('http://') or video_path.startswith('https://'):
@@ -25,7 +25,6 @@ def is_vid_path_valid(video_path):
             raise RuntimeError("Init video path or mask video path is not valid")
     return True
     
-
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, only_get_fps=False): 
     #todo? get the name of the video without the path and ext
     
@@ -91,6 +90,7 @@ def count_files(folder_path):
     return len(os.listdir(folder_path))
     
 def get_vid_fps_and_frame_count(vid_local_path):
+
     vidcap = cv2.VideoCapture(vid_local_path)
     video_fps = vidcap.get(cv2.CAP_PROP_FPS)
     video_frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
