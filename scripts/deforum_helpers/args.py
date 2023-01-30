@@ -761,37 +761,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
                 with gr.Row():
                     with gr.Accordion('Interpolate an existing video', open=True):
-                        def local_get_fps_and_fcount(x):
-                            a, b = get_vid_fps_and_frame_count(x.name)
-                            return(a,b)
-                        def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
-                            if not file is None:
-                                if x_am == 'Disabled':
-                                    print("Please set a proper value for 'Interp x'. Can't interpolate x0 times :)")
-                                else:
-                                    # TODO: handle wrong folder/ create folder/ decide on location logic
-                                    root_params = Root()
-                                    f_models_path = root_params['models_path']
-                                    outdir = os.path.join(os.getcwd(),'outputs', 'frame-interpolation', clean_folder_name(Path(file.orig_name).stem), 'tmp_input_frames') # todo take this to static param
-                                    if not os.path.exists(outdir):
-                                         os.makedirs(outdir)
-                                    print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}.")
-                                    print(f"outdir: {outdir}")
-                                    # return #!!!!!!
-                                    # outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
-                                    vid_to_interp_imgs_tmp_folder = os.path.join(outdir, Path(file.orig_name).stem)
-                                    # todo: check if we want to use the reg vid2frames instead
-                                    extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=outdir, out_img_format = 'png', ffmpeg_location=dv.ffmpeg_location)
-                                    # test quality of extracted imgs!?!?!
-                                    # todo: make sure we don't convert again the imgs when we ask to rife from *here*
-                                    # RIFE the video!
-                                    print("in vid fps:   ", in_vid_fps)
-                                    print("outdir:     ", outdir)
-                                    # return
-                                    process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, clean_folder_name(Path(file.orig_name).stem))                                  
-                            else:
-                                print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
-                                
                         # handle video to frames with vid2frames or ffmpeg - need to check implemn
                         vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
                         with gr.Row():
@@ -805,6 +774,40 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, in_vid_fps_ui_window])
     # END OF UI TABS
     return locals()
+
+# TODO: remove this function from file? maybe?
+def local_get_fps_and_fcount(x):
+    a, b = get_vid_fps_and_frame_count(x.name)
+    return(a,b)
+def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
+    if not file is None:
+        if x_am == 'Disabled':
+            print("Please set a proper value for 'Interp x'. Can't interpolate x0 times :)")
+        else:
+            # TODO: handle wrong folder/ create folder/ decide on location logic
+            root_params = Root()
+            f_models_path = root_params['models_path']
+            outdir = os.path.join(os.getcwd(),'outputs', 'frame-interpolation', clean_folder_name(Path(file.orig_name).stem), 'tmp_input_frames') # todo take this to static param
+            if not os.path.exists(outdir):
+                 os.makedirs(outdir)
+            print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}.")
+            print(f"outdir: {outdir}")
+            # return #!!!!!!
+            # outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
+            vid_to_interp_imgs_tmp_folder = os.path.join(outdir, Path(file.orig_name).stem)
+            # todo: check if we want to use the reg vid2frames instead
+            # extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=outdir, out_img_format = 'png', ffmpeg_location=dv.ffmpeg_location)
+            extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=outdir, out_img_format = 'png', ffmpeg_location=f_location)
+            
+            # test quality of extracted imgs!?!?!
+            # todo: make sure we don't convert again the imgs when we ask to rife from *here*
+            # RIFE the video!
+            print("in vid fps:   ", in_vid_fps)
+            print("outdir:     ", outdir)
+            # return
+            process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, clean_folder_name(Path(file.orig_name).stem))                                  
+    else:
+        print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
 
 ### SETTINGS STORAGE UPDATE! 2023-01-27
 ### To Reduce The Number Of Settings Overrides,
