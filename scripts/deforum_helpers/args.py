@@ -776,7 +776,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
                         with gr.Row():
                             in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
-                            in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='--- ^')
+                            in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
 
                         vid_to_rife_chosen_file.change(local_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file],outputs=[in_vid_frame_count_window,in_vid_fps_ui_window])
                         
