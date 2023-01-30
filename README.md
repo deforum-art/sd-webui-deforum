@@ -40,7 +40,7 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 
 6. Run the script and see if you got it working or even got something. **In 3D mode a large delay is expected at first** as the script loads the depth models. In the end, using the default settings the whole thing should consume 6.4 GBs of VRAM at 3D mode peaks and no more than 3.8 GB VRAM in 3D mode if you launch the webui with the '--lowvram' command line argument.
-ד
+
 7. After the generation process is completed, click the button with the self-describing name to show the video or gif result right in the GUI!
 
 8. Join our Discord where you can post generated stuff, ask questions and more: https://discord.gg/deforum. <br>
