@@ -3,7 +3,7 @@ import os
 import pathlib
 import numpy as np
 from PIL import Image, ImageChops, ImageOps, ImageEnhance
-from .vid2frames import vid2frames, get_frame_name, get_next_frame
+from .video_audio_utilities import vid2frames, get_frame_name, get_next_frame
 from .human_masking import video2humanmasks
 
 def hybrid_generation(args, anim_args, root):

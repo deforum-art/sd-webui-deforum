@@ -3,7 +3,7 @@ import pathlib
 import json
 from .render import render_animation
 from .seed import next_seed
-from .vid2frames import vid2frames
+from .video_audio_utilities import vid2frames
 from .prompt import interpolate_prompts
 from .generate import generate
 from .animation_key_frames import DeformAnimKeys
