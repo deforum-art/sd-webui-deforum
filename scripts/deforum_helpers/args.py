@@ -79,6 +79,7 @@ def DeforumAnimArgs():
     histogram_matching = False #@param {type:"boolean"}
     color_coherence = 'Match Frame 0 LAB' #@param ['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'] {type:'string'}
     color_coherence_video_every_N_frames = 1 #@param {type:"integer"}
+    color_force_grayscale = False #@param {type:"boolean"}
     diffusion_cadence = '1' #@param ['1','2','3','4','5','6','7','8'] {type:'string'}
 
     #@markdown ####**Noise settings:**
@@ -111,7 +112,8 @@ def DeforumAnimArgs():
     hybrid_generate_human_masks = "None" #@param ['None','PNGs','Video', 'Both']
     hybrid_use_first_frame_as_init_image = True #@param {type:"boolean"}
     hybrid_motion = "None" #@param ['None','Optical Flow','Perspective','Affine']
-    hybrid_flow_method = "Farneback" #@param ['Farneback','DenseRLOF','SF']
+    hybrid_motion_use_prev_img = False #@param {type:"boolean"}
+    hybrid_flow_method = "Farneback" #@param ['DIS Medium','Farneback']
     hybrid_composite = False #@param {type:"boolean"}
     hybrid_comp_mask_type = "None" #@param ['None', 'Depth', 'Video Depth', 'Blend', 'Difference']
     hybrid_comp_mask_inverse = False #@param {type:"boolean"}
@@ -459,9 +461,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 histogram_matching = gr.Checkbox(label="Force all frames to match initial frame's colors. Overrides a1111 settings. NOT RECOMMENDED, enable only for backwards compatibility.", value=da.histogram_matching, interactive=True)
             with gr.Row():
-                color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
-                color_coherence_video_every_N_frames = gr.Number(label="color_coherence_video_every_N_frames", value=1, interactive=True)
-                diffusion_cadence = gr.Number(label="diffusion_cadence", value=1, interactive=True)
+                with gr.Column(variant="compact"):
+                    color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
+                with gr.Column(variant="compact"):
+                    color_coherence_video_every_N_frames = gr.Number(label="color_coherence_video_every_N_frames", value=1, interactive=True)
+                with gr.Column(variant="compact"):
+                    color_force_grayscale = gr.Checkbox(label="color_force_grayscale", value=da.color_force_grayscale, interactive=True)
+                with gr.Column(variant="compact"):
+                    diffusion_cadence = gr.Number(label="diffusion_cadence", value=1, interactive=True)
             with gr.Row():
                 # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                 reroll_blank_frames = gr.Dropdown(label="reroll_blank_frames", choices=['reroll', 'interrupt', 'ignore'], value=d.reroll_blank_frames, type="value", elem_id="reroll_blank_frames", interactive=True)
@@ -652,17 +659,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             gr.HTML(hybrid_html)
         with gr.Accordion("Hybrid Settings", open=True):
             with gr.Row():
-                with gr.Column():
+                with gr.Column(variant="compact"):
                     hybrid_generate_inputframes = gr.Checkbox(label="hybrid_generate_inputframes", value=False, interactive=True)
-                with gr.Column():
+                with gr.Column(variant="compact"):
                     hybrid_generate_human_masks = gr.Dropdown(label="hybrid_generate_human_masks", choices=['None', 'PNGs', 'Video', 'Both'], value=da.hybrid_generate_human_masks, type="value", elem_id="hybrid_generate_human_masks", interactive=True)
-                with gr.Column():
+                with gr.Column(variant="compact"):
                     hybrid_use_first_frame_as_init_image = gr.Checkbox(label="hybrid_use_first_frame_as_init_image", value=False, interactive=True)
             with gr.Row():
-                with gr.Column():
+                with gr.Column(variant="compact"):
                     hybrid_motion = gr.Dropdown(label="hybrid_motion", choices=['None', 'Optical Flow', 'Perspective', 'Affine'], value=da.hybrid_motion, type="value", elem_id="hybrid_motion", interactive=True)
-                with gr.Column():
-                    hybrid_flow_method = gr.Dropdown(label="hybrid_flow_method", choices=['Farneback', 'DenseRLOF', 'SF'], value=da.hybrid_flow_method, type="value", elem_id="hybrid_flow_method", interactive=True)
+                with gr.Column(variant="compact"):
+                    hybrid_motion_use_prev_img = gr.Checkbox(label="hybrid_motion_use_prev_img", value=False, interactive=True)
+                with gr.Column(variant="compact"):
+                    hybrid_flow_method = gr.Dropdown(label="hybrid_flow_method", choices=['DIS Medium', 'Farneback'], value=da.hybrid_flow_method, type="value", elem_id="hybrid_flow_method", interactive=True)
             with gr.Row():
                 with gr.Column():
                     hybrid_composite = gr.Checkbox(label="hybrid_composite", value=False, interactive=True)
@@ -774,7 +783,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         mask_schedule, use_noise_mask, noise_mask_schedule,
                         enable_checkpoint_scheduling, checkpoint_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
-                        histogram_matching, color_coherence, color_coherence_video_every_N_frames,
+                        histogram_matching, color_coherence, color_coherence_video_every_N_frames, color_force_grayscale,
                         diffusion_cadence,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
                         use_depth_warping, midas_weight,
@@ -784,7 +793,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         resume_from_timestring, resume_timestring'''
                     ).replace("\n", "").replace(" ", "").split(',')
 hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
-                        hybrid_motion, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
+                        hybrid_motion, hybrid_motion_use_prev_img, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
                         hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames,
                         hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
                         hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
