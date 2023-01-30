@@ -100,7 +100,7 @@ def get_vid_fps_and_frame_count(vid_local_path):
     
     return video_frame_count, video_fps
 
-def ffmpegvid2frames(full_vid_path = None, full_out_imgs_path = None, out_img_format = 'jpg', ffmpeg_location = None):
+def ffmpegvid2frames(full_vid_path = None, full_out_imgs_path = None, out_img_format = 'png', ffmpeg_location = None):
     try:
 
         vid_to_interp_input_frame_count, vid_to_interp_input_fps = get_vid_fps_and_frame_count(full_vid_path)
@@ -109,7 +109,8 @@ def ffmpegvid2frames(full_vid_path = None, full_out_imgs_path = None, out_img_fo
         cmd = [
                 ffmpeg_location,
                 '-i', full_vid_path,
-                os.path.join(full_out_imgs_path,'%08d.' + out_img_format)
+                os.path.join(full_out_imgs_path,'%08d.' + out_img_format),
+                '-qscale:v', '2'
         ]
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()

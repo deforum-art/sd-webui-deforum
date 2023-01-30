@@ -20,7 +20,7 @@ def run_rife_new_video_infer(
         output=None,
         model=None,
         fp16=False,
-        UHD=False,
+        UHD=True,
         scale=1.0,
         fps=None,
         png=True,

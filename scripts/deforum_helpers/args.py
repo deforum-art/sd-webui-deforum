@@ -5,6 +5,7 @@ import modules.paths as ph
 import os
 from pkg_resources import resource_filename
 from .video_audio_utilities import vid2frames, ffmpegvid2frames, get_vid_fps_and_frame_count
+from .frame_interpolation import process_video_interpolation
 
 def Root():
     device = sh.device
@@ -754,7 +755,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         def local_get_fps_and_fcount(x):
                             a, b = get_vid_fps_and_frame_count(x.name)
                             return(a,b)
-                        def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs):
+                        def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location):
                             if not file is None:
                                 if x_am == 'Disabled':
                                     print("Please set a proper value for 'Interp x'. Can't interpolate x0 times :)")
@@ -762,13 +763,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     # TODO: handle wrong folder/ create folder/ decide on location logic
                                     root_params = Root()
                                     f_models_path = root_params['models_path']
-                                    print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}. models_path: {f_models_path}")
+                                    print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}.")
                                     outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
                                     vid_to_interp_imgs_tmp_folder = os.path.join(outdir, 'TEST_INTERP')
                                     # create folder for extracted imgs to live in if not already exist
                                     if not os.path.exists(vid_to_interp_imgs_tmp_folder):
                                         os.makedirs(vid_to_interp_imgs_tmp_folder)
-                                    extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=vid_to_interp_imgs_tmp_folder, out_img_format = 'jpg', ffmpeg_location=dv.ffmpeg_location)
+                                    # todo: check if we want to use the reg vid2frames instead
+                                    extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=vid_to_interp_imgs_tmp_folder, out_img_format = 'png', ffmpeg_location=dv.ffmpeg_location)
+                                    outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/OUTDIR'
+                                    # test quality of extracted imgs!?!?!
+                                    # todo: make sure we don't convert again the imgs when we ask to rife from *here*
+                                    # RIFE the video!
+                                    # process_video_interpolation(engine, x_am, sl_am, 20, f_models_path, None, vid_to_interp_imgs_tmp_folder, '0000', f_location, 17, 'veryfast', keep_imgs)                                  
                             else:
                                 print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
                                 
@@ -782,7 +789,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         
                         rife_btn = gr.Button(value="Start Interpolation!")
                         gr.HTML("* check your CLI for outputs")
-                        rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs])
+                        rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location])
     # END OF UI TABS
     return locals()
 
