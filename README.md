@@ -54,10 +54,7 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 ## Screenshots
 
-Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing and prompt-weighting enabled in 3D mode
-
-https://user-images.githubusercontent.com/14872007/197588218-6c42c54f-6874-46df-a650-e41433a09f74.mp4
-
+https://user-images.githubusercontent.com/121192995/215522284-d6fbedd5-09e2-4d2c-bd10-f9bbb4a20f82.mp4
 
 Main extension tab:
 
