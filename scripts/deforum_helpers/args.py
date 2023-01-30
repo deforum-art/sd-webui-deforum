@@ -751,7 +751,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
                 with gr.Row():
                     with gr.Accordion('Interpolate an existing video', open=False):
-                        def upload_file(file, engine, x_am, sl_am, keep_imgs):
+                        def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs):
                             if not file is None:
                                 if x_am == 'Disabled':
                                     print("Please set a proper value for 'Interp x'. Can't interpolate x0 times :)")
@@ -761,8 +761,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     f_models_path = root_params['models_path']
                                     print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}. models_path: {f_models_path}")
                                     outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
-                                    vid_to_interp_pngs_tmp_folder = video_in_frame_path = os.path.join(outdir, 'TEST_INTERP')
-                                    vid_to_interp_fps = vid2frames(file.name, video_in_frame_path, 1, True, 0, -1, False)
+                                    vid_to_interp_pngs_tmp_folder = os.path.join(outdir, 'TEST_INTERP')
+                                    if not os.path.exists(vid_to_interp_pngs_tmp_folder):
+                                        os.makedirs(vid_to_interp_pngs_tmp_folder)
+                                    vid_to_interp_fps = vid2frames(file.name, vid_to_interp_pngs_tmp_folder, 1, True, 0, -1, False)
                                     print(f"input vid fps: {vid_to_interp_fps}")
                             else:
                                 print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
@@ -770,7 +772,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
                         rife_btn = gr.Button(value="Start Interpolation!")
                         gr.HTML("* check your CLI for outputs")
-                        rife_btn.click(upload_file,[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs])
+                        rife_btn.click(upload_vid_to_rife,[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs])
     # END OF UI TABS
     return locals()
 
