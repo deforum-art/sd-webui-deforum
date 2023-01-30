@@ -54,8 +54,6 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 * Color correction is quite forced atm.
 
-* Browsers often cannot load too big gifs, so try to use `ffmpeg` when possible. Make sure it's installed and linked in your PATH!
-
 ## Screenshots
 
 Proof that it works good enough of AUTOMATIC1111's build with MATH keyframing and prompt-weighting enabled in 3D mode
