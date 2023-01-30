@@ -25,10 +25,10 @@ Therefore, it is best recommended to keep two folders:
 2. Now two ways: either clone the repo into the `extensions` directory via git commandline launched within in the `stable-diffusion-webui` folder
 
 ```sh
-git clone https://github.com/deforum-art/deforum-for-automatic1111-webui/ extensions/deforum
+git clone https://github.com/deforum-art/deforum-for-automatic1111-webui
 ```
 
-Or download this repository, locate the `extensions` folder within your WebUI installation, create folder named `deforum` in it and then put the contents of the archive inside. Then restart WebUI. **Warning: the extension folder has to be named 'deforum' or else it will fail to locate the 3D modules as the PATH addition is hardcoded**
+Or download this repository, locate the `extensions` folder within your WebUI installation, create a folder named `deforum` and put the contents of the downloaded directory inside of it. Then restart WebUI. **Warning: the extension folder has to be named 'deforum' or 'deforum-for-automatic1111-webui', otherwise it will fail to locate the 3D modules as the PATH addition is hardcoded**
 
 3. Open the webui, find the Deforum tab at the top of the page.
 
