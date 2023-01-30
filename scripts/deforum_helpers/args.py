@@ -756,10 +756,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 if x_am == 'Disabled':
                                     print("Please set a proper value for 'Interp x'. Can't interpolate x0 times :)")
                                 else:
-                                    print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}.")
+                                    root_params = Root()
+                                    f_models_path = root_params['models_path']
+                                    print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}. models_path: {f_models_path}")
                                     outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
                                     vid_to_interp_pngs_tmp_folder = video_in_frame_path = os.path.join(outdir, 'TEST_INTERP')
-                                    vid_to_interp_fps = vid2frames(file.name, video_in_frame_path, 1, True, 0, -1, True)
+                                    vid_to_interp_fps = vid2frames(file.name, video_in_frame_path, 1, True, 0, -1, False)
                                     print(f"input vid fps: {vid_to_interp_fps}")
                             else:
                                 print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
