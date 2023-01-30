@@ -94,7 +94,15 @@ def run_rife_new_video_infer(
     # TODO: add options to not move audio if slow mode is enabled + add option to slow-down the audio 
 
     interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames')
-    custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
+    # set custom name depending on if we interpolate after a run, or interpolate a video (related/unrelated to deforum, we don't know) directly from within the RIFE tab
+    if args.orig_vid_name is not None: # interpolating a video (deforum or unrelated)
+        custom_interp_path = "{}_{}".format(interpolated_path, args.orig_vid_name)
+    else: # interpolating after a deforum run:
+        custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
+    
+    
+    # TODO: make sure it actually happens, check which run and don't convert
+    # In this folder we temporarily keep the converted pngs (only if we got a request after a deforum run)
     temp_convert_raw_png_path = os.path.join(args.raw_output_imgs_path, "tmp_rife_folder")
     
     # CRITICAL TODO: dynamically use it only if we interpolate straight after generation of a deforum video! otherwise don't run it
@@ -262,6 +270,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
     print(f"stitching video with fps of: {fps}")
     parent_folder = os.path.dirname(img_folder_path)
     if orig_vid_name is not None:
+        # TODO: set correct path (one dir up) for interpolated video!
         mp4_path = os.path.join(parent_folder, str(orig_vid_name) +'_RIFE_' + 'x' + str(interp_x_amount))
     else:
         mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))

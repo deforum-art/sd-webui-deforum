@@ -772,7 +772,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     # TODO: handle wrong folder/ create folder/ decide on location logic
                                     root_params = Root()
                                     f_models_path = root_params['models_path']
-                                    outdir = os.path.join(os.getcwd(),'outputs', 'frame-interpolation', clean_folder_name(Path(file.orig_name).stem)) # todo take this to static param
+                                    outdir = os.path.join(os.getcwd(),'outputs', 'frame-interpolation', clean_folder_name(Path(file.orig_name).stem), 'tmp_input_frames') # todo take this to static param
                                     if not os.path.exists(outdir):
                                          os.makedirs(outdir)
                                     print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}.")
@@ -780,13 +780,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     # return #!!!!!!
                                     # outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
                                     vid_to_interp_imgs_tmp_folder = os.path.join(outdir, Path(file.orig_name).stem)
-                                    # create folder for extracted imgs to live in if not already exist
-                                    # if not os.path.exists(vid_to_interp_imgs_tmp_folder):
-                                        # os.makedirs(vid_to_interp_imgs_tmp_folder)
                                     # todo: check if we want to use the reg vid2frames instead
                                     extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=outdir, out_img_format = 'png', ffmpeg_location=dv.ffmpeg_location)
-                                    # outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/OUTDIR'
-                                    # print(outdir)
                                     # test quality of extracted imgs!?!?!
                                     # todo: make sure we don't convert again the imgs when we ask to rife from *here*
                                     # RIFE the video!
