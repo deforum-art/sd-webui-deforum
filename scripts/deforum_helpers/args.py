@@ -756,6 +756,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 if x_am == 'Disabled':
                                     print("Please set a proper value for 'Interp x'. Can't interpolate x0 times :)")
                                 else:
+                                    # TODO: handle wrong folder/ create folder/ decide on location logic
                                     root_params = Root()
                                     f_models_path = root_params['models_path']
                                     print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}. models_path: {f_models_path}")
