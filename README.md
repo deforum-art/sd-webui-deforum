@@ -1,7 +1,5 @@
 
-# Deforum Stable Diffusion — official extension script for AUTOMATIC1111's webui
-
-For now, video-input, 2D, pseudo-2D and 3D animation modes are available. Interpolation and render image batch temporary excluded for simplicity
+# Deforum Stable Diffusion — official extension for AUTOMATIC1111's webui
 
 <p align="left">
     <a href="https://github.com/deforum-art/deforum-for-automatic1111-webui/commits"><img alt="Last Commit" src="https://img.shields.io/github/last-commit/deforum-art/deforum-for-automatic1111-webui"></a>
@@ -13,9 +11,12 @@ For now, video-input, 2D, pseudo-2D and 3D animation modes are available. Interp
 
 ## Before Starting
 
-Read the README file at the original Deforum repo
+**Important note about versions updating:** <br>
+As auto's webui is getting updated multiple times a day, every day, things tend to break with regards to extensions compatability.
+Therefore, it is best recommended to keep two folders:
+1. "Stable" folder that you don't regularly update, with versions that you know *work* together (we will provide info on this soon). 
+2. "Experimental" folder in which you can add 'git pull' to your webui-user.bat, update deforum every day, etc. Keep it wild - but be prepared for bugs. 
 
-https://github.com/deforum/stable-diffusion
 
 ## Getting Started
 
@@ -24,10 +25,10 @@ https://github.com/deforum/stable-diffusion
 2. Now two ways: either clone the repo into the `extensions` directory via git commandline launched within in the `stable-diffusion-webui` folder
 
 ```sh
-git clone https://github.com/deforum-art/deforum-for-automatic1111-webui/ extensions/deforum
+git clone https://github.com/deforum-art/deforum-for-automatic1111-webui
 ```
 
-Or download this repository, locate the `extensions` folder within your WebUI installation, create folder named `deforum` in it and then put the contents of the archive inside. Then restart WebUI. **Warning: the extension folder has to be named 'deforum' or else it will fail to locate the 3D modules as the PATH addition is hardcoded**
+Or download this repository, locate the `extensions` folder within your WebUI installation, create a folder named `deforum` and put the contents of the downloaded directory inside of it. Then restart WebUI. **Warning: the extension folder has to be named 'deforum' or 'deforum-for-automatic1111-webui', otherwise it will fail to locate the 3D modules as the PATH addition is hardcoded**
 
 3. Open the webui, find the Deforum tab at the top of the page.
 
@@ -39,7 +40,7 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 
 6. Run the script and see if you got it working or even got something. **In 3D mode a large delay is expected at first** as the script loads the depth models. In the end, using the default settings the whole thing should consume 6.4 GBs of VRAM at 3D mode peaks and no more than 3.8 GB VRAM in 3D mode if you launch the webui with the '--lowvram' command line argument.
-ד
+
 7. After the generation process is completed, click the button with the self-describing name to show the video or gif result right in the GUI!
 
 8. Join our Discord where you can post generated stuff, ask questions and more: https://discord.gg/deforum. <br>
@@ -50,10 +51,6 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 ## Known issues
 
 * This port is not fully backward-compatible with the notebook and the local version both due to the changes in how AUTOMATIC1111's webui handles Stable Diffusion models and the changes in this script to get it to work in the new environment. *Expect* that you may not get exactly the same result or that the thing may break down because of the older settings.
-
-* Color correction is quite forced atm.
-
-* Browsers often cannot load too big gifs, so try to use `ffmpeg` when possible. Make sure it's installed and linked in your PATH!
 
 ## Screenshots
 
