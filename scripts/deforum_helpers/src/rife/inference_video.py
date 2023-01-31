@@ -110,6 +110,7 @@ def run_rife_new_video_infer(
     
     videogen = []
     for f in os.listdir(temp_convert_raw_png_path):
+        # double check for old _depth_ files, not really needed probably but keeping it for now
         if '_depth_' not in f:
             videogen.append(f)
     tot_frame = len(videogen)
