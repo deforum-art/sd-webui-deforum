@@ -758,9 +758,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
                     frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
                 with gr.Row():
-                    # Intrpolate any existing video from the local PC
+                    # Intrpolate any existing video from the connected PC
                     with gr.Accordion('Interpolate an existing video', open=True):
-                        # A drag-n-drop UI box to which the user upload a *single* (at this stage) video
+                        # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
                         vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
                         with gr.Row():
                             # Non interactive textbox showing uploaded input vid FPS
@@ -778,10 +778,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     # END OF UI TABS
     return locals()
 
-# TODO: remove this function from file? maybe? ** What about the Root() call?! **
-def local_get_fps_and_fcount(x):
-    a, b = get_vid_fps_and_frame_count(x.name)
-    return(a,b)
+# local-duplicted function that only calls the real function which is defined at aud_vid_utils
+def local_get_fps_and_fcount(vid_path):
+    if vid_path is None:
+        return '---', '---'
+    fps, fcount = get_vid_fps_and_frame_count(vid_path.name)
+    return(fps, fcount)
+
 def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
     if not file is None:
         if x_am == 'Disabled':

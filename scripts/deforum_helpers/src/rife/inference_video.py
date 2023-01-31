@@ -200,6 +200,9 @@ def run_rife_new_video_infer(
         print (f"Trying to stitch video from interpolated PNG frames...")
         vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs, args.orig_vid_name)
         print(f"Interpolated video created at: \n{vid_out_path}")
+        # remove folder with raw (non-interpolated) vid input frames opny i
+        if orig_vid_name is not None:
+            shutil.rmtree(raw_output_imgs_path)
     except Exception as e:
         print(f'Video stitching gone wrong. Error: {e}')
 
@@ -268,13 +271,18 @@ def get_filename(i, path):
     return path + s + '.png'
 
 def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):
+    print("img_batch_id: {}, fps: {}, img_folder_path: {}, audio_path: {}, ffmpeg_location: {}, interp_x_amount: {}, slow_mo_x_amount: {}, f_crf: {}, f_preset: {}, keep_imgs: {}, orig_vid_name: {}".format(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name))
+    
     print(f"stitching video with fps of: {fps}")
     parent_folder = os.path.dirname(img_folder_path)
+    grandparent_folder = os.path.dirname(parent_folder)
     if orig_vid_name is not None:
         # TODO: set correct path (one dir up) for interpolated video!
-        mp4_path = os.path.join(parent_folder, str(orig_vid_name) +'_RIFE_' + 'x' + str(interp_x_amount))
+        mp4_path = os.path.join(grandparent_folder, str(orig_vid_name) +'_RIFE_' + 'x' + str(interp_x_amount))
     else:
         mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
+    print("mp4 path:", mp4_path)
+    # return
     
     if slow_mo_x_amount != -1:
         mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)
@@ -332,6 +340,10 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
             print(f'Error adding audio to interpolated video. Actual error: {e}')
     # delete temp folder with interpolated frames if requested 
     #If ffmpeg was not found we won't reach this line - and the images will be left in the interpolated folder for the user to stitch later
+    print(img_folder_path, grandparent_folder)
     if not keep_imgs:
         shutil.rmtree(img_folder_path)
+    if keep_imgs and orig_vid_name is not None:
+        shutil.move(img_folder_path, grandparent_folder)
+        
     return mp4_path
