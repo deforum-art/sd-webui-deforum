@@ -135,6 +135,26 @@ def warpMatrix(W, H, theta, phi, gamma, scale, fV):
 
     return M33, sideLength
 
+def get_flip_perspective_matrix(W, H, keys, frame_idx):
+    perspective_flip_theta = keys.perspective_flip_theta_series[frame_idx]
+    perspective_flip_phi = keys.perspective_flip_phi_series[frame_idx]
+    perspective_flip_gamma = keys.perspective_flip_gamma_series[frame_idx]
+    perspective_flip_fv = keys.perspective_flip_fv_series[frame_idx]
+    M,sl = warpMatrix(W, H, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, 1., perspective_flip_fv);
+    post_trans_mat = np.float32([[1, 0, (W-sl)/2], [0, 1, (H-sl)/2]])
+    post_trans_mat = np.vstack([post_trans_mat, [0,0,1]])
+    bM = np.matmul(M, post_trans_mat)
+    return bM
+
+def flip_3d_perspective(anim_args, prev_img_cv2, keys, frame_idx):
+    W, H = (prev_img_cv2.shape[1], prev_img_cv2.shape[0])
+    return cv2.warpPerspective(
+        prev_img_cv2,
+        get_flip_perspective_matrix(W, H, keys, frame_idx),
+        (W, H),
+        borderMode=cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE
+    )
+
 def anim_frame_warp(prev_img_cv2, args, anim_args, keys, frame_idx, depth_model=None, depth=None, device='cuda', half_precision = False):
 
     if anim_args.use_depth_warping:
@@ -162,21 +182,13 @@ def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
     trans_mat = np.vstack([trans_mat, [0,0,1]])
     rot_mat = np.vstack([rot_mat, [0,0,1]])
     if anim_args.flip_2d_perspective:
-        perspective_flip_theta = keys.perspective_flip_theta_series[frame_idx]
-        perspective_flip_phi = keys.perspective_flip_phi_series[frame_idx]
-        perspective_flip_gamma = keys.perspective_flip_gamma_series[frame_idx]
-        perspective_flip_fv = keys.perspective_flip_fv_series[frame_idx]
-        M,sl = warpMatrix(args.W, args.H, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, 1., perspective_flip_fv);
-        post_trans_mat = np.float32([[1, 0, (args.W-sl)/2], [0, 1, (args.H-sl)/2]])
-        post_trans_mat = np.vstack([post_trans_mat, [0,0,1]])
-        bM = np.matmul(M, post_trans_mat)
-        xform = np.matmul(bM, rot_mat, trans_mat)
+        bM = get_flip_perspective_matrix(args.W, args.H, keys, frame_idx)
+        rot_mat = np.matmul(bM, rot_mat, trans_mat)
     else:
-        xform = np.matmul(rot_mat, trans_mat)
-
+        rot_mat = np.matmul(rot_mat, trans_mat)
     return cv2.warpPerspective(
         prev_img_cv2,
-        xform,
+        rot_mat,
         (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
         borderMode=cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE
     )
@@ -193,6 +205,8 @@ def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
         math.radians(keys.rotation_3d_y_series[frame_idx]), 
         math.radians(keys.rotation_3d_z_series[frame_idx])
     ]
+    if anim_args.flip_2d_perspective:
+        prev_img_cv2 = flip_3d_perspective(anim_args, prev_img_cv2, keys, frame_idx)
     rot_mat = p3d.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
     result = transform_image_3d(device if not device.type.startswith('mps') else torch.device('cpu'), prev_img_cv2, depth, rot_mat, translate_xyz, anim_args, keys, frame_idx)
     torch.cuda.empty_cache()
