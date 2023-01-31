@@ -263,7 +263,6 @@ def get_filename(i, path):
     s = str(i)
     while len(s) < 7:
         s = '0' + s
-    #return path + '/' + s + '.png'
     return path + s + '.png'
 
 def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):
