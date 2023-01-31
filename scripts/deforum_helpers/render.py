@@ -178,12 +178,15 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             "mask_auto_contrast_cutoff_high": int(keys.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx]),
         }        
         scheduled_sampler_name = None
+        scheduled_clipskip = None
         mask_seq = None
         noise_mask_seq = None
         if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
             args.steps = int(keys.steps_schedule_series[frame_idx])
         if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
             scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
+        if anim_args.enable_clipskip_scheduling and keys.clipskip_schedule_series[frame_idx] is not None:
+            scheduled_clipskip = int(keys.clipskip_schedule_series[frame_idx])
         if args.use_mask and keys.mask_schedule_series[frame_idx] is not None:
             mask_seq = keys.mask_schedule_series[frame_idx]
         if anim_args.use_noise_mask and keys.noise_mask_schedule_series[frame_idx] is not None:
@@ -335,6 +338,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         loop_args.colorCorrectionFactor = loopSchedulesAndData.color_correction_factor_series[frame_idx]
         loop_args.useLooper = loopSchedulesAndData.useLooper
         loop_args.imagesToKeyframe = loopSchedulesAndData.imagesToKeyframe
+        
+        if scheduled_clipskip is not None:
+            opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip
+        
         # sample the diffusion model
         image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10

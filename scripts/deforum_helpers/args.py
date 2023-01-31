@@ -21,6 +21,7 @@ def Root():
     outpath_samples = ""
     animation_prompts = None
     color_corrections = None 
+    initial_clipskip = None
     return locals()
 
 def DeforumAnimArgs():
@@ -65,6 +66,10 @@ def DeforumAnimArgs():
     # Checkpoint Scheduling
     enable_checkpoint_scheduling = False#@param {type:"boolean"}
     checkpoint_schedule = '0: ("model1.ckpt"), 100: ("model2.ckpt")'
+    
+    # CLIP skip Scheduling
+    enable_clipskip_scheduling = False #@param {type:"boolean"}
+    clipskip_schedule = '0: (2)'
 
     # Anti-blur
     kernel_schedule = "0: (5)"
@@ -542,6 +547,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 enable_checkpoint_scheduling = gr.Checkbox(label="enable_checkpoint_scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
             with gr.Row():
                 checkpoint_schedule = gr.Textbox(label="checkpoint_schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
+        with gr.Accordion('CLIP skip Scheduling', open=False):
+            with gr.Row():
+                enable_clipskip_scheduling = gr.Checkbox(label="enable_clipskip_scheduling", value=da.enable_clipskip_scheduling, interactive=True)
+            with gr.Row():
+                clipskip_schedule = gr.Textbox(label="clipskip_schedule", lines=1, value = da.clipskip_schedule, interactive=True)
     # Animation settings END
     
     # Prompts tab START    
@@ -844,6 +854,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_sampler_scheduling, sampler_schedule,
                         mask_schedule, use_noise_mask, noise_mask_schedule,
                         enable_checkpoint_scheduling, checkpoint_schedule,
+                        enable_clipskip_scheduling, clipskip_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         histogram_matching, color_coherence, color_coherence_video_every_N_frames,
                         diffusion_cadence,
