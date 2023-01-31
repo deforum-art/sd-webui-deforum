@@ -32,7 +32,7 @@ def process_video_interpolation(frame_interpolation_engine=None, frame_interpola
             if interp_slow_mo_clean_num != -1:
                 if int(interp_slow_mo_clean_num) not in [2,4,8]:
                     raise Error("frame_interpolation_slow_mo_amount must be 2x, 4x or 8x")
-                fps = orig_vid_fps * interp_amount_clean_num / interp_slow_mo_clean_num
+                fps = float(orig_vid_fps) * int(interp_amount_clean_num) / int(interp_slow_mo_clean_num)
                 
             # run actual interpolation and video stitching etc - the whole suite
             if actual_model_folder_name:
