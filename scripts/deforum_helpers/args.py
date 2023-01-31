@@ -799,18 +799,6 @@ def local_get_fps_and_fcount(vid_path):
     return (fps if fps is not None else '---', fcount if fcount is not None else '---')
 
 #TODO: check if we want to use the reg vid2frames instead
-# def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
-    # if file is None or x_am == 'Disabled':
-        # return "Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)"
-
-    # root_params = Root()
-    # f_models_path = root_params['models_path']
-    # folder_name = clean_folder_name(Path(file.orig_name).stem)
-    # outdir = Path.cwd() / 'outputs' / 'frame-interpolation' / folder_name / 'tmp_input_frames'
-    # outdir.mkdir(parents=True, exist_ok=True)
-    # extracted_frames = ffmpegvid2frames(file.name, outdir, 'png', f_location)
-    # process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, folder_name)
-
 def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
     if file is None or x_am == 'Disabled':
         return "Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)"
