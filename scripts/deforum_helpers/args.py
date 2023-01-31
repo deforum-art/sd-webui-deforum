@@ -335,8 +335,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                     with gr.Row(variant='compat'):
                         with gr.Column(scale=4):
-                            W = gr.Slider(label="W", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
-                            H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                            # W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                            # H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                            W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                            H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True)
+                            
                         with gr.Column(scale=4):
                             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
                             batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
@@ -783,35 +786,21 @@ def local_get_fps_and_fcount(vid_path):
     if vid_path is None:
         return '---', '---'
     fps, fcount = get_vid_fps_and_frame_count(vid_path.name)
-    return(fps, fcount)
+    return (fps if fps is not None else '---', fcount if fcount is not None else '---')
 
+#TODO: check if we want to use the reg vid2frames instead
 def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
-    if not file is None:
-        if x_am == 'Disabled':
-            print("Please set a proper value for 'Interp x'. Can't interpolate x0 times :)")
-        else:
-            # TODO: handle wrong folder/ create folder/ decide on location logic
-            root_params = Root()
-            f_models_path = root_params['models_path']
-            outdir = os.path.join(os.getcwd(),'outputs', 'frame-interpolation', clean_folder_name(Path(file.orig_name).stem), 'tmp_input_frames') # todo take this to static param
-            if not os.path.exists(outdir):
-                 os.makedirs(outdir)
-            print(f"** Got a request to frame-interpolate a video! **\nVid to interpolate: {file.orig_name}\nInteroplating using {engine}, {x_am} times with slow-mo set to {sl_am}.")
-            print(f"outdir: {outdir}")
-            # return #!!!!!!
-            # outdir = 'D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/Deforum'
-            vid_to_interp_imgs_tmp_folder = os.path.join(outdir, Path(file.orig_name).stem)
-            # todo: check if we want to use the reg vid2frames instead / handle video to frames with vid2frames or ffmpeg - need to check implemn
-            extracted_frames = ffmpegvid2frames(full_vid_path=file.name, full_out_imgs_path=outdir, out_img_format = 'png', ffmpeg_location=f_location)
-            
-            # test quality of extracted imgs!?!?!
-            # todo: make sure we don't convert again the imgs when we ask to rife from *here*
-            print("in vid fps:   ", in_vid_fps)
-            print("outdir:     ", outdir)
-            # RIFE the video!
-            process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, clean_folder_name(Path(file.orig_name).stem))                                  
-    else:
-        print("Found no uploaded video to interpolate on. Make sure the upload box is showing the video you tried to upload.")
+    if file is None or x_am == 'Disabled':
+        return "Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)"
+
+    root_params = Root()
+    f_models_path = root_params['models_path']
+    folder_name = clean_folder_name(Path(file.orig_name).stem)
+    outdir = Path.cwd() / 'outputs' / 'frame-interpolation' / folder_name / 'tmp_input_frames'
+    outdir.mkdir(parents=True, exist_ok=True)
+    extracted_frames = ffmpegvid2frames(file.name, outdir, 'png', f_location)
+    process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, folder_name)
+
 
 ### SETTINGS STORAGE UPDATE! 2023-01-27
 ### To Reduce The Number Of Settings Overrides,
