@@ -36,7 +36,4 @@ def process_video_interpolation(frame_interpolation_engine=None, frame_interpola
                 
             # run actual interpolation and video stitching etc - the whole suite
             if actual_model_folder_name:
-                # remove this
-                print(f"orig_vid_fps: {orig_vid_fps},fps: {fps} interp_amount_clean_num: {interp_amount_clean_num}, interp_slow_mo_clean_num: {interp_slow_mo_clean_num}")
-
                 run_rife_new_video_infer(interp_x_amount=interp_amount_clean_num, slow_mo_x_amount=interp_slow_mo_clean_num, output=None, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs, orig_vid_name=orig_vid_name)          

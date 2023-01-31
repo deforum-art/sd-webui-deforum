@@ -342,7 +342,6 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
             print(f'Error adding audio to interpolated video. Actual error: {e}')
     # delete temp folder with interpolated frames if requested 
     #If ffmpeg was not found we won't reach this line - and the images will be left in the interpolated folder for the user to stitch later
-    print(img_folder_path, grandparent_folder)
     if not keep_imgs:
         shutil.rmtree(img_folder_path)
     if keep_imgs and orig_vid_name is not None:
