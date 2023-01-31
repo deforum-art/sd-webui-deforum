@@ -23,7 +23,6 @@ def run_rife_new_video_infer(
         UHD=False, # Handle this before by resolution!
         scale=1.0,
         fps=None,
-        png=True,
         deforum_models_path=None,
         raw_output_imgs_path=None,
         img_batch_id=None,
@@ -43,7 +42,6 @@ def run_rife_new_video_infer(
     args.UHD = UHD
     args.scale = scale
     args.fps = fps
-    args.png = png
     args.deforum_models_path = deforum_models_path
     args.raw_output_imgs_path = raw_output_imgs_path
     args.img_batch_id = img_batch_id
@@ -124,9 +122,8 @@ def run_rife_new_video_infer(
     h, w, _ = lastframe.shape
     vid_out = None
 
-    if args.png:
-        if not os.path.exists(custom_interp_path):
-            os.mkdir(custom_interp_path)
+    if not os.path.exists(custom_interp_path):
+        os.mkdir(custom_interp_path)
 
     tmp = max(128, int(128 / args.scale))
     ph = ((h - 1) // tmp + 1) * tmp
@@ -203,7 +200,7 @@ def run_rife_new_video_infer(
         print (f"Trying to stitch video from interpolated PNG frames...")
         vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs, args.orig_vid_name)
         print(f"Interpolated video created at: \n{vid_out_path}")
-        # remove folder with raw (non-interpolated) vid input frames opny i
+        # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
         if orig_vid_name is not None:
             shutil.rmtree(raw_output_imgs_path)
     except Exception as e:
@@ -231,12 +228,11 @@ def clear_write_buffer(user_args, write_buffer, custom_interp_path):
         item = write_buffer.get()
         if item is None:
             break
-        if user_args.png:
-            filename = '{}/{:0>7d}.png'.format(custom_interp_path, cnt)
+        filename = '{}/{:0>7d}.png'.format(custom_interp_path, cnt)
 
-            cv2.imwrite(filename, item[:, :, ::-1])
+        cv2.imwrite(filename, item[:, :, ::-1])
 
-            cnt += 1
+        cnt += 1
 
 def build_read_buffer(user_args, read_buffer, videogen, temp_convert_raw_png_path):
     for frame in videogen:
