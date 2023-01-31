@@ -99,7 +99,8 @@ def run_rife_new_video_infer(
     
     videogen = []
     for f in os.listdir(temp_convert_raw_png_path):
-        videogen.append(f)
+        if '_depth_' not in f:
+            videogen.append(f)
     tot_frame = len(videogen)
     videogen.sort(key= lambda x:int(x[:-4]))
     img_path = os.path.join(temp_convert_raw_png_path, videogen[0])
