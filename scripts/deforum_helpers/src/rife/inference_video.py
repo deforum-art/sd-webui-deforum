@@ -106,7 +106,10 @@ def run_rife_new_video_infer(
     temp_convert_raw_png_path = os.path.join(args.raw_output_imgs_path, "tmp_rife_folder")
     
     # CRITICAL TODO: dynamically use it only if we interpolate straight after generation of a deforum video! otherwise don't run it
-    duplicate_pngs_from_folder(args.raw_output_imgs_path, temp_convert_raw_png_path, args.img_batch_id)
+    # if args.orig_vid_name is not None:
+        # temp_convert_raw_png_path = raw_output_imgs_path
+    # else:
+    duplicate_pngs_from_folder(args.raw_output_imgs_path, temp_convert_raw_png_path, args.img_batch_id, args.orig_vid_name)
     
     videogen = []
     for f in os.listdir(temp_convert_raw_png_path):
@@ -206,7 +209,7 @@ def run_rife_new_video_infer(
     except Exception as e:
         print(f'Video stitching gone wrong. Error: {e}')
 
-def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id):
+def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_name):
     temp_convert_raw_png_path = os.path.join(from_folder, to_folder) #"tmp_rife_folder")
     if not os.path.exists(temp_convert_raw_png_path):
                 os.makedirs(temp_convert_raw_png_path)
@@ -214,9 +217,12 @@ def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id):
     for f in os.listdir(from_folder):
         if ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and ((img_batch_id is not None and f.startswith(img_batch_id) or img_batch_id is None)):
             original_img_path = os.path.join(from_folder, f)
-            image = cv2.imread(original_img_path)
-            new_path = os.path.join(temp_convert_raw_png_path, f)
-            cv2.imwrite(new_path, image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            if orig_vid_name is not None:
+                shutil.copy(original_img_path, temp_convert_raw_png_path)
+            else:
+                image = cv2.imread(original_img_path)
+                new_path = os.path.join(temp_convert_raw_png_path, f)
+                cv2.imwrite(new_path, image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
     
 def clear_write_buffer(user_args, write_buffer, custom_interp_path):
     cnt = 0
