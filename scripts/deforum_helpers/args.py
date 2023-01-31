@@ -7,14 +7,7 @@ from pkg_resources import resource_filename
 from .video_audio_utilities import vid2frames, ffmpegvid2frames, get_vid_fps_and_frame_count
 from .frame_interpolation import process_video_interpolation
 from pathlib import Path
-
-
-def clean_folder_name(string):
-    illegal_chars = ["/", "\\", "<", ">", ":", "\"", "|", "?", "*"]
-    for char in illegal_chars:
-        string = string.replace(char, "_")
-    return string
-    
+  
 def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
@@ -766,8 +759,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     # Intrpolate any existing video from the local PC
                     with gr.Accordion('Interpolate an existing video', open=True):
-                        
-                        #
+                        # A drag-n-drop UI box to which the user upload a *single* (at this stage) video
                         vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
                         with gr.Row():
                             # Non interactive textbox showing uploaded input vid FPS
@@ -776,15 +768,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
                         # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
                         vid_to_rife_chosen_file.change(local_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file],outputs=[in_vid_frame_count_window,in_vid_fps_ui_window])
-                        
+                        # This is the actual button that's pressed to initiate the interpolation:
                         rife_btn = gr.Button(value="Start Interpolation!")
+                        # Show a text about CLI outputs:
                         gr.HTML("* check your CLI for outputs")
                         # TODO: pass crf and preset too?
                         rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, in_vid_fps_ui_window])
     # END OF UI TABS
     return locals()
 
-# TODO: remove this function from file? maybe?
+# TODO: remove this function from file? maybe? ** What about the Root() call?! **
 def local_get_fps_and_fcount(x):
     a, b = get_vid_fps_and_frame_count(x.name)
     return(a,b)
@@ -901,7 +894,6 @@ def pack_args(args_dict):
     args_dict['scale'] = 7
     args_dict['C'] = 4
     args_dict['f'] = 8
-    # args_dict['prompt'] = ""
     args_dict['timestring'] = ""
     args_dict['init_latent'] = None
     args_dict['init_sample'] = None
@@ -956,8 +948,6 @@ def process_args(args_dict_main):
     p.sampler_name = args.sampler
     p.batch_size = args.n_batch
     p.tiling = args.tiling
-    # p.firstphase_width = args.firstphase_width
-    # p.firstphase_height = args.firstphase_height
     p.seed_enable_extras = args.seed_enable_extras
     p.subseed = args.subseed
     p.subseed_strength = args.subseed_strength
@@ -1010,3 +1000,10 @@ def find_ffmpeg_binary():
             files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
             return files[0] if files else 'ffmpeg'
     return 'ffmpeg'
+
+# This function usually gets a filename, and converts it to a legal linux/windows *folder* name
+def clean_folder_name(string):
+    illegal_chars = ["/", "\\", "<", ">", ":", "\"", "|", "?", "*"]
+    for char in illegal_chars:
+        string = string.replace(char, "_")
+    return string
