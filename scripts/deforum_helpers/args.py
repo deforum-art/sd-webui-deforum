@@ -728,24 +728,25 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     mp4_path = gr.Textbox(label="mp4_path", lines=1, interactive=True, value = dv.mp4_path)
             
         with gr.Accordion('Frame Interpolation (RIFE)', open=True):
-            gr.HTML("""
-            Use RIFE and other Video Frame Interpolation methods to smooth out, slow-mo (or both) your output videos.</p>
-             <p style="margin-top:1em">
-                Supported engines:
-                <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
-                    <li>RIFE v4.6, v4.3 and v4.0. Recommended for now: v4.6.</li>
-                    <li>RIFE v2.3 and other interpolation engines might come in the future.</li>
-                </ul>
-            </p>
-             <p style="margin-top:1em">
-                Important notes:
-                <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
-                    <li>Frame Interpolation will *not* run if 'store_frames_in_ram' is enabled.</li>
-                    <li>Audio (if provided) will be transferred to the interpolated video even if Slow-Mo is enabled.</li>
-                    <li>Frame Interpolation will always save an .mp4 video even if you used GIF for the raw video.</li>
-                </ul>
-            </p>
-            """)
+            with gr.Accordion('Help and Info', open=False):
+                gr.HTML("""
+                Use RIFE and other Video Frame Interpolation methods to smooth out, slow-mo (or both) your output videos.</p>
+                 <p style="margin-top:1em">
+                    Supported engines:
+                    <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
+                        <li>RIFE v4.6, v4.3 and v4.0. Recommended for now: v4.6.</li>
+                        <li>RIFE v2.3 and other interpolation engines might come in the future.</li>
+                    </ul>
+                </p>
+                 <p style="margin-top:1em">
+                    Important notes:
+                    <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
+                        <li>Frame Interpolation will *not* run if 'store_frames_in_ram' is enabled.</li>
+                        <li>Audio (if provided) will be transferred to the interpolated video even if Slow-Mo is enabled.</li>
+                        <li>Frame Interpolation will always save an .mp4 video even if you used GIF for the raw video.</li>
+                    </ul>
+                </p>
+                """)
             with gr.Column():
                 with gr.Row():
                     # Interpolation Engine

@@ -99,10 +99,10 @@ def run_rife_new_video_infer(
         custom_interp_path = "{}_{}".format(interpolated_path, args.orig_vid_name)
     else: # interpolating after a deforum run:
         custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
-    
-    
+
     # TODO: make sure it actually happens, check which run and don't convert
-    # In this folder we temporarily keep the converted pngs (only if we got a request after a deforum run)
+    # In this folder we temporarily keep the original converted pngs (only if we got a request straight after a deforum run)
+    # it's done to avert a problem with 24 and 32 mixed outputs from the same animation run
     temp_convert_raw_png_path = os.path.join(args.raw_output_imgs_path, "tmp_rife_folder")
     
     # CRITICAL TODO: dynamically use it only if we interpolate straight after generation of a deforum video! otherwise don't run it
