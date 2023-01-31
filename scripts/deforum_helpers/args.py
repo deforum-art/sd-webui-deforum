@@ -819,13 +819,13 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_
     f_models_path = root_params['models_path']
     folder_name = clean_folder_name(Path(file.orig_name).stem)
 
-    i = 0
+    i = 1
     outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
     while os.path.exists(outdir_no_tmp):
+        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
         i += 1
-        outdir_no_tmp = outdir_no_tmp + '_' + str(i)
-    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
 
+    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
     print(outdir)
     os.makedirs(outdir, exist_ok=True)
 
