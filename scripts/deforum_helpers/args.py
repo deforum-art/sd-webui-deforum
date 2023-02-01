@@ -1018,5 +1018,6 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_
     print(outdir)
     os.makedirs(outdir, exist_ok=True)
     
-    extracted_frames = vid2frames(file.name, outdir, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
-    process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, folder_name)
+    vid2frames(video_path=file.name,video_in_frame_path=outdir, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
+
+    process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=in_vid_fps, deforum_models_path=f_models_path, real_audio_track=None, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=17, ffmpeg_preset='veryfast', keep_interp_imgs=keep_imgs, orig_vid_name=folder_name)

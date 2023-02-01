@@ -12,6 +12,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
     
     if n < 1: n = 1 #HACK Gradio interface does not currently allow min/max in gr.Number(...) 
 
+    # check vid path using a function and only enter if we get True
     if is_vid_path_valid(video_path):
         
         name = get_frame_name(video_path)
