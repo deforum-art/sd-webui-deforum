@@ -1,5 +1,5 @@
 # thanks to https://github.com/n00mkrad for the inspiration and a bit of code. Also thanks for https://github.com/XmYx for the initial reorganization of this script
-import os
+import os, sys
 from types import SimpleNamespace
 import cv2
 import torch
@@ -13,6 +13,9 @@ import _thread
 from queue import Queue, Empty
 import subprocess
 from .model.pytorch_msssim import ssim_matlab
+sys.path.append('../../')
+# from folder1.folder2 import my_module
+from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video
 
 warnings.filterwarnings("ignore")
 
@@ -193,9 +196,8 @@ def run_rife_new_video_infer(
     
     # stitch video from interpolated frames, and add audio if needed
     try:
-        print (f"Trying to stitch video from interpolated PNG frames...")
+        print (f"Passing interpolated frames to ffmpeg:...")
         vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs, args.orig_vid_name)
-        print(f"Interpolated video created at: \n{vid_out_path}")
         # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
         if orig_vid_name is not None:
             shutil.rmtree(raw_output_imgs_path)
@@ -284,55 +286,12 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
     mp4_path = mp4_path + '.mp4'
 
     t = os.path.join(img_folder_path, "%07d.png")
-    try:
-        cmd = [
-                ffmpeg_location,
-                '-y',
-                '-vcodec', 'png',
-                '-r', str(int(fps)),
-                '-start_number', str(0),
-                '-i', t,
-                '-frames:v', str(1000000),
-                '-c:v', 'libx264',
-                '-vf',
-                f'fps={int(fps)}',
-                '-pix_fmt', 'yuv420p',
-                '-crf', str(f_crf),
-                '-preset', f_preset,
-                '-pattern_type', 'sequence',
-                mp4_path
-        ]
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        # if process.returncode != 0:
-            # raise RuntimeError(stderr)
-    except FileNotFoundError:
-        raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under 'ffmpeg_location' parameter. \n*Interpolated frames were SAVED as backup!*")
-    except Exception as e:
-        raise Exception(f'Error stitching interpolation video. Actual runtime error:{e}\n*Interpolated frames were SAVED as backup!*')
-
+    add_soundtrack = 'None'
     if not audio_path is None:
-        try:
-            cmd = [
-                ffmpeg_location,
-                '-i',
-                mp4_path, 
-                '-i',
-                audio_path,
-                '-map', '0:v',
-                '-map', '1:a',
-                '-c:v', 'copy',
-                '-shortest',
-                mp4_path+'.temp.mp4'
-            ]
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            if process.returncode != 0:
-                print(stderr)
-                raise RuntimeError(stderr)
-            os.replace(mp4_path+'.temp.mp4', mp4_path)
-        except Exception as e:
-            print(f'Error adding audio to interpolated video. Actual error: {e}')
+        add_soundtrack = 'File'
+        
+    ffmpeg_stitch_video(ffmpeg_location=ffmpeg_location, fps=fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=1000000, imgs_path=t, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
+
     # delete temp folder with interpolated frames if requested 
     #If ffmpeg was not found we won't reach this line - and the images will be left in the interpolated folder for the user to stitch later
     if not keep_imgs:
