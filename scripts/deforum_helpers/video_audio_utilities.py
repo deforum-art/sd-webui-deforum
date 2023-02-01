@@ -25,7 +25,7 @@ def is_vid_path_valid(video_path):
             raise RuntimeError("Init video path or mask video path is not valid")
     return True
     
-def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, only_get_fps=False): 
+def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, only_get_fps=False, out_img_format='jpg', numeric_files_output = False): 
     #todo? get the name of the video without the path and ext
     
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
@@ -76,7 +76,10 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
                     if state.interrupted:
                         return
                     if (count <= extract_to_frame or extract_to_frame == -1) and count % n == 0:
-                        cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}.jpg" , image)     # save frame as JPEG file
+                        if numeric_files_output == True:
+                            cv2.imwrite(video_in_frame_path + os.path.sep + f"{t:05}.{out_img_format}" , image) # save frame as file
+                        else:
+                            cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}.{out_img_format}" , image) # save frame as file
                         t += 1
                     success,image = vidcap.read()
                     count += 1
