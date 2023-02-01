@@ -98,12 +98,11 @@ def run_rife_new_video_infer(
     else: # interpolating after a deforum run:
         custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
 
-    # TODO: make sure it actually happens, check which run and don't convert
-    # In this folder we temporarily keep the original converted pngs (only if we got a request straight after a deforum run)
-    # it's done to avert a problem with 24 and 32 mixed outputs from the same animation run
+    # In this folder we temporarily keep the original frames (converted/ copy-pasted and img format depends on scenario)
+    # the convertion case is done to avert a problem with 24 and 32 mixed outputs from the same animation run
     temp_convert_raw_png_path = os.path.join(args.raw_output_imgs_path, "tmp_rife_folder")
 
-    #TODO: don't copy-paste at all if the input is a video (now it copy-pastes, and if input is deforum run is also converts to make sure no errors rise cuz of 24-32 bit depth differences)
+    
     duplicate_pngs_from_folder(args.raw_output_imgs_path, temp_convert_raw_png_path, args.img_batch_id, args.orig_vid_name)
     
     videogen = []
@@ -204,7 +203,8 @@ def run_rife_new_video_infer(
         print(f'Video stitching gone wrong. Error: {e}')
 
 def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_name):
-    temp_convert_raw_png_path = os.path.join(from_folder, to_folder) #"tmp_rife_folder")
+    #TODO: don't copy-paste at all if the input is a video (now it copy-pastes, and if input is deforum run is also converts to make sure no errors rise cuz of 24-32 bit depth differences)
+    temp_convert_raw_png_path = os.path.join(from_folder, to_folder)
     if not os.path.exists(temp_convert_raw_png_path):
                 os.makedirs(temp_convert_raw_png_path)
                 

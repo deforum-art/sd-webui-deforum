@@ -802,7 +802,7 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_
     if file is None or x_am == 'Disabled':
         return "Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)"
     
-    print("Got a reqest to *frame interpolate* an existing video.")
+    print("Got a request to *frame interpolate* an existing video.")
     root_params = Root()
     f_models_path = root_params['models_path']
     folder_name = clean_folder_name(Path(file.orig_name).stem)

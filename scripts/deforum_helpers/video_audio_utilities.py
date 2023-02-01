@@ -62,7 +62,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
                     t += 1
                 success,image = vidcap.read()
                 count += 1
-            print(f"Extracted {count} frames from video: {name}")
+            print(f"Successfully extracted {count} frames from video.")
         else:
             print("Frames already unpacked")
         vidcap.release()
@@ -73,8 +73,8 @@ def is_vid_path_valid(video_path):
     # make sure file format is supported!
     file_formats = ["mov", "mpeg", "mp4", "m4v", "avi", "mpg", "webm"]
     extension = video_path.rsplit('.', 1)[-1].lower()
-    # vid path is actually a URL, check it 
     # TODO: this might not work offline? add a connection check to google.com maybe?
+    # vid path is actually a URL, check it 
     if video_path.startswith('http://') or video_path.startswith('https://'):
         response = requests.head(video_path)
         if response.status_code == 404 or response.status_code != 200:
