@@ -779,20 +779,18 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             # Non interactive textbox showing uploaded input vid total Frame Count
                             in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
                             # Non interactive textbox showing uploaded input vid FPS
-                            
-
                             in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False)
                             # Non interactive textbox showing expected output interpolated video FPS
                             out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS")
+                            # update output fps field upon changing of interp_x and/ or slow_mo_x
                             frame_interpolation_x_amount.change(tfun, [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], out_interp_vid_estimated_fps)
                             frame_interpolation_slow_mo_amount.change(tfun, [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], out_interp_vid_estimated_fps)
                         # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
-                        vid_to_rife_chosen_file.change(local_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_frame_count_window,in_vid_fps_ui_window, out_interp_vid_estimated_fps])
+                        vid_to_rife_chosen_file.change(local_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
                         # This is the actual button that's pressed to initiate the interpolation:
                         rife_btn = gr.Button(value="Start Interpolation!")
                         # Show a text about CLI outputs:
                         gr.HTML("* check your CLI for outputs")
-                        # TODO: pass crf and preset too?
                         rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, in_vid_fps_ui_window])
     # END OF UI TABS
     return locals()
@@ -997,10 +995,9 @@ def clean_folder_name(string):
         string = string.replace(char, "_")
     return string
     
-    
 def extract_number(string):
     return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
-    
+
 def tfun(interp_x, slom_x, in_vid_fps):
     fps = ''
     if interp_x != 'Disabled' and in_vid_fps not in ('---', None, '', 'None'):

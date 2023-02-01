@@ -98,7 +98,7 @@ def get_vid_fps_and_frame_count(vid_local_path):
     if video_fps == int(video_fps):
             video_fps = int(video_fps)
     
-    return video_frame_count, video_fps
+    return video_fps, video_frame_count
     
 # Stitch images to a h264 mp4 video using ffmpeg
 def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):
