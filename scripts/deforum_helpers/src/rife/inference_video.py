@@ -102,11 +102,8 @@ def run_rife_new_video_infer(
     # In this folder we temporarily keep the original converted pngs (only if we got a request straight after a deforum run)
     # it's done to avert a problem with 24 and 32 mixed outputs from the same animation run
     temp_convert_raw_png_path = os.path.join(args.raw_output_imgs_path, "tmp_rife_folder")
-    
-    # CRITICAL TODO: dynamically use it only if we interpolate straight after generation of a deforum video! otherwise don't run it
-    # if args.orig_vid_name is not None:
-        # temp_convert_raw_png_path = raw_output_imgs_path
-    # else:
+
+    #TODO: don't copy-paste at all if the input is a video (now it copy-pastes, and if input is deforum run is also converts to make sure no errors rise cuz of 24-32 bit depth differences)
     duplicate_pngs_from_folder(args.raw_output_imgs_path, temp_convert_raw_png_path, args.img_batch_id, args.orig_vid_name)
     
     videogen = []
