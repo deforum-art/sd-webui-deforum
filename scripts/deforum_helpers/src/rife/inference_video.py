@@ -13,8 +13,8 @@ import _thread
 from queue import Queue, Empty
 import subprocess
 from .model.pytorch_msssim import ssim_matlab
+
 sys.path.append('../../')
-# from folder1.folder2 import my_module
 from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video
 
 warnings.filterwarnings("ignore")
