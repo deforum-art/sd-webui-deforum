@@ -6,29 +6,9 @@ import requests
 import subprocess
 from modules.shared import state
 
-# this function makes sure the video_path provided is an existing local file or a web URL
-def is_vid_path_valid(video_path):
-    # make sure file format is supported!
-    file_formats = ["mov", "mpeg", "mp4", "m4v", "avi", "mpg", "webm"]
-    extension = video_path.rsplit('.', 1)[-1].lower()
-    if video_path.startswith('http://') or video_path.startswith('https://'):
-        response = requests.head(video_path)
-        if response.status_code == 404 or response.status_code != 200:
-            raise ConnectionError("Video URL is not valid. Response status code: {}".format(response.status_code))
-        if extension not in file_formats:
-            raise ValueError("Video file format '{}' not supported. Supported formats are: {}".format(extension, file_formats))
-    else:
-        if not os.path.exists(video_path):
-            raise RuntimeError("Video path does not exist.")
-        if extension not in file_formats:
-            raise ValueError("Video file format '{}' not supported. Supported formats are: {}".format(extension, file_formats))
-    return True
-
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
-    #todo? get the name of the video without the path and ext
-    
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
-        raise RuntimeError('extract_to_frame can not be highher than extract_from_frame')
+        raise RuntimeError('Error: extract_to_frame can not be higher than extract_from_frame')
     
     if n < 1: n = 1 #HACK Gradio interface does not currently allow min/max in gr.Number(...) 
 
@@ -64,6 +44,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
             os.makedirs(video_in_frame_path, exist_ok=True) # just deleted the folder so we need to make it again
             input_content = os.listdir(video_in_frame_path)
         
+        print(f"Trying to extract frames from video with input FPS of {video_fps}. Please wait patiently.")
         if len(input_content) == 0:
             vidcap.set(cv2.CAP_PROP_POS_FRAMES, extract_from_frame) # Set the starting frame
             success,image = vidcap.read()
@@ -81,11 +62,31 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
                     t += 1
                 success,image = vidcap.read()
                 count += 1
-            print("Converted %d frames" % count)
+            print(f"Extracted {count} frames from video: {name}")
         else:
             print("Frames already unpacked")
         vidcap.release()
         return video_fps
+
+# make sure the video_path provided is an existing local file or a web URL with a supported file extension
+def is_vid_path_valid(video_path):
+    # make sure file format is supported!
+    file_formats = ["mov", "mpeg", "mp4", "m4v", "avi", "mpg", "webm"]
+    extension = video_path.rsplit('.', 1)[-1].lower()
+    # vid path is actually a URL, check it 
+    # TODO: this might not work offline? add a connection check to google.com maybe?
+    if video_path.startswith('http://') or video_path.startswith('https://'):
+        response = requests.head(video_path)
+        if response.status_code == 404 or response.status_code != 200:
+            raise ConnectionError("Video URL is not valid. Response status code: {}".format(response.status_code))
+        if extension not in file_formats:
+            raise ValueError("Video file format '{}' not supported. Supported formats are: {}".format(extension, file_formats))
+    else:
+        if not os.path.exists(video_path):
+            raise RuntimeError("Video path does not exist.")
+        if extension not in file_formats:
+            raise ValueError("Video file format '{}' not supported. Supported formats are: {}".format(extension, file_formats))
+    return True
 
 # quick-retreive just the frame count and FPS of a video (local or URL-based)    
 def get_vid_fps_and_frame_count(vid_local_path):
@@ -97,29 +98,6 @@ def get_vid_fps_and_frame_count(vid_local_path):
             video_fps = int(video_fps)
     
     return video_frame_count, video_fps
-    
-# alternative vid2frames func that uses ffmpeg instead. Doesn't do jpg conversion properly, but fast af for pngs and other stuff
-def ffmpegvid2frames(full_vid_path = None, full_out_imgs_path = None, out_img_format = 'png', ffmpeg_location = None):
-    try:
-
-        vid_to_interp_input_frame_count, vid_to_interp_input_fps = get_vid_fps_and_frame_count(full_vid_path)
-        
-        print(f"Trying to extract {vid_to_interp_input_frame_count} frames from video with input FPS of {vid_to_interp_input_fps}. Please wait patiently.")
-        cmd = [
-                ffmpeg_location,
-                '-i', full_vid_path,
-                os.path.join(full_out_imgs_path,'%08d.' + out_img_format),
-                '-qscale:v', '2'
-        ]
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-    except FileNotFoundError:
-        raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under the 'ffmpeg_location' parameter.")
-    except Exception as e:
-        raise Exception(f'Error extracting frames from video. Actual runtime error:{e}.')
-    extracted_frame_count = len(os.listdir(full_out_imgs_path))
-    print(f"Extracted {extracted_frame_count} (out of {vid_to_interp_input_frame_count}) frames from video:\n{full_vid_path}\nTo folder:\n{full_out_imgs_path}")
-    return extracted_frame_count
 
 def get_frame_name(path):
     name = os.path.basename(path)

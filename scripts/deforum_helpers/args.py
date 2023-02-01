@@ -4,7 +4,7 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from pkg_resources import resource_filename
-from .video_audio_utilities import vid2frames, ffmpegvid2frames, get_vid_fps_and_frame_count
+from .video_audio_utilities import vid2frames, get_vid_fps_and_frame_count
 from .frame_interpolation import process_video_interpolation
 from pathlib import Path
   
@@ -798,11 +798,11 @@ def local_get_fps_and_fcount(vid_path):
     fps, fcount = get_vid_fps_and_frame_count(vid_path.name)
     return (fps if fps is not None else '---', fcount if fcount is not None else '---')
 
-#TODO: check if we want to use the reg vid2frames instead
 def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
     if file is None or x_am == 'Disabled':
         return "Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)"
-
+    
+    print("Got a reqest to *frame interpolate* an existing video.")
     root_params = Root()
     f_models_path = root_params['models_path']
     folder_name = clean_folder_name(Path(file.orig_name).stem)
@@ -816,8 +816,7 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
     print(outdir)
     os.makedirs(outdir, exist_ok=True)
-
-    # extracted_frames = ffmpegvid2frames(file.name, outdir, 'png', f_location)
+    
     extracted_frames = vid2frames(file.name, outdir, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
     process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, folder_name)
 
