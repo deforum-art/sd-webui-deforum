@@ -124,9 +124,9 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
     except FileNotFoundError:
-        raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under 'ffmpeg_location' parameter.") # \n*Interpolated frames were SAVED as backup!*")
+        raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under 'ffmpeg_location' parameter.")
     except Exception as e:
-        raise Exception(f'Error stitching frames to video. Actual runtime error:{e}') #\n*Interpolated frames were SAVED as backup!*')
+        raise Exception(f'Error stitching frames to video. Actual runtime error:{e}')
 
     if add_soundtrack != 'None':
         try:
