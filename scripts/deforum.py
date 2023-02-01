@@ -162,7 +162,7 @@ def run_deforum(*args, **kwargs):
                 mp4_path = os.path.join(args.outdir, f"{args.timestring}.gif")
                 max_video_frames = anim_args.max_frames
 
-        print(f"{image_path} -> {mp4_path}")
+        print(f"GIF created from:\n{image_path}\nTo:\n{mp4_path}")
 
         #save settings for the video
         video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")

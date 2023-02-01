@@ -196,7 +196,7 @@ def run_rife_new_video_infer(
     
     # stitch video from interpolated frames, and add audio if needed
     try:
-        print (f"Passing interpolated frames to ffmpeg:...")
+        print (f"*Passing interpolated frames to ffmpeg...*")
         vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs, args.orig_vid_name)
         # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
         if orig_vid_name is not None:
