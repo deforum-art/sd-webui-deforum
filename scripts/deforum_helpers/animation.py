@@ -135,6 +135,26 @@ def warpMatrix(W, H, theta, phi, gamma, scale, fV):
 
     return M33, sideLength
 
+def get_flip_perspective_matrix(W, H, keys, frame_idx):
+    perspective_flip_theta = keys.perspective_flip_theta_series[frame_idx]
+    perspective_flip_phi = keys.perspective_flip_phi_series[frame_idx]
+    perspective_flip_gamma = keys.perspective_flip_gamma_series[frame_idx]
+    perspective_flip_fv = keys.perspective_flip_fv_series[frame_idx]
+    M,sl = warpMatrix(W, H, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, 1., perspective_flip_fv);
+    post_trans_mat = np.float32([[1, 0, (W-sl)/2], [0, 1, (H-sl)/2]])
+    post_trans_mat = np.vstack([post_trans_mat, [0,0,1]])
+    bM = np.matmul(M, post_trans_mat)
+    return bM
+
+def flip_3d_perspective(anim_args, prev_img_cv2, keys, frame_idx):
+    W, H = (prev_img_cv2.shape[1], prev_img_cv2.shape[0])
+    return cv2.warpPerspective(
+        prev_img_cv2,
+        get_flip_perspective_matrix(W, H, keys, frame_idx),
+        (W, H),
+        borderMode=cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE
+    )
+
 def anim_frame_warp(prev_img_cv2, args, anim_args, keys, frame_idx, depth_model=None, depth=None, device='cuda', half_precision = False):
 
     if anim_args.use_depth_warping:
@@ -162,21 +182,13 @@ def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
     trans_mat = np.vstack([trans_mat, [0,0,1]])
     rot_mat = np.vstack([rot_mat, [0,0,1]])
     if anim_args.flip_2d_perspective:
-        perspective_flip_theta = keys.perspective_flip_theta_series[frame_idx]
-        perspective_flip_phi = keys.perspective_flip_phi_series[frame_idx]
-        perspective_flip_gamma = keys.perspective_flip_gamma_series[frame_idx]
-        perspective_flip_fv = keys.perspective_flip_fv_series[frame_idx]
-        M,sl = warpMatrix(args.W, args.H, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, 1., perspective_flip_fv);
-        post_trans_mat = np.float32([[1, 0, (args.W-sl)/2], [0, 1, (args.H-sl)/2]])
-        post_trans_mat = np.vstack([post_trans_mat, [0,0,1]])
-        bM = np.matmul(M, post_trans_mat)
-        xform = np.matmul(bM, rot_mat, trans_mat)
+        bM = get_flip_perspective_matrix(args.W, args.H, keys, frame_idx)
+        rot_mat = np.matmul(bM, rot_mat, trans_mat)
     else:
-        xform = np.matmul(rot_mat, trans_mat)
-
+        rot_mat = np.matmul(rot_mat, trans_mat)
     return cv2.warpPerspective(
         prev_img_cv2,
-        xform,
+        rot_mat,
         (prev_img_cv2.shape[1], prev_img_cv2.shape[0]),
         borderMode=cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE
     )
@@ -193,6 +205,8 @@ def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
         math.radians(keys.rotation_3d_y_series[frame_idx]), 
         math.radians(keys.rotation_3d_z_series[frame_idx])
     ]
+    if anim_args.flip_2d_perspective:
+        prev_img_cv2 = flip_3d_perspective(anim_args, prev_img_cv2, keys, frame_idx)
     rot_mat = p3d.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
     result = transform_image_3d(device if not device.type.startswith('mps') else torch.device('cpu'), prev_img_cv2, depth, rot_mat, translate_xyz, anim_args, keys, frame_idx)
     torch.cuda.empty_cache()
@@ -242,83 +256,3 @@ def transform_image_3d(device, prev_img_cv2, depth_tensor, rot_mat, translate, a
         'c h w -> h w c'
     ).cpu().numpy().astype(prev_img_cv2.dtype)
     return result
-
-class DeformAnimKeys():
-    def __init__(self, anim_args):
-        self.angle_series = get_inbetweens(parse_key_frames(anim_args.angle), anim_args.max_frames)
-        self.zoom_series = get_inbetweens(parse_key_frames(anim_args.zoom), anim_args.max_frames)
-        self.translation_x_series = get_inbetweens(parse_key_frames(anim_args.translation_x), anim_args.max_frames)
-        self.translation_y_series = get_inbetweens(parse_key_frames(anim_args.translation_y), anim_args.max_frames)
-        self.translation_z_series = get_inbetweens(parse_key_frames(anim_args.translation_z), anim_args.max_frames)
-        self.rotation_3d_x_series = get_inbetweens(parse_key_frames(anim_args.rotation_3d_x), anim_args.max_frames)
-        self.rotation_3d_y_series = get_inbetweens(parse_key_frames(anim_args.rotation_3d_y), anim_args.max_frames)
-        self.rotation_3d_z_series = get_inbetweens(parse_key_frames(anim_args.rotation_3d_z), anim_args.max_frames)
-        self.perspective_flip_theta_series = get_inbetweens(parse_key_frames(anim_args.perspective_flip_theta), anim_args.max_frames)
-        self.perspective_flip_phi_series = get_inbetweens(parse_key_frames(anim_args.perspective_flip_phi), anim_args.max_frames)
-        self.perspective_flip_gamma_series = get_inbetweens(parse_key_frames(anim_args.perspective_flip_gamma), anim_args.max_frames)
-        self.perspective_flip_fv_series = get_inbetweens(parse_key_frames(anim_args.perspective_flip_fv), anim_args.max_frames)
-        self.noise_schedule_series = get_inbetweens(parse_key_frames(anim_args.noise_schedule), anim_args.max_frames)
-        self.strength_schedule_series = get_inbetweens(parse_key_frames(anim_args.strength_schedule), anim_args.max_frames)
-        self.contrast_schedule_series = get_inbetweens(parse_key_frames(anim_args.contrast_schedule), anim_args.max_frames)
-        self.cfg_scale_schedule_series = get_inbetweens(parse_key_frames(anim_args.cfg_scale_schedule), anim_args.max_frames)
-        self.steps_schedule_series = get_inbetweens(parse_key_frames(anim_args.steps_schedule), anim_args.max_frames)
-        self.seed_schedule_series = get_inbetweens(parse_key_frames(anim_args.seed_schedule), anim_args.max_frames)
-        self.sampler_schedule_series = get_inbetweens(parse_key_frames(anim_args.sampler_schedule), anim_args.max_frames, is_single_string = True)
-        self.kernel_schedule_series = get_inbetweens(parse_key_frames(anim_args.kernel_schedule), anim_args.max_frames)
-        self.sigma_schedule_series = get_inbetweens(parse_key_frames(anim_args.sigma_schedule), anim_args.max_frames)
-        self.amount_schedule_series = get_inbetweens(parse_key_frames(anim_args.amount_schedule), anim_args.max_frames)
-        self.threshold_schedule_series = get_inbetweens(parse_key_frames(anim_args.threshold_schedule), anim_args.max_frames)
-        self.fov_series = get_inbetweens(parse_key_frames(anim_args.fov_schedule), anim_args.max_frames)
-        self.near_series = get_inbetweens(parse_key_frames(anim_args.near_schedule), anim_args.max_frames)
-        self.far_series = get_inbetweens(parse_key_frames(anim_args.far_schedule), anim_args.max_frames)
-
-def get_inbetweens(key_frames, max_frames, integer=False, interp_method='Linear', is_single_string = False):
-    import numexpr
-    key_frame_series = pd.Series([np.nan for a in range(max_frames)])
-    for i in range(0, max_frames):
-        if i in key_frames:
-            value = key_frames[i]
-            value_is_number = check_is_number(value)
-            # if it's only a number, leave the rest for the default interpolation
-            if value_is_number:
-                t = i
-                key_frame_series[i] = value
-        if not value_is_number:
-            t = i
-            if is_single_string:
-                if value.find("'") > -1:
-                    value = value.replace("'","")
-                if value.find('"') > -1:
-                    value = value.replace('"',"")
-            key_frame_series[i] = numexpr.evaluate(value) if not is_single_string else value # workaround for values formatted like 0:("Euler A") //used for sampler schedules
-    key_frame_series = key_frame_series.astype(float) if not is_single_string else key_frame_series # as string
-    
-    if interp_method == 'Cubic' and len(key_frames.items()) <= 3:
-        interp_method = 'Quadratic'    
-    if interp_method == 'Quadratic' and len(key_frames.items()) <= 2:
-        interp_method = 'Linear'
-          
-    key_frame_series[0] = key_frame_series[key_frame_series.first_valid_index()]
-    key_frame_series[max_frames-1] = key_frame_series[key_frame_series.last_valid_index()]
-    key_frame_series = key_frame_series.interpolate(method=interp_method.lower(), limit_direction='both')
-    if integer:
-        return key_frame_series.astype(int)
-    return key_frame_series
-
-def parse_key_frames(string, prompt_parser=None):
-    # because math functions (i.e. sin(t)) can utilize brackets 
-    # it extracts the value in form of some stuff
-    # which has previously been enclosed with brackets and
-    # with a comma or end of line existing after the closing one
-    pattern = r'((?P<frame>[0-9]+):[\s]*\((?P<param>[\S\s]*?)\)([,][\s]?|[\s]?$))'
-    frames = dict()
-    for match_object in re.finditer(pattern, string):
-        frame = int(match_object.groupdict()['frame'])
-        param = match_object.groupdict()['param']
-        if prompt_parser:
-            frames[frame] = prompt_parser(param)
-        else:
-            frames[frame] = param
-    if frames == {} and len(string) != 0:
-        raise RuntimeError('Key Frame string not correctly formatted')
-    return frames

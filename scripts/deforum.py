@@ -52,6 +52,7 @@ def run_deforum(*args, **kwargs):
     
     root, args, anim_args, video_args, parseq_args, loop_args = deforum_args.process_args(args_dict)
     root.clipseg_model = None
+    root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
     root.basedirs = basedirs
 
     # Install numexpr as it's the thing most people are having problems with
@@ -91,6 +92,7 @@ def run_deforum(*args, **kwargs):
             print('Other modes are not available yet!')
     finally:
         shared.total_tqdm = tqdm_backup
+        opts.data["CLIP_stop_at_last_layers"] = root.initial_clipskip
     
     if video_args.store_frames_in_ram:
         dump_frames_cache(root)
