@@ -3,7 +3,7 @@ import os
 import pathlib
 import numpy as np
 from PIL import Image, ImageChops, ImageOps, ImageEnhance
-from .video_audio_utilities import vid2frames, get_frame_name, get_next_frame
+from .video_audio_utilities import vid2frames, get_vid_fps_and_frame_count, get_frame_name, get_next_frame
 from .human_masking import video2humanmasks
 
 def hybrid_generation(args, anim_args, root):
@@ -23,7 +23,7 @@ def hybrid_generation(args, anim_args, root):
         # save the video frames from input video
         print(f"Video to extract: {anim_args.video_init_path}")
         print(f"Extracting video (1 every {anim_args.extract_nth_frame}) frames to {video_in_frame_path}...")
-        video_fps = vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames, anim_args.extract_from_frame, anim_args.extract_to_frame, False)
+        video_fps = vid2frames(video_path=anim_args.video_init_path, video_in_frame_path=video_in_frame_path, n=anim_args.extract_nth_frame, overwrite=anim_args.overwrite_extracted_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame)
     
     # extract alpha masks of humans from the extracted input video imgs
     if anim_args.hybrid_generate_human_masks != "None":
@@ -37,7 +37,8 @@ def hybrid_generation(args, anim_args, root):
         
         # in case that generate_input_frames isn't selected, we won't get the video fps rate as vid2frames isn't called, So we'll check the video fps in here instead
         if not anim_args.hybrid_generate_inputframes:
-            video_fps = vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames, 0, -1, True)
+            video_fcount, video_fps = get_vid_fps_and_frame_count(anim_args.video_init_path)
+            # video_fps = vid2frames(anim_args.video_init_path, video_in_frame_path, anim_args.extract_nth_frame, anim_args.overwrite_extracted_frames, 0, -1, True)
             
         # calculate the correct fps of the masked video according to the original video fps and 'extract_nth_frame'
         output_fps = video_fps/anim_args.extract_nth_frame
