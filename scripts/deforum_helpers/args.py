@@ -818,7 +818,7 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_
     os.makedirs(outdir, exist_ok=True)
 
     # extracted_frames = ffmpegvid2frames(file.name, outdir, 'png', f_location)
-    extracted_frames = vid2frames(file.name, outdir, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, only_get_fps=False, numeric_files_output=True, out_img_format='png')
+    extracted_frames = vid2frames(file.name, outdir, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
     process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, folder_name)
 
 ### SETTINGS STORAGE UPDATE! 2023-01-27
