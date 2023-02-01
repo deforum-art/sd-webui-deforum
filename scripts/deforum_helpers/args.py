@@ -791,35 +791,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     # END OF UI TABS
     return locals()
 
-# local-duplicted function that only calls the real function which is defined at aud_vid_utils
-def local_get_fps_and_fcount(vid_path):
-    if vid_path is None:
-        return '---', '---'
-    fps, fcount = get_vid_fps_and_frame_count(vid_path.name)
-    return (fps if fps is not None else '---', fcount if fcount is not None else '---')
-
-def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
-    if file is None or x_am == 'Disabled':
-        return "Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)"
-    
-    print("Got a request to *frame interpolate* an existing video.")
-    root_params = Root()
-    f_models_path = root_params['models_path']
-    folder_name = clean_folder_name(Path(file.orig_name).stem)
-
-    i = 1
-    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
-    while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
-        i += 1
-
-    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
-    print(outdir)
-    os.makedirs(outdir, exist_ok=True)
-    
-    extracted_frames = vid2frames(file.name, outdir, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
-    process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, folder_name)
-
 ### SETTINGS STORAGE UPDATE! 2023-01-27
 ### To Reduce The Number Of Settings Overrides,
 ### They Are Being Passed As Dictionaries
@@ -1019,3 +990,33 @@ def clean_folder_name(string):
     for char in illegal_chars:
         string = string.replace(char, "_")
     return string
+    
+# local-duplicted (Gradio...) function that only calls the real function which is defined at video_audio_utilities.py
+def local_get_fps_and_fcount(vid_path):
+    if vid_path is None:
+        return '---', '---'
+    fps, fcount = get_vid_fps_and_frame_count(vid_path.name)
+    return (fps if fps is not None else '---', fcount if fcount is not None else '---')
+
+# Local gradio-to-rife function
+def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
+    if file is None or x_am == 'Disabled':
+        return "Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)"
+    
+    print("Got a request to *frame interpolate* an existing video.")
+    root_params = Root()
+    f_models_path = root_params['models_path']
+    folder_name = clean_folder_name(Path(file.orig_name).stem)
+
+    i = 1
+    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
+    while os.path.exists(outdir_no_tmp):
+        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
+        i += 1
+
+    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
+    print(outdir)
+    os.makedirs(outdir, exist_ok=True)
+    
+    extracted_frames = vid2frames(file.name, outdir, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
+    process_video_interpolation(engine, x_am, sl_am, in_vid_fps, f_models_path, None, outdir, None, f_location, 17, 'veryfast', keep_imgs, folder_name)
