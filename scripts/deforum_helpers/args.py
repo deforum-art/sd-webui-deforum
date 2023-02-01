@@ -776,12 +776,18 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
                         vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
                         with gr.Row():
-                            # Non interactive textbox showing uploaded input vid FPS
-                            in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
                             # Non interactive textbox showing uploaded input vid total Frame Count
                             in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing uploaded input vid FPS
+                            
+
+                            in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False)
+                            # Non interactive textbox showing expected output interpolated video FPS
+                            out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS")
+                            frame_interpolation_x_amount.change(tfun, [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], out_interp_vid_estimated_fps)
+                            frame_interpolation_slow_mo_amount.change(tfun, [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], out_interp_vid_estimated_fps)
                         # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
-                        vid_to_rife_chosen_file.change(local_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file],outputs=[in_vid_frame_count_window,in_vid_fps_ui_window])
+                        vid_to_rife_chosen_file.change(local_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_frame_count_window,in_vid_fps_ui_window, out_interp_vid_estimated_fps])
                         # This is the actual button that's pressed to initiate the interpolation:
                         rife_btn = gr.Button(value="Start Interpolation!")
                         # Show a text about CLI outputs:
@@ -991,12 +997,28 @@ def clean_folder_name(string):
         string = string.replace(char, "_")
     return string
     
+    
+def extract_number(string):
+    return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
+    
+def tfun(interp_x, slom_x, in_vid_fps):
+    fps = ''
+    if interp_x != 'Disabled' and in_vid_fps not in ('---', None, '', 'None'):
+        clean_interp_x = extract_number(interp_x)
+        clean_slom_x = extract_number(slom_x)
+        if clean_slom_x != -1:
+            fps = float(in_vid_fps) * int(clean_interp_x) / int(clean_slom_x)
+        else:
+            fps = float(in_vid_fps) * int(clean_interp_x)
+    return fps
+
 # local-duplicted (Gradio...) function that only calls the real function which is defined at video_audio_utilities.py
-def local_get_fps_and_fcount(vid_path):
+def local_get_fps_and_fcount(vid_path, interp_x, slom_x):
     if vid_path is None:
-        return '---', '---'
+        return '---', '---', ''
     fps, fcount = get_vid_fps_and_frame_count(vid_path.name)
-    return (fps if fps is not None else '---', fcount if fcount is not None else '---')
+    expected_out_fps = tfun(interp_x, slom_x, fps)
+    return (fps if fps is not None else '---', fcount if fcount is not None else '---', expected_out_fps)
 
 # Local gradio-to-rife function
 def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
