@@ -12,10 +12,15 @@ def extract_rife_name(string):
 def process_video_interpolation(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_fps=None, deforum_models_path=None, real_audio_track=None, raw_output_imgs_path=None, img_batch_id=None, ffmpeg_location=None, ffmpeg_crf=None, ffmpeg_preset=None, keep_interp_imgs=False, orig_vid_name=None):
 
     if frame_interpolation_x_amount != "Disabled":
-
+        
         # extract clean numbers from values of 'x2' etc'
         interp_amount_clean_num = extract_number(frame_interpolation_x_amount)
         interp_slow_mo_clean_num = extract_number(frame_interpolation_slow_mo_amount)
+        
+        # Don't try to merge audio in the end if slow-mo is enabled
+        # Todo: slow-down the music to fit the new video duraion wihout changing audio's pitch
+        if real_audio_track is not None and (interp_slow_mo_clean_num != -1):
+            real_audio_track = None
 
         # **HANDLE RIFE INTERPOLATIONS** Other models might come in the future
         if frame_interpolation_engine.startswith("RIFE"):

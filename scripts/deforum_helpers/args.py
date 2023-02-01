@@ -755,7 +755,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     Important notes:
                     <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
                         <li>Frame Interpolation will *not* run if 'store_frames_in_ram' is enabled.</li>
-                        <li>Audio (if provided) will be transferred to the interpolated video even if Slow-Mo is enabled.</li>
+                        <li>Audio (if provided) will *not* be transferred to the interpolated video if Slow-Mo is enabled.</li>
                         <li>Frame Interpolation will always save an .mp4 video even if you used GIF for the raw video.</li>
                     </ul>
                 </p>
@@ -787,7 +787,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         # Show a text about CLI outputs:
                         gr.HTML("* check your CLI for outputs")
                         # TODO: pass crf and preset too?
-                        rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, in_vid_fps_ui_window])
+                        rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, in_vid_fps_ui_window])
     # END OF UI TABS
     return locals()
 
@@ -999,7 +999,7 @@ def local_get_fps_and_fcount(vid_path):
     return (fps if fps is not None else '---', fcount if fcount is not None else '---')
 
 # Local gradio-to-rife function
-def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_fps):
+def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
     if file is None or x_am == 'Disabled':
         return "Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)"
     
@@ -1019,5 +1019,6 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, in_vid_
     os.makedirs(outdir, exist_ok=True)
     
     vid2frames(video_path=file.name,video_in_frame_path=outdir, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
-
-    process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=in_vid_fps, deforum_models_path=f_models_path, real_audio_track=None, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=17, ffmpeg_preset='veryfast', keep_interp_imgs=keep_imgs, orig_vid_name=folder_name)
+    
+    # audio will not move to final video if slow_mo is active
+    process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=in_vid_fps, deforum_models_path=f_models_path, real_audio_track=file.name, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name)

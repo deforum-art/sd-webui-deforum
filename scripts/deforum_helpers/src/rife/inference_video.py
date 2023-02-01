@@ -88,12 +88,7 @@ def run_rife_new_video_infer(
     
     print(f"{args.modelDir}.pkl model successfully loaded into memory")
     print("Interpolation progress (it's OK if it finishes before 100%):")
-    
-    if not args.audio_track is None and args.slow_mo_x_amount >= 2:
-        print("Got a request to add audio. The audio will be added to the interpolated video as it is!")
-    
-    # TODO: add options to not move audio if slow mode is enabled + add option to slow-down the audio 
-
+   
     interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames')
     # set custom name depending on if we interpolate after a run, or interpolate a video (related/unrelated to deforum, we don't know) directly from within the RIFE tab
     if args.orig_vid_name is not None: # interpolating a video (deforum or unrelated)
@@ -104,7 +99,6 @@ def run_rife_new_video_infer(
     # In this folder we temporarily keep the original frames (converted/ copy-pasted and img format depends on scenario)
     # the convertion case is done to avert a problem with 24 and 32 mixed outputs from the same animation run
     temp_convert_raw_png_path = os.path.join(args.raw_output_imgs_path, "tmp_rife_folder")
-
     
     duplicate_pngs_from_folder(args.raw_output_imgs_path, temp_convert_raw_png_path, args.img_batch_id, args.orig_vid_name)
     
@@ -242,7 +236,6 @@ def build_read_buffer(user_args, read_buffer, videogen, temp_convert_raw_png_pat
     read_buffer.put(None)
 
 def make_inference(model, I0, I1, n, scale):
-    #global model
     if model.version >= 3.9:
         res = []
         for i in range(n):
@@ -272,11 +265,9 @@ def get_filename(i, path):
     return path + s + '.png'
 
 def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):        
-    # print(f"stitching video with fps of: {fps}")
     parent_folder = os.path.dirname(img_folder_path)
     grandparent_folder = os.path.dirname(parent_folder)
     if orig_vid_name is not None:
-        # TODO: set correct path (one dir up) for interpolated video!
         mp4_path = os.path.join(grandparent_folder, str(orig_vid_name) +'_RIFE_' + 'x' + str(interp_x_amount))
     else:
         mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
