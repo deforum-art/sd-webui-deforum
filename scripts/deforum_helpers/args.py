@@ -808,13 +808,13 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames,
                         use_mask_video, video_mask_path,
                         resume_from_timestring, resume_timestring'''
-                    ).replace("\n", "").replace(" ", "").split(',')
+                    ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
                         hybrid_motion, hybrid_motion_use_prev_img, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
                         hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames,
                         hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
                         hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
-                    ).replace("\n", "").replace(" ", "").split(',')
+                    ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 args_names =    str(r'''W, H, tiling,
                         seed, sampler,
                         seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h,
@@ -829,7 +829,7 @@ args_names =    str(r'''W, H, tiling,
                         mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
                         fill, full_res_mask, full_res_mask_padding,
                         reroll_blank_frames'''
-                    ).replace("\n", "").replace(" ", "").split(',')
+                    ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_for_run_all,
                             fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
                             add_soundtrack, soundtrack_path,
@@ -838,12 +838,12 @@ video_args_names =  str(r'''skip_video_for_run_all,
                             path_name_modifier, image_path, mp4_path, store_frames_in_ram,
                             frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount,
                             frame_interpolation_keep_imgs'''
-                    ).replace("\n", "").replace(" ", "").split(',')
+                    ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
-                    ).replace("\n", "").replace(" ", "").split(',')
+                    ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blendFactorMax, blendFactorSlope, 
                           tweening_frames_schedule, color_correction_factor'''
-                    ).replace("\n", "").replace(" ", "").split(',')
+                    ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 
 component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
 settings_component_names = [name for name in component_names if name not in video_args_names]
