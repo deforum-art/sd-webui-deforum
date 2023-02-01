@@ -27,6 +27,7 @@ import json
 
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
+from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video
 import gc
 import torch
 from webui import wrap_gradio_gpu_call
@@ -127,56 +128,13 @@ def run_deforum(*args, **kwargs):
                 mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
                 max_video_frames = anim_args.max_frames
 
-        print(f"{image_path} -> {mp4_path}")
-
         #save settings for the video
         video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
         with open(video_settings_filename, "w+", encoding="utf-8") as f:
             s = {**dict(video_args.__dict__)}
             json.dump(s, f, ensure_ascii=False, indent=4)
-        # make video
-        cmd = [
-            video_args.ffmpeg_location,
-            '-y',
-            '-vcodec', 'png',
-            '-r', str(int(video_args.fps)),
-            '-start_number', str(0),
-            '-i', image_path,
-            '-frames:v', str(max_video_frames),
-            '-c:v', 'libx264',
-            '-vf',
-            f'fps={int(video_args.fps)}',
-            '-pix_fmt', 'yuv420p',
-            '-crf', str(video_args.ffmpeg_crf),
-            '-preset', video_args.ffmpeg_preset,
-            '-pattern_type', 'sequence',
-            mp4_path
-        ]
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        if process.returncode != 0:
-            print(stderr)
-            raise RuntimeError(stderr)
-        
-        if video_args.add_soundtrack != 'None':
-            cmd = [
-                video_args.ffmpeg_location,
-                '-i',
-                mp4_path,
-                '-i',
-                real_audio_track,
-                '-map', '0:v',
-                '-map', '1:a',
-                '-c:v', 'copy',
-                '-shortest',
-                mp4_path+'.temp.mp4'
-            ]
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            if process.returncode != 0:
-                print(stderr)
-                raise RuntimeError(stderr)
-            os.replace(mp4_path+'.temp.mp4', mp4_path)
+        # Stitch video using ffmpeg!
+        ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
 
         mp4 = open(mp4_path,'rb').read()
         data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
