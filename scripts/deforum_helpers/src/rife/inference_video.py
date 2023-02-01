@@ -202,7 +202,7 @@ def run_rife_new_video_infer(
         if orig_vid_name is not None:
             shutil.rmtree(raw_output_imgs_path)
     except Exception as e:
-        print(f'Video stitching gone wrong. Error: {e}')
+        print(f'Video stitching gone wrong. *Interpolated frames were saved to HD as backup!*. Actual error: {e}')
 
 def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_name):
     #TODO: don't copy-paste at all if the input is a video (now it copy-pastes, and if input is deforum run is also converts to make sure no errors rise cuz of 24-32 bit depth differences)
