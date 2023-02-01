@@ -272,10 +272,8 @@ def get_filename(i, path):
         s = '0' + s
     return path + s + '.png'
 
-def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):
-    print("img_batch_id: {}, fps: {}, img_folder_path: {}, audio_path: {}, ffmpeg_location: {}, interp_x_amount: {}, slow_mo_x_amount: {}, f_crf: {}, f_preset: {}, keep_imgs: {}, orig_vid_name: {}".format(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name))
-    
-    print(f"stitching video with fps of: {fps}")
+def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):        
+    # print(f"stitching video with fps of: {fps}")
     parent_folder = os.path.dirname(img_folder_path)
     grandparent_folder = os.path.dirname(parent_folder)
     if orig_vid_name is not None:
@@ -283,8 +281,6 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
         mp4_path = os.path.join(grandparent_folder, str(orig_vid_name) +'_RIFE_' + 'x' + str(interp_x_amount))
     else:
         mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
-    print("mp4 path:", mp4_path)
-    # return
     
     if slow_mo_x_amount != -1:
         mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)
