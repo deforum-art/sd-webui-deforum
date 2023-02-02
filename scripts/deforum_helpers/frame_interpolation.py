@@ -1,9 +1,11 @@
 from rife.inference_video import run_rife_new_video_infer
 from .video_audio_utilities import get_vid_fps_and_frame_count
 
+# e.g gets 'x2' returns just 2 as int
 def extract_number(string):
     return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
-        
+   
+# gets 'RIFE v4.3', returns: 'RIFE43'   
 def extract_rife_name(string):
     parts = string.split()
     if len(parts) != 2 or parts[0] != "RIFE" or (parts[1][0] != "v" or not parts[1][1:].replace('.','').isdigit()):
@@ -17,6 +19,7 @@ def clean_folder_name(string):
         string = string.replace(char, "_")
     return string
    
+# calculate predicated output interp video fps for gradio UI
 def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
     if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
         return '---'
@@ -28,6 +31,7 @@ def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
         fps /= int(clean_slom_x)
     return fps
     
+# get uploaded video frame count, fps, and return 3 valuees for the gradio UI: in fcount, in fps, out fps (using the set_interp_out_fps function above)
 def gradio_f_interp_get_fps_and_fcount(vid_path, interp_x, slom_x):
     if vid_path is None:
         return '---', '---', '---'
