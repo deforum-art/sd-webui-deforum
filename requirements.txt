@@ -7,14 +7,14 @@ kornia
 numexpr
 matplotlib
 omegaconf
-opencv-contrib-python
+opencv-python
 pandas
 pytorch_lightning
 resize-right
 scikit-image
 timm
 torchdiffeq
-transformers==4.19.2
+transformers==4.25.1
 av
 pims
 moviepy

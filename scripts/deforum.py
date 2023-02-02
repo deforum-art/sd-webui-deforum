@@ -60,7 +60,7 @@ def run_deforum(*args, **kwargs):
     from launch import is_installed, run_pip
     if not is_installed("numexpr"):
         run_pip("install numexpr", "numexpr")
-    
+
     for basedir in basedirs:
         sys.path.extend([
             basedir + '/scripts/deforum_helpers/src',

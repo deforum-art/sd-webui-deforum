@@ -3,7 +3,7 @@ import json
 import pandas as pd
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
 from .generate import generate
 from .noise import add_noise
@@ -17,7 +17,8 @@ from .seed import next_seed
 from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
 from .load_images import get_mask, load_img
-from .hybrid_video import hybrid_generation, hybrid_composite, get_matrix_for_hybrid_motion, get_flow_for_hybrid_motion, image_transform_ransac, image_transform_optical_flow
+from .hybrid_video import hybrid_generation, hybrid_composite
+from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion, get_flow_for_hybrid_motion_prev, image_transform_ransac, image_transform_optical_flow
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 # Webui
@@ -219,24 +220,45 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
                 # hybrid video motion - warps turbo_prev_image or turbo_next_image to match motion
                 if tween_frame_idx > 0:
                     if anim_args.hybrid_motion in ['Affine', 'Perspective']:
-                        matrix = get_matrix_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, anim_args.hybrid_motion)
-                        if advance_prev:
-                            turbo_prev_image = image_transform_ransac(turbo_prev_image, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
-                        if advance_next:
-                            turbo_next_image = image_transform_ransac(turbo_next_image, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                        if anim_args.hybrid_motion_use_prev_img:
+                            if advance_prev:
+                                matrix = get_matrix_for_hybrid_motion_prev(tween_frame_idx, (args.W, args.H), inputfiles, turbo_prev_image, anim_args.hybrid_motion)
+                                turbo_prev_image = image_transform_ransac(turbo_prev_image, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                            if advance_next:
+                                matrix = get_matrix_for_hybrid_motion_prev(tween_frame_idx, (args.W, args.H), inputfiles, turbo_next_image, anim_args.hybrid_motion)
+                                turbo_next_image = image_transform_ransac(turbo_next_image, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                        else:
+                            matrix = get_matrix_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, anim_args.hybrid_motion)
+                            if advance_prev:
+                                turbo_prev_image = image_transform_ransac(turbo_prev_image, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                            if advance_next:
+                                turbo_next_image = image_transform_ransac(turbo_next_image, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
                     if anim_args.hybrid_motion in ['Optical Flow']:
-                        flow = get_flow_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
-                        if advance_prev:
-                            turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
-                        if advance_next:
-                            turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
-
+                        if anim_args.hybrid_motion_use_prev_img:
+                            if advance_prev:
+                                flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, turbo_prev_image, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                                turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                            if advance_next:
+                                flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, turbo_next_image, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                                turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                        else:
+                            flow = get_flow_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                            if advance_prev:
+                                turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                            if advance_next:
+                                turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                      
                 turbo_prev_frame_idx = turbo_next_frame_idx = tween_frame_idx
 
                 if turbo_prev_image is not None and tween < 1.0:
                     img = turbo_prev_image*(1.0-tween) + turbo_next_image*tween
                 else:
                     img = turbo_next_image
+
+                # intercept and override to grayscale
+                if anim_args.color_force_grayscale:
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
                 filename = f"{args.timestring}_{tween_frame_idx:05}.png"
                 cv2.imwrite(os.path.join(args.outdir, filename), img)
@@ -252,10 +274,16 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             # hybrid video motion - warps prev_img to match motion, usually to prepare for compositing
             if frame_idx > 0:
                 if anim_args.hybrid_motion in ['Affine', 'Perspective']:
-                    matrix = get_matrix_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, anim_args.hybrid_motion)
+                    if anim_args.hybrid_motion_use_prev_img:
+                        matrix = get_matrix_for_hybrid_motion_prev(frame_idx, (args.W, args.H), inputfiles, prev_img, anim_args.hybrid_motion)
+                    else:
+                        matrix = get_matrix_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, anim_args.hybrid_motion)
                     prev_img = image_transform_ransac(prev_img, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)    
                 if anim_args.hybrid_motion in ['Optical Flow']:
-                    flow = get_flow_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                    if anim_args.hybrid_motion_use_prev_img:
+                        flow = get_flow_for_hybrid_motion_prev(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_img, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                    else:
+                        flow = get_flow_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
                     prev_img = image_transform_optical_flow(prev_img, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
 
             # do hybrid video - composites video frame into prev_img (now warped if using motion)
@@ -277,6 +305,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
                     color_match_sample = prev_img.copy()
                 else:
                     prev_img = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)
+
+            # intercept and override to grayscale
+            if anim_args.color_force_grayscale:
+                prev_img = cv2.cvtColor(prev_img, cv2.COLOR_BGR2GRAY)
+                prev_img = cv2.cvtColor(prev_img, cv2.COLOR_GRAY2BGR)
 
             # apply scaling
             contrast_image = (prev_img * contrast).round().astype(np.uint8)
@@ -345,6 +378,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         # sample the diffusion model
         image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
+
+        # intercept and override to grayscale
+        if anim_args.color_force_grayscale:
+            image = ImageOps.grayscale(image)
+            image = ImageOps.colorize(image, black ="black", white ="white")
 
         # reroll blank frame 
         if not image.getbbox():
