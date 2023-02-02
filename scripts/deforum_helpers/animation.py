@@ -181,7 +181,7 @@ def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
     rot_mat = cv2.getRotationMatrix2D(center, angle, zoom)
     trans_mat = np.vstack([trans_mat, [0,0,1]])
     rot_mat = np.vstack([rot_mat, [0,0,1]])
-    if anim_args.flip_2d_perspective:
+    if anim_args.enable_perspective_flip:
         bM = get_flip_perspective_matrix(args.W, args.H, keys, frame_idx)
         rot_mat = np.matmul(bM, rot_mat, trans_mat)
     else:
@@ -205,7 +205,7 @@ def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
         math.radians(keys.rotation_3d_y_series[frame_idx]), 
         math.radians(keys.rotation_3d_z_series[frame_idx])
     ]
-    if anim_args.flip_2d_perspective:
+    if anim_args.enable_perspective_flip:
         prev_img_cv2 = flip_3d_perspective(anim_args, prev_img_cv2, keys, frame_idx)
     rot_mat = p3d.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
     result = transform_image_3d(device if not device.type.startswith('mps') else torch.device('cpu'), prev_img_cv2, depth, rot_mat, translate_xyz, anim_args, keys, frame_idx)

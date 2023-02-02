@@ -33,7 +33,7 @@ deforum_titles = {
 
     //Keyframes
     "animation_mode": "selects the type of animation",
-        "2D": "only 2D motion parameters will be used, but this mode uses the least amount of VRAM. You can optionally enable flip_2d_perspective to enable some psuedo-3d animation parameters while in 2D mode.",
+        "2D": "only 2D motion parameters will be used, but this mode uses the least amount of VRAM. You can optionally set 'enable_perspective_flip' = True to enable some psuedo-3d animation parameters while still in 2D mode.",
         "3D": "enables all 3D motion parameters.",
         "Video Input": "will ignore all motion parameters and attempt to reference a video loaded into the runtime, specified by the video_init_path. Max_frames is ignored during video_input mode, and instead, follows the number of frames pulled from the video’s length. Resume_from_timestring is NOT available with Video_Input mode.",
     "max_frames": "the maximum number of output images to be created",
@@ -48,7 +48,7 @@ deforum_titles = {
     "rotation_3d_x": "3D operator to tilt canvas up/down in degrees per frame",
     "rotation_3d_y": "3D operator to pan canvas left/right in degrees per frame",
     "rotation_3d_z": "3D operator to roll canvas clockwise/anticlockwise",
-    "flip_2d_perspective": "enables 2D mode functions to simulate faux 3D movement",
+    "enable_perspective_flip": "enables 2D (now works in 3D mode too!) mode functions to simulate faux 3D movement",
     "perspective_flip_theta": "the roll effect angle",
     "perspective_flip_phi": "the tilt effect angle",
     "perspective_flip_gamma": "the pan effect angle",
