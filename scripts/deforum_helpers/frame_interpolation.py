@@ -18,8 +18,7 @@ def clean_folder_name(string):
     for char in illegal_chars:
         string = string.replace(char, "_")
     return string
-   
-# calculate predicated output interp video fps for gradio UI
+
 def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
     if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
         return '---'
@@ -29,7 +28,7 @@ def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
     fps = float(in_vid_fps) * int(clean_interp_x)
     if clean_slom_x != -1:
         fps /= int(clean_slom_x)
-    return fps
+    return int(fps) if fps.is_integer() else fps
     
 # get uploaded video frame count, fps, and return 3 valuees for the gradio UI: in fcount, in fps, out fps (using the set_interp_out_fps function above)
 def gradio_f_interp_get_fps_and_fcount(vid_path, interp_x, slom_x):
@@ -38,6 +37,7 @@ def gradio_f_interp_get_fps_and_fcount(vid_path, interp_x, slom_x):
     fps, fcount, resolution = get_quick_vid_info(vid_path.name)
     expected_out_fps = set_interp_out_fps(interp_x, slom_x, fps)
     return (fps if fps is not None else '---', fcount if fcount is not None else '---', expected_out_fps)
+    
     
 def process_video_interpolation(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_fps=None, deforum_models_path=None, real_audio_track=None, raw_output_imgs_path=None, img_batch_id=None, ffmpeg_location=None, ffmpeg_crf=None, ffmpeg_preset=None, keep_interp_imgs=False, orig_vid_name=None, resolution = (512,512)):
 
