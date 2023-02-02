@@ -987,15 +987,12 @@ def print_args(args):
 def find_ffmpeg_binary():
     for package in ['imageio_ffmpeg', 'imageio-ffmpeg']:
         try:
-            package_path = resource_filename(package, '')
-            binaries_path = os.path.join(package_path, 'binaries')
-            if os.path.exists(binaries_path):
-                files = [os.path.join(binaries_path, f) for f in os.listdir(binaries_path) if f.startswith("ffmpeg-")]
-                files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
-                return files[0] if files else 'ffmpeg'
+            package_path = resource_filename(package, 'binaries')
+            files = [os.path.join(package_path, f) for f in os.listdir(package_path) if f.startswith("ffmpeg-")]
+            files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+            return files[0] if files else 'ffmpeg'
         except:
-            pass
-    return 'ffmpeg'
+            return 'ffmpeg'
  
 # Local gradio-to-rife function. *Needs* to stay here since we do Root(), to be changed
 def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
