@@ -789,8 +789,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             # Non interactive textbox showing expected output interpolated video FPS
                             out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS")
                             # update output fps field upon changing of interp_x and/ or slow_mo_x
-                            frame_interpolation_x_amount.change(tfun, [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], out_interp_vid_estimated_fps)
-                            frame_interpolation_slow_mo_amount.change(tfun, [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], out_interp_vid_estimated_fps)
+                            frame_interpolation_x_amount.change(set_interp_out_fps, [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], out_interp_vid_estimated_fps)
+                            frame_interpolation_slow_mo_amount.change(set_interp_out_fps, [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], out_interp_vid_estimated_fps)
                         # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
                         vid_to_rife_chosen_file.change(local_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
                         # This is the actual button that's pressed to initiate the interpolation:
@@ -1008,8 +1008,8 @@ def clean_folder_name(string):
 def extract_number(string):
     return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
 
-def tfun(interp_x, slom_x, in_vid_fps):
-    fps = ''
+def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
+    fps = '---'
     if interp_x != 'Disabled' and in_vid_fps not in ('---', None, '', 'None'):
         clean_interp_x = extract_number(interp_x)
         clean_slom_x = extract_number(slom_x)
@@ -1022,9 +1022,9 @@ def tfun(interp_x, slom_x, in_vid_fps):
 # local-duplicted (Gradio...) function that only calls the real function which is defined at video_audio_utilities.py
 def local_get_fps_and_fcount(vid_path, interp_x, slom_x):
     if vid_path is None:
-        return '---', '---', ''
+        return '---', '---', '---'
     fps, fcount = get_vid_fps_and_frame_count(vid_path.name)
-    expected_out_fps = tfun(interp_x, slom_x, fps)
+    expected_out_fps = set_interp_out_fps(interp_x, slom_x, fps)
     return (fps if fps is not None else '---', fcount if fcount is not None else '---', expected_out_fps)
 
 # Local gradio-to-rife function
