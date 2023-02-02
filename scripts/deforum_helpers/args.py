@@ -3,8 +3,8 @@ from modules.processing import get_fixed_seed
 import modules.shared as sh
 import modules.paths as ph
 import os
-from pkg_resources import resource_filename
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
+from .video_audio_utilities import find_ffmpeg_binary
 
 def Root():
     device = sh.device
@@ -979,17 +979,6 @@ def print_args(args):
     print("ARGS: /n")
     for key, value in args.__dict__.items():
         print(f"{key}: {value}")
-
-# this function needs to be in this file for now 
-def find_ffmpeg_binary():
-    for package in ['imageio_ffmpeg', 'imageio-ffmpeg']:
-        try:
-            package_path = resource_filename(package, 'binaries')
-            files = [os.path.join(package_path, f) for f in os.listdir(package_path) if f.startswith("ffmpeg-")]
-            files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
-            return files[0] if files else 'ffmpeg'
-        except:
-            return 'ffmpeg'
  
 # Local gradio-to-rife function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):

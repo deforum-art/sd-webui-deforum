@@ -4,7 +4,9 @@ import shutil
 import math
 import requests
 import subprocess
+from pkg_resources import resource_filename
 from modules.shared import state
+
 
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
@@ -165,3 +167,13 @@ def get_next_frame(outdir, video_path, frame_idx, mask=False):
     frame_path = 'inputframes'
     if (mask): frame_path = 'maskframes'
     return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:05}.jpg")
+     
+def find_ffmpeg_binary():
+    for package in ['imageio_ffmpeg', 'imageio-ffmpeg']:
+        try:
+            package_path = resource_filename(package, 'binaries')
+            files = [os.path.join(package_path, f) for f in os.listdir(package_path) if f.startswith("ffmpeg-")]
+            files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+            return files[0] if files else 'ffmpeg'
+        except:
+            return 'ffmpeg'
