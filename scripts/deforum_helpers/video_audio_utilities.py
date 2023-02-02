@@ -76,7 +76,6 @@ def is_vid_path_valid(video_path):
     # make sure file format is supported!
     file_formats = ["mov", "mpeg", "mp4", "m4v", "avi", "mpg", "webm"]
     extension = video_path.rsplit('.', 1)[-1].lower()
-    # TODO: this might not work offline? add a connection check to google.com maybe?
     # vid path is actually a URL, check it 
     if video_path.startswith('http://') or video_path.startswith('https://'):
         response = requests.head(video_path)
