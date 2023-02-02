@@ -749,7 +749,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Accordion('Frame Interpolation (RIFE)', open=True):
             with gr.Accordion('Help and Info', open=False):
                 gr.HTML("""
-                Use RIFE Interpolation to smooth out, slow-mo (or both) any video.</p>
+                Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
                  <p style="margin-top:1em">
                     Supported engines:
                     <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
@@ -789,7 +789,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             # Non interactive textbox showing expected output interpolated video FPS
                             out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS", value='---')
                         # This is the actual button that's pressed to initiate the interpolation:
-                        rife_btn = gr.Button(value="Start Interpolation!")
+                        rife_btn = gr.Button(value="*Interpolate uploaded video*")
                         # Show a text about CLI outputs:
                         gr.HTML("* check your CLI for outputs")
                         # make the functin call when the RIFE button is clicked
