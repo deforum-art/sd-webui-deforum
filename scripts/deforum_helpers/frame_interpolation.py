@@ -1,4 +1,5 @@
 from rife.inference_video import run_rife_new_video_infer
+from .video_audio_utilities import get_vid_fps_and_frame_count
 
 def extract_number(string):
     return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
@@ -26,6 +27,13 @@ def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
     if clean_slom_x != -1:
         fps /= int(clean_slom_x)
     return fps
+    
+def gradio_f_interp_get_fps_and_fcount(vid_path, interp_x, slom_x):
+    if vid_path is None:
+        return '---', '---', '---'
+    fps, fcount = get_vid_fps_and_frame_count(vid_path.name)
+    expected_out_fps = set_interp_out_fps(interp_x, slom_x, fps)
+    return (fps if fps is not None else '---', fcount if fcount is not None else '---', expected_out_fps)
     
 def process_video_interpolation(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_fps=None, deforum_models_path=None, real_audio_track=None, raw_output_imgs_path=None, img_batch_id=None, ffmpeg_location=None, ffmpeg_crf=None, ffmpeg_preset=None, keep_interp_imgs=False, orig_vid_name=None):
 

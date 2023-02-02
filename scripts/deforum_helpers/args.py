@@ -4,8 +4,8 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from pkg_resources import resource_filename
-from .video_audio_utilities import vid2frames, get_vid_fps_and_frame_count
-from .frame_interpolation import process_video_interpolation, extract_number, clean_folder_name, set_interp_out_fps
+from .video_audio_utilities import vid2frames
+from .frame_interpolation import process_video_interpolation, clean_folder_name, set_interp_out_fps, gradio_f_interp_get_fps_and_fcount
 from pathlib import Path
   
 def Root():
@@ -792,7 +792,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             frame_interpolation_x_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
                             frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
                         # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
-                        vid_to_rife_chosen_file.change(local_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
+                        vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
                         # This is the actual button that's pressed to initiate the interpolation:
                         rife_btn = gr.Button(value="Start Interpolation!")
                         # Show a text about CLI outputs:
@@ -981,7 +981,8 @@ def print_args(args):
     print("ARGS: /n")
     for key, value in args.__dict__.items():
         print(f"{key}: {value}")
-        
+
+# this function needs to be in this file for now 
 def find_ffmpeg_binary():
     package_path = None
     for package in ['imageio_ffmpeg', 'imageio-ffmpeg']:
@@ -999,15 +1000,7 @@ def find_ffmpeg_binary():
             return files[0] if files else 'ffmpeg'
     return 'ffmpeg'
  
-# local-duplicted (Gradio...) function that only calls the real function which is defined at video_audio_utilities.py
-def local_get_fps_and_fcount(vid_path, interp_x, slom_x):
-    if vid_path is None:
-        return '---', '---', '---'
-    fps, fcount = get_vid_fps_and_frame_count(vid_path.name)
-    expected_out_fps = set_interp_out_fps(interp_x, slom_x, fps)
-    return (fps if fps is not None else '---', fcount if fcount is not None else '---', expected_out_fps)
-
-# Local gradio-to-rife function
+# Local gradio-to-rife function. *Needs* to stay here since we do Root(), to be changed
 def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
     if file is None or x_am == 'Disabled':
         print("Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)")
