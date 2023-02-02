@@ -23,7 +23,7 @@ def run_rife_new_video_infer(
         output=None,
         model=None,
         fp16=False,
-        UHD=False, # Handle this before by resolution!
+        UHD=False, # *Will be received as *True* if imgs/vid resolution is 2K or higher*
         scale=1.0,
         fps=None,
         deforum_models_path=None,

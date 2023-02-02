@@ -1,5 +1,5 @@
 from rife.inference_video import run_rife_new_video_infer
-from .video_audio_utilities import get_vid_fps_and_frame_count
+from .video_audio_utilities import get_quick_vid_info
 
 # e.g gets 'x2' returns just 2 as int
 def extract_number(string):
@@ -35,13 +35,17 @@ def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
 def gradio_f_interp_get_fps_and_fcount(vid_path, interp_x, slom_x):
     if vid_path is None:
         return '---', '---', '---'
-    fps, fcount = get_vid_fps_and_frame_count(vid_path.name)
+    fps, fcount, resolution = get_quick_vid_info(vid_path.name)
     expected_out_fps = set_interp_out_fps(interp_x, slom_x, fps)
     return (fps if fps is not None else '---', fcount if fcount is not None else '---', expected_out_fps)
     
-def process_video_interpolation(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_fps=None, deforum_models_path=None, real_audio_track=None, raw_output_imgs_path=None, img_batch_id=None, ffmpeg_location=None, ffmpeg_crf=None, ffmpeg_preset=None, keep_interp_imgs=False, orig_vid_name=None):
+def process_video_interpolation(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_fps=None, deforum_models_path=None, real_audio_track=None, raw_output_imgs_path=None, img_batch_id=None, ffmpeg_location=None, ffmpeg_crf=None, ffmpeg_preset=None, keep_interp_imgs=False, orig_vid_name=None, resolution = (512,512)):
 
     if frame_interpolation_x_amount != "Disabled":
+
+        UHD = False
+        if resolution[0] >= 2048 and resolution[1] >= 2048:
+            UHD = True
         
         # extract clean numbers from values of 'x2' etc'
         interp_amount_clean_num = extract_number(frame_interpolation_x_amount)
@@ -71,4 +75,4 @@ def process_video_interpolation(frame_interpolation_engine=None, frame_interpola
                 
             # run actual interpolation and video stitching etc - the whole suite
             if actual_model_folder_name:
-                run_rife_new_video_infer(interp_x_amount=interp_amount_clean_num, slow_mo_x_amount=interp_slow_mo_clean_num, output=None, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs, orig_vid_name=orig_vid_name)          
+                run_rife_new_video_infer(interp_x_amount=interp_amount_clean_num, slow_mo_x_amount=interp_slow_mo_clean_num, output=None, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs, orig_vid_name=orig_vid_name, UHD=UHD)          

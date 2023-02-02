@@ -747,7 +747,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     mp4_path = gr.Textbox(label="mp4_path", lines=1, interactive=True, value = dv.mp4_path)
             
         with gr.Accordion('Frame Interpolation (RIFE)', open=True):
-            with gr.Accordion('Help and Info', open=False):
+            with gr.Accordion('Important notes and Help', open=False):
                 gr.HTML("""
                 Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
                  <p style="margin-top:1em">

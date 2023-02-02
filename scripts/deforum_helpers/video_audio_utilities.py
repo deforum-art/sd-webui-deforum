@@ -90,15 +90,17 @@ def is_vid_path_valid(video_path):
     return True
 
 # quick-retreive just the frame count and FPS of a video (local or URL-based)    
-def get_vid_fps_and_frame_count(vid_local_path):
+def get_quick_vid_info(vid_local_path):
     vidcap = cv2.VideoCapture(vid_local_path)
     video_fps = vidcap.get(cv2.CAP_PROP_FPS)
     video_frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
+    video_width = int(vidcap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    video_height = int(vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     vidcap.release()
     if video_fps == int(video_fps):
-            video_fps = int(video_fps)
-    
-    return video_fps, video_frame_count
+        video_fps = int(video_fps)
+
+    return video_fps, video_frame_count, (video_width, video_height)
     
 # Stitch images to a h264 mp4 video using ffmpeg
 def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):

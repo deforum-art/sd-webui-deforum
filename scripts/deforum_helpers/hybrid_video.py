@@ -3,7 +3,7 @@ import os
 import pathlib
 import numpy as np
 from PIL import Image, ImageChops, ImageOps, ImageEnhance
-from .video_audio_utilities import vid2frames, get_vid_fps_and_frame_count, get_frame_name, get_next_frame
+from .video_audio_utilities import vid2frames, get_quick_vid_info, get_frame_name, get_next_frame
 from .human_masking import video2humanmasks
 
 def hybrid_generation(args, anim_args, root):
@@ -37,7 +37,7 @@ def hybrid_generation(args, anim_args, root):
         
         # in case that generate_input_frames isn't selected, we won't get the video fps rate as vid2frames isn't called, So we'll check the video fps in here instead
         if not anim_args.hybrid_generate_inputframes:
-            _, video_fps = get_vid_fps_and_frame_count(anim_args.video_init_path)
+            _, video_fps, _ = get_quick_vid_info(anim_args.video_init_path)
             
         # calculate the correct fps of the masked video according to the original video fps and 'extract_nth_frame'
         output_fps = video_fps/anim_args.extract_nth_frame
