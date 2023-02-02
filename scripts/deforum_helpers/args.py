@@ -1008,16 +1008,16 @@ def clean_folder_name(string):
     
 def extract_number(string):
     return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
-
+  
 def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
-    fps = '---'
-    if interp_x != 'Disabled' and in_vid_fps not in ('---', None, '', 'None'):
-        clean_interp_x = extract_number(interp_x)
-        clean_slom_x = extract_number(slom_x)
-        if clean_slom_x != -1:
-            fps = float(in_vid_fps) * int(clean_interp_x) / int(clean_slom_x)
-        else:
-            fps = float(in_vid_fps) * int(clean_interp_x)
+    if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
+        return '---'
+
+    clean_interp_x = extract_number(interp_x)
+    clean_slom_x = extract_number(slom_x)
+    fps = float(in_vid_fps) * int(clean_interp_x)
+    if clean_slom_x != -1:
+        fps /= int(clean_slom_x)
     return fps
 
 # local-duplicted (Gradio...) function that only calls the real function which is defined at video_audio_utilities.py
