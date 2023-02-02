@@ -4,10 +4,8 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from pkg_resources import resource_filename
-# from .video_audio_utilities import vid2frames
-from .frame_interpolation import process_video_interpolation, clean_folder_name, set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
-from pathlib import Path
-  
+from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
+
 def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
@@ -1001,6 +999,5 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, 
 
     root_params = Root()
     f_models_path = root_params['models_path']
-    folder_name = clean_folder_name(Path(file.orig_name).stem)
 
-    process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, folder_name)
+    process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)

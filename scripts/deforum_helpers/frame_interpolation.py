@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from rife.inference_video import run_rife_new_video_infer
 from .video_audio_utilities import get_quick_vid_info, vid2frames
 
@@ -40,8 +41,9 @@ def gradio_f_interp_get_fps_and_fcount(vid_path, interp_x, slom_x):
     return (fps if fps is not None else '---', fcount if fcount is not None else '---', expected_out_fps)
 
 # handle call to interpolate an uploaded video from gradio button in args.py (the function that calls this func is named 'upload_vid_to_rife')
-def process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, folder_name):
+def process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, vid_file_name):
     print("got a request to *frame interpolate* an existing video.")
+    folder_name = clean_folder_name(Path(vid_file_name).stem)
     outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
     i = 1
     while os.path.exists(outdir_no_tmp):
