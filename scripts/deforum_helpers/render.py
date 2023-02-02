@@ -68,7 +68,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
     # Always enable pseudo-3d with parseq. No need for an extra toggle:
     # Whether it's used or not in practice is defined by the schedules
     if use_parseq:
-        anim_args.enable_perspective_flip = True        
+        anim_args.flip_2d_perspective = True        
 
     # expand prompts out to per-frame
     if use_parseq:

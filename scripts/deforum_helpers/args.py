@@ -37,8 +37,7 @@ def DeforumAnimArgs():
     rotation_3d_x = "0:(0)"#@param {type:"string"}
     rotation_3d_y = "0:(0)"#@param {type:"string"}
     rotation_3d_z = "0:(0)"#@param {type:"string"}
-    # flip_2d_perspective = False #@param {type:"boolean"}
-    enable_perspective_flip = False #@param {type:"boolean"}
+    flip_2d_perspective = False #@param {type:"boolean"}
     perspective_flip_theta = "0:(0)"#@param {type:"string"}
     perspective_flip_phi = "0:(t%15)"#@param {type:"string"}
     perspective_flip_gamma = "0:(0)"#@param {type:"string"}
@@ -522,10 +521,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
             with gr.Row():
                 far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
-        # Perspective Flip
-        with gr.Accordion('Perspective Flip', open=False):
+        # 2D Perspective Flip
+        with gr.Accordion('2D Perspective Flip', open=False):
             with gr.Row():
-                enable_perspective_flip = gr.Checkbox(label="enable_perspective_flip", value=da.enable_perspective_flip, interactive=True)
+                flip_2d_perspective = gr.Checkbox(label="flip_2d_perspective", value=da.flip_2d_perspective, interactive=True)
             with gr.Row():
                 perspective_flip_theta = gr.Textbox(label="perspective_flip_theta", lines=1, value = da.perspective_flip_theta, interactive=True)
             with gr.Row():
@@ -813,7 +812,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 anim_args_names =   str(r'''animation_mode, max_frames, border,
                         angle, zoom, translation_x, translation_y, translation_z,
                         rotation_3d_x, rotation_3d_y, rotation_3d_z,
-                        enable_perspective_flip,
+                        flip_2d_perspective,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule,
                         enable_steps_scheduling, steps_schedule,
