@@ -12,7 +12,7 @@ def extract_rife_name(string):
 
 # This function usually gets a filename, and converts it to a legal linux/windows *folder* name
 def clean_folder_name(string):
-    illegal_chars = ["/", "\\", "<", ">", ":", "\"", "|", "?", "*"]
+    illegal_chars = ["/", "\\", "<", ">", ":", "\"", "|", "?", "*", "."]
     for char in illegal_chars:
         string = string.replace(char, "_")
     return string
