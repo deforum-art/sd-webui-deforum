@@ -3,7 +3,8 @@ from modules.processing import get_fixed_seed
 import modules.shared as sh
 import modules.paths as ph
 import os
-from pkg_resources import resource_filename
+from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
+from .video_audio_utilities import find_ffmpeg_binary
 
 def Root():
     device = sh.device
@@ -271,7 +272,7 @@ def DeforumOutputArgs():
     max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False #@param {type: 'boolean'}
     frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
-    frame_interpolation_x_amount = "Disabled" #@param ["Disabled" + all values from x2 to x10]
+    frame_interpolation_x_amount = "Disabled" #"Disabled" #@param ["Disabled" + all values from x2 to x10]
     frame_interpolation_slow_mo_amount = "Disabled" #@param ["Disabled","x2","x4","x8"]
     frame_interpolation_keep_imgs = False #@param {type: 'boolean'}
     return locals()
@@ -338,8 +339,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                     with gr.Row(variant='compat'):
                         with gr.Column(scale=4):
-                            W = gr.Slider(label="W", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
-                            H = gr.Slider(label="H", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                            # W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                            # H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                            W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                            H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True)
+                            
                         with gr.Column(scale=4):
                             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
                             batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
@@ -739,30 +743,59 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     mp4_path = gr.Textbox(label="mp4_path", lines=1, interactive=True, value = dv.mp4_path)
             
         with gr.Accordion('Frame Interpolation (RIFE)', open=True):
-            gr.HTML("""
-            Use RIFE and other Video Frame Interpolation methods to smooth out, slow-mo (or both) your output videos.</p>
-             <p style="margin-top:1em">
-                Supported engines:
-                <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
-                    <li>RIFE v4.6, v4.3 and v4.0. Recommended for now: v4.6.</li>
-                    <li>RIFE v2.3 and other interpolation engines might come in the future.</li>
-                </ul>
-            </p>
-             <p style="margin-top:1em">
-                Important notes:
-                <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
-                    <li>Frame Interpolation will *not* run if 'store_frames_in_ram' is enabled.</li>
-                    <li>Audio (if provided) will be transferred to the interpolated video even if Slow-Mo is enabled.</li>
-                    <li>Frame Interpolation will always save an .mp4 video even if you used GIF for the raw video.</li>
-                </ul>
-            </p>
-            """)
+            with gr.Accordion('Important notes and Help', open=False):
+                gr.HTML("""
+                Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
+                 <p style="margin-top:1em">
+                    Supported engines:
+                    <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
+                        <li>RIFE v4.6, v4.3 and v4.0. Recommended for now: v4.6.</li>
+                    </ul>
+                </p>
+                 <p style="margin-top:1em">
+                    Important notes:
+                    <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
+                        <li>Working FFMPEG is required to get an output interpolated video. No ffmepg will leave you with just the interpolated imgs.</li>
+                        <li>Frame Interpolation will *not* run if 'store_frames_in_ram' is enabled.</li>
+                        <li>Audio (if provided) will *not* be transferred to the interpolated video if Slow-Mo is enabled.</li>
+                        <li>'add_soundtrack' and 'soundtrack_path' aren't being honoured in "Interpolate an existing video" mode. Original vid audio will be used instead with the same slow-mo rules above.</li>
+                        <li>Frame Interpolation will always save an .mp4 video even if you used GIF for the raw video.</li>
+                    </ul>
+                </p>
+                """)
             with gr.Column():
                 with gr.Row():
+                    # Interpolation Engine
                     frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['RIFE v4.0','RIFE v4.3','RIFE v4.6'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
+                    # How many times to interpolate (interp x)
                     frame_interpolation_x_amount = gr.Dropdown(label="Interp x", choices=['Disabled','x2','x3','x4','x5','x6','x7','x8','x9','x10'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frae_interpolation_x_amount", interactive=True)
+                    # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE)
                     frame_interpolation_slow_mo_amount = gr.Dropdown(label="Slow-Mo x", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
+                    # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
                     frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
+                with gr.Row():
+                    # Intrpolate any existing video from the connected PC
+                    with gr.Accordion('Interpolate an existing video', open=False):
+                        # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
+                        vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
+                        with gr.Row():
+                            # Non interactive textbox showing uploaded input vid total Frame Count
+                            in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing uploaded input vid FPS
+                            in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing expected output interpolated video FPS
+                            out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS", value='---')
+                        # This is the actual button that's pressed to initiate the interpolation:
+                        rife_btn = gr.Button(value="*Interpolate uploaded video*")
+                        # Show a text about CLI outputs:
+                        gr.HTML("* check your CLI for outputs")
+                        # make the functin call when the RIFE button is clicked
+                        rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, in_vid_fps_ui_window])
+                        # update output fps field upon changing of interp_x and/ or slow_mo_x
+                        frame_interpolation_x_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
+                        frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
+                        # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
+                        vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
     # END OF UI TABS
     return locals()
 
@@ -852,7 +885,6 @@ def pack_args(args_dict):
     args_dict['scale'] = 7
     args_dict['C'] = 4
     args_dict['f'] = 8
-    # args_dict['prompt'] = ""
     args_dict['timestring'] = ""
     args_dict['init_latent'] = None
     args_dict['init_sample'] = None
@@ -911,8 +943,6 @@ def process_args(args_dict_main):
     p.sampler_name = args.sampler
     p.batch_size = args.n_batch
     p.tiling = args.tiling
-    # p.firstphase_width = args.firstphase_width
-    # p.firstphase_height = args.firstphase_height
     p.seed_enable_extras = args.seed_enable_extras
     p.subseed = args.subseed
     p.subseed_strength = args.subseed_strength
@@ -948,20 +978,14 @@ def print_args(args):
     print("ARGS: /n")
     for key, value in args.__dict__.items():
         print(f"{key}: {value}")
-        
-def find_ffmpeg_binary():
-    package_path = None
-    for package in ['imageio_ffmpeg', 'imageio-ffmpeg']:
-        try:
-            package_path = resource_filename(package, '')
-            break
-        except:
-            pass
+ 
+# Local gradio-to-rife function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
+def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
+    # print msg and do nothing if vid not uploaded or interp_x not provided
+    if not file or x_am == 'Disabled':
+        return print("Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)")
 
-    if package_path:
-        binaries_path = os.path.join(package_path, 'binaries')
-        if os.path.exists(binaries_path):
-            files = [os.path.join(binaries_path, f) for f in os.listdir(binaries_path) if f.startswith("ffmpeg-")]
-            files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
-            return files[0] if files else 'ffmpeg'
-    return 'ffmpeg'
+    root_params = Root()
+    f_models_path = root_params['models_path']
+
+    process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)

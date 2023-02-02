@@ -127,10 +127,14 @@ deforum_titles = {
     //"path_name_modifier": "",
     "image_path": "the location of images to create the video from, when use_manual_settings is checked",
     "mp4_path": "the output location of the mp4 file, when use_manual_settings is checked",
-	"Engine": "chhoose the frame interpolation engine and version",
+	"Engine": "choose the frame interpolation engine and version",
 	"Interp x":"how many times to interpolate the source video. e.g source video fps of 12 and a value of x2 will yield a 24fps interpolated video",
 	"Slow-Mo x":"how many times to slow-down the video. *Naturally affects output fps as well",
 	"Keep Imgs": "delete or keep raw interpolated png imgs. Default: False which means delete",
+	"Interpolate an existing video":"This feature allows you to interpolate any video with a dedicated button. Video could be completly unrelated to deforum",
+	"In Frame Count": "uploaded video total frame count",
+	"In FPS":"uploaded video FPS",
+	"Interpolated Vid FPS":"calculated output-interpolated video FPS",
 
     // Looper Args
     // "use_looper": "",

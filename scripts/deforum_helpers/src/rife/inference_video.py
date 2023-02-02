@@ -1,5 +1,5 @@
 # thanks to https://github.com/n00mkrad for the inspiration and a bit of code. Also thanks for https://github.com/XmYx for the initial reorganization of this script
-import os
+import os, sys
 from types import SimpleNamespace
 import cv2
 import torch
@@ -14,16 +14,18 @@ from queue import Queue, Empty
 import subprocess
 from .model.pytorch_msssim import ssim_matlab
 
+sys.path.append('../../')
+from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video
+
 warnings.filterwarnings("ignore")
 
 def run_rife_new_video_infer(
         output=None,
         model=None,
         fp16=False,
-        UHD=False,
+        UHD=False, # *Will be received as *True* if imgs/vid resolution is 2K or higher*
         scale=1.0,
         fps=None,
-        png=True,
         deforum_models_path=None,
         raw_output_imgs_path=None,
         img_batch_id=None,
@@ -33,7 +35,8 @@ def run_rife_new_video_infer(
         slow_mo_x_amount=-1,
         ffmpeg_crf=17,
         ffmpeg_preset='veryslow',
-        keep_imgs=False):
+        keep_imgs=False,
+        orig_vid_name = None):
 
     args = SimpleNamespace()
     args.output = output
@@ -42,7 +45,6 @@ def run_rife_new_video_infer(
     args.UHD = UHD
     args.scale = scale
     args.fps = fps
-    args.png = png
     args.deforum_models_path = deforum_models_path
     args.raw_output_imgs_path = raw_output_imgs_path
     args.img_batch_id = img_batch_id
@@ -53,7 +55,8 @@ def run_rife_new_video_infer(
     args.ffmpeg_crf = ffmpeg_crf
     args.ffmpeg_preset = ffmpeg_preset
     args.keep_imgs = keep_imgs
-   
+    args.orig_vid_name = orig_vid_name
+
     if args.UHD and args.scale == 1.0:
         args.scale = 0.5
 
@@ -85,33 +88,35 @@ def run_rife_new_video_infer(
     
     print(f"{args.modelDir}.pkl model successfully loaded into memory")
     print("Interpolation progress (it's OK if it finishes before 100%):")
-    
-    if not args.audio_track is None and args.slow_mo_x_amount >= 2:
-        print("Got a request to add audio. The audio will be added to the interpolated video as it is!")
-    
-    # TODO: add options to not move audio if slow mode is enabled + add option to slow-down the audio 
-
+   
     interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames')
-    custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
+    # set custom name depending on if we interpolate after a run, or interpolate a video (related/unrelated to deforum, we don't know) directly from within the RIFE tab
+    if args.orig_vid_name is not None: # interpolating a video (deforum or unrelated)
+        custom_interp_path = "{}_{}".format(interpolated_path, args.orig_vid_name)
+    else: # interpolating after a deforum run:
+        custom_interp_path = "{}_{}".format(interpolated_path, args.img_batch_id)
+
+    # In this folder we temporarily keep the original frames (converted/ copy-pasted and img format depends on scenario)
+    # the convertion case is done to avert a problem with 24 and 32 mixed outputs from the same animation run
     temp_convert_raw_png_path = os.path.join(args.raw_output_imgs_path, "tmp_rife_folder")
     
-    duplicate_pngs_from_folder(args.raw_output_imgs_path, temp_convert_raw_png_path, args.img_batch_id)
+    duplicate_pngs_from_folder(args.raw_output_imgs_path, temp_convert_raw_png_path, args.img_batch_id, args.orig_vid_name)
     
     videogen = []
     for f in os.listdir(temp_convert_raw_png_path):
+        # double check for old _depth_ files, not really needed probably but keeping it for now
         if '_depth_' not in f:
             videogen.append(f)
     tot_frame = len(videogen)
-    videogen.sort(key= lambda x:int(x[:-4]))
+    videogen.sort(key= lambda x:int(x[:-5]))
     img_path = os.path.join(temp_convert_raw_png_path, videogen[0])
     lastframe = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
     videogen = videogen[1:]    
     h, w, _ = lastframe.shape
     vid_out = None
 
-    if args.png:
-        if not os.path.exists(custom_interp_path):
-            os.mkdir(custom_interp_path)
+    if not os.path.exists(custom_interp_path):
+        os.mkdir(custom_interp_path)
 
     tmp = max(128, int(128 / args.scale))
     ph = ((h - 1) // tmp + 1) * tmp
@@ -185,23 +190,29 @@ def run_rife_new_video_infer(
     
     # stitch video from interpolated frames, and add audio if needed
     try:
-        print (f"Trying to stitch video from interpolated PNG frames...")
-        vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs)
-        print(f"Interpolated video created at: \n{vid_out_path}")
+        print (f"*Passing interpolated frames to ffmpeg...*")
+        vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs, args.orig_vid_name)
+        # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
+        if orig_vid_name is not None:
+            shutil.rmtree(raw_output_imgs_path)
     except Exception as e:
-        print(f'Video stitching gone wrong. Error: {e}')
+        print(f'Video stitching gone wrong. *Interpolated frames were saved to HD as backup!*. Actual error: {e}')
 
-def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id):
-    temp_convert_raw_png_path = os.path.join(from_folder, to_folder) #"tmp_rife_folder")
+def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_name):
+    #TODO: don't copy-paste at all if the input is a video (now it copy-pastes, and if input is deforum run is also converts to make sure no errors rise cuz of 24-32 bit depth differences)
+    temp_convert_raw_png_path = os.path.join(from_folder, to_folder)
     if not os.path.exists(temp_convert_raw_png_path):
                 os.makedirs(temp_convert_raw_png_path)
                 
     for f in os.listdir(from_folder):
-        if ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and f.startswith(img_batch_id):
+        if ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and ((img_batch_id is not None and f.startswith(img_batch_id) or img_batch_id is None)):
             original_img_path = os.path.join(from_folder, f)
-            image = cv2.imread(original_img_path)
-            new_path = os.path.join(temp_convert_raw_png_path, f)
-            cv2.imwrite(new_path, image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+            if orig_vid_name is not None:
+                shutil.copy(original_img_path, temp_convert_raw_png_path)
+            else:
+                image = cv2.imread(original_img_path)
+                new_path = os.path.join(temp_convert_raw_png_path, f)
+                cv2.imwrite(new_path, image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
     
 def clear_write_buffer(user_args, write_buffer, custom_interp_path):
     cnt = 0
@@ -210,12 +221,11 @@ def clear_write_buffer(user_args, write_buffer, custom_interp_path):
         item = write_buffer.get()
         if item is None:
             break
-        if user_args.png:
-            filename = '{}/{:0>7d}.png'.format(custom_interp_path, cnt)
+        filename = '{}/{:0>7d}.png'.format(custom_interp_path, cnt)
 
-            cv2.imwrite(filename, item[:, :, ::-1])
+        cv2.imwrite(filename, item[:, :, ::-1])
 
-            cnt += 1
+        cnt += 1
 
 def build_read_buffer(user_args, read_buffer, videogen, temp_convert_raw_png_path):
     for frame in videogen:
@@ -226,7 +236,6 @@ def build_read_buffer(user_args, read_buffer, videogen, temp_convert_raw_png_pat
     read_buffer.put(None)
 
 def make_inference(model, I0, I1, n, scale):
-    #global model
     if model.version >= 3.9:
         res = []
         for i in range(n):
@@ -249,72 +258,34 @@ def pad_image(img, fp16, padding):
     else:
         return F.pad(img, padding)
 
-def get_filename(i, path):
-    s = str(i)
-    while len(s) < 7:
-        s = '0' + s
-    #return path + '/' + s + '.png'
-    return path + s + '.png'
-
-def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs):
+def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):        
     parent_folder = os.path.dirname(img_folder_path)
-    mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
+    grandparent_folder = os.path.dirname(parent_folder)
+    if orig_vid_name is not None:
+        mp4_path = os.path.join(grandparent_folder, str(orig_vid_name) +'_RIFE_' + 'x' + str(interp_x_amount))
+    else:
+        mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
+    
     if slow_mo_x_amount != -1:
         mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)
     mp4_path = mp4_path + '.mp4'
 
     t = os.path.join(img_folder_path, "%07d.png")
-    try:
-        cmd = [
-                ffmpeg_location,
-                '-y',
-                '-vcodec', 'png',
-                '-r', str(int(fps)),
-                '-start_number', str(0),
-                '-i', t,
-                '-frames:v', str(1000000),
-                '-c:v', 'libx264',
-                '-vf',
-                f'fps={int(fps)}',
-                '-pix_fmt', 'yuv420p',
-                '-crf', str(f_crf),
-                '-preset', f_preset,
-                '-pattern_type', 'sequence',
-                mp4_path
-        ]
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        # if process.returncode != 0:
-            # raise RuntimeError(stderr)
-    except FileNotFoundError:
-        raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under 'ffmpeg_location' parameter. \n*Interpolated frames were SAVED as backup!*")
-    except Exception as e:
-        raise Exception(f'Error stitching interpolation video. Actual runtime error:{e}\n*Interpolated frames were SAVED as backup!*')
-
+    add_soundtrack = 'None'
     if not audio_path is None:
-        try:
-            cmd = [
-                ffmpeg_location,
-                '-i',
-                mp4_path, 
-                '-i',
-                audio_path,
-                '-map', '0:v',
-                '-map', '1:a',
-                '-c:v', 'copy',
-                '-shortest',
-                mp4_path+'.temp.mp4'
-            ]
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            if process.returncode != 0:
-                print(stderr)
-                raise RuntimeError(stderr)
-            os.replace(mp4_path+'.temp.mp4', mp4_path)
-        except Exception as e:
-            print(f'Error adding audio to interpolated video. Actual error: {e}')
-    # delete temp folder with interpolated frames if requested 
-    #If ffmpeg was not found we won't reach this line - and the images will be left in the interpolated folder for the user to stitch later
-    if not keep_imgs:
+        add_soundtrack = 'File'
+        
+    exception_raised = False
+    try:
+        ffmpeg_stitch_video(ffmpeg_location=ffmpeg_location, fps=fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=1000000, imgs_path=t, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
+    except Exception as e:
+        exception_raised = True
+        print(f"An error occurred while stitching the video: {e}")
+
+    if not exception_raised and not keep_imgs:
         shutil.rmtree(img_folder_path)
+
+    if (keep_imgs and orig_vid_name is not None) or (orig_vid_name is not None and exception_raised is True):
+        shutil.move(img_folder_path, grandparent_folder)
+
     return mp4_path

@@ -9,7 +9,7 @@ from .generate import generate
 from .noise import add_noise
 from .animation import sample_from_cv2, sample_to_cv2, anim_frame_warp
 from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
-from .vid2frames import get_frame_name, get_next_frame
+from .video_audio_utilities import get_frame_name, get_next_frame
 from .depth import DepthModel
 from .colors import maintain_colors
 from .parseq_adapter import ParseqAnimKeys

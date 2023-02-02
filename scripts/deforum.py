@@ -27,6 +27,7 @@ import json
 
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
+from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video
 import gc
 import torch
 from webui import wrap_gradio_gpu_call
@@ -103,6 +104,11 @@ def run_deforum(*args, **kwargs):
     if video_args.add_soundtrack != 'None':
         real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
     
+    # Decide whether or not we need to try and frame interpolate laters
+    need_to_frame_interpolate = False
+    if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
+        need_to_frame_interpolate = True
+        
     if video_args.skip_video_for_run_all:
         print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
     elif video_args.output_format == 'FFMPEG mp4':
@@ -127,61 +133,23 @@ def run_deforum(*args, **kwargs):
                 mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
                 max_video_frames = anim_args.max_frames
 
-        print(f"{image_path} -> {mp4_path}")
-
         #save settings for the video
         video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
         with open(video_settings_filename, "w+", encoding="utf-8") as f:
             s = {**dict(video_args.__dict__)}
             json.dump(s, f, ensure_ascii=False, indent=4)
-        # make video
-        cmd = [
-            video_args.ffmpeg_location,
-            '-y',
-            '-vcodec', 'png',
-            '-r', str(int(video_args.fps)),
-            '-start_number', str(0),
-            '-i', image_path,
-            '-frames:v', str(max_video_frames),
-            '-c:v', 'libx264',
-            '-vf',
-            f'fps={int(video_args.fps)}',
-            '-pix_fmt', 'yuv420p',
-            '-crf', str(video_args.ffmpeg_crf),
-            '-preset', video_args.ffmpeg_preset,
-            '-pattern_type', 'sequence',
-            mp4_path
-        ]
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        if process.returncode != 0:
-            print(stderr)
-            raise RuntimeError(stderr)
-        
-        if video_args.add_soundtrack != 'None':
-            cmd = [
-                video_args.ffmpeg_location,
-                '-i',
-                mp4_path,
-                '-i',
-                real_audio_track,
-                '-map', '0:v',
-                '-map', '1:a',
-                '-c:v', 'copy',
-                '-shortest',
-                mp4_path+'.temp.mp4'
-            ]
-            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            if process.returncode != 0:
-                print(stderr)
-                raise RuntimeError(stderr)
-            os.replace(mp4_path+'.temp.mp4', mp4_path)
-
-        mp4 = open(mp4_path,'rb').read()
-        data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-        
-        deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
+        # Stitch video using ffmpeg!
+        try:
+            ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
+            mp4 = open(mp4_path,'rb').read()
+            data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
+            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
+        except Exception as e:
+            if need_to_frame_interpolate:
+                print(f"FFMPEG DID NOT STITCH ANY VIDEO. However, you requested to frame interpolate  - so we will continue to frame interpolation, but you'll be left only with the interpolated frames and not a video, since ffmpeg couldn't run. Original ffmpeg error: {e}")
+            else:
+                print(f"** FFMPEG DID NOT STITCH ANY VIDEO ** Error: {e}")
+            pass
 
     else: # *GIF* TIME!
         # TODO: add support for custom frame interpolation vid location?
@@ -204,7 +172,7 @@ def run_deforum(*args, **kwargs):
                 mp4_path = os.path.join(args.outdir, f"{args.timestring}.gif")
                 max_video_frames = anim_args.max_frames
 
-        print(f"{image_path} -> {mp4_path}")
+        print(f"GIF created from:\n{image_path}\nTo:\n{mp4_path}")
 
         #save settings for the video
         video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
@@ -236,9 +204,9 @@ def run_deforum(*args, **kwargs):
         root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
         root.initial_seed = 6934
     # FRMAE INTERPOLATION TIME
-    if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
+    if need_to_frame_interpolate: #video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
-        process_video_interpolation(video_args.frame_interpolation_engine, video_args.frame_interpolation_x_amount, video_args.frame_interpolation_slow_mo_amount, video_args.fps, root.models_path, real_audio_track, args.outdir, args.timestring, video_args.ffmpeg_location, video_args.ffmpeg_crf, video_args.ffmpeg_preset, video_args.frame_interpolation_keep_imgs)
+        process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
         
     root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
     root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
