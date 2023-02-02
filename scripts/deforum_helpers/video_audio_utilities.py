@@ -7,7 +7,6 @@ import subprocess
 from pkg_resources import resource_filename
 from modules.shared import state
 
-
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
         raise RuntimeError('Error: extract_to_frame can not be higher than extract_from_frame')

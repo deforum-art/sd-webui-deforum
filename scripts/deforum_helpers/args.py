@@ -982,7 +982,7 @@ def print_args(args):
  
 # Local gradio-to-rife function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
-    # print msg and do nothing if file or interp_x are not provided
+    # print msg and do nothing if vid not uploaded or interp_x not provided
     if not file or x_am == 'Disabled':
         return print("Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)")
 
