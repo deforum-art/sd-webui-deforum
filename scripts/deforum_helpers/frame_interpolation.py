@@ -1,5 +1,6 @@
+import os
 from rife.inference_video import run_rife_new_video_infer
-from .video_audio_utilities import get_quick_vid_info
+from .video_audio_utilities import get_quick_vid_info, vid2frames
 
 # e.g gets 'x2' returns just 2 as int
 def extract_number(string):
@@ -37,8 +38,24 @@ def gradio_f_interp_get_fps_and_fcount(vid_path, interp_x, slom_x):
     fps, fcount, resolution = get_quick_vid_info(vid_path.name)
     expected_out_fps = set_interp_out_fps(interp_x, slom_x, fps)
     return (fps if fps is not None else '---', fcount if fcount is not None else '---', expected_out_fps)
+
+# handle call to interpolate an uploaded video from gradio button in args.py (the function that calls this func is named 'upload_vid_to_rife')
+def process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, folder_name):
+    print("got a request to *frame interpolate* an existing video.")
+    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
+    i = 1
+    while os.path.exists(outdir_no_tmp):
+        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
+        i += 1
+
+    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
+    os.makedirs(outdir, exist_ok=True)
     
+    vid2frames(video_path=file.name, video_in_frame_path=outdir, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
     
+    process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=in_vid_fps, deforum_models_path=f_models_path, real_audio_track=file.name, raw_output_imgs_path=outdir, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name)
+
+# handle actual frame interoplation call to the rife module
 def process_video_interpolation(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_fps=None, deforum_models_path=None, real_audio_track=None, raw_output_imgs_path=None, img_batch_id=None, ffmpeg_location=None, ffmpeg_crf=None, ffmpeg_preset=None, keep_interp_imgs=False, orig_vid_name=None, resolution = (512,512)):
 
     if frame_interpolation_x_amount != "Disabled":

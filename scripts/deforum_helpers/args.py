@@ -4,8 +4,8 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from pkg_resources import resource_filename
-from .video_audio_utilities import vid2frames
-from .frame_interpolation import process_video_interpolation, clean_folder_name, set_interp_out_fps, gradio_f_interp_get_fps_and_fcount
+# from .video_audio_utilities import vid2frames
+from .frame_interpolation import process_video_interpolation, clean_folder_name, set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
 from pathlib import Path
   
 def Root():
@@ -995,24 +995,12 @@ def find_ffmpeg_binary():
  
 # Local gradio-to-rife function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
+    # print msg and do nothing if file or interp_x are not provided
     if not file or x_am == 'Disabled':
         return print("Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)")
-    
-    print("Got a request to *frame interpolate* an existing video.")
 
     root_params = Root()
     f_models_path = root_params['models_path']
     folder_name = clean_folder_name(Path(file.orig_name).stem)
 
-    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
-    i = 1
-    while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
-        i += 1
-
-    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
-    os.makedirs(outdir, exist_ok=True)
-    
-    vid2frames(video_path=file.name, video_in_frame_path=outdir, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
-    
-    process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=in_vid_fps, deforum_models_path=f_models_path, real_audio_track=file.name, raw_output_imgs_path=outdir, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name)
+    process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, folder_name)
