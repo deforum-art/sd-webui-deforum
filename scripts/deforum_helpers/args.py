@@ -684,7 +684,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Column():
                     hybrid_use_first_frame_as_init_image = gr.Checkbox(label="first_frame_as_init_image", value=False, interactive=True)
                     hybrid_motion_use_prev_img = gr.Checkbox(label="motion_use_prev_img", value=False, interactive=True)
-                hybrid_motion = gr.Dropdown(label="motion", choices=['None', 'Optical Flow', 'Perspective', 'Affine'], value=da.hybrid_motion, type="value", elem_id="hybrid_motion", interactive=True)
+                hybrid_motion = gr.Dropdown(label="hybrid_motion", choices=['None', 'Optical Flow', 'Perspective', 'Affine'], value=da.hybrid_motion, type="value", elem_id="hybrid_motion", interactive=True)
                 hybrid_flow_method = gr.Dropdown(label="flow_method", choices=['DIS Medium', 'Farneback'], value=da.hybrid_flow_method, type="value", elem_id="hybrid_flow_method", interactive=True)
             with gr.Row(equal_height=True):
                 hybrid_comp_mask_equalize = gr.Dropdown(label="comp_mask_equalize", choices=['None', 'Before', 'After', 'Both'], value=da.hybrid_comp_mask_equalize, type="value", elem_id="hybrid_comp_mask_equalize", interactive=True)
