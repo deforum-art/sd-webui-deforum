@@ -8,6 +8,13 @@ def extract_rife_name(string):
     if len(parts) != 2 or parts[0] != "RIFE" or (parts[1][0] != "v" or not parts[1][1:].replace('.','').isdigit()):
         raise ValueError("Input string should contain exactly 2 words, first word should be 'RIFE' and second word should start with 'v' followed by 2 numbers")
     return "RIFE"+parts[1][1:].replace('.','')
+
+# This function usually gets a filename, and converts it to a legal linux/windows *folder* name
+def clean_folder_name(string):
+    illegal_chars = ["/", "\\", "<", ">", ":", "\"", "|", "?", "*"]
+    for char in illegal_chars:
+        string = string.replace(char, "_")
+    return string
    
 def process_video_interpolation(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_fps=None, deforum_models_path=None, real_audio_track=None, raw_output_imgs_path=None, img_batch_id=None, ffmpeg_location=None, ffmpeg_crf=None, ffmpeg_preset=None, keep_interp_imgs=False, orig_vid_name=None):
 

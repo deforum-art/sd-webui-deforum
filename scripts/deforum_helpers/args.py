@@ -5,7 +5,7 @@ import modules.paths as ph
 import os
 from pkg_resources import resource_filename
 from .video_audio_utilities import vid2frames, get_vid_fps_and_frame_count
-from .frame_interpolation import process_video_interpolation, extract_number
+from .frame_interpolation import process_video_interpolation, extract_number, clean_folder_name
 from pathlib import Path
   
 def Root():
@@ -998,14 +998,7 @@ def find_ffmpeg_binary():
             files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
             return files[0] if files else 'ffmpeg'
     return 'ffmpeg'
-
-# This function usually gets a filename, and converts it to a legal linux/windows *folder* name
-def clean_folder_name(string):
-    illegal_chars = ["/", "\\", "<", ">", ":", "\"", "|", "?", "*"]
-    for char in illegal_chars:
-        string = string.replace(char, "_")
-    return string
-  
+ 
 def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
     if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
         return '---'
