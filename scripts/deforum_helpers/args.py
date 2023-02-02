@@ -999,17 +999,6 @@ def find_ffmpeg_binary():
             return files[0] if files else 'ffmpeg'
     return 'ffmpeg'
  
-# def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
-    # if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
-        # return '---'
-
-    # clean_interp_x = extract_number(interp_x)
-    # clean_slom_x = extract_number(slom_x)
-    # fps = float(in_vid_fps) * int(clean_interp_x)
-    # if clean_slom_x != -1:
-        # fps /= int(clean_slom_x)
-    # return fps
-
 # local-duplicted (Gradio...) function that only calls the real function which is defined at video_audio_utilities.py
 def local_get_fps_and_fcount(vid_path, interp_x, slom_x):
     if vid_path is None:
