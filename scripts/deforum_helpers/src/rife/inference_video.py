@@ -258,12 +258,6 @@ def pad_image(img, fp16, padding):
     else:
         return F.pad(img, padding)
 
-def get_filename(i, path):
-    s = str(i)
-    while len(s) < 7:
-        s = '0' + s
-    return path + s + '.png'
-
 def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):        
     parent_folder = os.path.dirname(img_folder_path)
     grandparent_folder = os.path.dirname(parent_folder)
@@ -281,13 +275,17 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
     if not audio_path is None:
         add_soundtrack = 'File'
         
-    ffmpeg_stitch_video(ffmpeg_location=ffmpeg_location, fps=fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=1000000, imgs_path=t, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
+    exception_raised = False
+    try:
+        ffmpeg_stitch_video(ffmpeg_location=ffmpeg_location, fps=fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=1000000, imgs_path=t, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
+    except Exception as e:
+        exception_raised = True
+        print(f"An error occurred while stitching the video: {e}")
 
-    # delete temp folder with interpolated frames if requested 
-    #If ffmpeg was not found we won't reach this line - and the images will be left in the interpolated folder for the user to stitch later
-    if not keep_imgs:
+    if not exception_raised and not keep_imgs:
         shutil.rmtree(img_folder_path)
-    if keep_imgs and orig_vid_name is not None:
+
+    if (keep_imgs and orig_vid_name is not None) or (orig_vid_name is not None and exception_raised is True):
         shutil.move(img_folder_path, grandparent_folder)
-        
+
     return mp4_path

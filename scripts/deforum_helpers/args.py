@@ -272,7 +272,7 @@ def DeforumOutputArgs():
     max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False #@param {type: 'boolean'}
     frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
-    frame_interpolation_x_amount = "x2" #"Disabled" #@param ["Disabled" + all values from x2 to x10]
+    frame_interpolation_x_amount = "Disabled" #"Disabled" #@param ["Disabled" + all values from x2 to x10]
     frame_interpolation_slow_mo_amount = "Disabled" #@param ["Disabled","x2","x4","x8"]
     frame_interpolation_keep_imgs = False #@param {type: 'boolean'}
     return locals()
@@ -778,7 +778,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
                 with gr.Row():
                     # Intrpolate any existing video from the connected PC
-                    with gr.Accordion('Interpolate an existing video', open=True):
+                    with gr.Accordion('Interpolate an existing video', open=False):
                         # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
                         vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
                         with gr.Row():
