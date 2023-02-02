@@ -5,7 +5,7 @@ import modules.paths as ph
 import os
 from pkg_resources import resource_filename
 from .video_audio_utilities import vid2frames, get_vid_fps_and_frame_count
-from .frame_interpolation import process_video_interpolation, extract_number, clean_folder_name
+from .frame_interpolation import process_video_interpolation, extract_number, clean_folder_name, set_interp_out_fps
 from pathlib import Path
   
 def Root():
@@ -785,9 +785,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             # Non interactive textbox showing uploaded input vid total Frame Count
                             in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
                             # Non interactive textbox showing uploaded input vid FPS
-                            in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False)
+                            in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
                             # Non interactive textbox showing expected output interpolated video FPS
-                            out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS")
+                            out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS", value='---')
                             # update output fps field upon changing of interp_x and/ or slow_mo_x
                             frame_interpolation_x_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
                             frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
@@ -999,16 +999,16 @@ def find_ffmpeg_binary():
             return files[0] if files else 'ffmpeg'
     return 'ffmpeg'
  
-def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
-    if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
-        return '---'
+# def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
+    # if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
+        # return '---'
 
-    clean_interp_x = extract_number(interp_x)
-    clean_slom_x = extract_number(slom_x)
-    fps = float(in_vid_fps) * int(clean_interp_x)
-    if clean_slom_x != -1:
-        fps /= int(clean_slom_x)
-    return fps
+    # clean_interp_x = extract_number(interp_x)
+    # clean_slom_x = extract_number(slom_x)
+    # fps = float(in_vid_fps) * int(clean_interp_x)
+    # if clean_slom_x != -1:
+        # fps /= int(clean_slom_x)
+    # return fps
 
 # local-duplicted (Gradio...) function that only calls the real function which is defined at video_audio_utilities.py
 def local_get_fps_and_fcount(vid_path, interp_x, slom_x):

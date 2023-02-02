@@ -16,6 +16,17 @@ def clean_folder_name(string):
         string = string.replace(char, "_")
     return string
    
+def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
+    if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
+        return '---'
+
+    clean_interp_x = extract_number(interp_x)
+    clean_slom_x = extract_number(slom_x)
+    fps = float(in_vid_fps) * int(clean_interp_x)
+    if clean_slom_x != -1:
+        fps /= int(clean_slom_x)
+    return fps
+    
 def process_video_interpolation(frame_interpolation_engine=None, frame_interpolation_x_amount="Disabled", frame_interpolation_slow_mo_amount="Disabled", orig_vid_fps=None, deforum_models_path=None, real_audio_track=None, raw_output_imgs_path=None, img_batch_id=None, ffmpeg_location=None, ffmpeg_crf=None, ffmpeg_preset=None, keep_interp_imgs=False, orig_vid_name=None):
 
     if frame_interpolation_x_amount != "Disabled":
