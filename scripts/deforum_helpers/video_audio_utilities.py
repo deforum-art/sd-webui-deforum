@@ -97,7 +97,7 @@ def get_quick_vid_info(vid_local_path):
     video_width = int(vidcap.get(cv2.CAP_PROP_FRAME_WIDTH))
     video_height = int(vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     vidcap.release()
-    if video_fps == int(video_fps):
+    if video_fps.is_integer():
         video_fps = int(video_fps)
 
     return video_fps, video_frame_count, (video_width, video_height)
