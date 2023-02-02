@@ -108,7 +108,7 @@ def run_rife_new_video_infer(
         if '_depth_' not in f:
             videogen.append(f)
     tot_frame = len(videogen)
-    videogen.sort(key= lambda x:int(x[:-4]))
+    videogen.sort(key= lambda x:int(x[:-5]))
     img_path = os.path.join(temp_convert_raw_png_path, videogen[0])
     lastframe = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_UNCHANGED)[:, :, ::-1].copy()
     videogen = videogen[1:]    
