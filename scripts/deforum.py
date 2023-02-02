@@ -59,14 +59,11 @@ def run_deforum(*args, **kwargs):
     # force-pip-install a couple of packages that didn't want to install as part of the req.txt
     from launch import is_installed, run_pip
     libs = ["numexpr", "av", "pims", "moviepy", "imageio_ffmpeg"]
-    ffmpeg_just_got_installed = False
     for lib in libs:
         if not is_installed(lib):
             run_pip(f"install {lib}", lib)
             if lib == "imageio_ffmpeg":
-                ffmpeg_just_got_installed = True
-    if ffmpeg_just_got_installed:
-        print("******** IMPORTANT MESSAGE: FFMPEG just got installed, please restart your webui for it to work in the next runs! ********")
+                print("******** IMPORTANT MESSAGE: FFMPEG just got installed, please restart your webui for it to work in the next runs! ********")
 
     for basedir in basedirs:
         sys.path.extend([
