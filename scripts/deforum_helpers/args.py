@@ -5,7 +5,7 @@ import modules.paths as ph
 import os
 from pkg_resources import resource_filename
 from .video_audio_utilities import vid2frames, get_vid_fps_and_frame_count
-from .frame_interpolation import process_video_interpolation
+from .frame_interpolation import process_video_interpolation, extract_number
 from pathlib import Path
   
 def Root():
@@ -1005,9 +1005,6 @@ def clean_folder_name(string):
     for char in illegal_chars:
         string = string.replace(char, "_")
     return string
-    
-def extract_number(string):
-    return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
   
 def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
     if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
