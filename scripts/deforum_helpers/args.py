@@ -292,7 +292,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
     dp = SimpleNamespace(**ParseqArgs()) #default parseq ars
     dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
-    # dr = SimpleNamespace(**Root()) #Root Args
     dloopArgs = SimpleNamespace(**LoopArgs())
     if not is_extension:
         with gr.Row():
