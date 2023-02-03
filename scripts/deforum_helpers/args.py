@@ -388,11 +388,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     else:
                         return gr.update(visible=True)
             with gr.Row():
-                # animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input', 'Interpolation'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
-                animation_mode = gr.Radio(['2D', '3D', 'Video Input', 'Interpolation'], label="animation_mode", value=da.animation_mode, elem_id="animation_mode")
+                animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="animation_mode", value=da.animation_mode, elem_id="animation_mode")
                 # TODO: hide max_frames if Video Input is selected!
             with gr.Row():
-                border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
+                # border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
+                border = gr.Radio(['replicate', 'wrap'], label="border", value=da.border, elem_id="border")
                 with gr.Row() as max_frames_row:
                     max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0, visible=True)
             # TODO: move this from here?
@@ -495,7 +495,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 histogram_matching = gr.Checkbox(label="Force all frames to match initial frame's colors. Overrides a1111 settings. NOT RECOMMENDED, enable only for backwards compatibility.", value=da.histogram_matching, interactive=True)
             with gr.Row():
                 with gr.Column(variant="compact"):
-                    color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
+                    # color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
+                    color_coherence = gr.Radio(['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], label="color_coherence", value=da.color_coherence, elem_id="color_coherence" )
                 with gr.Column(variant="compact"):
                     color_coherence_video_every_N_frames = gr.Number(label="color_coherence_video_every_N_frames", value=1, interactive=True)
                 with gr.Column(variant="compact"):
