@@ -339,8 +339,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         steps = gr.Slider(label="steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                     with gr.Row(variant='compat'):
                         with gr.Column(scale=4):
-                            # W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
-                            # H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                             W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                             H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True)
                             
@@ -348,7 +346,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
                             batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
                             with gr.Row(visible=False):
-                                # batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
                                 filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format, visible=False)
                     with gr.Accordion('Subseed controls & More', open=False):
                         with gr.Row():
@@ -391,7 +388,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="animation_mode", value=da.animation_mode, elem_id="animation_mode")
                 # TODO: hide max_frames if Video Input is selected!
             with gr.Row():
-                # border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
                 border = gr.Radio(['replicate', 'wrap'], label="border", value=da.border, elem_id="border")
                 with gr.Row() as max_frames_row:
                     max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0, visible=True)
@@ -491,21 +487,29 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 cfg_scale_schedule = gr.Textbox(label="cfg_scale_schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
         # Coherence
         with gr.Accordion('Coherence', open=True):
+            # TODO: move this line
+            def change_color_coherence_video_every_N_frames_visibility(choice):
+                if choice == "Video Input":
+                    return gr.update(visible=True)
+                else:
+                    return gr.update(visible=False)
             with gr.Row():
                 histogram_matching = gr.Checkbox(label="Force all frames to match initial frame's colors. Overrides a1111 settings. NOT RECOMMENDED, enable only for backwards compatibility.", value=da.histogram_matching, interactive=True)
             with gr.Row():
-                with gr.Column(variant="compact"):
-                    # color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
-                    color_coherence = gr.Radio(['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], label="color_coherence", value=da.color_coherence, elem_id="color_coherence" )
-                with gr.Column(variant="compact"):
-                    color_coherence_video_every_N_frames = gr.Number(label="color_coherence_video_every_N_frames", value=1, interactive=True)
-                with gr.Column(variant="compact"):
-                    color_force_grayscale = gr.Checkbox(label="color_force_grayscale", value=da.color_force_grayscale, interactive=True)
-                with gr.Column(variant="compact"):
-                    diffusion_cadence = gr.Number(label="diffusion_cadence", value=1, interactive=True)
+                # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
+                color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
+                color_force_grayscale = gr.Checkbox(label="color_force_grayscale", value=da.color_force_grayscale, interactive=True)
+            with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
+                color_coherence_video_every_N_frames = gr.Number(label="color_coherence_video_every_N_frames", value=1, interactive=True)
+            #TODO: move this line
+            color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
+            with gr.Row() as color_coherence_video_every_N_frames_row:
+                diffusion_cadence = gr.Slider(label="diffusion_cadence", minimum=1, maximum=30, step=1, value=da.diffusion_cadence, interactive=True)
             with gr.Row():
                 # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
-                reroll_blank_frames = gr.Dropdown(label="reroll_blank_frames", choices=['reroll', 'interrupt', 'ignore'], value=d.reroll_blank_frames, type="value", elem_id="reroll_blank_frames", interactive=True)
+                #TODO: add a check to see if nsfw filter is on and if not don't show this section at all?
+                reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="reroll_blank_frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
+                
         # Noise
         def change_perlin_visibility(choice):
             if choice == "perlin":
@@ -517,13 +521,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 noise_type = gr.Radio(['uniform', 'perlin'], label="noise_type", value=da.noise_type, elem_id="noise_type")
             with gr.Row():
                 noise_schedule = gr.Textbox(label="noise_schedule", lines=1, value = da.noise_schedule, interactive=True)
-                
             with gr.Row():
-                with gr.Row(scale=1):
-                    # gr.HTML("<p style=\"margin-bottom:0.75em\">Perlin noise params, if selected:</p>")
+                with gr.Column(scale=1, min_width=110):
                     perlin_w = gr.Number(label="perlin_w", value=da.perlin_w, interactive=True)
                     perlin_h = gr.Number(label="perlin_h", value=da.perlin_h, interactive=True)
-                with gr.Row(scale=2):
+                with gr.Column(scale=2):
                     perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                     perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
         # TODO: combine all funcs?
