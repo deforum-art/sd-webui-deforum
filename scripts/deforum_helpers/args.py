@@ -627,14 +627,17 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     # Prompts settings END
     with gr.Tab('Init'):
         # Image Init
+        # Need to REMOVE? (!!!)
+        from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
         with gr.Accordion('Image Init', open=True):
             with gr.Row():
-                use_init = gr.Checkbox(label="use_init", value=d.use_init, interactive=True, visible=True)
-                # Need to REMOVE?
-                from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
-            with gr.Row():
-                strength_0_no_init = gr.Checkbox(label="strength_0_no_init", value=True, interactive=True)
-                strength = gr.Slider(label="strength", minimum=0, maximum=1, step=0.02, value=0, interactive=True)
+                with gr.Column(min_width=150):
+                    use_init = gr.Checkbox(label="use_init", value=d.use_init, interactive=True, visible=True)
+                with gr.Column(min_width=150):
+                    strength_0_no_init = gr.Checkbox(label="strength_0_no_init", value=True, interactive=True)
+                with gr.Column(min_width=170):
+                    strength = gr.Slider(label="strength", minimum=0, maximum=1, step=0.02, value=0, interactive=True)
+
             with gr.Row():
                 init_image = gr.Textbox(label="init_image", lines=1, interactive=True, value = d.init_image)
         with gr.Accordion('Mask Init', open=True):
@@ -660,9 +663,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 video_init_path = gr.Textbox(label="video_init_path", lines=1, value = da.video_init_path, interactive=True)
             with gr.Row():
-                extract_nth_frame = gr.Number(label="extract_nth_frame", value=da.extract_nth_frame, interactive=True, precision=0)
                 extract_from_frame = gr.Number(label="extract_from_frame", value=da.extract_from_frame, interactive=True, precision=0)
                 extract_to_frame = gr.Number(label="extract_to_frame", value=da.extract_to_frame, interactive=True, precision=0)
+                extract_nth_frame = gr.Number(label="extract_nth_frame", value=da.extract_nth_frame, interactive=True, precision=0)
                 overwrite_extracted_frames = gr.Checkbox(label="overwrite_extracted_frames", value=False, interactive=True)
                 use_mask_video = gr.Checkbox(label="use_mask_video", value=False, interactive=True)
             with gr.Row():
@@ -756,17 +759,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Column():
                 with gr.Row():
                     ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
-                    ffmpeg_crf = gr.Number(label="ffmpeg_crf", interactive=True, value = dv.ffmpeg_crf)
+                    ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="ffmpeg_crf", value=dv.ffmpeg_crf, interactive=True)
                     ffmpeg_preset = gr.Dropdown(label="ffmpeg_preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
             with gr.Column():
                 with gr.Row():
-                    add_soundtrack = gr.Dropdown(label="add_soundtrack", choices=['None', 'File', 'Init Video'], value=dv.add_soundtrack, interactive=True, type="value")
+                    add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="add_soundtrack", value=dv.add_soundtrack)
                     soundtrack_path = gr.Textbox(label="soundtrack_path", lines=1, interactive=True, value = dv.soundtrack_path)
                 with gr.Row():
                     skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
                     store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
-                # with gr.Row():
-                    # store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
             with gr.Accordion('Manual Settings', open=False):
                 with gr.Row():
                     use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
