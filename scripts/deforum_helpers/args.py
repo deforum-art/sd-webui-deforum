@@ -382,10 +382,21 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 
         # Main top animation settings
         with gr.Accordion('Animation Mode, Max Frames and Border', open=True):
+            def change_max_frames_visibility(choice):
+                    if choice == "Video Input":
+                        return gr.update(visible=False)
+                    else:
+                        return gr.update(visible=True)
             with gr.Row():
-                animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input', 'Interpolation'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
-                max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0)
+                # animation_mode = gr.Dropdown(label="animation_mode", choices=['2D', '3D', 'Video Input', 'Interpolation'], value=da.animation_mode, type="value", elem_id="animation_mode", interactive=True)
+                animation_mode = gr.Radio(['2D', '3D', 'Video Input', 'Interpolation'], label="animation_mode", value=da.animation_mode, elem_id="animation_mode")
+                # TODO: hide max_frames if Video Input is selected!
+            with gr.Row():
                 border = gr.Dropdown(label="border", choices=['replicate', 'wrap'], value=da.border, type="value", elem_id="border", interactive=True)
+                with gr.Row() as max_frames_row:
+                    max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0, visible=True)
+            # TODO: move this from here?
+            animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_row)
         # loopArgs
         with gr.Accordion('Guided Images', open=False):
             gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
