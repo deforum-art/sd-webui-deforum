@@ -257,7 +257,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
 
                 # intercept and override to grayscale
                 if anim_args.color_force_grayscale:
-                    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2GRAY)
                     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
                 filename = f"{args.timestring}_{tween_frame_idx:05}.png"
