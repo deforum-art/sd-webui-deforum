@@ -39,7 +39,7 @@ def json_string_fixer(json_string):
     import platform
     # backslash -> forwardslash *Only* on windows PCs for now
     if platform.system() == "Windows":
-        json_string = json_string.replace("\\", "/") # no need to also replace double backshasles because they work on windows
+        json_string = json_string.replace("\\", "/") # no need to also replace double backslashes because they work on windows
     return json_string
     
 def isJson(myjson):
