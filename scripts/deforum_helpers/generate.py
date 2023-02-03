@@ -14,6 +14,7 @@ from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
 import math, json, itertools
+import platform
 import requests
 
 def load_mask_latent(mask_input, shape):
@@ -35,6 +36,12 @@ def load_mask_latent(mask_input, shape):
     mask = mask.convert("L")
     return mask
 
+def json_string_fixer(json_string):
+    # backslash -> forwardslash *Only* on windows PCs for now
+    if platform.system() == "Windows":
+        json_string = json_string.replace("\\", "/") # no need to also replace double backshasles because they work on windows
+    return json_string
+    
 def isJson(myjson):
     try:
         json.loads(myjson)
@@ -66,6 +73,8 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     image_init0 = None
 
     if loop_args.useLooper:
+        # replace backslashes (\) with a forward slash (/) so a user's path like 'E:\Images\01.jpg' will still work. *Will do something only on Windows PCs*
+        loop_args.imagesToKeyframe = json_string_fixer(loop_args.imagesToKeyframe)
         # TODO find out why we need to set this in the init tab
         if args.strength == 0:
             raise RuntimeError("Strength needs to be greater than 0 in Init tab and strength_0_no_init should *not* be checked")
