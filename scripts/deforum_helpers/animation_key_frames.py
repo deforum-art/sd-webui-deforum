@@ -44,7 +44,7 @@ class DeformAnimKeys():
 
 class LooperAnimKeys():
     def __init__(self, loop_args, anim_args):
-        self.useLooper = loop_args.use_looper
+        self.use_looper = loop_args.use_looper
         self.imagesToKeyframe = loop_args.init_images
         self.image_strength_schedule_series = get_inbetweens(parse_key_frames(loop_args.image_strength_schedule), anim_args.max_frames)
         self.blendFactorMax_series = get_inbetweens(parse_key_frames(loop_args.blendFactorMax), anim_args.max_frames)

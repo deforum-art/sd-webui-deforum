@@ -65,7 +65,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     init_image = None
     image_init0 = None
 
-    if loop_args.useLooper:
+    if loop_args.use_looper:
         # TODO find out why we need to set this in the init tab
         if args.strength == 0:
             raise RuntimeError("Strength needs to be greater than 0 in Init tab and strength_0_no_init should *not* be checked")
@@ -135,13 +135,13 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         img = args.init_sample
         init_image = img
         image_init0 = img
-        if loop_args.useLooper and isJson(loop_args.imagesToKeyframe):
+        if loop_args.use_looper and isJson(loop_args.imagesToKeyframe):
             init_image = Image.blend(init_image, init_image2, blendFactor)
             correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
             p.color_corrections = [processing.setup_color_correction(correction_colors)]
 
     # this is the first pass
-    elif loop_args.useLooper or (args.use_init and ((args.init_image != None and args.init_image != ''))):
+    elif loop_args.use_looper or (args.use_init and ((args.init_image != None and args.init_image != ''))):
         init_image, mask_image = load_img(image_init0, # initial init image
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
@@ -199,12 +199,9 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     if root.initial_info == None:
         root.initial_seed = processed.seed
         root.initial_info = processed.info
-    
+        
     if root.first_frame == None:
         root.first_frame = processed.images[0]
-        ### TODO: put the correct arg here.
-        if anim_args.histogram_matching:
-            root.color_corrections = [processing.setup_color_correction(root.first_frame)]
     
     results = processed.images[0]
     
