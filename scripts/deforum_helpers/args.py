@@ -395,26 +395,27 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_row)
         # loopArgs
         with gr.Accordion('Guided Images', open=False):
-            gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
-                       Set the keyframes and the images that you want to show up. 
-                       Note: the number of frames between each keyframe should be greater than the tweening frames.""")
-            #    In later versions this should be also in the strength schedule, but for now you need to set it.
-            gr.HTML("""Prerequisites: 
-                       <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0em">
-                           <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
-                           <li>Set 'seed_behavior' to 'schedule' under the Seed Scheduling section below.</li>
-                        </ul>
-                    """)
-            gr.HTML("""Looping recommendations: 
-                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0em">
-                            <li>seed_schedule should start and end on the same seed. <br />
-                                Example: seed_schedule could use 0:(5), 1:(-1), 219:(-1), 220:(5)</li>
-                            <li>The 1st and last keyframe images should match.</li>
-                            <li>Set your total number of keyframes to be 21 more than the last inserted keyframe image. <br />
-                                Example: Default args should use 221 as total keyframes.</li>
-                            <li>Prompts are stored in JSON format. If you've got an error, check it in validator, <a style="color:SteelBlue" href="https://odu.github.io/slingjsonlint/">like here</a></li>
-                        </ul>
-                    """)
+            with gr.Accordion('*READ ME before you use this mode!*', open=False):
+                gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
+                           Set the keyframes and the images that you want to show up. 
+                           Note: the number of frames between each keyframe should be greater than the tweening frames.""")
+                #    In later versions this should be also in the strength schedule, but for now you need to set it.
+                gr.HTML("""Prerequisites: 
+                           <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0em">
+                               <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
+                               <li>Set 'seed_behavior' to 'schedule' under the Seed Scheduling section below.</li>
+                            </ul>
+                        """)
+                gr.HTML("""Looping recommendations: 
+                            <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0em">
+                                <li>seed_schedule should start and end on the same seed. <br />
+                                    Example: seed_schedule could use 0:(5), 1:(-1), 219:(-1), 220:(5)</li>
+                                <li>The 1st and last keyframe images should match.</li>
+                                <li>Set your total number of keyframes to be 21 more than the last inserted keyframe image. <br />
+                                    Example: Default args should use 221 as total keyframes.</li>
+                                <li>Prompts are stored in JSON format. If you've got an error, check it in validator, <a style="color:SteelBlue" href="https://odu.github.io/slingjsonlint/">like here</a></li>
+                            </ul>
+                        """)
             with gr.Row():
                 use_looper = gr.Checkbox(label="Use guided images for the next run", value=False, interactive=True)
             with gr.Row():
@@ -504,12 +505,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             #TODO: move this line
             color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
             with gr.Row() as color_coherence_video_every_N_frames_row:
-                diffusion_cadence = gr.Slider(label="diffusion_cadence", minimum=1, maximum=30, step=1, value=da.diffusion_cadence, interactive=True)
+                diffusion_cadence = gr.Slider(label="diffusion_cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
             with gr.Row():
                 # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                 #TODO: add a check to see if nsfw filter is on and if not don't show this section at all?
                 reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="reroll_blank_frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
-                
         # Noise
         def change_perlin_visibility(choice):
             if choice == "perlin":
@@ -521,18 +521,17 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 noise_type = gr.Radio(['uniform', 'perlin'], label="noise_type", value=da.noise_type, elem_id="noise_type")
             with gr.Row():
                 noise_schedule = gr.Textbox(label="noise_schedule", lines=1, value = da.noise_schedule, interactive=True)
-            with gr.Row():
-                with gr.Column(scale=1, min_width=110):
-                    perlin_w = gr.Number(label="perlin_w", value=da.perlin_w, interactive=True)
-                    perlin_h = gr.Number(label="perlin_h", value=da.perlin_h, interactive=True)
-                with gr.Column(scale=2):
+            with gr.Row() as perlin_row:
+                with gr.Column(min_width=200):
+                    # perlin_w = gr.Number(label="perlin_w", value=da.perlin_w, interactive=True)
+                    perlin_w = gr.Slider(label="perlin_w", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
+                    perlin_h = gr.Slider(label="perlin_h", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
+                    # perlin_h = gr.Number(label="perlin_h", value=da.perlin_h, interactive=True)
+                with gr.Column(min_width=230):
                     perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                     perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
-        # TODO: combine all funcs?
-        noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_w)
-        noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_h)
-        noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_octaves)
-        noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_persistence)
+        # TODO: move this line
+        noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
         # Anti-blur
         with gr.Accordion('Anti Blur', open=True):
             with gr.Row():
