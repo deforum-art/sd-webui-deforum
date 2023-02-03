@@ -430,13 +430,26 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
         # Seed Scheduling
         with gr.Accordion('Seed Scheduling', open=False):
+            # TODO: move this func
+            def change_seed_iter_visibility(choice):
+                if choice == "iter":
+                    return gr.update(visible=True)
+                else:
+                    return gr.update(visible=False)
+            def change_seed_schedule_visibility(choice):
+                if choice == "schedule":
+                    return gr.update(visible=True)
+                else:
+                    return gr.update(visible=False)
             with gr.Row():
-                seed_behavior = gr.Dropdown(label="seed_behavior", choices=['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], value=d.seed_behavior, type="value", elem_id="seed_behavior", interactive=True)
+                seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="seed_behavior", value=d.seed_behavior, elem_id="seed_behavior")
+            with gr.Row() as seed_iter_N_row:
                 seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
-            with gr.Row():
-                gr.HTML("Please set seed_behavior to 'Schedule' for this option to become active")
-            with gr.Row():
+            with gr.Row(visible=False) as seed_schedule_row:
                 seed_schedule = gr.Textbox(label="seed_schedule", lines=1, value = da.seed_schedule, interactive=True)
+            # TODO: move these 
+            seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row)
+            seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
         # 2D + 3D Motion
         with gr.Accordion('2D + 3D Motion', open=True):
             with gr.Row():
@@ -482,18 +495,30 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                 reroll_blank_frames = gr.Dropdown(label="reroll_blank_frames", choices=['reroll', 'interrupt', 'ignore'], value=d.reroll_blank_frames, type="value", elem_id="reroll_blank_frames", interactive=True)
         # Noise
+        def change_perlin_visibility(choice):
+            if choice == "perlin":
+                return gr.update(visible=True)
+            else:
+                return gr.update(visible=False)
         with gr.Accordion('Noise', open=True):
             with gr.Row():
+                noise_type = gr.Radio(['uniform', 'perlin'], label="noise_type", value=da.noise_type, elem_id="noise_type")
+            with gr.Row():
                 noise_schedule = gr.Textbox(label="noise_schedule", lines=1, value = da.noise_schedule, interactive=True)
+                
             with gr.Row():
-                noise_type = gr.Dropdown(label="noise_type", choices=['uniform', 'perlin'], value=da.noise_type, type="value", elem_id="noise_type", interactive=True)
-            with gr.Row():
-                gr.HTML("<p style=\"margin-bottom:0.75em\">Perlin noise params, if selected:</p>")
-                perlin_w = gr.Number(label="perlin_w", value=da.perlin_w, interactive=True)
-                perlin_h = gr.Number(label="perlin_h", value=da.perlin_h, interactive=True)
-            with gr.Row():
-                perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
-                perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
+                with gr.Row(scale=1):
+                    # gr.HTML("<p style=\"margin-bottom:0.75em\">Perlin noise params, if selected:</p>")
+                    perlin_w = gr.Number(label="perlin_w", value=da.perlin_w, interactive=True)
+                    perlin_h = gr.Number(label="perlin_h", value=da.perlin_h, interactive=True)
+                with gr.Row(scale=2):
+                    perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
+                    perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
+        # TODO: combine all funcs?
+        noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_w)
+        noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_h)
+        noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_octaves)
+        noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_persistence)
         # Anti-blur
         with gr.Accordion('Anti Blur', open=True):
             with gr.Row():
