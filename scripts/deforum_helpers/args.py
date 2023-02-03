@@ -260,8 +260,8 @@ def DeforumOutputArgs():
     fps = 12 #@param {type:"number"}
     #@markdown **Manual Settings**
     use_manual_settings = False #@param {type:"boolean"}
-    image_path = "/content/drive/MyDrive/AI/StableDiffusion/2022-09/20220903000939_%05d.png" #@param {type:"string"}
-    mp4_path = "/content/drive/MyDrive/AI/StableDiffusion/content/drive/MyDrive/AI/StableDiffusion/2022-09/kabachuha/2022-09/20220903000939.mp4" #@param {type:"string"}
+    image_path = "/content/drive/20220903000939_%05d.png" #@param {type:"string"}
+    mp4_path = "/content/drive/20220903000939.mp4" #@param {type:"string"}
     ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
     ffmpeg_preset = 'veryslow'
@@ -771,15 +771,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Accordion('Manual Settings', open=False):
                 with gr.Row():
                     use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
-                    # rend_step Never worked - set to visible false 28-1-23
-                    render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True, visible=False)
-                with gr.Row():
                     max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
                     path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True)
                 with gr.Row():
                     image_path = gr.Textbox(label="image_path", lines=1, interactive=True, value = dv.image_path)
                 with gr.Row():
                     mp4_path = gr.Textbox(label="mp4_path", lines=1, interactive=True, value = dv.mp4_path)
+                with gr.Row(visible=False):
+                    # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
+                    render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True, visible=False)
             
         with gr.Accordion('Frame Interpolation (RIFE)', open=True):
             with gr.Accordion('Important notes and Help', open=False):
