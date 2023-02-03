@@ -573,10 +573,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 animation_prompts = gr.Textbox(label="animation_prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
             gr.HTML("Positive prompt to be appended to all animation prompts")
             with gr.Row():
-                animation_prompts_positive = gr.Textbox(label="animation_prompts_positive", lines=1, interactive=True, value = "hq")
+                animation_prompts_positive = gr.Textbox(label="animation_prompts_positive", lines=1, interactive=True, value = "")
             gr.HTML("Negative prompt to be appended to all animation prompts, dont add --neg here")
             with gr.Row():
-                animation_prompts_negative = gr.Textbox(label="animation_prompts_negative", lines=1, interactive=True, value = "blurry")
+                animation_prompts_negative = gr.Textbox(label="animation_prompts_negative", lines=1, interactive=True, value = "")
             # Composable Mask scheduling
             with gr.Accordion('Composable Mask scheduling', open=True):
                 gr.HTML("To enable, check use_mask in the Init tab.<br>Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); <br>default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; <br>masks from files in [], like [mask1.png]; <br>description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
