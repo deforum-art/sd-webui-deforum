@@ -14,7 +14,6 @@ from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
 import math, json, itertools
-import platform
 import requests
 
 def load_mask_latent(mask_input, shape):
@@ -37,6 +36,7 @@ def load_mask_latent(mask_input, shape):
     return mask
 
 def json_string_fixer(json_string):
+    import platform
     # backslash -> forwardslash *Only* on windows PCs for now
     if platform.system() == "Windows":
         json_string = json_string.replace("\\", "/") # no need to also replace double backshasles because they work on windows
