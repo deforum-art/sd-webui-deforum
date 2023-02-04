@@ -257,7 +257,7 @@ def ParseqArgs():
     
 def DeforumOutputArgs():
     skip_video_for_run_all = False #@param {type: 'boolean'}
-    fps = 12 #@param {type:"number"}
+    fps = 15 #@param {type:"number"}
     #@markdown **Manual Settings**
     use_manual_settings = False #@param {type:"boolean"}
     image_path = "/content/drive/20220903000939_%05d.png" #@param {type:"string"}
