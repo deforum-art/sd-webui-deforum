@@ -264,7 +264,7 @@ def DeforumOutputArgs():
     mp4_path = "/content/drive/20220903000939.mp4" #@param {type:"string"}
     ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
-    ffmpeg_preset = 'veryslow'
+    ffmpeg_preset = 'slow'
     add_soundtrack = 'None' #@param ["File","Init Video"]
     soundtrack_path = "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_1MB_MP3.mp3"
     render_steps = False  #@param {type: 'boolean'}
