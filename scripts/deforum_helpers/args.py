@@ -706,11 +706,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             def change_comp_mask_x_visibility(choice):
                 return gr.update(visible=choice != "None")
             with gr.Row():
-                with gr.Column():
+                with gr.Column(min_width=340):
                     with gr.Row():
                         hybrid_generate_inputframes = gr.Checkbox(label="generate_inputframes", value=False, interactive=True)
                         hybrid_composite = gr.Checkbox(label="hybrid_composite", value=False, interactive=True)
-                with gr.Column():
+                with gr.Column(min_width=340):
                     with gr.Row():
                         hybrid_use_first_frame_as_init_image = gr.Checkbox(label="first_frame_as_init_image", value=False, interactive=True)
                         hybrid_motion_use_prev_img = gr.Checkbox(label="motion_use_prev_img", value=False, interactive=True)
