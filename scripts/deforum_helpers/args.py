@@ -374,9 +374,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
     # Animation settings 'Key' tab
     with gr.Tab('Keyframes'):
-        with gr.Row():
-            open_btn = gr.Button(value="Open all")
-            close_btn = gr.Button(value="Close all")
         #TODO make a some sort of the original dictionary parsing
         # Main top animation settings
         with gr.Accordion('Animation Mode, Max Frames and Border', open=True) as a1:
@@ -384,16 +381,17 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             def change_max_frames_visibility(choice):
                 return gr.update(visible=choice != "Video Input")
             with gr.Row():
-                animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="animation_mode", value=da.animation_mode, elem_id="animation_mode")
-            with gr.Row():
-                border = gr.Radio(['replicate', 'wrap'], label="border", value=da.border, elem_id="border")
-                with gr.Row() as max_frames_row:
+                with gr.Column(scale=5):
+                    with gr.Row():
+                        with gr.Column(scale=2):
+                            animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="animation_mode", value=da.animation_mode, elem_id="animation_mode")
+                        with gr.Column(scale=1, min_width=180):
+                            border = gr.Radio(['replicate', 'wrap'], label="border", value=da.border, elem_id="border")
+                with gr.Column(scale=1, min_width=115) as max_frames_column:
                     max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0, visible=True)
             # TODO: move this from here
-            animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_row)
+            animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_column)
         # loopArgs
-
-
         with gr.Accordion('Guided Images', open=False) as a2:
             with gr.Accordion('*READ ME before you use this mode!*', open=False):
                 gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
@@ -580,12 +578,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 enable_clipskip_scheduling = gr.Checkbox(label="enable_clipskip_scheduling", value=da.enable_clipskip_scheduling, interactive=True)
             with gr.Row():
                 clipskip_schedule = gr.Textbox(label="clipskip_schedule", lines=1, value = da.clipskip_schedule, interactive=True)
-        outputs = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16]
-        for i, output in enumerate(outputs):
-            open_btn.click(lambda i=i: gr.Accordion.update(open=True), inputs=None, outputs=[outputs[i]])
-            close_btn.click(lambda i=i: gr.Accordion.update(open=False), inputs=None, outputs=[outputs[i]])
     # Animation settings END
-    
     # Prompts tab START    
     with gr.Tab('Prompts'):
             gr.HTML("""
@@ -724,12 +717,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 with gr.Column():
                     with gr.Row():
-                        hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="generate_human_masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
                         hybrid_motion = gr.Radio(['None', 'Optical Flow', 'Perspective', 'Affine'], label="hybrid_motion", value=da.hybrid_motion, elem_id="hybrid_motion")
                 with gr.Column():
                     with gr.Row():
-                        hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="flow_method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method")
-                        hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="comp_mask_type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type")
+                        with gr.Column(scale=1):
+                            hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="flow_method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method")
+                            hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="comp_mask_type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type")
             with gr.Row(visible=False) as hybrid_comp_mask_row:
                 hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="comp_mask_equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
                 with gr.Column():
@@ -750,18 +743,23 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 hybrid_comp_mask_auto_contrast_cutoff_high_schedule = gr.Textbox(label="comp_mask_auto_contrast_cutoff_high_schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, interactive=True)
             with gr.Row():
                 hybrid_comp_mask_auto_contrast_cutoff_low_schedule = gr.Textbox(label="comp_mask_auto_contrast_cutoff_low_schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, interactive=True)
+        with gr.Accordion("Humans Masking", open=False):
+            with gr.Row():
+                hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="generate_human_masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
     # VIDEO OUTPUT TAB
     with gr.Tab('Video output'):
         with gr.Accordion('Video Output Settings', open=True):
             with gr.Row():
-                # fps = gr.Number(label="fps", value=dv.fps, interactive=True)
                 fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
                 output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
             with gr.Column():
                 with gr.Row():
-                    ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
-                    ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="ffmpeg_crf", value=dv.ffmpeg_crf, interactive=True)
-                    ffmpeg_preset = gr.Dropdown(label="ffmpeg_preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
+                    with gr.Column():
+                        ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
+                    with gr.Column(min_width=190):
+                        ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="ffmpeg_crf", value=dv.ffmpeg_crf, interactive=True)
+                    with gr.Column(min_width=130):
+                        ffmpeg_preset = gr.Dropdown(label="ffmpeg_preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
             with gr.Column():
                 with gr.Row():
                     add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="add_soundtrack", value=dv.add_soundtrack)
