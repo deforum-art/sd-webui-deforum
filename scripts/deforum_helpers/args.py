@@ -374,9 +374,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
     # Animation settings 'Key' tab
     with gr.Tab('Keyframes'):
+        with gr.Row():
+            open_btn = gr.Button(value="Open all")
+            close_btn = gr.Button(value="Close all")
         #TODO make a some sort of the original dictionary parsing
         # Main top animation settings
-        with gr.Accordion('Animation Mode, Max Frames and Border', open=True):
+        with gr.Accordion('Animation Mode, Max Frames and Border', open=True) as a1:
             #TODO: move this from here
             def change_max_frames_visibility(choice):
                 return gr.update(visible=choice != "Video Input")
@@ -389,7 +392,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # TODO: move this from here
             animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_row)
         # loopArgs
-        with gr.Accordion('Guided Images', open=False):
+
+
+        with gr.Accordion('Guided Images', open=False) as a2:
             with gr.Accordion('*READ ME before you use this mode!*', open=False):
                 gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
                            Set the keyframes and the images that you want to show up. 
@@ -432,7 +437,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
         # Seed Scheduling
-        with gr.Accordion('Seed Scheduling', open=False):
+        with gr.Accordion('Seed Scheduling', open=False) as a3:
             # TODO: move this func
             def change_seed_iter_visibility(choice):
                 return gr.update(visible=choice=="iter")
@@ -448,7 +453,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row)
             seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
         # 2D + 3D Motion
-        with gr.Accordion('2D + 3D Motion', open=True):
+        with gr.Accordion('2D + 3D Motion', open=True) as a4:
             with gr.Row():
                 angle = gr.Textbox(label="angle", lines=1, value = da.angle, interactive=True)
             with gr.Row():
@@ -458,7 +463,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 translation_y = gr.Textbox(label="translation_y", lines=1, value = da.translation_y, interactive=True)
         # 3D-only Motion
-        with gr.Accordion('3D-Only Motion', open=True):
+        with gr.Accordion('3D-Only Motion', open=True) as a5:
             with gr.Row():
                 translation_z = gr.Textbox(label="translation_z", lines=1, value = da.translation_z, interactive=True)
             with gr.Row():
@@ -468,7 +473,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 rotation_3d_z = gr.Textbox(label="rotation_3d_z", lines=1, value = da.rotation_3d_z, interactive=True)
         # General Settings
-        with gr.Accordion('General Settings', open=True):
+        with gr.Accordion('General Settings', open=True) as a6:
             with gr.Row():
                 strength_schedule = gr.Textbox(label="strength_schedule", lines=1, value = da.strength_schedule, interactive=True)
             with gr.Row():
@@ -476,7 +481,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 cfg_scale_schedule = gr.Textbox(label="cfg_scale_schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
         # Coherence
-        with gr.Accordion('Coherence', open=True):
+        with gr.Accordion('Coherence', open=True) as a7:
             # TODO: move this line
             def change_color_coherence_video_every_N_frames_visibility(choice):
                 return gr.update(visible=choice=="Video Input")
@@ -499,7 +504,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # Noise
         def change_perlin_visibility(choice):
             return gr.update(visible=choice=="perlin")
-        with gr.Accordion('Noise', open=True):
+        with gr.Accordion('Noise', open=True) as a8:
             with gr.Row():
                 noise_type = gr.Radio(['uniform', 'perlin'], label="noise_type", value=da.noise_type, elem_id="noise_type")
             with gr.Row():
@@ -514,7 +519,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # TODO: move this line
         noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
         # Anti-blur
-        with gr.Accordion('Anti Blur', open=True):
+        with gr.Accordion('Anti Blur', open=True) as a9:
             with gr.Row():
                 kernel_schedule = gr.Textbox(label="kernel_schedule", lines=1, value = da.kernel_schedule, interactive=True)
             with gr.Row():
@@ -524,7 +529,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
         # 3D Depth Warping
-        with gr.Accordion('3D Depth Warping', open=False):
+        with gr.Accordion('3D Depth Warping', open=False) as a10:
             with gr.Row():
                 use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
                 midas_weight = gr.Number(label="midas_weight", value=da.midas_weight, interactive=True)
@@ -533,7 +538,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="padding_mode", value=da.padding_mode, elem_id="padding_mode")
                 sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="sampling_mode", value=da.sampling_mode, elem_id="sampling_mode")
         # 3D FOV
-        with gr.Accordion('3D Field Of View (FOV)', open=False):
+        with gr.Accordion('3D Field Of View (FOV)', open=False) as a11:
             with gr.Row():
                 fov_schedule = gr.Textbox(label="fov_schedule", lines=1, value = da.fov_schedule, interactive=True)
             with gr.Row():
@@ -541,7 +546,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
         # Perspective Flip
-        with gr.Accordion('Perspective Flip', open=False):
+        with gr.Accordion('Perspective Flip', open=False) as a12:
             with gr.Row():
                 flip_2d_perspective = gr.Checkbox(label="flip_2d_perspective", value=da.flip_2d_perspective, interactive=True)
             with gr.Row():
@@ -553,28 +558,188 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 perspective_flip_fv = gr.Textbox(label="perspective_flip_fv", lines=1, value = da.perspective_flip_fv, interactive=True)
         # Steps Scheduling
-        with gr.Accordion('Steps Scheduling', open=False):
+        with gr.Accordion('Steps Scheduling', open=False) as a13:
             with gr.Row():
                 enable_steps_scheduling = gr.Checkbox(label="enable steps scheduling", value=da.enable_steps_scheduling, interactive=True)
             with gr.Row():
                 steps_schedule = gr.Textbox(label="steps_schedule", lines=1, value = da.steps_schedule, interactive=True)
         # Sampler Scheduling
-        with gr.Accordion('Sampler Scheduling', open=False):
+        with gr.Accordion('Sampler Scheduling', open=False) as a14:
             with gr.Row():
                 enable_sampler_scheduling = gr.Checkbox(label="enable sampler scheduling.", value=da.enable_sampler_scheduling, interactive=True)
             with gr.Row():
                 sampler_schedule = gr.Textbox(label="sampler_schedule", lines=1, value = da.sampler_schedule, interactive=True)
         # Checkpoint Scheduling
-        with gr.Accordion('Checkpoint Scheduling', open=True):
+        with gr.Accordion('Checkpoint Scheduling', open=True) as a15:
             with gr.Row():
                 enable_checkpoint_scheduling = gr.Checkbox(label="enable_checkpoint_scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
             with gr.Row():
                 checkpoint_schedule = gr.Textbox(label="checkpoint_schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
-        with gr.Accordion('CLIP skip Scheduling', open=False):
+        with gr.Accordion('CLIP skip Scheduling', open=False) as a16:
             with gr.Row():
                 enable_clipskip_scheduling = gr.Checkbox(label="enable_clipskip_scheduling", value=da.enable_clipskip_scheduling, interactive=True)
             with gr.Row():
                 clipskip_schedule = gr.Textbox(label="clipskip_schedule", lines=1, value = da.clipskip_schedule, interactive=True)
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a1],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a1],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a2],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a2],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a3],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a3],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a4],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a4],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a5],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a5],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a6],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a6],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a7],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a7],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a8],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a8],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a9],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a9],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a10],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a10],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a11],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a11],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a12],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a12],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a13],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a13],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a14],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a14],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a15],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a15],
+        )
+        open_btn.click(
+            lambda: gr.Accordion.update(open=True),
+            inputs=None,
+            outputs=[a16],
+        )
+        close_btn.click(
+            lambda: gr.Accordion.update(open=False),
+            inputs=None,
+            outputs=[a16],
+        )
     # Animation settings END
     
     # Prompts tab START    
