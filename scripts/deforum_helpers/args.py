@@ -389,6 +389,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             border = gr.Radio(['replicate', 'wrap'], label="border", value=da.border, elem_id="border")
                 with gr.Column(scale=1, min_width=115) as max_frames_column:
                     max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0, visible=True)
+            with gr.Row() as diffusion_cadence_row:
+                diffusion_cadence = gr.Slider(label="diffusion_cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
             # TODO: move this from here
             animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_column)
         # loopArgs
@@ -493,8 +495,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 color_coherence_video_every_N_frames = gr.Number(label="color_coherence_video_every_N_frames", value=1, interactive=True)
             #TODO: move this line
             color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
-            with gr.Row() as color_coherence_video_every_N_frames_row:
-                diffusion_cadence = gr.Slider(label="diffusion_cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
             with gr.Row():
                 # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                 #TODO: add a check to see if nsfw filter is on and if not don't show this section at all?
