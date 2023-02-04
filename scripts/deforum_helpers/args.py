@@ -341,7 +341,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(scale=4):
                             W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                             H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True)
-                            
                         with gr.Column(scale=4):
                             seed = gr.Number(label="seed", value=d.seed, interactive=True, precision=0)
                             batch_name = gr.Textbox(label="batch_name", lines=1, interactive=True, value = d.batch_name)
@@ -376,7 +375,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     # Animation settings 'Key' tab
     with gr.Tab('Keyframes'):
         #TODO make a some sort of the original dictionary parsing
-
         # Main top animation settings
         with gr.Accordion('Animation Mode, Max Frames and Border', open=True):
             def change_max_frames_visibility(choice):
@@ -523,10 +521,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 noise_schedule = gr.Textbox(label="noise_schedule", lines=1, value = da.noise_schedule, interactive=True)
             with gr.Row() as perlin_row:
                 with gr.Column(min_width=200):
-                    # perlin_w = gr.Number(label="perlin_w", value=da.perlin_w, interactive=True)
                     perlin_w = gr.Slider(label="perlin_w", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                     perlin_h = gr.Slider(label="perlin_h", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
-                    # perlin_h = gr.Number(label="perlin_h", value=da.perlin_h, interactive=True)
                 with gr.Column(min_width=230):
                     perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                     perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
@@ -719,25 +715,38 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             hybrid_html += "<a style='color:SteelBlue;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/Animation-Settings#hybrid-video-mode-for-2d3d-animations'>Click Here</a> for more info/ a Guide."      
             gr.HTML(hybrid_html)
         with gr.Accordion("Hybrid Settings", open=True):
-            with gr.Row(equal_height=True):
+            #TODO: move this!
+            def change_comp_mask_x_visibility(choice):
+                if choice == "None":
+                    return gr.update(visible=False)
+                else:
+                    return gr.update(visible=True)
+            with gr.Row():
                 with gr.Column():
-                    hybrid_generate_inputframes = gr.Checkbox(label="generate_inputframes", value=False, interactive=True)
-                    hybrid_composite = gr.Checkbox(label="hybrid_composite", value=False, interactive=True)
-                hybrid_generate_human_masks = gr.Dropdown(label="generate_human_masks", choices=['None', 'PNGs', 'Video', 'Both'], value=da.hybrid_generate_human_masks, type="value", elem_id="hybrid_generate_human_masks", interactive=True)
-                
-            with gr.Row(equal_height=True):
+                    with gr.Row():
+                        hybrid_generate_inputframes = gr.Checkbox(label="generate_inputframes", value=False, interactive=True)
+                        hybrid_composite = gr.Checkbox(label="hybrid_composite", value=False, interactive=True)
                 with gr.Column():
-                    hybrid_use_first_frame_as_init_image = gr.Checkbox(label="first_frame_as_init_image", value=False, interactive=True)
-                    hybrid_motion_use_prev_img = gr.Checkbox(label="motion_use_prev_img", value=False, interactive=True)
-                hybrid_motion = gr.Dropdown(label="hybrid_motion", choices=['None', 'Optical Flow', 'Perspective', 'Affine'], value=da.hybrid_motion, type="value", elem_id="hybrid_motion", interactive=True)
-                hybrid_flow_method = gr.Dropdown(label="flow_method", choices=['DIS Medium', 'Farneback'], value=da.hybrid_flow_method, type="value", elem_id="hybrid_flow_method", interactive=True)
-            with gr.Row(equal_height=True):
-                hybrid_comp_mask_equalize = gr.Dropdown(label="comp_mask_equalize", choices=['None', 'Before', 'After', 'Both'], value=da.hybrid_comp_mask_equalize, type="value", elem_id="hybrid_comp_mask_equalize", interactive=True)
-                hybrid_comp_mask_type = gr.Dropdown(label="comp_mask_type", choices=['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], value=da.hybrid_comp_mask_type, type="value", elem_id="hybrid_comp_mask_type", interactive=True)
-            with gr.Row(equal_height=True):
+                    with gr.Row():
+                        hybrid_use_first_frame_as_init_image = gr.Checkbox(label="first_frame_as_init_image", value=False, interactive=True)
+                        hybrid_motion_use_prev_img = gr.Checkbox(label="motion_use_prev_img", value=False, interactive=True)
+            with gr.Row():
+                with gr.Column():
+                    with gr.Row():
+                        hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="generate_human_masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
+                        hybrid_motion = gr.Radio(['None', 'Optical Flow', 'Perspective', 'Affine'], label="hybrid_motion", value=da.hybrid_motion, elem_id="hybrid_motion")
+                with gr.Column():
+                    with gr.Row():
+                        hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="flow_method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method")
+                        hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="comp_mask_type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type")
+            with gr.Row(visible=False) as hybrid_comp_mask_row:
+                hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="comp_mask_equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
                 with gr.Column():
                     hybrid_comp_mask_auto_contrast = gr.Checkbox(label="comp_mask_auto_contrast", value=False, interactive=True)
                     hybrid_comp_mask_inverse = gr.Checkbox(label="comp_mask_inverse", value=False, interactive=True)
+            #TODO: move this!
+            hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
+            with gr.Row():
                     hybrid_comp_save_extra_frames = gr.Checkbox(label="comp_save_extra_frames", value=False, interactive=True)
         with gr.Accordion("Hybrid Schedules", open=False):
             with gr.Row():
@@ -754,7 +763,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     with gr.Tab('Video output'):
         with gr.Accordion('Video Output Settings', open=True):
             with gr.Row():
-                fps = gr.Number(label="fps", value=dv.fps, interactive=True)
+                # fps = gr.Number(label="fps", value=dv.fps, interactive=True)
+                fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
                 output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
             with gr.Column():
                 with gr.Row():
