@@ -377,9 +377,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         #TODO make a some sort of the original dictionary parsing
         # Main top animation settings
         with gr.Accordion('Animation Mode, Max Frames and Border', open=True) as a1:
-            #TODO: move this from here
+            #TODO: move these functions from here!
             def change_max_frames_visibility(choice):
                 return gr.update(visible=choice != "Video Input")
+            def change_diffusion_cadence_visibility(choice):
+                return gr.update(visible=choice not in ['Video Input', 'Interpolation'])
             with gr.Row():
                 with gr.Column(scale=5):
                     with gr.Row():
@@ -393,6 +395,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 diffusion_cadence = gr.Slider(label="diffusion_cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
             # TODO: move this from here
             animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_column)
+            animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_row)
         # loopArgs
         with gr.Accordion('Guided Images', open=False) as a2:
             with gr.Accordion('*READ ME before you use this mode!*', open=False):
@@ -497,7 +500,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
             with gr.Row():
                 # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
-                #TODO: add a check to see if nsfw filter is on and if not don't show this section at all?
                 reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="reroll_blank_frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
         # Noise
         def change_perlin_visibility(choice):
