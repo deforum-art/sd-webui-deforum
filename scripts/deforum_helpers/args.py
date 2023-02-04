@@ -378,10 +378,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # Main top animation settings
         with gr.Accordion('Animation Mode, Max Frames and Border', open=True):
             def change_max_frames_visibility(choice):
-                    if choice == "Video Input":
-                        return gr.update(visible=False)
-                    else:
-                        return gr.update(visible=True)
+                return gr.update(visible=choice != "Video Input")
             with gr.Row():
                 animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="animation_mode", value=da.animation_mode, elem_id="animation_mode")
                 # TODO: hide max_frames if Video Input is selected!
@@ -438,15 +435,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Accordion('Seed Scheduling', open=False):
             # TODO: move this func
             def change_seed_iter_visibility(choice):
-                if choice == "iter":
-                    return gr.update(visible=True)
-                else:
-                    return gr.update(visible=False)
+                return gr.update(visible=choice=="iter")
             def change_seed_schedule_visibility(choice):
-                if choice == "schedule":
-                    return gr.update(visible=True)
-                else:
-                    return gr.update(visible=False)
+                return gr.update(visible=choice=="schedule")
             with gr.Row():
                 seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="seed_behavior", value=d.seed_behavior, elem_id="seed_behavior")
             with gr.Row() as seed_iter_N_row:
@@ -488,10 +479,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Accordion('Coherence', open=True):
             # TODO: move this line
             def change_color_coherence_video_every_N_frames_visibility(choice):
-                if choice == "Video Input":
-                    return gr.update(visible=True)
-                else:
-                    return gr.update(visible=False)
+                return gr.update(visible=choice=="Video Input")
             with gr.Row():
                 histogram_matching = gr.Checkbox(label="Force all frames to match initial frame's colors. Overrides a1111 settings. NOT RECOMMENDED, enable only for backwards compatibility.", value=da.histogram_matching, interactive=True)
             with gr.Row():
@@ -510,10 +498,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="reroll_blank_frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
         # Noise
         def change_perlin_visibility(choice):
-            if choice == "perlin":
-                return gr.update(visible=True)
-            else:
-                return gr.update(visible=False)
+            return gr.update(visible=choice=="perlin")
         with gr.Accordion('Noise', open=True):
             with gr.Row():
                 noise_type = gr.Radio(['uniform', 'perlin'], label="noise_type", value=da.noise_type, elem_id="noise_type")
@@ -717,10 +702,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Accordion("Hybrid Settings", open=True):
             #TODO: move this!
             def change_comp_mask_x_visibility(choice):
-                if choice == "None":
-                    return gr.update(visible=False)
-                else:
-                    return gr.update(visible=True)
+                return gr.update(visible=choice != "None")
             with gr.Row():
                 with gr.Column():
                     with gr.Row():
