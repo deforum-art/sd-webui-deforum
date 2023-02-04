@@ -619,7 +619,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Column(min_width=150):
                     strength_0_no_init = gr.Checkbox(label="strength_0_no_init", value=True, interactive=True)
                 with gr.Column(min_width=170):
-                    strength = gr.Slider(label="strength", minimum=0, maximum=1, step=0.02, value=0, interactive=True)
+                    strength = gr.Slider(label="strength", minimum=0, maximum=1, step=0.01, value=0, interactive=True)
 
             with gr.Row():
                 init_image = gr.Textbox(label="init_image", lines=1, interactive=True, value = d.init_image)
