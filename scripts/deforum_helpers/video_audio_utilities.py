@@ -4,6 +4,7 @@ import shutil
 import math
 import requests
 import subprocess
+import time
 from pkg_resources import resource_filename
 from modules.shared import state
 
@@ -108,8 +109,9 @@ def get_quick_vid_info(vid_local_path):
     
 # Stitch images to a h264 mp4 video using ffmpeg
 def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):
+    start_time = time.time()
     # TODO: add audio custom print msgs for a nice user experience
-    print(f"Trying to stitch video from frames using FFMPEG:\nFrames:\n{imgs_path}\nTo Video:\n{outmp4_path}")
+    print(f"Stitching video from frames using FFMPEG:\nFrames:\n{imgs_path}\nTo Video:\n{outmp4_path}")
     try:
         cmd = [
             ffmpeg_location,
@@ -136,6 +138,8 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         raise Exception(f'Error stitching frames to video. Actual runtime error:{e}')
 
     if add_soundtrack != 'None':
+        print("Adding audio to video...")
+        audio_add_start_time = time.time()
         try:
             cmd = [
                 ffmpeg_location,
@@ -155,10 +159,13 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
                 print(stderr)
                 raise RuntimeError(stderr)
             os.replace(outmp4_path+'.temp.mp4', outmp4_path)
+            print(f"Adding audio to video took {time.time() - audio_add_start_time:.2f} seconds.")
+            print(f"FFMPEG Video+Audio stitching done in {time.time() - start_time:.2f} seconds!")
         except Exception as e:
             print(f'Error adding audio to video. Actual error: {e}')
-    # If we reached this point, all ok. Let the user know!
-    print("FFMPEG Video Stitching done!")
+            print(f"FFMPEG Video (sorry, no audio) stitching done in {time.time() - start_time:.2f} seconds!")
+    else:
+        print(f"FFMPEG Video stitching done in {time.time() - start_time:.2f} seconds!")
 
 def get_frame_name(path):
     name = os.path.basename(path)
