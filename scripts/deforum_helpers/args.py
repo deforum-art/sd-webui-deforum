@@ -105,7 +105,7 @@ def DeforumAnimArgs():
     save_depth_maps = False #@param {type:"boolean"}
 
     #@markdown ####**Video Input:**
-    video_init_path ='/content/video_in.mp4'#@param {type:"string"}
+    video_init_path ='https://github.com/hithereai/d/releases/download/m/vid.mp4' #@param {type:"string"}
     extract_nth_frame = 1#@param {type:"number"}
     extract_from_frame = 0 #@param {type:"number"}
     extract_to_frame = -1 #@param {type:"number"} minus 1 for unlimited frames
