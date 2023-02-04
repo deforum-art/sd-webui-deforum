@@ -377,16 +377,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         #TODO make a some sort of the original dictionary parsing
         # Main top animation settings
         with gr.Accordion('Animation Mode, Max Frames and Border', open=True):
+            #TODO: move this from here
             def change_max_frames_visibility(choice):
                 return gr.update(visible=choice != "Video Input")
             with gr.Row():
                 animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="animation_mode", value=da.animation_mode, elem_id="animation_mode")
-                # TODO: hide max_frames if Video Input is selected!
             with gr.Row():
                 border = gr.Radio(['replicate', 'wrap'], label="border", value=da.border, elem_id="border")
                 with gr.Row() as max_frames_row:
                     max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0, visible=True)
-            # TODO: move this from here?
+            # TODO: move this from here
             animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_row)
         # loopArgs
         with gr.Accordion('Guided Images', open=False):
@@ -527,11 +527,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Accordion('3D Depth Warping', open=False):
             with gr.Row():
                 use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
-            with gr.Row():
                 midas_weight = gr.Number(label="midas_weight", value=da.midas_weight, interactive=True)
-                padding_mode = gr.Dropdown(label="padding_mode", choices=['border', 'reflection', 'zeros'], value=da.padding_mode, type="value", elem_id="padding_mode", interactive=True)
-                sampling_mode = gr.Dropdown(label="sampling_mode", choices=['bicubic', 'bilinear', 'nearest'], value=da.sampling_mode, type="value", elem_id="sampling_mode", interactive=True)
                 save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
+            with gr.Row():
+                padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="padding_mode", value=da.padding_mode, elem_id="padding_mode")
+                sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="sampling_mode", value=da.sampling_mode, elem_id="sampling_mode")
         # 3D FOV
         with gr.Accordion('3D Field Of View (FOV)', open=False):
             with gr.Row():
@@ -540,8 +540,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
             with gr.Row():
                 far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
-        # 2D Perspective Flip
-        with gr.Accordion('2D Perspective Flip', open=False):
+        # Perspective Flip
+        with gr.Accordion('Perspective Flip', open=False):
             with gr.Row():
                 flip_2d_perspective = gr.Checkbox(label="flip_2d_perspective", value=da.flip_2d_perspective, interactive=True)
             with gr.Row():
