@@ -77,8 +77,12 @@ def is_vid_path_valid(video_path):
     extension = video_path.rsplit('.', 1)[-1].lower()
     # vid path is actually a URL, check it 
     if video_path.startswith('http://') or video_path.startswith('https://'):
-        response = requests.head(video_path)
-        if response.status_code == 404 or response.status_code != 200:
+        response = requests.head(video_path, allow_redirects=True)
+        if response.status_code == 404:
+            raise ConnectionError("Video URL is not valid. Response status code: {}".format(response.status_code))
+        elif response.status_code == 302:
+            response = requests.head(response.headers['location'], allow_redirects=True)
+        if response.status_code != 200:
             raise ConnectionError("Video URL is not valid. Response status code: {}".format(response.status_code))
         if extension not in file_formats:
             raise ValueError("Video file format '{}' not supported. Supported formats are: {}".format(extension, file_formats))
