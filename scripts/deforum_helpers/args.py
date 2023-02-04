@@ -376,7 +376,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     with gr.Tab('Keyframes'):
         #TODO make a some sort of the original dictionary parsing
         # Main top animation settings
-        with gr.Accordion('Animation Mode, Max Frames and Border', open=True) as a1:
+        with gr.Accordion('Main Settings', open=True) as a1:
             #TODO: move these functions from here!
             def change_max_frames_visibility(choice):
                 return gr.update(visible=choice != "Video Input")
@@ -393,6 +393,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     max_frames = gr.Number(label="max_frames", value=da.max_frames, interactive=True, precision=0, visible=True)
             with gr.Row() as diffusion_cadence_row:
                 diffusion_cadence = gr.Slider(label="diffusion_cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
+            with gr.Row():
+                strength_schedule = gr.Textbox(label="strength_schedule", lines=1, value = da.strength_schedule, interactive=True)
+            with gr.Row():
+                cfg_scale_schedule = gr.Textbox(label="cfg_scale_schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
             # TODO: move this from here
             animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_column)
             animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_row)
@@ -475,14 +479,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 rotation_3d_y = gr.Textbox(label="rotation_3d_y", lines=1, value = da.rotation_3d_y, interactive=True)
             with gr.Row():
                 rotation_3d_z = gr.Textbox(label="rotation_3d_z", lines=1, value = da.rotation_3d_z, interactive=True)
-        # General Settings
-        with gr.Accordion('General Settings', open=True) as a6:
-            with gr.Row():
-                strength_schedule = gr.Textbox(label="strength_schedule", lines=1, value = da.strength_schedule, interactive=True)
-            with gr.Row():
-                contrast_schedule = gr.Textbox(label="contrast_schedule", lines=1, value = da.contrast_schedule, interactive=True)
-            with gr.Row():
-                cfg_scale_schedule = gr.Textbox(label="cfg_scale_schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
         # Coherence
         with gr.Accordion('Coherence', open=True) as a7:
             # TODO: move this line
@@ -498,6 +494,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 color_coherence_video_every_N_frames = gr.Number(label="color_coherence_video_every_N_frames", value=1, interactive=True)
             #TODO: move this line
             color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
+            with gr.Row():
+                contrast_schedule = gr.Textbox(label="contrast_schedule", lines=1, value = da.contrast_schedule, interactive=True)
             with gr.Row():
                 # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                 reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="reroll_blank_frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
