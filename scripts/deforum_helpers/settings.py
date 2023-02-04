@@ -13,6 +13,8 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom
         with open(custom_settings_file, "r") as f:
             jdata = json.loads(f.read())
             root.animation_prompts = jdata["prompts"]
+            root.animation_prompts_positive = jdata["animation_prompts_positive"]
+            root.animation_prompts_negative = jdata["animation_prompts_negative"]
             for i, k in enumerate(args_dict):
                 if k in jdata:
                     args_dict[k] = jdata[k]
@@ -50,6 +52,8 @@ def save_settings(*args, **kwargs):
     anim_args_dict = pack_anim_args(data)
     parseq_dict = pack_parseq_args(data)
     args_dict["prompts"] = json.loads(data['animation_prompts'])
+    args_dict["prompts_positive"] = data['animation_prompts_positive']
+    args_dict["prompts_negative"] = data['animation_prompts_negative']
     loop_dict = pack_loop_args(data)
     print(f"saving custom settings to {settings_path}")
     with open(settings_path, "w") as f:
@@ -81,7 +85,10 @@ def load_settings(*args, **kwargs):
 
     if 'animation_prompts' in jdata:
         jdata['prompts'] = jdata['animation_prompts']#compatibility with old versions
-
+    if 'animation_prompts_positive' in jdata:
+        jdata["animation_prompts_positive"] = data['animation_prompts_positive']
+    if 'animation_prompts_negative' in jdata:
+        jdata["animation_prompts_negative"] = data['animation_prompts_negative']
     for key in data:
         if key == 'sampler':
             sampler_val = jdata[key]
@@ -126,6 +133,10 @@ def load_settings(*args, **kwargs):
         else:
             if key == 'animation_prompts':
                 ret.append(json.dumps(jdata['prompts'], ensure_ascii=False, indent=4))
+            elif key == 'animation_prompts_positive':
+                ret.append(jdata['prompts_positive'])
+            elif key == 'animation_prompts_negative':
+                ret.append(jdata['prompts_negative'])
             else:
                 ret.append(data[key])
 
