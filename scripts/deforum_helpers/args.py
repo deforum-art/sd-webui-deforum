@@ -746,19 +746,24 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     # VIDEO OUTPUT TAB
     with gr.Tab('Video output'):
         with gr.Accordion('Video Output Settings', open=True):
-            with gr.Row():
+            with gr.Row() as fps_out_format_row:
                 fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
                 output_format = gr.Dropdown(label="output_format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
             with gr.Column():
-                with gr.Row():
+                with gr.Row() as ffmpeg_set_row:
                     with gr.Column():
                         ffmpeg_location = gr.Textbox(label="ffmpeg_location", lines=1, interactive=True, value = dv.ffmpeg_location)
                     with gr.Column(min_width=190):
                         ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="ffmpeg_crf", value=dv.ffmpeg_crf, interactive=True)
                     with gr.Column(min_width=130):
                         ffmpeg_preset = gr.Dropdown(label="ffmpeg_preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
+            def change_visibility_from_skip_video(choice):
+                if choice:
+                    return gr.update(visible=False)
+                else:
+                    return gr.update(visible=True) 
             with gr.Column():
-                with gr.Row():
+                with gr.Row() as soundtrack_row:
                     add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="add_soundtrack", value=dv.add_soundtrack)
                     soundtrack_path = gr.Textbox(label="soundtrack_path", lines=1, interactive=True, value = dv.soundtrack_path)
                 with gr.Row():
@@ -776,6 +781,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row(visible=False):
                     # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
                     render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True, visible=False)
+            # skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=fps_out_format_row)
+            # skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=soundtrack_row)
+            # skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=ffmpeg_set_row)
+            # skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=store_frames_in_ram)  
+          
             
         with gr.Accordion('Frame Interpolation (RIFE)', open=True):
             with gr.Accordion('Important notes and Help', open=False):
@@ -831,6 +841,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
                         # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
                         vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
+        # TODO: move these lines from here
+        outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram]
+        for output in outputs:
+            skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
     # END OF UI TABS
     return locals()
 
