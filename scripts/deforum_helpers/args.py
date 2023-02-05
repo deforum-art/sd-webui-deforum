@@ -371,6 +371,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
                 custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
+        with gr.Accordion('Resume Animation', open=False):
+            with gr.Row():
+                resume_from_timestring = gr.Checkbox(label="resume_from_timestring", value=da.resume_from_timestring, interactive=True)
+                resume_timestring = gr.Textbox(label="resume_timestring", lines=1, value = da.resume_timestring, interactive=True)
     # Animation settings 'Key' tab
     with gr.Tab('Keyframes'):
         #TODO make a some sort of the original dictionary parsing
@@ -650,10 +654,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 use_mask_video = gr.Checkbox(label="use_mask_video", value=False, interactive=True)
             with gr.Row():
                 video_mask_path = gr.Textbox(label="video_mask_path", lines=1, value = da.video_mask_path, interactive=True)
-        with gr.Accordion('Resume Animation', open=False):
-            with gr.Row():
-                resume_from_timestring = gr.Checkbox(label="resume_from_timestring", value=da.resume_from_timestring, interactive=True)
-                resume_timestring = gr.Textbox(label="resume_timestring", lines=1, value = da.resume_timestring, interactive=True)
         # Parseq
         with gr.Accordion('Parseq', open=False):
             gr.HTML("""
