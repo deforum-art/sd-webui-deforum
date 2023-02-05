@@ -769,7 +769,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row():
                         skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
-                with gr.Accordion('Manual Settings', open=True, visible=True) as vid_manual_settings_accord:
+                with gr.Accordion('Manual Settings', open=True, visible=False) as vid_manual_settings_accord:
                     with gr.Row():
                         use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
                         max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
