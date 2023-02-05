@@ -3,6 +3,7 @@ import os
 import json
 import deforum_helpers.args as deforum_args
 from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
+from .deprecation_utils import handle_deprecated_settings
 import logging
 
 def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root):
@@ -12,6 +13,7 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom
     else:
         with open(custom_settings_file, "r") as f:
             jdata = json.loads(f.read())
+            handle_deprecated_settings(jdata)
             root.animation_prompts = jdata["prompts"]
             for i, k in enumerate(args_dict):
                 if k in jdata:
@@ -77,6 +79,7 @@ def load_settings(*args, **kwargs):
     else:
         with open(settings_path, "r") as f:
             jdata = json.loads(f.read())
+            handle_deprecated_settings(jdata)
     ret = []
 
     if 'animation_prompts' in jdata:
@@ -145,6 +148,7 @@ def load_video_settings(*args, **kwargs):
     else:
         with open(video_settings_path, "r") as f:
             jdata = json.loads(f.read())
+            handle_deprecated_settings(jdata)
     ret = []
 
     for key in data:
