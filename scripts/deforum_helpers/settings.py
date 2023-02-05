@@ -3,6 +3,7 @@ import os
 import json
 import deforum_helpers.args as deforum_args
 from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
+from .deprecation_utils import handle_deprecated_settings
 import logging
 
 def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root):
@@ -12,7 +13,12 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom
     else:
         with open(custom_settings_file, "r") as f:
             jdata = json.loads(f.read())
+            handle_deprecated_settings(jdata)
             root.animation_prompts = jdata["prompts"]
+            if "animation_prompts_positive" in jdata:
+                root.animation_prompts_positive = jdata["animation_prompts_positive"]
+            if "animation_prompts_negative" in jdata:
+                root.animation_prompts_negative = jdata["animation_prompts_negative"]
             for i, k in enumerate(args_dict):
                 if k in jdata:
                     args_dict[k] = jdata[k]
@@ -50,6 +56,8 @@ def save_settings(*args, **kwargs):
     anim_args_dict = pack_anim_args(data)
     parseq_dict = pack_parseq_args(data)
     args_dict["prompts"] = json.loads(data['animation_prompts'])
+    args_dict["animation_prompts_positive"] = data['animation_prompts_positive']
+    args_dict["animation_prompts_negative"] = data['animation_prompts_negative']
     loop_dict = pack_loop_args(data)
     print(f"saving custom settings to {settings_path}")
     with open(settings_path, "w") as f:
@@ -77,11 +85,14 @@ def load_settings(*args, **kwargs):
     else:
         with open(settings_path, "r") as f:
             jdata = json.loads(f.read())
+            handle_deprecated_settings(jdata)
     ret = []
-
     if 'animation_prompts' in jdata:
         jdata['prompts'] = jdata['animation_prompts']#compatibility with old versions
-
+    if 'animation_prompts_positive' in jdata:
+        data["animation_prompts_positive"] = jdata['animation_prompts_positive']
+    if 'animation_prompts_negative' in jdata:
+        data["animation_prompts_negative"] = jdata['animation_prompts_negative']
     for key in data:
         if key == 'sampler':
             sampler_val = jdata[key]
@@ -126,6 +137,10 @@ def load_settings(*args, **kwargs):
         else:
             if key == 'animation_prompts':
                 ret.append(json.dumps(jdata['prompts'], ensure_ascii=False, indent=4))
+            elif key == 'animation_prompts_positive' and 'animation_prompts_positive' in jdata:
+                ret.append(jdata['animation_prompts_positive'])
+            elif key == 'animation_prompts_negative' and 'animation_prompts_negative' in jdata:
+                ret.append(jdata['animation_prompts_negative'])
             else:
                 ret.append(data[key])
 
@@ -145,6 +160,7 @@ def load_video_settings(*args, **kwargs):
     else:
         with open(video_settings_path, "r") as f:
             jdata = json.loads(f.read())
+            handle_deprecated_settings(jdata)
     ret = []
 
     for key in data:

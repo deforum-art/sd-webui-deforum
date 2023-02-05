@@ -82,7 +82,6 @@ def DeforumAnimArgs():
     hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" #@param {type:"string"}
 
     #@markdown ####**Coherence:**
-    histogram_matching = False #@param {type:"boolean"}
     color_coherence = 'Match Frame 0 LAB' #@param ['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'] {type:'string'}
     color_coherence_video_every_N_frames = 1 #@param {type:"integer"}
     color_force_grayscale = False #@param {type:"boolean"}
@@ -485,8 +484,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             def change_color_coherence_video_every_N_frames_visibility(choice):
                 return gr.update(visible=choice=="Video Input")
             with gr.Row():
-                histogram_matching = gr.Checkbox(label="Force all frames to match initial frame's colors. Overrides a1111 settings. NOT RECOMMENDED, enable only for backwards compatibility.", value=da.histogram_matching, interactive=True)
-            with gr.Row():
                 # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
                 color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
                 color_force_grayscale = gr.Checkbox(label="color_force_grayscale", value=da.color_force_grayscale, interactive=True)
@@ -861,7 +858,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_checkpoint_scheduling, checkpoint_schedule,
                         enable_clipskip_scheduling, clipskip_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
-                        histogram_matching, color_coherence, color_coherence_video_every_N_frames, color_force_grayscale,
+                        color_coherence, color_coherence_video_every_N_frames, color_force_grayscale,
                         diffusion_cadence,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
                         use_depth_warping, midas_weight,

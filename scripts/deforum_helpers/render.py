@@ -257,7 +257,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
 
                 # intercept and override to grayscale
                 if anim_args.color_force_grayscale:
-                    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2GRAY)
                     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
                 filename = f"{args.timestring}_{tween_frame_idx:05}.png"
@@ -369,7 +369,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         loop_args.blendFactorSlope = loopSchedulesAndData.blendFactorSlope_series[frame_idx]
         loop_args.tweeningFrameSchedule = loopSchedulesAndData.tweening_frames_schedule_series[frame_idx]
         loop_args.colorCorrectionFactor = loopSchedulesAndData.color_correction_factor_series[frame_idx]
-        loop_args.useLooper = loopSchedulesAndData.useLooper
+        loop_args.use_looper = loopSchedulesAndData.use_looper
         loop_args.imagesToKeyframe = loopSchedulesAndData.imagesToKeyframe
         
         if scheduled_clipskip is not None:
