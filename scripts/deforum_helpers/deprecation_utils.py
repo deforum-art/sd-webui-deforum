@@ -3,11 +3,9 @@
 # if the latter is removed completely, put a warning
 
 # as of 2023-02-05
-# "useLooper" -> "use_looper"
 # "histogram_matching" -> None
 
 deprecation_map = {
-    "useLooper": "use_looper",
     "histogram_matching": None
 }
 
