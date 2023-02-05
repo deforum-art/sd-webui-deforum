@@ -44,9 +44,7 @@ def get_webui_sd_pipeline(args, root, frame):
     else:
         p.denoising_strength = 1 - args.strength
     p.cfg_scale = args.scale
-    # FIXME better color corrections as match histograms doesn't seem to be fully working
-    if root.color_corrections is not None:
-        p.color_corrections = root.color_corrections
     p.outpath_samples = root.outpath_samples
+    
 
     return p
