@@ -536,14 +536,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row():
                 padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="padding_mode", value=da.padding_mode, elem_id="padding_mode")
                 sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="sampling_mode", value=da.sampling_mode, elem_id="sampling_mode")
+            with gr.Accordion('3D Field Of View (FOV)', open=False) as a11:
+                with gr.Row():
+                    fov_schedule = gr.Textbox(label="fov_schedule", lines=1, value = da.fov_schedule, interactive=True)
+                with gr.Row():
+                    near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
+                with gr.Row():
+                    far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
         # 3D FOV
-        with gr.Accordion('3D Field Of View (FOV)', open=False) as a11:
-            with gr.Row():
-                fov_schedule = gr.Textbox(label="fov_schedule", lines=1, value = da.fov_schedule, interactive=True)
-            with gr.Row():
-                near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
-            with gr.Row():
-                far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
         # Perspective Flip
         with gr.Accordion('Perspective Flip', open=False) as a12:
             with gr.Row():
