@@ -110,7 +110,6 @@ def get_quick_vid_info(vid_local_path):
 # Stitch images to a h264 mp4 video using ffmpeg
 def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):
     start_time = time.time()
-    # TODO: add audio custom print msgs for a nice user experience
     print(f"Stitching video from frames using FFMPEG:\nFrames:\n{imgs_path}\nTo Video:\n{outmp4_path}")
     if stitch_to_frame == -1:
         stitch_to_frame = 9999999
