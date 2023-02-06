@@ -389,7 +389,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 def change_diffusion_cadence_visibility(choice):
                     return gr.update(visible=choice not in ['Video Input', 'Interpolation'])
                 def disble_3d_related_stuff(choice):
-                    if choice == '2D':
+                    if choice != '3D':
                         return gr.update(visible=False)
                     else:
                         return gr.update(visible=True)
@@ -398,6 +398,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         return gr.update(visible=True)
                     else:
                         return gr.update(visible=False)
+                def disable_by_interpolation(choice):
+                    if choice == 'Interpolation':
+                        return gr.update(visible=False)
+                    else:
+                        return gr.update(visible=True)
                 with gr.Row():
                     with gr.Column(scale=5):
                         with gr.Row():
@@ -477,7 +482,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row)
                 seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
             # 2D + 3D Motion
-            with gr.Accordion('Motion', open=True) as a4:
+            with gr.Accordion('Motion', open=True) as motion_accord:
                 with gr.Column(visible=True) as only_2d_motion_column:
                     with gr.Row():
                         angle = gr.Textbox(label="angle", lines=1, value = da.angle, interactive=True)
@@ -500,6 +505,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             #TODO: move these lines
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
             animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
+            animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=motion_accord)
+            
             # Coherence
             with gr.Accordion('Coherence', open=True) as a7:
                 # TODO: move this line
@@ -550,7 +557,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
                     midas_weight = gr.Number(label="midas_weight", value=da.midas_weight, interactive=True)
-                    save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
+                    # save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
                 with gr.Row():
                     padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="padding_mode", value=da.padding_mode, elem_id="padding_mode")
                     sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="sampling_mode", value=da.sampling_mode, elem_id="sampling_mode")
@@ -565,7 +572,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
             # 3D FOV
             # Perspective Flip
-            with gr.Accordion('Perspective Flip', open=False) as a12:
+            with gr.Accordion('Perspective Flip', open=False) as perspective_flip_accord:
                 with gr.Row():
                     enable_perspective_flip = gr.Checkbox(label="enable_perspective_flip", value=da.enable_perspective_flip, interactive=True)
                 with gr.Row():
@@ -576,6 +583,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     perspective_flip_gamma = gr.Textbox(label="perspective_flip_gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
                 with gr.Row():
                     perspective_flip_fv = gr.Textbox(label="perspective_flip_fv", lines=1, value = da.perspective_flip_fv, interactive=True)
+            #TODO: move this from here
+            animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=perspective_flip_accord)
             # Steps Scheduling
             with gr.Accordion('Steps Scheduling', open=False) as a13:
                 with gr.Row():
@@ -807,6 +816,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row():
                         skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
+                        save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
                 with gr.Accordion('Stitch Frames to Video', open=False, visible=True) as stitch_imgs_to_vid_row:
                     with gr.Row(visible=False):
                         # max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
