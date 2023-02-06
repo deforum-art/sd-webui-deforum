@@ -2,4 +2,6 @@
 	display: none;
 }
 
-.min-h-[6rem] #vid_to_rife_chosen_file {}
+#vid_to_rife_chosen_file {
+	height: 180p;
+}
