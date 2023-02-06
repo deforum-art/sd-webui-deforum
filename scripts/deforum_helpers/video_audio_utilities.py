@@ -112,6 +112,8 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
     start_time = time.time()
     # TODO: add audio custom print msgs for a nice user experience
     print(f"Stitching video from frames using FFMPEG:\nFrames:\n{imgs_path}\nTo Video:\n{outmp4_path}")
+    if stitch_to_frame == -1:
+        stitch_to_frame = 9999999
     try:
         cmd = [
             ffmpeg_location,
