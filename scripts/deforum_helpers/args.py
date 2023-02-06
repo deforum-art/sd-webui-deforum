@@ -769,8 +769,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         formatted_serial = '%0' + str(padding) + 'd'
                         return re.sub(serial, formatted_serial, filename)
                 def direct_stitch_vid_from_frames(first_img_path, out_vid_path, fps, f_location, f_crf, f_preset):
-                    print(first_img_path.orig_name)
-                    print(extract_serial(first_img_path.orig_name))
+                    if first_img_path is not None:
+                        print(first_img_path.orig_name)
+                        print(extract_serial(first_img_path.orig_name))
                     # print(img_path_list.name)
                     # print msg and do nothing if vid not uploaded or interp_x not provided
                     # if not file or x_am == 'Disabled':
@@ -790,7 +791,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row():
                         skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
-                with gr.Accordion('Manual Settings', open=True, visible=False) as stitch_imgs_to_vid_row:
+                with gr.Accordion('Manual Settings', open=True, visible=True) as stitch_imgs_to_vid_row:
                     with gr.Row(visible=False):
                         # max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
                         path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) # not visible as of 06-02-23 since render_steps is disabled as well and they work together. Need to fix both.
