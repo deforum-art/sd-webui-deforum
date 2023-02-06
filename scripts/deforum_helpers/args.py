@@ -259,7 +259,7 @@ def DeforumOutputArgs():
     skip_video_for_run_all = False #@param {type: 'boolean'}
     fps = 15 #@param {type:"number"}
     #@markdown **Manual Settings**
-    image_path = "" #@param {type:"string"}
+    image_path = "D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/BBBBBBBBBBBBBBBB1/20230124234916_%05d.png" #@param {type:"string"}
     mp4_path = "testvidmanualsettings.mp4" #@param {type:"string"}
     ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
@@ -281,7 +281,7 @@ import os
 import time
 from types import SimpleNamespace
 
-i1_store_backup = "<p style=\"font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.0b</p>"
+i1_store_backup = "<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.0b</p>"
 i1_store = i1_store_backup
 
 mask_fill_choices=['fill', 'original', 'latent noise', 'latent nothing']
@@ -768,10 +768,20 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         padding = len(serial)
                         formatted_serial = '%0' + str(padding) + 'd'
                         return re.sub(serial, formatted_serial, filename)
-                def direct_stitch_vid_from_frames(first_img_path, out_vid_path, fps, f_location, f_crf, f_preset):
-                    if first_img_path is not None:
-                        print(first_img_path.orig_name)
-                        print(extract_serial(first_img_path.orig_name))
+                def direct_stitch_vid_from_frames(image_path, fps, f_location, f_crf, f_preset, add_soundtrack, audio_path):
+                    if image_path is not None and image_path != '':
+                        print(f"image_path: {image_path}")
+                        print(f"fps: {fps}")
+                        print(f"f_location: {f_location}")
+                        print(f"f_crf: {f_crf}")
+                        print(f"f_preset: {f_preset}")
+                        print(f"add_soundtrack: {add_soundtrack}")
+                        print(f"audio_path: {audio_path}")
+                        # ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path="D:/D-SD/autopt2NEW/stable-diffusion-webui/outputs/img2img-images/BBBBBBBBBBBBBBBB1/TEST-OUT.mp4", stitch_from_frame=0, stitch_to_frame=-1, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
+                    else:
+                        print("Please set correct image_path")
+                    
+                    # ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
                     # print(img_path_list.name)
                     # print msg and do nothing if vid not uploaded or interp_x not provided
                     # if not file or x_am == 'Disabled':
@@ -798,14 +808,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     gr.HTML("Please select only the very first (0) img from your sequence!")
                     with gr.Row():
                         # image_path = gr.Textbox(label="image_path", lines=1, interactive=True, value = dv.image_path)
-                          image_path = gr.File(label="Images to Stitch", interactive=True, file_count="single", file_types=[".png", ".jpg"])
-                    with gr.Row():
+                          # image_path = gr.File(label="Images to Stitch", interactive=True, file_count="single", file_types=[".png", ".jpg"])
+                          image_path = gr.Textbox(label="image_path", lines=1, interactive=True, value = dv.image_path)
+                    with gr.Row(visible=False):
                         mp4_path = gr.Textbox(label="mp4_path", lines=1, interactive=True, value = dv.mp4_path)
                     with gr.Row(visible=False):
                         # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
                         render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True, visible=False)
                     ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
-                    ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, mp4_path, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                    ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path])
 
                 # process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
             with gr.Accordion('Frame Interpolation (RIFE)', open=True):
