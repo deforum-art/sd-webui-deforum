@@ -517,13 +517,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row():
                         padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="padding_mode", value=da.padding_mode, elem_id="padding_mode")
                         sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="sampling_mode", value=da.sampling_mode, elem_id="sampling_mode")
-                    with gr.Accordion('3D Field Of View (FOV)', open=False) as a11:
-                        with gr.Row():
-                            fov_schedule = gr.Textbox(label="fov_schedule", lines=1, value = da.fov_schedule, interactive=True)
-                        with gr.Row():
-                            near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
-                        with gr.Row():
-                            far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
+                with gr.Accordion('Field Of View', open=False, visible=False) as fov_accord:
+                    with gr.Row():
+                        fov_schedule = gr.Textbox(label="fov_schedule", lines=1, value = da.fov_schedule, interactive=True)
+                    with gr.Row():
+                        near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
+                    with gr.Row():
+                        far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
             def update_motion_accord_name(choice):
                 if choice == '2D':
                     return gr.update(label = '2D Motion')
@@ -593,6 +593,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
             #TODO: move this line
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
+            animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
             # 3D FOV
             # Perspective Flip
             with gr.Accordion('Perspective Flip', open=False) as perspective_flip_accord:
