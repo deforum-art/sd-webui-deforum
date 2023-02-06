@@ -785,11 +785,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(visible=False):
                         # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
                         render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True, visible=False)
-                # skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=fps_out_format_row)
-                # skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=soundtrack_row)
-                # skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=ffmpeg_set_row)
-                # skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=store_frames_in_ram)  
-              
                 
             with gr.Accordion('Frame Interpolation (RIFE)', open=True):
                 with gr.Accordion('Important notes and Help', open=False):
