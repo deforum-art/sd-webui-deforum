@@ -152,6 +152,7 @@ def DeforumArgs():
 
     #@markdonw **Webui stuff**
     tiling = False
+    restore_faces = False
     # firstphase_width = 0
     # firstphase_height = 0
     seed_enable_extras = False
@@ -346,6 +347,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 with gr.Row(visible=False):
                                     filename_format = gr.Textbox(label="filename_format", lines=1, interactive=True, value = d.filename_format, visible=False)
                         with gr.Accordion('Subseed controls & More', open=False):
+                            # Not visible until fixed, 06-02-23
+                            with gr.Row(visible=False):
+                                restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
                             with gr.Row():
                                 seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
                                 subseed = gr.Number(label="subseed", value=d.subseed, interactive=True, precision=0)
@@ -887,7 +891,7 @@ hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human
                         hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
                         hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
-args_names =    str(r'''W, H, tiling,
+args_names =    str(r'''W, H, tiling, restore_faces,
                         seed, sampler,
                         seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h,
                         steps, ddim_eta,
@@ -992,6 +996,7 @@ def process_args(args_dict_main):
     p.sampler_name = args.sampler
     p.batch_size = args.n_batch
     p.tiling = args.tiling
+    p.restore_faces = args.restore_faces
     p.seed_enable_extras = args.seed_enable_extras
     p.subseed = args.subseed
     p.subseed_strength = args.subseed_strength
