@@ -774,7 +774,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     import re
                     # TODO: make the if smarter
                     if re.search(r"_%\d+d\.png$", image_path):
-                        if os.path.exists(out_mp4_path)
+                        out_mp4_path = get_output_path(image_path)
                         ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=out_mp4_path, stitch_from_frame=0, stitch_to_frame=-1, imgs_path=image_path, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
                     else:
                         print("Please set correct image_path")
@@ -794,7 +794,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(visible=False):
                         # max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
                         path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) # not visible as of 06-02-23 since render_steps is disabled as well and they work together. Need to fix both.
-                    gr.HTML("<li>Enter relative or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID</li>")
+                    gr.HTML("<li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID</li>")
                     
                     with gr.Row():
                           image_path = gr.Textbox(label="image_path", lines=1, interactive=True, value = dv.image_path)
