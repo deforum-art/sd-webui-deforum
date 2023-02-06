@@ -487,7 +487,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row)
                 seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
             # 2D + 3D Motion
-            with gr.Accordion('Motion', open=True) as motion_accord:
+            with gr.Accordion('2D Motion', open=True) as motion_accord:
                 with gr.Column(visible=True) as only_2d_motion_column:
                     with gr.Row():
                         angle = gr.Textbox(label="angle", lines=1, value = da.angle, interactive=True)
@@ -508,6 +508,30 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         rotation_3d_y = gr.Textbox(label="rotation_3d_y", lines=1, value = da.rotation_3d_y, interactive=True)
                     with gr.Row():
                         rotation_3d_z = gr.Textbox(label="rotation_3d_z", lines=1, value = da.rotation_3d_z, interactive=True)
+                            # 3D Depth Warping
+                with gr.Accordion('Depth Warping', open=False, visible=False) as depth_3d_warping_accord:
+                    with gr.Row():
+                        use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
+                        midas_weight = gr.Number(label="midas_weight", value=da.midas_weight, interactive=True)
+                        # save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
+                    with gr.Row():
+                        padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="padding_mode", value=da.padding_mode, elem_id="padding_mode")
+                        sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="sampling_mode", value=da.sampling_mode, elem_id="sampling_mode")
+                    with gr.Accordion('3D Field Of View (FOV)', open=False) as a11:
+                        with gr.Row():
+                            fov_schedule = gr.Textbox(label="fov_schedule", lines=1, value = da.fov_schedule, interactive=True)
+                        with gr.Row():
+                            near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
+                        with gr.Row():
+                            far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
+            def update_motion_accord_name(choice):
+                if choice == '2D':
+                    return gr.update(label = '2D Motion')
+                elif choice == '3D':
+                    return gr.update(label = '3D Motion, Depth & FOV')
+                else:
+                    return gr.update()
+                    
             #TODO: move these lines
             def disable_motion_accord(choice):
                 if choice in ['2D','3D']:
@@ -517,8 +541,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
             animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
             animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=motion_accord) 
-            # animation_mode.change(fn=disable_by_video_input, inputs=animation_mode, outputs=motion_accord)
-  
+            
+            animation_mode.change(fn=update_motion_accord_name, inputs=animation_mode, outputs=motion_accord) 
             # Coherence
             with gr.Accordion('Coherence', open=False) as coherence_accord:
                 # TODO: move this line
@@ -567,22 +591,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     amount_schedule = gr.Textbox(label="amount_schedule", lines=1, value = da.amount_schedule, interactive=True)
                 with gr.Row():
                     threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
-            # 3D Depth Warping
-            with gr.Accordion('3D Depth Warping', open=False, visible=False) as depth_3d_warping_accord:
-                with gr.Row():
-                    use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
-                    midas_weight = gr.Number(label="midas_weight", value=da.midas_weight, interactive=True)
-                    # save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
-                with gr.Row():
-                    padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="padding_mode", value=da.padding_mode, elem_id="padding_mode")
-                    sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="sampling_mode", value=da.sampling_mode, elem_id="sampling_mode")
-                with gr.Accordion('3D Field Of View (FOV)', open=False) as a11:
-                    with gr.Row():
-                        fov_schedule = gr.Textbox(label="fov_schedule", lines=1, value = da.fov_schedule, interactive=True)
-                    with gr.Row():
-                        near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
-                    with gr.Row():
-                        far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
             #TODO: move this line
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
             # 3D FOV
