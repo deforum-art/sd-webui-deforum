@@ -37,7 +37,7 @@ def DeforumAnimArgs():
     rotation_3d_x = "0:(0)"#@param {type:"string"}
     rotation_3d_y = "0:(0)"#@param {type:"string"}
     rotation_3d_z = "0:(0)"#@param {type:"string"}
-    flip_2d_perspective = False #@param {type:"boolean"}
+    enable_perspective_flip = False #@param {type:"boolean"}
     perspective_flip_theta = "0:(0)"#@param {type:"string"}
     perspective_flip_phi = "0:(t%15)"#@param {type:"string"}
     perspective_flip_gamma = "0:(0)"#@param {type:"string"}
@@ -497,6 +497,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         rotation_3d_y = gr.Textbox(label="rotation_3d_y", lines=1, value = da.rotation_3d_y, interactive=True)
                     with gr.Row():
                         rotation_3d_z = gr.Textbox(label="rotation_3d_z", lines=1, value = da.rotation_3d_z, interactive=True)
+            #TODO: move these lines
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
             animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
             # Coherence
@@ -545,7 +546,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
             # 3D Depth Warping
-            with gr.Accordion('3D Depth Warping', open=False) as a10:
+            with gr.Accordion('3D Depth Warping', open=False, visible=False) as depth_3d_warping_accord:
                 with gr.Row():
                     use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
                     midas_weight = gr.Number(label="midas_weight", value=da.midas_weight, interactive=True)
@@ -560,11 +561,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
                     with gr.Row():
                         far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
+            #TODO: move this line
+            animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
             # 3D FOV
             # Perspective Flip
             with gr.Accordion('Perspective Flip', open=False) as a12:
                 with gr.Row():
-                    flip_2d_perspective = gr.Checkbox(label="flip_2d_perspective", value=da.flip_2d_perspective, interactive=True)
+                    enable_perspective_flip = gr.Checkbox(label="enable_perspective_flip", value=da.enable_perspective_flip, interactive=True)
                 with gr.Row():
                     perspective_flip_theta = gr.Textbox(label="perspective_flip_theta", lines=1, value = da.perspective_flip_theta, interactive=True)
                 with gr.Row():
@@ -894,7 +897,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 anim_args_names =   str(r'''animation_mode, max_frames, border,
                         angle, zoom, translation_x, translation_y, translation_z,
                         rotation_3d_x, rotation_3d_y, rotation_3d_z,
-                        flip_2d_perspective,
+                        enable_perspective_flip,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule,
                         enable_steps_scheduling, steps_schedule,

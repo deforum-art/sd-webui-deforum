@@ -6,7 +6,8 @@
 # "histogram_matching" -> None
 
 deprecation_map = {
-    "histogram_matching": None
+    "histogram_matching": None,
+    "flip_2d_perspective": "enable_perspective_flip"
 }
 
 def handle_deprecated_settings(settings_json):
