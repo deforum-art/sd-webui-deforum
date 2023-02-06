@@ -259,9 +259,8 @@ def DeforumOutputArgs():
     skip_video_for_run_all = False #@param {type: 'boolean'}
     fps = 15 #@param {type:"number"}
     #@markdown **Manual Settings**
-    use_manual_settings = False #@param {type:"boolean"}
-    image_path = "/content/drive/20220903000939_%05d.png" #@param {type:"string"}
-    mp4_path = "/content/drive/20220903000939.mp4" #@param {type:"string"}
+    image_path = "" #@param {type:"string"}
+    mp4_path = "testvidmanualsettings.mp4" #@param {type:"string"}
     ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
     ffmpeg_preset = 'slow'
@@ -269,7 +268,7 @@ def DeforumOutputArgs():
     soundtrack_path = "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_1MB_MP3.mp3"
     render_steps = False  #@param {type: 'boolean'}
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
-    max_video_frames = 200 #@param {type:"string"}
+    # max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False #@param {type: 'boolean'}
     frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
     frame_interpolation_x_amount = "Disabled" #"Disabled" #@param ["Disabled" + all values from x2 to x10]
@@ -737,7 +736,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     hybrid_comp_alpha_schedule = gr.Textbox(label="comp_alpha_schedule", lines=1, value = da.hybrid_comp_alpha_schedule, interactive=True)
                 with gr.Row():
-                    hybrid_comp_mask_blend_alpha_schedule = gr.Textbox(label="comp_mask_blend_alpha_schedule", lines=1, value = da.hybrid_comp_mask_blend_alpha_schedule, interactive=True)
+                    hybrid_comp_mask_blend_alpha_schedule = gr.Textbox(label="comp_mask_blend_alpha_schedule", lines=1, value = da.hybrid_comp_mask_blend_alpha_schedule, interactive=True, elem_id="hybridelemtest")
                 with gr.Row():
                     hybrid_comp_mask_contrast_schedule = gr.Textbox(label="comp_mask_contrast_schedule", lines=1, value = da.hybrid_comp_mask_contrast_schedule, interactive=True)
                 with gr.Row():
@@ -761,6 +760,24 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="ffmpeg_crf", value=dv.ffmpeg_crf, interactive=True)
                         with gr.Column(min_width=130):
                             ffmpeg_preset = gr.Dropdown(label="ffmpeg_preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
+                def extract_serial(filename):
+                    import re
+                    match = re.search(r'^(\d+)|(\d+)$', filename)
+                    if match:
+                        serial = match.group()
+                        padding = len(serial)
+                        formatted_serial = '%0' + str(padding) + 'd'
+                        return re.sub(serial, formatted_serial, filename)
+                def direct_stitch_vid_from_frames(first_img_path, out_vid_path, fps, f_location, f_crf, f_preset):
+                    print(first_img_path.orig_name)
+                    print(extract_serial(first_img_path.orig_name))
+                    # print(img_path_list.name)
+                    # print msg and do nothing if vid not uploaded or interp_x not provided
+                    # if not file or x_am == 'Disabled':
+                        # return print("Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)")
+
+                    # root_params = Root()
+                    # f_models_path = root_params['models_path']
                 def change_visibility_from_skip_video(choice):
                     if choice:
                         return gr.update(visible=False)
@@ -773,19 +790,23 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row():
                         skip_video_for_run_all = gr.Checkbox(label="skip_video_for_run_all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="store_frames_in_ram", value=dv.store_frames_in_ram, interactive=True)
-                with gr.Accordion('Manual Settings', open=True, visible=False) as vid_manual_settings_accord:
+                with gr.Accordion('Manual Settings', open=True, visible=False) as stitch_imgs_to_vid_row:
+                    with gr.Row(visible=False):
+                        # max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
+                        path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) # not visible as of 06-02-23 since render_steps is disabled as well and they work together. Need to fix both.
+                    gr.HTML("Please select only the very first (0) img from your sequence!")
                     with gr.Row():
-                        use_manual_settings = gr.Checkbox(label="use_manual_settings", value=dv.use_manual_settings, interactive=True)
-                        max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
-                        path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True)
-                    with gr.Row():
-                        image_path = gr.Textbox(label="image_path", lines=1, interactive=True, value = dv.image_path)
+                        # image_path = gr.Textbox(label="image_path", lines=1, interactive=True, value = dv.image_path)
+                          image_path = gr.File(label="Images to Stitch", interactive=True, file_count="single", file_types=[".png", ".jpg"])
                     with gr.Row():
                         mp4_path = gr.Textbox(label="mp4_path", lines=1, interactive=True, value = dv.mp4_path)
                     with gr.Row(visible=False):
                         # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
                         render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True, visible=False)
-                
+                    ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
+                    ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, mp4_path, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+
+                # process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
             with gr.Accordion('Frame Interpolation (RIFE)', open=True):
                 with gr.Accordion('Important notes and Help', open=False):
                     gr.HTML("""
@@ -821,7 +842,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         # Intrpolate any existing video from the connected PC
                         with gr.Accordion('Interpolate an existing video', open=False):
                             # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
-                            vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"])
+                            vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_rife_chosen_file")
                             with gr.Row():
                                 # Non interactive textbox showing uploaded input vid total Frame Count
                                 in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
@@ -904,8 +925,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
 video_args_names =  str(r'''skip_video_for_run_all,
                             fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
                             add_soundtrack, soundtrack_path,
-                            use_manual_settings,
-                            render_steps, max_video_frames,
+                            render_steps,
                             path_name_modifier, image_path, mp4_path, store_frames_in_ram,
                             frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount,
                             frame_interpolation_keep_imgs'''
@@ -1038,3 +1058,5 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, 
     f_models_path = root_params['models_path']
 
     process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
+
+

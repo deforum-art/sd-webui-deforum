@@ -1,0 +1,5 @@
+#save_deforum, #img2img_tab, #inpaint_tab, #inpaint_tab, #extras_tab, #save_zip_txt2img, #save_zip_deforum, #deforum_skip {
+	display: none;
+}
+
+.min-h-[6rem] #vid_to_rife_chosen_file {}
