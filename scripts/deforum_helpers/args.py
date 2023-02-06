@@ -399,7 +399,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     else:
                         return gr.update(visible=False)
                 def disable_by_interpolation(choice):
-                    if choice == 'Interpolation':
+                    if choice in ['Interpolation']:
+                        return gr.update(visible=False)
+                    else:
+                        return gr.update(visible=True)
+                def disable_by_video_input(choice):
+                    if choice in ['Video Input']:
                         return gr.update(visible=False)
                     else:
                         return gr.update(visible=True)
@@ -488,10 +493,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         angle = gr.Textbox(label="angle", lines=1, value = da.angle, interactive=True)
                     with gr.Row():
                         zoom = gr.Textbox(label="zoom", lines=1, value = da.zoom, interactive=True)
-                with gr.Row():
-                    translation_x = gr.Textbox(label="translation_x", lines=1, value = da.translation_x, interactive=True)
-                with gr.Row():
-                    translation_y = gr.Textbox(label="translation_y", lines=1, value = da.translation_y, interactive=True)
+                with gr.Column(visible=True) as both_anim_mode_motion_params_column:
+                    with gr.Row():
+                        translation_x = gr.Textbox(label="translation_x", lines=1, value = da.translation_x, interactive=True)
+                    with gr.Row():
+                        translation_y = gr.Textbox(label="translation_y", lines=1, value = da.translation_y, interactive=True)
                 # 3D-only Motion
                 with gr.Column(visible=False) as only_3d_motion_column:
                     with gr.Row():
@@ -503,19 +509,26 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row():
                         rotation_3d_z = gr.Textbox(label="rotation_3d_z", lines=1, value = da.rotation_3d_z, interactive=True)
             #TODO: move these lines
+            def disable_motion_accord(choice):
+                if choice in ['2D','3D']:
+                    return gr.update(visible=True)
+                else:
+                    return gr.update(visible=False)
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
             animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
-            animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=motion_accord)
-            
+            animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=motion_accord) 
+            # animation_mode.change(fn=disable_by_video_input, inputs=animation_mode, outputs=motion_accord)
+  
             # Coherence
-            with gr.Accordion('Coherence', open=True) as a7:
+            with gr.Accordion('Coherence', open=False) as coherence_accord:
                 # TODO: move this line
                 def change_color_coherence_video_every_N_frames_visibility(choice):
                     return gr.update(visible=choice=="Video Input")
-                with gr.Row():
+                with gr.Row(equal_height=True):
                     # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
                     color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
-                    color_force_grayscale = gr.Checkbox(label="color_force_grayscale", value=da.color_force_grayscale, interactive=True)
+                    with gr.Column() as force_grayscale_column:
+                        color_force_grayscale = gr.Checkbox(label="color_force_grayscale", value=da.color_force_grayscale, interactive=True)
                 with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
                     color_coherence_video_every_N_frames = gr.Number(label="color_coherence_video_every_N_frames", value=1, interactive=True)
                 #TODO: move this line
@@ -525,6 +538,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                     reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="reroll_blank_frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
+            #TODO: move this line 
+            animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
             # Noise
             def change_perlin_visibility(choice):
                 return gr.update(visible=choice=="perlin")
@@ -543,7 +558,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # TODO: move this line
             noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
             # Anti-blur
-            with gr.Accordion('Anti Blur', open=True) as a9:
+            with gr.Accordion('Anti Blur', open=False) as anti_blur_accord:
                 with gr.Row():
                     kernel_schedule = gr.Textbox(label="kernel_schedule", lines=1, value = da.kernel_schedule, interactive=True)
                 with gr.Row():
@@ -583,8 +598,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     perspective_flip_gamma = gr.Textbox(label="perspective_flip_gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
                 with gr.Row():
                     perspective_flip_fv = gr.Textbox(label="perspective_flip_fv", lines=1, value = da.perspective_flip_fv, interactive=True)
-            #TODO: move this from here
-            animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=perspective_flip_accord)
+            #TODO: move this from here # CHANGE FUNC NAME? as it does more than just disableing motion accord now!
+            animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=perspective_flip_accord)
             # Steps Scheduling
             with gr.Accordion('Steps Scheduling', open=False) as a13:
                 with gr.Row():
