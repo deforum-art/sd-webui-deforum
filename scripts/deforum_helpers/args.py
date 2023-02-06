@@ -388,6 +388,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     return gr.update(visible=choice != "Video Input")
                 def change_diffusion_cadence_visibility(choice):
                     return gr.update(visible=choice not in ['Video Input', 'Interpolation'])
+                def disble_3d_related_stuff(choice):
+                    if choice == '2D':
+                        return gr.update(visible=False)
+                    else:
+                        return gr.update(visible=True)
+                def enable_2d_related_stuff(choice):
+                    if choice == '2D':
+                        return gr.update(visible=True)
+                    else:
+                        return gr.update(visible=False)
                 with gr.Row():
                     with gr.Column(scale=5):
                         with gr.Row():
@@ -406,6 +416,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 # TODO: move this from here
                 animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_column)
                 animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_row)
+                
             # loopArgs
             with gr.Accordion('Guided Images', open=False) as a2:
                 with gr.Accordion('*READ ME before you use this mode!*', open=False):
@@ -466,25 +477,28 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row)
                 seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
             # 2D + 3D Motion
-            with gr.Accordion('2D + 3D Motion', open=True) as a4:
-                with gr.Row():
-                    angle = gr.Textbox(label="angle", lines=1, value = da.angle, interactive=True)
-                with gr.Row():
-                    zoom = gr.Textbox(label="zoom", lines=1, value = da.zoom, interactive=True)
+            with gr.Accordion('Motion', open=True) as a4:
+                with gr.Column(visible=True) as only_2d_motion_column:
+                    with gr.Row():
+                        angle = gr.Textbox(label="angle", lines=1, value = da.angle, interactive=True)
+                    with gr.Row():
+                        zoom = gr.Textbox(label="zoom", lines=1, value = da.zoom, interactive=True)
                 with gr.Row():
                     translation_x = gr.Textbox(label="translation_x", lines=1, value = da.translation_x, interactive=True)
                 with gr.Row():
                     translation_y = gr.Textbox(label="translation_y", lines=1, value = da.translation_y, interactive=True)
-            # 3D-only Motion
-            with gr.Accordion('3D-Only Motion', open=True) as a5:
-                with gr.Row():
-                    translation_z = gr.Textbox(label="translation_z", lines=1, value = da.translation_z, interactive=True)
-                with gr.Row():
-                    rotation_3d_x = gr.Textbox(label="rotation_3d_x", lines=1, value = da.rotation_3d_x, interactive=True)
-                with gr.Row():
-                    rotation_3d_y = gr.Textbox(label="rotation_3d_y", lines=1, value = da.rotation_3d_y, interactive=True)
-                with gr.Row():
-                    rotation_3d_z = gr.Textbox(label="rotation_3d_z", lines=1, value = da.rotation_3d_z, interactive=True)
+                # 3D-only Motion
+                with gr.Column(visible=False) as only_3d_motion_column:
+                    with gr.Row():
+                        translation_z = gr.Textbox(label="translation_z", lines=1, value = da.translation_z, interactive=True)
+                    with gr.Row():
+                        rotation_3d_x = gr.Textbox(label="rotation_3d_x", lines=1, value = da.rotation_3d_x, interactive=True)
+                    with gr.Row():
+                        rotation_3d_y = gr.Textbox(label="rotation_3d_y", lines=1, value = da.rotation_3d_y, interactive=True)
+                    with gr.Row():
+                        rotation_3d_z = gr.Textbox(label="rotation_3d_z", lines=1, value = da.rotation_3d_z, interactive=True)
+            animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
+            animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
             # Coherence
             with gr.Accordion('Coherence', open=True) as a7:
                 # TODO: move this line
