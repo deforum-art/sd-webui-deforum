@@ -1,0 +1,18 @@
+#vid_to_rife_chosen_file .w-full {
+		display: flex !important;
+		align-items: flex-start !important;
+		justify-content: center !important;
+}
+#vid_to_rife_chosen_file {
+	height: 85px !important;
+}
+
+#deforum_interrupt, #save_zip_deforum, #save_deforum  {
+	display: none;
+}
+
+#deforum_results .flex #image_buttons_deforum #img2img_tab,
+#deforum_results .flex #image_buttons_deforum #inpaint_tab,
+#deforum_results .flex #image_buttons_deforum #extras_tab {
+	display: none !important;
+}
