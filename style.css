@@ -14,3 +14,9 @@
 #vid_to_rife_chosen_file {
 	height: 85px !important;
 }
+
+#deforum_results .flex #image_buttons_deforum #img2img_tab,
+#deforum_results .flex #image_buttons_deforum #inpaint_tab,
+#deforum_results .flex #image_buttons_deforum #extras_tab {
+	display: none !important;
+}
