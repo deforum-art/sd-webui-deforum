@@ -34,13 +34,13 @@ def DeforumAnimArgs():
     zoom = "0:(1.0025+0.002*sin(1.25*3.14*t/30))"#@param {type:"string"}
     translation_x = "0:(0)"#@param {type:"string"}
     translation_y = "0:(0)"#@param {type:"string"}
-    translation_z = "0:(10)"#@param {type:"string"}
+    translation_z = "0:(1.75)"#@param {type:"string"}
     rotation_3d_x = "0:(0)"#@param {type:"string"}
     rotation_3d_y = "0:(0)"#@param {type:"string"}
     rotation_3d_z = "0:(0)"#@param {type:"string"}
     enable_perspective_flip = False #@param {type:"boolean"}
     perspective_flip_theta = "0:(0)"#@param {type:"string"}
-    perspective_flip_phi = "0:(t%15)"#@param {type:"string"}
+    perspective_flip_phi = "0:(0)"#@param {type:"string"}
     perspective_flip_gamma = "0:(0)"#@param {type:"string"}
     perspective_flip_fv = "0:(53)"#@param {type:"string"}
     noise_schedule = "0: (0.065)"#@param {type:"string"}
@@ -73,7 +73,7 @@ def DeforumAnimArgs():
     # Anti-blur
     kernel_schedule = "0: (5)"
     sigma_schedule = "0: (1.0)"
-    amount_schedule = "0: (0.1)"
+    amount_schedule = "0: (0.35)"
     threshold_schedule = "0: (0.0)"
     # Hybrid video
     hybrid_comp_alpha_schedule = "0:(1)" #@param {type:"string"}
@@ -86,7 +86,7 @@ def DeforumAnimArgs():
     color_coherence = 'Match Frame 0 LAB' #@param ['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'] {type:'string'}
     color_coherence_video_every_N_frames = 1 #@param {type:"integer"}
     color_force_grayscale = False #@param {type:"boolean"}
-    diffusion_cadence = '1' #@param ['1','2','3','4','5','6','7','8'] {type:'string'}
+    diffusion_cadence = '2' #@param ['1','2','3','4','5','6','7','8'] {type:'string'}
 
     #@markdown ####**Noise settings:**
     noise_type = 'perlin' #@param ['uniform', 'perlin'] {type:'string'}
@@ -98,7 +98,7 @@ def DeforumAnimArgs():
 
     #@markdown ####**3D Depth Warping:**
     use_depth_warping = True #@param {type:"boolean"}
-    midas_weight = 0.3 #@param {type:"number"}
+    midas_weight = 0.2 #@param {type:"number"}
 
     padding_mode = 'border'#@param ['border', 'reflection', 'zeros'] {type:'string'}
     sampling_mode = 'bicubic'#@param ['bicubic', 'bilinear', 'nearest'] {type:'string'}
@@ -838,7 +838,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
     hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
-    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram
+    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram]
     
     for output in outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
