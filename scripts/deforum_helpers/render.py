@@ -16,7 +16,7 @@ from .parseq_adapter import ParseqAnimKeys
 from .seed import next_seed
 from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
-from .load_images import get_mask, load_img
+from .load_images import get_mask, load_img, get_mask_from_file
 from .hybrid_video import hybrid_generation, hybrid_composite
 from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion, get_flow_for_hybrid_motion_prev, image_transform_ransac, image_transform_optical_flow
 from .save_images import save_image
@@ -145,8 +145,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         noise_mask_vals['init_mask'] = get_mask(args) # TODO?: add a different default noise mask
 
     if anim_args.use_mask_video:
-        mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
-        noise_mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+        mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+        noise_mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
     else:
         mask_vals['video_mask'] = None
         noise_mask_vals['video_mask'] = None
