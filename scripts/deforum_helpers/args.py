@@ -577,7 +577,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     </ul>
                     """)
                 with gr.Row():
-                    animation_prompts = gr.Textbox(label="animation_prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
+                    animation_prompts = gr.Textbox(label="animation_prompts", lines=6, interactive=True, value = DeforumAnimPrompts())
                 gr.HTML("Positive prompt to be appended to all animation prompts")
                 with gr.Row():
                     animation_prompts_positive = gr.Textbox(label="animation_prompts_positive", lines=1, interactive=True, value = "")
