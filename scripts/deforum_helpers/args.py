@@ -665,8 +665,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     parseq_manifest = gr.Textbox(label="Parseq Manifest (JSON or URL)", lines=4, value = dp.parseq_manifest, interactive=True)
                 with gr.Row():
                     parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
+        def show_hybrid_html_msg(choice):
+            if choice not in ['2D','3D']:
+                return gr.update(visible=True) 
+            else:
+                return gr.update(visible=False)
+        def change_hybrid_tab_status(choice):
+            if choice in ['2D','3D']:
+                return gr.update(visible=True) 
+            else:
+                return gr.update(visible=False)
         # HYBRID VIDEO tab
         with gr.Tab('Hybrid Video'):
+            hybrid_msg_html = gr.HTML(value='<font color="Tomato"><b>HYBRID MODE IS DISABLED! Please change animation mode to 2D or 3D to re-enable.</b></font>',visible=False, elem_id='hybrid_msg_html')
             with gr.Accordion("Info & Help", open=False):
                 hybrid_html = "<p style=\"padding-bottom:0\"><b style=\"text-shadow: blue -1px -1px;\">Hybrid Video Compositing in 2D/3D Mode</b><span style=\"color:#DDD;font-size:0.7rem;text-shadow: black -1px -1px;margin-left:10px;\">by <a href=\"https://github.com/reallybigname\">reallybigname</a></span></p>"
                 hybrid_html += "<ul style=\"list-style-type:circle; margin-left:1em; margin-bottom:1em;\"><li>Composite video with previous frame init image in <b>2D or 3D animation_mode</b> <i>(not for Video Input mode)</i></li>"
@@ -682,7 +693,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 hybrid_html += "<li>Autocontrast low/high cutoff schedules 0-100. Low 0 High 100 is full range. <br>(<i><b>hybrid_comp_mask_auto_contrast</b> must be enabled</i>)</li></ul>"            
                 hybrid_html += "<a style='color:SteelBlue;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/Animation-Settings#hybrid-video-mode-for-2d3d-animations'>Click Here</a> for more info/ a Guide."      
                 gr.HTML(hybrid_html)
-            with gr.Accordion("Hybrid Settings", open=True):
+            animation_mode.change(fn=show_hybrid_html_msg, inputs=animation_mode, outputs=hybrid_msg_html)
+            with gr.Accordion("Hybrid Settings", open=True) as hybrid_settings_accord:
                 with gr.Row():
                     with gr.Column(min_width=340):
                         with gr.Row():
@@ -708,7 +720,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         hybrid_comp_mask_inverse = gr.Checkbox(label="comp_mask_inverse", value=False, interactive=True)
                 with gr.Row():
                         hybrid_comp_save_extra_frames = gr.Checkbox(label="comp_save_extra_frames", value=False, interactive=True)
-            with gr.Accordion("Hybrid Schedules", open=False):
+            with gr.Accordion("Hybrid Schedules", open=False) as hybrid_sch_accord:
                 with gr.Row():
                     hybrid_comp_alpha_schedule = gr.Textbox(label="comp_alpha_schedule", lines=1, value = da.hybrid_comp_alpha_schedule, interactive=True)
                 with gr.Row():
@@ -719,9 +731,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     hybrid_comp_mask_auto_contrast_cutoff_high_schedule = gr.Textbox(label="comp_mask_auto_contrast_cutoff_high_schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, interactive=True)
                 with gr.Row():
                     hybrid_comp_mask_auto_contrast_cutoff_low_schedule = gr.Textbox(label="comp_mask_auto_contrast_cutoff_low_schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, interactive=True)
-            with gr.Accordion("Humans Masking", open=False):
+            with gr.Accordion("Humans Masking", open=False) as humans_masking_accord:
                 with gr.Row():
                     hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="generate_human_masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
+            animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_sch_accord)
+            animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_settings_accord)
+            animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=humans_masking_accord)
         # VIDEO OUTPUT TAB
         with gr.Tab('Output'):
             with gr.Accordion('Video Output Settings', open=True):
