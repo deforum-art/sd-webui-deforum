@@ -186,4 +186,28 @@ def find_ffmpeg_binary():
             files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
             return files[0] if files else 'ffmpeg'
         except:
-            return 'ffmpeg'
+            return 'ffmpeg'   
+            
+# These 2 functions belong to "stitch frames to video" in Output tab
+def get_manual_frame_to_vid_output_path(input_path):
+    root, ext = os.path.splitext(input_path)
+    base, _ = root.rsplit("_", 1)
+    output_path = f"{base}.mp4"
+    i = 1
+    while os.path.exists(output_path):
+        output_path = f"{base}_{i}.mp4"
+        i += 1
+    return output_path
+    
+def direct_stitch_vid_from_frames(image_path, fps, f_location, f_crf, f_preset, add_soundtrack, audio_path):
+    import re
+    # TODO: make the if smarter
+    if re.search(r"_%\d+d\.png$", image_path):
+        out_mp4_path = get_manual_frame_to_vid_output_path(image_path)
+        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=out_mp4_path, stitch_from_frame=0, stitch_to_frame=-1, imgs_path=image_path, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
+    else:
+        print("Please set correct image_path")
+# end of 2 stitch frame to video funcs
+
+
+
