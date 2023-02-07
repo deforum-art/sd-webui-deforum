@@ -439,8 +439,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                Set the keyframes and the images that you want to show up. 
                                Note: the number of frames between each keyframe should be greater than the tweening frames.""")
                     #    In later versions this should be also in the strength schedule, but for now you need to set it.
-                    gr.HTML("""Prerequisites: 
+                    gr.HTML("""Prerequisites and Important Info: 
                                <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0em">
+                                   <li>This mode works ONLY with 2D/3D animation modes. Interpolation and Video Input modes aren't supported.</ li>
                                    <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
                                    <li>Set 'seed_behavior' to 'schedule' under the Seed Scheduling section below.</li>
                                 </ul>
