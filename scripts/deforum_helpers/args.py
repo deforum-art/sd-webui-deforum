@@ -806,7 +806,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="generate_human_masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
         # VIDEO OUTPUT TAB
-        with gr.Tab('Video output'):
+        with gr.Tab('Output'):
             with gr.Accordion('Video Output Settings', open=True):
                 with gr.Row() as fps_out_format_row:
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
