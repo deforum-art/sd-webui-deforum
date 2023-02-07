@@ -1,11 +1,3 @@
-/*#save_deforum, #img2img_tab, #inpaint_tab, #inpaint_tab, #extras_tab, #save_zip_txt2img, #save_zip_deforum, #deforum_skip, #deforum_interrupt {
-	display: none;
-}*/
-
-#deforum_interrupt, #save_zip_deforum, #save_deforum  {
-	display: none;
-}
-
 #vid_to_rife_chosen_file .w-full {
 		display: flex !important;
 		align-items: flex-start !important;
@@ -13,6 +5,10 @@
 }
 #vid_to_rife_chosen_file {
 	height: 85px !important;
+}
+
+#deforum_interrupt, #save_zip_deforum, #save_deforum  {
+	display: none;
 }
 
 #deforum_results .flex #image_buttons_deforum #img2img_tab,
