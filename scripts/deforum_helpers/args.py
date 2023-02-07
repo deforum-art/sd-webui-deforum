@@ -400,9 +400,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     strength_schedule = gr.Textbox(label="strength_schedule", lines=1, value = da.strength_schedule, interactive=True)
                 with gr.Row():
                     cfg_scale_schedule = gr.Textbox(label="cfg_scale_schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
-                # TODO: move this from here
-                animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_column)
-                animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_row)
             # loopArgs
             with gr.Accordion('Guided Images', open=False) as a2:
                 with gr.Accordion('*READ ME before you use this mode!*', open=False):
@@ -455,9 +452,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     seed_iter_N = gr.Number(label="seed_iter_N", value=d.seed_iter_N, interactive=True, precision=0)
                 with gr.Row(visible=False) as seed_schedule_row:
                     seed_schedule = gr.Textbox(label="seed_schedule", lines=1, value = da.seed_schedule, interactive=True)
-                # TODO: move these 
-                seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row)
-                seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
             # 2D + 3D Motion
             with gr.Accordion('2D Motion', open=True) as motion_accord:
                 with gr.Column(visible=True) as only_2d_motion_column:
@@ -480,12 +474,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         rotation_3d_y = gr.Textbox(label="rotation_3d_y", lines=1, value = da.rotation_3d_y, interactive=True)
                     with gr.Row():
                         rotation_3d_z = gr.Textbox(label="rotation_3d_z", lines=1, value = da.rotation_3d_z, interactive=True)
-                            # 3D Depth Warping
+                # 3D Depth Warping
                 with gr.Accordion('Depth Warping', open=False, visible=False) as depth_3d_warping_accord:
                     with gr.Row():
                         use_depth_warping = gr.Checkbox(label="use_depth_warping", value=da.use_depth_warping, interactive=True)
                         midas_weight = gr.Number(label="midas_weight", value=da.midas_weight, interactive=True)
-                        # save_depth_maps = gr.Checkbox(label="save_depth_maps", value=da.save_depth_maps, interactive=True)
                     with gr.Row():
                         padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="padding_mode", value=da.padding_mode, elem_id="padding_mode")
                         sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="sampling_mode", value=da.sampling_mode, elem_id="sampling_mode")
@@ -496,11 +489,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
                     with gr.Row():
                         far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
-
-            animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
-            animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
-            animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=motion_accord) 
-            animation_mode.change(fn=update_motion_accord_name, inputs=animation_mode, outputs=motion_accord) 
             # Coherence
             with gr.Accordion('Coherence', open=False) as coherence_accord:
                 with gr.Row(equal_height=True):
@@ -510,15 +498,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         color_force_grayscale = gr.Checkbox(label="color_force_grayscale", value=da.color_force_grayscale, interactive=True)
                 with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
                     color_coherence_video_every_N_frames = gr.Number(label="color_coherence_video_every_N_frames", value=1, interactive=True)
-                #TODO: move this line
-                color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
                 with gr.Row():
                     contrast_schedule = gr.Textbox(label="contrast_schedule", lines=1, value = da.contrast_schedule, interactive=True)
                 with gr.Row():
                     # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                     reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="reroll_blank_frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
-            #TODO: move this line 
-            animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
             # Noise
             def change_perlin_visibility(choice):
                 return gr.update(visible=choice=="perlin")
@@ -534,8 +518,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Column(min_width=230):
                         perlin_octaves = gr.Slider(label="perlin_octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                         perlin_persistence = gr.Slider(label="perlin_persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
-            # TODO: move this line
-            noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
             # Anti-blur
             with gr.Accordion('Anti Blur', open=False) as anti_blur_accord:
                 with gr.Row():
@@ -546,10 +528,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     amount_schedule = gr.Textbox(label="amount_schedule", lines=1, value = da.amount_schedule, interactive=True)
                 with gr.Row():
                     threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
-            #TODO: move this line
-            animation_mode.change(fn=disable_when_not_in_2d_or_3d_modes, inputs=animation_mode, outputs=anti_blur_accord) # hide antiblur accord when not in 3d or 2d mode
-            animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
-            animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
             # 3D FOV
             # Perspective Flip
             with gr.Accordion('Perspective Flip', open=False) as perspective_flip_accord:
@@ -563,8 +541,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     perspective_flip_gamma = gr.Textbox(label="perspective_flip_gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
                 with gr.Row():
                     perspective_flip_fv = gr.Textbox(label="perspective_flip_fv", lines=1, value = da.perspective_flip_fv, interactive=True)
-            #TODO: move this from here # CHANGE FUNC NAME? as it does more than just disableing motion accord now!
-            animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=perspective_flip_accord)
             # Steps Scheduling
             with gr.Accordion('Steps Scheduling', open=False) as a13:
                 with gr.Row():
@@ -730,8 +706,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Column():
                         hybrid_comp_mask_auto_contrast = gr.Checkbox(label="comp_mask_auto_contrast", value=False, interactive=True)
                         hybrid_comp_mask_inverse = gr.Checkbox(label="comp_mask_inverse", value=False, interactive=True)
-                #TODO: move this!
-                hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
                 with gr.Row():
                         hybrid_comp_save_extra_frames = gr.Checkbox(label="comp_save_extra_frames", value=False, interactive=True)
             with gr.Accordion("Hybrid Schedules", open=False):
@@ -846,10 +820,29 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
                             # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
-            # TODO: move these lines from here
-            outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram]
-            for output in outputs:
-                skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
+            
+    # Gradio's Change functions - hiding and renaming elements based on other elements
+    animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_column)
+    animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_row)
+    animation_mode.change(fn=disable_when_not_in_2d_or_3d_modes, inputs=animation_mode, outputs=anti_blur_accord)
+    animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
+    animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
+    animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
+    animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
+    animation_mode.change(fn=update_motion_accord_name, inputs=animation_mode, outputs=motion_accord) 
+    animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
+    animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=motion_accord) 
+    animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
+    seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row) 
+    seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
+    color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
+    noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
+    hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
+    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram
+    
+    for output in outputs:
+        skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
+        
     # END OF UI TABS
     return locals()
 
