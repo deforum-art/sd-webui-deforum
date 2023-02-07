@@ -853,13 +853,20 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Accordion('Stitch Frames to Video', open=False, visible=True) as stitch_imgs_to_vid_row:
                     with gr.Row(visible=False):
                         # max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
-                        path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) # not visible as of 06-02-23 since render_steps is disabled as well and they work together. Need to fix both.
-                    gr.HTML("<li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID</li>")
-                    
+                        path_name_modifier = gr.Dropdown(label="path_name_modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
+                    gr.HTML("""
+                     <p style="margin-top:0em">
+                        Important Notes:
+                        <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
+                            <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID</li>
+                            <li>Working FFMPEG under 'ffmpeg_location' is required to stitch a video in this mode!</li>
+                        </ul>
+                        """)
                     with gr.Row():
                           image_path = gr.Textbox(label="image_path", lines=1, interactive=True, value = dv.image_path)
                     with gr.Row(visible=False):
                         mp4_path = gr.Textbox(label="mp4_path", lines=1, interactive=True, value = dv.mp4_path)
+                    # not visible as of 06-02-23 since render_steps is disabled as well and they work together. Need to fix both.
                     with gr.Row(visible=False):
                         # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
                         render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True, visible=False)
