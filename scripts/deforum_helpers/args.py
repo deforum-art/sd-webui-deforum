@@ -408,6 +408,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         return gr.update(visible=False)
                     else:
                         return gr.update(visible=True)
+                def disable_when_not_in_2d_or_3d_modes(choice):
+                    if choice not in ['2D','3D']:
+                        return gr.update(visible=False)
+                    else:
+                        return gr.update(visible=True)
                 with gr.Row():
                     with gr.Column(scale=5):
                         with gr.Row():
@@ -564,6 +569,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="reroll_blank_frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
             #TODO: move this line 
             animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
+            
+            
             # Noise
             def change_perlin_visibility(choice):
                 return gr.update(visible=choice=="perlin")
@@ -592,6 +599,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     threshold_schedule = gr.Textbox(label="threshold_schedule", lines=1, value = da.threshold_schedule, interactive=True)
             #TODO: move this line
+            animation_mode.change(fn=disable_when_not_in_2d_or_3d_modes, inputs=animation_mode, outputs=anti_blur_accord) # hide antiblur accord when not in 3d or 2d mode
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
             # 3D FOV
