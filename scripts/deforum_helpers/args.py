@@ -385,7 +385,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             #TODO make a some sort of the original dictionary parsing
             # Main top animation settings
             with gr.Accordion('Main Settings', open=True) as a1:
-                
                 with gr.Row():
                     with gr.Column(scale=5):
                         with gr.Row():
@@ -404,7 +403,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 # TODO: move this from here
                 animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_column)
                 animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_row)
-                
             # loopArgs
             with gr.Accordion('Guided Images', open=False) as a2:
                 with gr.Accordion('*READ ME before you use this mode!*', open=False):
@@ -451,7 +449,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
             # Seed Scheduling
             with gr.Accordion('Seed Scheduling', open=False) as a3:
-               
                 with gr.Row():
                     seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="seed_behavior", value=d.seed_behavior, elem_id="seed_behavior")
                 with gr.Row() as seed_iter_N_row:
@@ -503,11 +500,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
             animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
             animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=motion_accord) 
-            
             animation_mode.change(fn=update_motion_accord_name, inputs=animation_mode, outputs=motion_accord) 
             # Coherence
             with gr.Accordion('Coherence', open=False) as coherence_accord:
-                
                 with gr.Row(equal_height=True):
                     # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
                     color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
@@ -524,8 +519,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="reroll_blank_frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
             #TODO: move this line 
             animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
-            
-            
             # Noise
             def change_perlin_visibility(choice):
                 return gr.update(visible=choice=="perlin")
@@ -637,7 +630,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         strength_0_no_init = gr.Checkbox(label="strength_0_no_init", value=True, interactive=True)
                     with gr.Column(min_width=170):
                         strength = gr.Slider(label="strength", minimum=0, maximum=1, step=0.01, value=0, interactive=True)
-
                 with gr.Row():
                     init_image = gr.Textbox(label="init_image", lines=1, interactive=True, value = d.init_image)
             with gr.Accordion('Mask Init', open=True):
@@ -715,7 +707,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 hybrid_html += "<a style='color:SteelBlue;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/Animation-Settings#hybrid-video-mode-for-2d3d-animations'>Click Here</a> for more info/ a Guide."      
                 gr.HTML(hybrid_html)
             with gr.Accordion("Hybrid Settings", open=True):
-               
                 with gr.Row():
                     with gr.Column(min_width=340):
                         with gr.Row():
@@ -771,7 +762,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="ffmpeg_crf", value=dv.ffmpeg_crf, interactive=True)
                         with gr.Column(min_width=130):
                             ffmpeg_preset = gr.Dropdown(label="ffmpeg_preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
-                
                 with gr.Column():
                     with gr.Row() as soundtrack_row:
                         add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="add_soundtrack", value=dv.add_soundtrack)
@@ -1052,5 +1042,3 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, 
     f_models_path = root_params['models_path']
 
     process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
-
-
