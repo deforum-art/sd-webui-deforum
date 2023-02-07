@@ -270,10 +270,20 @@ def DeforumOutputArgs():
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
     max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False #@param {type: 'boolean'}
+    #@markdown **Interpolate Video Settings**
     frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
     frame_interpolation_x_amount = "Disabled" #"Disabled" #@param ["Disabled" + all values from x2 to x10]
     frame_interpolation_slow_mo_amount = "Disabled" #@param ["Disabled","x2","x4","x8"]
     frame_interpolation_keep_imgs = False #@param {type: 'boolean'}
+    #@markdown **Upscale Video Settings**
+    resize_mode = "Just resize" #@param ["Just resize", "Crop and resize", "Resize and fill", "Just resize (latent upscale)"]
+    upscaling_resize
+    upscaling_resize_w
+    upscaling_resize_h
+    upscaling_crop
+    extras_upscaler_1
+    extras_upscaler_2
+    extras_upscaler_2_visibility
     return locals()
     
 import gradio as gr
