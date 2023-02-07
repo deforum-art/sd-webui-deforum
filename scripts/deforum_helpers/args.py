@@ -4,7 +4,8 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
-from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video
+from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames
+from .gradio_funcs import *
 
 def Root():
     device = sh.device
@@ -30,7 +31,7 @@ def DeforumAnimArgs():
     border = 'replicate' #@param ['wrap', 'replicate'] {type:'string'}
     #@markdown ####**Motion Parameters:**
     angle = "0:(0)"#@param {type:"string"}
-    zoom = "0:(1.02+0.02*sin(2*3.14*t/20))"#@param {type:"string"}
+    zoom = "0:(1.0025+0.002*sin(1.25*3.14*t/30))"#@param {type:"string"}
     translation_x = "0:(0)"#@param {type:"string"}
     translation_y = "0:(0)"#@param {type:"string"}
     translation_z = "0:(10)"#@param {type:"string"}
@@ -137,10 +138,10 @@ def DeforumAnimArgs():
     
 def DeforumAnimPrompts():
     return r"""{
-    "0": "(scenic countryside:1.0), (cherry:`where(cos(6.28*t/10)>0, 1.8*cos(6.28*t/10), 0.001)`), (strawberry:`where(cos(6.28*t/10)<0, -1.8*cos(6.28*t/10), 0.001)`), snow, detailed painting by greg rutkowski --neg (cherry:`where(cos(6.28*t/10)<0, -1.8*cos(6.28*t/10), 0.001)`), (strawberry:`where(cos(6.28*t/10)>0, 1.8*cos(6.28*t/10), 0.001)`)",
-    "60": "a beautiful (((banana))), trending on Artstation",
-    "80": "a beautiful coconut --neg photo, realistic",
-    "100": "a beautiful durian, trending on Artstation"
+    "0": "tiny cute swamp bunny, highly detailed, intricate, ultra hd, sharp photo, crepuscular rays, in focus, by tomasz alen kopera",
+    "30": "anthropomorphic clean cat, surrounded by fractals, epic angle and pose, symmetrical, 3d, depth of field, ruan jia and fenghua zhong",
+    "60": "a beautiful coconut --neg photo, realistic",
+    "90": "a beautiful durian, trending on Artstation"
     }
     """
 
@@ -384,36 +385,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             #TODO make a some sort of the original dictionary parsing
             # Main top animation settings
             with gr.Accordion('Main Settings', open=True) as a1:
-                #TODO: move these functions from here!
-                def change_max_frames_visibility(choice):
-                    return gr.update(visible=choice != "Video Input")
-                def change_diffusion_cadence_visibility(choice):
-                    return gr.update(visible=choice not in ['Video Input', 'Interpolation'])
-                def disble_3d_related_stuff(choice):
-                    if choice != '3D':
-                        return gr.update(visible=False)
-                    else:
-                        return gr.update(visible=True)
-                def enable_2d_related_stuff(choice):
-                    if choice == '2D':
-                        return gr.update(visible=True)
-                    else:
-                        return gr.update(visible=False)
-                def disable_by_interpolation(choice):
-                    if choice in ['Interpolation']:
-                        return gr.update(visible=False)
-                    else:
-                        return gr.update(visible=True)
-                def disable_by_video_input(choice):
-                    if choice in ['Video Input']:
-                        return gr.update(visible=False)
-                    else:
-                        return gr.update(visible=True)
-                def disable_when_not_in_2d_or_3d_modes(choice):
-                    if choice not in ['2D','3D']:
-                        return gr.update(visible=False)
-                    else:
-                        return gr.update(visible=True)
+                
                 with gr.Row():
                     with gr.Column(scale=5):
                         with gr.Row():
@@ -479,11 +451,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     color_correction_factor = gr.Textbox(label="color correction factor", lines=1, value = "0:(.075)", interactive=True)
             # Seed Scheduling
             with gr.Accordion('Seed Scheduling', open=False) as a3:
-                # TODO: move this func
-                def change_seed_iter_visibility(choice):
-                    return gr.update(visible=choice=="iter")
-                def change_seed_schedule_visibility(choice):
-                    return gr.update(visible=choice=="schedule")
+               
                 with gr.Row():
                     seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="seed_behavior", value=d.seed_behavior, elem_id="seed_behavior")
                 with gr.Row() as seed_iter_N_row:
@@ -531,20 +499,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         near_schedule = gr.Textbox(label="near_schedule", lines=1, value = da.near_schedule, interactive=True)
                     with gr.Row():
                         far_schedule = gr.Textbox(label="far_schedule", lines=1, value = da.far_schedule, interactive=True)
-            def update_motion_accord_name(choice):
-                if choice == '2D':
-                    return gr.update(label = '2D Motion')
-                elif choice == '3D':
-                    return gr.update(label = '3D Motion, Depth & FOV')
-                else:
-                    return gr.update()
-                    
-            #TODO: move these lines
-            def disable_motion_accord(choice):
-                if choice in ['2D','3D']:
-                    return gr.update(visible=True)
-                else:
-                    return gr.update(visible=False)
+
             animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
             animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
             animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=motion_accord) 
@@ -552,9 +507,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             animation_mode.change(fn=update_motion_accord_name, inputs=animation_mode, outputs=motion_accord) 
             # Coherence
             with gr.Accordion('Coherence', open=False) as coherence_accord:
-                # TODO: move this line
-                def change_color_coherence_video_every_N_frames_visibility(choice):
-                    return gr.update(visible=choice=="Video Input")
+                
                 with gr.Row(equal_height=True):
                     # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
                     color_coherence = gr.Dropdown(label="color_coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
@@ -762,9 +715,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 hybrid_html += "<a style='color:SteelBlue;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/Animation-Settings#hybrid-video-mode-for-2d3d-animations'>Click Here</a> for more info/ a Guide."      
                 gr.HTML(hybrid_html)
             with gr.Accordion("Hybrid Settings", open=True):
-                #TODO: move this!
-                def change_comp_mask_x_visibility(choice):
-                    return gr.update(visible=choice != "None")
+               
                 with gr.Row():
                     with gr.Column(min_width=340):
                         with gr.Row():
@@ -820,29 +771,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="ffmpeg_crf", value=dv.ffmpeg_crf, interactive=True)
                         with gr.Column(min_width=130):
                             ffmpeg_preset = gr.Dropdown(label="ffmpeg_preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
-                # TODO: move these funcs from here
-                def get_output_path(input_path):
-                    root, ext = os.path.splitext(input_path)
-                    base, _ = root.rsplit("_", 1)
-                    output_path = f"{base}.mp4"
-                    i = 1
-                    while os.path.exists(output_path):
-                        output_path = f"{base}_{i}.mp4"
-                        i += 1
-                    return output_path
-                def direct_stitch_vid_from_frames(image_path, fps, f_location, f_crf, f_preset, add_soundtrack, audio_path):
-                    import re
-                    # TODO: make the if smarter
-                    if re.search(r"_%\d+d\.png$", image_path):
-                        out_mp4_path = get_output_path(image_path)
-                        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=out_mp4_path, stitch_from_frame=0, stitch_to_frame=-1, imgs_path=image_path, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
-                    else:
-                        print("Please set correct image_path")
-                def change_visibility_from_skip_video(choice):
-                    if choice:
-                        return gr.update(visible=False)
-                    else:
-                        return gr.update(visible=True) 
+                
                 with gr.Column():
                     with gr.Row() as soundtrack_row:
                         add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="add_soundtrack", value=dv.add_soundtrack)
@@ -871,7 +800,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(visible=False):
                         # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
                         render_steps = gr.Checkbox(label="render_steps", value=dv.render_steps, interactive=True, visible=False)
-                    #TODO: move these from 
                     ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
                     ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path])
             with gr.Accordion('Frame Interpolation (RIFE)', open=True):
@@ -1005,7 +933,6 @@ loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blen
 
 component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
 settings_component_names = [name for name in component_names if name not in video_args_names]
-
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
     ds = setup_deforum_setting_dictionary(self, is_img2img, is_extension)
