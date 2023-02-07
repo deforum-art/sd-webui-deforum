@@ -118,24 +118,19 @@ def run_deforum(*args, **kwargs):
     elif video_args.output_format == 'FFMPEG mp4':
         import subprocess
 
-        if video_args.use_manual_settings:
-            max_video_frames = video_args.max_video_frames #@param {type:"string"}
-            image_path = video_args.image_path
-            mp4_path = video_args.mp4_path
-        else:
-            path_name_modifier = video_args.path_name_modifier
-            if video_args.render_steps: # render steps from a single image
-                fname = f"{path_name_modifier}_%05d.png"
-                all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
-                newest_dir = max(all_step_dirs, key=os.path.getmtime)
-                image_path = os.path.join(newest_dir, fname)
-                print(f"Reading images from {image_path}")
-                mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
-                max_video_frames = args.steps
-            else: # render images for a video
-                image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
-                mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
-                max_video_frames = anim_args.max_frames
+        path_name_modifier = video_args.path_name_modifier
+        if video_args.render_steps: # render steps from a single image
+            fname = f"{path_name_modifier}_%05d.png"
+            all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
+            newest_dir = max(all_step_dirs, key=os.path.getmtime)
+            image_path = os.path.join(newest_dir, fname)
+            print(f"Reading images from {image_path}")
+            mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
+            max_video_frames = args.steps
+        else: # render images for a video
+            image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
+            mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
+            max_video_frames = anim_args.max_frames
 
         #save settings for the video
         video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
@@ -147,7 +142,7 @@ def run_deforum(*args, **kwargs):
             ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
             mp4 = open(mp4_path,'rb').read()
             data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
+            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
         except Exception as e:
             if need_to_frame_interpolate:
                 print(f"FFMPEG DID NOT STITCH ANY VIDEO. However, you requested to frame interpolate  - so we will continue to frame interpolation, but you'll be left only with the interpolated frames and not a video, since ffmpeg couldn't run. Original ffmpeg error: {e}")
@@ -157,24 +152,19 @@ def run_deforum(*args, **kwargs):
 
     else: # *GIF* TIME!
         # TODO: add support for custom frame interpolation vid location?
-        if video_args.use_manual_settings:
-            max_video_frames = video_args.max_video_frames #@param {type:"string"}
-            image_path = video_args.image_path
-            mp4_path = video_args.mp4_path
-        else:
-            path_name_modifier = video_args.path_name_modifier
-            if video_args.render_steps: # render steps from a single image
-                fname = f"{path_name_modifier}_%05d.png"
-                all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
-                newest_dir = max(all_step_dirs, key=os.path.getmtime)
-                image_path = os.path.join(newest_dir, fname)
-                print(f"Reading images from {image_path}")
-                mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.gif")
-                max_video_frames = args.steps
-            else: # render images for a video
-                image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
-                mp4_path = os.path.join(args.outdir, f"{args.timestring}.gif")
-                max_video_frames = anim_args.max_frames
+        path_name_modifier = video_args.path_name_modifier
+        if video_args.render_steps: # render steps from a single image
+            fname = f"{path_name_modifier}_%05d.png"
+            all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
+            newest_dir = max(all_step_dirs, key=os.path.getmtime)
+            image_path = os.path.join(newest_dir, fname)
+            print(f"Reading images from {image_path}")
+            mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.gif")
+            max_video_frames = args.steps
+        else: # render images for a video
+            image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
+            mp4_path = os.path.join(args.outdir, f"{args.timestring}.gif")
+            max_video_frames = anim_args.max_frames
 
         print(f"GIF created from:\n{image_path}\nTo:\n{mp4_path}")
 
@@ -198,7 +188,7 @@ def run_deforum(*args, **kwargs):
         mp4 = open(mp4_path,'rb').read()
         data_url = "data:image/gif;base64," + b64encode(mp4).decode()
         
-        deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0.75em\">Deforum v0.5-webui-beta</p><img src="{data_url}" type="image/gif"></img>'
+        deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum v0.5-webui-beta</p><img src="{data_url}" type="image/gif"></img>'
 
     if root.initial_info is None:
         root.initial_info = "An error has occured and nothing has been generated!"
@@ -207,8 +197,8 @@ def run_deforum(*args, **kwargs):
         a = np.random.rand(args.W, args.H, 3)*255
         root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
         root.initial_seed = 6934
-    # FRMAE INTERPOLATION TIME
-    if need_to_frame_interpolate: #video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
+    # FRAME INTERPOLATION TIME
+    if need_to_frame_interpolate: 
         print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
         process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
         
@@ -229,7 +219,7 @@ def run_deforum(*args, **kwargs):
     if opts.do_not_show_images:
         processed.images = []
 
-    return processed.images, generation_info_js, plaintext_to_html(processed.info), plaintext_to_html('#TODO')
+    return processed.images, generation_info_js, plaintext_to_html(processed.info), plaintext_to_html('')
 
 def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
@@ -275,7 +265,7 @@ def on_ui_tabs():
                         )
                 id_part = 'deforum'
                 with gr.Row(elem_id=f"{id_part}_generate_box"):
-                    skip = gr.Button('Skip', elem_id=f"{id_part}_skip", visible=True)
+                    skip = gr.Button('Skip', elem_id=f"{id_part}_skip", visible=False)
                     interrupt = gr.Button('Interrupt', elem_id=f"{id_part}_interrupt", visible=True)
                     submit = gr.Button('Generate', elem_id=f"{id_part}_generate", variant='primary')
 

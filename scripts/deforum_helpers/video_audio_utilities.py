@@ -4,6 +4,7 @@ import shutil
 import math
 import requests
 import subprocess
+import time
 from pkg_resources import resource_filename
 from modules.shared import state
 
@@ -77,8 +78,12 @@ def is_vid_path_valid(video_path):
     extension = video_path.rsplit('.', 1)[-1].lower()
     # vid path is actually a URL, check it 
     if video_path.startswith('http://') or video_path.startswith('https://'):
-        response = requests.head(video_path)
-        if response.status_code == 404 or response.status_code != 200:
+        response = requests.head(video_path, allow_redirects=True)
+        if response.status_code == 404:
+            raise ConnectionError("Video URL is not valid. Response status code: {}".format(response.status_code))
+        elif response.status_code == 302:
+            response = requests.head(response.headers['location'], allow_redirects=True)
+        if response.status_code != 200:
             raise ConnectionError("Video URL is not valid. Response status code: {}".format(response.status_code))
         if extension not in file_formats:
             raise ValueError("Video file format '{}' not supported. Supported formats are: {}".format(extension, file_formats))
@@ -104,8 +109,10 @@ def get_quick_vid_info(vid_local_path):
     
 # Stitch images to a h264 mp4 video using ffmpeg
 def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):
-    # TODO: add audio custom print msgs for a nice user experience
-    print(f"Trying to stitch video from frames using FFMPEG:\nFrames:\n{imgs_path}\nTo Video:\n{outmp4_path}")
+    start_time = time.time()
+    print(f"Stitching video from frames using FFMPEG:\nFrames:\n{imgs_path}\nTo Video:\n{outmp4_path}")
+    if stitch_to_frame == -1:
+        stitch_to_frame = 9999999
     try:
         cmd = [
             ffmpeg_location,
@@ -132,6 +139,8 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         raise Exception(f'Error stitching frames to video. Actual runtime error:{e}')
 
     if add_soundtrack != 'None':
+        print("Adding audio to video...")
+        audio_add_start_time = time.time()
         try:
             cmd = [
                 ffmpeg_location,
@@ -151,10 +160,13 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
                 print(stderr)
                 raise RuntimeError(stderr)
             os.replace(outmp4_path+'.temp.mp4', outmp4_path)
+            print(f"Adding audio to video took {time.time() - audio_add_start_time:.2f} seconds.")
+            print(f"FFMPEG Video+Audio stitching done in {time.time() - start_time:.2f} seconds!")
         except Exception as e:
             print(f'Error adding audio to video. Actual error: {e}')
-    # If we reached this point, all ok. Let the user know!
-    print("FFMPEG Video Stitching done!")
+            print(f"FFMPEG Video (sorry, no audio) stitching done in {time.time() - start_time:.2f} seconds!")
+    else:
+        print(f"FFMPEG Video stitching done in {time.time() - start_time:.2f} seconds!")
 
 def get_frame_name(path):
     name = os.path.basename(path)
