@@ -11,6 +11,11 @@
 	display: none;
 }
 
+#TTTTTTTT::before {
+  content: "Schedules:";
+  font-size: 10px !important;
+}
+
 #hybrid_msg_html {
 	color: Tomato !important;
 	margin-top: 5px !important;
@@ -18,7 +23,11 @@
 	font-size: 20px !important;
 	font-weight: bold !important;
 }
-
+/*
+#main_settings_tab {
+	visibility: hidden !important;
+}
+*/
 #deforum_results .flex #image_buttons_deforum #img2img_tab,
 #deforum_results .flex #image_buttons_deforum #inpaint_tab,
 #deforum_results .flex #image_buttons_deforum #extras_tab {

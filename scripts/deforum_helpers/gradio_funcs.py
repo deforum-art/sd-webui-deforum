@@ -6,6 +6,12 @@ def change_visibility_from_skip_video(choice):
     else:
         return gr.update(visible=True) 
 
+def hide_by_gif(choice):
+    if choice == 'PIL gif':
+        return gr.update(visible=False)
+    else:
+        return gr.update(visible=True)
+        
 def change_color_coherence_video_every_N_frames_visibility(choice):
     return gr.update(visible=choice=="Video Input")
 
