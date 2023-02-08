@@ -142,7 +142,7 @@ def DeforumAnimPrompts():
     "30": "anthropomorphic clean cat, surrounded by fractals, epic angle and pose, symmetrical, 3d, depth of field, ruan jia and fenghua zhong",
     "60": "a beautiful coconut --neg photo, realistic",
     "90": "a beautiful durian, trending on Artstation"
-    }
+}
     """
 
 def DeforumArgs():
@@ -573,16 +573,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0.2em">
                     <li>Please always keep values in math functions above 0.</li>
                     <li>There is *no* Batch mode like in vanilla deforum. Please Use the txt2img tab for that.</li>
-                    <li>For negative prompts, please write your positive prompt, then --neg ugly, text, assymetric, or any other negative tokens of your choice.</li>
+                    <li>For negative prompts, please write your positive prompt, then --neg ugly, text, assymetric, or any other negative tokens of your choice. OR:</li>
+                    <li>Use the negative_prompts field to automatically append all words as a negative prompt. *Don't* add --neg in the negative_prompts field!</li>
                     <li>Prompts are stored in JSON format. If you've got an error, check it in validator, <a style="color:SteelBlue" href="https://odu.github.io/slingjsonlint/">like here</a></li>
                     </ul>
                     """)
             with gr.Row():
                 animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
-            gr.HTML("Positive prompt to be appended to all prompts")
             with gr.Row():
                 animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, value = "")
-            gr.HTML("Negative prompt to be appended to all prompts")
             with gr.Row():
                 animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, value = "")
             # Composable Mask scheduling
