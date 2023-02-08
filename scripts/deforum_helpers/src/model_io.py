@@ -35,6 +35,8 @@ def load_weights(model, filename, path="./saved_models"):
 
 def load_checkpoint(fpath, model, optimizer=None):
     ckpt = torch.load(fpath, map_location='cpu')
+    if ckpt is None:
+        raise Exception(f"\nERROR Loading AdaBins_nyu.pt. Read this for a fix:\nhttps://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/FAQ-&-Troubleshooting#3d-animation-mode-is-not-working-only-2d-works")
     if optimizer is None:
         optimizer = ckpt.get('optimizer', None)
     else:
