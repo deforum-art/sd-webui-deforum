@@ -604,7 +604,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     <li>There is *no* Batch mode like in vanilla deforum. Please Use the txt2img tab for that.</li>
                     <li>For negative prompts, please write your positive prompt, then --neg ugly, text, assymetric, or any other negative tokens of your choice. OR:</li>
                     <li>Use the negative_prompts field to automatically append all words as a negative prompt. *Don't* add --neg in the negative_prompts field!</li>
-                    <li>Prompts are stored in JSON format. If you've got an error, check it in validator, <a style="color:SteelBlue" href="https://odu.github.io/slingjsonlint/">like here</a></li>
+                    <li>Prompts are stored in JSON format. If you've got an error, check it in a <a style="color:SteelBlue" href="https://odu.github.io/slingjsonlint/">JSON Validator</a></li>
                     </ul>
                     """)
             with gr.Row():
