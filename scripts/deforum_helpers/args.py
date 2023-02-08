@@ -490,6 +490,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
                     with gr.Row():
                         far_schedule = gr.Textbox(label="Far schedule", lines=1, value = da.far_schedule, interactive=True)
+            # Noise
+            def change_perlin_visibility(choice):
+                return gr.update(visible=choice=="perlin")
+            with gr.Accordion('Noise', open=True) as a8:
+                with gr.Row():
+                    noise_type = gr.Radio(['uniform', 'perlin'], label="Noise type", value=da.noise_type, elem_id="noise_type")
+                with gr.Row():
+                    noise_schedule = gr.Textbox(label="Noise schedule", lines=1, value = da.noise_schedule, interactive=True)
+                with gr.Row() as perlin_row:
+                    with gr.Column(min_width=220):
+                        perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
+                    with gr.Column(min_width=220):
+                        perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
             # Coherence
             with gr.Accordion('Coherence', open=False) as coherence_accord:
                 with gr.Row(equal_height=True):
@@ -504,19 +517,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                     reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
-            # Noise
-            def change_perlin_visibility(choice):
-                return gr.update(visible=choice=="perlin")
-            with gr.Accordion('Noise', open=True) as a8:
-                with gr.Row():
-                    noise_type = gr.Radio(['uniform', 'perlin'], label="Noise type", value=da.noise_type, elem_id="noise_type")
-                with gr.Row():
-                    noise_schedule = gr.Textbox(label="Noise schedule", lines=1, value = da.noise_schedule, interactive=True)
-                with gr.Row() as perlin_row:
-                    with gr.Column(min_width=220):
-                        perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
-                    with gr.Column(min_width=220):
-                        perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
             # Anti-blur
             with gr.Accordion('Anti Blur', open=False) as anti_blur_accord:
                 with gr.Row():
@@ -553,7 +553,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     sampler_schedule = gr.Textbox(label="Sampler schedule", lines=1, value = da.sampler_schedule, interactive=True)
             # Checkpoint Scheduling
-            with gr.Accordion('Checkpoint Scheduling', open=True) as a15:
+            with gr.Accordion('Checkpoint Scheduling', open=False) as a15:
                 with gr.Row():
                     enable_checkpoint_scheduling = gr.Checkbox(label="Enable checkpoint scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
                 with gr.Row():
