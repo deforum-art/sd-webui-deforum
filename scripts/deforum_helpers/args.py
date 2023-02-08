@@ -209,7 +209,7 @@ def DeforumArgs():
     # Overlay the masked image at the end of the generation so it does not get degraded by encoding and decoding
     overlay_mask = True  # {type:"boolean"}
     # Blur edges of final overlay mask, if used. Minimum = 0 (no blur)
-    mask_overlay_blur = 5 # {type:"number"}
+    mask_overlay_blur = 4 # {type:"number"}
 
     fill = 1 #MASKARGSEXPANSION Todo : Rename and convert to same formatting as used in img2img masked content
     full_res_mask = True
@@ -329,49 +329,60 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             )
     with gr.Blocks():
         with gr.Tab('Run'):
+            from modules.sd_samplers import samplers_for_img2img
+            with gr.Row(variant='compact'):
+                sampler = gr.Dropdown(label="Sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
+                steps = gr.Slider(label="Steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
+            with gr.Row(variant='compact'):
+                # with gr.Column(scale=4):
+                W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True) 
+            with gr.Row(variables='compact'):
+                seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
+                batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
             # Sampling settings START
-            with gr.Accordion('General Image Sampling Settings', open=True):
-                with gr.Row().style(equal_height=False):
-                    # with gr.Column(variant='compact'):
-                    with gr.Column():
-                        from modules.sd_samplers import samplers_for_img2img
-                        with gr.Row(variant='compact'):
-                            sampler = gr.Dropdown(label="Sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
-                            steps = gr.Slider(label="Steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
-                        with gr.Row(variant='compact'):
-                            with gr.Column(scale=4):
-                                W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
-                                H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True)
-                            with gr.Column(scale=4):
-                                seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
-                                batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
-                                with gr.Row(visible=False):
-                                    filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
-                        with gr.Accordion('Subseed controls & More', open=False):
-                            # Not visible until fixed, 06-02-23
-                            with gr.Row(visible=False):
-                                restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
-                            with gr.Row(variant='compact'):
-                                seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
-                                subseed = gr.Number(label="Subseed", value=d.subseed, interactive=True, precision=0)
-                                subseed_strength = gr.Slider(label="Subseed strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
-                            with gr.Row(variant='compact'):
-                                seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
-                                seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
-                            with gr.Row(variant='compact'):
-                                ddim_eta = gr.Number(label="DDIM ETA", value=d.ddim_eta, interactive=True)
-                                tiling = gr.Checkbox(label='Tiling', value=False)
-                                n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
-                        # NOT VISIBLE IN THE UI!
-                        with gr.Row(visible=False):
-                            save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
-                        # NOT VISIBLE IN THE UI!
-                        with gr.Row(visible=False):
-                            save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
-                            display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
-                        with gr.Row(visible=False):
-                            save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
-                            show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
+            # with gr.Accordion('General Image Sampling Settings', open=True):
+            # with gr.Row().style(equal_height=False):
+                # with gr.Column(variant='compact'):
+                # with gr.Column():
+                    # from modules.sd_samplers import samplers_for_img2img
+                    # with gr.Row(variant='compact'):
+                        # sampler = gr.Dropdown(label="Sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
+                        # steps = gr.Slider(label="Steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
+                    # with gr.Row(variant='compact'):
+                        # with gr.Column(scale=4):
+                        # W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
+                        # H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True)
+                        # with gr.Column(scale=4):
+                            # seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
+                            # batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
+            with gr.Row(visible=False):
+                filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
+            with gr.Accordion('Subseed controls & More', open=False):
+                # Not visible until fixed, 06-02-23
+                with gr.Row(visible=False):
+                    restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
+                with gr.Row(variant='compact'):
+                    seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
+                    subseed = gr.Number(label="Subseed", value=d.subseed, interactive=True, precision=0)
+                    subseed_strength = gr.Slider(label="Subseed strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
+                with gr.Row(variant='compact'):
+                    seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
+                    seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
+                with gr.Row(variant='compact'):
+                    ddim_eta = gr.Number(label="DDIM ETA", value=d.ddim_eta, interactive=True)
+                    tiling = gr.Checkbox(label='Tiling', value=False)
+                    n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
+            # NOT VISIBLE IN THE UI!
+            with gr.Row(visible=False):
+                save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
+            # NOT VISIBLE IN THE UI!
+            with gr.Row(visible=False):
+                save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
+                display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
+            with gr.Row(visible=False):
+                save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
+                show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
             with gr.Accordion('Run from Settings file', open=False):
                 with gr.Row(variant='compact'):
                     override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
@@ -432,25 +443,26 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 </ul>
                             """)
                 with gr.Row():
-                    use_looper = gr.Checkbox(label="Use guided images for the next run", value=False, interactive=True)
+                    use_looper = gr.Checkbox(label="Enable guided images mode", value=False, interactive=True)
                 with gr.Row():
                     init_images = gr.Textbox(label="Images to use for keyframe guidance", lines=9, value = keyframeExamples(), interactive=True)
-                gr.HTML("""strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on""")
-                with gr.Row():
-                    image_strength_schedule = gr.Textbox(label="Image strength schedule", lines=1, value = "0:(.75)", interactive=True)
-                gr.HTML("""blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))""")
-                with gr.Row():
-                    blendFactorMax = gr.Textbox(label="BlendFactorMax", lines=1, value = "0:(.35)", interactive=True)
-                with gr.Row():
-                    blendFactorSlope = gr.Textbox(label="BlendFactorSlope", lines=1, value = "0:(.25)", interactive=True)
-                with gr.Row():
-                    gr.HTML("""number of frames this will calculated over. After each insersion frame.""")
-                with gr.Row():
-                    tweening_frames_schedule = gr.Textbox(label="Tweening frames schedule", lines=1, value = "0:(20)", interactive=True)
-                with gr.Row():
-                    gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
-                with gr.Row():
-                    color_correction_factor = gr.Textbox(label="Color correction factor", lines=1, value = "0:(.075)", interactive=True)
+                with gr.Accordion('Guided images schedules', open=False):
+                    gr.HTML("""strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on""")
+                    with gr.Row():
+                        image_strength_schedule = gr.Textbox(label="Image strength schedule", lines=1, value = "0:(.75)", interactive=True)
+                    gr.HTML("""blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))""")
+                    with gr.Row():
+                        blendFactorMax = gr.Textbox(label="BlendFactorMax", lines=1, value = "0:(.35)", interactive=True)
+                    with gr.Row():
+                        blendFactorSlope = gr.Textbox(label="BlendFactorSlope", lines=1, value = "0:(.25)", interactive=True)
+                    with gr.Row():
+                        gr.HTML("""number of frames this will calculated over. After each insersion frame.""")
+                    with gr.Row():
+                        tweening_frames_schedule = gr.Textbox(label="Tweening frames schedule", lines=1, value = "0:(20)", interactive=True)
+                    with gr.Row():
+                        gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
+                    with gr.Row():
+                        color_correction_factor = gr.Textbox(label="Color correction factor", lines=1, value = "0:(.075)", interactive=True)
             # 2D + 3D Motion
             # with gr.Accordion('2D Motion', open=True) as motion_accord:
             # schedule_msg = gr.HTML('*Schedules*:')
@@ -644,9 +656,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     mask_file = gr.Textbox(label="Mask file", lines=1, interactive=True, value = d.mask_file)
                 with gr.Row():
-                    mask_contrast_adjust = gr.Number(label="Mask contrast adjust", value=d.mask_contrast_adjust, interactive=True)
-                    mask_brightness_adjust = gr.Number(label="Mask brightness adjust", value=d.mask_brightness_adjust, interactive=True)
-                    mask_overlay_blur = gr.Number(label="Mask overlay blur", value=d.mask_overlay_blur, interactive=True)
+                    mask_contrast_adjust = gr.Slider(label="Mask contrast adjust", minimum=0, maximum=1, step=0.01, value=d.mask_contrast_adjust, interactive=True)
+                    mask_brightness_adjust = gr.Slider(label="Mask brightness adjust", minimum=0, maximum=1, step=0.01, value=d.mask_brightness_adjust, interactive=True)
+                    mask_overlay_blur = gr.Slider(label="Mask overlay blur", minimum=0, maximum=64, step=1, value=d.mask_overlay_blur, interactive=True)
                 with gr.Row():
                     choice = mask_fill_choices[d.fill]
                     fill = gr.Radio(label='Mask fill', choices=mask_fill_choices, value=choice, type="index")
