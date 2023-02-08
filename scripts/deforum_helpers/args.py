@@ -327,6 +327,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             [],
             [i1]
             )
+    # TODO: Make new comments with section names!
     with gr.Blocks():
         with gr.Tab('Run'):
             from modules.sd_samplers import samplers_for_img2img
@@ -334,28 +335,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 sampler = gr.Dropdown(label="Sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
                 steps = gr.Slider(label="Steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
             with gr.Row(variant='compact'):
-                # with gr.Column(scale=4):
                 W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                 H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True) 
             with gr.Row(variables='compact'):
                 seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
                 batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
-            # Sampling settings START
-            # with gr.Accordion('General Image Sampling Settings', open=True):
-            # with gr.Row().style(equal_height=False):
-                # with gr.Column(variant='compact'):
-                # with gr.Column():
-                    # from modules.sd_samplers import samplers_for_img2img
-                    # with gr.Row(variant='compact'):
-                        # sampler = gr.Dropdown(label="Sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
-                        # steps = gr.Slider(label="Steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
-                    # with gr.Row(variant='compact'):
-                        # with gr.Column(scale=4):
-                        # W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
-                        # H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True)
-                        # with gr.Column(scale=4):
-                            # seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
-                            # batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
             with gr.Row(visible=False):
                 filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
             with gr.Accordion('Subseed controls & More', open=False):
@@ -395,8 +379,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Tab('Keyframes'):
             #TODO make a some sort of the original dictionary parsing
             # Main top animation settings
-            # with gr.Tab('Main Settings', elem_id='main_settings_tab') as main_settings_tab:
-            # with gr.Accordion('Main Settings', open=True) as a1:
             with gr.Row(variant='compact'):
                 with gr.Column(scale=5):
                     with gr.Row(variant='compact'):
@@ -404,8 +386,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="Animation mode", value=da.animation_mode, elem_id="animation_mode")
                         with gr.Column(scale=1, min_width=180):
                             border = gr.Radio(['replicate', 'wrap'], label="Border", value=da.border, elem_id="border")
-                # with gr.Column(scale=1, min_width=115) as max_frames_column:
-                    
             with gr.Row(variant='compact'):
                 with gr.Column(scale=5):
                     with gr.Row(variant='compact'):
@@ -414,11 +394,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(scale=2, min_width=185):
                             # max_frames = gr.Number(label="Max frames", value=da.max_frames, interactive=True, precision=0, visible=True)
                             max_frames = gr.Slider(label="Max frames", minimum=2, maximum=9999, step=1, value=da.max_frames, interactive=True)
-                            
-                # diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
-                # max_frames = gr.Number(label="Max frames", value=da.max_frames, interactive=True, precision=0, visible=True)
             # loopArgs
-            # testme = gr.HTML(value='HIHTHERE', visible=True, elem_id='testme')
             with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
                 with gr.Accordion('*READ ME before you use this mode!*', open=False):
                     gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
@@ -463,10 +439,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
                     with gr.Row():
                         color_correction_factor = gr.Textbox(label="Color correction factor", lines=1, value = "0:(.075)", interactive=True)
-            # 2D + 3D Motion
-            # with gr.Accordion('2D Motion', open=True) as motion_accord:
-            # schedule_msg = gr.HTML('*Schedules*:')
-            with gr.Tabs(elem_id='TTTTTTTT'):
+            with gr.Tabs(elem_id='extra_schedules'):
                 with gr.TabItem('Strength'):
                     strength_schedule = gr.Textbox(label="Strength schedule", lines=1, value = da.strength_schedule, interactive=True)
                 with gr.TabItem('CFG'):
@@ -479,9 +452,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(visible=False) as seed_schedule_row:
                         seed_schedule = gr.Textbox(label="Seed schedule", lines=1, value = da.seed_schedule, interactive=True)
                 # Steps Scheduling
-                # with gr.Tab('Special Schedules'
-                # with gr.Accordion('Special Schedules', open=False) as a13:
-                with gr.TabItem('Steps') as a13:
+                with gr.TabItem('Step') as a13:
                     with gr.Row():
                         enable_steps_scheduling = gr.Checkbox(label="Enable steps scheduling", value=da.enable_steps_scheduling, interactive=True)
                     with gr.Row():
@@ -503,8 +474,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         enable_clipskip_scheduling = gr.Checkbox(label="Enable CLIP skip scheduling", value=da.enable_clipskip_scheduling, interactive=True)
                     with gr.Row():
                         clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
-                    
-                    
             with gr.Tab('Motion') as motion_accord:
                 with gr.Column(visible=True) as only_2d_motion_column:
                     with gr.Row(variant='compact'):
@@ -554,7 +523,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row():
                         perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value = da.perspective_flip_fv, interactive=True)
             # Noise
-        
             def change_perlin_visibility(choice):
                 return gr.update(visible=choice=="perlin")
             with gr.Tab('Noise', open=True) as a8:
@@ -582,7 +550,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                     reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
             # Anti-blur
-            with gr.Tab('Anti Blur', open=False) as anti_blur_accord:
+            with gr.Tab('Anti Blur', open=False, elem_id='anti_blur_accord') as anti_blur_accord:
                 with gr.Row(variant='compact'):
                     kernel_schedule = gr.Textbox(label="Kernel schedule", lines=1, value = da.kernel_schedule, interactive=True)
                 with gr.Row(variant='compact'):
@@ -591,9 +559,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     amount_schedule = gr.Textbox(label="Amount schedule", lines=1, value = da.amount_schedule, interactive=True)
                 with gr.Row(variant='compact'):
                     threshold_schedule = gr.Textbox(label="Threshold schedule", lines=1, value = da.threshold_schedule, interactive=True)
-            # 3D FOV
-            # Seed Scheduling
-            
         # Animation settings END
         # Prompts tab START    
         with gr.Tab('Prompts'):
@@ -790,10 +755,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         skip_video_for_run_all = gr.Checkbox(label="Skip video for run all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
-                
                 with gr.Accordion('Stitch Frames to Video', open=False, visible=True) as stitch_imgs_to_vid_row:
                     with gr.Row(visible=False):
-                        # max_video_frames = gr.Number(label="max_video_frames", value=200, interactive=True)
                         path_name_modifier = gr.Dropdown(label="Path name modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
                     gr.HTML("""
                      <p style="margin-top:0em">
@@ -880,7 +843,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
             
     # Gradio's Change functions - hiding and renaming elements based on other elements
-    # animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
     animation_mode.change(fn=disable_when_not_in_2d_or_3d_modes, inputs=animation_mode, outputs=anti_blur_accord)
