@@ -615,7 +615,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, value = "")
             # Composable Mask scheduling
             with gr.Accordion('Composable Mask scheduling', open=False):
-                gr.HTML("To enable, check use_mask in the Init tab.<br>Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); <br>default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; <br>masks from files in [], like [mask1.png]; <br>description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
+                gr.HTML("""
+                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0.2em">
+                        <li>To enable, check use_mask in the Init tab</li>
+                        <li>Supports boolean operations: (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations)</li>
+                        <li>default variables: in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}</li>
+                        <li>masks from files: in [], like [mask1.png]</li>
+                        <li>description-based: <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt</li>
+                        </ul>
+                        """)
+                # gr.HTML("To enable, check use_mask in the Init tab.<br>Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); <br>default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; <br>masks from files in [], like [mask1.png]; <br>description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
                 with gr.Row():
                     mask_schedule = gr.Textbox(label="Mask schedule", lines=1, value = da.mask_schedule, interactive=True)
                 with gr.Row():
