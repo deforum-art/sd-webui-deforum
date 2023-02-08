@@ -395,14 +395,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             border = gr.Radio(['replicate', 'wrap'], label="Border", value=da.border, elem_id="border")
                 # with gr.Column(scale=1, min_width=115) as max_frames_column:
                     
-            with gr.Row(variant='compact') as diffusion_cadence_row:
+            with gr.Row(variant='compact'):
                 with gr.Column(scale=5):
                     with gr.Row(variant='compact'):
-                        with gr.Column(scale=2):
+                        with gr.Column(scale=1, min_width=185) as diffusion_cadence_column:
                             diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
-                        with gr.Column(scale=1, min_width=180):
+                        with gr.Column(scale=2, min_width=185):
                             # max_frames = gr.Number(label="Max frames", value=da.max_frames, interactive=True, precision=0, visible=True)
-                            max_frames = gr.Slider(label="Max frames", minimum=1, maximum=9999, step=1, value=da.max_frames, interactive=True)
+                            max_frames = gr.Slider(label="Max frames", minimum=2, maximum=9999, step=1, value=da.max_frames, interactive=True)
                             
                 # diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
                 # max_frames = gr.Number(label="Max frames", value=da.max_frames, interactive=True, precision=0, visible=True)
@@ -859,8 +859,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
             
     # Gradio's Change functions - hiding and renaming elements based on other elements
+    # animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
-    animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_row)
+    animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
     animation_mode.change(fn=disable_when_not_in_2d_or_3d_modes, inputs=animation_mode, outputs=anti_blur_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
@@ -882,11 +883,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
     hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
     outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram]
-    
-    
+
     for output in outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
-        
     # END OF UI TABS
     return locals()
 
