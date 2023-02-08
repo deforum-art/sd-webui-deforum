@@ -599,7 +599,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         with gr.Tab('Prompts'):
             with gr.Accordion(label='*Important* notes on Prompts', elem_id='prompts_info_accord', open=False, visible=True) as prompts_info_accord:
                 gr.HTML("""
-                    <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0.2em">
+                    <ul style="list-style-type:circle; margin-left:0.75em; margin-bottom:0.2em">
                     <li>Please always keep values in math functions above 0.</li>
                     <li>There is *no* Batch mode like in vanilla deforum. Please Use the txt2img tab for that.</li>
                     <li>For negative prompts, please write your positive prompt, then --neg ugly, text, assymetric, or any other negative tokens of your choice. OR:</li>
@@ -616,7 +616,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # Composable Mask scheduling
             with gr.Accordion('Composable Mask scheduling', open=False):
                 gr.HTML("""
-                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0.2em">
+                        <ul style="list-style-type:circle; margin-left:0.75em; margin-bottom:0.2em">
                         <li>To enable, check use_mask in the Init tab</li>
                         <li>Supports boolean operations: (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations)</li>
                         <li>default variables: in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}</li>
