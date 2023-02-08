@@ -613,7 +613,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # Prompts settings END
         with gr.Tab('Init'):
             # Image Init
-            with gr.Accordion('Image Init', open=True):
+            with gr.Tab('Image Init'):
                 with gr.Row():
                     with gr.Column(min_width=150):
                         use_init = gr.Checkbox(label="Use init", value=d.use_init, interactive=True, visible=True)
@@ -623,7 +623,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         strength = gr.Slider(label="Strength", minimum=0, maximum=1, step=0.01, value=0, interactive=True)
                 with gr.Row():
                     init_image = gr.Textbox(label="Init image", lines=1, interactive=True, value = d.init_image)
-            with gr.Accordion('Mask Init', open=True):
+            # Video Init
+            with gr.Tab('Video Init'):
+                with gr.Row():
+                    video_init_path = gr.Textbox(label="Video init path", lines=1, value = da.video_init_path, interactive=True)
+                with gr.Row():
+                    extract_from_frame = gr.Number(label="Extract from frame", value=da.extract_from_frame, interactive=True, precision=0)
+                    extract_to_frame = gr.Number(label="Extract to frame", value=da.extract_to_frame, interactive=True, precision=0)
+                    extract_nth_frame = gr.Number(label="Extract nth frame", value=da.extract_nth_frame, interactive=True, precision=0)
+                    overwrite_extracted_frames = gr.Checkbox(label="Overwrite extracted frames", value=False, interactive=True)
+                    use_mask_video = gr.Checkbox(label="Use mask video", value=False, interactive=True)
+                with gr.Row():
+                    video_mask_path = gr.Textbox(label="Video mask path", lines=1, value = da.video_mask_path, interactive=True)
+            with gr.Tab('Mask Init'):
                 with gr.Row():
                     use_mask = gr.Checkbox(label="Use mask", value=d.use_mask, interactive=True)
                     use_alpha_as_mask = gr.Checkbox(label="Use alpha as mask", value=d.use_alpha_as_mask, interactive=True)
@@ -641,18 +653,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     full_res_mask = gr.Checkbox(label="Full res mask", value=d.full_res_mask, interactive=True)
                     full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="Full res mask padding", value=d.full_res_mask_padding, interactive=True)
-            # Video Init
-            with gr.Accordion('Video Init', open=True):
-                with gr.Row():
-                    video_init_path = gr.Textbox(label="Video init path", lines=1, value = da.video_init_path, interactive=True)
-                with gr.Row():
-                    extract_from_frame = gr.Number(label="Extract from frame", value=da.extract_from_frame, interactive=True, precision=0)
-                    extract_to_frame = gr.Number(label="Extract to frame", value=da.extract_to_frame, interactive=True, precision=0)
-                    extract_nth_frame = gr.Number(label="Extract nth frame", value=da.extract_nth_frame, interactive=True, precision=0)
-                    overwrite_extracted_frames = gr.Checkbox(label="Overwrite extracted frames", value=False, interactive=True)
-                    use_mask_video = gr.Checkbox(label="Use mask video", value=False, interactive=True)
-                with gr.Row():
-                    video_mask_path = gr.Textbox(label="Video mask path", lines=1, value = da.video_mask_path, interactive=True)
             # Parseq
             with gr.Accordion('Parseq', open=False):
                 gr.HTML("""
@@ -668,11 +668,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 <p">
                     Parseq does <strong><em>not</em></strong> override:
                     <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                        <li>Run: Sampler, W, H, Restore faces, tiling, highres fix, resize seed.</li>
-                        <li>Keyframes: animation settings (animation mode, max_frames, border) </li>
-                        <li>Keyframes: coherence (color coherence & diffusion cadence) </li>
+                        <li>Run: Sampler, Width, Height, tiling, resize seed.</li>
+                        <li>Keyframes: animation settings (animation mode, max frames, border) </li>
+                        <li>Keyframes: coherence (color coherence & cadence) </li>
                         <li>Keyframes: depth warping</li>
-                        <li>Video output settings: all settings (including fps and max frames)</li>
+                        <li>Output settings: all settings (including fps and max frames)</li>
                     </ul>
                 </p>
                 """)
