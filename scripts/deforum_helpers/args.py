@@ -677,7 +677,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 return gr.update(visible=False)
         # HYBRID VIDEO tab
         with gr.Tab('Hybrid Video'):
-            hybrid_msg_html = gr.HTML(value='<font color="Tomato"><b>HYBRID MODE IS DISABLED! Please change animation mode to 2D or 3D to re-enable.</b></font>',visible=False, elem_id='hybrid_msg_html')
+            # this html only shows when not in 2d/3d mode
+            hybrid_msg_html = gr.HTML(value='HYBRID MODE IS DISABLED! Please change animation mode to 2D or 3D to re-enable',visible=False, elem_id='hybrid_msg_html')
             with gr.Accordion("Info & Help", open=False):
                 hybrid_html = "<p style=\"padding-bottom:0\"><b style=\"text-shadow: blue -1px -1px;\">Hybrid Video Compositing in 2D/3D Mode</b><span style=\"color:#DDD;font-size:0.7rem;text-shadow: black -1px -1px;margin-left:10px;\">by <a href=\"https://github.com/reallybigname\">reallybigname</a></span></p>"
                 hybrid_html += "<ul style=\"list-style-type:circle; margin-left:1em; margin-bottom:1em;\"><li>Composite video with previous frame init image in <b>2D or 3D animation_mode</b> <i>(not for Video Input mode)</i></li>"
@@ -693,7 +694,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 hybrid_html += "<li>Autocontrast low/high cutoff schedules 0-100. Low 0 High 100 is full range. <br>(<i><b>hybrid_comp_mask_auto_contrast</b> must be enabled</i>)</li></ul>"            
                 hybrid_html += "<a style='color:SteelBlue;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/Animation-Settings#hybrid-video-mode-for-2d3d-animations'>Click Here</a> for more info/ a Guide."      
                 gr.HTML(hybrid_html)
-            animation_mode.change(fn=show_hybrid_html_msg, inputs=animation_mode, outputs=hybrid_msg_html)
             with gr.Accordion("Hybrid Settings", open=True) as hybrid_settings_accord:
                 with gr.Row():
                     with gr.Column(min_width=340):
@@ -734,9 +734,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Accordion("Humans Masking", open=False) as humans_masking_accord:
                 with gr.Row():
                     hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="generate_human_masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
-            animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_sch_accord)
-            animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_settings_accord)
-            animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=humans_masking_accord)
         # VIDEO OUTPUT TAB
         with gr.Tab('Output'):
             with gr.Accordion('Video Output Settings', open=True):
@@ -848,12 +845,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
     animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=motion_accord) 
     animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
+    #Hybrid related:
+    animation_mode.change(fn=show_hybrid_html_msg, inputs=animation_mode, outputs=hybrid_msg_html)
+    animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_sch_accord)
+    animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_settings_accord)
+    animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=humans_masking_accord)
+    # End of hybrid related
     seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row) 
     seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
     hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
     outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram]
+    
     
     for output in outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
