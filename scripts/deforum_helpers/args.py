@@ -568,8 +568,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # Animation settings END
         # Prompts tab START    
         with gr.Tab('Prompts'):
+            with gr.Accordion(label='*Important* notes on Prompts', elem_id='prompts_info_accord', open=False, visible=True) as prompts_info_accord:
                 gr.HTML("""
-                    <p><b>Important notes and changes from regular vanilla deforum:</b></p>
                     <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0.2em">
                     <li>Please always keep values in math functions above 0.</li>
                     <li>There is *no* Batch mode like in vanilla deforum. Please Use the txt2img tab for that.</li>
@@ -577,23 +577,23 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     <li>Prompts are stored in JSON format. If you've got an error, check it in validator, <a style="color:SteelBlue" href="https://odu.github.io/slingjsonlint/">like here</a></li>
                     </ul>
                     """)
+            with gr.Row():
+                animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
+            gr.HTML("Positive prompt to be appended to all animation prompts")
+            with gr.Row():
+                animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, value = "")
+            gr.HTML("Negative prompt to be appended to all animation prompts")
+            with gr.Row():
+                animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, value = "")
+            # Composable Mask scheduling
+            with gr.Accordion('Composable Mask scheduling', open=False):
+                gr.HTML("To enable, check use_mask in the Init tab.<br>Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); <br>default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; <br>masks from files in [], like [mask1.png]; <br>description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
                 with gr.Row():
-                    animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
-                gr.HTML("Positive prompt to be appended to all animation prompts")
+                    mask_schedule = gr.Textbox(label="Mask schedule", lines=1, value = da.mask_schedule, interactive=True)
                 with gr.Row():
-                    animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, value = "")
-                gr.HTML("Negative prompt to be appended to all animation prompts, dont add --neg here")
+                    use_noise_mask = gr.Checkbox(label="Use noise mask", value=da.use_noise_mask, interactive=True)
                 with gr.Row():
-                    animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, value = "")
-                # Composable Mask scheduling
-                with gr.Accordion('Composable Mask scheduling', open=True):
-                    gr.HTML("To enable, check use_mask in the Init tab.<br>Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); <br>default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; <br>masks from files in [], like [mask1.png]; <br>description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
-                    with gr.Row():
-                        mask_schedule = gr.Textbox(label="Mask schedule", lines=1, value = da.mask_schedule, interactive=True)
-                    with gr.Row():
-                        use_noise_mask = gr.Checkbox(label="Use noise mask", value=da.use_noise_mask, interactive=True)
-                    with gr.Row():
-                        noise_mask_schedule = gr.Textbox(label="Noise mask schedule", lines=1, value = da.noise_mask_schedule, interactive=True)
+                    noise_mask_schedule = gr.Textbox(label="Noise mask schedule", lines=1, value = da.noise_mask_schedule, interactive=True)
         # Prompts settings END
         with gr.Tab('Init'):
             # Image Init
@@ -984,6 +984,8 @@ def process_args(args_dict_main):
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
     positive_prompts = args_dict_main['animation_prompts_positive']
     negative_prompts = args_dict_main['animation_prompts_negative']
+    # remove --neg from negative_prompts if recieved by mistake
+    negative_prompts = negative_prompts.replace('--neg', '')
     for key in root.animation_prompts:
         animationPromptCurr = root.animation_prompts[key]
         root.animation_prompts[key] = f"{positive_prompts} {animationPromptCurr} {'' if '--neg' in animationPromptCurr else '--neg'} {negative_prompts}"
