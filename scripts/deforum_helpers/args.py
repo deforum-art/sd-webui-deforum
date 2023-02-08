@@ -579,10 +579,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     """)
             with gr.Row():
                 animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
-            gr.HTML("Positive prompt to be appended to all animation prompts")
+            gr.HTML("Positive prompt to be appended to all prompts")
             with gr.Row():
                 animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, value = "")
-            gr.HTML("Negative prompt to be appended to all animation prompts")
+            gr.HTML("Negative prompt to be appended to all prompts")
             with gr.Row():
                 animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, value = "")
             # Composable Mask scheduling
