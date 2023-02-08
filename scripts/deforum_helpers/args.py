@@ -596,8 +596,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # Prompts settings END
         with gr.Tab('Init'):
             # Image Init
-            # Need to REMOVE? (!!!) NOT VISIBLE!
-            from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
             with gr.Accordion('Image Init', open=True):
                 with gr.Row():
                     with gr.Column(min_width=150):
@@ -832,6 +830,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
                             # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
+            # Old/ Non actives accordion
+            with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
+                from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
             
     # Gradio's Change functions - hiding and renaming elements based on other elements
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_column)
