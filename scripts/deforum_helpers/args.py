@@ -401,7 +401,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     cfg_scale_schedule = gr.Textbox(label="cfg_scale_schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
             # loopArgs
-            with gr.Accordion('Guided Images', open=False) as a2:
+            with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
                 with gr.Accordion('*READ ME before you use this mode!*', open=False):
                     gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
                                Set the keyframes and the images that you want to show up. 

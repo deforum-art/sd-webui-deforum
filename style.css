@@ -18,6 +18,23 @@
 	font-size: 20px !important;
 	font-weight: bold !important;
 }
+/*
+#guided_images_accord {
+	display: none !important;
+}
+*/
+
+/* use float with another hidden element to show disabled!*/
+#guided_images_accord::before {
+	float: left !important;
+	color: Tomato !important;
+    content: "Disabled ";
+	font-size: 10px !important;
+	margin-top: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 0 !important;
+    margin-left: 0 !important;
+  }
 
 #deforum_results .flex #image_buttons_deforum #img2img_tab,
 #deforum_results .flex #image_buttons_deforum #inpaint_tab,
