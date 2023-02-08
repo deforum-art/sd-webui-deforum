@@ -513,11 +513,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     noise_schedule = gr.Textbox(label="Noise schedule", lines=1, value = da.noise_schedule, interactive=True)
                 with gr.Row() as perlin_row:
-                    with gr.Column(min_width=200):
-                        perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
-                        perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
-                    with gr.Column(min_width=230):
+                    with gr.Column(min_width=220):
                         perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
+                    with gr.Column(min_width=220):
                         perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
             # Anti-blur
             with gr.Accordion('Anti Blur', open=False) as anti_blur_accord:
@@ -833,6 +831,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # Old/ Non actives accordion
             with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
                 from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
+                # INVISIBLE AS OF 08-02 (with static value of 8 for both W and H). Was in Perlin section before Perlin Octaves/Persistence
+                with gr.Column(min_width=200, visible=False):
+                    perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
+                    perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
             
     # Gradio's Change functions - hiding and renaming elements based on other elements
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames_column)
