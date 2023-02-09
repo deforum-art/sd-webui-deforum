@@ -94,9 +94,9 @@ def is_vid_path_valid(video_path):
             raise ValueError("Video file format '{}' not supported. Supported formats are: {}".format(extension, file_formats))
     return True
 
-# quick-retreive just the frame count and FPS of a video (local or URL-based)    
-def get_quick_vid_info(vid_local_path):
-    vidcap = cv2.VideoCapture(vid_local_path)
+# quick-retreive frame count, FPS and H/W dimensions of a video (local or URL-based)
+def get_quick_vid_info(vid_path):
+    vidcap = cv2.VideoCapture(vid_path)
     video_fps = vidcap.get(cv2.CAP_PROP_FPS)
     video_frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
     video_width = int(vidcap.get(cv2.CAP_PROP_FRAME_WIDTH))
