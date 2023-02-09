@@ -630,9 +630,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     mask_file = gr.Textbox(label="Mask file", lines=1, interactive=True, value = d.mask_file)
                 with gr.Row():
+                    mask_overlay_blur = gr.Slider(label="Mask overlay blur", minimum=0, maximum=64, step=1, value=d.mask_overlay_blur, interactive=True)
+                # NOT VISIBLE AS OF 09-02-23
+                with gr.Row(visible=False):
                     mask_contrast_adjust = gr.Slider(label="Mask contrast adjust", minimum=0, maximum=1, step=0.01, value=d.mask_contrast_adjust, interactive=True)
                     mask_brightness_adjust = gr.Slider(label="Mask brightness adjust", minimum=0, maximum=1, step=0.01, value=d.mask_brightness_adjust, interactive=True)
-                    mask_overlay_blur = gr.Slider(label="Mask overlay blur", minimum=0, maximum=64, step=1, value=d.mask_overlay_blur, interactive=True)
                 with gr.Row():
                     choice = mask_fill_choices[d.fill]
                     fill = gr.Radio(label='Mask fill', choices=mask_fill_choices, value=choice, type="index")
