@@ -365,15 +365,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                 show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
             # RUN FROM SETTING FILE ACCORD
-            with gr.Accordion('Run from Settings file', open=False):
-                with gr.Row(variant='compact'):
-                    override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
-                    custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
-            # RESUME ANIMATION ACCORD
-            with gr.Accordion('Resume Animation', open=False):
-                with gr.Row(variant='compact'):
-                    resume_from_timestring = gr.Checkbox(label="Resume from timestring", value=da.resume_from_timestring, interactive=True)
-                    resume_timestring = gr.Textbox(label="Resume timestring", lines=1, value = da.resume_timestring, interactive=True)
+            with gr.Accordion('Resume & Run from file', open=False):
+                with gr.Tab('Run from Settings file'):
+                    with gr.Row(variant='compact'):
+                        override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
+                        custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
+                # RESUME ANIMATION ACCORD
+                with gr.Tab('Resume Animation'):
+                    with gr.Row(variant='compact'):
+                        resume_from_timestring = gr.Checkbox(label="Resume from timestring", value=da.resume_from_timestring, interactive=True)
+                        resume_timestring = gr.Textbox(label="Resume timestring", lines=1, value = da.resume_timestring, interactive=True)
         # KEYFRAMES TAB
         with gr.Tab('Keyframes'): #TODO make a some sort of the original dictionary parsing
             with gr.Row(variant='compact'):
