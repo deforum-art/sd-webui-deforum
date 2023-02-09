@@ -244,10 +244,10 @@ def keyframeExamples():
 def LoopArgs():
     use_looper = False
     init_images = keyframeExamples()
-    image_strength_schedule = "0:(0.6)"
-    blendFactorMax = "0:(0.6)"
+    image_strength_schedule = "0:(0.75)"
+    blendFactorMax = "0:(0.35)"
     blendFactorSlope = "0:(0.25)"
-    tweening_frames_schedule = "0:(0.25)"
+    tweening_frames_schedule = "0:(20)"
     color_correction_factor = "0:(0.075)"
     return locals()
 
@@ -418,27 +418,21 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 </ul>
                             """)
                 with gr.Row():
-                    use_looper = gr.Checkbox(label="Enable guided images mode", value=False, interactive=True)
+                    use_looper = gr.Checkbox(label="Enable guided images mode", value=dloopArgs.use_looper, interactive=True)
                 with gr.Row():
                     init_images = gr.Textbox(label="Images to use for keyframe guidance", lines=9, value = keyframeExamples(), interactive=True)
                 # GUIDED IMAGES SCHEDULES ACCORD
                 with gr.Accordion('Guided images schedules', open=False):
-                    gr.HTML("""strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on""")
                     with gr.Row():
-                        image_strength_schedule = gr.Textbox(label="Image strength schedule", lines=1, value = "0:(.75)", interactive=True)
-                    gr.HTML("""blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))""")
+                        image_strength_schedule = gr.Textbox(label="Image strength schedule", lines=1, value = dloopArgs.image_strength_schedule, interactive=True)
                     with gr.Row():
-                        blendFactorMax = gr.Textbox(label="BlendFactorMax", lines=1, value = "0:(.35)", interactive=True)
+                        blendFactorMax = gr.Textbox(label="Blend factor max", lines=1, value = dloopArgs.blendFactorMax, interactive=True)
                     with gr.Row():
-                        blendFactorSlope = gr.Textbox(label="BlendFactorSlope", lines=1, value = "0:(.25)", interactive=True)
+                        blendFactorSlope = gr.Textbox(label="Blend factor slope", lines=1, value = dloopArgs.blendFactorSlope, interactive=True)
                     with gr.Row():
-                        gr.HTML("""number of frames this will calculated over. After each insersion frame.""")
+                        tweening_frames_schedule = gr.Textbox(label="Tweening frames schedule", lines=1, value = dloopArgs.tweening_frames_schedule, interactive=True)
                     with gr.Row():
-                        tweening_frames_schedule = gr.Textbox(label="Tweening frames schedule", lines=1, value = "0:(20)", interactive=True)
-                    with gr.Row():
-                        gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
-                    with gr.Row():
-                        color_correction_factor = gr.Textbox(label="Color correction factor", lines=1, value = "0:(.075)", interactive=True)
+                        color_correction_factor = gr.Textbox(label="Color correction factor", lines=1, value = dloopArgs.color_correction_factor, interactive=True)
             # EXTA SCHEDULES TABS
             with gr.Tabs(elem_id='extra_schedules'):
                 with gr.TabItem('Strength'):

@@ -142,12 +142,13 @@ deforum_titles = {
 
     // Looper Args
     // "use_looper": "",
-    "Images to use for keyframe guidance": "images you iterate over, you can do local or web paths",
-    "Image strength schedule": "schedule for how much the image should look like previous and new image frame init",
-    // "blendFactorMax": "",
-    // "blendFactorSlope": "",
-    "tweening frames schedule": "number of the frames that we will blend between current imagined image and input frame image",
-    "color correction factor": "how close to get to the colors of the input frame image"
+	"Enable guided images mode": "check this box to enable guided images mode",
+    "Images to use for keyframe guidance": "images you iterate over, you can do local or web paths (no single backslashes!)",
+    "Image strength schedule": "how much the image should look like the previou one and new image frame init. strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on",
+    "Blend factor max": "blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))",
+    "Blend factor slope": "blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))",
+    "Tweening frames schedule": "number of the frames that we will blend between current imagined image and input frame image",
+    "Color correction factor": "how close to get to the colors of the input frame image/ the amount each frame during a tweening step to use the new images colors"
 }
 
 
