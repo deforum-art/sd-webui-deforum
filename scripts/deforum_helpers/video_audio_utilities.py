@@ -209,5 +209,8 @@ def direct_stitch_vid_from_frames(image_path, fps, f_location, f_crf, f_preset, 
         print("Please set correct image_path")
 # end of 2 stitch frame to video funcs
 
-
-
+# returns True if filename (could be also media URL) contains an audio stream, othehrwise False
+def media_file_has_audio(filename, ffmpeg_location):
+    result = subprocess.run([ffmpeg_location, "-i", filename, "-af", "volumedetect", "-f", "null", "-"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    output = result.stderr.decode()
+    return True if "Stream #0:1: Audio: " in output or "Stream #0:1(und): Audio" in output else False
