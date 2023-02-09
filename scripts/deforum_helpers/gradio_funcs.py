@@ -11,7 +11,10 @@ def hide_by_gif(choice):
         return gr.update(visible=False)
     else:
         return gr.update(visible=True)
-        
+
+def change_perlin_visibility(choice):
+    return gr.update(visible=choice=="perlin")
+
 def change_color_coherence_video_every_N_frames_visibility(choice):
     return gr.update(visible=choice=="Video Input")
 

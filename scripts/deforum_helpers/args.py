@@ -300,6 +300,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             i1 = gr.HTML(i1_store, elem_id='deforum_header')
     else:
         btn = i1 = gr.HTML("")
+        
+    # MAIN (TOP) EXTENSION INFO ACCORD
     with gr.Accordion("Info, Links and Help", open=False):
             gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
             gr.HTML("""<a  style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/FAQ-&-Troubleshooting">FOR HELP CLICK HERE</a""", elem_id="for_help_click_here")
@@ -327,8 +329,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             [],
             [i1]
             )
-    # TODO: Make new comments with section names!
+            
     with gr.Blocks():
+        # RUN TAB
         with gr.Tab('Run'):
             from modules.sd_samplers import samplers_for_img2img
             with gr.Row(variant='compact'):
@@ -342,6 +345,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
             with gr.Row(visible=False):
                 filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
+            # SUBSEED CONTROL ACCORD
             with gr.Accordion('Subseed controls & More', open=False):
                 # Not visible until fixed, 06-02-23
                 with gr.Row(visible=False):
@@ -357,28 +361,21 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     ddim_eta = gr.Number(label="DDIM ETA", value=d.ddim_eta, interactive=True)
                     tiling = gr.Checkbox(label='Tiling', value=False)
                     n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
-            # NOT VISIBLE IN THE UI!
-            with gr.Row(visible=False):
-                save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
-            # NOT VISIBLE IN THE UI!
-            with gr.Row(visible=False):
-                save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
-                display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
             with gr.Row(visible=False):
                 save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                 show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
+            # RUN FROM SETTING FILE ACCORD
             with gr.Accordion('Run from Settings file', open=False):
                 with gr.Row(variant='compact'):
                     override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
                     custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
+            # RESUME ANIMATION ACCORD
             with gr.Accordion('Resume Animation', open=False):
                 with gr.Row(variant='compact'):
                     resume_from_timestring = gr.Checkbox(label="Resume from timestring", value=da.resume_from_timestring, interactive=True)
                     resume_timestring = gr.Textbox(label="Resume timestring", lines=1, value = da.resume_timestring, interactive=True)
-        # Animation settings 'Key' tab
-        with gr.Tab('Keyframes'):
-            #TODO make a some sort of the original dictionary parsing
-            # Main top animation settings
+        # KEYFRAMES TAB
+        with gr.Tab('Keyframes'): #TODO make a some sort of the original dictionary parsing
             with gr.Row(variant='compact'):
                 with gr.Column(scale=5):
                     with gr.Row(variant='compact'):
@@ -394,8 +391,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(scale=2, min_width=185):
                             # max_frames = gr.Number(label="Max frames", value=da.max_frames, interactive=True, precision=0, visible=True)
                             max_frames = gr.Slider(label="Max frames", minimum=2, maximum=9999, step=1, value=da.max_frames, interactive=True)
-            # loopArgs
+            # GUIDED IMAGES ACCORD
             with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
+                # GUIDED IMAGES INFO ACCORD
                 with gr.Accordion('*READ ME before you use this mode!*', open=False):
                     gr.HTML("""You can use this as a guided image tool or as a looper depending on your settings in the keyframe images field. 
                                Set the keyframes and the images that you want to show up. 
@@ -422,6 +420,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     use_looper = gr.Checkbox(label="Enable guided images mode", value=False, interactive=True)
                 with gr.Row():
                     init_images = gr.Textbox(label="Images to use for keyframe guidance", lines=9, value = keyframeExamples(), interactive=True)
+                # GUIDED IMAGES SCHEDULES ACCORD
                 with gr.Accordion('Guided images schedules', open=False):
                     gr.HTML("""strength schedule might be better if this is higher, around .75 during the keyfames you want to switch on""")
                     with gr.Row():
@@ -439,6 +438,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         gr.HTML("""the amount each frame during a tweening step to use the new images colors""")
                     with gr.Row():
                         color_correction_factor = gr.Textbox(label="Color correction factor", lines=1, value = "0:(.075)", interactive=True)
+            # EXTA SCHEDULES TABS
             with gr.Tabs(elem_id='extra_schedules'):
                 with gr.TabItem('Strength'):
                     strength_schedule = gr.Textbox(label="Strength schedule", lines=1, value = da.strength_schedule, interactive=True)
@@ -474,6 +474,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         enable_clipskip_scheduling = gr.Checkbox(label="Enable CLIP skip scheduling", value=da.enable_clipskip_scheduling, interactive=True)
                     with gr.Row():
                         clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
+            # MOTION INNER TAB
             with gr.Tab('Motion') as motion_accord:
                 with gr.Column(visible=True) as only_2d_motion_column:
                     with gr.Row(variant='compact'):
@@ -485,7 +486,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         translation_x = gr.Textbox(label="Translation X", lines=1, value = da.translation_x, interactive=True)
                     with gr.Row(variant='compact'):
                         translation_y = gr.Textbox(label="Translation Y", lines=1, value = da.translation_y, interactive=True)
-                # 3D-only Motion
                 with gr.Column(visible=False) as only_3d_motion_column:
                     with gr.Row(variant='compact'):
                         translation_z = gr.Textbox(label="Translation Z", lines=1, value = da.translation_z, interactive=True)
@@ -495,7 +495,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         rotation_3d_y = gr.Textbox(label="Rotation 3D Y", lines=1, value = da.rotation_3d_y, interactive=True)
                     with gr.Row(variant='compact'):
                         rotation_3d_z = gr.Textbox(label="Rotation 3D Z", lines=1, value = da.rotation_3d_z, interactive=True)
-                # 3D Depth Warping
+                # 3D DEPTH & FOV ACCORD
                 with gr.Accordion('Depth Warping & FOV', visible=False, open=False) as depth_3d_warping_accord:
                     with gr.Tab('Depth Warping'): 
                         with gr.Row(variant='compact'):
@@ -511,7 +511,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
                         with gr.Row():
                             far_schedule = gr.Textbox(label="Far schedule", lines=1, value = da.far_schedule, interactive=True)
-                # Perspective Flip
+                # PERSPECTIVE FLIP ACCORD
                 with gr.Accordion('Perspective Flip', open=False) as perspective_flip_accord:
                     with gr.Row():
                         enable_perspective_flip = gr.Checkbox(label="Enable perspective flip", value=da.enable_perspective_flip, interactive=True)
@@ -523,9 +523,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         perspective_flip_gamma = gr.Textbox(label="Perspective flip gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
                     with gr.Row():
                         perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value = da.perspective_flip_fv, interactive=True)
-            # Noise
-            def change_perlin_visibility(choice):
-                return gr.update(visible=choice=="perlin")
+            # NOISE INNER TAB
             with gr.Tab('Noise', open=True) as a8:
                 with gr.Row():
                     noise_type = gr.Radio(['uniform', 'perlin'], label="Noise type", value=da.noise_type, elem_id="noise_type")
@@ -536,7 +534,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                     with gr.Column(min_width=220):
                         perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
-            # Coherence
+            # COHERENCE INNER TAB
             with gr.Tab('Coherence', open=False) as coherence_accord:
                 with gr.Row(equal_height=True):
                     # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
@@ -550,7 +548,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                     reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
-            # Anti-blur
+            # ANTI BLUR INNER TAB  
             with gr.Tab('Anti Blur', open=False, elem_id='anti_blur_accord') as anti_blur_accord:
                 with gr.Row(variant='compact'):
                     kernel_schedule = gr.Textbox(label="Kernel schedule", lines=1, value = da.kernel_schedule, interactive=True)
@@ -560,9 +558,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     amount_schedule = gr.Textbox(label="Amount schedule", lines=1, value = da.amount_schedule, interactive=True)
                 with gr.Row(variant='compact'):
                     threshold_schedule = gr.Textbox(label="Threshold schedule", lines=1, value = da.threshold_schedule, interactive=True)
-        # Animation settings END
-        # Prompts tab START    
+        # PROMPTS TAB    
         with gr.Tab('Prompts'):
+            # PROMPTS INFO ACCORD  
             with gr.Accordion(label='*Important* notes on Prompts', elem_id='prompts_info_accord', open=False, visible=True) as prompts_info_accord:
                 gr.HTML("""
                     <ul style="list-style-type:circle; margin-left:0.75em; margin-bottom:0.2em">
@@ -579,7 +577,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, value = "")
             with gr.Row():
                 animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, value = "")
-            # Composable Mask scheduling
+            # COMPOSABLE MASK SCHEDULING ACCORD
             with gr.Accordion('Composable Mask scheduling', open=False):
                 gr.HTML("""
                         <ul style="list-style-type:circle; margin-left:0.75em; margin-bottom:0.2em">
@@ -590,16 +588,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         <li>description-based: <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt</li>
                         </ul>
                         """)
-                # gr.HTML("To enable, check use_mask in the Init tab.<br>Supports boolean operations (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations); <br>default variables in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}; <br>masks from files in [], like [mask1.png]; <br>description-based <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt;")
                 with gr.Row():
                     mask_schedule = gr.Textbox(label="Mask schedule", lines=1, value = da.mask_schedule, interactive=True)
                 with gr.Row():
                     use_noise_mask = gr.Checkbox(label="Use noise mask", value=da.use_noise_mask, interactive=True)
                 with gr.Row():
                     noise_mask_schedule = gr.Textbox(label="Noise mask schedule", lines=1, value = da.noise_mask_schedule, interactive=True)
-        # Prompts settings END
+        # INIT MAIN TAB
         with gr.Tab('Init'):
-            # Image Init
+            # IMAGE INIT INNER-TAB
             with gr.Tab('Image Init'):
                 with gr.Row():
                     with gr.Column(min_width=150):
@@ -610,7 +607,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         strength = gr.Slider(label="Strength", minimum=0, maximum=1, step=0.01, value=0, interactive=True)
                 with gr.Row():
                     init_image = gr.Textbox(label="Init image", lines=1, interactive=True, value = d.init_image)
-            # Video Init
+            # VIDEO INIT INNER-TAB
             with gr.Tab('Video Init'):
                 with gr.Row():
                     video_init_path = gr.Textbox(label="Video init path", lines=1, value = da.video_init_path, interactive=True)
@@ -622,6 +619,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     use_mask_video = gr.Checkbox(label="Use mask video", value=False, interactive=True)
                 with gr.Row():
                     video_mask_path = gr.Textbox(label="Video mask path", lines=1, value = da.video_mask_path, interactive=True)
+            # MASK INIT INNER-TAB
             with gr.Tab('Mask Init'):
                 with gr.Row():
                     use_mask = gr.Checkbox(label="Use mask", value=d.use_mask, interactive=True)
@@ -632,17 +630,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     mask_file = gr.Textbox(label="Mask file", lines=1, interactive=True, value = d.mask_file)
                 with gr.Row():
                     mask_overlay_blur = gr.Slider(label="Mask overlay blur", minimum=0, maximum=64, step=1, value=d.mask_overlay_blur, interactive=True)
-                # NOT VISIBLE AS OF 09-02-23
-                with gr.Row(visible=False):
-                    mask_contrast_adjust = gr.Slider(label="Mask contrast adjust", minimum=0, maximum=1, step=0.01, value=d.mask_contrast_adjust, interactive=True)
-                    mask_brightness_adjust = gr.Slider(label="Mask brightness adjust", minimum=0, maximum=1, step=0.01, value=d.mask_brightness_adjust, interactive=True)
                 with gr.Row():
                     choice = mask_fill_choices[d.fill]
                     fill = gr.Radio(label='Mask fill', choices=mask_fill_choices, value=choice, type="index")
                 with gr.Row():
                     full_res_mask = gr.Checkbox(label="Full res mask", value=d.full_res_mask, interactive=True)
                     full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="Full res mask padding", value=d.full_res_mask_padding, interactive=True)
-            # Parseq
+            # PARSEQ ACCORD
             with gr.Accordion('Parseq', open=False):
                 gr.HTML("""
                 Use an <a style='color:blue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
@@ -679,10 +673,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 return gr.update(visible=True) 
             else:
                 return gr.update(visible=False)
-        # HYBRID VIDEO tab
+        # HYBRID VIDEO TAB
         with gr.Tab('Hybrid Video'):
             # this html only shows when not in 2d/3d mode
             hybrid_msg_html = gr.HTML(value='Please, change animation mode to 2D or 3D to enable Hybrid Mode',visible=False, elem_id='hybrid_msg_html')
+            # HYBRID INFO ACCORD
             with gr.Accordion("Info & Help", open=False):
                 hybrid_html = "<p style=\"padding-bottom:0\"><b style=\"text-shadow: blue -1px -1px;\">Hybrid Video Compositing in 2D/3D Mode</b><span style=\"color:#DDD;font-size:0.7rem;text-shadow: black -1px -1px;margin-left:10px;\">by <a href=\"https://github.com/reallybigname\">reallybigname</a></span></p>"
                 hybrid_html += "<ul style=\"list-style-type:circle; margin-left:1em; margin-bottom:1em;\"><li>Composite video with previous frame init image in <b>2D or 3D animation_mode</b> <i>(not for Video Input mode)</i></li>"
@@ -698,6 +693,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 hybrid_html += "<li>Autocontrast low/high cutoff schedules 0-100. Low 0 High 100 is full range. <br>(<i><b>hybrid_comp_mask_auto_contrast</b> must be enabled</i>)</li></ul>"            
                 hybrid_html += "<a style='color:SteelBlue;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/Animation-Settings#hybrid-video-mode-for-2d3d-animations'>Click Here</a> for more info/ a Guide."      
                 gr.HTML(hybrid_html)
+            # HYBRID SETTINGS ACCORD
             with gr.Accordion("Hybrid Settings", open=True) as hybrid_settings_accord:
                 with gr.Row(variant='compact'):
                     with gr.Column(min_width=340):
@@ -724,6 +720,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         hybrid_comp_mask_inverse = gr.Checkbox(label="Comp mask inverse", value=False, interactive=True)
                 with gr.Row(variant='compact'):
                         hybrid_comp_save_extra_frames = gr.Checkbox(label="Comp save extra frames", value=False, interactive=True)
+            # HYBRID SCHEDULES ACCORD
             with gr.Accordion("Hybrid Schedules", open=False) as hybrid_sch_accord:
                 with gr.Row(variant='compact'):
                     hybrid_comp_alpha_schedule = gr.Textbox(label="Comp alpha schedule", lines=1, value = da.hybrid_comp_alpha_schedule, interactive=True)
@@ -735,18 +732,18 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     hybrid_comp_mask_auto_contrast_cutoff_high_schedule = gr.Textbox(label="Comp mask auto contrast cutoff high schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, interactive=True)
                 with gr.Row(variant='compact'):
                     hybrid_comp_mask_auto_contrast_cutoff_low_schedule = gr.Textbox(label="Comp mask auto contrast cutoff low schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, interactive=True)
+            # HUMANS MASKING ACCORD
             with gr.Accordion("Humans Masking", open=False) as humans_masking_accord:
                 with gr.Row(variant='compact'):
                     hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="Generate human masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
-        # VIDEO OUTPUT TAB
+        # OUTPUT TAB
         with gr.Tab('Output'):
+            # VID OUTPUT ACCORD
             with gr.Accordion('Video Output Settings', open=True):
                 with gr.Row(variant='compact') as fps_out_format_row:
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
                     output_format = gr.Dropdown(label="Output format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
-                # with gr.Column(variant='compact'):
                 with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
-                    # with gr.Row(variant='compact', equal_height=True) as ffmpeg_set_row:
                     ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True)
                     ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
                     ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location)
@@ -758,6 +755,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         skip_video_for_run_all = gr.Checkbox(label="Skip video for run all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
+                # STITCH FRAMES TO VID ACCORD
                 with gr.Accordion('Stitch Frames to Video', open=False, visible=True) as stitch_imgs_to_vid_row:
                     with gr.Row(visible=False):
                         path_name_modifier = gr.Dropdown(label="Path name modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
@@ -779,6 +777,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         render_steps = gr.Checkbox(label="Render steps", value=dv.render_steps, interactive=True, visible=False)
                     ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
                     ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path])
+            # RIFE ACCORD
             with gr.Accordion('Frame Interpolation (RIFE)', open=True) as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
                     gr.HTML("""
@@ -839,11 +838,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             output_format.change(fn=hide_by_gif, inputs=output_format, outputs=rife_accord)
             # Old/ Non actives accordion
             with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
+                # NOT VISIBLE AS OF 09-02-23
+                mask_contrast_adjust = gr.Slider(label="Mask contrast adjust", minimum=0, maximum=1, step=0.01, value=d.mask_contrast_adjust, interactive=True)
+                mask_brightness_adjust = gr.Slider(label="Mask brightness adjust", minimum=0, maximum=1, step=0.01, value=d.mask_brightness_adjust, interactive=True)
                 from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
                 # INVISIBLE AS OF 08-02 (with static value of 8 for both W and H). Was in Perlin section before Perlin Octaves/Persistence
                 with gr.Column(min_width=200, visible=False):
                     perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                     perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
+                with gr.Row(visible=False):
+                    save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
+                with gr.Row(visible=False):
+                    save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
+                    display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
             
     # Gradio's Change functions - hiding and renaming elements based on other elements
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
