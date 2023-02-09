@@ -1,9 +1,11 @@
 from modules.shared import cmd_opts
 from modules.processing import get_fixed_seed
+from modules.ui_components import FormRow
 import modules.shared as sh
 import modules.paths as ph
 import os
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
+from .upscaling import process_upscale_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames
 from .gradio_funcs import *
 
@@ -271,6 +273,7 @@ def DeforumOutputArgs():
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
     # max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False #@param {type: 'boolean'}
+    #@markdown **Interpolate Video Settings**
     frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
     frame_interpolation_x_amount = "Disabled" #"Disabled" #@param ["Disabled" + all values from x2 to x10]
     frame_interpolation_slow_mo_amount = "Disabled" #@param ["Disabled","x2","x4","x8"]
@@ -847,6 +850,42 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
                     display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
             
+            # TODO: add upscalers parameters to the settings and make them a part of the pipeline
+            with gr.Accordion('Upscale video', open=True):
+                with gr.Column():
+                    vid_to_upscale_chosen_file = gr.File(label="Video to upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_extra_chosen_file")
+
+                    selected_tab = gr.State(value=0)
+
+                    with gr.Tabs(elem_id="extras_resize_mode"):
+                        with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
+                            upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
+
+                        with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
+                            with FormRow():
+                                upscaling_resize_w = gr.Number(label="Width", value=512, precision=0, elem_id="extras_upscaling_resize_w")
+                                upscaling_resize_h = gr.Number(label="Height", value=512, precision=0, elem_id="extras_upscaling_resize_h")
+                                upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
+
+                    with FormRow():
+                        extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
+
+                    with FormRow():
+                        extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
+                        extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
+
+                    tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
+                    tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
+
+                    with FormRow():
+                        upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
+                    # This is the actual button that's pressed to initiate the interpolation:
+                    upscale_btn = gr.Button(value="*Upscale uploaded video*")
+                    # Show a text about CLI outputs:
+                    gr.HTML("* check your CLI for outputs")
+                    # make the functin call when the RIFE button is clicked
+                    upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+        
     # Gradio's Change functions - hiding and renaming elements based on other elements
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
@@ -1065,3 +1104,11 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, 
     f_models_path = root_params['models_path']
 
     process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
+
+# Local gradio-to-upscalers function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
+def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
+    # print msg and do nothing if vid not uploaded
+    if not vid_to_upscale_chosen_file:
+        return print("Please upload a video :)")
+    
+    process_upscale_vid_upload_logic(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_to_upscale_chosen_file.orig_name, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset)
