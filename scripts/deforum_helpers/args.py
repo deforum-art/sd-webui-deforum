@@ -475,7 +475,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row():
                         clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
             # MOTION INNER TAB
-            with gr.Tab('Motion') as motion_accord:
+            with gr.Tab('Motion') as motion_tab:
                 with gr.Column(visible=True) as only_2d_motion_column:
                     with gr.Row(variant='compact'):
                         angle = gr.Textbox(label="Angle", lines=1, value = da.angle, interactive=True)
@@ -549,7 +549,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                     reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
             # ANTI BLUR INNER TAB  
-            with gr.Tab('Anti Blur', open=False, elem_id='anti_blur_accord') as anti_blur_accord:
+            with gr.Tab('Anti Blur', open=False, elem_id='anti_blur_accord') as anti_blur_tab:
                 with gr.Row(variant='compact'):
                     kernel_schedule = gr.Textbox(label="Kernel schedule", lines=1, value = da.kernel_schedule, interactive=True)
                 with gr.Row(variant='compact'):
@@ -855,15 +855,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     # Gradio's Change functions - hiding and renaming elements based on other elements
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
-    animation_mode.change(fn=disable_when_not_in_2d_or_3d_modes, inputs=animation_mode, outputs=anti_blur_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
-    animation_mode.change(fn=update_motion_accord_name, inputs=animation_mode, outputs=motion_accord) 
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
-    animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=motion_accord) 
-    animation_mode.change(fn=disable_motion_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
+    animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
     #Hybrid related:
     animation_mode.change(fn=show_hybrid_html_msg, inputs=animation_mode, outputs=hybrid_msg_html)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_sch_accord)
