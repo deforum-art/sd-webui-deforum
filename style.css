@@ -11,8 +11,22 @@
 	display: none;
 }
 
+#extra_schedules::before {
+  content: "Schedules:";
+  font-size: 10px !important;
+}
+
+#hybrid_msg_html {
+	color: Tomato !important;
+	margin-top: 5px !important;
+	text-align: center !important;
+	font-size: 20px !important;
+	font-weight: bold !important;
+}
+
 #deforum_results .flex #image_buttons_deforum #img2img_tab,
 #deforum_results .flex #image_buttons_deforum #inpaint_tab,
 #deforum_results .flex #image_buttons_deforum #extras_tab {
 	display: none !important;
 }
+
