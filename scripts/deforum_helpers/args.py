@@ -496,20 +496,21 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact'):
                         rotation_3d_z = gr.Textbox(label="Rotation 3D Z", lines=1, value = da.rotation_3d_z, interactive=True)
                 # 3D Depth Warping
-                with gr.Accordion('Depth Warping', visible=False, open=False) as depth_3d_warping_accord:
-                    with gr.Row(variant='compact'):
-                        use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
-                        midas_weight = gr.Number(label="MiDaS weight", value=da.midas_weight, interactive=True)
-                    with gr.Row(variant='compact'):
-                        padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode")
-                        sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="Sampling mode", value=da.sampling_mode, elem_id="sampling_mode")
-                with gr.Accordion('Field Of View', visible=False, open=False) as fov_accord:
-                    with gr.Row(variant='compact'):
-                        fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True)
-                    with gr.Row():
-                        near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
-                    with gr.Row():
-                        far_schedule = gr.Textbox(label="Far schedule", lines=1, value = da.far_schedule, interactive=True)
+                with gr.Accordion('Depth Warping & FOV', visible=False, open=False) as depth_3d_warping_accord:
+                    with gr.Tab('Depth Warping'): 
+                        with gr.Row(variant='compact'):
+                            use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
+                            midas_weight = gr.Number(label="MiDaS weight", value=da.midas_weight, interactive=True)
+                        with gr.Row(variant='compact'):
+                            padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode")
+                            sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="Sampling mode", value=da.sampling_mode, elem_id="sampling_mode")
+                    with gr.Tab('Field Of View', visible=False, open=False) as fov_accord:
+                        with gr.Row(variant='compact'):
+                            fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True)
+                        with gr.Row():
+                            near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
+                        with gr.Row():
+                            far_schedule = gr.Textbox(label="Far schedule", lines=1, value = da.far_schedule, interactive=True)
                 # Perspective Flip
                 with gr.Accordion('Perspective Flip', open=False) as perspective_flip_accord:
                     with gr.Row():
