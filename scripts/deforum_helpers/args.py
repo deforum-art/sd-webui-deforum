@@ -368,8 +368,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Accordion('Resume & Run from file', open=False):
                 with gr.Tab('Run from Settings file'):
                     with gr.Row(variant='compact'):
-                        override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True)
-                        custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True)
+                        with gr.Column():
+                            override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True, elem_id='override_settings')
+                        with gr.Column(elem_id='custom_settings_file_column'):
+                            custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True, elem_id='custom_settings_file')
                 # RESUME ANIMATION ACCORD
                 with gr.Tab('Resume Animation'):
                     with gr.Row(variant='compact'):
