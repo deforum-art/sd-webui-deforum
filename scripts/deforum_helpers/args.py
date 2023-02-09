@@ -1,4 +1,4 @@
-from modules.shared import cmd_opts, sd_upscalers
+from modules.shared import cmd_opts
 from modules.processing import get_fixed_seed
 from modules.ui_components import FormRow
 import modules.shared as sh
@@ -842,10 +842,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
 
                     with FormRow():
-                        extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sd_upscalers], value=sd_upscalers[3].name)
+                        extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
 
                     with FormRow():
-                        extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sd_upscalers], value=sd_upscalers[0].name)
+                        extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
                         extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
 
                     tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
