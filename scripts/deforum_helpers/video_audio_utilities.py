@@ -94,9 +94,9 @@ def is_vid_path_valid(video_path):
             raise ValueError("Video file format '{}' not supported. Supported formats are: {}".format(extension, file_formats))
     return True
 
-# quick-retreive just the frame count and FPS of a video (local or URL-based)    
-def get_quick_vid_info(vid_local_path):
-    vidcap = cv2.VideoCapture(vid_local_path)
+# quick-retreive frame count, FPS and H/W dimensions of a video (local or URL-based)
+def get_quick_vid_info(vid_path):
+    vidcap = cv2.VideoCapture(vid_path)
     video_fps = vidcap.get(cv2.CAP_PROP_FPS)
     video_frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
     video_width = int(vidcap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -209,5 +209,8 @@ def direct_stitch_vid_from_frames(image_path, fps, f_location, f_crf, f_preset, 
         print("Please set correct image_path")
 # end of 2 stitch frame to video funcs
 
-
-
+# returns True if filename (could be also media URL) contains an audio stream, othehrwise False
+def media_file_has_audio(filename, ffmpeg_location):
+    result = subprocess.run([ffmpeg_location, "-i", filename, "-af", "volumedetect", "-f", "null", "-"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    output = result.stderr.decode()
+    return True if "Stream #0:1: Audio: " in output or "Stream #0:1(und): Audio" in output else False
