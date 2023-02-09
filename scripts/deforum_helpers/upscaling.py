@@ -51,7 +51,7 @@ def process_video_upscaling(resize_mode, upscaling_resize, upscaling_resize_w, u
         if '_depth_' not in f:
             videogen.append(f)
             
-    videogen.sort(key= lambda x:int(x[:-5]))
+    videogen.sort(key= lambda x:int(x.split('.')[0]))
     vid_out = None
 
     if not os.path.exists(custom_upscale_path):
