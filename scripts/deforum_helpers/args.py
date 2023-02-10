@@ -55,6 +55,8 @@ def DeforumAnimArgs():
     near_schedule = "0: (200)"
     far_schedule = "0: (10000)"
     seed_schedule = "0:(5), 1:(-1), 219:(-1), 220:(5)"
+    pix2pix_img_cfg_scale = "1"
+    pix2pix_img_cfg_scale_schedule = "0:(1)"
     
     # Sampler Scheduling
     enable_sampler_scheduling = False #@param {type:"boolean"}
@@ -364,6 +366,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     ddim_eta = gr.Number(label="DDIM ETA", value=d.ddim_eta, interactive=True)
                     tiling = gr.Checkbox(label='Tiling', value=False)
                     n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
+                with gr.Row() as pix2pix_img_cfg_scale_row:
+                    pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True) 
             with gr.Row(visible=False):
                 save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                 show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
@@ -928,7 +932,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         rotation_3d_x, rotation_3d_y, rotation_3d_z,
                         enable_perspective_flip,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
-                        noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule,
+                        noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
                         enable_steps_scheduling, steps_schedule,
                         fov_schedule, near_schedule, far_schedule,
                         seed_schedule,
