@@ -148,7 +148,8 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                                           use_alpha_as_mask=args.use_alpha_as_mask)
                                           
     else:
-        print(f"Not using an init image (doing pure txt2img)")
+        if anim_args.animation_mode != 'Interpolation':
+            print(f"Not using an init image (doing pure txt2img)")
         p_txt = StableDiffusionProcessingTxt2Img(
                 sd_model=sd_model,
                 outpath_samples=p.outpath_samples,
