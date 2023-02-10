@@ -815,7 +815,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         # Intrpolate any existing video from the connected PC
                         with gr.Accordion('Interpolate an existing video', open=False):
                             # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
-                            vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_rife_chosen_file")
+                            vid_to_rife_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_rife_chosen_file")
                             with gr.Row(variant='compact'):
                                 # Non interactive textbox showing uploaded input vid total Frame Count
                                 in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
@@ -874,16 +874,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 
                     with FormRow():
                         extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
-
-                    with FormRow():
                         extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
-                        extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
+                    with FormRow():
+                        with gr.Column(scale=3):
+                            extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
+                        with gr.Column(scale=1, min_width=80):
+                            upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
 
                     tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
                     tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
 
-                    with FormRow():
-                        upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
                     # This is the actual button that's pressed to initiate the Upscaling:
                     upscale_btn = gr.Button(value="*Upscale uploaded video*")
                     # Show a text about CLI outputs:
