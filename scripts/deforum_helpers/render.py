@@ -52,7 +52,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
-    print(f"Saving animation frames to {args.outdir}")
+    print(f"Saving animation frames to:\n{args.outdir}")
 
     # save settings for the batch
     settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
@@ -203,7 +203,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
                 tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
-                print(f"  Creating in-between frame: {tween_frame_idx}; tween:{tween:0.2f};")
+                print(f" Creating in-between frame: {tween_frame_idx}; tween:{tween:0.2f};")
 
                 advance_prev = turbo_prev_image is not None and tween_frame_idx > turbo_prev_frame_idx
                 advance_next = tween_frame_idx > turbo_next_frame_idx
@@ -346,7 +346,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
 
-        print(f"{args.prompt} {args.seed}")
+        print(f"Prompt: {args.prompt.strip()}")
+        print(f"Seed: {args.seed}")
         if not using_vid_init:
             print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
             print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")
