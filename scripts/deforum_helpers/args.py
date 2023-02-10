@@ -55,8 +55,8 @@ def DeforumAnimArgs():
     near_schedule = "0: (200)"
     far_schedule = "0: (10000)"
     seed_schedule = "0:(5), 1:(-1), 219:(-1), 220:(5)"
-    pix2pix_img_cfg_scale = "1"
-    pix2pix_img_cfg_scale_schedule = "0:(1)"
+    pix2pix_img_cfg_scale = "1.5"
+    pix2pix_img_cfg_scale_schedule = "0:(1.5)"
     
     # Sampler Scheduling
     enable_sampler_scheduling = False #@param {type:"boolean"}
