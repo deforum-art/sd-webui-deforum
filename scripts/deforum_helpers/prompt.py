@@ -114,3 +114,8 @@ def interpolate_prompts(animation_prompts, max_frames):
     
     # Return the filled series, in case max_frames is greater than the last keyframe or any ranges were skipped.
     return prompt_series.ffill().bfill()
+
+def prompts_to_dataframe(prompts_json_str):
+    prompts_json = json.loads(prompts_json_str)
+    
+    pd.DataFrame.from_dict(prompts_json, orient='index').reset_index().rename(columns={'index':'Start frame', 0:'Positive prompt', 1:'Negative prompt'})

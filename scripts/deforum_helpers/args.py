@@ -8,6 +8,8 @@ from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and
 from .upscaling import process_upscale_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames
 from .gradio_funcs import *
+import json
+from .prompt import prompts_to_dataframe, prompts_from_dataframe
 
 def Root():
     device = sh.device
@@ -569,6 +571,22 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     <li>Prompts are stored in JSON format. If you've got an error, check it in a <a style="color:SteelBlue" href="https://odu.github.io/slingjsonlint/">JSON Validator</a></li>
                     </ul>
                     """)
+            with gr.Row():
+                animation_prompts_df = gr.Dataframe(
+                    headers=["Start frame", "Prompt", "Negative prompt"],
+                    datatype=["number", "str", "str"],
+                    label="Prompts",
+                    col_count=(3, 'fixed'),
+                    row_count=(1, 'dynamic'),
+                    max_rows=None, #infinite
+                    max_cols=3,
+                    interactive=True,
+                    wrap=True,
+                    type='pandas',
+                    #value = json.loads(DeforumAnimPrompts()), # TODO: split into pos/neg
+                    # json to dataframe
+                    value=prompts_to_dataframe(DeforumAnimPrompts()),
+                )
             with gr.Row():
                 animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
             with gr.Row():
