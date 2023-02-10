@@ -107,6 +107,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, an
         args.n_samples = 1
         args.prompt = prompt_series[frame_idx]
         args.scale = keys.cfg_scale_schedule_series[frame_idx]
+        args.pix2pix_img_cfg_scale = keys.pix2pix_img_cfg_scale_series[frame_idx]
         
         if anim_args.enable_checkpoint_scheduling:
             args.checkpoint = keys.checkpoint_schedule_series[frame_idx]

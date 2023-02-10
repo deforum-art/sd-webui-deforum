@@ -194,6 +194,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         p.image_mask = mask
 
         print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}; sampler={p.sampler_name}")
+        p.image_cfg_scale = args.pix2pix_img_cfg_scale
         processed = processing.process_images(p)
     
     if root.initial_info == None:

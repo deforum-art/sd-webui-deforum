@@ -44,6 +44,7 @@ def get_webui_sd_pipeline(args, root, frame):
     else:
         p.denoising_strength = 1 - args.strength
     p.cfg_scale = args.scale
+    p.image_cfg_scale = args.pix2pix_img_cfg_scale
     p.outpath_samples = root.outpath_samples
     
 
