@@ -36,11 +36,11 @@ def split_weighted_subprompts(text, frame = 0):
     prompt_split = parsed_prompt.split("--neg")
     if len(prompt_split) > 1:
         positive_prompts, negative_prompts = parsed_prompt.split("--neg") #TODO: add --neg to vanilla Deforum for compat
-        print(f'Positive prompt:{positive_prompts}')
-        print(f'Negative prompt:{negative_prompts}')
+        # print(f'Positive prompt:{positive_prompts}')
+        # print(f'Negative prompt:{negative_prompts}')
     else:
         positive_prompts = prompt_split[0]
-        print(f'Positive prompt:{positive_prompts}')
+        # print(f'Positive prompt:{positive_prompts}')
         negative_prompts = ""
 
     return positive_prompts, negative_prompts

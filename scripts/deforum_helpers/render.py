@@ -161,7 +161,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         if state.interrupted:
             break
         
-        print(f"Rendering animation frame {frame_idx} of {anim_args.max_frames}")
+        print(f"Animation frame: {frame_idx}/{anim_args.max_frames} ")
 
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
@@ -203,7 +203,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
                 tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
-                print(f"  creating in between frame {tween_frame_idx} tween:{tween:0.2f}")
+                print(f"  Creating in-between frame: {tween_frame_idx}; tween:{tween:0.2f};")
 
                 advance_prev = turbo_prev_image is not None and tween_frame_idx > turbo_prev_frame_idx
                 advance_next = tween_frame_idx > turbo_next_frame_idx

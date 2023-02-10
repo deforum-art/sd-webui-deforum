@@ -147,7 +147,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                                           use_alpha_as_mask=args.use_alpha_as_mask)
                                           
     else:
-        print(f"Not using an init image (doing pure txt2img) - seed:{p.seed}; subseed:{p.subseed}; subseed_strength:{p.subseed_strength}; cfg_scale:{p.cfg_scale}; steps:{p.steps}")
+        print(f"Not using an init image (doing pure txt2img) subseed:{p.subseed}; subseed_strength:{p.subseed_strength}; cfg_scale:{p.cfg_scale}; steps:{p.steps}")
         p_txt = StableDiffusionProcessingTxt2Img(
                 sd_model=sd_model,
                 outpath_samples=p.outpath_samples,
