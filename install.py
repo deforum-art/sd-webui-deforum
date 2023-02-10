@@ -1,6 +1,10 @@
 import launch
+import os
 
-deforum_libs = ["pandas", "matplotlib", "numexpr", "av", "pims", "moviepy", "imageio_ffmpeg"]
-for lib in deforum_libs:
-    if not launch.is_installed(lib):
-        launch.run_pip(f"install {lib}", f"deforum requirement: {lib}")
+req_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "requirements.txt")
+
+with open(req_file) as file:
+    for lib in file:
+        lib = lib.strip()
+        if not launch.is_installed(lib):
+            launch.run_pip(f"install {lib}", f"deforum requirement: {lib}")
