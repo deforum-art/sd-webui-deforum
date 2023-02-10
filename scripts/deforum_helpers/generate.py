@@ -218,8 +218,9 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
 def print_pretty_table(args, anim_args, p):
 
     x = PrettyTable(padding_width=0)
-    field_names = ["Steps", "CFG", "Denoise"]
-
+    field_names = ["Steps", "CFG"]
+    if anim_args.animation_mode != 'Interpolation':
+        field_names.append("Denoise")
     if args.subseed != -1 or args.subseed_strength != 0:
         field_names.append("Subseed")
         field_names.append("Subs. str")
@@ -229,7 +230,9 @@ def print_pretty_table(args, anim_args, p):
         field_names.append("Checkpoint")
     x.field_names = field_names
 
-    row = [p.steps, p.cfg_scale, p.denoising_strength]
+    row = [p.steps, p.cfg_scale]
+    if anim_args.animation_mode != 'Interpolation':
+        row.append(p.denoising_strength)
     if args.subseed != -1 or args.subseed_strength != 0:
         row.append(p.subseed)
         row.append(p.subseed_strength)
