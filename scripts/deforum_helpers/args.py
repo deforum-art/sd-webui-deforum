@@ -714,7 +714,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.Column(scale=1):
                                 hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method")
                                 hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type")
-                with gr.Row(visible=False) as hybrid_comp_mask_row:
+                with gr.Row(visible=False, variant='compact') as hybrid_comp_mask_row:
                     hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="Comp mask equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
                     with gr.Column(variant='compact'):
                         hybrid_comp_mask_auto_contrast = gr.Checkbox(label="Comp mask auto contrast", value=False, interactive=True)
