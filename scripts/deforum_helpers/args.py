@@ -857,7 +857,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
             with gr.Accordion('Video Upscaling', open=False):
                 with gr.Column():
-                    vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_extra_chosen_file")
+                    vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
 
                     selected_tab = gr.State(value=0)
 
