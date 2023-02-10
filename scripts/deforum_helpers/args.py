@@ -744,7 +744,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Accordion('Video Output Settings', open=True):
                 with gr.Row(variant='compact') as fps_out_format_row:
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
-                    output_format = gr.Dropdown(label="Output format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
+                    # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
+                    output_format = gr.Dropdown(visible=False, label="Output format", choices=['FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
                 with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
                     ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True)
                     ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
@@ -757,9 +758,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         skip_video_for_run_all = gr.Checkbox(label="Skip video for run all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
-           
-            # RIFE ACCORD
-            # with gr.Accordion('Frame Interpolation (RIFE)', open=True) as rife_accord:
+            # RIFE TAB
             with gr.Tab('RIFE') as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
                     gr.HTML("""
@@ -814,24 +813,20 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
                             # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
-
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
+            # VIDEO UPSCALE TAB
             with gr.Tab('Video Upscaling'):
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                 with gr.Column():
-
                     selected_tab = gr.State(value=0)
-
                     with gr.Tabs(elem_id="extras_resize_mode"):
                         with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
                             upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
-
                         with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
                             with FormRow():
                                 upscaling_resize_w = gr.Number(label="Width", value=512, precision=0, elem_id="extras_upscaling_resize_w")
                                 upscaling_resize_h = gr.Number(label="Height", value=512, precision=0, elem_id="extras_upscaling_resize_h")
                                 upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
-
                     with FormRow():
                         extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
                         extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
@@ -850,7 +845,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     gr.HTML("* check your CLI for outputs")
                     # make the function call when the UPSCALE button is clicked
                     upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
-            # STITCH FRAMES TO VID ACCORD
+            # STITCH FRAMES TO VID TAB
             with gr.Tab('Frames to Video') as stitch_imgs_to_vid_row:
                 with gr.Row(visible=False):
                     path_name_modifier = gr.Dropdown(label="Path name modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
