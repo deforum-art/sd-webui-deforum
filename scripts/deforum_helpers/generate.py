@@ -196,15 +196,22 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         
         # start of table printing
         x = PrettyTable(padding_width=0)
-        field_names = ["Steps", "CFG", "Subseed", "SubS str.", "Denoise str."]
-
+        field_names = ["Steps", "CFG", "Denoise"]
+        
+        if args.subseed != -1 or args.subseed_strength != 0:
+            field_names.append("Subseed")
+            field_names.append("Subs. str")
         if anim_args.enable_sampler_scheduling:
             field_names.append("Sampler")
         if anim_args.enable_checkpoint_scheduling:
             field_names.append("Checkpoint")
         x.field_names = field_names
 
-        row = [p.steps, p.cfg_scale, p.subseed, p.subseed_strength, p.denoising_strength]
+        
+        row = [p.steps, p.cfg_scale, p.denoising_strength]
+        if args.subseed != -1 or args.subseed_strength != 0:
+            row.append(p.subseed)
+            row.append(p.subseed_strength)
         if anim_args.enable_sampler_scheduling:
             row.append(p.sampler_name)
         if anim_args.enable_checkpoint_scheduling:
