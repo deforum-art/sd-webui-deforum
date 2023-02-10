@@ -741,7 +741,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # OUTPUT TAB
         with gr.Tab('Output'):
             # VID OUTPUT ACCORD
-            with gr.Accordion('Video Output Settings', open=True):
+            with gr.Accordion('Video Output Settings - FFmpeg', open=True):
                 with gr.Row(variant='compact') as fps_out_format_row:
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
                     # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
@@ -773,7 +773,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         Important notes:
                         <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
                             <li>Working FFMPEG is required to get an output interpolated video. No ffmepg will leave you with just the interpolated imgs.</li>
-                            <li>Frame Interpolation will *not* run if 'store_frames_in_ram' is enabled.</li>
+                            <li>Frame Interpolation will *not* run if any of the following are enabled: 'Store frames in ram' / 'Skip video for run all'.</li>
                             <li>Audio (if provided) will *not* be transferred to the interpolated video if Slow-Mo is enabled.</li>
                             <li>'add_soundtrack' and 'soundtrack_path' aren't being honoured in "Interpolate an existing video" mode. Original vid audio will be used instead with the same slow-mo rules above.</li>
                         </ul>
@@ -853,7 +853,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     Important Notes:
                     <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
                         <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID</li>
-                        <li>Working FFMPEG under 'ffmpeg_location' is required to stitch a video in this mode!</li>
+                        <li>Working FFMPEG under 'Location' (above ^) is required to stitch a video in this mode!</li>
                     </ul>
                     """)
                 with gr.Row(variant='compact'):
