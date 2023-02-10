@@ -45,8 +45,7 @@ def run_deforum(*args, **kwargs):
         #we'll setup the rest later
     )
     
-    print('** Deforum extension for auto1111 webui, v2.0b **')
-    
+    print("\033[4;33mDeforum extension for auto1111 webui, v2.0b\033[0m")
     args_dict['self'] = None
     args_dict['p'] = p
     
