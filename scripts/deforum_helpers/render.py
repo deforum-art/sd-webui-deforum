@@ -341,7 +341,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
 
         if anim_args.enable_checkpoint_scheduling:
             args.checkpoint = keys.checkpoint_schedule_series[frame_idx]
-            print(f"Checkpoint: {args.checkpoint}")
         else:
             args.checkpoint = None
 
