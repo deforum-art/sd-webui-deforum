@@ -757,30 +757,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         skip_video_for_run_all = gr.Checkbox(label="Skip video for run all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
-                # STITCH FRAMES TO VID ACCORD
-                with gr.Accordion('Stitch Frames to Video', open=False, visible=True) as stitch_imgs_to_vid_row:
-                    with gr.Row(visible=False):
-                        path_name_modifier = gr.Dropdown(label="Path name modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
-                    gr.HTML("""
-                     <p style="margin-top:0em">
-                        Important Notes:
-                        <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
-                            <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID</li>
-                            <li>Working FFMPEG under 'ffmpeg_location' is required to stitch a video in this mode!</li>
-                        </ul>
-                        """)
-                    with gr.Row(variant='compact'):
-                          image_path = gr.Textbox(label="Image path", lines=1, interactive=True, value = dv.image_path)
-                    with gr.Row(visible=False):
-                        mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
-                    # not visible as of 06-02-23 since render_steps is disabled as well and they work together. Need to fix both.
-                    with gr.Row(visible=False):
-                        # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
-                        render_steps = gr.Checkbox(label="Render steps", value=dv.render_steps, interactive=True, visible=False)
-                    ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
-                    ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path])
+           
             # RIFE ACCORD
-            with gr.Accordion('Frame Interpolation (RIFE)', open=True) as rife_accord:
+            # with gr.Accordion('Frame Interpolation (RIFE)', open=True) as rife_accord:
+            with gr.Tab('RIFE') as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
                     gr.HTML("""
                     Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
@@ -834,31 +814,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
                             # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
-            output_format.change(fn=hide_by_gif, inputs=output_format, outputs=ffmpeg_set_row)
-            output_format.change(fn=hide_by_gif, inputs=output_format, outputs=soundtrack_row)
-            output_format.change(fn=hide_by_gif, inputs=output_format, outputs=stitch_imgs_to_vid_row)
-            output_format.change(fn=hide_by_gif, inputs=output_format, outputs=rife_accord)
-            # Old/ Non actives accordion
-            with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
-                # NOT VISIBLE AS OF 09-02-23
-                mask_contrast_adjust = gr.Slider(label="Mask contrast adjust", minimum=0, maximum=1, step=0.01, value=d.mask_contrast_adjust, interactive=True)
-                mask_brightness_adjust = gr.Slider(label="Mask brightness adjust", minimum=0, maximum=1, step=0.01, value=d.mask_brightness_adjust, interactive=True)
-                from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
-                # INVISIBLE AS OF 08-02 (with static value of 8 for both W and H). Was in Perlin section before Perlin Octaves/Persistence
-                with gr.Column(min_width=200, visible=False):
-                    perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
-                    perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
-                with gr.Row(visible=False):
-                    save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
-                with gr.Row(visible=False):
-                    save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
-                    display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
-            
+
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
-            with gr.Accordion('Video Upscaling', open=False):
+            with gr.Tab('Video Upscaling'):
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                 with gr.Column():
-                    
 
                     selected_tab = gr.State(value=0)
 
@@ -890,6 +850,43 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     gr.HTML("* check your CLI for outputs")
                     # make the function call when the UPSCALE button is clicked
                     upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+            # STITCH FRAMES TO VID ACCORD
+            with gr.Tab('Frames to Video') as stitch_imgs_to_vid_row:
+                with gr.Row(visible=False):
+                    path_name_modifier = gr.Dropdown(label="Path name modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
+                gr.HTML("""
+                 <p style="margin-top:0em">
+                    Important Notes:
+                    <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
+                        <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID</li>
+                        <li>Working FFMPEG under 'ffmpeg_location' is required to stitch a video in this mode!</li>
+                    </ul>
+                    """)
+                with gr.Row(variant='compact'):
+                      image_path = gr.Textbox(label="Image path", lines=1, interactive=True, value = dv.image_path)
+                with gr.Row(visible=False):
+                    mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
+                # not visible as of 06-02-23 since render_steps is disabled as well and they work together. Need to fix both.
+                with gr.Row(visible=False):
+                    # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
+                    render_steps = gr.Checkbox(label="Render steps", value=dv.render_steps, interactive=True, visible=False)
+                ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
+                ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path])
+            # **OLD + NON ACTIVES AREA**
+            with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
+                # NOT VISIBLE AS OF 09-02-23
+                mask_contrast_adjust = gr.Slider(label="Mask contrast adjust", minimum=0, maximum=1, step=0.01, value=d.mask_contrast_adjust, interactive=True)
+                mask_brightness_adjust = gr.Slider(label="Mask brightness adjust", minimum=0, maximum=1, step=0.01, value=d.mask_brightness_adjust, interactive=True)
+                from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
+                # INVISIBLE AS OF 08-02 (with static value of 8 for both W and H). Was in Perlin section before Perlin Octaves/Persistence
+                with gr.Column(min_width=200, visible=False):
+                    perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
+                    perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
+                with gr.Row(visible=False):
+                    save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
+                with gr.Row(visible=False):
+                    save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
+                    display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
         
     # Gradio's Change functions - hiding and renaming elements based on other elements
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
