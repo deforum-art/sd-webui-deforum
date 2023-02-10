@@ -446,6 +446,9 @@ def print_render_table(anim_args, keys, frame_idx):
     field_names += ["Tr X", "Tr Y"]
     if anim_args.animation_mode == '3D':
         field_names += ["Tr Z", "Ro X", "Ro Y", "Ro Z"]
+    if anim_args.enable_perspective_flip:
+        field_names += ["Pf T", "Pf P", "Pf G", "Pf F"]
+
     x.field_names = field_names
 
     row = []
@@ -454,5 +457,8 @@ def print_render_table(anim_args, keys, frame_idx):
     row += [keys.translation_x_series[frame_idx],keys.translation_y_series[frame_idx]]
     if anim_args.animation_mode == '3D':
         row += [keys.translation_z_series[frame_idx],keys.rotation_3d_x_series[frame_idx],keys.rotation_3d_y_series[frame_idx],keys.rotation_3d_z_series[frame_idx]]
+    if anim_args.enable_perspective_flip:
+        row +=[keys.perspective_flip_theta_series[frame_idx], keys.perspective_flip_phi_series[frame_idx], keys.perspective_flip_gamma_series[frame_idx], keys.perspective_flip_fv_series[frame_idx]]
+        
     x.add_row(row)
     print(x)

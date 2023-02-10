@@ -176,7 +176,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                 denoising_strength=None,
             )
         # print dynamic table to cli
-        print_pretty_table(args, anim_args, p_txt)
+        print_generate_table(args, anim_args, p_txt)
         
         processed = processing.process_images(p_txt)
     
@@ -215,7 +215,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     
     return results
     
-def print_pretty_table(args, anim_args, p):
+def print_generate_table(args, anim_args, p):
     x = PrettyTable(padding_width=0)
     field_names = ["Steps", "CFG"]
     if anim_args.animation_mode != 'Interpolation':
