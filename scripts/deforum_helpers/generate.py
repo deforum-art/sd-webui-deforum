@@ -200,7 +200,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         p.image_cfg_scale = args.pix2pix_img_cfg_scale
         
         # print dynamic table to cli
-        print_pretty_table(args, anim_args, p)
+        print_generate_table(args, anim_args, p)
        
         processed = processing.process_images(p)
     
