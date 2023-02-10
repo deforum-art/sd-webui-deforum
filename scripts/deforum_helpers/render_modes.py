@@ -95,8 +95,9 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, an
     
     state.job_count = anim_args.max_frames
     frame_idx = 0
+    # INTERPOLATION MODE
     while frame_idx < anim_args.max_frames:
-        print(f"Rendering interpolation animation frame {frame_idx} of {anim_args.max_frames}")
+        print(f"\033[36mInterpolation frame: \033[0m{frame_idx}/{anim_args.max_frames}  ")
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
         state.job_no = frame_idx + 1
         
