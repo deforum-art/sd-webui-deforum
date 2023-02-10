@@ -350,14 +350,18 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         print(f"\033[32mSeed: \033[0m{args.seed}")
         print(f"\033[35mPrompt: \033[0m{args.prompt.strip()}")
         if not using_vid_init:
+            # PRINTING TIME
             x = PrettyTable(padding_width = 0)
             if anim_args.animation_mode == '2D':
-                # PRINTING TIME
                 short_zoom = round(keys.zoom_series[frame_idx], 6)
-                # x = PrettyTable(padding_width = 0)
                 x.field_names = ["Angle", "Zoom", "Tr X", "Tr Y"]
                 x.add_rows([[keys.angle_series[frame_idx],short_zoom,keys.translation_x_series[frame_idx],keys.translation_y_series[frame_idx]]])
                 print(x)
+            elif anim_args.animation_mode == '3D':
+                x.field_names = ["Tr X", "Tr Y", "Tr Z", "Ro X", "Ro Y", "Ro Z"]
+                x.add_rows([[keys.translation_x_series[frame_idx],keys.translation_y_series[frame_idx],keys.translation_z_series[frame_idx],keys.rotation_3d_x_series[frame_idx],keys.rotation_3d_y_series[frame_idx],keys.rotation_3d_z_series[frame_idx]]])
+                print(x)
+                
                 
         # x.field_names = ["Angle", "Zoom", "Tr X", "Tr Y", "Tr Z", "Ro X", "Ro Y", "Ro Z"]
         # grab init image for current frame
