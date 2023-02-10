@@ -148,7 +148,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                                           use_alpha_as_mask=args.use_alpha_as_mask)
                                           
     else:
-        print(f"Not using an init image (doing pure txt2img) subseed:{p.subseed}; subseed_strength:{p.subseed_strength}; cfg_scale:{p.cfg_scale}; steps:{p.steps}")
+        print(f"Not using an init image (doing pure txt2img)")
         p_txt = StableDiffusionProcessingTxt2Img(
                 sd_model=sd_model,
                 outpath_samples=p.outpath_samples,
@@ -213,32 +213,21 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     results = processed.images[0]
     
     return results
-
- 
+    
 def print_pretty_table(args, anim_args, p):
-
     x = PrettyTable(padding_width=0)
     field_names = ["Steps", "CFG"]
     if anim_args.animation_mode != 'Interpolation':
         field_names.append("Denoise")
-    if args.subseed != -1 or args.subseed_strength != 0:
-        field_names.append("Subseed")
-        field_names.append("Subs. str")
-    if anim_args.enable_sampler_scheduling:
-        field_names.append("Sampler")
-    if anim_args.enable_checkpoint_scheduling:
-        field_names.append("Checkpoint")
+    field_names += ["Subseed", "Subs. str"] * (args.subseed != -1 or args.subseed_strength != 0)
+    field_names += ["Sampler"] * anim_args.enable_sampler_scheduling
+    field_names += ["Checkpoint"] * anim_args.enable_checkpoint_scheduling
     x.field_names = field_names
-
     row = [p.steps, p.cfg_scale]
     if anim_args.animation_mode != 'Interpolation':
         row.append(p.denoising_strength)
-    if args.subseed != -1 or args.subseed_strength != 0:
-        row.append(p.subseed)
-        row.append(p.subseed_strength)
-    if anim_args.enable_sampler_scheduling:
-        row.append(p.sampler_name)
-    if anim_args.enable_checkpoint_scheduling:
-        row.append(args.checkpoint)
+    row += [p.subseed, p.subseed_strength] * (args.subseed != -1 or args.subseed_strength != 0)
+    row += [p.sampler_name] * anim_args.enable_sampler_scheduling
+    row += [args.checkpoint] * anim_args.enable_checkpoint_scheduling
     x.add_row(row)
     print(x)
