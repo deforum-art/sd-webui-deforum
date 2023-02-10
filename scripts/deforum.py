@@ -45,8 +45,7 @@ def run_deforum(*args, **kwargs):
         #we'll setup the rest later
     )
     
-    print('Deforum extension (auto1111) for 2D, pseudo-2D, 3D and Hybrid animations')
-    print('v2.0b-webui')
+    print('Deforum extension for auto1111 webui, v2.0b')
     
     args_dict['self'] = None
     args_dict['p'] = p
