@@ -161,8 +161,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         state.job_no = frame_idx + 1
         if state.interrupted:
             break
-        
-        print(f"Animation frame: {frame_idx}/{anim_args.max_frames} ")
+
+        print(f"\033[36mAnimation frame: \033[0m{frame_idx}/{anim_args.max_frames}  ")
 
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
@@ -347,8 +347,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
 
-        print(f"Seed: {args.seed}")
-        print(f"Prompt: {args.prompt.strip()}")
+        print(f"\033[32mSeed: \033[0m{args.seed}")
+        print(f"\033[35mPrompt: \033[0m{args.prompt.strip()}")
         if not using_vid_init:
             # PRINTING TIME
             short_zoom = round(keys.zoom_series[frame_idx], 6)
