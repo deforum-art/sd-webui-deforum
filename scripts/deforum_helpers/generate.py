@@ -220,6 +220,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         print(x)
         # end of table printing
 
+        p.image_cfg_scale = args.pix2pix_img_cfg_scale
         processed = processing.process_images(p)
     
     if root.initial_info == None:

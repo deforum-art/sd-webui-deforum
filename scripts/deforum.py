@@ -55,15 +55,6 @@ def run_deforum(*args, **kwargs):
     root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
     root.basedirs = basedirs
 
-    # force-pip-install a couple of packages that didn't want to install as part of the req.txt
-    from launch import is_installed, run_pip
-    libs = ["numexpr", "av", "pims", "moviepy", "imageio_ffmpeg"]
-    for lib in libs:
-        if not is_installed(lib):
-            run_pip(f"install {lib}", lib)
-            if lib == "imageio_ffmpeg":
-                print("******** IMPORTANT MESSAGE: FFMPEG just got installed, please restart your webui for it to work in the next runs! ********")
-
     for basedir in basedirs:
         sys.path.extend([
             basedir + '/scripts/deforum_helpers/src',

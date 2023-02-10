@@ -329,6 +329,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             args.strength = max(0.0, min(1.0, strength))
         
         args.scale = scale
+       
+        # Pix2Pix Image CFG Scale - does *nothing* with non pix2pix checkpoints
+        args.pix2pix_img_cfg_scale = float(keys.pix2pix_img_cfg_scale_series[frame_idx])
 
         # grab prompt for current frame
         args.prompt = prompt_series[frame_idx]
@@ -443,4 +446,3 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         state.current_image = image
 
         args.seed = next_seed(args)
-
