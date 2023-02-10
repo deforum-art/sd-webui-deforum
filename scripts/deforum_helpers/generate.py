@@ -174,6 +174,9 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                 enable_hr=None,
                 denoising_strength=None,
             )
+        # print dynamic table to cli
+        print_pretty_table(args, anim_args, p_txt)
+        
         processed = processing.process_images(p_txt)
     
     if processed is None:
@@ -193,34 +196,11 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         
         p.init_images = [init_image]
         p.image_mask = mask
-        
-        # start of table printing
-        x = PrettyTable(padding_width=0)
-        field_names = ["Steps", "CFG", "Denoise"]
-        
-        if args.subseed != -1 or args.subseed_strength != 0:
-            field_names.append("Subseed")
-            field_names.append("Subs. str")
-        if anim_args.enable_sampler_scheduling:
-            field_names.append("Sampler")
-        if anim_args.enable_checkpoint_scheduling:
-            field_names.append("Checkpoint")
-        x.field_names = field_names
-
-        
-        row = [p.steps, p.cfg_scale, p.denoising_strength]
-        if args.subseed != -1 or args.subseed_strength != 0:
-            row.append(p.subseed)
-            row.append(p.subseed_strength)
-        if anim_args.enable_sampler_scheduling:
-            row.append(p.sampler_name)
-        if anim_args.enable_checkpoint_scheduling:
-            row.append(args.checkpoint)
-        x.add_row(row)
-        print(x)
-        # end of table printing
-
         p.image_cfg_scale = args.pix2pix_img_cfg_scale
+        
+        # print dynamic table to cli
+        print_pretty_table(args, anim_args, p)
+       
         processed = processing.process_images(p)
     
     if root.initial_info == None:
@@ -233,3 +213,29 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     results = processed.images[0]
     
     return results
+
+ 
+def print_pretty_table(args, anim_args, p):
+
+    x = PrettyTable(padding_width=0)
+    field_names = ["Steps", "CFG", "Denoise"]
+
+    if args.subseed != -1 or args.subseed_strength != 0:
+        field_names.append("Subseed")
+        field_names.append("Subs. str")
+    if anim_args.enable_sampler_scheduling:
+        field_names.append("Sampler")
+    if anim_args.enable_checkpoint_scheduling:
+        field_names.append("Checkpoint")
+    x.field_names = field_names
+
+    row = [p.steps, p.cfg_scale, p.denoising_strength]
+    if args.subseed != -1 or args.subseed_strength != 0:
+        row.append(p.subseed)
+        row.append(p.subseed_strength)
+    if anim_args.enable_sampler_scheduling:
+        row.append(p.sampler_name)
+    if anim_args.enable_checkpoint_scheduling:
+        row.append(args.checkpoint)
+    x.add_row(row)
+    print(x)
