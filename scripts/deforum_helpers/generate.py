@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from PIL import Image
+from prettytable import PrettyTable
 from .prompt import split_weighted_subprompts
 from .load_images import load_img, prepare_mask, check_mask_for_errors
 from .webui_sd_pipeline import get_webui_sd_pipeline
@@ -192,9 +193,8 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         
         p.init_images = [init_image]
         p.image_mask = mask
-
-        # TODO: print it better
-        from prettytable import PrettyTable # move import!
+        
+        # PRINTING TIME!
         x = PrettyTable(padding_width = 0)
         x.field_names = ["Subseed", "SubS str.", "Denoise str.", "Steps", "CFG", "Sampler"]
         x.add_rows([[p.subseed,p.subseed_strength,p.denoising_strength,p.steps,p.cfg_scale,p.sampler_name]])

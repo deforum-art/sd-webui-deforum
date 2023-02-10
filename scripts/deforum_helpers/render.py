@@ -4,6 +4,7 @@ import pandas as pd
 import cv2
 import numpy as np
 from PIL import Image, ImageOps
+from prettytable import PrettyTable
 
 from .generate import generate
 from .noise import add_noise
@@ -349,9 +350,12 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         print(f"Seed: {args.seed}")
         print(f"Prompt: {args.prompt.strip()}")
         if not using_vid_init:
-            print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
-            print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")
-            print(f"Rx: {keys.rotation_3d_x_series[frame_idx]} Ry: {keys.rotation_3d_y_series[frame_idx]} Rz: {keys.rotation_3d_z_series[frame_idx]}")
+            # PRINTING TIME
+            short_zoom = round(keys.zoom_series[frame_idx], 6)
+            x = PrettyTable(padding_width = 0)
+            x.field_names = ["Angle", "Zoom", "Tr X", "Tr Y", "Tr Z", "Ro X", "Ro Y", "Ro Z"]
+            x.add_rows([[keys.angle_series[frame_idx],short_zoom,keys.translation_x_series[frame_idx],keys.translation_y_series[frame_idx],keys.translation_z_series[frame_idx],keys.rotation_3d_x_series[frame_idx],keys.rotation_3d_y_series[frame_idx],keys.rotation_3d_z_series[frame_idx]]])
+            print(x)
         
         # grab init image for current frame
         elif using_vid_init:
