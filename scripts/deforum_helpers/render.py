@@ -347,8 +347,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
 
+        # remove '--neg' from end of prompt if there's nothing after it, for PRINTING purposes ONLY
+        prompt_to_print = args.prompt.strip()
+        if prompt_to_print.endswith("--neg"):
+            prompt_to_print = prompt_to_print[:-5]
+            
         print(f"\033[32mSeed: \033[0m{args.seed}")
-        print(f"\033[35mPrompt: \033[0m{args.prompt.strip()}")
+        print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
         if not using_vid_init:
             # PRINTING TIME
             x = PrettyTable(padding_width = 0)
