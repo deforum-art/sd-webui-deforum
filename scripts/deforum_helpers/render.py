@@ -358,20 +358,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         print(f"\033[32mSeed: \033[0m{args.seed}")
         print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
         if not using_vid_init:
-            # PRINTING TIME
-            x = PrettyTable(padding_width = 0)
-            if anim_args.animation_mode == '2D':
-                short_zoom = round(keys.zoom_series[frame_idx], 6)
-                x.field_names = ["Angle", "Zoom", "Tr X", "Tr Y"]
-                x.add_rows([[keys.angle_series[frame_idx],short_zoom,keys.translation_x_series[frame_idx],keys.translation_y_series[frame_idx]]])
-                print(x)
-            elif anim_args.animation_mode == '3D':
-                x.field_names = ["Tr X", "Tr Y", "Tr Z", "Ro X", "Ro Y", "Ro Z"]
-                x.add_rows([[keys.translation_x_series[frame_idx],keys.translation_y_series[frame_idx],keys.translation_z_series[frame_idx],keys.rotation_3d_x_series[frame_idx],keys.rotation_3d_y_series[frame_idx],keys.rotation_3d_z_series[frame_idx]]])
-                print(x)
-                
-                
-        # x.field_names = ["Angle", "Zoom", "Tr X", "Tr Y", "Tr Z", "Ro X", "Ro Y", "Ro Z"]
+            # print motion table to cli if anim mode = 2D or 3D
+            if anim_args.animation_mode in ['2D','3D']:
+                print_render_table(anim_args, keys, frame_idx)
+
         # grab init image for current frame
         elif using_vid_init:
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
@@ -446,3 +436,23 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         state.current_image = image
 
         args.seed = next_seed(args)
+
+def print_render_table(anim_args, keys, frame_idx):
+    x = PrettyTable(padding_width=0)
+    field_names = []
+    if anim_args.animation_mode == '2D':
+        short_zoom = round(keys.zoom_series[frame_idx], 6)
+        field_names += ["Angle", "Zoom"]
+    field_names += ["Tr X", "Tr Y"]
+    if anim_args.animation_mode == '3D':
+        field_names += ["Tr Z", "Ro X", "Ro Y", "Ro Z"]
+    x.field_names = field_names
+
+    row = []
+    if anim_args.animation_mode == '2D':
+        row += [keys.angle_series[frame_idx],short_zoom]
+    row += [keys.translation_x_series[frame_idx],keys.translation_y_series[frame_idx]]
+    if anim_args.animation_mode == '3D':
+        row += [keys.translation_z_series[frame_idx],keys.rotation_3d_x_series[frame_idx],keys.rotation_3d_y_series[frame_idx],keys.rotation_3d_z_series[frame_idx]]
+    x.add_row(row)
+    print(x)
