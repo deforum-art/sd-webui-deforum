@@ -194,11 +194,24 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         p.init_images = [init_image]
         p.image_mask = mask
         
-        # PRINTING TIME!
-        x = PrettyTable(padding_width = 0)
-        x.field_names = ["Subseed", "SubS str.", "Denoise str.", "Steps", "CFG", "Sampler"]
-        x.add_rows([[p.subseed,p.subseed_strength,p.denoising_strength,p.steps,p.cfg_scale,p.sampler_name]])
+        # start of table printing
+        x = PrettyTable(padding_width=0)
+        field_names = ["Steps", "CFG", "Subseed", "SubS str.", "Denoise str."]
+
+        if anim_args.enable_sampler_scheduling:
+            field_names.append("Sampler")
+        if anim_args.enable_checkpoint_scheduling:
+            field_names.append("Checkpoint")
+        x.field_names = field_names
+
+        row = [p.steps, p.cfg_scale, p.subseed, p.subseed_strength, p.denoising_strength]
+        if anim_args.enable_sampler_scheduling:
+            row.append(p.sampler_name)
+        if anim_args.enable_checkpoint_scheduling:
+            row.append(args.checkpoint)
+        x.add_row(row)
         print(x)
+        # end of table printing
 
         processed = processing.process_images(p)
     
