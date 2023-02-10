@@ -346,8 +346,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
 
-        print(f"Prompt: {args.prompt.strip()}")
         print(f"Seed: {args.seed}")
+        print(f"Prompt: {args.prompt.strip()}")
         if not using_vid_init:
             print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
             print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")

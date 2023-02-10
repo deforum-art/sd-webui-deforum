@@ -193,7 +193,13 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         p.init_images = [init_image]
         p.image_mask = mask
 
-        print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}; sampler={p.sampler_name}")
+        # TODO: print it better
+        from prettytable import PrettyTable # move import!
+        x = PrettyTable(padding_width = 0)
+        x.field_names = ["Subseed", "SubS str.", "Denoise str.", "Steps", "CFG", "Sampler"]
+        x.add_rows([[p.subseed,p.subseed_strength,p.denoising_strength,p.steps,p.cfg_scale,p.sampler_name]])
+        print(x)
+
         processed = processing.process_images(p)
     
     if root.initial_info == None:
