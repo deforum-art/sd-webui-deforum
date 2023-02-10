@@ -855,9 +855,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
             
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
-            with gr.Accordion('Upscale video', open=True):
+            with gr.Accordion('Upscale video', open=False):
                 with gr.Column():
-                    vid_to_upscale_chosen_file = gr.File(label="Video to upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_extra_chosen_file")
+                    vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_extra_chosen_file")
 
                     selected_tab = gr.State(value=0)
 
@@ -883,11 +883,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 
                     with FormRow():
                         upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
-                    # This is the actual button that's pressed to initiate the interpolation:
+                    # This is the actual button that's pressed to initiate the Upscaling:
                     upscale_btn = gr.Button(value="*Upscale uploaded video*")
                     # Show a text about CLI outputs:
                     gr.HTML("* check your CLI for outputs")
-                    # make the functin call when the RIFE button is clicked
+                    # make the function call when the UPSCALE button is clicked
                     upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
         
     # Gradio's Change functions - hiding and renaming elements based on other elements
