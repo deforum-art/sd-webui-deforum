@@ -160,7 +160,6 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                 subseed_strength=p.subseed_strength,
                 seed_resize_from_h=p.seed_resize_from_h,
                 seed_resize_from_w=p.seed_resize_from_w,
-                seed_enable_extras=p.seed_enable_extras,
                 sampler_name=p.sampler_name,
                 batch_size=p.batch_size,
                 n_iter=p.n_iter,
