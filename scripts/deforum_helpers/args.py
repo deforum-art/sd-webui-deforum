@@ -161,8 +161,6 @@ def DeforumArgs():
     #@markdonw **Webui stuff**
     tiling = False
     restore_faces = False
-    # firstphase_width = 0
-    # firstphase_height = 0
     seed_enable_extras = False
     subseed = -1
     subseed_strength = 0
