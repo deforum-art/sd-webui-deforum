@@ -940,7 +940,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_perspective_flip,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
-                        enable_subseed_scheduling, subseed_schedule, subseed_strength_schedule
+                        enable_subseed_scheduling, subseed_schedule, subseed_strength_schedule,
                         enable_steps_scheduling, steps_schedule,
                         fov_schedule, near_schedule, far_schedule,
                         seed_schedule,
