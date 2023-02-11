@@ -57,6 +57,8 @@ def DeforumAnimArgs():
     seed_schedule = "0:(5), 1:(-1), 219:(-1), 220:(5)"
     pix2pix_img_cfg_scale = "1.5"
     pix2pix_img_cfg_scale_schedule = "0:(1.5)"
+    subseed_schedule = "0:(1)"
+    subseed_strength_schedule = "0:(0)"
     
     # Sampler Scheduling
     enable_sampler_scheduling = False #@param {type:"boolean"}
@@ -476,6 +478,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         enable_clipskip_scheduling = gr.Checkbox(label="Enable CLIP skip scheduling", value=da.enable_clipskip_scheduling, interactive=True)
                     with gr.Row():
                         clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
+                with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
+                    subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value = da.subseed_schedule, interactive=True)
+                    subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value = da.subseed_strength_schedule, interactive=True)
             # MOTION INNER TAB
             with gr.Tab('Motion') as motion_tab:
                 with gr.Column(visible=True) as only_2d_motion_column:
@@ -933,6 +938,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_perspective_flip,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
+                        subseed_schedule, subseed_strength_schedule
                         enable_steps_scheduling, steps_schedule,
                         fov_schedule, near_schedule, far_schedule,
                         seed_schedule,
