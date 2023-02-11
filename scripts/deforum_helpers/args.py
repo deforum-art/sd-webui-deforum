@@ -57,6 +57,7 @@ def DeforumAnimArgs():
     seed_schedule = "0:(5), 1:(-1), 219:(-1), 220:(5)"
     pix2pix_img_cfg_scale = "1.5"
     pix2pix_img_cfg_scale_schedule = "0:(1.5)"
+    enable_subseed_scheduling = False
     subseed_schedule = "0:(1)"
     subseed_strength_schedule = "0:(0)"
     
@@ -479,6 +480,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row():
                         clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
                 with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
+                    enable_subseed_scheduling = gr.Checkbox(label="Enable Subseed scheduling", value=da.enable_subseed_scheduling, interactive=True)
                     subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value = da.subseed_schedule, interactive=True)
                     subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value = da.subseed_strength_schedule, interactive=True)
             # MOTION INNER TAB
@@ -938,7 +940,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_perspective_flip,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
-                        subseed_schedule, subseed_strength_schedule
+                        enable_subseed_scheduling, subseed_schedule, subseed_strength_schedule
                         enable_steps_scheduling, steps_schedule,
                         fov_schedule, near_schedule, far_schedule,
                         seed_schedule,

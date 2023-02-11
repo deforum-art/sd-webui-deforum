@@ -343,6 +343,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             print(f"Checkpoint: {args.checkpoint}")
         else:
             args.checkpoint = None
+            
+        #SubSeed scheduling
+        if anim_args.enable_subseed_scheduling:
+            args.subseed = int(keys.subseed_schedule_series[frame_idx])
+            args.subseed_strength = float(keys.subseed_strength_schedule_series[frame_idx])
 
         if use_parseq:
             args.seed_enable_extras = True
