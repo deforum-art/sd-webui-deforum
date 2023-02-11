@@ -356,24 +356,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 tiling = gr.Checkbox(label='Tiling', value=False)
             with gr.Row(visible=False):
                 filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
-            # SUBSEED CONTROL ACCORD
-            # NOT VISIBLE 11-02-23 htai
-            with gr.Accordion('Subseed controls & More', open=False, visible=False):
-                # Not visible until fixed, 06-02-23
-                with gr.Row(visible=False):
-                    restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
-                # NOT VISIBLE as of 11-02 - we have sch now. will delete the actual params in a later date
-                with gr.Row(variant='compact', visible=False):
-                    seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
-                    # subseed = gr.Number(label="Subseed", value=d.subseed, interactive=True, precision=0)
-                    subseed_strength = gr.Slider(label="Subseed strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
-                
-                    n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
-                with gr.Row() as pix2pix_img_cfg_scale_row:
-                    pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True) 
-            with gr.Row(visible=False):
-                save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
-                show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
             # RUN FROM SETTING FILE ACCORD
             with gr.Accordion('Resume & Run from file', open=False):
                 with gr.Tab('Run from Settings file'):
@@ -863,6 +845,21 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row(visible=False):
                     save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
                     display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
+                    # SUBSEED CONTROL ACCORD
+            # NOT VISIBLE 11-02-23 htai
+            with gr.Accordion('Subseed controls & More', open=False, visible=False):
+                # Not visible until fixed, 06-02-23
+                with gr.Row(visible=False):
+                    restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
+                # NOT VISIBLE as of 11-02 - we have sch now. will delete the actual params in a later date
+                with gr.Row(variant='compact', visible=False):
+                    seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
+                    n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
+                with gr.Row() as pix2pix_img_cfg_scale_row:
+                    pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True) 
+            with gr.Row(visible=False):
+                save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
+                show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
             
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
             with gr.Accordion('Upscale video', open=True):
@@ -969,7 +966,7 @@ hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 args_names =    str(r'''W, H, tiling, restore_faces,
                         seed, sampler,
-                        seed_enable_extras,  subseed_strength, seed_resize_from_w, seed_resize_from_h,
+                        seed_enable_extras, seed_resize_from_w, seed_resize_from_h,
                         steps, ddim_eta,
                         n_batch,
                         save_settings, save_samples, display_samples,
@@ -1011,6 +1008,7 @@ def pack_args(args_dict):
     args_dict['precision'] = 'autocast' 
     args_dict['scale'] = 7
     args_dict['subseed'] = -1
+    args_dict['subseed_strength'] = 0
     args_dict['C'] = 4
     args_dict['f'] = 8
     args_dict['timestring'] = ""
