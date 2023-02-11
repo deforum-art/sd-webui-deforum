@@ -456,6 +456,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         seed_iter_N = gr.Number(label="Seed iter N", value=d.seed_iter_N, interactive=True, precision=0)
                     with gr.Row(visible=False) as seed_schedule_row:
                         seed_schedule = gr.Textbox(label="Seed schedule", lines=1, value = da.seed_schedule, interactive=True)
+                with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
+                    enable_subseed_scheduling = gr.Checkbox(label="Enable Subseed scheduling", value=da.enable_subseed_scheduling, interactive=True)
+                    subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value = da.subseed_schedule, interactive=True)
+                    subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value = da.subseed_strength_schedule, interactive=True)
                 # Steps Scheduling
                 with gr.TabItem('Step') as a13:
                     with gr.Row():
@@ -479,10 +483,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         enable_clipskip_scheduling = gr.Checkbox(label="Enable CLIP skip scheduling", value=da.enable_clipskip_scheduling, interactive=True)
                     with gr.Row():
                         clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
-                with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
-                    enable_subseed_scheduling = gr.Checkbox(label="Enable Subseed scheduling", value=da.enable_subseed_scheduling, interactive=True)
-                    subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value = da.subseed_schedule, interactive=True)
-                    subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value = da.subseed_strength_schedule, interactive=True)
             # MOTION INNER TAB
             with gr.Tab('Motion') as motion_tab:
                 with gr.Column(visible=True) as only_2d_motion_column:
