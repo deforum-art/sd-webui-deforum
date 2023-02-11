@@ -348,14 +348,15 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
-
-        # remove '--neg' from end of prompt if there's nothing after it, for PRINTING purposes ONLY
-        prompt_to_print = args.prompt.strip()
-        if prompt_to_print.endswith("--neg"):
-            prompt_to_print = prompt_to_print[:-5]
             
+        prompt_to_print, *after_neg = args.prompt.strip().split("--neg")
+        prompt_to_print = prompt_to_print.strip()
+        after_neg = "".join(after_neg).strip()
+
         print(f"\033[32mSeed: \033[0m{args.seed}")
         print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
+        if after_neg and after_neg.strip():
+            print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
         if not using_vid_init:
             # print motion table to cli if anim mode = 2D or 3D
             if anim_args.animation_mode in ['2D','3D']:
