@@ -4,6 +4,7 @@ import pandas as pd
 import cv2
 import numpy as np
 from PIL import Image, ImageOps
+from prettytable import PrettyTable
 
 from .generate import generate
 from .noise import add_noise
@@ -52,7 +53,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
-    print(f"Saving animation frames to {args.outdir}")
+    print(f"Saving animation frames to:\n{args.outdir}")
 
     # save settings for the batch
     settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
@@ -160,8 +161,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         state.job_no = frame_idx + 1
         if state.interrupted:
             break
-        
-        print(f"Rendering animation frame {frame_idx} of {anim_args.max_frames}")
+
+        print(f"\033[36mAnimation frame: \033[0m{frame_idx}/{anim_args.max_frames}  ")
 
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
@@ -203,7 +204,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
                 tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
-                print(f"  creating in between frame {tween_frame_idx} tween:{tween:0.2f}")
+                print(f" Creating in-between frame: {tween_frame_idx}; tween:{tween:0.2f};")
 
                 advance_prev = turbo_prev_image is not None and tween_frame_idx > turbo_prev_frame_idx
                 advance_next = tween_frame_idx > turbo_next_frame_idx
@@ -340,7 +341,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
 
         if anim_args.enable_checkpoint_scheduling:
             args.checkpoint = keys.checkpoint_schedule_series[frame_idx]
-            print(f"Checkpoint: {args.checkpoint}")
         else:
             args.checkpoint = None
             
@@ -353,13 +353,20 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
+            
+        prompt_to_print, *after_neg = args.prompt.strip().split("--neg")
+        prompt_to_print = prompt_to_print.strip()
+        after_neg = "".join(after_neg).strip()
 
-        print(f"{args.prompt} {args.seed}")
+        print(f"\033[32mSeed: \033[0m{args.seed}")
+        print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
+        if after_neg and after_neg.strip():
+            print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
         if not using_vid_init:
-            print(f"Angle: {keys.angle_series[frame_idx]} Zoom: {keys.zoom_series[frame_idx]}")
-            print(f"Tx: {keys.translation_x_series[frame_idx]} Ty: {keys.translation_y_series[frame_idx]} Tz: {keys.translation_z_series[frame_idx]}")
-            print(f"Rx: {keys.rotation_3d_x_series[frame_idx]} Ry: {keys.rotation_3d_y_series[frame_idx]} Rz: {keys.rotation_3d_z_series[frame_idx]}")
-        
+            # print motion table to cli if anim mode = 2D or 3D
+            if anim_args.animation_mode in ['2D','3D']:
+                print_render_table(anim_args, keys, frame_idx)
+
         # grab init image for current frame
         elif using_vid_init:
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
@@ -434,3 +441,29 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         state.current_image = image
 
         args.seed = next_seed(args)
+
+def print_render_table(anim_args, keys, frame_idx):
+    x = PrettyTable(padding_width=0)
+    field_names = []
+    if anim_args.animation_mode == '2D':
+        short_zoom = round(keys.zoom_series[frame_idx], 6)
+        field_names += ["Angle", "Zoom"]
+    field_names += ["Tr X", "Tr Y"]
+    if anim_args.animation_mode == '3D':
+        field_names += ["Tr Z", "Ro X", "Ro Y", "Ro Z"]
+    if anim_args.enable_perspective_flip:
+        field_names += ["Pf T", "Pf P", "Pf G", "Pf F"]
+
+    x.field_names = field_names
+
+    row = []
+    if anim_args.animation_mode == '2D':
+        row += [keys.angle_series[frame_idx],short_zoom]
+    row += [keys.translation_x_series[frame_idx],keys.translation_y_series[frame_idx]]
+    if anim_args.animation_mode == '3D':
+        row += [keys.translation_z_series[frame_idx],keys.rotation_3d_x_series[frame_idx],keys.rotation_3d_y_series[frame_idx],keys.rotation_3d_z_series[frame_idx]]
+    if anim_args.enable_perspective_flip:
+        row +=[keys.perspective_flip_theta_series[frame_idx], keys.perspective_flip_phi_series[frame_idx], keys.perspective_flip_gamma_series[frame_idx], keys.perspective_flip_fv_series[frame_idx]]
+        
+    x.add_row(row)
+    print(x)

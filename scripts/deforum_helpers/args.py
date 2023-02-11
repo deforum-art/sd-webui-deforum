@@ -308,7 +308,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         btn = i1 = gr.HTML("")
         
     # MAIN (TOP) EXTENSION INFO ACCORD
-    with gr.Accordion("Info, Links and Help", open=False):
+    with gr.Accordion("Info, Links and Help", open=False, elem_id='main_top_info_accord'):
             gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
             gr.HTML("""<a  style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/FAQ-&-Troubleshooting">FOR HELP CLICK HERE</a""", elem_id="for_help_click_here")
             gr.HTML("""<ul style="list-style-type:circle; margin-left:1em">
@@ -354,6 +354,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 tiling = gr.Checkbox(label='Tiling', value=False)
             with gr.Row(visible=False):
                 filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
+            with gr.Row() as pix2pix_img_cfg_scale_row:
+                    pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True) 
             # RUN FROM SETTING FILE ACCORD
             with gr.Accordion('Resume & Run from file', open=False):
                 with gr.Tab('Run from Settings file'):
@@ -380,7 +382,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(scale=1, min_width=185) as diffusion_cadence_column:
                             diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
                         with gr.Column(scale=2, min_width=185):
-                            # max_frames = gr.Number(label="Max frames", value=da.max_frames, interactive=True, precision=0, visible=True)
                             max_frames = gr.Slider(label="Max frames", minimum=2, maximum=9999, step=1, value=da.max_frames, interactive=True)
             # GUIDED IMAGES ACCORD
             with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
@@ -705,7 +706,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.Column(scale=1):
                                 hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method")
                                 hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type")
-                with gr.Row(visible=False) as hybrid_comp_mask_row:
+                with gr.Row(visible=False, variant='compact') as hybrid_comp_mask_row:
                     hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="Comp mask equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
                     with gr.Column(variant='compact'):
                         hybrid_comp_mask_auto_contrast = gr.Checkbox(label="Comp mask auto contrast", value=False, interactive=True)
@@ -731,10 +732,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # OUTPUT TAB
         with gr.Tab('Output'):
             # VID OUTPUT ACCORD
-            with gr.Accordion('Video Output Settings', open=True):
+            with gr.Accordion('Video Output Settings - FFmpeg', open=True):
                 with gr.Row(variant='compact') as fps_out_format_row:
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
-                    output_format = gr.Dropdown(label="Output format", choices=['PIL gif', 'FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
+                    # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
+                    output_format = gr.Dropdown(visible=False, label="Output format", choices=['FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
                 with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
                     ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True)
                     ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
@@ -747,30 +749,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         skip_video_for_run_all = gr.Checkbox(label="Skip video for run all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
-                # STITCH FRAMES TO VID ACCORD
-                with gr.Accordion('Stitch Frames to Video', open=False, visible=True) as stitch_imgs_to_vid_row:
-                    with gr.Row(visible=False):
-                        path_name_modifier = gr.Dropdown(label="Path name modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
-                    gr.HTML("""
-                     <p style="margin-top:0em">
-                        Important Notes:
-                        <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
-                            <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID</li>
-                            <li>Working FFMPEG under 'ffmpeg_location' is required to stitch a video in this mode!</li>
-                        </ul>
-                        """)
-                    with gr.Row(variant='compact'):
-                          image_path = gr.Textbox(label="Image path", lines=1, interactive=True, value = dv.image_path)
-                    with gr.Row(visible=False):
-                        mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
-                    # not visible as of 06-02-23 since render_steps is disabled as well and they work together. Need to fix both.
-                    with gr.Row(visible=False):
-                        # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
-                        render_steps = gr.Checkbox(label="Render steps", value=dv.render_steps, interactive=True, visible=False)
-                    ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
-                    ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path])
-            # RIFE ACCORD
-            with gr.Accordion('Frame Interpolation (RIFE)', open=True) as rife_accord:
+            # RIFE TAB
+            with gr.Tab('RIFE') as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
                     gr.HTML("""
                     Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
@@ -784,10 +764,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         Important notes:
                         <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
                             <li>Working FFMPEG is required to get an output interpolated video. No ffmepg will leave you with just the interpolated imgs.</li>
-                            <li>Frame Interpolation will *not* run if 'store_frames_in_ram' is enabled.</li>
+                            <li>Frame Interpolation will *not* run if any of the following are enabled: 'Store frames in ram' / 'Skip video for run all'.</li>
                             <li>Audio (if provided) will *not* be transferred to the interpolated video if Slow-Mo is enabled.</li>
                             <li>'add_soundtrack' and 'soundtrack_path' aren't being honoured in "Interpolate an existing video" mode. Original vid audio will be used instead with the same slow-mo rules above.</li>
-                            <li>Frame Interpolation will always save an .mp4 video even if you used GIF for the raw video.</li>
                         </ul>
                     </p>
                     """)
@@ -805,7 +784,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         # Intrpolate any existing video from the connected PC
                         with gr.Accordion('Interpolate an existing video', open=False):
                             # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
-                            vid_to_rife_chosen_file = gr.File(label="Video to interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_rife_chosen_file")
+                            vid_to_rife_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_rife_chosen_file")
                             with gr.Row(variant='compact'):
                                 # Non interactive textbox showing uploaded input vid total Frame Count
                                 in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
@@ -824,11 +803,61 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
                             # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
-            output_format.change(fn=hide_by_gif, inputs=output_format, outputs=ffmpeg_set_row)
-            output_format.change(fn=hide_by_gif, inputs=output_format, outputs=soundtrack_row)
-            output_format.change(fn=hide_by_gif, inputs=output_format, outputs=stitch_imgs_to_vid_row)
-            output_format.change(fn=hide_by_gif, inputs=output_format, outputs=rife_accord)
-            # Old/ Non actives accordion
+            # TODO: add upscalers parameters to the settings and make them a part of the pipeline
+            # VIDEO UPSCALE TAB
+            with gr.Tab('Video Upscaling'):
+                vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
+                with gr.Column():
+                    selected_tab = gr.State(value=0)
+                    with gr.Tabs(elem_id="extras_resize_mode"):
+                        with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
+                            upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
+                        with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
+                            with FormRow():
+                                upscaling_resize_w = gr.Slider(label="Width", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_w")
+                                upscaling_resize_h = gr.Slider(label="Height", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_h")
+                                upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
+                    with FormRow():
+                        extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
+                        extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
+                    with FormRow():
+                        with gr.Column(scale=3):
+                            extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
+                        with gr.Column(scale=1, min_width=80):
+                            upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
+
+                    tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
+                    tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
+
+                    # This is the actual button that's pressed to initiate the Upscaling:
+                    upscale_btn = gr.Button(value="*Upscale uploaded video*")
+                    # Show a text about CLI outputs:
+                    gr.HTML("* check your CLI for outputs")
+                    # make the function call when the UPSCALE button is clicked
+                    upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+            # STITCH FRAMES TO VID TAB
+            with gr.Tab('Frames to Video') as stitch_imgs_to_vid_row:
+                with gr.Row(visible=False):
+                    path_name_modifier = gr.Dropdown(label="Path name modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
+                gr.HTML("""
+                 <p style="margin-top:0em">
+                    Important Notes:
+                    <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
+                        <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID</li>
+                        <li>Working FFMPEG under 'Location' (above ^) is required to stitch a video in this mode!</li>
+                    </ul>
+                    """)
+                with gr.Row(variant='compact'):
+                      image_path = gr.Textbox(label="Image path", lines=1, interactive=True, value = dv.image_path)
+                with gr.Row(visible=False):
+                    mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
+                # not visible as of 06-02-23 since render_steps is disabled as well and they work together. Need to fix both.
+                with gr.Row(visible=False):
+                    # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
+                    render_steps = gr.Checkbox(label="Render steps", value=dv.render_steps, interactive=True, visible=False)
+                ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
+                ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path])
+            # **OLD + NON ACTIVES AREA**
             with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
                 # NOT VISIBLE AS OF 09-02-23
                 mask_contrast_adjust = gr.Slider(label="Mask contrast adjust", minimum=0, maximum=1, step=0.01, value=d.mask_contrast_adjust, interactive=True)
@@ -843,7 +872,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row(visible=False):
                     save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
                     display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
-                    # SUBSEED CONTROL ACCORD
             # NOT VISIBLE 11-02-23 htai
             with gr.Accordion('Subseed controls & More', open=False, visible=False):
                 # Not visible until fixed, 06-02-23
@@ -853,48 +881,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row(variant='compact', visible=False):
                     seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
                     n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
-                with gr.Row() as pix2pix_img_cfg_scale_row:
-                    pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True) 
             with gr.Row(visible=False):
                 save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                 show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
-            
-            # TODO: add upscalers parameters to the settings and make them a part of the pipeline
-            with gr.Accordion('Upscale video', open=True):
-                with gr.Column():
-                    vid_to_upscale_chosen_file = gr.File(label="Video to upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_extra_chosen_file")
 
-                    selected_tab = gr.State(value=0)
-
-                    with gr.Tabs(elem_id="extras_resize_mode"):
-                        with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
-                            upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
-
-                        with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
-                            with FormRow():
-                                upscaling_resize_w = gr.Number(label="Width", value=512, precision=0, elem_id="extras_upscaling_resize_w")
-                                upscaling_resize_h = gr.Number(label="Height", value=512, precision=0, elem_id="extras_upscaling_resize_h")
-                                upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
-
-                    with FormRow():
-                        extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
-
-                    with FormRow():
-                        extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
-                        extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
-
-                    tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
-                    tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
-
-                    with FormRow():
-                        upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
-                    # This is the actual button that's pressed to initiate the interpolation:
-                    upscale_btn = gr.Button(value="*Upscale uploaded video*")
-                    # Show a text about CLI outputs:
-                    gr.HTML("* check your CLI for outputs")
-                    # make the functin call when the RIFE button is clicked
-                    upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
-        
     # Gradio's Change functions - hiding and renaming elements based on other elements
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
