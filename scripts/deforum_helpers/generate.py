@@ -220,14 +220,14 @@ def print_generate_table(args, anim_args, p):
     field_names = ["Steps", "CFG"]
     if anim_args.animation_mode != 'Interpolation':
         field_names.append("Denoise")
-    field_names += ["Subseed", "Subs. str"] * (args.subseed != -1 or args.subseed_strength != 0)
+    field_names += ["Subseed", "Subs. str"] * (args.seed_enable_extras)
     field_names += ["Sampler"] * anim_args.enable_sampler_scheduling
     field_names += ["Checkpoint"] * anim_args.enable_checkpoint_scheduling
     x.field_names = field_names
     row = [p.steps, p.cfg_scale]
     if anim_args.animation_mode != 'Interpolation':
         row.append(p.denoising_strength)
-    row += [p.subseed, p.subseed_strength] * (args.subseed != -1 or args.subseed_strength != 0)
+    row += [p.subseed, p.subseed_strength] * (args.seed_enable_extras)
     row += [p.sampler_name] * anim_args.enable_sampler_scheduling
     row += [args.checkpoint] * anim_args.enable_checkpoint_scheduling
     x.add_row(row)
