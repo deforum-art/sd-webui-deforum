@@ -1,4 +1,4 @@
-import os
+import os, sys
 import torch
 import torch.nn as nn
 import numpy as np
@@ -10,7 +10,8 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from .IFNet_HDv3 import *
 import torch.nn.functional as F
 from ..model.loss import *
-from ..model.checksum import *
+sys.path.append('../../')
+from deforum_helpers.general_utils import checksum
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
