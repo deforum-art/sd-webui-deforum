@@ -581,9 +581,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     value=prompts_to_listlist(DeforumAnimPrompts()),
                 )
             with gr.Row():
-                animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, value = "")
+                animation_prompts_positive = gr.Textbox(label="Common positive prompt", lines=1, interactive=True, value = "")
             with gr.Row():
-                animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, value = "")
+                animation_prompts_negative = gr.Textbox(label="Common negative prompt", lines=1, interactive=True, value = "")
             with gr.Row():
                 animation_prompts = gr.Textbox(label="Prompts JSON", lines=8, interactive=True, value = DeforumAnimPrompts())
             # update button functions

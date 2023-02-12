@@ -86,9 +86,10 @@ deforum_titles = {
     "save_depth_maps": "will output a greyscale depth map image alongside the output images.",
     
 	// Prompts
-	"Prompts": "prompts for your animation in a JSON format. Use --neg words to add 'words' as negative prompt",
-	"Prompts positive": "positive prompt to be appended to *all* prompts",
-	"Prompts negative": "negative prompt to be appended to *all* prompts. DON'T use --neg here!",
+    "Prompts": "table of your prompt keyframes. Press Load from JSON if you want to populate it with raw json data below. The JSON output will be updated automatically with your edits",
+	"Prompts JSON": "prompts for your animation in a JSON format. Use --neg words to add 'words' as negative prompt",
+	"Common positive prompt": "positive prompt to be appended to *all* prompts",
+	"Common negative prompt": "negative prompt to be appended to *all* prompts. DON'T use --neg here!",
 	
     //Init
 	"Use init": "Diffuse the first frame based on an image, similar to img2img.",
