@@ -6,8 +6,11 @@ from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 from .deprecation_utils import handle_deprecated_settings
 import logging
 
-def get_keys_to_exclude():
-    return ["n_batch", "restore_faces", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal"]
+def get_keys_to_exclude(setting_type):
+    if setting_type == 'general':
+        return ["n_batch", "restore_faces", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal"]
+    else: #video
+        return ["mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
 
 def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
@@ -61,7 +64,7 @@ def save_settings(*args, **kwargs):
     loop_dict = pack_loop_args(data)
     
     combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict}
-    exclude_keys = get_keys_to_exclude()
+    exclude_keys = get_keys_to_exclude('general')
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
     
     print(f"saving custom settings to {settings_path}")
@@ -75,9 +78,11 @@ def save_video_settings(*args, **kwargs):
     data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
     from deforum_helpers.args import pack_video_args
     video_args_dict = pack_video_args(data)
+    exclude_keys = get_keys_to_exclude('video')
+    filtered_data = video_args_dict if exclude_keys is None else {k: v for k, v in video_args_dict.items() if k not in exclude_keys}
     print(f"saving video settings to {video_settings_path}")
     with open(video_settings_path, "w") as f:
-        f.write(json.dumps(video_args_dict, ensure_ascii=False, indent=4))
+        f.write(json.dumps(filtered_data, ensure_ascii=False, indent=4))
     return [""]
 
 def load_settings(*args, **kwargs):
