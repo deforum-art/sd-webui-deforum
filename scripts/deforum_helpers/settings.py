@@ -52,7 +52,7 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom
 
 # In gradio gui settings save/ load funs:
 def save_settings(*args, **kwargs):
-    settings_path = args[0]
+    settings_path = args[0].strip()
     data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
     from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args
     args_dict = pack_args(data)
@@ -74,7 +74,7 @@ def save_settings(*args, **kwargs):
     return [""]
 
 def save_video_settings(*args, **kwargs):
-    video_settings_path = args[0]
+    video_settings_path = args[0].strip()
     data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
     from deforum_helpers.args import pack_video_args
     video_args_dict = pack_video_args(data)
@@ -86,7 +86,7 @@ def save_video_settings(*args, **kwargs):
     return [""]
 
 def load_settings(*args, **kwargs):
-    settings_path = args[0]
+    settings_path = args[0].strip()
     data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
     print(f"reading custom settings from {settings_path}")
     jdata = {}
@@ -161,7 +161,7 @@ def load_settings(*args, **kwargs):
     return ret
 
 def load_video_settings(*args, **kwargs):
-    video_settings_path = args[0]
+    video_settings_path = args[0].strip()
     data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
     print(f"reading custom video settings from {video_settings_path}")
     jdata = {}
