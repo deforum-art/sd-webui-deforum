@@ -22,27 +22,20 @@ def check_and_download_gifski(models_folder, cur_user_os):
             load_file_from_url(r"https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski", models_folder)
             if checksum(os.path.join(models_folder,'gifski')) != 'e65bf9502bca520a7fd373397e41078d5c73db12ec3e9b47458c282d076c04fa697adecb5debb5d37fc9cbbee0673bb95e78d92c1cf813b4f5cc1cabe96880ff':
                 raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski and place in: " + models_folder)    
-                
+       
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder):
     print("Creating GIF...")
     start_time = time.time()
     
     cur_user_os = get_os()
-    if cur_user_os == 'Windows':
-        gifski_location = os.path.join(models_folder,'gifski.exe')
-    elif cur_user_os == 'Linux':
-        gifski_location = os.path.join(models_folder,'gifski')
-    else:
-        raise Exception(f"GIF creation is not yet available on the following OS platform: {cur_user_os}")
+    gifski_location = os.path.join(models_folder, 'gifski' + ('.exe' if cur_user_os == 'Windows' else ''))
     final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
     input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '*.png')
     
     check_and_download_gifski(models_folder, cur_user_os)
 
     try:
-        # TODO: make gifski loc dynamic 
-        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski ,'--fps', str(fps)]
-
+        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps)]
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
         if process.returncode != 0:
@@ -50,7 +43,7 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder):
             raise RuntimeError(stderr)
         print(f"GIF creation done in {time.time() - start_time:.2f} seconds!")
     except Exception as e:
-        print(f"GIF creation *failed* with error:\n{e}")    
+        print(f"GIF creation *failed* with error:\n{e}")
 
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:

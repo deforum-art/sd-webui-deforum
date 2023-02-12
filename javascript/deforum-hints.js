@@ -117,6 +117,7 @@ deforum_titles = {
 	
     //Video Output
     "Skip video for run all": "when checked, do not output a video",
+	"Make GIF": "create a gif in addition to .mp4 file. supports up to 30 fps, will self-disable at higher fps values",
     "FPS": "The frames per second that the video will run at",
     "Output format": "select the type of video file to output",
         "PIL gif": "create an animated GIF",
