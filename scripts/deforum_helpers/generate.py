@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from PIL import Image
+from prettytable import PrettyTable
 from .prompt import split_weighted_subprompts
 from .load_images import load_img, prepare_mask, check_mask_for_errors
 from .webui_sd_pipeline import get_webui_sd_pipeline
@@ -147,7 +148,8 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                                           use_alpha_as_mask=args.use_alpha_as_mask)
                                           
     else:
-        print(f"Not using an init image (doing pure txt2img) - seed:{p.seed}; subseed:{p.subseed}; subseed_strength:{p.subseed_strength}; cfg_scale:{p.cfg_scale}; steps:{p.steps}")
+        if anim_args.animation_mode != 'Interpolation':
+            print(f"Not using an init image (doing pure txt2img)")
         p_txt = StableDiffusionProcessingTxt2Img(
                 sd_model=sd_model,
                 outpath_samples=p.outpath_samples,
@@ -160,7 +162,6 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                 subseed_strength=p.subseed_strength,
                 seed_resize_from_h=p.seed_resize_from_h,
                 seed_resize_from_w=p.seed_resize_from_w,
-                seed_enable_extras=p.seed_enable_extras,
                 sampler_name=p.sampler_name,
                 batch_size=p.batch_size,
                 n_iter=p.n_iter,
@@ -173,6 +174,9 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                 enable_hr=None,
                 denoising_strength=None,
             )
+        # print dynamic table to cli
+        print_generate_table(args, anim_args, p_txt)
+        
         processed = processing.process_images(p_txt)
     
     if processed is None:
@@ -192,8 +196,11 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         
         p.init_images = [init_image]
         p.image_mask = mask
-
-        print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}; sampler={p.sampler_name}")
+        p.image_cfg_scale = args.pix2pix_img_cfg_scale
+        
+        # print dynamic table to cli
+        print_generate_table(args, anim_args, p)
+       
         processed = processing.process_images(p)
     
     if root.initial_info == None:
@@ -206,3 +213,21 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     results = processed.images[0]
     
     return results
+    
+def print_generate_table(args, anim_args, p):
+    x = PrettyTable(padding_width=0)
+    field_names = ["Steps", "CFG"]
+    if anim_args.animation_mode != 'Interpolation':
+        field_names.append("Denoise")
+    field_names += ["Subseed", "Subs. str"] * (args.seed_enable_extras)
+    field_names += ["Sampler"] * anim_args.enable_sampler_scheduling
+    field_names += ["Checkpoint"] * anim_args.enable_checkpoint_scheduling
+    x.field_names = field_names
+    row = [p.steps, p.cfg_scale]
+    if anim_args.animation_mode != 'Interpolation':
+        row.append(p.denoising_strength)
+    row += [p.subseed, p.subseed_strength] * (args.seed_enable_extras)
+    row += [p.sampler_name] * anim_args.enable_sampler_scheduling
+    row += [args.checkpoint] * anim_args.enable_checkpoint_scheduling
+    x.add_row(row)
+    print(x)

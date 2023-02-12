@@ -45,9 +45,7 @@ def run_deforum(*args, **kwargs):
         #we'll setup the rest later
     )
     
-    print('Deforum extension (auto1111) for 2D, pseudo-2D, 3D and Hybrid animations')
-    print('v2.0b-webui')
-    
+    print("\033[4;33mDeforum extension for auto1111 webui, v2.0b\033[0m")
     args_dict['self'] = None
     args_dict['p'] = p
     
@@ -55,15 +53,6 @@ def run_deforum(*args, **kwargs):
     root.clipseg_model = None
     root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
     root.basedirs = basedirs
-
-    # force-pip-install a couple of packages that didn't want to install as part of the req.txt
-    from launch import is_installed, run_pip
-    libs = ["numexpr", "av", "pims", "moviepy", "imageio_ffmpeg"]
-    for lib in libs:
-        if not is_installed(lib):
-            run_pip(f"install {lib}", lib)
-            if lib == "imageio_ffmpeg":
-                print("******** IMPORTANT MESSAGE: FFMPEG just got installed, please restart your webui for it to work in the next runs! ********")
 
     for basedir in basedirs:
         sys.path.extend([

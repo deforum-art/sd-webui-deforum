@@ -95,8 +95,16 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, an
     
     state.job_count = anim_args.max_frames
     frame_idx = 0
+    # INTERPOLATION MODE
     while frame_idx < anim_args.max_frames:
-        print(f"Rendering interpolation animation frame {frame_idx} of {anim_args.max_frames}")
+        # print data to cli
+        prompt_to_print = prompt_series[frame_idx].strip()
+        if prompt_to_print.endswith("--neg"):
+            prompt_to_print = prompt_to_print[:-5]
+        print(f"\033[36mInterpolation frame: \033[0m{frame_idx}/{anim_args.max_frames}  ")
+        print(f"\033[32mSeed: \033[0m{args.seed}")
+        print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
+        
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
         state.job_no = frame_idx + 1
         
@@ -107,6 +115,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, an
         args.n_samples = 1
         args.prompt = prompt_series[frame_idx]
         args.scale = keys.cfg_scale_schedule_series[frame_idx]
+        args.pix2pix_img_cfg_scale = keys.pix2pix_img_cfg_scale_series[frame_idx]
         
         if anim_args.enable_checkpoint_scheduling:
             args.checkpoint = keys.checkpoint_schedule_series[frame_idx]
@@ -114,8 +123,12 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, an
         else:
             args.checkpoint = None
             
+        if anim_args.enable_subseed_scheduling:
+            args.subseed = keys.subseed_schedule_series[frame_idx]
+            args.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
+            
         if use_parseq:
-            args.seed_enable_extras = True
+            anim_args.enable_subseed_scheduling = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
             

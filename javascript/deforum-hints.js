@@ -24,6 +24,7 @@ deforum_titles = {
     //"save_settings": "",
     //"save_samples": "",
     "Batch name": "output images will be placed in a folder with this name, inside of the img2img output folder",
+	"Pix2Pix img CFG schedule": "*Only in use with pix2pix checkpoints!*",
     "Filename format": "specify the format of the filename for output images",
     "Seed behavior": "defines the seed behavior that is used for animations",
         "iter": "the seed value will increment by 1 for each subsequent frame of the animation",

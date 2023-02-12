@@ -110,7 +110,8 @@ def get_quick_vid_info(vid_path):
 # Stitch images to a h264 mp4 video using ffmpeg
 def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):
     start_time = time.time()
-    print(f"Stitching video from frames using FFMPEG:\nFrames:\n{imgs_path}\nTo Video:\n{outmp4_path}")
+
+    print(f"\033[0;33mStitching video from frames using FFMPEG:\n\033[0m{imgs_path}\nTo Video:\n{outmp4_path}")
     if stitch_to_frame == -1:
         stitch_to_frame = 9999999
     try:
@@ -179,6 +180,11 @@ def get_next_frame(outdir, video_path, frame_idx, mask=False):
     return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:05}.jpg")
      
 def find_ffmpeg_binary():
+    try:
+        import google.colab
+        return 'ffmpeg'
+    except:
+        pass
     for package in ['imageio_ffmpeg', 'imageio-ffmpeg']:
         try:
             package_path = resource_filename(package, 'binaries')
@@ -186,7 +192,7 @@ def find_ffmpeg_binary():
             files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
             return files[0] if files else 'ffmpeg'
         except:
-            return 'ffmpeg'   
+            return 'ffmpeg'
             
 # These 2 functions belong to "stitch frames to video" in Output tab
 def get_manual_frame_to_vid_output_path(input_path):
