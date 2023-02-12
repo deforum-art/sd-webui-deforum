@@ -6,6 +6,9 @@ from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 from .deprecation_utils import handle_deprecated_settings
 import logging
 
+def get_keys_to_exclude():
+    return ["n_batch", "restore_faces", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal"]
+
 def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
     if not os.path.isfile(custom_settings_file):
@@ -43,11 +46,10 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom
             print(anim_args_dict)
             print(parseq_args_dict)
             print(loop_args_dict)
-            
 
-import gradio as gr
- 
-# In gradio gui settings save/load
+# import gradio as gr
+
+# In gradio gui settings save
 def save_settings(*args, **kwargs):
     settings_path = args[0]
     data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
@@ -59,9 +61,15 @@ def save_settings(*args, **kwargs):
     args_dict["animation_prompts_positive"] = data['animation_prompts_positive']
     args_dict["animation_prompts_negative"] = data['animation_prompts_negative']
     loop_dict = pack_loop_args(data)
+    
+    combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict}
+    exclude_keys = get_keys_to_exclude()
+    filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
+    
     print(f"saving custom settings to {settings_path}")
     with open(settings_path, "w") as f:
-        f.write(json.dumps({**args_dict, **anim_args_dict, **parseq_dict, **loop_dict}, ensure_ascii=False, indent=4))
+        f.write(json.dumps(filtered_combined, ensure_ascii=False, indent=4))
+    
     return [""]
 
 def save_video_settings(*args, **kwargs):
