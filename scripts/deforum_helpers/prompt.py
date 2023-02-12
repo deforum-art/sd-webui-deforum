@@ -147,7 +147,7 @@ def prompts_from_dataframe(prompts_df):
     prompts = {}
     for _, row in prompts_df.iterrows():
         prompt = row['Prompt']
-        if row['Negative prompt'] is not None:
+        if row['Negative prompt'] is not None and len(row['Negative prompt']) > 1:
             prompt += f" --neg {row['Negative prompt']}"
         prompts[row['Start frame']] = prompt
-    return prompts
+    return json.dumps(prompts, indent=4, separators=(',', ': '))

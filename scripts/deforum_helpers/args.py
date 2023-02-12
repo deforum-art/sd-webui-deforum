@@ -578,16 +578,23 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     interactive=True,
                     wrap=True,
                     type='pandas',
-                    #value = json.loads(DeforumAnimPrompts()), # TODO: split into pos/neg
-                    # json to dataframe
                     value=prompts_to_listlist(DeforumAnimPrompts()),
                 )
-            with gr.Row():
-                animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
             with gr.Row():
                 animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, value = "")
             with gr.Row():
                 animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, value = "")
+            with gr.Row():
+                animation_prompts = gr.Textbox(label="Prompts JSON", lines=8, interactive=True, value = DeforumAnimPrompts())
+            # update button functions
+            def update_prompts_json(prompts_df):
+                return prompts_from_dataframe(prompts_df)
+            animation_prompts_df.change(update_prompts_json, inputs=[animation_prompts_df], outputs=[animation_prompts])
+            def update_prompts_df(prompts_json):
+                return prompts_to_listlist(prompts_json)
+            with gr.Row():
+                load_from_json = gr.Button(value="Load from JSON", elem_id="load_from_json")
+            load_from_json.click(update_prompts_df, inputs=[animation_prompts], outputs=[animation_prompts_df])
             # COMPOSABLE MASK SCHEDULING ACCORD
             with gr.Accordion('Composable Mask scheduling', open=False):
                 gr.HTML("""
@@ -999,7 +1006,7 @@ loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blen
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names + ['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
 settings_component_names = [name for name in component_names if name not in video_args_names]
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
