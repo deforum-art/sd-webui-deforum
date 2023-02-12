@@ -165,7 +165,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                 warp_mask_image = Image.fromarray(root.warp_mask).convert('L')
                 for x in range(mask_image.width):
                     for y in range(mask_image.height):
-                        if mask_image.getpixel((x,y)) > 0 or warp_mask_image.getpixel((x,y)) > 0:
+                        if mask_image.getpixel((x,y)) > 0 or warp_mask_image.getpixel((x,y)) == 0:
                             mask_image.putpixel((x,y), 255)
                         else:
                             mask_image.putpixel((x,y), 0)
