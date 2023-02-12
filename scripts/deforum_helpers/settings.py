@@ -47,8 +47,6 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom
             print(parseq_args_dict)
             print(loop_args_dict)
 
-# import gradio as gr
-
 # In gradio gui settings save
 def save_settings(*args, **kwargs):
     settings_path = args[0]
