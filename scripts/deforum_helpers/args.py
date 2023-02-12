@@ -730,13 +730,17 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Accordion("Humans Masking", open=False) as humans_masking_accord:
                 with gr.Row(variant='compact'):
                     hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="Generate human masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
+        def s_fn(choice):
+            if int(choice) > 30:
+                return gr.update(visible=False, value=False)
+            else:
+                return gr.update(visible=True)
         # OUTPUT TAB
         with gr.Tab('Output'):
             # VID OUTPUT ACCORD
             with gr.Accordion('Video Output Settings - FFmpeg', open=True):
                 with gr.Row(variant='compact') as fps_out_format_row:
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
-                    # make_gifski = gr.Checkbox(label="Gifski", value=dv.make_gifski, interactive=True)
                     # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
                     output_format = gr.Dropdown(visible=False, label="Output format", choices=['FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
                 with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
@@ -751,7 +755,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         skip_video_for_run_all = gr.Checkbox(label="Skip video for run all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
-                        make_gifski = gr.Checkbox(label="Gifski", value=dv.make_gifski, interactive=True)
+                        make_gifski = gr.Checkbox(label="Make GIF", value=dv.make_gifski, interactive=True)
+            fps.change(fn=s_fn, inputs=fps, outputs=make_gifski)
             # RIFE TAB
             with gr.Tab('RIFE') as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
