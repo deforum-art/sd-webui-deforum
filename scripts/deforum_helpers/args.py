@@ -1036,7 +1036,6 @@ def process_args(args_dict_main):
     if override_settings_with_file:
         load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root)
     
-    print(f"Additional models path: {root.models_path}")
     if not os.path.exists(root.models_path):
         os.mkdir(root.models_path)
 
