@@ -22,6 +22,7 @@ from .hybrid_video import hybrid_generation, hybrid_composite
 from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion, get_flow_for_hybrid_motion_prev, image_transform_ransac, image_transform_optical_flow
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
+from .settings import get_keys_to_exclude
 # Webui
 from modules.shared import opts, cmd_opts, state
 
@@ -56,12 +57,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
     print(f"Saving animation frames to:\n{args.outdir}")
 
     # save settings for the batch
+    exclude_keys = get_keys_to_exclude('general')
     settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         args.__dict__["prompts"] = animation_prompts
-        s = {**dict(args.__dict__), **dict(anim_args.__dict__), **dict(parseq_args.__dict__), **dict(loop_args.__dict__)}
+        s = {}
+        for d in [dict(args.__dict__), dict(anim_args.__dict__), dict(parseq_args.__dict__), dict(loop_args.__dict__)]:
+            for key, value in d.items():
+                if key not in exclude_keys:
+                    s[key] = value
         json.dump(s, f, ensure_ascii=False, indent=4)
-        
+
     # resume from timestring
     if anim_args.resume_from_timestring:
         args.timestring = anim_args.resume_timestring
