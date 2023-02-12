@@ -1,4 +1,7 @@
 import re
+import numpy as np
+import pandas as pd
+import json
 
 def check_is_number(value):
     float_pattern = r'^(?=.)([+-]?([0-9]*)(\.([0-9]+))?)$'
@@ -43,8 +46,6 @@ def split_weighted_subprompts(text, frame = 0):
     return positive_prompts, negative_prompts
 
 def interpolate_prompts(animation_prompts, max_frames):
-    import numpy as np
-    import pandas as pd
     # Get prompts sorted by keyframe 
     sorted_prompts = sorted(animation_prompts.items(), key=lambda item: int(item[0]))
 
@@ -114,5 +115,42 @@ def interpolate_prompts(animation_prompts, max_frames):
 
 def prompts_to_dataframe(prompts_json_str):
     prompts_json = json.loads(prompts_json_str)
-    
-    pd.DataFrame.from_dict(prompts_json, orient='index').reset_index().rename(columns={'index':'Start frame', 0:'Positive prompt', 1:'Negative prompt'})
+    df = pd.DataFrame(columns=['Start frame', 'Prompt', 'Negative prompt'])
+    l = []
+    for key, _ in prompts_json.items():
+        l += [int(key)]
+    l.sort()
+    for key in l:
+        row = {}
+        row['Start frame'] = key
+        prompt = prompts_json[str(key)]
+        if '--neg' in prompt:
+            prompt_parts = prompt.split('--neg')
+            if len(prompt_parts) > 2:
+                prompt_parts[1] = "".join(prompt_parts[2:])
+            row['Prompt'] = prompt_parts[0]
+            row['Negative prompt'] = prompt_parts[1]
+        else:
+            row['Prompt'] = prompt
+            row['Negative prompt'] = ""
+        df = df.append(row, ignore_index=True)
+    return df
+
+def prompts_to_listlist(prompts_json_str):
+    df = prompts_to_dataframe(prompts_json_str)
+    print(df)
+    ret = []
+    for _, row in df.iterrows():
+        print(row)
+        ret.append([row['Start frame'], row['Prompt'], row['Negative prompt']])
+    print(ret)
+    return ret
+
+def prompts_from_dataframe(prompts_df):
+    prompts = {}
+    for index, row in prompts_df.iterrows():
+        prompt = row['Prompt']
+        if row['Negative prompt'] is not None:
+            prompt += f" --neg {row['Negative prompt']}"
+        prompts[row['Start frame']] = prompt
+    return prompts

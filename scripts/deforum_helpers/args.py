@@ -9,7 +9,7 @@ from .upscaling import process_upscale_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames
 from .gradio_funcs import *
 import json
-from .prompt import prompts_to_dataframe, prompts_from_dataframe
+from .prompt import prompts_to_dataframe, prompts_to_listlist, prompts_from_dataframe
 
 def Root():
     device = sh.device
@@ -580,7 +580,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     type='pandas',
                     #value = json.loads(DeforumAnimPrompts()), # TODO: split into pos/neg
                     # json to dataframe
-                    value=prompts_to_dataframe(DeforumAnimPrompts()),
+                    value=prompts_to_listlist(DeforumAnimPrompts()),
                 )
             with gr.Row():
                 animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
