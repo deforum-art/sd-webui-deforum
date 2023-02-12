@@ -184,7 +184,7 @@ def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
     rot_mat = np.vstack([rot_mat, [0,0,1]])
     if anim_args.enable_perspective_flip:
         bM = get_flip_perspective_matrix(args.W, args.H, keys, frame_idx)
-        rot_mat = np.matmul(bM, rot_mat, trans_mat)
+        xform = np.matmul(bM, rot_mat, trans_mat)
     else:
         xform = np.matmul(rot_mat, trans_mat)
 
