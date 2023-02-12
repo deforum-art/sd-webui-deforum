@@ -50,7 +50,7 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom
             print(parseq_args_dict)
             print(loop_args_dict)
 
-# In gradio gui settings save
+# In gradio gui settings save/ load funs:
 def save_settings(*args, **kwargs):
     settings_path = args[0]
     data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
