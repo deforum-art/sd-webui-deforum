@@ -121,11 +121,15 @@ def run_deforum(*args, **kwargs):
             mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
             max_video_frames = anim_args.max_frames
 
-        #save settings for the video
+        exclude_keys = deforum_settings.get_keys_to_exclude('video')
         video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
         with open(video_settings_filename, "w+", encoding="utf-8") as f:
-            s = {**dict(video_args.__dict__)}
+            s = {}
+            for key, value in dict(video_args.__dict__).items():
+                if key not in exclude_keys:
+                    s[key] = value
             json.dump(s, f, ensure_ascii=False, indent=4)
+
         # Stitch video using ffmpeg!
         try:
             ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
