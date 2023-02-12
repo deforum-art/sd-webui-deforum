@@ -9,34 +9,39 @@ from pkg_resources import resource_filename
 from modules.shared import state
 from .general_utils import checksum, get_os
 
-def check_and_download_gifski(models_folder):  
-    cur_user_os = get_os()
-    # TODO: check hash and change in the code
+def check_and_download_gifski(models_folder, cur_user_os):  
     if cur_user_os == 'Windows':
         if not os.path.exists(os.path.join(models_folder,'gifski.exe')):
             from basicsr.utils.download_util import load_file_from_url
             load_file_from_url(r"https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe", models_folder)
             if checksum(os.path.join(models_folder,'gifski.exe')) != 'b0dd261ad021c31c7fdb99db761b45165e6b2a7e8e09c5d070a2b8064b575d7a4976c364d8508b28a6940343119b16a23e9f7d76f1f3d5ff02289d3068b469cf':
                 raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe and place in: " + models_folder)
-                
     elif cur_user_os == 'Linux':
         if not os.path.exists(os.path.join(models_folder,'gifski')):
             from basicsr.utils.download_util import load_file_from_url
             load_file_from_url(r"https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski", models_folder)
             if checksum(os.path.join(models_folder,'gifski')) != 'e65bf9502bca520a7fd373397e41078d5c73db12ec3e9b47458c282d076c04fa697adecb5debb5d37fc9cbbee0673bb95e78d92c1cf813b4f5cc1cabe96880ff':
-                raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski and place in: " + models_folder)
-                
-    else:
-        print(f"GIF creation not supported on OS of type: {cur_user_os}")
-    
+                raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski and place in: " + models_folder)    
                 
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder):
-    check_and_download_gifski(models_folder)
     print("Creating GIF...")
     start_time = time.time()
+    
+    cur_user_os = get_os()
+    if cur_user_os == 'Windows':
+        gifski_location = os.path.join(models_folder,'gifski.exe')
+    elif cur_user_os == 'Linux':
+        gifski_location = os.path.join(models_folder,'gifski')
+    else:
+        raise Exception(f"GIF creation is not yet available on the following OS platform: {cur_user_os}")
+    final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
+    input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '*.png')
+    
+    check_and_download_gifski(models_folder, cur_user_os)
+
     try:
         # TODO: make gifski loc dynamic 
-        cmd = [os.path.join(models_folder,'gifski.exe'), '-o', os.path.join(imgs_raw_path, imgs_batch_id + '.gif'), os.path.join(imgs_raw_path, imgs_batch_id + '*.png') ,'--fps', str(fps)]
+        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski ,'--fps', str(fps)]
 
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
