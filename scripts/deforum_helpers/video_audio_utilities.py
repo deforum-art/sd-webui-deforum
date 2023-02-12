@@ -223,20 +223,25 @@ def media_file_has_audio(filename, ffmpeg_location):
     return True if "Stream #0:1: Audio: " in output or "Stream #0:1(und): Audio" in output else False
 
 # download gifski binaries if neede - linux and windows atm
-def check_and_download_gifski(models_folder, cur_user_os):  
+def check_and_download_gifski(models_folder, cur_user_os):
+    from basicsr.utils.download_util import load_file_from_url
+    
     if cur_user_os == 'Windows':
-        if not os.path.exists(os.path.join(models_folder,'gifski.exe')):
-            from basicsr.utils.download_util import load_file_from_url
-            load_file_from_url(r"https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe", models_folder)
-            if checksum(os.path.join(models_folder,'gifski.exe')) != 'b0dd261ad021c31c7fdb99db761b45165e6b2a7e8e09c5d070a2b8064b575d7a4976c364d8508b28a6940343119b16a23e9f7d76f1f3d5ff02289d3068b469cf':
-                raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe and place in: " + models_folder)
+        file_name = 'gifski.exe'
+        checksum_value = 'b0dd261ad021c31c7fdb99db761b45165e6b2a7e8e09c5d070a2b8064b575d7a4976c364d8508b28a6940343119b16a23e9f7d76f1f3d5ff02289d3068b469cf'
+        download_url = 'https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe'
     elif cur_user_os == 'Linux':
-        if not os.path.exists(os.path.join(models_folder,'gifski')):
-            from basicsr.utils.download_util import load_file_from_url
-            load_file_from_url(r"https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski", models_folder)
-            if checksum(os.path.join(models_folder,'gifski')) != 'e65bf9502bca520a7fd373397e41078d5c73db12ec3e9b47458c282d076c04fa697adecb5debb5d37fc9cbbee0673bb95e78d92c1cf813b4f5cc1cabe96880ff':
-                raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski and place in: " + models_folder)    
-                
+        file_name = 'gifski'
+        checksum_value = 'e65bf9502bca520a7fd373397e41078d5c73db12ec3e9b47458c282d076c04fa697adecb5debb5d37fc9cbbee0673bb95e78d92c1cf813b4f5cc1cabe96880ff'
+        download_url = 'https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski'
+        
+    file_path = os.path.join(models_folder, file_name)
+    
+    if not os.path.exists(file_path):
+        load_file_from_url(download_url, models_folder)
+        if checksum(file_path) != checksum_value:
+            raise Exception(f"Error while downloading {file_name}. Please download from here: {download_url} and place in: {models_folder}")
+           
 # create a gif using gifski - limited to up to 30 fps (from the ui; if users wanna try to hack it, results are not good, but possible up to 100 fps theoretically)   
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder):
     print(f"\033[3;33mStitching \033[3;33mGIF\033[0m \033[3;33mfrom frames using gifski:\033[0m")
