@@ -180,6 +180,11 @@ def get_next_frame(outdir, video_path, frame_idx, mask=False):
     return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:05}.jpg")
      
 def find_ffmpeg_binary():
+    try:
+        import google.colab
+        return 'ffmpeg'
+    except:
+        pass
     for package in ['imageio_ffmpeg', 'imageio-ffmpeg']:
         try:
             package_path = resource_filename(package, 'binaries')
@@ -187,7 +192,7 @@ def find_ffmpeg_binary():
             files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
             return files[0] if files else 'ffmpeg'
         except:
-            return 'ffmpeg'   
+            return 'ffmpeg'
             
 # These 2 functions belong to "stitch frames to video" in Output tab
 def get_manual_frame_to_vid_output_path(input_path):
