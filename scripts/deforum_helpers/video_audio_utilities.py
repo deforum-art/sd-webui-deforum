@@ -7,28 +7,7 @@ import subprocess
 import time
 from pkg_resources import resource_filename
 from modules.shared import state
-
-import hashlib
-# TODO: move this to a util file and remove the duplication of it in rife's src model checksum.py
-def checksum(filename, hash_factory=hashlib.blake2b, chunk_num_blocks=128):
-    
-    h = hash_factory()
-    with open(filename,'rb') as f: 
-        while chunk := f.read(chunk_num_blocks*h.block_size): 
-            h.update(chunk)
-    return h.hexdigest()
-    
-def get_os():
-    import platform
-    os_name = platform.system()
-    if os_name == "Windows":
-        return "Windows"
-    elif os_name == "Linux":
-        return "Linux"
-    elif os_name == "Darwin":
-        return "Mac"
-    else:
-        return "Unknown"
+from .general_utils import checksum, get_os
 
 def check_and_download_gifski(models_folder):  
     cur_user_os = get_os()
@@ -37,19 +16,21 @@ def check_and_download_gifski(models_folder):
         if not os.path.exists(os.path.join(models_folder,'gifski.exe')):
             from basicsr.utils.download_util import load_file_from_url
             load_file_from_url(r"https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe", models_folder)
-            if checksum(os.path.join(models_folder,'RIFE46.pkl')) != 'af6f0b4bed96dea2c9f0624b449216c7adfaf7f0b722fba0c8f5c6e20b2ec39559cf33f3d238d53b160c22f00c6eaa47dc54a6e4f8aa4f59a6e4a9e90e1a808a':
+            if checksum(os.path.join(models_folder,'gifski.exe')) != 'b0dd261ad021c31c7fdb99db761b45165e6b2a7e8e09c5d070a2b8064b575d7a4976c364d8508b28a6940343119b16a23e9f7d76f1f3d5ff02289d3068b469cf':
                 raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe and place in: " + models_folder)
                 
     elif cur_user_os == 'Linux':
         if not os.path.exists(os.path.join(models_folder,'gifski')):
             from basicsr.utils.download_util import load_file_from_url
             load_file_from_url(r"https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski", models_folder)
-            if checksum(os.path.join(models_folder,'RIFE46.pkl')) != 'af6f0b4bed96dea2c9f0624b449216c7adfaf7f0b722fba0c8f5c6e20b2ec39559cf33f3d238d53b160c22f00c6eaa47dc54a6e4f8aa4f59a6e4a9e90e1a808a':
+            if checksum(os.path.join(models_folder,'gifski')) != 'e65bf9502bca520a7fd373397e41078d5c73db12ec3e9b47458c282d076c04fa697adecb5debb5d37fc9cbbee0673bb95e78d92c1cf813b4f5cc1cabe96880ff':
                 raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski and place in: " + models_folder)
+                
+    else:
+        print(f"GIF creation not supported on OS of type: {cur_user_os}")
     
                 
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder):
-    # print(f"OS: {get_os()}")
     check_and_download_gifski(models_folder)
     print("Creating GIF...")
     start_time = time.time()
