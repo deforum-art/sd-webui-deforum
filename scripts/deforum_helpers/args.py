@@ -264,6 +264,7 @@ def ParseqArgs():
 def DeforumOutputArgs():
     skip_video_for_run_all = False #@param {type: 'boolean'}
     fps = 15 #@param {type:"number"}
+    make_gifski = False
     #@markdown **Manual Settings**
     image_path = "C:/SD/20230124234916_%05d.png" #@param {type:"string"}
     mp4_path = "testvidmanualsettings.mp4" #@param {type:"string"}
@@ -735,6 +736,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Accordion('Video Output Settings - FFmpeg', open=True):
                 with gr.Row(variant='compact') as fps_out_format_row:
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
+                    make_gifski = gr.Checkbox(label="Gifski", value=dv.make_gifski, interactive=True)
                     # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
                     output_format = gr.Dropdown(visible=False, label="Output format", choices=['FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
                 with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
@@ -968,7 +970,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         reroll_blank_frames'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_for_run_all,
-                            fps, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
+                            fps, make_gifski, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
                             add_soundtrack, soundtrack_path,
                             render_steps,
                             path_name_modifier, image_path, mp4_path, store_frames_in_ram,

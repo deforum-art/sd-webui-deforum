@@ -8,6 +8,21 @@ import time
 from pkg_resources import resource_filename
 from modules.shared import state
 
+def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps):
+    print("Making GIF using Gifski...")
+    start_time = time.time()
+    try:
+        cmd = ['gifski', '-o', os.path.join(imgs_raw_path, imgs_batch_id + '.gif'), os.path.join(imgs_raw_path, imgs_batch_id + '*.png') ,'--fps', str(fps)]
+
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            print(stderr)
+            raise RuntimeError(stderr)
+        print(f"Gifski GIF creation done in {time.time() - start_time:.2f} seconds!")
+    except Exception as e:
+        print(f"Gifski GIF creation *failed* with error:\n{e}")    
+
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
         raise RuntimeError('Error: extract_to_frame can not be higher than extract_from_frame')
