@@ -138,17 +138,14 @@ def prompts_to_dataframe(prompts_json_str):
 
 def prompts_to_listlist(prompts_json_str):
     df = prompts_to_dataframe(prompts_json_str)
-    print(df)
     ret = []
     for _, row in df.iterrows():
-        print(row)
         ret.append([row['Start frame'], row['Prompt'], row['Negative prompt']])
-    print(ret)
     return ret
 
 def prompts_from_dataframe(prompts_df):
     prompts = {}
-    for index, row in prompts_df.iterrows():
+    for _, row in prompts_df.iterrows():
         prompt = row['Prompt']
         if row['Negative prompt'] is not None:
             prompt += f" --neg {row['Negative prompt']}"
