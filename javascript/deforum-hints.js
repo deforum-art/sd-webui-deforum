@@ -83,7 +83,7 @@ deforum_titles = {
 	    "reflection": "reflection will attempt to approximate the image and tile/repeat pixels",
 	    "zeros": "zeros will not add any new pixel information",
 	"sampling_mode": "choose from Bicubic, Bilinear or Nearest modes. (Recommended: Bicubic)",
-    "save_depth_maps": "will output a greyscale depth map image alongside the output images.",
+    "Save depth maps": "will output a greyscale depth map image alongside the output images.",
     
 	// Prompts
 	"Prompts": "prompts for your animation in a JSON format. Use --neg words to add 'words' as negative prompt",
