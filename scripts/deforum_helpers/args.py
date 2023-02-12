@@ -1006,7 +1006,7 @@ loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blen
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names + ['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names + ['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative', 'animation_prompts_df'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
 settings_component_names = [name for name in component_names if name not in video_args_names]
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):

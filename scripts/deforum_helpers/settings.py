@@ -4,11 +4,12 @@ import json
 import deforum_helpers.args as deforum_args
 from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 from .deprecation_utils import handle_deprecated_settings
+from .prompt import prompts_to_listlist
 import logging
 
 def get_keys_to_exclude(setting_type):
     if setting_type == 'general':
-        return ["n_batch", "restore_faces", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal"]
+        return ["n_batch", "restore_faces", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal", "animation_prompts_df"]
     else: #video
         return ["mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
 
@@ -152,6 +153,8 @@ def load_settings(*args, **kwargs):
                 ret.append(jdata['animation_prompts_positive'])
             elif key == 'animation_prompts_negative' and 'animation_prompts_negative' in jdata:
                 ret.append(jdata['animation_prompts_negative'])
+            elif key == 'animation_prompts_df':
+                ret.append(prompts_to_listlist(json.dumps(jdata['prompts'], ensure_ascii=False, indent=4)))
             else:
                 ret.append(data[key])
 
