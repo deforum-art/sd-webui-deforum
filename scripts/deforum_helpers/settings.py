@@ -1,17 +1,30 @@
 from math import ceil
 import os
 import json
-from .args import mask_fill_choices, DeforumArgs
+import deforum_helpers.args as deforum_args
+from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
+from .deprecation_utils import handle_deprecated_settings
 import logging
 
-def load_args(args_dict,anim_args_dict, parseq_args_dict, custom_settings_file, root):
+def get_keys_to_exclude(setting_type):
+    if setting_type == 'general':
+        return ["n_batch", "restore_faces", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal"]
+    else: #video
+        return ["mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
+
+def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
     if not os.path.isfile(custom_settings_file):
         print('The custom settings file does not exist. The in-notebook settings will be used instead')
     else:
         with open(custom_settings_file, "r") as f:
             jdata = json.loads(f.read())
+            handle_deprecated_settings(jdata)
             root.animation_prompts = jdata["prompts"]
+            if "animation_prompts_positive" in jdata:
+                root.animation_prompts_positive = jdata["animation_prompts_positive"]
+            if "animation_prompts_negative" in jdata:
+                root.animation_prompts_negative = jdata["animation_prompts_negative"]
             for i, k in enumerate(args_dict):
                 if k in jdata:
                     args_dict[k] = jdata[k]
@@ -27,48 +40,70 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, custom_settings_file, 
                     parseq_args_dict[k] = jdata[k]
                 else:
                     print(f"key {k} doesn't exist in the custom settings data! using the default value of {parseq_args_dict[k]}")                    
+            for i, k in enumerate(loop_args_dict):
+                if k in jdata:
+                    loop_args_dict[k] = jdata[k]
+                else:
+                    print(f"key {k} doesn't exist in the custom settings data! using the default value of {loop_args_dict[k]}")                    
             print(args_dict)
             print(anim_args_dict)
             print(parseq_args_dict)
+            print(loop_args_dict)
 
-import gradio as gr
- 
-# In gradio gui settings save/load
-def save_settings(settings_path, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, smart_border_fill_mode, parseq_manifest, parseq_use_deltas):
-    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args
-    args_dict = pack_args(W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, smart_border_fill_mode)
-    anim_args_dict = pack_anim_args(animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring)
-    parseq_dict = pack_parseq_args(parseq_manifest, parseq_use_deltas)    
-    args_dict["prompts"] = json.loads(animation_prompts)
+# In gradio gui settings save/ load funs:
+def save_settings(*args, **kwargs):
+    settings_path = args[0].strip()
+    data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
+    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args
+    args_dict = pack_args(data)
+    anim_args_dict = pack_anim_args(data)
+    parseq_dict = pack_parseq_args(data)
+    args_dict["prompts"] = json.loads(data['animation_prompts'])
+    args_dict["animation_prompts_positive"] = data['animation_prompts_positive']
+    args_dict["animation_prompts_negative"] = data['animation_prompts_negative']
+    loop_dict = pack_loop_args(data)
+    
+    combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict}
+    exclude_keys = get_keys_to_exclude('general')
+    filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
+    
     print(f"saving custom settings to {settings_path}")
     with open(settings_path, "w") as f:
-        f.write(json.dumps({**args_dict, **anim_args_dict, **parseq_dict}, ensure_ascii=False, indent=4))
+        f.write(json.dumps(filtered_combined, ensure_ascii=False, indent=4))
+    
     return [""]
 
-def save_video_settings(video_settings_path, skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path):
+def save_video_settings(*args, **kwargs):
+    video_settings_path = args[0].strip()
+    data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
     from deforum_helpers.args import pack_video_args
-    video_args_dict = pack_video_args(skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path)
+    video_args_dict = pack_video_args(data)
+    exclude_keys = get_keys_to_exclude('video')
+    filtered_data = video_args_dict if exclude_keys is None else {k: v for k, v in video_args_dict.items() if k not in exclude_keys}
     print(f"saving video settings to {video_settings_path}")
     with open(video_settings_path, "w") as f:
-        f.write(json.dumps(video_args_dict, ensure_ascii=False, indent=4))
+        f.write(json.dumps(filtered_data, ensure_ascii=False, indent=4))
     return [""]
 
-def load_settings(settings_path, override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, smart_border_fill_mode, parseq_manifest, parseq_use_deltas):
+def load_settings(*args, **kwargs):
+    settings_path = args[0].strip()
+    data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
     print(f"reading custom settings from {settings_path}")
-    data = locals()
-    data.pop("settings_path")
     jdata = {}
     if not os.path.isfile(settings_path):
         print('The custom settings file does not exist. The values will be unchanged.')
-        return [override_settings_with_file, custom_settings_file, animation_mode, max_frames, border, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, flip_2d_perspective, perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv, noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, fov_schedule, near_schedule, far_schedule, seed_schedule, kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule, histogram_matching, color_coherence, diffusion_cadence, use_depth_warping, midas_weight, near_plane, far_plane, fov, padding_mode, sampling_mode, save_depth_maps, video_init_path, extract_nth_frame, overwrite_extracted_frames, use_mask_video, video_mask_path, interpolate_key_frames, interpolate_x_frames, resume_from_timestring, resume_timestring, prompts, animation_prompts, W, H, restore_faces, tiling, enable_hr, firstphase_width, firstphase_height, seed, sampler, seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, make_grid, grid_rows, save_settings, save_samples, display_samples, save_sample_per_step, show_sample_per_step, override_these_with_webui, batch_name, filename_format, seed_behavior, use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image, use_mask, use_alpha_as_mask, invert_mask, overlay_mask, mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur, fill, full_res_mask, full_res_mask_padding, reroll_blank_frames, smart_border_fill_mode, parseq_manifest, parseq_use_deltas, ""]
+        return [data[name] for name in deforum_args.settings_component_names] + [""]
     else:
         with open(settings_path, "r") as f:
             jdata = json.loads(f.read())
+            handle_deprecated_settings(jdata)
     ret = []
-
     if 'animation_prompts' in jdata:
         jdata['prompts'] = jdata['animation_prompts']#compatibility with old versions
-
+    if 'animation_prompts_positive' in jdata:
+        data["animation_prompts_positive"] = jdata['animation_prompts_positive']
+    if 'animation_prompts_negative' in jdata:
+        data["animation_prompts_negative"] = jdata['animation_prompts_negative']
     for key in data:
         if key == 'sampler':
             sampler_val = jdata[key]
@@ -110,12 +145,25 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
                 reroll_blank_frames_default = DeforumArgs()['reroll_blank_frames']
                 logging.debug(f"Reroll blank frames not found in load file, using default value: {reroll_blank_frames_default}")
                 ret.append(reroll_blank_frames_default)
-
+        
+        elif key == 'noise_type':
+            if key in jdata:
+                noise_type_val = jdata[key]
+                ret.append(noise_type_val)
+            else:
+                noise_type_default = DeforumAnimArgs()['noise_type']
+                logging.debug(f"Noise type not found in load file, using default value: {noise_type_default}")
+                ret.append(noise_type_default)
+            
         elif key in jdata:
             ret.append(jdata[key])
         else:
             if key == 'animation_prompts':
                 ret.append(json.dumps(jdata['prompts'], ensure_ascii=False, indent=4))
+            elif key == 'animation_prompts_positive' and 'animation_prompts_positive' in jdata:
+                ret.append(jdata['animation_prompts_positive'])
+            elif key == 'animation_prompts_negative' and 'animation_prompts_negative' in jdata:
+                ret.append(jdata['animation_prompts_negative'])
             else:
                 ret.append(data[key])
 
@@ -124,21 +172,28 @@ def load_settings(settings_path, override_settings_with_file, custom_settings_fi
 
     return ret
 
-def load_video_settings(video_settings_path, skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path):  
+def load_video_settings(*args, **kwargs):
+    video_settings_path = args[0].strip()
+    data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
     print(f"reading custom video settings from {video_settings_path}")
-    data = locals()
-    data.pop("video_settings_path")
     jdata = {}
     if not os.path.isfile(video_settings_path):
         print('The custom video settings file does not exist. The values will be unchanged.')
-        return [skip_video_for_run_all, fps, output_format, ffmpeg_location, add_soundtrack, soundtrack_path, use_manual_settings, render_steps, max_video_frames, path_name_modifier, image_path, mp4_path, ""]
+        return [data[name] for name in deforum_args.video_args_names] + [""]
     else:
         with open(video_settings_path, "r") as f:
             jdata = json.loads(f.read())
+            handle_deprecated_settings(jdata)
     ret = []
 
     for key in data:
-        if key in jdata:
+        if key == 'add_soundtrack':
+            add_soundtrack_val = jdata[key]
+            if type(add_soundtrack_val) == bool:
+                ret.append('File' if add_soundtrack_val else 'None')
+            else:
+                ret.append(add_soundtrack_val)
+        elif key in jdata:
             ret.append(jdata[key])
         else:
             ret.append(data[key])
@@ -158,7 +213,7 @@ class DeforumTQDM:
         self._parseq_args = parseq_args
 
     def reset(self):
-        from .animation import DeformAnimKeys
+        from .animation_key_frames import DeformAnimKeys
         from .parseq_adapter import ParseqAnimKeys
         deforum_total = 0
         # FIXME: get only amount of steps
@@ -187,7 +242,6 @@ class DeforumTQDM:
         had_first = False
         while frame_idx < self._anim_args.max_frames:
             strength = keys.strength_schedule_series[frame_idx]
-            #sample, image = generate(args, root, frame_idx, return_sample=True)
             if not had_first and self._args.use_init and self._args.init_image != None and self._args.init_image != '':
                 deforum_total += int(ceil(self._args.steps * (1-strength)))
                 had_first = True

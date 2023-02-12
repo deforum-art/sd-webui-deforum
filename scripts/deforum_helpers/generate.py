@@ -1,61 +1,22 @@
-import torch
-import PIL #HOTFIXISSUE#33 needed for instruction to generate negative mask. 
-from PIL import Image, ImageOps
-import requests
 import numpy as np
-from math import ceil
-import torchvision.transforms.functional as TF
-from pytorch_lightning import seed_everything
-import os
-from ldm.models.diffusion.plms import PLMSSampler
-from ldm.models.diffusion.ddim import DDIMSampler
-from k_diffusion.external import CompVisDenoiser
-from torch import autocast
-from contextlib import nullcontext
-from einops import rearrange
-
-from .prompt import get_uc_and_c, parse_weight
-from .k_samplers import sampler_fn
-from scipy.ndimage import gaussian_filter
-
-from .callback import SamplerCallback
+import cv2
+from PIL import Image
+from prettytable import PrettyTable
+from .prompt import split_weighted_subprompts
+from .load_images import load_img, prepare_mask, check_mask_for_errors
+from .webui_sd_pipeline import get_webui_sd_pipeline
+from .animation import sample_from_cv2, sample_to_cv2
 
 #Webui
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
-from modules import processing, masking
-from modules import shared
+from modules import processing, sd_models, masking
 from modules.shared import opts, sd_model
-from modules.processing import process_images, StableDiffusionProcessingTxt2Img, StableDiffusionProcessingImg2Img
-import logging
+import modules.shared as shared
+from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
-#MASKARGSEXPANSION 
-#Add option to remove noise in relation to masking so that areas which are masked receive less noise
-def add_noise(sample: torch.Tensor, noise_amt: float) -> torch.Tensor:
-    return sample + torch.randn(sample.shape, device=sample.device) * noise_amt
-
-def load_img(path, shape, use_alpha_as_mask=False):
-    # use_alpha_as_mask: Read the alpha channel of the image as the mask image
-    if path.startswith('http://') or path.startswith('https://'):
-        image = Image.open(requests.get(path, stream=True).raw)
-    else:
-        image = Image.open(path)
-
-    if use_alpha_as_mask:
-        image = image.convert('RGBA')
-    else:
-        image = image.convert('RGB')
-
-    image = image.resize(shape, resample=Image.LANCZOS)
-
-    mask_image = None
-    if use_alpha_as_mask:
-        # Split alpha channel into a mask_image
-        red, green, blue, alpha = Image.Image.split(image)
-        mask_image = alpha.convert('L')
-        image = image.convert('RGB')
-
-    return image, mask_image #PIL image for auto's pipeline
+import math, json, itertools
+import requests
 
 def load_mask_latent(mask_input, shape):
     # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
@@ -76,129 +37,111 @@ def load_mask_latent(mask_input, shape):
     mask = mask.convert("L")
     return mask
 
-def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contrast_adjust=1.0, invert_mask=False):
-    # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
-    # shape (list-like len(4)): shape of the image to match, usually latent_image.shape
-    # mask_brightness_adjust (non-negative float): amount to adjust brightness of the iamge, 
-    #     0 is black, 1 is no adjustment, >1 is brighter
-    # mask_contrast_adjust (non-negative float): amount to adjust contrast of the image, 
-    #     0 is a flat grey image, 1 is no adjustment, >1 is more contrast
-    
-    mask = load_mask_latent(mask_input, mask_shape)
+def isJson(myjson):
+    try:
+        json.loads(myjson)
+    except ValueError as e:
+        return False
+    return True
 
-    # Mask brightness/contrast adjustments
-    if mask_brightness_adjust != 1:
-        mask = TF.adjust_brightness(mask, mask_brightness_adjust)
-    if mask_contrast_adjust != 1:
-        mask = TF.adjust_contrast(mask, mask_contrast_adjust)
+# Add pairwise implementation here not to upgrade
+# the whole python to 3.10 just for one function
+def pairwise_repl(iterable):
+    a, b = itertools.tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
-    if invert_mask:
-        mask = PIL.ImageOps.invert(mask)
-    
-    return mask
-
-# Resets the pipeline object as recomended by kabachuha to simplify resets for additional passes
-def reset_pipeline(args, prompt, negative_prompt):
-    # Setup the pipeline
-    p = StableDiffusionProcessingImg2Img(
-        sd_model=sd_model,
-        outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
-        outpath_grids = opts.outdir_grids or opts.outdir_img2img_grids,
-        #prompt=prompt, 
-        #negative_prompt=negative_prompt,
-        #styles=[prompt_style, prompt_style2], 
-        seed=args.seed,
-        subseed=args.subseed,
-        subseed_strength=args.subseed_strength,
-        seed_resize_from_h=args.seed_resize_from_h,
-        seed_resize_from_w=args.seed_resize_from_w,
-        #seed_enable_extras=args.seed_enable_extras,
-        sampler_name = args.sampler,
-        batch_size=args.n_batch,
-        n_iter=1,
-        cfg_scale=args.scale,
-        width=args.W,
-        height=args.H,
-        restore_faces=args.restore_faces,
-        tiling=args.tiling,
-        #init_images=[image], # Assigned during generation 
-        mask=None, # Assigned during generation 
-        mask_blur=args.mask_overlay_blur,
-        #resize_mode=resize_mode, #TODO There are several settings to this and it may 
-        #inpainting_fill=args.fill, # Assign during generation
-        #inpaint_full_res=args.full_res_mask, # Assign during generation
-        #inpaint_full_res_padding=inpaint_full_res_padding, # Assign during generation
-        #inpainting_mask_invert=inpainting_mask_invert, # Assign during generation
-        do_not_save_samples=not args.save_sample_per_step,
-        do_not_save_grid=not args.make_grid,
-    )
-    p.restore_faces = args.restore_faces
-    p.tiling = args.tiling
-    p.enable_hr = args.enable_hr
-    p.firstphase_width = args.firstphase_width
-    p.firstphase_height = args.firstphase_height
-    p.seed_enable_extras = args.seed_enable_extras
-    p.subseed = args.subseed
-    p.subseed_strength = args.subseed_strength
-    p.seed_resize_from_w = args.seed_resize_from_w
-    p.seed_resize_from_h = args.seed_resize_from_h
-    p.ddim_eta = args.ddim_eta
-
-    # Below settings which have conditions or symbols that dont work in the p object constructor
-    p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
-
-    p.steps = args.steps
-    if opts.img2img_fix_steps:
-        p.denoising_strength = 1 / (1 - args.strength + 1.0/args.steps) #see https://github.com/deforum-art/deforum-for-automatic1111-webui/issues/3
-    else:
-        p.denoising_strength = 1 - args.strength
-    
-    # The prompts are precomputed as the math functions can be quite resource heavy
-    # and also not to log things twice
-    p.prompt = prompt
-    p.negative_prompt = negative_prompt
-    return p
-
-def generate(args, anim_args, root, frame = 0, return_sample=False):
-    import re
+def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, sampler_name=None):
     assert args.prompt is not None
     
-    # Evaluate prompt math!
-    
-    math_parser = re.compile("""
-            (?P<weight>(
-            `[\S\s]*?`# a math function wrapped in `-characters
-            ))
-            """, re.VERBOSE)
-    
-    parsed_prompt = re.sub(math_parser, lambda m: str(parse_weight(m, frame)), args.prompt)
-
-    prompt_split = parsed_prompt.split("--neg")
-    if len(prompt_split) > 1:
-        prompt, negative_prompt = parsed_prompt.split("--neg") #TODO: add --neg to vanilla Deforum for compat
-        print(f'Positive prompt:{prompt}')
-        print(f'Negative prompt:{negative_prompt}')
-    else:
-        prompt = prompt_split[0]
-        print(f'Positive prompt:{prompt}')
-        negative_prompt = ""
-    
-    p = reset_pipeline(args, prompt, negative_prompt)
+    # Setup the pipeline
+    p = get_webui_sd_pipeline(args, root, frame)
+    p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame)
     
     if not args.use_init and args.strength > 0 and args.strength_0_no_init:
         print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
         print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
         args.strength = 0
+    processed = None
     mask_image = None
     init_image = None
-    
-    processed = None
+    image_init0 = None
+
+    if loop_args.use_looper:
+        # TODO find out why we need to set this in the init tab
+        if args.strength == 0:
+            raise RuntimeError("Strength needs to be greater than 0 in Init tab and strength_0_no_init should *not* be checked")
+        if args.seed_behavior != "schedule":
+            raise RuntimeError("seed_behavior needs to be set to schedule in under 'Keyframes' tab --> 'Seed scheduling'")
+        if not isJson(loop_args.imagesToKeyframe):
+            raise RuntimeError("The images set for use with keyframe-guidance are not in a proper JSON format")
+        args.strength = loop_args.imageStrength
+        tweeningFrames = loop_args.tweeningFrameSchedule
+        blendFactor = .07
+        colorCorrectionFactor = loop_args.colorCorrectionFactor
+        jsonImages = json.loads(loop_args.imagesToKeyframe)
+        framesToImageSwapOn = list(map(int, list(jsonImages.keys())))
+        # find which image to show
+        frameToChoose = 0
+        for swappingFrame in framesToImageSwapOn[1:]:
+            frameToChoose += (frame >= int(swappingFrame))
+        
+        #find which frame to do our swapping on for tweening
+        skipFrame = 25
+        for fs, fe in pairwise_repl(framesToImageSwapOn):
+            if fs <= frame <= fe:
+                skipFrame = fe - fs
+
+        if frame % skipFrame <= tweeningFrames: # number of tweening frames
+            blendFactor = loop_args.blendFactorMax - loop_args.blendFactorSlope*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
+        init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
+                                shape=(args.W, args.H),
+                                use_alpha_as_mask=args.use_alpha_as_mask)
+        image_init0 = list(jsonImages.values())[0]
+            
+    else: # they passed in a single init image
+        image_init0 = args.init_image
+
+
+    available_samplers = { 
+        'euler a':'Euler a',
+        'euler':'Euler',
+        'lms':'LMS',
+        'heun':'Heun',
+        'dpm2':'DPM2',
+        'dpm2 a':'DPM2 a',
+        'dpm++ 2s a':'DPM++ 2S a',
+        'dpm++ 2m':'DPM++ 2M',
+        'dpm++ sde':'DPM++ SDE',
+        'dpm fast':'DPM fast',
+        'dpm adaptive':'DPM adaptive',
+        'lms karras':'LMS Karras' ,
+        'dpm2 karras':'DPM2 Karras',
+        'dpm2 a karras':'DPM2 a Karras',
+        'dpm++ 2s a karras':'DPM++ 2S a Karras',
+        'dpm++ 2m karras':'DPM++ 2M Karras',
+        'dpm++ sde karras':'DPM++ SDE Karras'
+    }
+    if sampler_name is not None:
+        if sampler_name in available_samplers.keys():
+            args.sampler = available_samplers[sampler_name]
+
+    if args.checkpoint is not None:
+        info = sd_models.get_closet_checkpoint_match(args.checkpoint)
+        if info is None:
+            raise RuntimeError(f"Unknown checkpoint: {args.checkpoint}")
+        sd_models.reload_model_weights(info=info)
     
     if args.init_sample is not None:
-        open_cv_image = sample_to_cv2(args.init_sample)
-        img = cv2.cvtColor(open_cv_image, cv2.COLOR_BGR2RGB)
-        init_image = Image.fromarray(img)
-
+        # TODO: cleanup init_sample remains later
+        img = args.init_sample
+        init_image = img
+        image_init0 = img
+        if loop_args.use_looper and isJson(loop_args.imagesToKeyframe):
+            init_image = Image.blend(init_image, init_image2, blendFactor)
+            correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
+            p.color_corrections = [processing.setup_color_correction(correction_colors)]
+        
         if anim_args.border == 'smart':
             
             # Inpaint changed parts of the image
@@ -257,38 +200,29 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
                 processed = processing.process_images(p)
                 init_image = processed.images[0].convert('RGB')
 
-                p = reset_pipeline(args, prompt, negative_prompt) # This should reset as to not lose prompts and base args in next pass
-                p.init_images = [init_image] # preserve the init image that we just generated, as we reset the p object
+                p = get_webui_sd_pipeline(args, root, frame)
+                p.init_images = [init_image]
 
-                processed = None # This needs to be none so that the normal pass will continue
-                mask_image = None # Could be using a standard mask in addition to this pass, so this needs to be reset also
-
-                # Below are the settings that started stacking up
-                #p.inpainting_mask_invert = False
-                #p.sd_model=sd_model
-                #p.color_corrections = None
-                #p.image_mask = None
-                #p.inpainting_fill = 1
-                #p.sd_model=sd_model
-
-                # This setting allowed the diffusion to continue however we decided that resetting the p object 
-                # was safer
-                #p.mask = None
+                processed = None
             else:
                 # fix tqdm total steps if we don't have to conduct a second pass
                 tqdm_instance = shared.total_tqdm
                 current_total = tqdm_instance.getTotal()
                 if current_total != -1:
-                    tqdm_instance.updateTotal(current_total - int(ceil(args.steps * (1-args.strength))))
+                    tqdm_instance.updateTotal(current_total - int(math.ceil(args.steps * (1-args.strength))))
             
             mask = None
             mask_image = None
-    elif args.use_init and args.init_image != None and args.init_image != '':
-        init_image, mask_image = load_img(args.init_image, 
+
+    # this is the first pass
+    elif loop_args.use_looper or (args.use_init and ((args.init_image != None and args.init_image != ''))):
+        init_image, mask_image = load_img(image_init0, # initial init image
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
+                                          
     else:
-        print(f"Not using an init image (doing pure txt2img) - seed:{p.seed}; subseed:{p.subseed}; subseed_strength:{p.subseed_strength}; cfg_scale:{p.cfg_scale}; steps:{p.steps}")
+        if anim_args.animation_mode != 'Interpolation':
+            print(f"Not using an init image (doing pure txt2img)")
         p_txt = StableDiffusionProcessingTxt2Img(
                 sd_model=sd_model,
                 outpath_samples=p.outpath_samples,
@@ -301,7 +235,6 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
                 subseed_strength=p.subseed_strength,
                 seed_resize_from_h=p.seed_resize_from_h,
                 seed_resize_from_w=p.seed_resize_from_w,
-                seed_enable_extras=p.seed_enable_extras,
                 sampler_name=p.sampler_name,
                 batch_size=p.batch_size,
                 n_iter=p.n_iter,
@@ -314,57 +247,60 @@ def generate(args, anim_args, root, frame = 0, return_sample=False):
                 enable_hr=None,
                 denoising_strength=None,
             )
+        # print dynamic table to cli
+        print_generate_table(args, anim_args, p_txt)
+        
         processed = processing.process_images(p_txt)
     
     if processed is None:
         # Mask functions
         if args.use_mask:
-            assert args.mask_file is not None or mask_image is not None, "use_mask==True: An mask image is required for a mask. Please enter a mask_file or use an init image with an alpha channel"
-            assert args.use_init, "use_mask==True: use_init is required for a mask"
-            mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
-                                (args.W, args.H), 
-                                args.mask_contrast_adjust, 
-                                args.mask_brightness_adjust, 
-                                args.invert_mask)
-                                
-            p.inpainting_fill = args.fill # need to come up with better name. 
-            p.inpaint_full_res= args.full_res_mask 
-            p.inpaint_full_res_padding = args.full_res_mask_padding 
-
-            #if (torch.all(mask == 0) or torch.all(mask == 1)) and args.use_alpha_as_mask:
-            #    raise Warning("use_alpha_as_mask==True: Using the alpha channel from the init image as a mask, but the alpha channel is blank.")
-            
-            #mask = repeat(mask, '1 ... -> b ...', b=batch_size)
+            mask = args.mask_image
+            #assign masking options to pipeline
+            if mask is not None:
+                p.inpainting_mask_invert = args.invert_mask
+                p.inpainting_fill = args.fill 
+                p.inpaint_full_res= args.full_res_mask 
+                p.inpaint_full_res_padding = args.full_res_mask_padding
         else:
             mask = None
 
-        assert not ( (args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
+        assert not ( (mask is not None and args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
         
         p.init_images = [init_image]
-        p.image_mask = mask_image
-
-        print(f"seed={p.seed}; subseed={p.subseed}; subseed_strength={p.subseed_strength}; denoising_strength={p.denoising_strength}; steps={p.steps}; cfg_scale={p.cfg_scale}")
+        p.image_mask = mask
+        p.image_cfg_scale = args.pix2pix_img_cfg_scale
+        
+        # print dynamic table to cli
+        print_generate_table(args, anim_args, p)
+       
         processed = processing.process_images(p)
-        p.sd_model=sd_model
     
     if root.initial_info == None:
         root.initial_seed = processed.seed
         root.initial_info = processed.info
-    
+        
     if root.first_frame == None:
         root.first_frame = processed.images[0]
-        ### TODO: put the correct arg here.
-        if anim_args.histogram_matching:
-            root.color_corrections = [processing.setup_color_correction(root.first_frame)]
     
-    if return_sample:
-        pil_image = processed.images[0].convert('RGB') 
-        open_cv_image = np.array(pil_image) 
-        # Convert RGB to BGR 
-        open_cv_image = open_cv_image[:, :, ::-1].copy() 
-        image = sample_from_cv2(open_cv_image)
-        results = [image, processed.images[0]]
-    else:
-        results = [processed.images[0]]
+    results = processed.images[0]
     
     return results
+    
+def print_generate_table(args, anim_args, p):
+    x = PrettyTable(padding_width=0)
+    field_names = ["Steps", "CFG"]
+    if anim_args.animation_mode != 'Interpolation':
+        field_names.append("Denoise")
+    field_names += ["Subseed", "Subs. str"] * (args.seed_enable_extras)
+    field_names += ["Sampler"] * anim_args.enable_sampler_scheduling
+    field_names += ["Checkpoint"] * anim_args.enable_checkpoint_scheduling
+    x.field_names = field_names
+    row = [p.steps, p.cfg_scale]
+    if anim_args.animation_mode != 'Interpolation':
+        row.append(p.denoising_strength)
+    row += [p.subseed, p.subseed_strength] * (args.seed_enable_extras)
+    row += [p.sampler_name] * anim_args.enable_sampler_scheduling
+    row += [args.checkpoint] * anim_args.enable_checkpoint_scheduling
+    x.add_row(row)
+    print(x)

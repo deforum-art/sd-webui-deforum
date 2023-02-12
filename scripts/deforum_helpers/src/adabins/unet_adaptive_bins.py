@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import os
+from pathlib import Path
 
 from .miniViT import mViT
 
@@ -123,7 +125,14 @@ class UnetAdaptiveBins(nn.Module):
         basemodel_name = 'tf_efficientnet_b5_ap'
 
         print('Loading base model ()...'.format(basemodel_name), end='')
-        basemodel = torch.hub.load('rwightman/gen-efficientnet-pytorch', basemodel_name, pretrained=True)
+        predicted_torch_model_cache_path = str(Path.home()) + '\\.cache\\torch\\hub\\rwightman_gen-efficientnet-pytorch_master' 
+        predicted_gep_cache_testilfe = Path(predicted_torch_model_cache_path + '\\hubconf.py')
+        #print(f"predicted_gep_cache_testilfe:  {predicted_gep_cache_testilfe}")
+        # try to fetch the models from cache, and only if it can't be find, download from the internet (to enable offline usage)
+        if os.path.isfile(predicted_gep_cache_testilfe):
+            basemodel = torch.hub.load(predicted_torch_model_cache_path, basemodel_name, pretrained=True, source = 'local')        
+        else:
+            basemodel = torch.hub.load('rwightman/gen-efficientnet-pytorch', basemodel_name, pretrained=True)
         print('Done.')
 
         # Remove last layer

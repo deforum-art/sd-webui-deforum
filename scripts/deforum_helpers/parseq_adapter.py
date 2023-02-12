@@ -1,11 +1,14 @@
-from operator import itemgetter
+import copy
 import json
 import logging
-import pandas as pd
-import numpy as np
 import operator
+from operator import itemgetter
+
+import numpy as np
+import pandas as pd
 import requests
-from .animation import DeformAnimKeys
+
+from .animation_key_frames import DeformAnimKeys
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -22,6 +25,17 @@ class ParseqAnimKeys():
                 body = requests.get(manifestOrUrl).text
                 logging.debug(f"Loaded remote manifest: {body}")
                 self.parseq_json = json.loads(body)
+
+                # Add the parseq manifest without the detailed frame data to parseq_args.
+                # This ensures it will be saved in the settings file, so that you can always
+                # see exactly what parseq prompts and keyframes were used, even if what the URL
+                # points to changes.
+                parseq_args.fetched_parseq_manifest_summary = copy.deepcopy(self.parseq_json)
+                if parseq_args.fetched_parseq_manifest_summary['rendered_frames']:
+                    del parseq_args.fetched_parseq_manifest_summary['rendered_frames']
+                if parseq_args.fetched_parseq_manifest_summary['rendered_frames_meta']:
+                    del parseq_args.fetched_parseq_manifest_summary['rendered_frames_meta']
+
             except Exception as e:
                 logging.error(f"Unable to load Parseq manifest from URL: {manifestOrUrl}")
                 raise e
@@ -68,8 +82,10 @@ class ParseqAnimKeys():
         self.perspective_flip_fv_series = self.parseq_to_anim_series('perspective_flip_fv')
         self.noise_schedule_series = self.parseq_to_anim_series('noise')
         self.strength_schedule_series = self.parseq_to_anim_series('strength')
+        self.sampler_schedule_series = self.parseq_to_anim_series('sampler_schedule')
         self.contrast_schedule_series = self.parseq_to_anim_series('contrast')
         self.cfg_scale_schedule_series = self.parseq_to_anim_series('scale')
+        self.steps_schedule_series = self.parseq_to_anim_series("steps_schedule")
         self.seed_schedule_series = self.parseq_to_anim_series('seed')
         self.fov_series = self.parseq_to_anim_series('fov')
         self.near_series = self.parseq_to_anim_series('near')
@@ -81,7 +97,7 @@ class ParseqAnimKeys():
         self.sigma_schedule_series = self.parseq_to_anim_series('antiblur_sigma')
         self.amount_schedule_series = self.parseq_to_anim_series('antiblur_amount')
         self.threshold_schedule_series = self.parseq_to_anim_series('antiblur_threshold')
-
+        
         # Config:
         # TODO this is currently ignored. User must ensure the output FPS set in parseq
         # matches the one set in Deforum to avoid unexpected results.
@@ -98,9 +114,7 @@ class ParseqAnimKeys():
             if self.rendered_frames[0][seriesName] is not None:
                 logging.info(f"Found {seriesName} in first frame of Parseq data. Assuming it's defined.")
         except KeyError:
-            logging.info(f"{seriesName} not found in first frame of Parseq data. Assuming it's undefined, will use standard Deforum values.")
             return None
-            
 
         key_frame_series = pd.Series([np.nan for a in range(self.required_frames)])
         
@@ -124,11 +138,27 @@ class ParseqAnimKeys():
         try:
             definedField = super(ParseqAnimKeys, inst).__getattribute__(name)
         except AttributeError:
-            definedField = None
+            # No field with this name has been explicitly extracted from the JSON data.
+            # It must be a new parameter. Let's see if it's in the raw JSON.
+
+            # parseq doesn't use _series, _schedule or _schedule_series suffixes in the
+            # JSON data - remove them.
+            strippableSuffixes = ['_series', '_schedule']
+            parseqName = name
+            while any(parseqName.endswith(suffix) for suffix in strippableSuffixes):
+                for suffix in strippableSuffixes:
+                    if parseqName.endswith(suffix):
+                        parseqName = parseqName[:-len(suffix)]            
+            
+            # returns None if not defined in Parseq JSON data
+            definedField = inst.parseq_to_anim_series(parseqName)
+            if (definedField is not None):
+                # add the field to the instance so we don't compute it again.
+                setattr(inst, name, definedField)
 
         if (definedField is not None):
             return definedField
         else:
-            logging.info(f"Data for {name} not defined in Parseq data. Falling back to stanard Deforum values.")
+            logging.info(f"Data for {name} not defined in Parseq data (looked for: '{parseqName}'). Falling back to standard Deforum values.")
             return getattr(inst.default_anim_keys, name)
 
