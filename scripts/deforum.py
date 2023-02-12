@@ -104,7 +104,7 @@ def run_deforum(*args, **kwargs):
         
     if video_args.skip_video_for_run_all:
         print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
-    elif video_args.output_format == 'FFMPEG mp4':
+    else: #video_args.output_format == 'FFMPEG mp4':
         import subprocess
 
         path_name_modifier = video_args.path_name_modifier
@@ -121,11 +121,15 @@ def run_deforum(*args, **kwargs):
             mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
             max_video_frames = anim_args.max_frames
 
-        #save settings for the video
+        exclude_keys = deforum_settings.get_keys_to_exclude('video')
         video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
         with open(video_settings_filename, "w+", encoding="utf-8") as f:
-            s = {**dict(video_args.__dict__)}
+            s = {}
+            for key, value in dict(video_args.__dict__).items():
+                if key not in exclude_keys:
+                    s[key] = value
             json.dump(s, f, ensure_ascii=False, indent=4)
+
         # Stitch video using ffmpeg!
         try:
             ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
@@ -138,46 +142,6 @@ def run_deforum(*args, **kwargs):
             else:
                 print(f"** FFMPEG DID NOT STITCH ANY VIDEO ** Error: {e}")
             pass
-
-    else: # *GIF* TIME!
-        # TODO: add support for custom frame interpolation vid location?
-        path_name_modifier = video_args.path_name_modifier
-        if video_args.render_steps: # render steps from a single image
-            fname = f"{path_name_modifier}_%05d.png"
-            all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
-            newest_dir = max(all_step_dirs, key=os.path.getmtime)
-            image_path = os.path.join(newest_dir, fname)
-            print(f"Reading images from {image_path}")
-            mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.gif")
-            max_video_frames = args.steps
-        else: # render images for a video
-            image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
-            mp4_path = os.path.join(args.outdir, f"{args.timestring}.gif")
-            max_video_frames = anim_args.max_frames
-
-        print(f"GIF created from:\n{image_path}\nTo:\n{mp4_path}")
-
-        #save settings for the video
-        video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
-        with open(video_settings_filename, "w+", encoding="utf-8") as f:
-            s = {**dict(video_args.__dict__)}
-            json.dump(s, f, ensure_ascii=False, indent=4)
-        
-        imagelist = [Image.open(os.path.join(args.outdir, image_path%d)) for d in range(max_video_frames) if os.path.exists(os.path.join(args.outdir, image_path%d))]
-        
-        imagelist[0].save(
-            mp4_path,#gif here
-            save_all=True,
-            append_images=imagelist[1:],
-            optimize=True,
-            duration=1000/video_args.fps, #????
-            loop=0
-        )
-        
-        mp4 = open(mp4_path,'rb').read()
-        data_url = "data:image/gif;base64," + b64encode(mp4).decode()
-        
-        deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum v0.5-webui-beta</p><img src="{data_url}" type="image/gif"></img>'
 
     if root.initial_info is None:
         root.initial_info = "An error has occured and nothing has been generated!"
