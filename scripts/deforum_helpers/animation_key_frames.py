@@ -23,6 +23,8 @@ class DeformAnimKeys():
         self.contrast_schedule_series = get_inbetweens(parse_key_frames(anim_args.contrast_schedule), anim_args.max_frames)
         self.cfg_scale_schedule_series = get_inbetweens(parse_key_frames(anim_args.cfg_scale_schedule), anim_args.max_frames)
         self.pix2pix_img_cfg_scale_series = get_inbetweens(parse_key_frames(anim_args.pix2pix_img_cfg_scale_schedule), anim_args.max_frames)
+        self.subseed_schedule_series = get_inbetweens(parse_key_frames(anim_args.subseed_schedule), anim_args.max_frames)
+        self.subseed_strength_schedule_series = get_inbetweens(parse_key_frames(anim_args.subseed_strength_schedule), anim_args.max_frames)
         self.checkpoint_schedule_series = get_inbetweens(parse_key_frames(anim_args.checkpoint_schedule), anim_args.max_frames, is_single_string = True)
         self.steps_schedule_series = get_inbetweens(parse_key_frames(anim_args.steps_schedule), anim_args.max_frames)
         self.seed_schedule_series = get_inbetweens(parse_key_frames(anim_args.seed_schedule), anim_args.max_frames)

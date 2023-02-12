@@ -123,8 +123,12 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, an
         else:
             args.checkpoint = None
             
+        if anim_args.enable_subseed_scheduling:
+            args.subseed = keys.subseed_schedule_series[frame_idx]
+            args.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
+            
         if use_parseq:
-            args.seed_enable_extras = True
+            anim_args.enable_subseed_scheduling = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
             

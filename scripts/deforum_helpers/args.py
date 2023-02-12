@@ -57,6 +57,9 @@ def DeforumAnimArgs():
     seed_schedule = "0:(5), 1:(-1), 219:(-1), 220:(5)"
     pix2pix_img_cfg_scale = "1.5"
     pix2pix_img_cfg_scale_schedule = "0:(1.5)"
+    enable_subseed_scheduling = False
+    subseed_schedule = "0:(1)"
+    subseed_strength_schedule = "0:(0)"
     
     # Sampler Scheduling
     enable_sampler_scheduling = False #@param {type:"boolean"}
@@ -158,8 +161,6 @@ def DeforumArgs():
     #@markdonw **Webui stuff**
     tiling = False
     restore_faces = False
-    # firstphase_width = 0
-    # firstphase_height = 0
     seed_enable_extras = False
     subseed = -1
     subseed_strength = 0
@@ -348,29 +349,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row(variables='compact'):
                 seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
                 batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
+            with gr.Row(variant='compact'):
+                ddim_eta = gr.Number(label="DDIM ETA", value=d.ddim_eta, interactive=True)
+                tiling = gr.Checkbox(label='Tiling', value=False)
             with gr.Row(visible=False):
                 filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
-            # SUBSEED CONTROL ACCORD
-            with gr.Accordion('Subseed controls & More', open=False):
-                # Not visible until fixed, 06-02-23
-                with gr.Row(visible=False):
-                    restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
-                with gr.Row(variant='compact'):
-                    seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
-                    subseed = gr.Number(label="Subseed", value=d.subseed, interactive=True, precision=0)
-                    subseed_strength = gr.Slider(label="Subseed strength", minimum=0, maximum=1, step=0.01, value=d.subseed_strength, interactive=True)
-                with gr.Row(variant='compact'):
-                    seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
-                    seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
-                with gr.Row(variant='compact'):
-                    ddim_eta = gr.Number(label="DDIM ETA", value=d.ddim_eta, interactive=True)
-                    tiling = gr.Checkbox(label='Tiling', value=False)
-                    n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
-                with gr.Row() as pix2pix_img_cfg_scale_row:
+            with gr.Row() as pix2pix_img_cfg_scale_row:
                     pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True) 
-            with gr.Row(visible=False):
-                save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
-                show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
             # RUN FROM SETTING FILE ACCORD
             with gr.Accordion('Resume & Run from file', open=False):
                 with gr.Tab('Run from Settings file'):
@@ -452,6 +437,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         seed_iter_N = gr.Number(label="Seed iter N", value=d.seed_iter_N, interactive=True, precision=0)
                     with gr.Row(visible=False) as seed_schedule_row:
                         seed_schedule = gr.Textbox(label="Seed schedule", lines=1, value = da.seed_schedule, interactive=True)
+                with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
+                    enable_subseed_scheduling = gr.Checkbox(label="Enable Subseed scheduling", value=da.enable_subseed_scheduling, interactive=True)
+                    subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value = da.subseed_schedule, interactive=True)
+                    subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value = da.subseed_strength_schedule, interactive=True)
+                    with gr.Row(variant='compact'):
+                        seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
+                        seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
                 # Steps Scheduling
                 with gr.TabItem('Step') as a13:
                     with gr.Row():
@@ -880,7 +872,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row(visible=False):
                     save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
                     display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
-        
+            # NOT VISIBLE 11-02-23 htai
+            with gr.Accordion('Subseed controls & More', open=False, visible=False):
+                # Not visible until fixed, 06-02-23
+                with gr.Row(visible=False):
+                    restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
+                # NOT VISIBLE as of 11-02 - we have sch now. will delete the actual params in a later date
+                with gr.Row(variant='compact', visible=False):
+                    seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
+                    n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
+            with gr.Row(visible=False):
+                save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
+                show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
+
     # Gradio's Change functions - hiding and renaming elements based on other elements
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
@@ -924,6 +928,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_perspective_flip,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
+                        enable_subseed_scheduling, subseed_schedule, subseed_strength_schedule,
                         enable_steps_scheduling, steps_schedule,
                         fov_schedule, near_schedule, far_schedule,
                         seed_schedule,
@@ -949,7 +954,7 @@ hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 args_names =    str(r'''W, H, tiling, restore_faces,
                         seed, sampler,
-                        seed_enable_extras, subseed, subseed_strength, seed_resize_from_w, seed_resize_from_h,
+                        seed_enable_extras, seed_resize_from_w, seed_resize_from_h,
                         steps, ddim_eta,
                         n_batch,
                         save_settings, save_samples, display_samples,
@@ -990,6 +995,8 @@ def pack_args(args_dict):
     args_dict = {name: args_dict[name] for name in args_names}
     args_dict['precision'] = 'autocast' 
     args_dict['scale'] = 7
+    args_dict['subseed'] = -1
+    args_dict['subseed_strength'] = 0
     args_dict['C'] = 4
     args_dict['f'] = 8
     args_dict['timestring'] = ""
