@@ -9,42 +9,6 @@ from pkg_resources import resource_filename
 from modules.shared import state
 from .general_utils import checksum, get_os
 
-def check_and_download_gifski(models_folder, cur_user_os):  
-    if cur_user_os == 'Windows':
-        if not os.path.exists(os.path.join(models_folder,'gifski.exe')):
-            from basicsr.utils.download_util import load_file_from_url
-            load_file_from_url(r"https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe", models_folder)
-            if checksum(os.path.join(models_folder,'gifski.exe')) != 'b0dd261ad021c31c7fdb99db761b45165e6b2a7e8e09c5d070a2b8064b575d7a4976c364d8508b28a6940343119b16a23e9f7d76f1f3d5ff02289d3068b469cf':
-                raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe and place in: " + models_folder)
-    elif cur_user_os == 'Linux':
-        if not os.path.exists(os.path.join(models_folder,'gifski')):
-            from basicsr.utils.download_util import load_file_from_url
-            load_file_from_url(r"https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski", models_folder)
-            if checksum(os.path.join(models_folder,'gifski')) != 'e65bf9502bca520a7fd373397e41078d5c73db12ec3e9b47458c282d076c04fa697adecb5debb5d37fc9cbbee0673bb95e78d92c1cf813b4f5cc1cabe96880ff':
-                raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski and place in: " + models_folder)    
-       
-def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder):
-    print("Creating GIF...")
-    start_time = time.time()
-    
-    cur_user_os = get_os()
-    gifski_location = os.path.join(models_folder, 'gifski' + ('.exe' if cur_user_os == 'Windows' else ''))
-    final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
-    input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '*.png')
-    
-    check_and_download_gifski(models_folder, cur_user_os)
-
-    try:
-        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps)]
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        if process.returncode != 0:
-            print(stderr)
-            raise RuntimeError(stderr)
-        print(f"GIF creation done in {time.time() - start_time:.2f} seconds!")
-    except Exception as e:
-        print(f"GIF creation *failed* with error:\n{e}")
-
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
         raise RuntimeError('Error: extract_to_frame can not be higher than extract_from_frame')
@@ -257,3 +221,41 @@ def media_file_has_audio(filename, ffmpeg_location):
     result = subprocess.run([ffmpeg_location, "-i", filename, "-af", "volumedetect", "-f", "null", "-"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     output = result.stderr.decode()
     return True if "Stream #0:1: Audio: " in output or "Stream #0:1(und): Audio" in output else False
+
+# download gifski binaries if neede - linux and windows atm
+def check_and_download_gifski(models_folder, cur_user_os):  
+    if cur_user_os == 'Windows':
+        if not os.path.exists(os.path.join(models_folder,'gifski.exe')):
+            from basicsr.utils.download_util import load_file_from_url
+            load_file_from_url(r"https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe", models_folder)
+            if checksum(os.path.join(models_folder,'gifski.exe')) != 'b0dd261ad021c31c7fdb99db761b45165e6b2a7e8e09c5d070a2b8064b575d7a4976c364d8508b28a6940343119b16a23e9f7d76f1f3d5ff02289d3068b469cf':
+                raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe and place in: " + models_folder)
+    elif cur_user_os == 'Linux':
+        if not os.path.exists(os.path.join(models_folder,'gifski')):
+            from basicsr.utils.download_util import load_file_from_url
+            load_file_from_url(r"https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski", models_folder)
+            if checksum(os.path.join(models_folder,'gifski')) != 'e65bf9502bca520a7fd373397e41078d5c73db12ec3e9b47458c282d076c04fa697adecb5debb5d37fc9cbbee0673bb95e78d92c1cf813b4f5cc1cabe96880ff':
+                raise Exception(r"Error while downloading gifski.exe. Please download from here: https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski and place in: " + models_folder)    
+                
+# create a gif using gifski - limited to up to 30 fps (from the ui; if users wanna try to hack it, results are not good, but possible up to 100 fps theoretically)   
+def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder):
+    print(f"\033[0;33mCreating GIF...\n\033[0m")
+    start_time = time.time()
+    
+    cur_user_os = get_os()
+    gifski_location = os.path.join(models_folder, 'gifski' + ('.exe' if cur_user_os == 'Windows' else ''))
+    final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
+    input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '*.png')
+    
+    check_and_download_gifski(models_folder, cur_user_os)
+
+    try:
+        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps)]
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            print(stderr)
+            raise RuntimeError(stderr)
+        print(f"GIF creation done in {time.time() - start_time:.2f} seconds!")
+    except Exception as e:
+        print(f"GIF creation *failed* with error:\n{e}")
