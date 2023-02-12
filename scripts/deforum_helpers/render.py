@@ -220,9 +220,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
                     depth = depth_model.predict(turbo_next_image, anim_args, root.half_precision)
                 
                 if advance_prev:
-                    turbo_prev_image, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+                    turbo_prev_image, _, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
                 if advance_next:
-                    turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+                    turbo_next_image, _, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
 
                 # hybrid video motion - warps turbo_prev_image or turbo_next_image to match motion
                 if tween_frame_idx > 0:

@@ -174,8 +174,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
             mask = prepare_mask(mask_image, 
                                     (args.W, args.H), 
                                     args.mask_contrast_adjust, 
-                                    args.mask_brightness_adjust, 
-                                    invert_mask=False)
+                                    args.mask_brightness_adjust)
             
             # HACK: this is a hacky check to make the mask work with the new inpainting code
             crop_region = masking.get_crop_region(np.array(mask_image), args.full_res_mask_padding)
