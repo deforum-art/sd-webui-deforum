@@ -630,6 +630,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     choice = mask_fill_choices[d.fill]
                     fill = gr.Radio(label='Mask fill', choices=mask_fill_choices, value=choice, type="index")
                 with gr.Row():
+                    choice = mask_fill_choices[d.smart_border_fill_mode]
+                    smart_border_fill_mode = gr.Radio(label='Smart border fill', choices=mask_fill_choices, value=choice, type="index")
+                with gr.Row():
                     full_res_mask = gr.Checkbox(label="Full res mask", value=d.full_res_mask, interactive=True)
                     full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="Full res mask padding", value=d.full_res_mask_padding, interactive=True)
             # PARSEQ ACCORD
@@ -967,7 +970,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image,
                         use_mask, use_alpha_as_mask, invert_mask, overlay_mask,
                         mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
-                        fill, full_res_mask, full_res_mask_padding,
+                        fill, smart_border_fill_mode, full_res_mask, full_res_mask_padding,
                         reroll_blank_frames'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_for_run_all,
