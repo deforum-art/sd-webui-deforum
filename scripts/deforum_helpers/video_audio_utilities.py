@@ -222,7 +222,7 @@ def media_file_has_audio(filename, ffmpeg_location):
     output = result.stderr.decode()
     return True if "Stream #0:1: Audio: " in output or "Stream #0:1(und): Audio" in output else False
 
-# download gifski binaries if neede - linux and windows atm
+# download gifski binaries if needed - linux and windows only atm (apple users won't even see the option)
 def check_and_download_gifski(models_folder, current_user_os):
     from basicsr.utils.download_util import load_file_from_url
     
