@@ -104,7 +104,7 @@ def run_deforum(*args, **kwargs):
         
     if video_args.skip_video_for_run_all:
         print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
-    else: #video_args.output_format == 'FFMPEG mp4':
+    else:
         import subprocess
 
         path_name_modifier = video_args.path_name_modifier
