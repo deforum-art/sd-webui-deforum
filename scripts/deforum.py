@@ -239,7 +239,6 @@ def on_ui_tabs():
                 
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
 
-                
                 gr.HTML("<p>* Paths can be relative to webui folder OR full - absolute </p>")
                 with gr.Row():
                     settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="General Settings File")
@@ -260,7 +259,6 @@ def on_ui_tabs():
                 components['show_sample_per_step'].visible = False
                 components['display_samples'].visible = False
 
-               
         component_list = [components[name] for name in deforum_args.component_names]
 
         submit.click(
