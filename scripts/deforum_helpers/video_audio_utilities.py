@@ -112,7 +112,7 @@ def get_quick_vid_info(vid_path):
 def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):
     start_time = time.time()
 
-    print(f"\033[0;33mStitching Video from frames using FFmpeg:\n\033[0m{imgs_path}\nTo Video:\n{outmp4_path}")
+    print(f"\033[0;33mStitching *video* from frames using FFmpeg:\n\033[0m{imgs_path}\nTo Video:\n{outmp4_path}")
     if stitch_to_frame == -1:
         stitch_to_frame = 9999999
     try:
@@ -244,7 +244,7 @@ def check_and_download_gifski(models_folder, cur_user_os):
            
 # create a gif using gifski - limited to up to 30 fps (from the ui; if users wanna try to hack it, results are not good, but possible up to 100 fps theoretically)   
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder):
-    print(f"\033[3;33mStitching \033[3;33mGIF\033[0m \033[3;33mfrom frames using gifski:\033[0m")
+    print(f"\033[0;33mStitching *gif* from frames using Gifski:\033[0m")
     start_time = time.time()
     
     cur_user_os = get_os()
