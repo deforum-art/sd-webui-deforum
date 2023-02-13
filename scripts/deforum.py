@@ -14,7 +14,6 @@ for basedir in basedirs:
             sys.path.extend([deforum_scripts_path_fix])
 
 # Main deforum stuff
-
 import deforum_helpers.args as deforum_args
 import deforum_helpers.settings as deforum_settings
 from deforum_helpers.save_images import dump_frames_cache, reset_frames_cache
