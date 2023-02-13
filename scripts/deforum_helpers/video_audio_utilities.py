@@ -7,6 +7,7 @@ import subprocess
 import time
 from pkg_resources import resource_filename
 from modules.shared import state
+from .general_utils import checksum
 
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
@@ -111,7 +112,7 @@ def get_quick_vid_info(vid_path):
 def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):
     start_time = time.time()
 
-    print(f"\033[0;33mStitching video from frames using FFMPEG:\n\033[0m{imgs_path}\nTo Video:\n{outmp4_path}")
+    print(f"\033[0;33mStitching *video* from frames using FFmpeg:\n\033[0m{imgs_path}\nTo Video:\n{outmp4_path}")
     if stitch_to_frame == -1:
         stitch_to_frame = 9999999
     try:
@@ -167,7 +168,7 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
             print(f'Error adding audio to video. Actual error: {e}')
             print(f"FFMPEG Video (sorry, no audio) stitching done in {time.time() - start_time:.2f} seconds!")
     else:
-        print(f"FFMPEG Video stitching done in {time.time() - start_time:.2f} seconds!")
+        print(f"Video stitching done in {time.time() - start_time:.2f} seconds!")
 
 def get_frame_name(path):
     name = os.path.basename(path)
@@ -220,3 +221,55 @@ def media_file_has_audio(filename, ffmpeg_location):
     result = subprocess.run([ffmpeg_location, "-i", filename, "-af", "volumedetect", "-f", "null", "-"], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
     output = result.stderr.decode()
     return True if "Stream #0:1: Audio: " in output or "Stream #0:1(und): Audio" in output else False
+
+# download gifski binaries if needed - linux and windows only atm (apple users won't even see the option)
+def check_and_download_gifski(models_folder, current_user_os):
+    from basicsr.utils.download_util import load_file_from_url
+    
+    if current_user_os == 'Windows':
+        file_name = 'gifski.exe'
+        checksum_value = 'b0dd261ad021c31c7fdb99db761b45165e6b2a7e8e09c5d070a2b8064b575d7a4976c364d8508b28a6940343119b16a23e9f7d76f1f3d5ff02289d3068b469cf'
+        download_url = 'https://github.com/hithereai/d/releases/download/giski-windows-bin/gifski.exe'
+    elif current_user_os == 'Linux':
+        file_name = 'gifski'
+        checksum_value = 'e65bf9502bca520a7fd373397e41078d5c73db12ec3e9b47458c282d076c04fa697adecb5debb5d37fc9cbbee0673bb95e78d92c1cf813b4f5cc1cabe96880ff'
+        download_url = 'https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski'
+        
+    file_path = os.path.join(models_folder, file_name)
+    
+    if not os.path.exists(file_path):
+        load_file_from_url(download_url, models_folder)
+        if current_user_os == 'Linux':
+            os.chmod(file_path, 0o755)
+        if checksum(file_path) != checksum_value:
+            raise Exception(f"Error while downloading {file_name}. Please download from here: {download_url} and place in: {models_folder}")
+           
+# create a gif using gifski - limited to up to 30 fps (from the ui; if users wanna try to hack it, results are not good, but possible up to 100 fps theoretically)   
+def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
+    import glob
+    print(f"\033[0;33mStitching *gif* from frames using Gifski:\033[0m")
+    start_time = time.time()
+    
+    gifski_location = os.path.join(models_folder, 'gifski' + ('.exe' if current_user_os == 'Windows' else ''))
+    final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
+    if current_user_os == "Linux":
+        input_img_pattern = imgs_batch_id + '_0*.png'
+        input_img_files = [os.path.join(imgs_raw_path, file) for file in sorted(glob.glob(os.path.join(imgs_raw_path, input_img_pattern)))]
+        cmd = [gifski_location, '-o', final_gif_path] + input_img_files + ['--fps', str(fps), '--quality', str(95)]
+    elif current_user_os == "Windows":
+        input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '_0*.png')
+        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps), '--quality', str(95)]
+    else: # should never this else as we check before, but just in case
+        raise Exception(f"No support for OS type: {current_user_os}")
+        
+    check_and_download_gifski(models_folder, current_user_os)
+
+    try:
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        if process.returncode != 0:
+            print(stderr)
+            raise RuntimeError(stderr)
+        print(f"GIF stitching done in {time.time() - start_time:.2f} seconds!")
+    except Exception as e:
+        print(f"GIF stitching *failed* with error:\n{e}")

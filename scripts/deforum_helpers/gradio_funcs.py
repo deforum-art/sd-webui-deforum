@@ -41,3 +41,6 @@ def disable_by_video_input(choice):
     
 def change_comp_mask_x_visibility(choice):
     return gr.update(visible=choice != "None")
+    
+def change_gif_button_visibility(choice):
+    return gr.update(visible=False, value=False) if int(choice) > 30 else gr.update(visible=True)

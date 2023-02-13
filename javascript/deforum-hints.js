@@ -83,7 +83,7 @@ deforum_titles = {
 	    "reflection": "reflection will attempt to approximate the image and tile/repeat pixels",
 	    "zeros": "zeros will not add any new pixel information",
 	"sampling_mode": "choose from Bicubic, Bilinear or Nearest modes. (Recommended: Bicubic)",
-    "save_depth_maps": "will output a greyscale depth map image alongside the output images.",
+    "Save depth maps": "will output a greyscale depth map image alongside the output images.",
     
 	// Prompts
 	"Prompts": "prompts for your animation in a JSON format. Use --neg words to add 'words' as negative prompt",
@@ -117,6 +117,7 @@ deforum_titles = {
 	
     //Video Output
     "Skip video for run all": "when checked, do not output a video",
+	"Make GIF": "create a gif in addition to .mp4 file. supports up to 30 fps, will self-disable at higher fps values",
     "FPS": "The frames per second that the video will run at",
     "Output format": "select the type of video file to output",
         "PIL gif": "create an animated GIF",
