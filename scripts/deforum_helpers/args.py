@@ -266,7 +266,7 @@ def ParseqArgs():
 def DeforumOutputArgs():
     skip_video_for_run_all = False #@param {type: 'boolean'}
     fps = 15 #@param {type:"number"}
-    make_gifski = False
+    make_gif = False
     #@markdown **Manual Settings**
     image_path = "C:/SD/20230124234916_%05d.png" #@param {type:"string"}
     mp4_path = "testvidmanualsettings.mp4" #@param {type:"string"}
@@ -752,7 +752,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         skip_video_for_run_all = gr.Checkbox(label="Skip video for run all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
-                        make_gifski = gr.Checkbox(label="Make GIF", value=dv.make_gifski, interactive=True, visible = (True if dr.current_user_os in ["Windows", "Linux"] else False))
+                        # the following param only shows for windows and linux users!
+                        make_gif = gr.Checkbox(label="Make GIF", value=dv.make_gif, interactive=True, visible = (True if dr.current_user_os in ["Windows", "Linux"] else False))
             # RIFE TAB
             with gr.Tab('RIFE') as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
@@ -891,7 +892,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 
     # Gradio's Change functions - hiding and renaming elements based on other elements
     if dr.current_user_os in ["Windows", "Apple"]:
-        fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gifski)
+        fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
@@ -911,7 +912,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
     hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
-    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram, make_gifski]
+    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram, make_gif]
 
     for output in outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
@@ -974,7 +975,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         reroll_blank_frames'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_for_run_all,
-                            fps, make_gifski, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
+                            fps, make_gif, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
                             add_soundtrack, soundtrack_path,
                             render_steps,
                             path_name_modifier, image_path, mp4_path, store_frames_in_ram,
