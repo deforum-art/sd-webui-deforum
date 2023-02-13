@@ -239,6 +239,8 @@ def check_and_download_gifski(models_folder, current_user_os):
     
     if not os.path.exists(file_path):
         load_file_from_url(download_url, models_folder)
+        if current_user_os == 'Linux':
+            os.chmod(file_path, 0o755)
         if checksum(file_path) != checksum_value:
             raise Exception(f"Error while downloading {file_name}. Please download from here: {download_url} and place in: {models_folder}")
            
