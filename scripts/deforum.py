@@ -26,7 +26,7 @@ import json
 
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
-from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif
+from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, make_upscale_v2
 import gc
 import torch
 from webui import wrap_gradio_gpu_call
@@ -156,6 +156,8 @@ def run_deforum(*args, **kwargs):
     
     if video_args.make_gif and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
+    
+    make_upscale_v2()
         
     root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
     root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
