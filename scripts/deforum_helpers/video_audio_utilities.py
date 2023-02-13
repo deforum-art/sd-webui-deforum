@@ -246,17 +246,25 @@ def check_and_download_gifski(models_folder, current_user_os):
            
 # create a gif using gifski - limited to up to 30 fps (from the ui; if users wanna try to hack it, results are not good, but possible up to 100 fps theoretically)   
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
+    import glob
     print(f"\033[0;33mStitching *gif* from frames using Gifski:\033[0m")
     start_time = time.time()
     
     gifski_location = os.path.join(models_folder, 'gifski' + ('.exe' if current_user_os == 'Windows' else ''))
     final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
-    input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '_0*.png')
-    
+    if current_user_os == "Linux":
+        input_img_pattern = imgs_batch_id + '_0*.png'
+        input_img_files = [os.path.join(imgs_raw_path, file) for file in sorted(glob.glob(os.path.join(imgs_raw_path, input_img_pattern)))]
+        cmd = [gifski_location, '-o', final_gif_path] + input_img_files + ['--fps', str(fps), '--quality', str(95)]
+    elif current_user_os == "Windows":
+        input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '_0*.png')
+        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps), '--quality', str(95)]
+    else: # should never this else as we check before, but just in case
+        raise Exception(f"No support for OS type: {current_user_os}")
+        
     check_and_download_gifski(models_folder, current_user_os)
 
     try:
-        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps), '--quality', str(95)]
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
         if process.returncode != 0:
