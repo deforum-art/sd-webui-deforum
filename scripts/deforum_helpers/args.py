@@ -8,6 +8,7 @@ from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and
 from .upscaling import process_upscale_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames
 from .gradio_funcs import *
+from .general_utils import get_os
 
 def Root():
     device = sh.device
@@ -23,6 +24,7 @@ def Root():
     animation_prompts = None
     color_corrections = None 
     initial_clipskip = None
+    current_user_os = get_os()
     return locals()
 
 def DeforumAnimArgs():
@@ -299,6 +301,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
     dp = SimpleNamespace(**ParseqArgs()) #default parseq ars
     dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
+    dr = SimpleNamespace(**Root()) # ROOT args
     dloopArgs = SimpleNamespace(**LoopArgs())
     if not is_extension:
         with gr.Row():
@@ -307,7 +310,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             i1 = gr.HTML(i1_store, elem_id='deforum_header')
     else:
         btn = i1 = gr.HTML("")
-        
+       
     # MAIN (TOP) EXTENSION INFO ACCORD
     with gr.Accordion("Info, Links and Help", open=False, elem_id='main_top_info_accord'):
             gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
@@ -324,7 +327,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             <li>If you want to use Width/Height which are not multiples of 64, please change noise_type to 'Uniform', in Keyframes --> Noise.</li>
             </ul>
             <italic>If you liked this extension, please <a style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">give it a star on GitHub</a>!</italic> 😊""")
-  
     if not is_extension:
         def show_vid():
             return {
@@ -730,11 +732,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Accordion("Humans Masking", open=False) as humans_masking_accord:
                 with gr.Row(variant='compact'):
                     hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="Generate human masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
-        def s_fn(choice):
-            if int(choice) > 30:
-                return gr.update(visible=False, value=False)
-            else:
-                return gr.update(visible=True)
         # OUTPUT TAB
         with gr.Tab('Output'):
             # VID OUTPUT ACCORD
@@ -755,8 +752,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         skip_video_for_run_all = gr.Checkbox(label="Skip video for run all", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
-                        make_gifski = gr.Checkbox(label="Make GIF", value=dv.make_gifski, interactive=True)
-            fps.change(fn=s_fn, inputs=fps, outputs=make_gifski)
+                        make_gifski = gr.Checkbox(label="Make GIF", value=dv.make_gifski, interactive=True, visible = (True if dr.current_user_os in ["Windows", "Linux"] else False))
             # RIFE TAB
             with gr.Tab('RIFE') as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
@@ -894,6 +890,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
 
     # Gradio's Change functions - hiding and renaming elements based on other elements
+    if dr.current_user_os in ["Windows", "Apple"]:
+        fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gifski)
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
