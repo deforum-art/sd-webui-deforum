@@ -260,6 +260,6 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
         if process.returncode != 0:
             print(stderr)
             raise RuntimeError(stderr)
-        print(f"GIF creation done in {time.time() - start_time:.2f} seconds!")
+        print(f"GIF stitching done in {time.time() - start_time:.2f} seconds!")
     except Exception as e:
-        print(f"GIF creation *failed* with error:\n{e}")
+        print(f"GIF stitching *failed* with error:\n{e}")
