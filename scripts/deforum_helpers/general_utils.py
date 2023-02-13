@@ -8,15 +8,7 @@ def checksum(filename, hash_factory=hashlib.blake2b, chunk_num_blocks=128):
         while chunk := f.read(chunk_num_blocks*h.block_size): 
             h.update(chunk)
     return h.hexdigest()
-    
+
 def get_os():
     import platform
-    os_name = platform.system()
-    if os_name == "Windows":
-        return "Windows"
-    elif os_name == "Linux":
-        return "Linux"
-    elif os_name == "Darwin":
-        return "Mac"
-    else:
-        return "Unknown"
+    return {"Windows": "Windows", "Linux": "Linux", "Darwin": "Mac"}.get(platform.system(), "Unknown")
