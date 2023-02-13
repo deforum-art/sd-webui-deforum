@@ -249,7 +249,7 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
     
     gifski_location = os.path.join(models_folder, 'gifski' + ('.exe' if current_user_os == 'Windows' else ''))
     final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
-    input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '*.png')
+    input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '_0*.png')
     
     check_and_download_gifski(models_folder, current_user_os)
 
