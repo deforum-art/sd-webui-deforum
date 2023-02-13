@@ -254,7 +254,7 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
     check_and_download_gifski(models_folder, current_user_os)
 
     try:
-        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps)]
+        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps), '--quality', str(95)]
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
         if process.returncode != 0:
