@@ -4,21 +4,13 @@ import hashlib
 import numpy as np
 import torch
 import torchvision.transforms as T
-
 from einops import rearrange, repeat
 from PIL import Image
-
 from infer import InferenceHelper
 from midas.dpt_depth import DPTDepthModel
 from midas.transforms import Resize, NormalizeImage, PrepareForNet
 import torchvision.transforms.functional as TF
-
-def checksum(filename, hash_factory=hashlib.blake2b, chunk_num_blocks=128):
-    h = hash_factory()
-    with open(filename,'rb') as f: 
-        while chunk := f.read(chunk_num_blocks*h.block_size): 
-            h.update(chunk)
-    return h.hexdigest()
+from .general_utils import checksum
 
 class DepthModel():
     def __init__(self, device):
