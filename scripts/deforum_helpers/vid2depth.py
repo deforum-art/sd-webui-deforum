@@ -119,8 +119,12 @@ def process_frame(model, image, mode, thresholding, threshold_value, adapt_block
     if end_blur > 0:
         depth = cv2.GaussianBlur(depth, (5, 5), end_blur)
 
-    # This commits thresholding again, but on the already processed image, so we don't need to set it up as much
-    return Image.fromarray(depth).convert('1').convert('L')
+    if thresholding == 'None':
+        # Return a graymap
+        return Image.fromarray(depth).convert('L')
+    else:
+        # This commits thresholding again, but on the already processed image, so we don't need to set it up as much
+        return Image.fromarray(depth).convert('1').convert('L')
     
 def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, f_crf, f_preset, keep_imgs, orig_vid_name):        
     parent_folder = os.path.dirname(img_folder_path)
