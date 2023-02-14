@@ -169,14 +169,11 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
                 raise RuntimeError(stderr)
             os.replace(outmp4_path+'.temp.mp4', outmp4_path)
             print(f"Adding audio to video took {time.time() - audio_add_start_time:.2f} seconds.")
-            # print(f"FFmpeg Video+Audio stitching done in {time.time() - start_time:.2f} seconds!")
             print(f"\rFFmpeg Video+Audio stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!")
         except Exception as e:
             print(f'Error adding audio to video. Actual error: {e}')
-            # print(f"FFMPEG Video (sorry, no audio) stitching done in {time.time() - start_time:.2f} seconds!")
             print(f"FFMPEG Video (sorry, no audio) stitching \033[33mdone\033[0m in {time.time() - start_time:.2f} seconds!")
     else:
-        # print(f"Video stitching done in {time.time() - start_time:.2f} seconds!")
         print(f"\rVideo stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!")
         
 
