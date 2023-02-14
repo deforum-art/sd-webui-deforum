@@ -281,12 +281,24 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
 def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
     import zipfile
     from basicsr.utils.download_util import load_file_from_url
+    
+    if current_user_os == 'Windows':
+        zip_file_name = 'realesrgan-ncnn-windows.zip'
+        executble_name = 'realesrgan-ncnn-vulkan.exe'
+        zip_checksum_value = '1d073f520a4a3f6438a500fea88407964da6d4a87489719bedfa7445b76c019fdd95a5c39576ca190d7ac22c906b33d5250a6f48cb7eda2b6af3e86ec5f09dfc'
+        download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-windows/realesrgan-ncnn-windows.zip'
+    elif current_user_os == 'Linux':
+        zip_file_name = 'realesrgan-ncnn-linux.zip'
+        executble_name = 'realesrgan-ncnn-vulkan'
+        zip_checksum_value = 'df44c4e9a1ff66331079795f018a67fbad8ce37c4472929a56b5a38440cf96982d6e164a086b438c3d26d269025290dd6498bd50846bda8691521ecf8f0fafdf'
+        download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-linux/realesrgan-ncnn-linux.zip'
 
     realesrgan_ncnn_folder = os.path.join(models_folder, 'realesrgan_ncnn')
     realesrgan_exe_path = os.path.join(realesrgan_ncnn_folder, 'realesrgan-ncnn-vulkan.exe')
-    realesrgan_zip_path = os.path.join(realesrgan_ncnn_folder, 'realesrgan_ncnn_windows.zip')
-    download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-windows/realesrgan_ncnn_windows.zip'
-    if not os.path.exists(realesrgan_exe_path): # todo: change logic to check folder content
+    realesrgan_exec_path = os.path.join(realesrgan_ncnn_folder, executble_name)
+    realesrgan_zip_path = os.path.join(realesrgan_ncnn_folder, zip_file_name)
+    download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-windows/realesrgan-ncnn-windows.zip'
+    if not os.path.exists(realesrgan_exec_path): # todo: change logic to check folder content
         os.makedirs(realesrgan_ncnn_folder)
         load_file_from_url(download_url, realesrgan_ncnn_folder)
 
