@@ -925,7 +925,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
     hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
-    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram, make_gif]
+    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram, make_gif, r_upscale_row]
 
     for output in outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
