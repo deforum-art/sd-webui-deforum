@@ -281,14 +281,14 @@ def check_and_download_realesrgan_ncnn():
 def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, deforum_models_path, current_user_os):
 
     print(f"\033[0;33mUpscaling raw output images using realesrgan\033[0m")
-    
-   
+
     realesrgan_ncnn_location = os.path.join(deforum_models_path, 'realesrgan_ncnn', 'realesrgan-ncnn-vulkan.exe')
     upscaled_folder_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
         
     # check_and_download_realesrgan_ncnn(models_folder, current_user_os)
     cmd = [realesrgan_ncnn_location, '-i', 'D:/D-SD/realesrgan/f' ,'-o', 'D:/D-SD/realesrgan/output_xrplus', '-s', '2']
-    # print(cmd)
+   
+    print(cmd)
     try:
         start_time = time.time()
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
