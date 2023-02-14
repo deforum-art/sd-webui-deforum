@@ -274,10 +274,23 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
     except Exception as e:
         print(f"GIF stitching *failed* with error:\n{e}")
         
-def check_and_download_realesrgan_ncnn():
-    pass
-    
-# def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
+def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
+    import zipfile
+    from basicsr.utils.download_util import load_file_from_url
+
+    realesrgan_ncnn_folder = os.path.join(models_folder, 'realesrgan_ncnn')
+    realesrgan_exe_path = os.path.join(realesrgan_ncnn_folder, 'realesrgan-ncnn-vulkan.exe')
+    realesrgan_zip_path = os.path.join(realesrgan_ncnn_folder, 'realesrgan_ncnn_windows.zip')
+    download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-windows/realesrgan_ncnn_windows.zip'
+    if not os.path.exists(realesrgan_exe_path): # todo: change logic to check folder content
+        os.makedirs(realesrgan_ncnn_folder)
+        load_file_from_url(download_url, realesrgan_ncnn_folder)
+
+        with zipfile.ZipFile(realesrgan_zip_path, 'r') as zip_ref:
+            zip_ref.extractall(os.path.dirname(realesrgan_zip_path))
+
+        os.remove(realesrgan_zip_path)
+
 def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, deforum_models_path, current_user_os):
 
     print(f"\033[0;33mUpscaling raw output images using realesrgan\033[0m")
@@ -285,7 +298,7 @@ def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, deforum_models_path, curr
     realesrgan_ncnn_location = os.path.join(deforum_models_path, 'realesrgan_ncnn', 'realesrgan-ncnn-vulkan.exe')
     upscaled_folder_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
         
-    # check_and_download_realesrgan_ncnn(models_folder, current_user_os)
+    check_and_download_realesrgan_ncnn(deforum_models_path, current_user_os)
     cmd = [realesrgan_ncnn_location, '-i', 'D:/D-SD/realesrgan/f' ,'-o', 'D:/D-SD/realesrgan/output_xrplus', '-s', '2']
    
     print(cmd)
