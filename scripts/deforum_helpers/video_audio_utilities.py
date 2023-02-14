@@ -292,24 +292,30 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         os.remove(realesrgan_zip_path)
        
 def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, imgs_batch_id, deforum_models_path, current_user_os, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, fps, stitch_from_frame, stitch_to_frame, audio_path, add_soundtrack):
-    print("\033[0;33mUpscaling raw output PNGs using realesrgan\033[0m")
-
+    # set paths
     realesrgan_ncnn_location = os.path.join(deforum_models_path, 'realesrgan_ncnn', 'realesrgan-ncnn-vulkan.exe')
     upscaled_folder_path = os.path.join(imgs_raw_path, f"{imgs_batch_id}_upscaled")
     temp_folder_to_keep_raw_ims = os.path.join(upscaled_folder_path, 'temp_raw_imgs_to_upscale')
     out_upscaled_mp4_path = os.path.join(imgs_raw_path, f"{imgs_batch_id}_Upscaled_x{upscale_factor}.mp4")
+    # download upscaling model if needed
     check_and_download_realesrgan_ncnn(deforum_models_path, current_user_os)
-
+    # make a folder with only the imgs we need to duplicate so we can call the ncnn with the folder syntax (quicker!)
     duplicate_pngs_from_folder(from_folder=imgs_raw_path, to_folder=temp_folder_to_keep_raw_ims, img_batch_id=imgs_batch_id, orig_vid_name='Dummy')
     cmd = [realesrgan_ncnn_location, '-i', temp_folder_to_keep_raw_ims, '-o', upscaled_folder_path, '-s', str(upscale_factor), '-n', upscale_model]
-    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, f"{imgs_batch_id}_%05d.png")
-
+    print("\033[0;33mUpscaling raw output PNGs using realesrgan\033[0m")
     start_time = time.time()
+    # make call to ncnn upscaling executble
     process = subprocess.run(cmd, capture_output=True, check=True, text=True)
+    
     print(f"Upscaling done in {time.time() - start_time:.2f} seconds!")
 
+    # set custom path for ffmpeg func below
+    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, f"{imgs_batch_id}_%05d.png")
+    # stitch video from upscaled pngs 
     ffmpeg_stitch_video(ffmpeg_location=ffmpeg_location, fps=fps, outmp4_path=out_upscaled_mp4_path, stitch_from_frame=stitch_from_frame, stitch_to_frame=stitch_to_frame, imgs_path=upscaled_imgs_path_for_ffmpeg, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=ffmpeg_crf, preset=ffmpeg_preset)
 
+    # delete the duplicated raw imgs
     shutil.rmtree(temp_folder_to_keep_raw_ims)
+
     if not keep_imgs:
         shutil.rmtree(upscaled_folder_path)
