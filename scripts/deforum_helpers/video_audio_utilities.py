@@ -274,35 +274,28 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
     except Exception as e:
         print(f"GIF stitching *failed* with error:\n{e}")
         
-# def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
-def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
-    # import glob
-    # print(f"\033[0;33mStitching *gif* from frames using Gifski:\033[0m")
-    # start_time = time.time()
+def check_and_download_realesrgan_ncnn():
+    pass
     
-    # gifski_location = os.path.join(models_folder, 'gifski' + ('.exe' if current_user_os == 'Windows' else ''))
-    # final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
-    # if current_user_os == "Linux":
-        # input_img_pattern = imgs_batch_id + '_0*.png'
-        # input_img_files = [os.path.join(imgs_raw_path, file) for file in sorted(glob.glob(os.path.join(imgs_raw_path, input_img_pattern)))]
-        # cmd = [gifski_location, '-o', final_gif_path] + input_img_files + ['--fps', str(fps), '--quality', str(95)]
-    # elif current_user_os == "Windows":
-        # input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '_0*.png')
-        # cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps), '--quality', str(95)]
-    # else: # should never this else as we check before, but just in case
-        # raise Exception(f"No support for OS type: {current_user_os}")
+# def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
+def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, deforum_models_path, current_user_os):
+
+    print(f"\033[0;33mUpscaling raw output images using realesrgan\033[0m")
+    
+   
+    realesrgan_ncnn_location = os.path.join(deforum_models_path, 'realesrgan_ncnn', 'realesrgan-ncnn-vulkan.exe')
+    upscaled_folder_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
         
-    # check_and_download_gifski(models_folder, current_user_os)
-    start_time = time.time()
-    # cmd = ['realesrgan-ncnn-vulkan', '-i', 'D:/D-SD/realsrfan/f' ,'-o', 'D:/D-SD/realsrfan/output_xrplus', '-s', '2']
-    cmd = ['realesrgan-ncnn-vulkan', '-i', 'D:/D-SD/realsrfan/f' ,'-o', 'D:/D-SD/realsrfan/output_xrplus', '-s', '2']
+    # check_and_download_realesrgan_ncnn(models_folder, current_user_os)
+    cmd = [realesrgan_ncnn_location, '-i', 'D:/D-SD/realesrgan/f' ,'-o', 'D:/D-SD/realesrgan/output_xrplus', '-s', '2']
     # print(cmd)
     try:
+        start_time = time.time()
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
         if process.returncode != 0:
             print(stderr)
             raise RuntimeError(stderr)
-        print(f"GIF stitching done in {time.time() - start_time:.2f} seconds!")
+        print(f"Video upscaling done in {time.time() - start_time:.2f} seconds!")
     except Exception as e:
-        print(f"GIF stitching *failed* with error:\n{e}")
+        print(f"Video upscaling *failed* with error:\n{e}")

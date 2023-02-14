@@ -157,7 +157,7 @@ def run_deforum(*args, **kwargs):
     if video_args.make_gif and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
     
-    make_upscale_v2()
+    make_upscale_v2(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os)
         
     root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
     root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
