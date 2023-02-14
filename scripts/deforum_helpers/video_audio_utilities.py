@@ -294,7 +294,6 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-linux/realesrgan-ncnn-linux.zip'
 
     realesrgan_ncnn_folder = os.path.join(models_folder, 'realesrgan_ncnn')
-    realesrgan_exe_path = os.path.join(realesrgan_ncnn_folder, 'realesrgan-ncnn-vulkan.exe')
     realesrgan_exec_path = os.path.join(realesrgan_ncnn_folder, executble_name)
     realesrgan_zip_path = os.path.join(realesrgan_ncnn_folder, zip_file_name)
     download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-windows/realesrgan-ncnn-windows.zip'
@@ -304,6 +303,9 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
 
         with zipfile.ZipFile(realesrgan_zip_path, 'r') as zip_ref:
             zip_ref.extractall(os.path.dirname(realesrgan_zip_path))
+            
+        if current_user_os == 'Linux':
+            os.chmod(realesrgan_exec_path, 0o755)
 
         os.remove(realesrgan_zip_path)
        
