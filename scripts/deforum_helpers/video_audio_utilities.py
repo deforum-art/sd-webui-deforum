@@ -325,7 +325,7 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
     duplicate_pngs_from_folder(from_folder=imgs_raw_path, to_folder=temp_folder_to_keep_raw_ims, img_batch_id=imgs_batch_id, orig_vid_name='Dummy')
     cmd = [realesrgan_ncnn_location, '-i', temp_folder_to_keep_raw_ims, '-o', upscaled_folder_path, '-s', str(clean_num_r_up_factor), '-n', upscale_model]
     msg_to_print = "Upscaling raw output PNGs using realesrgan"
-    console.print(msg_to_print, style="blink yellow", end="")
+    console.print(msg_to_print, style="blink", end="")
     start_time = time.time()
     # make call to ncnn upscaling executble
     process = subprocess.run(cmd, capture_output=True, check=True, text=True)
