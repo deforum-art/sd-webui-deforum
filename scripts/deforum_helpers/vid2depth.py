@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 from pathlib import Path
 from tqdm import tqdm
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageChops
 from modules.shared import cmd_opts
 from modules.scripts_postprocessing import PostprocessedImage
 from modules import devices
@@ -62,7 +62,9 @@ def process_video_depth(mode, thresholding, threshold_value, adapt_block_size, a
         os.mkdir(custom_upscale_path)
     
     # Loading the chosen model
-    if 'Depth' in mode:
+    if 'Mixed' in mode:
+        model = (load_depth_model(f_models_path, midas_weight_vid2depth), load_anime_model())
+    elif 'Depth' in mode:
         model = load_depth_model(f_models_path, midas_weight_vid2depth)
     else:
         model = load_anime_model()
@@ -96,7 +98,21 @@ def process_video_depth(mode, thresholding, threshold_value, adapt_block_size, a
 
 def process_frame(model, image, mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth):
     # Get grayscale foreground map
-    depth = process_frame_depth(model, np.array(image), midas_weight_vid2depth) if 'Depth' in mode else process_frame_anime(model, np.array(image))
+    if not 'Mixed' in mode:
+        depth = process_frame_depth(model, np.array(image), midas_weight_vid2depth) if 'Depth' in mode else process_frame_anime(model, np.array(image))
+        depth = process_depth(depth, mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur)
+    else:
+        if thresholding == 'None':
+            raise "Mixed mode doesn't work with no thresholding!"
+        depth_depth = process_frame_depth(model[0], np.array(image), midas_weight_vid2depth)
+        depth_depth = process_depth(depth_depth, 'Depth', thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur)
+        anime_depth = process_frame_anime(model[1], np.array(image))
+        anime_depth = process_depth(anime_depth, 'Anime', thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur)
+        depth = ImageChops.logical_or(depth_depth.convert('1'), anime_depth.convert('1'))
+
+    return depth
+
+def process_depth(depth, mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur):
     depth = depth.convert('L')
     # Depth mode need inverting whereas Anime mode doesn't
     # (invert and 'Depth' in mode) or (not invert and not 'Depth' in mode)

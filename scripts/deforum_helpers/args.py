@@ -845,7 +845,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 vid_to_depth_chosen_file = gr.File(label="Video to Depth", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_depth_chosen_file")
                 with gr.Column():
                     with gr.Row():
-                        mode = gr.Dropdown(label='Mode', elem_id="mode", choices=['Depth (Midas/Adabins)', 'Anime Remove Background'], value='Depth (Midas/Adabins)')
+                        mode = gr.Dropdown(label='Mode', elem_id="mode", choices=['Depth (Midas/Adabins)', 'Anime Remove Background', 'Mixed'], value='Depth (Midas/Adabins)')
                         thresholding = gr.Radio(['None', 'Simple', 'Simple (Auto-value)', 'Adaptive (Mean)', 'Adaptive (Gaussian)'], label="Thresholding Mode", value='None')
                     with gr.Row():
                         with gr.Column():
