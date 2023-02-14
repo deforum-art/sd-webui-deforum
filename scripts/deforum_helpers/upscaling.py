@@ -10,7 +10,7 @@ import shutil
 from queue import Queue, Empty
 import modules.scripts as scr
 from .frame_interpolation import clean_folder_name
-from rife.inference_video import duplicate_pngs_from_folder
+from .general_utils import duplicate_pngs_from_folder
 from .video_audio_utilities import get_quick_vid_info, vid2frames, ffmpeg_stitch_video
 
 def process_upscale_vid_upload_logic(file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_file_name, keep_imgs, f_location, f_crf, f_preset):
