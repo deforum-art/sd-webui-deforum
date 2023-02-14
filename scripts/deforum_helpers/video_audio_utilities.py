@@ -315,7 +315,6 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
 
     # set paths
     realesrgan_ncnn_location = os.path.join(deforum_models_path, 'realesrgan_ncnn', 'realesrgan-ncnn-vulkan' + ('.exe' if current_user_os == 'Windows' else ''))
-    final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
     upscaled_folder_path = os.path.join(imgs_raw_path, f"{imgs_batch_id}_upscaled")
     temp_folder_to_keep_raw_ims = os.path.join(upscaled_folder_path, 'temp_raw_imgs_to_upscale')
     out_upscaled_mp4_path = os.path.join(imgs_raw_path, f"{imgs_batch_id}_Upscaled_{upscale_factor}.mp4")
