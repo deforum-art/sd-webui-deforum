@@ -291,7 +291,7 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
 
         os.remove(realesrgan_zip_path)
 
-def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, deforum_models_path, current_user_os):
+def make_upscale_v2(upscale_factor, upscale_model, imgs_raw_path, imgs_batch_id, fps, deforum_models_path, current_user_os):
 
     print(f"\033[0;33mUpscaling raw output images using realesrgan\033[0m")
 
@@ -302,11 +302,12 @@ def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, deforum_models_path, curr
         
     check_and_download_realesrgan_ncnn(deforum_models_path, current_user_os)
     
-    duplicate_pngs_from_folder(from_folder=imgs_raw_path, to_folder=temp_folder_to_keep_raw_ims, img_batch_id=imgs_batch_id, orig_vid_name='Dummy') # keep dummy?
+    duplicate_pngs_from_folder(from_folder=imgs_raw_path, to_folder=temp_folder_to_keep_raw_ims, img_batch_id=imgs_batch_id, orig_vid_name='Dummy')
+    #  ^^ keep dummy so it doesn't actually convert or find a diff way? ^^
     
-    cmd = [realesrgan_ncnn_location, '-i', 'D:/D-SD/realesrgan/f' ,'-o', 'D:/D-SD/realesrgan/output_xrplus', '-s', '2']
+    # todo: handle models, upscale factor
+    cmd = [realesrgan_ncnn_location, '-i', temp_folder_to_keep_raw_ims ,'-o', upscaled_folder_path, '-s', str(upscale_factor), '-n', upscale_model]
    
-    print(cmd)
     try:
         start_time = time.time()
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

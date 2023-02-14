@@ -17,7 +17,7 @@ for basedir in basedirs:
 import deforum_helpers.args as deforum_args
 import deforum_helpers.settings as deforum_settings
 from deforum_helpers.save_images import dump_frames_cache, reset_frames_cache
-from deforum_helpers.frame_interpolation import process_video_interpolation
+from deforum_helpers.frame_interpolation import process_video_interpolation, extract_number
 
 import modules.scripts as wscripts
 from modules import script_callbacks
@@ -157,7 +157,12 @@ def run_deforum(*args, **kwargs):
     if video_args.make_gif and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
     
-    make_upscale_v2(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os)
+    # Upscale video once generation is done:
+    if video_args.r_upscale_video:
+        
+        clean_num_r_up_factor = extract_number(video_args.r_upscale_factor)
+
+        make_upscale_v2(upscale_factor = clean_num_r_up_factor, upscale_model = video_args.r_upscale_model, imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os)
         
     root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
     root.initial_info += "Only the first frame is shown in webui not to clutter the memory"

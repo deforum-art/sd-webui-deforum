@@ -267,7 +267,6 @@ def DeforumOutputArgs():
     skip_video_for_run_all = False #@param {type: 'boolean'}
     fps = 15 #@param {type:"number"}
     make_gif = False
-    #@markdown **Manual Settings**
     image_path = "C:/SD/20230124234916_%05d.png" #@param {type:"string"}
     mp4_path = "testvidmanualsettings.mp4" #@param {type:"string"}
     ffmpeg_location = find_ffmpeg_binary()
@@ -275,6 +274,12 @@ def DeforumOutputArgs():
     ffmpeg_preset = 'slow'
     add_soundtrack = 'None' #@param ["File","Init Video"]
     soundtrack_path = "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_1MB_MP3.mp3"
+    # End-Run upscaling
+    r_upscale_video = False
+    r_upscale_factor = 'x2' # ['2x', 'x3', 'x4']
+    # **model below** - 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest does only 4x: 'realesrgan-x4plus', 'realesrgan-x4plus-anime'
+    r_upscale_model = 'realesr-animevideov3' 
+    
     render_steps = False  #@param {type: 'boolean'}
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
     # max_video_frames = 200 #@param {type:"string"}
@@ -735,7 +740,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # OUTPUT TAB
         with gr.Tab('Output'):
             # VID OUTPUT ACCORD
-            with gr.Accordion('Video Output Settings - FFmpeg', open=True):
+            with gr.Accordion('Video Output Settings', open=True):
                 with gr.Row(variant='compact') as fps_out_format_row:
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
                     # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
@@ -754,6 +759,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
                         # the following param only shows for windows and linux users!
                         make_gif = gr.Checkbox(label="Make GIF", value=dv.make_gif, interactive=True, visible = (True if dr.current_user_os in ["Windows", "Linux"] else False))
+                with gr.Row(equal_height=True, variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux"] else False)) as r_upscale_row:
+                    r_upscale_video = gr.Checkbox(label="Upscale", value=dv.r_upscale_video, interactive=True)
+                    r_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
+                    r_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
             # RIFE TAB
             with gr.Tab('RIFE') as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
@@ -977,6 +986,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
 video_args_names =  str(r'''skip_video_for_run_all,
                             fps, make_gif, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
                             add_soundtrack, soundtrack_path,
+                            r_upscale_video, r_upscale_model, r_upscale_factor,
                             render_steps,
                             path_name_modifier, image_path, mp4_path, store_frames_in_ram,
                             frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount,
