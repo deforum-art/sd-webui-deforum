@@ -136,7 +136,7 @@ deforum_titles = {
 	"Engine": "choose the frame interpolation engine and version",
 	"Interp x":"how many times to interpolate the source video. e.g source video fps of 12 and a value of x2 will yield a 24fps interpolated video",
 	"Slow-Mo x":"how many times to slow-down the video. *Naturally affects output fps as well",
-	"Keep Imgs": "delete or keep raw interpolated png imgs. Default: False which means delete",
+	"Keep Imgs": "delete or keep raw affected (interpolated/ upscaled depending on the UI section) png imgs. Default: False which means delete",
 	"Interpolate an existing video":"This feature allows you to interpolate any video with a dedicated button. Video could be completly unrelated to deforum",
 	"In Frame Count": "uploaded video total frame count",
 	"In FPS":"uploaded video FPS",
