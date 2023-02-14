@@ -96,7 +96,7 @@ def process_video_depth(mode, thresholding, threshold_value, adapt_block_size, a
 
 def process_frame(model, image, mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth):
     # Get grayscale foreground map
-    depth = process_frame_depth(model, np.array(image), midas_weight_vid2depth) if 'Depth' in mode else Image.fromarray(process_frame_anime(model, np.array(image)))
+    depth = process_frame_depth(model, np.array(image), midas_weight_vid2depth) if 'Depth' in mode else process_frame_anime(model, np.array(image))
     depth = depth.convert('L')
     # Depth mode need inverting whereas Anime mode doesn't
     # (invert and 'Depth' in mode) or (not invert and not 'Depth' in mode)
@@ -191,7 +191,8 @@ def get_mask(rmbg_model, img, s=1024):
     mask = rmbg_model.run(None, {'img': img_input})[0][0]
     mask = np.transpose(mask, (1, 2, 0))
     mask = mask[ph // 2:ph // 2 + h, pw // 2:pw // 2 + w]
-    mask = cv2.resize(mask, (w0, h0))[:, :, np.newaxis]
+    mask = cv2.resize(mask, (w0, h0))
+    # TODO: pass in batches
     mask = (mask * 255).astype(np.uint8)
     return mask
 
@@ -201,4 +202,4 @@ def process_frame_depth(depth_model, image, midas_weight):
     return depth_model.to_image(depth)
 
 def process_frame_anime(model, image):
-    return get_mask(model, image)
+    return Image.fromarray(get_mask(model, image), 'L')
