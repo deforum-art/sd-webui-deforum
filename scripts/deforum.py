@@ -158,7 +158,7 @@ def run_deforum(*args, **kwargs):
         make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
     
     # Upscale video once generation is done:
-    if video_args.r_upscale_video:
+    if video_args.r_upscale_video and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         
         clean_num_r_up_factor = extract_number(video_args.r_upscale_factor)
 
