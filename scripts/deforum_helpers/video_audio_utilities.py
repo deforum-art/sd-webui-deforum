@@ -296,7 +296,6 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
     realesrgan_ncnn_folder = os.path.join(models_folder, 'realesrgan_ncnn')
     realesrgan_exec_path = os.path.join(realesrgan_ncnn_folder, executble_name)
     realesrgan_zip_path = os.path.join(realesrgan_ncnn_folder, zip_file_name)
-    download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-windows/realesrgan-ncnn-windows.zip'
     if not os.path.exists(realesrgan_exec_path): # todo: change logic to check folder content
         os.makedirs(realesrgan_ncnn_folder)
         load_file_from_url(download_url, realesrgan_ncnn_folder)
