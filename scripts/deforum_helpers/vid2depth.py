@@ -111,9 +111,9 @@ def process_frame(model, image, mode, thresholding, threshold_value, adapt_block
     elif thresholding == 'Simple (Auto-value)':
         _, depth = cv2.threshold(depth, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     elif thresholding == 'Adaptive (Mean)':
-        depth = cv2.adaptiveThreshold(depth, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, adapt_block_size, adapt_c)
+        depth = cv2.adaptiveThreshold(depth, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, int(adapt_block_size), adapt_c)
     elif thresholding == 'Adaptive (Gaussian)':
-        depth = cv2.adaptiveThreshold(depth, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, adapt_block_size, adapt_c)
+        depth = cv2.adaptiveThreshold(depth, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, int(adapt_block_size), adapt_c)
 
     # Apply slight blur in the end to smoothen the edges after initial thresholding
     if end_blur > 0:
