@@ -118,6 +118,9 @@ deforum_titles = {
     //Video Output
     "Skip video for run all": "when checked, do not output a video",
 	"Make GIF": "create a gif in addition to .mp4 file. supports up to 30 fps, will self-disable at higher fps values",
+	"Upscale":"upscale the images of the next run once it's finished + make a video out of them",
+	"Upscale model":"model of the upscaler to use. animevideov3 is much faster but yields smoother, less detailed results. the other models only do x4",
+	"Upscale factor":"how many times to upscale, actual options depend on the chosen upscale model",
     "FPS": "The frames per second that the video will run at",
     "Output format": "select the type of video file to output",
         "PIL gif": "create an animated GIF",
