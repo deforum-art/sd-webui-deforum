@@ -304,10 +304,9 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         with zipfile.ZipFile(realesrgan_zip_path, 'r') as zip_ref:
             zip_ref.extractall(os.path.dirname(realesrgan_zip_path))
             
+        os.remove(realesrgan_zip_path)
         if current_user_os == 'Linux':
             os.chmod(realesrgan_exec_path, 0o755)
-
-        os.remove(realesrgan_zip_path)
        
 def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, imgs_batch_id, deforum_models_path, current_user_os, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, fps, stitch_from_frame, stitch_to_frame, audio_path, add_soundtrack):
     
