@@ -7,7 +7,7 @@ import subprocess
 import time
 from pkg_resources import resource_filename
 from modules.shared import state
-from .general_utils import checksum
+from .general_utils import checksum, duplicate_pngs_from_folder
 
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
@@ -296,9 +296,14 @@ def make_upscale_v2(imgs_raw_path, imgs_batch_id, fps, deforum_models_path, curr
     print(f"\033[0;33mUpscaling raw output images using realesrgan\033[0m")
 
     realesrgan_ncnn_location = os.path.join(deforum_models_path, 'realesrgan_ncnn', 'realesrgan-ncnn-vulkan.exe')
-    upscaled_folder_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
+    
+    upscaled_folder_path = os.path.join(imgs_raw_path, imgs_batch_id + 'upscaled')
+    temp_folder_to_keep_raw_ims = os.path.join(upscaled_folder_path, 'temp_raw_imgs_to_upscale')
         
     check_and_download_realesrgan_ncnn(deforum_models_path, current_user_os)
+    
+    duplicate_pngs_from_folder(from_folder=imgs_raw_path, to_folder=temp_folder_to_keep_raw_ims, img_batch_id=imgs_batch_id, orig_vid_name='Dummy') # keep dummy?
+    
     cmd = [realesrgan_ncnn_location, '-i', 'D:/D-SD/realesrgan/f' ,'-o', 'D:/D-SD/realesrgan/output_xrplus', '-s', '2']
    
     print(cmd)
