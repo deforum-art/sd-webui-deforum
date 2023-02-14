@@ -107,16 +107,17 @@ def process_frame(model, image, mode, thresholding, threshold_value, adapt_block
     
     # Apply thresholding
     if thresholding == 'Simple':
-        depth = cv2.threshold(depth, threshold_value, 255, cv2.THRESH_BINARY)
+        _, depth = cv2.threshold(depth, threshold_value, 255, cv2.THRESH_BINARY)
     elif thresholding == 'Simple (Auto-value)':
-        depth = cv2.threshold(depth, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        _, depth = cv2.threshold(depth, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     elif thresholding == 'Adaptive (Mean)':
         depth = cv2.adaptiveThreshold(depth, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, adapt_block_size, adapt_c)
     elif thresholding == 'Adaptive (Gaussian)':
         depth = cv2.adaptiveThreshold(depth, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, adapt_block_size, adapt_c)
 
     # Apply slight blur in the end to smoothen the edges after initial thresholding
-    depth = cv2.GaussianBlur(depth, (end_blur, end_blur), 0)
+    if end_blur > 0:
+        depth = cv2.GaussianBlur(depth, (5, 5), end_blur)
 
     # This commits thresholding again, but on the already processed image, so we don't need to set it up as much
     return Image.fromarray(depth).convert('1').convert('L')

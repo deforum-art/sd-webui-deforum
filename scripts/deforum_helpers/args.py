@@ -855,7 +855,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             adapt_c = gr.Number(label="C", value=2)
                     with gr.Row():
                         invert = gr.Checkbox(label='Closer is brighter', value=True, elem_id="invert")
-                        end_blur = gr.Slider(label="End blur width", value=1, minimum=1, maximum=255, step=2)
+                        end_blur = gr.Slider(label="End blur width", value=0, minimum=0, maximum=255, step=1)
                     with gr.Row():
                         midas_weight_vid2depth = gr.Slider(label="MiDaS weight (vid2depth)", value=da.midas_weight, minimum=0, maximum=1, step=0.05, interactive=True)
                         depth_keep_imgs = gr.Checkbox(label='Keep Imgs', value=True, elem_id="depth_keep_imgs")
