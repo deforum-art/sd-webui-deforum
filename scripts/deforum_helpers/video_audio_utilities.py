@@ -318,3 +318,5 @@ def make_upscale_v2(upscale_factor, upscale_model, imgs_raw_path, imgs_batch_id,
         print(f"Video upscaling done in {time.time() - start_time:.2f} seconds!")
     except Exception as e:
         print(f"Video upscaling *failed* with error:\n{e}")
+     
+    shutil.rmtree(temp_folder_to_keep_raw_ims)
