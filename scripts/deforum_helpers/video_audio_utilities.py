@@ -291,7 +291,7 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
 
         os.remove(realesrgan_zip_path)
 
-def make_upscale_v2(upscale_factor, upscale_model, imgs_raw_path, imgs_batch_id, fps, deforum_models_path, current_user_os):
+def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, imgs_batch_id, fps, deforum_models_path, current_user_os):
 
     print(f"\033[0;33mUpscaling raw output images using realesrgan\033[0m")
 
@@ -318,5 +318,10 @@ def make_upscale_v2(upscale_factor, upscale_model, imgs_raw_path, imgs_batch_id,
         print(f"Video upscaling done in {time.time() - start_time:.2f} seconds!")
     except Exception as e:
         print(f"Video upscaling *failed* with error:\n{e}")
-     
+    
+    
     shutil.rmtree(temp_folder_to_keep_raw_ims)
+    
+    # shutil.move(,)
+    if not keep_imgs:
+        shutil.rmtree(upscaled_folder_path)

@@ -162,7 +162,7 @@ def run_deforum(*args, **kwargs):
         
         clean_num_r_up_factor = extract_number(video_args.r_upscale_factor)
 
-        make_upscale_v2(upscale_factor = clean_num_r_up_factor, upscale_model = video_args.r_upscale_model, imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os)
+        make_upscale_v2(upscale_factor = clean_num_r_up_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os)
         
     root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
     root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
