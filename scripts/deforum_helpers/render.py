@@ -217,7 +217,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
 
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
-                    depth = depth_model.predict(turbo_next_image, anim_args, root.half_precision)
+                    depth = depth_model.predict(turbo_next_image, anim_args.midas_weight, root.half_precision)
                 
                 if advance_prev:
                     turbo_prev_image, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
@@ -440,7 +440,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             save_image(image, 'PIL', filename, args, video_args, root)
 
             if anim_args.save_depth_maps:
-                depth = depth_model.predict(opencv_image, anim_args, root.half_precision)
+                depth = depth_model.predict(opencv_image, anim_args.midas_weight, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
             frame_idx += 1
 
