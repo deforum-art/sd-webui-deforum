@@ -760,7 +760,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
                         # the following param only shows for windows and linux users!
                         make_gif = gr.Checkbox(label="Make GIF", value=dv.make_gif, interactive=True, visible = (True if dr.current_user_os in ["Windows", "Linux"] else False))
-                with gr.Row(equal_height=True, variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux", "Mac"] else False)) as r_upscale_row:
+                with gr.Row(equal_height=True, variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux"] else False)) as r_upscale_row:
                     r_upscale_video = gr.Checkbox(label="Upscale", value=dv.r_upscale_video, interactive=True)
                     r_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
                     r_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
@@ -904,7 +904,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     # Gradio's Change functions - hiding and renaming elements based on other elements
     if dr.current_user_os in ["Windows", "Linux"]:
         fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
-    if dr.current_user_os in ["Windows", "Linux", "Mac"]:
+    if dr.current_user_os in ["Windows", "Linux"]: # mac removed 15-2 until fix is found
         r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)    
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
