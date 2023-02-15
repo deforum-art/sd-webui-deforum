@@ -350,7 +350,6 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
 def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, imgs_batch_id, deforum_models_path, current_user_os, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, fps, stitch_from_frame, stitch_to_frame, audio_path, add_soundtrack):
     # get clean number from 'x2, x3' etc
     clean_num_r_up_factor = extract_number(upscale_factor)
-
     # set paths
     realesrgan_ncnn_location = os.path.join(deforum_models_path, 'realesrgan_ncnn', 'realesrgan-ncnn-vulkan' + ('.exe' if current_user_os == 'Windows' else ''))
     upscaled_folder_path = os.path.join(imgs_raw_path, f"{imgs_batch_id}_upscaled")
