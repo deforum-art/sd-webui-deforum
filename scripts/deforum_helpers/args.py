@@ -842,8 +842,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     # make the function call when the UPSCALE button is clicked
                     upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
             # Vid2Depth TAB
-            with gr.Tab('vid2depth'):
-                vid_to_depth_chosen_file = gr.File(label="Video to Depth", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_depth_chosen_file")
+            with gr.Tab('Vid2depth'):
+                vid_to_depth_chosen_file = gr.File(label="Video to get Depth from", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_depth_chosen_file")
                 with gr.Row():
                     mode = gr.Dropdown(label='Mode', elem_id="mode", choices=['Depth (Midas/Adabins)', 'Anime Remove Background', 'Mixed'], value='Depth (Midas/Adabins)')
                     threshold_value = gr.Slider(label="Threshold Value", value=127, minimum=0, maximum=255, step=1)
@@ -1137,7 +1137,6 @@ def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, 
 
     process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
 
-# Local gradio-to-upscalers function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
     # print msg and do nothing if vid not uploaded
     if not vid_to_upscale_chosen_file:
