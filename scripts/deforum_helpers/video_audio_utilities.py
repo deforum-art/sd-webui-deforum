@@ -350,13 +350,14 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
     # set dynamic cmd command
     cmd = [realesrgan_ncnn_location, '-i', temp_folder_to_keep_raw_ims, '-o', upscaled_folder_path, '-s', str(clean_num_r_up_factor), '-n', upscale_model]
     # msg to print - need it to hide that text later on (!)
-    msg_to_print = f"Upscaling raw output PNGs using {upscale_model} at {upscale_factor}"
+    msg_to_print = f"Upscaling raw output PNGs using {upscale_model} at {upscale_factor}..."
     # blink the msg in the cli until action is done
     console.print(msg_to_print, style="blink yellow", end="") 
     start_time = time.time()
     # make call to ncnn upscaling executble
     process = subprocess.run(cmd, capture_output=True, check=True, text=True)
     print("\r" + " " * len(msg_to_print), end="", flush=True)
+    print(f"\r{msg_to_print}", flush=True)
     print(f"\rUpscaling \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
     # set custom path for ffmpeg func below
     upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, f"{imgs_batch_id}_%05d.png")
