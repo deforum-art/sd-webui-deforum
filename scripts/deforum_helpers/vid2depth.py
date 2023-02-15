@@ -107,7 +107,7 @@ def process_frame(model, image, mode, thresholding, threshold_value, threshold_v
         depth_depth = process_frame_depth(model[0], np.array(image), midas_weight_vid2depth)
         depth_depth = process_depth(depth_depth, 'Depth', thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur)
         anime_depth = process_frame_anime(model[1], np.array(image))
-        anime_depth = process_depth(anime_depth, 'Anime', thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur)
+        anime_depth = process_depth(anime_depth, 'Anime', 'Simple', 32, 255, adapt_block_size, adapt_c, invert, end_blur)
         depth = ImageChops.logical_or(depth_depth.convert('1'), anime_depth.convert('1'))
 
     return depth
