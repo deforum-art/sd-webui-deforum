@@ -293,6 +293,14 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         executble_name = 'realesrgan-ncnn-vulkan'
         zip_checksum_value = 'df44c4e9a1ff66331079795f018a67fbad8ce37c4472929a56b5a38440cf96982d6e164a086b438c3d26d269025290dd6498bd50846bda8691521ecf8f0fafdf'
         download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-linux/realesrgan-ncnn-linux.zip'
+    elif current_user_os = 'Apple':
+        zip_file_name = 'realesrgan-ncnn-mac.zip'
+        executble_name = 'realesrgan-ncnn-vulkan'
+        zip_checksum_value = '65f09472025b55b18cf6ba64149ede8cded90c20e18d35a9edb1ab60715b383a6ffbf1be90d973fc2075cf99d4cc1411fbdc459411af5c904f544b8656111469'
+        download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-mac/realesrgan-ncnn-mac.zip'
+        
+    else: # who are you then?
+        raise Exception(f"No support for OS type: {current_user_os}")
 
     # set paths
     realesrgan_ncnn_folder = os.path.join(models_folder, 'realesrgan_ncnn')
@@ -311,11 +319,12 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         # wrong hash, file is probably broken/ download interrupted 
         if file_hash != zip_checksum_value:
             raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
-
+        # hash ok, extract zip contents into our folder
         with zipfile.ZipFile(realesrgan_zip_path, 'r') as zip_ref:
             zip_ref.extractall(realesrgan_ncnn_folder)
-        
+        # delete the zip file
         os.remove(realesrgan_zip_path)
+        # chmod 755 the exec if we're in a linux machine, otherwise we'd get permission errors
         if current_user_os == 'Linux':
             os.chmod(realesrgan_exec_path, 0o755)
     except Exception as e:
