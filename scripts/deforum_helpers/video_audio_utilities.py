@@ -333,7 +333,7 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
     # make a folder with only the imgs we need to duplicate so we can call the ncnn with the folder syntax (quicker!)
     duplicate_pngs_from_folder(from_folder=imgs_raw_path, to_folder=temp_folder_to_keep_raw_ims, img_batch_id=imgs_batch_id, orig_vid_name='Dummy')
     cmd = [realesrgan_ncnn_location, '-i', temp_folder_to_keep_raw_ims, '-o', upscaled_folder_path, '-s', str(clean_num_r_up_factor), '-n', upscale_model]
-    msg_to_print = "Upscaling raw output PNGs using realesrgan"
+    msg_to_print = f"Upscaling raw output PNGs using {upscale_model} at {upscale_factor}"
     console.print(msg_to_print, style="blink", end="")
     start_time = time.time()
     # make call to ncnn upscaling executble
