@@ -146,8 +146,12 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
     except FileNotFoundError:
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
         raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under 'ffmpeg_location' parameter.")
     except Exception as e:
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
         raise Exception(f'Error stitching frames to video. Actual runtime error:{e}')
     
     if add_soundtrack != 'None':
@@ -258,9 +262,10 @@ def check_and_download_gifski(models_folder, current_user_os):
 # create a gif using gifski - limited to up to 30 fps (from the ui; if users wanna try to hack it, results are not good, but possible up to 100 fps theoretically)   
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
     import glob
-    print(f"\033[0;33mStitching *gif* from frames using Gifski:\033[0m")
+    msg_to_print = f"Stitching *gif* from frames using Gifski..."
+    # blink the msg in the cli until action is done
+    console.print(msg_to_print, style="blink yellow", end="") 
     start_time = time.time()
-    
     gifski_location = os.path.join(models_folder, 'gifski' + ('.exe' if current_user_os == 'Windows' else ''))
     final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
     if current_user_os == "Linux":
@@ -276,12 +281,14 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
     check_and_download_gifski(models_folder, current_user_os)
 
     try:
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
         stdout, stderr = process.communicate()
         if process.returncode != 0:
             print(stderr)
             raise RuntimeError(stderr)
-        print(f"GIF stitching done in {time.time() - start_time:.2f} seconds!")
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
+        print(f"GIF stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!")
     except Exception as e:
         print(f"GIF stitching *failed* with error:\n{e}")
         
