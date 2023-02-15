@@ -329,7 +329,7 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         # delete the zip file
         os.remove(realesrgan_zip_path)
         # chmod 755 the exec if we're in a linux machine, otherwise we'd get permission errors
-        if current_user_os == 'Linux':
+        if current_user_os in ['Linux', 'Mac'']:
             os.chmod(realesrgan_exec_path, 0o755)
     except Exception as e:
         raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
