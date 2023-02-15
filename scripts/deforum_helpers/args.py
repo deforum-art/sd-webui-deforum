@@ -861,6 +861,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     # This is the actual button that's pressed to initiate the Upscaling:
                     depth_btn = gr.Button(value="*Get depth from uploaded video*")
+                with gr.Row():
                     # Show a text about CLI outputs:
                     gr.HTML("* check your CLI for outputs")
                     # make the function call when the UPSCALE button is clicked
