@@ -249,7 +249,7 @@ def check_and_download_gifski(models_folder, current_user_os):
         if current_user_os == 'Linux':
             os.chmod(file_path, 0o755)
         if checksum(file_path) != checksum_value:
-            raise Exception(f"Error while downloading {file_name}. Please download from here: {download_url} and place in: {models_folder}")
+            raise Exception(f"Error while downloading {file_name}. Please download from: {download_url} and place in: {models_folder}")
            
 # create a gif using gifski - limited to up to 30 fps (from the ui; if users wanna try to hack it, results are not good, but possible up to 100 fps theoretically)   
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
@@ -303,12 +303,14 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         return
     try:
         os.makedirs(realesrgan_ncnn_folder, exist_ok=True)
+        # download exec and model files from url
         load_file_from_url(download_url, realesrgan_ncnn_folder)
-        # check file's hash
+        # check downloaded zip's hash
         with open(realesrgan_zip_path, 'rb') as f:
             file_hash = checksum(realesrgan_zip_path)
+        # wrong hash, file is probably broken/ download interrupted 
         if file_hash != zip_checksum_value:
-            raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from here: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
+            raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
 
         with zipfile.ZipFile(realesrgan_zip_path, 'r') as zip_ref:
             zip_ref.extractall(realesrgan_ncnn_folder)
@@ -317,10 +319,10 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         if current_user_os == 'Linux':
             os.chmod(realesrgan_exec_path, 0o755)
     except Exception as e:
-        raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from here: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
+        raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
 
 def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, imgs_batch_id, deforum_models_path, current_user_os, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, fps, stitch_from_frame, stitch_to_frame, audio_path, add_soundtrack):
-    
+    # get clean number from 'x2, x3' etc
     clean_num_r_up_factor = extract_number(upscale_factor)
 
     # set paths
@@ -332,9 +334,12 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
     check_and_download_realesrgan_ncnn(deforum_models_path, current_user_os)
     # make a folder with only the imgs we need to duplicate so we can call the ncnn with the folder syntax (quicker!)
     duplicate_pngs_from_folder(from_folder=imgs_raw_path, to_folder=temp_folder_to_keep_raw_ims, img_batch_id=imgs_batch_id, orig_vid_name='Dummy')
+    # set dynamic cmd command
     cmd = [realesrgan_ncnn_location, '-i', temp_folder_to_keep_raw_ims, '-o', upscaled_folder_path, '-s', str(clean_num_r_up_factor), '-n', upscale_model]
+    # msg to print - need it to hide that text later on (!)
     msg_to_print = f"Upscaling raw output PNGs using {upscale_model} at {upscale_factor}"
-    console.print(msg_to_print, style="blink", end="")
+    # blink the msg in the cli until action is done
+    console.print(msg_to_print, style="blink", end="") 
     start_time = time.time()
     # make call to ncnn upscaling executble
     process = subprocess.run(cmd, capture_output=True, check=True, text=True)
