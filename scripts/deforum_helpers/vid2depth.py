@@ -86,7 +86,7 @@ def process_video_depth(mode, thresholding, threshold_value, threshold_value_max
     # stitch video from upscaled frames, and add audio if needed
     try:
         print (f"*Passing depth frames to ffmpeg...*")
-        vid_out_path = stitch_video(img_batch_id, orig_vid_fps, custom_upscale_path, real_audio_track, ffmpeg_location, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, ffmpeg_crf, ffmpeg_preset, keep_depth_imgs, orig_vid_name)
+        vid_out_path = stitch_video(img_batch_id, orig_vid_fps, custom_upscale_path, real_audio_track, ffmpeg_location, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, ffmpeg_crf, ffmpeg_preset, keep_depth_imgs, orig_vid_name)
         # remove folder with raw (non-upscaled) vid input frames in case of input VID and not PNGs
         if orig_vid_name is not None:
             shutil.rmtree(raw_output_imgs_path)
@@ -142,10 +142,11 @@ def process_depth(depth, mode, thresholding, threshold_value, threshold_value_ma
         # This commits thresholding again, but on the already processed image, so we don't need to set it up as much
         return Image.fromarray(cv2.threshold(depth, 127, 255, cv2.THRESH_BINARY)[1]).convert('L')
     
-def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, f_crf, f_preset, keep_imgs, orig_vid_name):        
+def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, f_crf, f_preset, keep_imgs, orig_vid_name):        
     parent_folder = os.path.dirname(img_folder_path)
     grandparent_folder = os.path.dirname(parent_folder)
-    mp4_path = os.path.join(grandparent_folder, str(orig_vid_name if orig_vid_name is not None else img_batch_id) +'_depth')
+    mode = str(mode).replace('\\', '_').replace(' ', '_').replace('(', '_').replace(')', '_')
+    mp4_path = os.path.join(grandparent_folder, str(orig_vid_name if orig_vid_name is not None else img_batch_id) +'_depth_'+f"{thresholding}")
     
     mp4_path = mp4_path + '.mp4'
 
