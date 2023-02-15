@@ -172,6 +172,8 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode != 0:
+                print("\r" + " " * len(msg_to_print), end="", flush=True)
+                print(f"\r{msg_to_print}", flush=True)
                 raise RuntimeError(stderr)
             os.replace(outmp4_path+'.temp.mp4', outmp4_path)
             print("\r" + " " * len(msg_to_print), end="", flush=True)
@@ -276,6 +278,8 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
         input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '_0*.png')
         cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps), '--quality', str(95)]
     else: # should never this else as we check before, but just in case
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
         raise Exception(f"No support for OS type: {current_user_os}")
         
     check_and_download_gifski(models_folder, current_user_os)
@@ -284,6 +288,8 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
         stdout, stderr = process.communicate()
         if process.returncode != 0:
+            print("\r" + " " * len(msg_to_print), end="", flush=True)
+            print(f"\r{msg_to_print}", flush=True)
             print(stderr)
             raise RuntimeError(stderr)
         print("\r" + " " * len(msg_to_print), end="", flush=True)
