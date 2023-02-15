@@ -17,7 +17,7 @@ from .frame_interpolation import clean_folder_name
 from rife.inference_video import duplicate_pngs_from_folder
 from .video_audio_utilities import get_quick_vid_info, vid2frames, ffmpeg_stitch_video
 
-def process_depth_vid_upload_logic(file, mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, vid_file_name, keep_imgs, f_location, f_crf, f_preset, f_models_path):
+def process_depth_vid_upload_logic(file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, vid_file_name, keep_imgs, f_location, f_crf, f_preset, f_models_path):
     print("got a request to *vid2depth* an existing video.")
 
     in_vid_fps, _, _ = get_quick_vid_info(file.name)
@@ -33,9 +33,9 @@ def process_depth_vid_upload_logic(file, mode, thresholding, threshold_value, ad
     
     vid2frames(video_path=file.name, video_in_frame_path=outdir, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
     
-    process_video_depth(mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, orig_vid_fps=in_vid_fps, real_audio_track=file.name, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, f_models_path=f_models_path, keep_depth_imgs=keep_imgs, orig_vid_name=folder_name)
+    process_video_depth(mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, orig_vid_fps=in_vid_fps, real_audio_track=file.name, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, f_models_path=f_models_path, keep_depth_imgs=keep_imgs, orig_vid_name=folder_name)
 
-def process_video_depth(mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, orig_vid_fps, real_audio_track, raw_output_imgs_path, img_batch_id, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, f_models_path, keep_depth_imgs, orig_vid_name):
+def process_video_depth(mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, orig_vid_fps, real_audio_track, raw_output_imgs_path, img_batch_id, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, f_models_path, keep_depth_imgs, orig_vid_name):
     devices.torch_gc()
 
     print("Vid2depth progress (it's OK if it finishes before 100%):")
@@ -73,7 +73,7 @@ def process_video_depth(mode, thresholding, threshold_value, adapt_block_size, a
     for i in tqdm(range(len(videogen)), desc="Vid2depth"):
         lastframe = videogen[i]
         img_path = os.path.join(temp_convert_raw_png_path, lastframe)
-        image = process_frame(model, Image.open(img_path).convert("RGB"), mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth)
+        image = process_frame(model, Image.open(img_path).convert("RGB"), mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth)
         filename = '{}/{:0>7d}.png'.format(custom_upscale_path, i)
         image.save(filename)
     
@@ -96,23 +96,23 @@ def process_video_depth(mode, thresholding, threshold_value, adapt_block_size, a
     gc.collect()
     devices.torch_gc()
 
-def process_frame(model, image, mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth):
+def process_frame(model, image, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth):
     # Get grayscale foreground map
     if not 'Mixed' in mode:
         depth = process_frame_depth(model, np.array(image), midas_weight_vid2depth) if 'Depth' in mode else process_frame_anime(model, np.array(image))
-        depth = process_depth(depth, mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur)
+        depth = process_depth(depth, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur)
     else:
         if thresholding == 'None':
             raise "Mixed mode doesn't work with no thresholding!"
         depth_depth = process_frame_depth(model[0], np.array(image), midas_weight_vid2depth)
-        depth_depth = process_depth(depth_depth, 'Depth', thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur)
+        depth_depth = process_depth(depth_depth, 'Depth', thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur)
         anime_depth = process_frame_anime(model[1], np.array(image))
-        anime_depth = process_depth(anime_depth, 'Anime', thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur)
+        anime_depth = process_depth(anime_depth, 'Anime', thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur)
         depth = ImageChops.logical_or(depth_depth.convert('1'), anime_depth.convert('1'))
 
     return depth
 
-def process_depth(depth, mode, thresholding, threshold_value, adapt_block_size, adapt_c, invert, end_blur):
+def process_depth(depth, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur):
     depth = depth.convert('L')
     # Depth mode need inverting whereas Anime mode doesn't
     # (invert and 'Depth' in mode) or (not invert and not 'Depth' in mode)
@@ -123,13 +123,13 @@ def process_depth(depth, mode, thresholding, threshold_value, adapt_block_size, 
     
     # Apply thresholding
     if thresholding == 'Simple':
-        _, depth = cv2.threshold(depth, threshold_value, 255, cv2.THRESH_BINARY)
+        _, depth = cv2.threshold(depth, threshold_value, threshold_value_max, cv2.THRESH_BINARY)
     elif thresholding == 'Simple (Auto-value)':
         _, depth = cv2.threshold(depth, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     elif thresholding == 'Adaptive (Mean)':
-        depth = cv2.adaptiveThreshold(depth, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, int(adapt_block_size), adapt_c)
+        depth = cv2.adaptiveThreshold(depth, threshold_value_max, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, int(adapt_block_size), adapt_c)
     elif thresholding == 'Adaptive (Gaussian)':
-        depth = cv2.adaptiveThreshold(depth, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, int(adapt_block_size), adapt_c)
+        depth = cv2.adaptiveThreshold(depth, threshold_value_max, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, int(adapt_block_size), adapt_c)
 
     # Apply slight blur in the end to smoothen the edges after initial thresholding
     if end_blur > 0:
