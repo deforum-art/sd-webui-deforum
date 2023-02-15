@@ -8,8 +8,10 @@ import time
 from pkg_resources import resource_filename
 from modules.shared import state
 from .general_utils import checksum, duplicate_pngs_from_folder
+from basicsr.utils.download_util import load_file_from_url
 # move these from here?
 from .rich import console
+
 
 # e.g gets 'x2' returns just 2 as int
 def extract_number(string):
@@ -231,8 +233,6 @@ def media_file_has_audio(filename, ffmpeg_location):
 
 # download gifski binaries if needed - linux and windows only atm (apple users won't even see the option)
 def check_and_download_gifski(models_folder, current_user_os):
-    from basicsr.utils.download_util import load_file_from_url
-    
     if current_user_os == 'Windows':
         file_name = 'gifski.exe'
         checksum_value = 'b0dd261ad021c31c7fdb99db761b45165e6b2a7e8e09c5d070a2b8064b575d7a4976c364d8508b28a6940343119b16a23e9f7d76f1f3d5ff02289d3068b469cf'
@@ -283,8 +283,6 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
         
 def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
     import zipfile
-    from basicsr.utils.download_util import load_file_from_url
-    
     if current_user_os == 'Windows':
         zip_file_name = 'realesrgan-ncnn-windows.zip'
         executble_name = 'realesrgan-ncnn-vulkan.exe'
@@ -296,20 +294,31 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         zip_checksum_value = 'df44c4e9a1ff66331079795f018a67fbad8ce37c4472929a56b5a38440cf96982d6e164a086b438c3d26d269025290dd6498bd50846bda8691521ecf8f0fafdf'
         download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-linux/realesrgan-ncnn-linux.zip'
 
+    # set paths
     realesrgan_ncnn_folder = os.path.join(models_folder, 'realesrgan_ncnn')
     realesrgan_exec_path = os.path.join(realesrgan_ncnn_folder, executble_name)
     realesrgan_zip_path = os.path.join(realesrgan_ncnn_folder, zip_file_name)
-    if not os.path.exists(realesrgan_exec_path): # todo: change logic to check folder content
-        os.makedirs(realesrgan_ncnn_folder)
+    # return if exec file already exist
+    if os.path.exists(realesrgan_exec_path):
+        return
+    try:
+        os.makedirs(realesrgan_ncnn_folder, exist_ok=True)
         load_file_from_url(download_url, realesrgan_ncnn_folder)
+        # check file's hash
+        with open(realesrgan_zip_path, 'rb') as f:
+            file_hash = checksum(realesrgan_zip_path)
+        if file_hash != zip_checksum_value:
+            raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from here: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
 
         with zipfile.ZipFile(realesrgan_zip_path, 'r') as zip_ref:
-            zip_ref.extractall(os.path.dirname(realesrgan_zip_path))
-            
+            zip_ref.extractall(realesrgan_ncnn_folder)
+        
         os.remove(realesrgan_zip_path)
         if current_user_os == 'Linux':
             os.chmod(realesrgan_exec_path, 0o755)
-       
+    except Exception as e:
+        raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from here: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
+
 def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, imgs_batch_id, deforum_models_path, current_user_os, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, fps, stitch_from_frame, stitch_to_frame, audio_path, add_soundtrack):
     
     clean_num_r_up_factor = extract_number(upscale_factor)
