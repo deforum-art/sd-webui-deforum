@@ -293,7 +293,7 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         executble_name = 'realesrgan-ncnn-vulkan'
         zip_checksum_value = 'df44c4e9a1ff66331079795f018a67fbad8ce37c4472929a56b5a38440cf96982d6e164a086b438c3d26d269025290dd6498bd50846bda8691521ecf8f0fafdf'
         download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-linux/realesrgan-ncnn-linux.zip'
-    elif current_user_os = 'Apple':
+    elif current_user_os == 'Apple':
         zip_file_name = 'realesrgan-ncnn-mac.zip'
         executble_name = 'realesrgan-ncnn-vulkan'
         zip_checksum_value = '65f09472025b55b18cf6ba64149ede8cded90c20e18d35a9edb1ab60715b383a6ffbf1be90d973fc2075cf99d4cc1411fbdc459411af5c904f544b8656111469'
