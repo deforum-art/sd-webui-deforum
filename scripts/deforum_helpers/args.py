@@ -902,8 +902,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
 
     # Gradio's Change functions - hiding and renaming elements based on other elements
-    if dr.current_user_os in ["Windows", "Apple"]:
+    if dr.current_user_os in ["Windows", "Linux"]:
         fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
+    if dr.current_user_os in ["Windows", "Linux", "Apple"]:
         r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)    
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
