@@ -120,7 +120,9 @@ def get_quick_vid_info(vid_path):
 def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):
     start_time = time.time()
 
-    print(f"\033[0;33mStitching *video* from frames using FFmpeg:\n\033[0m{imgs_path}\nTo Video:\n{outmp4_path}")
+    print(f"Got a request to stitch frames to video using FFmpeg.\nFrames:\n{imgs_path}\nTo Video:\n{outmp4_path}")
+    msg_to_print = f"Stitching *video*..."
+    console.print(msg_to_print, style="blink yellow", end="") 
     if stitch_to_frame == -1:
         stitch_to_frame = 9999999
     try:
@@ -147,9 +149,8 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under 'ffmpeg_location' parameter.")
     except Exception as e:
         raise Exception(f'Error stitching frames to video. Actual runtime error:{e}')
-
+    
     if add_soundtrack != 'None':
-        print("Adding audio to video...")
         audio_add_start_time = time.time()
         try:
             cmd = [
@@ -167,17 +168,20 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode != 0:
-                print(stderr)
                 raise RuntimeError(stderr)
             os.replace(outmp4_path+'.temp.mp4', outmp4_path)
-            print(f"Adding audio to video took {time.time() - audio_add_start_time:.2f} seconds.")
-            print(f"\rFFmpeg Video+Audio stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!")
+            print("\r" + " " * len(msg_to_print), end="", flush=True)
+            print(f"\r{msg_to_print}", flush=True)
+            print(f"\rFFmpeg Video+Audio stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
         except Exception as e:
-            print(f'Error adding audio to video. Actual error: {e}')
-            print(f"FFMPEG Video (sorry, no audio) stitching \033[33mdone\033[0m in {time.time() - start_time:.2f} seconds!")
+            print("\r" + " " * len(msg_to_print), end="", flush=True)
+            print(f"\r{msg_to_print}", flush=True)
+            print(f'\rError adding audio to video. Actual error: {e}', flush=True)
+            print(f"FFMPEG Video (sorry, no audio) stitching \033[33mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
     else:
-        print(f"\rVideo stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!")
-        
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
+        print(f"\rVideo stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
 
 def get_frame_name(path):
     name = os.path.basename(path)
@@ -348,7 +352,7 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
     # msg to print - need it to hide that text later on (!)
     msg_to_print = f"Upscaling raw output PNGs using {upscale_model} at {upscale_factor}"
     # blink the msg in the cli until action is done
-    console.print(msg_to_print, style="blink", end="") 
+    console.print(msg_to_print, style="blink yellow", end="") 
     start_time = time.time()
     # make call to ncnn upscaling executble
     process = subprocess.run(cmd, capture_output=True, check=True, text=True)
