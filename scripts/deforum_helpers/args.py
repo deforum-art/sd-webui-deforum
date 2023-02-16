@@ -779,7 +779,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                      <p style="margin-top:1em">
                         Important notes:
                         <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
-                            <li>Working FFMPEG is required to get an output interpolated video. No ffmepg will leave you with just the interpolated imgs.</li>
                             <li>Frame Interpolation will *not* run if any of the following are enabled: 'Store frames in ram' / 'Skip video for run all'.</li>
                             <li>Audio (if provided) will *not* be transferred to the interpolated video if Slow-Mo is enabled.</li>
                             <li>'add_soundtrack' and 'soundtrack_path' aren't being honoured in "Interpolate an existing video" mode. Original vid audio will be used instead with the same slow-mo rules above.</li>
@@ -822,35 +821,53 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
             # VIDEO UPSCALE TAB
             with gr.Tab('Video Upscaling'):
+                
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                 with gr.Column():
-                    selected_tab = gr.State(value=0)
-                    with gr.Tabs(elem_id="extras_resize_mode"):
-                        with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
-                            upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
-                        with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
+                    with gr.Tab('Upscale V1'):
+                        with gr.Column():
+                            selected_tab = gr.State(value=0)
+                            with gr.Tabs(elem_id="extras_resize_mode"):
+                                with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
+                                    upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
+                                with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
+                                    with FormRow():
+                                        upscaling_resize_w = gr.Slider(label="Width", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_w")
+                                        upscaling_resize_h = gr.Slider(label="Height", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_h")
+                                        upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
                             with FormRow():
-                                upscaling_resize_w = gr.Slider(label="Width", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_w")
-                                upscaling_resize_h = gr.Slider(label="Height", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_h")
-                                upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
-                    with FormRow():
-                        extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
-                        extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
-                    with FormRow():
-                        with gr.Column(scale=3):
-                            extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
-                        with gr.Column(scale=1, min_width=80):
-                            upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
+                                extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
+                                extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
+                            with FormRow():
+                                with gr.Column(scale=3):
+                                    extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
+                                with gr.Column(scale=1, min_width=80):
+                                    upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
 
-                    tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
-                    tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
+                            tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
+                            tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
 
-                    # This is the actual button that's pressed to initiate the Upscaling:
-                    upscale_btn = gr.Button(value="*Upscale uploaded video*")
-                    # Show a text about CLI outputs:
-                    gr.HTML("* check your CLI for outputs")
-                    # make the function call when the UPSCALE button is clicked
-                    upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                            # This is the actual button that's pressed to initiate the Upscaling:
+                            upscale_btn = gr.Button(value="*Upscale uploaded video*")
+                            # Show a text about CLI outputs:
+                            gr.HTML("* check your CLI for outputs")
+                            # make the function call when the UPSCALE button is clicked
+                            upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                     # NCNN UPSCALE TAB
+                    with gr.Tab('Upscale V2') as ncnn_upscale_tab:
+                        # vid_to_ncnn_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_ncnn_upscale_chosen_file")
+                        with gr.Row(variant='compact'):
+                            # Non interactive textbox showing uploaded input vid total Frame Count
+                            in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing uploaded input vid FPS
+                            in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing expected output interpolated video FPS
+                            out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS", value='---')
+                        with gr.Column():
+                            with gr.Row(variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux"] else False)) as ncnn_upscale_row:
+                                ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
+                                ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
+                                r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True)
             # STITCH FRAMES TO VID TAB
             with gr.Tab('Frames to Video') as stitch_imgs_to_vid_row:
                 with gr.Row(visible=False):
@@ -860,7 +877,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     Important Notes:
                     <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
                         <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID. The %05d is important, don't forget it!</li>
-                        <li>Working FFMPEG under 'Location' (above ^) is required to stitch a video in this mode!</li>
                     </ul>
                     """)
                 with gr.Row(variant='compact'):
