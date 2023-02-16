@@ -355,8 +355,7 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
     # get clean number from 'x2, x3' etc
     clean_num_r_up_factor = extract_number(upscale_factor)
     # set paths
-    realesrgan_ncnn_path = os.path.join(deforum_models_path, 'realesrgan_ncnn')
-    realesrgan_ncnn_exec_location = os.path.join(realesrgan_ncnn_path, 'realesrgan-ncnn-vulkan' + ('.exe' if current_user_os == 'Windows' else ''))
+    realesrgan_ncnn_location = os.path.join(deforum_models_path, 'realesrgan_ncnn', 'realesrgan-ncnn-vulkan' + ('.exe' if current_user_os == 'Windows' else ''))
     upscaled_folder_path = os.path.join(imgs_raw_path, f"{imgs_batch_id}_upscaled")
     temp_folder_to_keep_raw_ims = os.path.join(upscaled_folder_path, 'temp_raw_imgs_to_upscale')
     out_upscaled_mp4_path = os.path.join(imgs_raw_path, f"{imgs_batch_id}_Upscaled_{upscale_factor}.mp4")
@@ -365,14 +364,14 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
     # make a folder with only the imgs we need to duplicate so we can call the ncnn with the folder syntax (quicker!)
     duplicate_pngs_from_folder(from_folder=imgs_raw_path, to_folder=temp_folder_to_keep_raw_ims, img_batch_id=imgs_batch_id, orig_vid_name='Dummy')
     # set dynamic cmd command
-    cmd = [realesrgan_ncnn_exec_location, '-i', temp_folder_to_keep_raw_ims, '-o', upscaled_folder_path, '-s', str(clean_num_r_up_factor), '-n', upscale_model]
+    cmd = [realesrgan_ncnn_location, '-i', temp_folder_to_keep_raw_ims, '-o', upscaled_folder_path, '-s', str(clean_num_r_up_factor), '-n', upscale_model]
     # msg to print - need it to hide that text later on (!)
     msg_to_print = f"Upscaling raw output PNGs using {upscale_model} at {upscale_factor}..."
     # blink the msg in the cli until action is done
     console.print(msg_to_print, style="blink yellow", end="") 
     start_time = time.time()
     # make call to ncnn upscaling executble
-    process = subprocess.run(cmd, capture_output=True, check=True, text=True, cwd=realesrgan_ncnn_path)
+    process = subprocess.run(cmd, capture_output=True, check=True, text=True)
     print("\r" + " " * len(msg_to_print), end="", flush=True)
     print(f"\r{msg_to_print}", flush=True)
     print(f"\rUpscaling \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
