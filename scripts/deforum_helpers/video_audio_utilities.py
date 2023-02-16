@@ -346,7 +346,8 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
             os.chmod(realesrgan_exec_path, 0o755)
             # enable running the exec for mac users
             if current_user_os == 'Mac':
-                subprocess.run(['xattr', '-d', 'com.apple.quarantine', f'./{realesrgan_exec_path}'])
+                os.system(f'xattr -d com.apple.quarantine "{path}"')
+                # subprocess.run(['xattr', '-d', 'com.apple.quarantine', f'./{realesrgan_exec_path}'])
 
     except Exception as e:
         raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
