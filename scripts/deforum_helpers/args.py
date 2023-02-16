@@ -824,6 +824,24 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                 with gr.Column():
+                    
+                     # NCNN UPSCALE TAB
+                    with gr.Tab('Upscale V2') as ncnn_upscale_tab:
+                        with gr.Row(variant='compact') as ncnn_upload_vid_stats_row:
+                            # Non interactive textbox showing uploaded input vid total Frame Count
+                            ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing uploaded input vid FPS
+                            ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing uploaded input resolution
+                            ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing expected output resolution
+                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')
+                        with gr.Column():
+                            with gr.Row(variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux"] else False)) as ncnn_actual_upscale_row:
+                                ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
+                                ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
+                                r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True)
+                        ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
                     with gr.Tab('Upscale V1'):
                         with gr.Column():
                             selected_tab = gr.State(value=0)
@@ -853,22 +871,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             gr.HTML("* check your CLI for outputs")
                             # make the function call when the UPSCALE button is clicked
                             upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
-                     # NCNN UPSCALE TAB
-                    with gr.Tab('Upscale V2') as ncnn_upscale_tab:
-                        with gr.Row(variant='compact') as ncnn_upload_vid_stats_row:
-                            # Non interactive textbox showing uploaded input vid total Frame Count
-                            ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing uploaded input vid FPS
-                            ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing uploaded input resolution
-                            ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing expected output resolution
-                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')
-                        with gr.Column():
-                            with gr.Row(variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux"] else False)) as ncnn_actual_upscale_row:
-                                ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
-                                ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
-                                r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True)
             # STITCH FRAMES TO VID TAB
             with gr.Tab('Frames to Video') as stitch_imgs_to_vid_row:
                 with gr.Row(visible=False):
@@ -934,7 +936,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         w, h = [int(x) * factor for x in in_res.split('*')]
         return f"{w}*{h}"
     def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
-        if not upscale_model_name:
+        if not upscale_model_name or in_res == '---':
             return '---'
         factor = 2 if upscale_model_name == 'realesr-animevideov3' else 4
         return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
