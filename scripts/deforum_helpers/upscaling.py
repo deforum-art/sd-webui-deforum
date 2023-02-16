@@ -11,7 +11,11 @@ from queue import Queue, Empty
 import modules.scripts as scr
 from .frame_interpolation import clean_folder_name
 from .general_utils import duplicate_pngs_from_folder
-from .video_audio_utilities import get_quick_vid_info, vid2frames, ffmpeg_stitch_video
+# TODO: move some funcs to this file?
+from .video_audio_utilities import get_quick_vid_info, vid2frames, ffmpeg_stitch_video, extract_number, check_and_download_realesrgan_ncnn
+from .rich import console
+import time
+import subprocess
 
 def process_upscale_vid_upload_logic(file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_file_name, keep_imgs, f_location, f_crf, f_preset):
     print("got a request to *upscale* an existing video.")
@@ -116,7 +120,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
     return mp4_path
 
 # NCNN Upscale section:
-def process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
+def process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, current_user_os):
     print(f"got a request to *upscale* a video using {upscale_model} at {upscale_factor}")
 
     folder_name = clean_folder_name(Path(vid_path.orig_name).stem)
@@ -131,4 +135,46 @@ def process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_
     
     vid2frames(video_path=vid_path.name, video_in_frame_path=outdir, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
     
-    # process_video_upscaling(selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, orig_vid_fps=in_vid_fps, real_audio_track=file.name, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_upscale_imgs=keep_imgs, orig_vid_name=folder_name)
+    process_ncnn_video_upscaling(vid_path, outdir, in_vid_fps, in_vid_res, out_vid_res, models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, current_user_os)
+    
+def process_ncnn_video_upscaling(vid_path, outdir, in_vid_fps, in_vid_res, out_vid_res, models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, current_user_os):
+    
+    # get clean number from 'x2, x3' etc
+    clean_num_r_up_factor = extract_number(upscale_factor)
+    
+    # set paths
+    realesrgan_ncnn_location = os.path.join(models_path, 'realesrgan_ncnn', 'realesrgan-ncnn-vulkan' + ('.exe' if current_user_os == 'Windows' else ''))
+    upscaled_folder_path = os.path.join(os.path.dirname(outdir), 'Upscaled_frames')
+    
+    os.makedirs(upscaled_folder_path, exist_ok=True)
+    
+
+    out_upscaled_mp4_path = os.path.join(os.path.dirname(outdir), f"{vid_path.orig_name}_Upscaled_{upscale_factor}.mp4")
+    # download upscaling model if needed
+    check_and_download_realesrgan_ncnn(models_path, current_user_os)
+
+    # set dynamic cmd command
+    cmd = [realesrgan_ncnn_location, '-i', outdir, '-o', upscaled_folder_path, '-s', str(clean_num_r_up_factor), '-n', upscale_model]
+    # msg to print - need it to hide that text later on (!)
+    msg_to_print = f"Upscaling raw output PNGs using {upscale_model} at {upscale_factor}..."
+    # blink the msg in the cli until action is done
+    console.print(msg_to_print, style="blink yellow", end="") 
+    start_time = time.time()
+    # make call to ncnn upscaling executble
+    process = subprocess.run(cmd, capture_output=True, check=True, text=True)
+    print("\r" + " " * len(msg_to_print), end="", flush=True)
+    print(f"\r{msg_to_print}", flush=True)
+    print(f"\rUpscaling \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
+    # set custom path for ffmpeg func below
+    
+    # return
+    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, "%05d.png")
+
+    # stitch video from upscaled pngs 
+    ffmpeg_stitch_video(ffmpeg_location=f_location, fps=in_vid_fps, outmp4_path=out_upscaled_mp4_path, stitch_from_frame=0, stitch_to_frame=-1, imgs_path=upscaled_imgs_path_for_ffmpeg, add_soundtrack='File', audio_path=vid_path, crf=f_crf, preset=f_preset)
+
+    # delete the raw video pngs
+    shutil.rmtree(outdir)
+
+    if not keep_imgs:
+        shutil.rmtree(upscaled_folder_path)

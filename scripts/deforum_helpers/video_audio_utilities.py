@@ -9,7 +9,6 @@ from pkg_resources import resource_filename
 from modules.shared import state
 from .general_utils import checksum, duplicate_pngs_from_folder
 from basicsr.utils.download_util import load_file_from_url
-# move these from here?
 from .rich import console
 
 

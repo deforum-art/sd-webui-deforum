@@ -827,7 +827,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 root_params = Root()
                 f_models_path = root_params['models_path']
                 # using vid_path.name actually
-                process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, f_models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset)
+                process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, f_models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, dr.current_user_os)
                 
                 
             with gr.Tab('Video Upscaling'):
@@ -848,11 +848,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')
                         with gr.Column():
                             with gr.Row(variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux", "Mac"] else False)) as ncnn_actual_upscale_row:
-                                ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
-                                ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
-                                ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True) # fix value
+                                ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = "realesr-animevideov3", type="value")
+                                ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value="x2", type="value")
+                                ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=True, interactive=True) # fix value
                         ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
-                        ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model, ncnn_upscale_factor, r_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                        ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model, ncnn_upscale_factor, ncnn_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
                     with gr.Tab('Upscale V1'):
                         with gr.Column():
                             selected_tab = gr.State(value=0)
