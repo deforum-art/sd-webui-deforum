@@ -156,7 +156,7 @@ def process_ncnn_video_upscaling(vid_path, outdir, in_vid_fps, in_vid_res, out_v
     # set dynamic cmd command
     cmd = [realesrgan_ncnn_location, '-i', outdir, '-o', upscaled_folder_path, '-s', str(clean_num_r_up_factor), '-n', upscale_model]
     # msg to print - need it to hide that text later on (!)
-    msg_to_print = f"Upscaling raw output PNGs using {upscale_model} at {upscale_factor}..."
+    msg_to_print = f"Upscaling raw PNGs using {upscale_model} at {upscale_factor}..."
     # blink the msg in the cli until action is done
     console.print(msg_to_print, style="blink yellow", end="") 
     start_time = time.time()
