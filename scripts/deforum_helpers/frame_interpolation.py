@@ -1,11 +1,7 @@
 import os
 from pathlib import Path
 from rife.inference_video import run_rife_new_video_infer
-from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio
-
-# e.g gets 'x2' returns just 2 as int
-def extract_number(string):
-    return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
+from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio, extract_number
    
 # gets 'RIFE v4.3', returns: 'RIFE43'   
 def extract_rife_name(string):

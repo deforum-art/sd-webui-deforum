@@ -7,8 +7,15 @@ import subprocess
 import time
 from pkg_resources import resource_filename
 from modules.shared import state
-from .general_utils import checksum
+from .general_utils import checksum, duplicate_pngs_from_folder
+from basicsr.utils.download_util import load_file_from_url
+from .rich import console
 
+
+# e.g gets 'x2' returns just 2 as int
+def extract_number(string):
+    return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
+    
 def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
         raise RuntimeError('Error: extract_to_frame can not be higher than extract_from_frame')
@@ -112,7 +119,9 @@ def get_quick_vid_info(vid_path):
 def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):
     start_time = time.time()
 
-    print(f"\033[0;33mStitching *video* from frames using FFmpeg:\n\033[0m{imgs_path}\nTo Video:\n{outmp4_path}")
+    print(f"Got a request to stitch frames to video using FFmpeg.\nFrames:\n{imgs_path}\nTo Video:\n{outmp4_path}")
+    msg_to_print = f"Stitching *video*..."
+    console.print(msg_to_print, style="blink yellow", end="") 
     if stitch_to_frame == -1:
         stitch_to_frame = 9999999
     try:
@@ -136,12 +145,15 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
     except FileNotFoundError:
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
         raise FileNotFoundError("FFmpeg not found. Please make sure you have a working ffmpeg path under 'ffmpeg_location' parameter.")
     except Exception as e:
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
         raise Exception(f'Error stitching frames to video. Actual runtime error:{e}')
-
+    
     if add_soundtrack != 'None':
-        print("Adding audio to video...")
         audio_add_start_time = time.time()
         try:
             cmd = [
@@ -159,16 +171,22 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode != 0:
-                print(stderr)
+                print("\r" + " " * len(msg_to_print), end="", flush=True)
+                print(f"\r{msg_to_print}", flush=True)
                 raise RuntimeError(stderr)
             os.replace(outmp4_path+'.temp.mp4', outmp4_path)
-            print(f"Adding audio to video took {time.time() - audio_add_start_time:.2f} seconds.")
-            print(f"FFMPEG Video+Audio stitching done in {time.time() - start_time:.2f} seconds!")
+            print("\r" + " " * len(msg_to_print), end="", flush=True)
+            print(f"\r{msg_to_print}", flush=True)
+            print(f"\rFFmpeg Video+Audio stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
         except Exception as e:
-            print(f'Error adding audio to video. Actual error: {e}')
-            print(f"FFMPEG Video (sorry, no audio) stitching done in {time.time() - start_time:.2f} seconds!")
+            print("\r" + " " * len(msg_to_print), end="", flush=True)
+            print(f"\r{msg_to_print}", flush=True)
+            print(f'\rError adding audio to video. Actual error: {e}', flush=True)
+            print(f"FFMPEG Video (sorry, no audio) stitching \033[33mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
     else:
-        print(f"Video stitching done in {time.time() - start_time:.2f} seconds!")
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
+        print(f"\rVideo stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
 
 def get_frame_name(path):
     name = os.path.basename(path)
@@ -224,8 +242,6 @@ def media_file_has_audio(filename, ffmpeg_location):
 
 # download gifski binaries if needed - linux and windows only atm (apple users won't even see the option)
 def check_and_download_gifski(models_folder, current_user_os):
-    from basicsr.utils.download_util import load_file_from_url
-    
     if current_user_os == 'Windows':
         file_name = 'gifski.exe'
         checksum_value = 'b0dd261ad021c31c7fdb99db761b45165e6b2a7e8e09c5d070a2b8064b575d7a4976c364d8508b28a6940343119b16a23e9f7d76f1f3d5ff02289d3068b469cf'
@@ -242,14 +258,15 @@ def check_and_download_gifski(models_folder, current_user_os):
         if current_user_os == 'Linux':
             os.chmod(file_path, 0o755)
         if checksum(file_path) != checksum_value:
-            raise Exception(f"Error while downloading {file_name}. Please download from here: {download_url} and place in: {models_folder}")
+            raise Exception(f"Error while downloading {file_name}. Please download from: {download_url} and place in: {models_folder}")
            
 # create a gif using gifski - limited to up to 30 fps (from the ui; if users wanna try to hack it, results are not good, but possible up to 100 fps theoretically)   
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
     import glob
-    print(f"\033[0;33mStitching *gif* from frames using Gifski:\033[0m")
+    msg_to_print = f"Stitching *gif* from frames using Gifski..."
+    # blink the msg in the cli until action is done
+    console.print(msg_to_print, style="blink yellow", end="") 
     start_time = time.time()
-    
     gifski_location = os.path.join(models_folder, 'gifski' + ('.exe' if current_user_os == 'Windows' else ''))
     final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
     if current_user_os == "Linux":
@@ -260,16 +277,111 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
         input_img_pattern_for_gifski = os.path.join(imgs_raw_path, imgs_batch_id + '_0*.png')
         cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps), '--quality', str(95)]
     else: # should never this else as we check before, but just in case
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
         raise Exception(f"No support for OS type: {current_user_os}")
         
     check_and_download_gifski(models_folder, current_user_os)
 
     try:
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
         stdout, stderr = process.communicate()
         if process.returncode != 0:
+            print("\r" + " " * len(msg_to_print), end="", flush=True)
+            print(f"\r{msg_to_print}", flush=True)
             print(stderr)
             raise RuntimeError(stderr)
-        print(f"GIF stitching done in {time.time() - start_time:.2f} seconds!")
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
+        print(f"GIF stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!")
     except Exception as e:
         print(f"GIF stitching *failed* with error:\n{e}")
+        
+def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
+    import zipfile
+    if current_user_os == 'Windows':
+        zip_file_name = 'realesrgan-ncnn-windows.zip'
+        executble_name = 'realesrgan-ncnn-vulkan.exe'
+        zip_checksum_value = '1d073f520a4a3f6438a500fea88407964da6d4a87489719bedfa7445b76c019fdd95a5c39576ca190d7ac22c906b33d5250a6f48cb7eda2b6af3e86ec5f09dfc'
+        download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-windows/realesrgan-ncnn-windows.zip'
+    elif current_user_os == 'Linux':
+        zip_file_name = 'realesrgan-ncnn-linux.zip'
+        executble_name = 'realesrgan-ncnn-vulkan'
+        zip_checksum_value = 'df44c4e9a1ff66331079795f018a67fbad8ce37c4472929a56b5a38440cf96982d6e164a086b438c3d26d269025290dd6498bd50846bda8691521ecf8f0fafdf'
+        download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-linux/realesrgan-ncnn-linux.zip'
+    elif current_user_os == 'Mac':
+        zip_file_name = 'realesrgan-ncnn-mac.zip'
+        executble_name = 'realesrgan-ncnn-vulkan'
+        zip_checksum_value = '65f09472025b55b18cf6ba64149ede8cded90c20e18d35a9edb1ab60715b383a6ffbf1be90d973fc2075cf99d4cc1411fbdc459411af5c904f544b8656111469'
+        download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-mac/realesrgan-ncnn-mac.zip'
+        
+    else: # who are you then?
+        raise Exception(f"No support for OS type: {current_user_os}")
+
+    # set paths
+    realesrgan_ncnn_folder = os.path.join(models_folder, 'realesrgan_ncnn')
+    realesrgan_exec_path = os.path.join(realesrgan_ncnn_folder, executble_name)
+    realesrgan_zip_path = os.path.join(realesrgan_ncnn_folder, zip_file_name)
+    # return if exec file already exist
+    if os.path.exists(realesrgan_exec_path):
+        return
+    try:
+        os.makedirs(realesrgan_ncnn_folder, exist_ok=True)
+        # download exec and model files from url
+        load_file_from_url(download_url, realesrgan_ncnn_folder)
+        # check downloaded zip's hash
+        with open(realesrgan_zip_path, 'rb') as f:
+            file_hash = checksum(realesrgan_zip_path)
+        # wrong hash, file is probably broken/ download interrupted 
+        if file_hash != zip_checksum_value:
+            raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
+        # hash ok, extract zip contents into our folder
+        with zipfile.ZipFile(realesrgan_zip_path, 'r') as zip_ref:
+            zip_ref.extractall(realesrgan_ncnn_folder)
+        # delete the zip file
+        os.remove(realesrgan_zip_path)
+        # chmod 755 the exec if we're in a linux machine, otherwise we'd get permission errors
+        if current_user_os in ('Linux', 'Mac'):
+            os.chmod(realesrgan_exec_path, 0o755)
+            # enable running the exec for mac users
+            if current_user_os == 'Mac':
+                os.system(f'xattr -d com.apple.quarantine "{realesrgan_exec_path}"')
+                # subprocess.run(['xattr', '-d', 'com.apple.quarantine', f'./{realesrgan_exec_path}'])
+
+    except Exception as e:
+        raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
+
+def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, imgs_batch_id, deforum_models_path, current_user_os, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, fps, stitch_from_frame, stitch_to_frame, audio_path, add_soundtrack):
+    # get clean number from 'x2, x3' etc
+    clean_num_r_up_factor = extract_number(upscale_factor)
+    # set paths
+    realesrgan_ncnn_location = os.path.join(deforum_models_path, 'realesrgan_ncnn', 'realesrgan-ncnn-vulkan' + ('.exe' if current_user_os == 'Windows' else ''))
+    upscaled_folder_path = os.path.join(imgs_raw_path, f"{imgs_batch_id}_upscaled")
+    temp_folder_to_keep_raw_ims = os.path.join(upscaled_folder_path, 'temp_raw_imgs_to_upscale')
+    out_upscaled_mp4_path = os.path.join(imgs_raw_path, f"{imgs_batch_id}_Upscaled_{upscale_factor}.mp4")
+    # download upscaling model if needed
+    check_and_download_realesrgan_ncnn(deforum_models_path, current_user_os)
+    # make a folder with only the imgs we need to duplicate so we can call the ncnn with the folder syntax (quicker!)
+    duplicate_pngs_from_folder(from_folder=imgs_raw_path, to_folder=temp_folder_to_keep_raw_ims, img_batch_id=imgs_batch_id, orig_vid_name='Dummy')
+    # set dynamic cmd command
+    cmd = [realesrgan_ncnn_location, '-i', temp_folder_to_keep_raw_ims, '-o', upscaled_folder_path, '-s', str(clean_num_r_up_factor), '-n', upscale_model]
+    # msg to print - need it to hide that text later on (!)
+    msg_to_print = f"Upscaling raw output PNGs using {upscale_model} at {upscale_factor}..."
+    # blink the msg in the cli until action is done
+    console.print(msg_to_print, style="blink yellow", end="") 
+    start_time = time.time()
+    # make call to ncnn upscaling executble
+    process = subprocess.run(cmd, capture_output=True, check=True, text=True)
+    print("\r" + " " * len(msg_to_print), end="", flush=True)
+    print(f"\r{msg_to_print}", flush=True)
+    print(f"\rUpscaling \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
+    # set custom path for ffmpeg func below
+    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, f"{imgs_batch_id}_%05d.png")
+    # stitch video from upscaled pngs 
+    ffmpeg_stitch_video(ffmpeg_location=ffmpeg_location, fps=fps, outmp4_path=out_upscaled_mp4_path, stitch_from_frame=stitch_from_frame, stitch_to_frame=stitch_to_frame, imgs_path=upscaled_imgs_path_for_ffmpeg, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=ffmpeg_crf, preset=ffmpeg_preset)
+
+    # delete the duplicated raw imgs
+    shutil.rmtree(temp_folder_to_keep_raw_ims)
+
+    if not keep_imgs:
+        shutil.rmtree(upscaled_folder_path)

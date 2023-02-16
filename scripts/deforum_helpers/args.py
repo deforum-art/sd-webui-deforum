@@ -5,8 +5,8 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
-from .upscaling import process_upscale_vid_upload_logic
-from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames
+from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vid_upload_logic
+from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os
 
@@ -267,7 +267,6 @@ def DeforumOutputArgs():
     skip_video_for_run_all = False #@param {type: 'boolean'}
     fps = 15 #@param {type:"number"}
     make_gif = False
-    #@markdown **Manual Settings**
     image_path = "C:/SD/20230124234916_%05d.png" #@param {type:"string"}
     mp4_path = "testvidmanualsettings.mp4" #@param {type:"string"}
     ffmpeg_location = find_ffmpeg_binary()
@@ -275,6 +274,13 @@ def DeforumOutputArgs():
     ffmpeg_preset = 'slow'
     add_soundtrack = 'None' #@param ["File","Init Video"]
     soundtrack_path = "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_1MB_MP3.mp3"
+    # End-Run upscaling
+    r_upscale_video = False
+    r_upscale_factor = 'x2' # ['2x', 'x3', 'x4']
+    # **model below** - 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest do only 4x: 'realesrgan-x4plus', 'realesrgan-x4plus-anime'
+    r_upscale_model = 'realesr-animevideov3' 
+    r_upscale_keep_imgs = True
+    
     render_steps = False  #@param {type: 'boolean'}
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
     # max_video_frames = 200 #@param {type:"string"}
@@ -735,7 +741,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         # OUTPUT TAB
         with gr.Tab('Output'):
             # VID OUTPUT ACCORD
-            with gr.Accordion('Video Output Settings - FFmpeg', open=True):
+            with gr.Accordion('Video Output Settings', open=True):
                 with gr.Row(variant='compact') as fps_out_format_row:
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
                     # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
@@ -754,6 +760,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
                         # the following param only shows for windows and linux users!
                         make_gif = gr.Checkbox(label="Make GIF", value=dv.make_gif, interactive=True, visible = (True if dr.current_user_os in ["Windows", "Linux"] else False))
+                with gr.Row(equal_height=True, variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux", "Mac"] else False)) as r_upscale_row:
+                    r_upscale_video = gr.Checkbox(label="Upscale", value=dv.r_upscale_video, interactive=True)
+                    r_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
+                    r_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
+                    r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True)
             # RIFE TAB
             with gr.Tab('RIFE') as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
@@ -768,7 +779,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                      <p style="margin-top:1em">
                         Important notes:
                         <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
-                            <li>Working FFMPEG is required to get an output interpolated video. No ffmepg will leave you with just the interpolated imgs.</li>
                             <li>Frame Interpolation will *not* run if any of the following are enabled: 'Store frames in ram' / 'Skip video for run all'.</li>
                             <li>Audio (if provided) will *not* be transferred to the interpolated video if Slow-Mo is enabled.</li>
                             <li>'add_soundtrack' and 'soundtrack_path' aren't being honoured in "Interpolate an existing video" mode. Original vid audio will be used instead with the same slow-mo rules above.</li>
@@ -810,36 +820,64 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
             # VIDEO UPSCALE TAB
+            def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
+                if vid_path is None:
+                    print("Please upload a video :)")
+                    return
+                root_params = Root()
+                f_models_path = root_params['models_path']
+                # using vid_path.name actually
+                process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, f_models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, dr.current_user_os)
             with gr.Tab('Video Upscaling'):
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                 with gr.Column():
-                    selected_tab = gr.State(value=0)
-                    with gr.Tabs(elem_id="extras_resize_mode"):
-                        with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
-                            upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
-                        with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
+                    # NCNN UPSCALE TAB
+                    with gr.Tab('Upscale V2') as ncnn_upscale_tab:
+                        with gr.Row(variant='compact') as ncnn_upload_vid_stats_row:
+                            # Non interactive textbox showing uploaded input vid total Frame Count
+                            ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing uploaded input vid FPS
+                            ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing uploaded input resolution
+                            ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing expected output resolution
+                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')
+                        with gr.Column():
+                            with gr.Row(variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux", "Mac"] else False)) as ncnn_actual_upscale_row:
+                                ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = "realesr-animevideov3", type="value")
+                                ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value="x2", type="value")
+                                ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=True, interactive=True) # fix value
+                        ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
+                        ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model, ncnn_upscale_factor, ncnn_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                    with gr.Tab('Upscale V1'):
+                        with gr.Column():
+                            selected_tab = gr.State(value=0)
+                            with gr.Tabs(elem_id="extras_resize_mode"):
+                                with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
+                                    upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
+                                with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
+                                    with FormRow():
+                                        upscaling_resize_w = gr.Slider(label="Width", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_w")
+                                        upscaling_resize_h = gr.Slider(label="Height", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_h")
+                                        upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
                             with FormRow():
-                                upscaling_resize_w = gr.Slider(label="Width", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_w")
-                                upscaling_resize_h = gr.Slider(label="Height", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_h")
-                                upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
-                    with FormRow():
-                        extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
-                        extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
-                    with FormRow():
-                        with gr.Column(scale=3):
-                            extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
-                        with gr.Column(scale=1, min_width=80):
-                            upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
+                                extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
+                                extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
+                            with FormRow():
+                                with gr.Column(scale=3):
+                                    extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
+                                with gr.Column(scale=1, min_width=80):
+                                    upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
 
-                    tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
-                    tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
+                            tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
+                            tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
 
-                    # This is the actual button that's pressed to initiate the Upscaling:
-                    upscale_btn = gr.Button(value="*Upscale uploaded video*")
-                    # Show a text about CLI outputs:
-                    gr.HTML("* check your CLI for outputs")
-                    # make the function call when the UPSCALE button is clicked
-                    upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                            # This is the actual button that's pressed to initiate the Upscaling:
+                            upscale_btn = gr.Button(value="*Upscale uploaded video*")
+                            # Show a text about CLI outputs:
+                            gr.HTML("* check your CLI for outputs")
+                            # make the function call when the UPSCALE button is clicked
+                            upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
             # STITCH FRAMES TO VID TAB
             with gr.Tab('Frames to Video') as stitch_imgs_to_vid_row:
                 with gr.Row(visible=False):
@@ -848,8 +886,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                  <p style="margin-top:0em">
                     Important Notes:
                     <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
-                        <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID</li>
-                        <li>Working FFMPEG under 'Location' (above ^) is required to stitch a video in this mode!</li>
+                        <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID. The %05d is important, don't forget it!</li>
                     </ul>
                     """)
                 with gr.Row(variant='compact'):
@@ -890,9 +927,37 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                 show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
 
+    # todo: MOVE these funcs from here
+    def vid_upscale_gradio_update_stats(vid_path, upscale_factor):
+        if not vid_path:
+            return '---', '---', '---', '---'
+        factor = extract_number(upscale_factor)
+        fps, fcount, resolution = get_quick_vid_info(vid_path.name)
+        in_res_str = f"{resolution[0]}*{resolution[1]}"
+        out_res_str = f"{resolution[0] * factor}*{resolution[1] * factor}"
+        return fps, fcount, in_res_str, out_res_str
+    def update_upscale_out_res(in_res, upscale_factor):
+        if not in_res:
+            return '---'
+        factor = extract_number(upscale_factor)
+        w, h = [int(x) * factor for x in in_res.split('*')]
+        return f"{w}*{h}"
+    def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
+        if not upscale_model_name or in_res == '---':
+            return '---'
+        factor = 2 if upscale_model_name == 'realesr-animevideov3' else 4
+        return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
+
     # Gradio's Change functions - hiding and renaming elements based on other elements
-    if dr.current_user_os in ["Windows", "Apple"]:
+    if dr.current_user_os in ["Windows", "Linux"]:
         fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
+    if dr.current_user_os in ["Windows", "Linux", "Mac"]: # mac removed 15-2 until fix is found
+        r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
+        ncnn_upscale_model.change(fn=update_r_upscale_factor, inputs=ncnn_upscale_model, outputs=ncnn_upscale_factor)
+        ncnn_upscale_model.change(update_upscale_out_res_by_model_name, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_model], outputs=ncnn_upscale_out_vid_res)
+        ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
+        vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
+        
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
@@ -912,7 +977,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
     hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
-    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram, make_gif]
+    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram, make_gif, r_upscale_row]
 
     for output in outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
@@ -977,6 +1042,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
 video_args_names =  str(r'''skip_video_for_run_all,
                             fps, make_gif, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
                             add_soundtrack, soundtrack_path,
+                            r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
                             render_steps,
                             path_name_modifier, image_path, mp4_path, store_frames_in_ram,
                             frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount,
@@ -1120,3 +1186,4 @@ def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_re
         return print("Please upload a video :)")
     
     process_upscale_vid_upload_logic(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_to_upscale_chosen_file.orig_name, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset)
+
