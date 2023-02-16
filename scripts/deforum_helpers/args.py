@@ -936,12 +936,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
         if not upscale_model_name:
             return '---'
-        if upscale_model_name == 'realesr-animevideov3':
-            factor = 2
-        else:
-            factor = 4
-        w, h = [int(x) * factor for x in in_res.split('*')]
-        return f"{w}*{h}"
+        factor = 2 if upscale_model_name == 'realesr-animevideov3' else 4
+        return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
 
     # Gradio's Change functions - hiding and renaming elements based on other elements
     if dr.current_user_os in ["Windows", "Linux"]: # duplicate ifs to enable changes only to GIFski by adding Mac to one of them
