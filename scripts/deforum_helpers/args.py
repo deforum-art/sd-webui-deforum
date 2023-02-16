@@ -5,7 +5,7 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
-from .upscaling import process_upscale_vid_upload_logic
+from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os
@@ -391,7 +391,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(scale=1, min_width=185) as diffusion_cadence_column:
                             diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
                         with gr.Column(scale=2, min_width=185):
-                            max_frames = gr.Slider(label="Max frames", minimum=2, maximum=9999, step=1, value=da.max_frames, interactive=True)
+                            max_frames = gr.Slider(label="Max frames", minimum=2, maximum=99999, step=1, value=da.max_frames, interactive=True)
             # GUIDED IMAGES ACCORD
             with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
                 # GUIDED IMAGES INFO ACCORD
@@ -820,10 +820,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
             # VIDEO UPSCALE TAB
-            def ncnn_upload_vid_to_upscale(vid_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
+            def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
                 if vid_path is None:
                     print("Please upload a video :)")
                     return
+                root_params = Root()
+                f_models_path = root_params['models_path']
+                # using vid_path.name actually
+                process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, f_models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset)
+                
                 
             with gr.Tab('Video Upscaling'):
                 
@@ -847,7 +852,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
                                 ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True) # fix value
                         ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
-                        ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_model, ncnn_upscale_factor, r_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                        ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model, ncnn_upscale_factor, r_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
                     with gr.Tab('Upscale V1'):
                         with gr.Column():
                             selected_tab = gr.State(value=0)
