@@ -385,7 +385,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(scale=1, min_width=185) as diffusion_cadence_column:
                             diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
                         with gr.Column(scale=2, min_width=185):
-                            max_frames = gr.Slider(label="Max frames", minimum=2, maximum=9999, step=1, value=da.max_frames, interactive=True)
+                            max_frames = gr.Slider(label="Max frames", minimum=2, maximum=99999, step=1, value=da.max_frames, interactive=True)
             # GUIDED IMAGES ACCORD
             with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
                 # GUIDED IMAGES INFO ACCORD
