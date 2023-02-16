@@ -863,7 +863,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             # Non interactive textbox showing uploaded input resolution
                             ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---')
                             # Non interactive textbox showing expected output resolution
-                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Rez", value='---')
+                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')
                         with gr.Column():
                             with gr.Row(variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux"] else False)) as ncnn_actual_upscale_row:
                                 ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
