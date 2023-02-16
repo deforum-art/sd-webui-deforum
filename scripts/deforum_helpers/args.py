@@ -948,7 +948,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
 
     # Gradio's Change functions - hiding and renaming elements based on other elements
-    if dr.current_user_os in ["Windows", "Linux"]: # duplicate ifs to enable changes only to GIFski by adding Mac to one of them
+    if dr.current_user_os in ["Windows", "Linux"]:
         fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
     if dr.current_user_os in ["Windows", "Linux", "Mac"]: # mac removed 15-2 until fix is found
         r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
