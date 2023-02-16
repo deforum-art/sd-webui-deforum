@@ -869,24 +869,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
                                 ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
                                 r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True)
-                # todo: move these funcs from here
-                def vid_upscale_gradio_update_stats(vid_path, upscale_factor):
-                    if not vid_path:
-                        return '---', '---', '---', '---'
-                    factor = extract_number(upscale_factor)
-                    fps, fcount, resolution = get_quick_vid_info(vid_path.name)
-                    in_res_str = f"{resolution[0]}*{resolution[1]}"
-                    out_res_str = f"{resolution[0] * factor}*{resolution[1] * factor}"
-                    return fps, fcount, in_res_str, out_res_str
-                def update_upscale_out_res(in_res, upscale_factor):
-                    if not in_res:
-                        return '---'
-                    factor = extract_number(upscale_factor)
-                    w, h = [int(x) * factor for x in in_res.split('*')]
-                    return f"{w}*{h}"
-
-                ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
-                vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
             # STITCH FRAMES TO VID TAB
             with gr.Tab('Frames to Video') as stitch_imgs_to_vid_row:
                 with gr.Row(visible=False):
@@ -936,11 +918,41 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                 show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
 
+    # todo: MOVE these funcs from here
+    def vid_upscale_gradio_update_stats(vid_path, upscale_factor):
+        if not vid_path:
+            return '---', '---', '---', '---'
+        factor = extract_number(upscale_factor)
+        fps, fcount, resolution = get_quick_vid_info(vid_path.name)
+        in_res_str = f"{resolution[0]}*{resolution[1]}"
+        out_res_str = f"{resolution[0] * factor}*{resolution[1] * factor}"
+        return fps, fcount, in_res_str, out_res_str
+    def update_upscale_out_res(in_res, upscale_factor):
+        if not in_res:
+            return '---'
+        factor = extract_number(upscale_factor)
+        w, h = [int(x) * factor for x in in_res.split('*')]
+        return f"{w}*{h}"
+    def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
+        if not upscale_model_name:
+            return '---'
+        if upscale_model_name == 'realesr-animevideov3':
+            factor = 2
+        else:
+            factor = 4
+        w, h = [int(x) * factor for x in in_res.split('*')]
+        return f"{w}*{h}"
+
     # Gradio's Change functions - hiding and renaming elements based on other elements
-    if dr.current_user_os in ["Windows", "Linux"]:
+    if dr.current_user_os in ["Windows", "Linux"]: # duplicate ifs to enable changes only to GIFski by adding Mac to one of them
         fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
     if dr.current_user_os in ["Windows", "Linux"]: # mac removed 15-2 until fix is found
-        r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)    
+        r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
+        ncnn_upscale_model.change(fn=update_r_upscale_factor, inputs=ncnn_upscale_model, outputs=ncnn_upscale_factor)
+    ncnn_upscale_model.change(update_upscale_out_res_by_model_name, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_model], outputs=ncnn_upscale_out_vid_res)
+    ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
+    vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
+        
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
