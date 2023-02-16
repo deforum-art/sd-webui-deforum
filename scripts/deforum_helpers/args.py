@@ -6,7 +6,7 @@ import modules.paths as ph
 import os
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
 from .upscaling import process_upscale_vid_upload_logic
-from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info
+from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os
 
@@ -869,11 +869,17 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
                                 ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
                                 r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True)
-                def vid_upscale_gradio_update_stats(vid_path):
+                # todo: move this func from here
+                def vid_upscale_gradio_update_stats(vid_path, upscale_factor):
+                    if not vid_path:
+                        return '---', '---', '---', '---'
+                    factor = extract_number(upscale_factor)
                     fps, fcount, resolution = get_quick_vid_info(vid_path.name)
-                    
-                    return fps, fcount, resolution, '256*256'
-                vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
+                    in_res_str = f"{resolution[0]}*{resolution[1]}"
+                    out_res_str = f"{resolution[0] * factor}*{resolution[1] * factor}"
+                    return fps, fcount, in_res_str, out_res_str
+
+                vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
             # STITCH FRAMES TO VID TAB
             with gr.Tab('Frames to Video') as stitch_imgs_to_vid_row:
                 with gr.Row(visible=False):
