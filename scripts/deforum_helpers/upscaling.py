@@ -147,7 +147,6 @@ def process_ncnn_video_upscaling(vid_path, outdir, in_vid_fps, in_vid_res, out_v
     upscaled_folder_path = os.path.join(os.path.dirname(outdir), 'Upscaled_frames')
     
     os.makedirs(upscaled_folder_path, exist_ok=True)
-    
 
     out_upscaled_mp4_path = os.path.join(os.path.dirname(outdir), f"{vid_path.orig_name}_Upscaled_{upscale_factor}.mp4")
     # download upscaling model if needed
@@ -166,12 +165,8 @@ def process_ncnn_video_upscaling(vid_path, outdir, in_vid_fps, in_vid_res, out_v
     print(f"\r{msg_to_print}", flush=True)
     print(f"\rUpscaling \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
     # set custom path for ffmpeg func below
-    
-    # return
     upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, "%05d.png")
-    
-    # print(vid_path.name)
-    # return
+
     add_soundtrack = 'None'
     if media_file_has_audio(vid_path.name, f_location):
         add_soundtrack = 'File'
