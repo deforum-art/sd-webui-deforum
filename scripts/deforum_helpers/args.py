@@ -828,14 +828,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 f_models_path = root_params['models_path']
                 # using vid_path.name actually
                 process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, f_models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, dr.current_user_os)
-                
-                
             with gr.Tab('Video Upscaling'):
-                
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                 with gr.Column():
-                    
-                     # NCNN UPSCALE TAB
+                    # NCNN UPSCALE TAB
                     with gr.Tab('Upscale V2') as ncnn_upscale_tab:
                         with gr.Row(variant='compact') as ncnn_upload_vid_stats_row:
                             # Non interactive textbox showing uploaded input vid total Frame Count
