@@ -869,7 +869,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
                                 ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
                                 r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True)
-                # todo: move this func from here
+                # todo: move these funcs from here
                 def vid_upscale_gradio_update_stats(vid_path, upscale_factor):
                     if not vid_path:
                         return '---', '---', '---', '---'
@@ -878,7 +878,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     in_res_str = f"{resolution[0]}*{resolution[1]}"
                     out_res_str = f"{resolution[0] * factor}*{resolution[1] * factor}"
                     return fps, fcount, in_res_str, out_res_str
+                def update_upscale_out_res(in_res, upscale_factor):
+                    if not in_res:
+                        return '---'
+                    factor = extract_number(upscale_factor)
+                    w, h = [int(x) * factor for x in in_res.split('*')]
+                    return f"{w}*{h}"
 
+                ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
                 vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
             # STITCH FRAMES TO VID TAB
             with gr.Tab('Frames to Video') as stitch_imgs_to_vid_row:
