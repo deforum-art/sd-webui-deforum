@@ -858,11 +858,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         # vid_to_ncnn_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_ncnn_upscale_chosen_file")
                         with gr.Row(variant='compact'):
                             # Non interactive textbox showing uploaded input vid total Frame Count
-                            in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
+                            ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
                             # Non interactive textbox showing uploaded input vid FPS
-                            in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing expected output interpolated video FPS
-                            out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS", value='---')
+                            ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing uploaded input resolution
+                            ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---')
+                            # Non interactive textbox showing expected output resolution
+                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Rez", value='---')
                         with gr.Column():
                             with gr.Row(variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux"] else False)) as ncnn_upscale_row:
                                 ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
