@@ -344,6 +344,7 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         # chmod 755 the exec if we're in a linux machine, otherwise we'd get permission errors
         if current_user_os in ('Linux', 'Mac'):
             os.chmod(realesrgan_exec_path, 0o755)
+            # enable running the exec for mac users
             if current_user_os == 'Mac':
                 subprocess.run(['xattr', '-d', 'com.apple.quarantine', f'./{realesrgan_exec_path}'])
 
