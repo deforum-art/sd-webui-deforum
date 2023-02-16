@@ -820,6 +820,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
             # VIDEO UPSCALE TAB
+            def ncnn_upload_vid_to_upscale(vid_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
+                if vid_path is None:
+                    print("Please upload a video :)")
+                    return
+                
             with gr.Tab('Video Upscaling'):
                 
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
@@ -840,8 +845,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.Row(variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux"] else False)) as ncnn_actual_upscale_row:
                                 ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
                                 ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
-                                r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True)
+                                ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True) # fix value
                         ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
+                        ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_model, ncnn_upscale_factor, r_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
                     with gr.Tab('Upscale V1'):
                         with gr.Column():
                             selected_tab = gr.State(value=0)
@@ -1179,3 +1185,4 @@ def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_re
         return print("Please upload a video :)")
     
     process_upscale_vid_upload_logic(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_to_upscale_chosen_file.orig_name, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset)
+
