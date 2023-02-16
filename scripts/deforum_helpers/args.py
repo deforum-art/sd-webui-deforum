@@ -279,7 +279,7 @@ def DeforumOutputArgs():
     r_upscale_factor = 'x2' # ['2x', 'x3', 'x4']
     # **model below** - 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest do only 4x: 'realesrgan-x4plus', 'realesrgan-x4plus-anime'
     r_upscale_model = 'realesr-animevideov3' 
-    r_upscale_keep_imgs = False
+    r_upscale_keep_imgs = True
     
     render_steps = False  #@param {type: 'boolean'}
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
