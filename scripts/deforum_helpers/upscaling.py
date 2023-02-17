@@ -10,9 +10,10 @@ import shutil
 from queue import Queue, Empty
 import modules.scripts as scr
 from .frame_interpolation import clean_folder_name
-from .general_utils import duplicate_pngs_from_folder
+from .general_utils import duplicate_pngs_from_folder, checksum
 # TODO: move some funcs to this file?
 from .video_audio_utilities import get_quick_vid_info, vid2frames, ffmpeg_stitch_video, extract_number, media_file_has_audio
+from basicsr.utils.download_util import load_file_from_url
 from .rich import console
 import time
 import subprocess
