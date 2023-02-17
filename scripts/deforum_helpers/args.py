@@ -704,7 +704,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             hybrid_composite = gr.Checkbox(label="Hybrid composite", value=False, interactive=True)
                     with gr.Column(min_width=340) as hybrid_2nd_column:
                         with gr.Row(variant='compact'):
-                            hybrid_use_first_frame_as_init_image = gr.Checkbox(label="First frame as init image", value=da.hybrid_use_first_frame_as_init_image, interactive=True)
+                            hybrid_use_first_frame_as_init_image = gr.Checkbox(label="First frame as init image", value=da.hybrid_use_first_frame_as_init_image, interactive=True, visible=False)
                             hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=False, interactive=True)
                 with gr.Row() as hybrid_flow_row:
                     with gr.Column(variant='compact'):
@@ -713,7 +713,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Column(variant='compact'):
                         with gr.Row(variant='compact'):
                             with gr.Column(scale=1):
-                                hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method")
+                                hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method", visible=False)
                                 hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type", visible=False)
                 with gr.Row(visible=False, variant='compact') as hybrid_comp_mask_row:
                     hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="Comp mask equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
@@ -724,15 +724,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         hybrid_comp_save_extra_frames = gr.Checkbox(label="Comp save extra frames", value=False, interactive=True)
             # HYBRID SCHEDULES ACCORD
             with gr.Accordion("Hybrid Schedules", open=False, visible=False) as hybrid_sch_accord:
-                with gr.Row(variant='compact'):
+                with gr.Row(variant='compact') as hybrid_comp_alpha_schedule_row:
                     hybrid_comp_alpha_schedule = gr.Textbox(label="Comp alpha schedule", lines=1, value = da.hybrid_comp_alpha_schedule, interactive=True)
-                with gr.Row(variant='compact'):
+                with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_blend_alpha_schedule_row:
                     hybrid_comp_mask_blend_alpha_schedule = gr.Textbox(label="Comp mask blend alpha schedule", lines=1, value = da.hybrid_comp_mask_blend_alpha_schedule, interactive=True, elem_id="hybridelemtest")
-                with gr.Row(variant='compact'):
+                with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_contrast_schedule_row:
                     hybrid_comp_mask_contrast_schedule = gr.Textbox(label="Comp mask contrast schedule", lines=1, value = da.hybrid_comp_mask_contrast_schedule, interactive=True)
-                with gr.Row(variant='compact'):
+                with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row :
                     hybrid_comp_mask_auto_contrast_cutoff_high_schedule = gr.Textbox(label="Comp mask auto contrast cutoff high schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, interactive=True)
-                with gr.Row(variant='compact'):
+                with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row:
                     hybrid_comp_mask_auto_contrast_cutoff_low_schedule = gr.Textbox(label="Comp mask auto contrast cutoff low schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, interactive=True)
             # HUMANS MASKING ACCORD
             with gr.Accordion("Humans Masking", open=False, visible=False) as humans_masking_accord:
@@ -748,14 +748,22 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     if comp_mask_type != 'None':
                         return gr.update(visible=True)
                 return gr.update(visible=False)
-                
-                    
-             # hybrid_composite.change(
+            def disable_by_comp_mask(choice):
+                if choice == 'None':
+                    return gr.update(visible=False)
+                else:
+                    return gr.update(visible=True)
+            # todo: move this and shorten
             hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=humans_masking_accord)
             hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=hybrid_sch_accord)
             hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=hybrid_comp_mask_type)
+            hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=hybrid_use_first_frame_as_init_image)
             hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)
-            # hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=hybrid_2nd_column)
+            hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_flow_method)
+            hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_blend_alpha_schedule_row)
+            hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_contrast_schedule_row)
+            hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row)
+            hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row)
         # OUTPUT TAB
         with gr.Tab('Output'):
             # VID OUTPUT ACCORD
