@@ -360,12 +360,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
             with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
                 with gr.Row(variant='compact'):
-                    ddim_eta = gr.Number(label="DDIM Eta", value=d.ddim_eta, interactive=True)
-                    tiling = gr.Checkbox(label='Tiling', value=False)
-                with gr.Row() as pix2pix_img_cfg_scale_row:
-                        pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True) 
-                with gr.Row(visible=True):
                     restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
+                    tiling = gr.Checkbox(label='Tiling', value=False)
+                    ddim_eta = gr.Number(label="DDIM Eta", value=d.ddim_eta, interactive=True)
+                with gr.Row() as pix2pix_img_cfg_scale_row:
+                    pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
             # RUN FROM SETTING FILE ACCORD
             with gr.Accordion('Resume & Run from file', open=False):
                 with gr.Tab('Run from Settings file'):
