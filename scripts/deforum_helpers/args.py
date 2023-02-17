@@ -919,32 +919,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row(visible=False):
                 save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                 show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
-
-    # todo: MOVE these funcs from here
-    def vid_upscale_gradio_update_stats(vid_path, upscale_factor):
-        if not vid_path:
-            return '---', '---', '---', '---'
-        factor = extract_number(upscale_factor)
-        fps, fcount, resolution = get_quick_vid_info(vid_path.name)
-        in_res_str = f"{resolution[0]}*{resolution[1]}"
-        out_res_str = f"{resolution[0] * factor}*{resolution[1] * factor}"
-        return fps, fcount, in_res_str, out_res_str
-    def update_upscale_out_res(in_res, upscale_factor):
-        if not in_res:
-            return '---'
-        factor = extract_number(upscale_factor)
-        w, h = [int(x) * factor for x in in_res.split('*')]
-        return f"{w}*{h}"
-    def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
-        if not upscale_model_name or in_res == '---':
-            return '---'
-        factor = 2 if upscale_model_name == 'realesr-animevideov3' else 4
-        return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
-
     # Gradio's Change functions - hiding and renaming elements based on other elements
     if dr.current_user_os in ["Windows", "Linux"]:
         fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
-    if dr.current_user_os in ["Windows", "Linux", "Mac"]: # mac removed 15-2 until fix is found
+    if dr.current_user_os in ["Windows", "Linux", "Mac"]:
         r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
         ncnn_upscale_model.change(fn=update_r_upscale_factor, inputs=ncnn_upscale_model, outputs=ncnn_upscale_factor)
         ncnn_upscale_model.change(update_upscale_out_res_by_model_name, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_model], outputs=ncnn_upscale_out_vid_res)

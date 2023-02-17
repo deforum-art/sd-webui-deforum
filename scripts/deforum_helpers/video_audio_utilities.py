@@ -11,7 +11,6 @@ from .general_utils import checksum, duplicate_pngs_from_folder
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
 
-
 # e.g gets 'x2' returns just 2 as int
 def extract_number(string):
     return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
