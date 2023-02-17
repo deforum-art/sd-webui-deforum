@@ -705,7 +705,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Column(min_width=340) as hybrid_2nd_column:
                         with gr.Row(variant='compact'):
                             hybrid_use_first_frame_as_init_image = gr.Checkbox(label="First frame as init image", value=da.hybrid_use_first_frame_as_init_image, interactive=True, visible=False)
-                            hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=False, interactive=True)
+                            hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=False, interactive=True, visible=False)
                 with gr.Row() as hybrid_flow_row:
                     with gr.Column(variant='compact'):
                         with gr.Row(variant='compact'):
@@ -738,32 +738,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Accordion("Humans Masking", open=False, visible=False) as humans_masking_accord:
                 with gr.Row(variant='compact'):
                     hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="Generate human masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
-            def disable_by_hybrid_composite(choice):
-                if choice == True:
-                    return gr.update(visible=True)
-                else:
-                    return gr.update(visible=False)
-            def disable_by_hybrid_composite_dynamic(choice, comp_mask_type):
-                if choice == True:
-                    if comp_mask_type != 'None':
-                        return gr.update(visible=True)
-                return gr.update(visible=False)
-            def disable_by_comp_mask(choice):
-                if choice == 'None':
-                    return gr.update(visible=False)
-                else:
-                    return gr.update(visible=True)
-            # todo: move this and shorten
-            hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=humans_masking_accord)
-            hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=hybrid_sch_accord)
-            hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=hybrid_comp_mask_type)
-            hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=hybrid_use_first_frame_as_init_image)
-            hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)
-            hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_flow_method)
-            hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_blend_alpha_schedule_row)
-            hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_contrast_schedule_row)
-            hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row)
-            hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row)
         # OUTPUT TAB
         with gr.Tab('Output'):
             # VID OUTPUT ACCORD
@@ -987,15 +961,23 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_sch_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_settings_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=humans_masking_accord)
+    hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
+    hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_method)
+    hybrid_motion.change(fn=disable_by_comp_mask, inputs=hybrid_motion, outputs=hybrid_motion_use_prev_img)
+    hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)
+    hybrid_composite_outputs = [humans_masking_accord, hybrid_sch_accord, hybrid_comp_mask_type, hybrid_use_first_frame_as_init_image]
+    for output in hybrid_composite_outputs:
+        hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=output)  
+    hybrid_comp_mask_type_outputs = [hybrid_comp_mask_blend_alpha_schedule_row, hybrid_comp_mask_contrast_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row]
+    for output in hybrid_comp_mask_type_outputs:
+        hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=output)
     # End of hybrid related
     seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row) 
     seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
-    hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
-    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram, make_gif, r_upscale_row]
-
-    for output in outputs:
+    skip_video_for_run_all_outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram, make_gif, r_upscale_row]
+    for output in skip_video_for_run_all_outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
     # END OF UI TABS
     return locals()
