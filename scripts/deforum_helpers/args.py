@@ -358,13 +358,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row(variables='compact'):
                 seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
                 batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
-            with gr.Row(variant='compact'):
-                ddim_eta = gr.Number(label="DDIM ETA", value=d.ddim_eta, interactive=True)
-                tiling = gr.Checkbox(label='Tiling', value=False)
-            with gr.Row(visible=False):
-                filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
-            with gr.Row() as pix2pix_img_cfg_scale_row:
-                    pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True) 
+            with gr.Accordion('Tiling, Pix2Pix, DDIM eta', open=False) as run_more_settings_accord:
+                with gr.Row(variant='compact'):
+                    ddim_eta = gr.Number(label="DDIM Eta", value=d.ddim_eta, interactive=True)
+                    tiling = gr.Checkbox(label='Tiling', value=False)
+                with gr.Row() as pix2pix_img_cfg_scale_row:
+                        pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True) 
             # RUN FROM SETTING FILE ACCORD
             with gr.Accordion('Resume & Run from file', open=False):
                 with gr.Tab('Run from Settings file'):
@@ -902,6 +901,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Column(min_width=200, visible=False):
                     perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                     perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
+                with gr.Row(visible=False):
+                    filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
                 with gr.Row(visible=False):
                     save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
                 with gr.Row(visible=False):
