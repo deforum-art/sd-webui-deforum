@@ -1,6 +1,6 @@
 # Detach 'deforum_helpers' from 'scripts' to prevent "No module named 'scripts.deforum_helpers'"  error 
 # causing Deforum's tab not show up in some cases when you've might've broken the environment with webui packages updates
-import sys, os
+import sys, os, shutil
 
 basedirs = [os.getcwd()]
 if 'google.colab' in sys.modules:
@@ -96,6 +96,9 @@ def run_deforum(*args, **kwargs):
     real_audio_track = None
     if video_args.add_soundtrack != 'None':
         real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
+    
+    # Delete folder with duplicated imgs from OS temp folder
+    shutil.rmtree(root.tmp_deforum_run_duplicated_folder)
     
     # Decide whether or not we need to try and frame interpolate laters
     need_to_frame_interpolate = False

@@ -9,7 +9,8 @@ from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vi
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os
-
+import tempfile
+        
 def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
@@ -25,6 +26,7 @@ def Root():
     color_corrections = None 
     initial_clipskip = None
     current_user_os = get_os()
+    tmp_deforum_run_duplicated_folder = os.path.join(tempfile.gettempdir(), 'tmp_run_deforum')
     return locals()
 
 def DeforumAnimArgs():
