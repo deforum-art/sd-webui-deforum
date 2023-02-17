@@ -144,6 +144,8 @@ deforum_titles = {
 	"In Frame Count": "uploaded video total frame count",
 	"In FPS":"uploaded video FPS",
 	"Interpolated Vid FPS":"calculated output-interpolated video FPS",
+	"In Res":"uploaded video resolution",
+	"Out Res":"output video resolution",
 
     // Looper Args
     // "use_looper": "",
