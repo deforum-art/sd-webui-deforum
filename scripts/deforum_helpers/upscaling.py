@@ -249,7 +249,7 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
     console.print(msg_to_print, style="blink yellow", end="") 
     start_time = time.time()
     # make call to ncnn upscaling executble
-    process = subprocess.run(cmd, capture_output=True, check=True, text=True)
+    process = subprocess.run(cmd, capture_output=True, check=True, text=True, cwd=(os.path.join(deforum_models_path, 'realesrgan_ncnn') if current_user_os == 'Mac' else None))
     print("\r" + " " * len(msg_to_print), end="", flush=True)
     print(f"\r{msg_to_print}", flush=True)
     print(f"\rUpscaling \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
