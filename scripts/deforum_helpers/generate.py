@@ -148,12 +148,15 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                                           use_alpha_as_mask=args.use_alpha_as_mask)
                                           
     else:
+        # save duplicated files to temp folder - *temp* solution
+        import tempfile
+        temp_folder = tempfile.gettempdir()
         if anim_args.animation_mode != 'Interpolation':
             print(f"Not using an init image (doing pure txt2img)")
         p_txt = StableDiffusionProcessingTxt2Img(
                 sd_model=sd_model,
-                outpath_samples=p.outpath_samples,
-                outpath_grids=p.outpath_samples,
+                outpath_samples=temp_folder, # save duplicated imgs to OS temp folder
+                outpath_grids=temp_folder, # save duplicated imgs to OS temp folder
                 prompt=p.prompt,
                 styles=p.styles,
                 negative_prompt=p.negative_prompt,
@@ -178,7 +181,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         print_generate_table(args, anim_args, p_txt)
         
         processed = processing.process_images(p_txt)
-    
+
     if processed is None:
         # Mask functions
         if args.use_mask:
