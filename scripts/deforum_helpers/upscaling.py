@@ -18,7 +18,7 @@ import time
 import subprocess
 
 def process_upscale_vid_upload_logic(file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_file_name, keep_imgs, f_location, f_crf, f_preset):
-    print("got a request to *upscale* an existing video.")
+    print("Got a request to *upscale* an existing video.")
 
     in_vid_fps, _, _ = get_quick_vid_info(file.name)
     folder_name = clean_folder_name(Path(vid_file_name).stem)
@@ -121,7 +121,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
 
 # NCNN Upscale section START
 def process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, current_user_os):
-    print(f"got a request to *upscale* a video using {upscale_model} at {upscale_factor}")
+    print(f"Got a request to *upscale* a video using {upscale_model} at {upscale_factor}")
 
     folder_name = clean_folder_name(Path(vid_path.orig_name).stem)
     outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-upscaling', folder_name)
