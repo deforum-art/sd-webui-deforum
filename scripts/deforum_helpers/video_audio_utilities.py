@@ -225,12 +225,15 @@ def get_manual_frame_to_vid_output_path(input_path):
     
 def direct_stitch_vid_from_frames(image_path, fps, f_location, f_crf, f_preset, add_soundtrack, audio_path):
     import re
-    # TODO: make the if smarter
-    if re.search(r"_%\d+d\.png$", image_path):
+    # checking - do we actually have at least 4 matched files for the provided pattern
+    file_list = [image_path % i for i in range(4)]
+    exists_list = [os.path.isfile(file) for file in file_list]
+    # we got 4 files, moving on
+    if all(exists_list):
         out_mp4_path = get_manual_frame_to_vid_output_path(image_path)
         ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=out_mp4_path, stitch_from_frame=0, stitch_to_frame=-1, imgs_path=image_path, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
     else:
-        print("Please set correct image_path")
+        print("Couldn't find images that match the provided path/ pattern. At least 2 matched images are required.")
 # end of 2 stitch frame to video funcs
 
 # returns True if filename (could be also media URL) contains an audio stream, othehrwise False
