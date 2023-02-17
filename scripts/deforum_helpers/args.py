@@ -820,14 +820,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
             # VIDEO UPSCALE TAB
-            def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
-                if vid_path is None:
-                    print("Please upload a video :)")
-                    return
-                root_params = Root()
-                f_models_path = root_params['models_path']
-                # using vid_path.name actually
-                process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, f_models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, dr.current_user_os)
             with gr.Tab('Video Upscaling'):
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                 with gr.Column():
@@ -868,10 +860,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
                                 with gr.Column(scale=1, min_width=80):
                                     upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
-
                             tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
                             tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
-
                             # This is the actual button that's pressed to initiate the Upscaling:
                             upscale_btn = gr.Button(value="*Upscale uploaded video*")
                             # Show a text about CLI outputs:
@@ -1187,3 +1177,11 @@ def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_re
     
     process_upscale_vid_upload_logic(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_to_upscale_chosen_file.orig_name, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset)
 
+def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
+    if vid_path is None:
+        print("Please upload a video :)")
+        return
+    root_params = Root()
+    f_models_path = root_params['models_path']
+    current_user = root_params['current_user_os']
+    process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, f_models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, current_user)
