@@ -1,11 +1,11 @@
 import numpy as np
 import cv2
 from PIL import Image
-from prettytable import PrettyTable
 from .prompt import split_weighted_subprompts
 from .load_images import load_img, prepare_mask, check_mask_for_errors
 from .webui_sd_pipeline import get_webui_sd_pipeline
 from .animation import sample_from_cv2, sample_to_cv2
+from .rich import console
 
 #Webui
 import cv2
@@ -213,21 +213,25 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
     results = processed.images[0]
     
     return results
-    
+
 def print_generate_table(args, anim_args, p):
-    x = PrettyTable(padding_width=0)
+    from rich.table import Table
+    from rich import box
+    table = Table(padding=0, box=box.ROUNDED)
     field_names = ["Steps", "CFG"]
     if anim_args.animation_mode != 'Interpolation':
         field_names.append("Denoise")
-    field_names += ["Subseed", "Subs. str"] * (args.seed_enable_extras)
+    field_names += ["Subseed", "Subs. str"] * (anim_args.enable_subseed_scheduling)
     field_names += ["Sampler"] * anim_args.enable_sampler_scheduling
     field_names += ["Checkpoint"] * anim_args.enable_checkpoint_scheduling
-    x.field_names = field_names
-    row = [p.steps, p.cfg_scale]
+    for field_name in field_names:
+        table.add_column(field_name, justify="center")
+    rows = [str(p.steps), str(p.cfg_scale)]
     if anim_args.animation_mode != 'Interpolation':
-        row.append(p.denoising_strength)
-    row += [p.subseed, p.subseed_strength] * (args.seed_enable_extras)
-    row += [p.sampler_name] * anim_args.enable_sampler_scheduling
-    row += [args.checkpoint] * anim_args.enable_checkpoint_scheduling
-    x.add_row(row)
-    print(x)
+        rows.append(str(p.denoising_strength))
+    rows += [str(p.subseed), str(p.subseed_strength)] * (anim_args.enable_subseed_scheduling)
+    rows += [p.sampler_name] * anim_args.enable_sampler_scheduling
+    rows += [str(args.checkpoint)] * anim_args.enable_checkpoint_scheduling
+    table.add_row(*rows)
+
+    console.print(table)

@@ -358,13 +358,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row(variables='compact'):
                 seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
                 batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
-            with gr.Row(variant='compact'):
-                ddim_eta = gr.Number(label="DDIM ETA", value=d.ddim_eta, interactive=True)
-                tiling = gr.Checkbox(label='Tiling', value=False)
-            with gr.Row(visible=False):
-                filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
-            with gr.Row() as pix2pix_img_cfg_scale_row:
-                    pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True) 
+            with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
+                with gr.Row(variant='compact'):
+                    restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
+                    tiling = gr.Checkbox(label='Tiling', value=False)
+                    ddim_eta = gr.Number(label="DDIM Eta", value=d.ddim_eta, interactive=True)
+                with gr.Row() as pix2pix_img_cfg_scale_row:
+                    pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
             # RUN FROM SETTING FILE ACCORD
             with gr.Accordion('Resume & Run from file', open=False):
                 with gr.Tab('Run from Settings file'):
@@ -702,19 +702,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Row(variant='compact'):
                             hybrid_generate_inputframes = gr.Checkbox(label="Generate inputframes", value=False, interactive=True)
                             hybrid_composite = gr.Checkbox(label="Hybrid composite", value=False, interactive=True)
-                    with gr.Column(min_width=340):
+                    with gr.Column(min_width=340) as hybrid_2nd_column:
                         with gr.Row(variant='compact'):
-                            hybrid_use_first_frame_as_init_image = gr.Checkbox(label="First frame as init image", value=False, interactive=True)
-                            hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=False, interactive=True)
-                with gr.Row():
+                            hybrid_use_first_frame_as_init_image = gr.Checkbox(label="First frame as init image", value=da.hybrid_use_first_frame_as_init_image, interactive=True, visible=False)
+                            hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=False, interactive=True, visible=False)
+                with gr.Row() as hybrid_flow_row:
                     with gr.Column(variant='compact'):
                         with gr.Row(variant='compact'):
                             hybrid_motion = gr.Radio(['None', 'Optical Flow', 'Perspective', 'Affine'], label="Hybrid motion", value=da.hybrid_motion, elem_id="hybrid_motion")
                     with gr.Column(variant='compact'):
                         with gr.Row(variant='compact'):
                             with gr.Column(scale=1):
-                                hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method")
-                                hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type")
+                                hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method", visible=False)
+                                hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type", visible=False)
                 with gr.Row(visible=False, variant='compact') as hybrid_comp_mask_row:
                     hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="Comp mask equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
                     with gr.Column(variant='compact'):
@@ -723,19 +723,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row(variant='compact'):
                         hybrid_comp_save_extra_frames = gr.Checkbox(label="Comp save extra frames", value=False, interactive=True)
             # HYBRID SCHEDULES ACCORD
-            with gr.Accordion("Hybrid Schedules", open=False) as hybrid_sch_accord:
-                with gr.Row(variant='compact'):
+            with gr.Accordion("Hybrid Schedules", open=False, visible=False) as hybrid_sch_accord:
+                with gr.Row(variant='compact') as hybrid_comp_alpha_schedule_row:
                     hybrid_comp_alpha_schedule = gr.Textbox(label="Comp alpha schedule", lines=1, value = da.hybrid_comp_alpha_schedule, interactive=True)
-                with gr.Row(variant='compact'):
+                with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_blend_alpha_schedule_row:
                     hybrid_comp_mask_blend_alpha_schedule = gr.Textbox(label="Comp mask blend alpha schedule", lines=1, value = da.hybrid_comp_mask_blend_alpha_schedule, interactive=True, elem_id="hybridelemtest")
-                with gr.Row(variant='compact'):
+                with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_contrast_schedule_row:
                     hybrid_comp_mask_contrast_schedule = gr.Textbox(label="Comp mask contrast schedule", lines=1, value = da.hybrid_comp_mask_contrast_schedule, interactive=True)
-                with gr.Row(variant='compact'):
+                with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row :
                     hybrid_comp_mask_auto_contrast_cutoff_high_schedule = gr.Textbox(label="Comp mask auto contrast cutoff high schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, interactive=True)
-                with gr.Row(variant='compact'):
+                with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row:
                     hybrid_comp_mask_auto_contrast_cutoff_low_schedule = gr.Textbox(label="Comp mask auto contrast cutoff low schedule", lines=1, value = da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, interactive=True)
             # HUMANS MASKING ACCORD
-            with gr.Accordion("Humans Masking", open=False) as humans_masking_accord:
+            with gr.Accordion("Humans Masking", open=False, visible=False) as humans_masking_accord:
                 with gr.Row(variant='compact'):
                     hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="Generate human masks", value=da.hybrid_generate_human_masks, elem_id="hybrid_generate_human_masks")
         # OUTPUT TAB
@@ -746,10 +746,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
                     # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
                     output_format = gr.Dropdown(visible=False, label="Output format", choices=['FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
-                with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
-                    ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True)
-                    ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
-                    ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location)
+                
                 with gr.Column(variant='compact'):
                     with gr.Row(variant='compact') as soundtrack_row:
                         add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="Add soundtrack", value=dv.add_soundtrack)
@@ -765,6 +762,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     r_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
                     r_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
                     r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True)
+                with gr.Accordion('FFmpeg settings', visible=True, open=False) as ffmpeg_quality_accordion:
+                    with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
+                        ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True)
+                        ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
+                    with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_location_row:
+                        ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location)
             # RIFE TAB
             with gr.Tab('RIFE') as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
@@ -820,14 +823,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
             # VIDEO UPSCALE TAB
-            def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
-                if vid_path is None:
-                    print("Please upload a video :)")
-                    return
-                root_params = Root()
-                f_models_path = root_params['models_path']
-                # using vid_path.name actually
-                process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, f_models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, dr.current_user_os)
             with gr.Tab('Video Upscaling'):
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                 with gr.Column():
@@ -868,10 +863,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
                                 with gr.Column(scale=1, min_width=80):
                                     upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
-
                             tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
                             tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
-
                             # This is the actual button that's pressed to initiate the Upscaling:
                             upscale_btn = gr.Button(value="*Upscale uploaded video*")
                             # Show a text about CLI outputs:
@@ -910,6 +903,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                     perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
                 with gr.Row(visible=False):
+                    filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
+                with gr.Row(visible=False):
                     save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
                 with gr.Row(visible=False):
                     save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
@@ -917,8 +912,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # NOT VISIBLE 11-02-23 htai
             with gr.Accordion('Subseed controls & More', open=False, visible=False):
                 # Not visible until fixed, 06-02-23
-                with gr.Row(visible=False):
-                    restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
                 # NOT VISIBLE as of 11-02 - we have sch now. will delete the actual params in a later date
                 with gr.Row(variant='compact', visible=False):
                     seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
@@ -926,38 +919,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Row(visible=False):
                 save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                 show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
-
-    # todo: MOVE these funcs from here
-    def vid_upscale_gradio_update_stats(vid_path, upscale_factor):
-        if not vid_path:
-            return '---', '---', '---', '---'
-        factor = extract_number(upscale_factor)
-        fps, fcount, resolution = get_quick_vid_info(vid_path.name)
-        in_res_str = f"{resolution[0]}*{resolution[1]}"
-        out_res_str = f"{resolution[0] * factor}*{resolution[1] * factor}"
-        return fps, fcount, in_res_str, out_res_str
-    def update_upscale_out_res(in_res, upscale_factor):
-        if not in_res:
-            return '---'
-        factor = extract_number(upscale_factor)
-        w, h = [int(x) * factor for x in in_res.split('*')]
-        return f"{w}*{h}"
-    def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
-        if not upscale_model_name or in_res == '---':
-            return '---'
-        factor = 2 if upscale_model_name == 'realesr-animevideov3' else 4
-        return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
-
     # Gradio's Change functions - hiding and renaming elements based on other elements
     if dr.current_user_os in ["Windows", "Linux"]:
         fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
-    if dr.current_user_os in ["Windows", "Linux", "Mac"]: # mac removed 15-2 until fix is found
+    if dr.current_user_os in ["Windows", "Linux", "Mac"]:
         r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
         ncnn_upscale_model.change(fn=update_r_upscale_factor, inputs=ncnn_upscale_model, outputs=ncnn_upscale_factor)
         ncnn_upscale_model.change(update_upscale_out_res_by_model_name, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_model], outputs=ncnn_upscale_out_vid_res)
         ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
         vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
-        
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence_column)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
@@ -966,20 +936,29 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
+    animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=both_anim_mode_motion_params_column)
     #Hybrid related:
     animation_mode.change(fn=show_hybrid_html_msg, inputs=animation_mode, outputs=hybrid_msg_html)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_sch_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_settings_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=humans_masking_accord)
+    hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
+    hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_method)
+    hybrid_motion.change(fn=disable_by_comp_mask, inputs=hybrid_motion, outputs=hybrid_motion_use_prev_img)
+    hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)
+    hybrid_composite_outputs = [humans_masking_accord, hybrid_sch_accord, hybrid_comp_mask_type, hybrid_use_first_frame_as_init_image]
+    for output in hybrid_composite_outputs:
+        hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=output)  
+    hybrid_comp_mask_type_outputs = [hybrid_comp_mask_blend_alpha_schedule_row, hybrid_comp_mask_contrast_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row]
+    for output in hybrid_comp_mask_type_outputs:
+        hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=output)
     # End of hybrid related
     seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row) 
     seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
-    hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
-    outputs = [fps_out_format_row, soundtrack_row, ffmpeg_set_row, store_frames_in_ram, make_gif, r_upscale_row]
-
-    for output in outputs:
+    skip_video_for_run_all_outputs = [fps_out_format_row, soundtrack_row, ffmpeg_quality_accordion, store_frames_in_ram, make_gif, r_upscale_row]
+    for output in skip_video_for_run_all_outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
     # END OF UI TABS
     return locals()
@@ -1187,3 +1166,11 @@ def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_re
     
     process_upscale_vid_upload_logic(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_to_upscale_chosen_file.orig_name, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset)
 
+def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
+    if vid_path is None:
+        print("Please upload a video :)")
+        return
+    root_params = Root()
+    f_models_path = root_params['models_path']
+    current_user = root_params['current_user_os']
+    process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, f_models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, current_user)

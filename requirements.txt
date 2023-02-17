@@ -4,5 +4,4 @@ pandas
 av
 pims
 imageio_ffmpeg
-prettytable
 rich

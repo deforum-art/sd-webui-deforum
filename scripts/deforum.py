@@ -26,7 +26,8 @@ import json
 
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
-from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, make_upscale_v2
+from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif
+from deforum_helpers.upscaling import make_upscale_v2
 import gc
 import torch
 from webui import wrap_gradio_gpu_call
