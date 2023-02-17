@@ -192,7 +192,6 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
         executble_name = 'realesrgan-ncnn-vulkan'
         zip_checksum_value = '65f09472025b55b18cf6ba64149ede8cded90c20e18d35a9edb1ab60715b383a6ffbf1be90d973fc2075cf99d4cc1411fbdc459411af5c904f544b8656111469'
         download_url = 'https://github.com/hithereai/Real-ESRGAN/releases/download/real-esrgan-ncnn-mac/realesrgan-ncnn-mac.zip'
-        
     else: # who are you then?
         raise Exception(f"No support for OS type: {current_user_os}")
 
@@ -224,7 +223,6 @@ def check_and_download_realesrgan_ncnn(models_folder, current_user_os):
             # enable running the exec for mac users
             if current_user_os == 'Mac':
                 os.system(f'xattr -d com.apple.quarantine "{realesrgan_exec_path}"')
-                # subprocess.run(['xattr', '-d', 'com.apple.quarantine', f'./{realesrgan_exec_path}'])
 
     except Exception as e:
         raise Exception(f"Error while downloading {realesrgan_zip_path}. Please download from: {download_url}, and extract its contents into: {models_folder}/realesrgan_ncnn")
