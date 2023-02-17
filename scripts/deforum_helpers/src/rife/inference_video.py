@@ -16,6 +16,7 @@ from .model.pytorch_msssim import ssim_matlab
 
 sys.path.append('../../')
 from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video
+from deforum_helpers.general_utils import duplicate_pngs_from_folder
 
 warnings.filterwarnings("ignore")
 
@@ -198,22 +199,6 @@ def run_rife_new_video_infer(
     except Exception as e:
         print(f'Video stitching gone wrong. *Interpolated frames were saved to HD as backup!*. Actual error: {e}')
 
-def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_name):
-    #TODO: don't copy-paste at all if the input is a video (now it copy-pastes, and if input is deforum run is also converts to make sure no errors rise cuz of 24-32 bit depth differences)
-    temp_convert_raw_png_path = os.path.join(from_folder, to_folder)
-    if not os.path.exists(temp_convert_raw_png_path):
-                os.makedirs(temp_convert_raw_png_path)
-                
-    for f in os.listdir(from_folder):
-        if ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and ((img_batch_id is not None and f.startswith(img_batch_id) or img_batch_id is None)):
-            original_img_path = os.path.join(from_folder, f)
-            if orig_vid_name is not None:
-                shutil.copy(original_img_path, temp_convert_raw_png_path)
-            else:
-                image = cv2.imread(original_img_path)
-                new_path = os.path.join(temp_convert_raw_png_path, f)
-                cv2.imwrite(new_path, image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
-    
 def clear_write_buffer(user_args, write_buffer, custom_interp_path):
     cnt = 0
 

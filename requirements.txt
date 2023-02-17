@@ -3,6 +3,6 @@ matplotlib
 pandas
 av
 pims
-moviepy
 imageio_ffmpeg
 prettytable
+rich

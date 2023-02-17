@@ -14,7 +14,6 @@ for basedir in basedirs:
             sys.path.extend([deforum_scripts_path_fix])
 
 # Main deforum stuff
-
 import deforum_helpers.args as deforum_args
 import deforum_helpers.settings as deforum_settings
 from deforum_helpers.save_images import dump_frames_cache, reset_frames_cache
@@ -27,7 +26,7 @@ import json
 
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
-from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video
+from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, make_upscale_v2
 import gc
 import torch
 from webui import wrap_gradio_gpu_call
@@ -45,7 +44,7 @@ def run_deforum(*args, **kwargs):
         #we'll setup the rest later
     )
     
-    print("\033[4;33mDeforum extension for auto1111 webui, v2.0b\033[0m")
+    print("\033[4;33mDeforum extension for auto1111 webui, v2.1b\033[0m")
     args_dict['self'] = None
     args_dict['p'] = p
     
@@ -104,7 +103,7 @@ def run_deforum(*args, **kwargs):
         
     if video_args.skip_video_for_run_all:
         print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
-    else: #video_args.output_format == 'FFMPEG mp4':
+    else:
         import subprocess
 
         path_name_modifier = video_args.path_name_modifier
@@ -142,7 +141,7 @@ def run_deforum(*args, **kwargs):
             else:
                 print(f"** FFMPEG DID NOT STITCH ANY VIDEO ** Error: {e}")
             pass
-
+            
     if root.initial_info is None:
         root.initial_info = "An error has occured and nothing has been generated!"
         root.initial_info += "\nPlease, report the bug to https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"
@@ -154,6 +153,15 @@ def run_deforum(*args, **kwargs):
     if need_to_frame_interpolate: 
         print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
         process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
+    
+    if video_args.make_gif and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
+        make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
+    
+    # Upscale video once generation is done:
+    if video_args.r_upscale_video and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
+        
+        # out mp4 path is defined in make_upscale func
+        make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=video_args.ffmpeg_location, stitch_from_frame=0, stitch_to_frame=max_video_frames, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track)
         
     root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
     root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
@@ -236,7 +244,6 @@ def on_ui_tabs():
                 
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
 
-                
                 gr.HTML("<p>* Paths can be relative to webui folder OR full - absolute </p>")
                 with gr.Row():
                     settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="General Settings File")
@@ -257,7 +264,6 @@ def on_ui_tabs():
                 components['show_sample_per_step'].visible = False
                 components['display_samples'].visible = False
 
-               
         component_list = [components[name] for name in deforum_args.component_names]
 
         submit.click(

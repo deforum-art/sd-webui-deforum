@@ -3,8 +3,8 @@ import gradio as gr
 def change_visibility_from_skip_video(choice):
     return gr.update(visible=False) if choice else gr.update(visible=True) 
 
-# def hide_by_gif(choice):
-    # return gr.update(visible=False) if choice == 'PIL gif' else gr.update(visible=True)
+def update_r_upscale_factor(choice):
+    return gr.update(value='x4', choices = ['x4']) if choice != 'realesr-animevideov3' else gr.update(value='x2', choices = ['x2', 'x3', 'x4'])
 
 def change_perlin_visibility(choice):
     return gr.update(visible=choice=="perlin")
@@ -41,3 +41,6 @@ def disable_by_video_input(choice):
     
 def change_comp_mask_x_visibility(choice):
     return gr.update(visible=choice != "None")
+    
+def change_gif_button_visibility(choice):
+    return gr.update(visible=False, value=False) if int(choice) > 30 else gr.update(visible=True)
