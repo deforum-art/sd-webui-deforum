@@ -94,7 +94,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
     predict_depths = predict_depths or (anim_args.hybrid_composite and anim_args.hybrid_comp_mask_type in ['Depth','Video Depth'])
     if predict_depths:
-        depth_model = DepthModel('cpu' if anim_args.low_vram_depth else root.device)
+        depth_model = DepthModel('cpu' if cmd_opts.lowvram or cmd_opts.medvram else root.device)
         depth_model.load_midas(root.models_path, root.half_precision)
         if anim_args.midas_weight < 1.0:
             depth_model.load_adabins(root.models_path)
@@ -206,9 +206,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         
         depth = None
 
-        if anim_args.low_vram_depth:
+        if cmd_opts.lowvram or cmd_opts.medvram:
             # Unload the main checkpoint and load the depth model
             lowvram.send_everything_to_cpu()
+            devices.torch_gc()
             depth_model.to(root.device)
         
         # emit in-between frames
@@ -402,9 +403,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         if scheduled_clipskip is not None:
             opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip
         
-        if anim_args.low_vram_depth:
+        if cmd_opts.lowvram or cmd_opts.medvram:
             depth_model.to('cpu')
-            sd_model.to(root.device)
+            devices.torch_gc()
+            lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
         
         # sample the diffusion model
         image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
@@ -450,14 +452,16 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             save_image(image, 'PIL', filename, args, video_args, root)
 
             if anim_args.save_depth_maps:
-                if anim_args.low_vram_depth:
+                if cmd_opts.lowvram or cmd_opts.medvram:
                     lowvram.send_everything_to_cpu()
+                    devices.torch_gc()
                     depth_model.to(root.device)
                 depth = depth_model.predict(opencv_image, anim_args, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
-                if anim_args.low_vram_depth:
+                if cmd_opts.lowvram or cmd_opts.medvram:
                     depth_model.to('cpu')
-                    sd_model.to(root.device)
+                    devices.torch_gc()
+                    lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
             frame_idx += 1
 
         state.current_image = image
