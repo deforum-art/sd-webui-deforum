@@ -206,7 +206,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         
         depth = None
 
-        if cmd_opts.lowvram or cmd_opts.medvram:
+        if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
             # Unload the main checkpoint and load the depth model
             lowvram.send_everything_to_cpu()
             devices.torch_gc()
@@ -403,7 +403,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         if scheduled_clipskip is not None:
             opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip
         
-        if cmd_opts.lowvram or cmd_opts.medvram:
+        if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
             depth_model.to('cpu')
             devices.torch_gc()
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
