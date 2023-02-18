@@ -25,7 +25,7 @@ from .composable_masks import compose_mask_with_check
 from .settings import get_keys_to_exclude
 # Webui
 from modules.shared import opts, cmd_opts, state, sd_model
-from modules import lowvram, devices
+from modules import lowvram, devices, sd_hijack
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root):
     # handle hybrid video generation
@@ -209,6 +209,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
             # Unload the main checkpoint and load the depth model
             lowvram.send_everything_to_cpu()
+            sd_hijack.model_hijack.undo_hijack(sd_model)
             devices.torch_gc()
             depth_model.to(root.device)
         
@@ -407,6 +408,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             depth_model.to('cpu')
             devices.torch_gc()
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
+            sd_hijack.model_hijack.hijack(sd_model)
         
         # sample the diffusion model
         image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
@@ -454,6 +456,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             if anim_args.save_depth_maps:
                 if cmd_opts.lowvram or cmd_opts.medvram:
                     lowvram.send_everything_to_cpu()
+                    sd_hijack.model_hijack.undo_hijack(sd_model)
                     devices.torch_gc()
                     depth_model.to(root.device)
                 depth = depth_model.predict(opencv_image, anim_args, root.half_precision)
@@ -462,6 +465,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
                     depth_model.to('cpu')
                     devices.torch_gc()
                     lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
+                    sd_hijack.model_hijack.hijack(sd_model)
             frame_idx += 1
 
         state.current_image = image
