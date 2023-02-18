@@ -157,5 +157,6 @@ class DepthModel():
     
     def to(self, device):
         self.midas_model.to(device)
-        self.adabins_helper.to(device)
+        if self.adabins_helper is not None:
+            self.adabins_helper.to(device)
 
