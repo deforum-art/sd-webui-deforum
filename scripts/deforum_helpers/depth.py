@@ -153,5 +153,9 @@ class DepthModel():
         denom = max(1e-8, self.depth_max - self.depth_min)
         temp = rearrange((depth - self.depth_min) / denom * 255, 'c h w -> h w c')
         temp = repeat(temp, 'h w 1 -> h w c', c=3)
-        Image.fromarray(temp.astype(np.uint8)).save(filename)    
+        Image.fromarray(temp.astype(np.uint8)).save(filename)
+    
+    def to(self, device):
+        self.midas_model.to(device)
+        self.adabins_helper.to(device)
 
