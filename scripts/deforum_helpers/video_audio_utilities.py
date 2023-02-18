@@ -225,12 +225,15 @@ def get_manual_frame_to_vid_output_path(input_path):
     
 def direct_stitch_vid_from_frames(image_path, fps, f_location, f_crf, f_preset, add_soundtrack, audio_path):
     import re
-    # TODO: make the if smarter
-    if re.search(r"_%\d+d\.png$", image_path):
+    # checking - do we actually have at least 4 matched files for the provided pattern
+    file_list = [image_path % i for i in range(4)]
+    exists_list = [os.path.isfile(file) for file in file_list]
+    # we got 4 files, moving on
+    if all(exists_list):
         out_mp4_path = get_manual_frame_to_vid_output_path(image_path)
         ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=out_mp4_path, stitch_from_frame=0, stitch_to_frame=-1, imgs_path=image_path, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
     else:
-        print("Please set correct image_path")
+        print("Couldn't find images that match the provided path/ pattern. At least 2 matched images are required.")
 # end of 2 stitch frame to video funcs
 
 # returns True if filename (could be also media URL) contains an audio stream, othehrwise False
@@ -249,13 +252,22 @@ def check_and_download_gifski(models_folder, current_user_os):
         file_name = 'gifski'
         checksum_value = 'e65bf9502bca520a7fd373397e41078d5c73db12ec3e9b47458c282d076c04fa697adecb5debb5d37fc9cbbee0673bb95e78d92c1cf813b4f5cc1cabe96880ff'
         download_url = 'https://github.com/hithereai/d/releases/download/gifski-linux-bin/gifski'
+    elif current_user_os == 'Mac':
+        file_name = 'gifski'
+        checksum_value = '622a65d25609677169ed2c1c53fd9aa496a98b357cf84d0c3627ae99c85a565d61ca42cdc4d24ed6d60403bb79b6866ce24f3c4b6fff58c4d27632264a96353c'
+        download_url = 'https://github.com/hithereai/d/releases/download/gifski-mac-bin/gifski'
+    else: # who are you then?
+        raise Exception(f"No support for OS type: {current_user_os}")
         
     file_path = os.path.join(models_folder, file_name)
     
     if not os.path.exists(file_path):
         load_file_from_url(download_url, models_folder)
-        if current_user_os == 'Linux':
+        if current_user_os in ['Linux','Mac']:
             os.chmod(file_path, 0o755)
+            if current_user_os == 'Mac':
+                # enable running the exec for mac users
+                os.system(f'xattr -d com.apple.quarantine "{file_path}"')
         if checksum(file_path) != checksum_value:
             raise Exception(f"Error while downloading {file_name}. Please download from: {download_url} and place in: {models_folder}")
            
@@ -283,15 +295,11 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
     check_and_download_gifski(models_folder, current_user_os)
 
     try:
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
-        stdout, stderr = process.communicate()
-        if process.returncode != 0:
-            print("\r" + " " * len(msg_to_print), end="", flush=True)
-            print(f"\r{msg_to_print}", flush=True)
-            print(stderr)
-            raise RuntimeError(stderr)
+        process = subprocess.run(cmd, capture_output=True, check=True, text=True, cwd=(models_folder if current_user_os == 'Mac' else None))
         print("\r" + " " * len(msg_to_print), end="", flush=True)
         print(f"\r{msg_to_print}", flush=True)
         print(f"GIF stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!")
     except Exception as e:
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
         print(f"GIF stitching *failed* with error:\n{e}")

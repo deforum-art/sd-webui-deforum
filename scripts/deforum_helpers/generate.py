@@ -6,7 +6,6 @@ from .load_images import load_img, prepare_mask, check_mask_for_errors
 from .webui_sd_pipeline import get_webui_sd_pipeline
 from .animation import sample_from_cv2, sample_to_cv2
 from .rich import console
-
 #Webui
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
@@ -148,12 +147,13 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
                                           use_alpha_as_mask=args.use_alpha_as_mask)
                                           
     else:
+        
         if anim_args.animation_mode != 'Interpolation':
             print(f"Not using an init image (doing pure txt2img)")
         p_txt = StableDiffusionProcessingTxt2Img(
                 sd_model=sd_model,
-                outpath_samples=p.outpath_samples,
-                outpath_grids=p.outpath_samples,
+                outpath_samples=root.tmp_deforum_run_duplicated_folder,
+                outpath_grids=root.tmp_deforum_run_duplicated_folder,
                 prompt=p.prompt,
                 styles=p.styles,
                 negative_prompt=p.negative_prompt,
@@ -178,7 +178,7 @@ def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, s
         print_generate_table(args, anim_args, p_txt)
         
         processed = processing.process_images(p_txt)
-    
+
     if processed is None:
         # Mask functions
         if args.use_mask:
