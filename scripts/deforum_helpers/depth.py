@@ -156,6 +156,7 @@ class DepthModel():
         Image.fromarray(temp.astype(np.uint8)).save(filename)
     
     def to(self, device):
+        self.device = device
         self.midas_model.to(device)
         if self.adabins_helper is not None:
             self.adabins_helper.to(device)
