@@ -295,7 +295,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         "threshold_b": controlnet_args.controlnet_threshold_b,
     }
 
-    p.scripts = scrpts.scripts_txt2img
+    from .deforum_controlnet_hardcode import process
     p.script_args = (
         0, # todo: why
         cn_args["enabled"],
@@ -315,7 +315,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 
     print(p.script_args) # TODO add pretty table
 
-    processed = scrpts.scripts_txt2img.run(p, *(p.script_args))
+    processed = process(p, *(p.script_args))
 
     if processed is None: # the script just swaps the pipeline, so failing is OK for the first time
         processed = process_images(p)
@@ -360,7 +360,7 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         "threshold_b": controlnet_args.controlnet_threshold_b,
     }
 
-    p.scripts = scrpts.scripts_img2img
+    from .deforum_controlnet_hardcode import process
     p.script_args = (
         0, # todo: why
         cn_args["enabled"],
@@ -380,7 +380,7 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 
     print(p.script_args) # TODO add pretty table
 
-    processed = scrpts.scripts_img2img.run(p, *(p.script_args))
+    processed = process(p, *(p.script_args))
 
     if processed is None: # the script just swaps the pipeline, so failing is OK for the first time
         processed = process_images(p)
