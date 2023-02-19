@@ -744,7 +744,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
                     # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
                     output_format = gr.Dropdown(visible=False, label="Output format", choices=['FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
-                
                 with gr.Column(variant='compact'):
                     with gr.Row(variant='compact') as soundtrack_row:
                         add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="Add soundtrack", value=dv.add_soundtrack)
@@ -786,18 +785,18 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         </ul>
                     </p>
                     """)
-                with gr.Column():
+                with gr.Column(variant='compact'):
                     with gr.Row(variant='compact'):
                         # Interpolation Engine
-                        frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['RIFE v4.0','RIFE v4.3','RIFE v4.6', 'FILM'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
-                        # How many times to interpolate (interp x)
-                        # frame_interpolation_x_amount = gr.Dropdown(label="Interp x", choices=['Disabled','x2','x3','x4','x5','x6','x7','x8','x9','x10'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frame_interpolation_x_amount", interactive=True)
-                        frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp x", value=dv.frame_interpolation_x_amount, interactive=True)
-                        # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE)
-                        frame_interpolation_slow_mo_amount = gr.Dropdown(label="Slow-Mo x", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
-                        frame_interpolation_slow_mo_amount =  gr.Slider(minimum=0, maximum=10, step=1, label="Interp x", value=dv.frame_interpolation_x_amount, interactive=True)
+                        frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['None','RIFE v4.0','RIFE v4.3','RIFE v4.6', 'FILM'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
+                        frame_interpolation_slow_mo_enabled = gr.Checkbox(label="Slow Mo", elem_id="frame_interpolation_slow_mo_enabled", value=dv.frame_interpolation_slow_mo_enabled, interactive=True)
                         # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
                         frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
+                    with gr.Row():
+                        # How many times to interpolate (interp x)
+                        frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp x", value=dv.frame_interpolation_x_amount, interactive=True)
+                        # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE)
+                        frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo x", value=dv.frame_interpolation_x_amount, interactive=True)
                     with gr.Row():
                         # Intrpolate any existing video from the connected PC
                         with gr.Accordion('Interpolate an existing video', open=False):
@@ -1022,7 +1021,7 @@ video_args_names =  str(r'''skip_video_for_run_all,
                             r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
                             render_steps,
                             path_name_modifier, image_path, mp4_path, store_frames_in_ram,
-                            frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount,
+                            frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount,
                             frame_interpolation_keep_imgs'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
