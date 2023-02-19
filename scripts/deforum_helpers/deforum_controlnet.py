@@ -14,11 +14,11 @@ def find_controlnet():
     try:
         from scripts import controlnet
     except Exception as e:
-        print(f'Failed to import controlnet! The exact error is {e}. Deforum support for ControlNet will not be activated')
+        print(f'\033[33mFailed to import controlnet! The exact error is {e}. Deforum support for ControlNet will not be activated\033[0m')
         has_controlnet = False
         return False
     has_controlnet = True
-    print(f'Congratulations! You have ControlNet support for Deforum enabled!') # TODO: make green
+    print(f'\033[0;32mCongratulations! You have ControlNet support for Deforum enabled!\033[0m')
     return True
 
 # The most parts below are plainly copied from controlnet.py
