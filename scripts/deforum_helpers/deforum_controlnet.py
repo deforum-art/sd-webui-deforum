@@ -65,22 +65,15 @@ def ControlnetArgs():
     return locals()
 
 def setup_controlnet_ui_raw():
+    # Already under an accordion
     from scripts import controlnet
     from scripts.controlnet import update_cn_models, cn_models, cn_models_names
 
+    refresh_symbol = '\U0001f504'  # 🔄
+    switch_values_symbol = '\U000021C5' # ⇅
     model_dropdowns = []
     infotext_fields = []
-
-    # Already under an accordion
-
-    # Copying the main ControlNet widgets while getting rid of static elements such as the scribble pad
-    with gr.Row():
-        controlnet_enabled = gr.Checkbox(label='Enable', value=False)
-        controlnet_scribble_mode = gr.Checkbox(label='Scribble Mode (Invert colors)', value=False)
-        controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False)
-        controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False)
-
-    # Main part
+        # Main part
     class ToolButton(gr.Button, gr.components.FormComponent):
         """Small button with single emoji as text, fits inside gradio forms"""
 
@@ -89,7 +82,7 @@ def setup_controlnet_ui_raw():
 
         def get_block_name(self):
             return "button"
-
+            
     from scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
 
     preprocessor = {
@@ -108,15 +101,19 @@ def setup_controlnet_ui_raw():
         "segmentation": uniformer,
     }
 
+    # Copying the main ControlNet widgets while getting rid of static elements such as the scribble pad
+    with gr.Row():
+        controlnet_enabled = gr.Checkbox(label='Enable', value=False)
+        controlnet_scribble_mode = gr.Checkbox(label='Scribble Mode (Invert colors)', value=False)
+        controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False)
+        controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False)
+
     def refresh_all_models(*inputs):
         update_cn_models()
         
         dd = inputs[0]
         selected = dd if dd in cn_models else "None"
         return gr.Dropdown.update(value=selected, choices=list(cn_models.keys()))
-
-    refresh_symbol = '\U0001f504'  # 🔄
-    switch_values_symbol = '\U000021C5' # ⇅
 
     with gr.Row():
         controlnet_module = gr.Dropdown(list(preprocessor.keys()), label=f"Preprocessor", value="none")
@@ -127,75 +124,9 @@ def setup_controlnet_ui_raw():
     with gr.Row():
         controlnet_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05)
         controlnet_guidance_strength =  gr.Slider(label="Guidance strength (T)", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
-
         # ctrls += (module, model, weight,)
         # model_dropdowns.append(model)
-        
-    def build_sliders(module):
-        if controlnet_module == "canny":
-            return [
-                gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
-                gr.update(label="Canny low threshold", minimum=1, maximum=255, value=100, step=1, interactive=True),
-                gr.update(label="Canny high threshold", minimum=1, maximum=255, value=200, step=1, interactive=True),
-                gr.update(visible=True)
-            ]
-        elif controlnet_module == "mlsd": #Hough
-            return [
-                gr.update(label="Hough Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
-                gr.update(label="Hough value threshold (MLSD)", minimum=0.01, maximum=2.0, value=0.1, step=0.01, interactive=True),
-                gr.update(label="Hough distance threshold (MLSD)", minimum=0.01, maximum=20.0, value=0.1, step=0.01, interactive=True),
-                gr.update(visible=True)
-            ]
-        elif controlnet_module in ["hed", "fake_scribble"]:
-            return [
-                gr.update(label="HED Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
-                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=True)
-            ]
-        elif controlnet_module in ["openpose", "openpose_hand", "segmentation"]:
-            return [
-                gr.update(label="Annotator Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
-                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=True)
-            ]
-        elif controlnet_module == "depth":
-            return [
-                gr.update(label="Midas Resolution", minimum=64, maximum=2048, value=384, step=1, interactive=True),
-                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=True)
-            ]
-        elif controlnet_module == "depth_leres":
-            return [
-                gr.update(label="LeReS Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
-                gr.update(label="Remove Near %", value=0, minimum=0, maximum=100, step=0.1, interactive=True),
-                gr.update(label="Remove Background %", value=0, minimum=0, maximum=100, step=0.1, interactive=True),
-                gr.update(visible=True)
-            ]
-        elif controlnet_module == "normal_map":
-            return [
-                gr.update(label="Normal Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
-                gr.update(label="Normal background threshold", minimum=0.0, maximum=1.0, value=0.4, step=0.01, interactive=True),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=True)
-            ]
-        elif controlnet_module == "none":
-            return [
-                gr.update(label="Normal Resolution", value=64, minimum=64, maximum=2048, interactive=False),
-                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=False)
-            ]
-        else:
-            return [
-                gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
-                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=True)
-            ]
-        
+  
     # advanced options    
     controlnet_advanced = gr.Column(visible=False)
     with controlnet_advanced:
@@ -212,19 +143,6 @@ def setup_controlnet_ui_raw():
         (controlnet_weight, f"ControlNet Weight"),
     ])
 
-    # def svgPreprocess(inputs):
-    #     if (inputs):
-    #         if (inputs['image'].startswith("data:image/svg+xml;base64,") and svgsupport):
-    #             svg_data = base64.b64decode(inputs['image'].replace('data:image/svg+xml;base64,',''))
-    #             drawing = svg2rlg(io.BytesIO(svg_data))
-    #             png_data = renderPM.drawToString(drawing, fmt='PNG')
-    #             encoded_string = base64.b64encode(png_data)
-    #             base64_str = str(encoded_string, "utf-8")
-    #             base64_str = "data:image/png;base64,"+ base64_str
-    #             inputs['image'] = base64_str
-    #         return input_image.orgpreprocess(inputs)
-    #     return None
-
     with gr.Row():
         controlnet_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode")
 
@@ -235,6 +153,71 @@ def setup_controlnet_ui_raw():
 
     return locals()
 
+def build_sliders(cn_model):
+        if cn_model == "canny":
+            return [
+                gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
+                gr.update(label="Canny low threshold", minimum=1, maximum=255, value=100, step=1, interactive=True),
+                gr.update(label="Canny high threshold", minimum=1, maximum=255, value=200, step=1, interactive=True),
+                gr.update(visible=True)
+            ]
+        elif cn_model == "mlsd": #Hough
+            return [
+                gr.update(label="Hough Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
+                gr.update(label="Hough value threshold (MLSD)", minimum=0.01, maximum=2.0, value=0.1, step=0.01, interactive=True),
+                gr.update(label="Hough distance threshold (MLSD)", minimum=0.01, maximum=20.0, value=0.1, step=0.01, interactive=True),
+                gr.update(visible=True)
+            ]
+        elif cn_model in ["hed", "fake_scribble"]:
+            return [
+                gr.update(label="HED Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
+                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=True)
+            ]
+        elif cn_model in ["openpose", "openpose_hand", "segmentation"]:
+            return [
+                gr.update(label="Annotator Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
+                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=True)
+            ]
+        elif cn_model == "depth":
+            return [
+                gr.update(label="Midas Resolution", minimum=64, maximum=2048, value=384, step=1, interactive=True),
+                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=True)
+            ]
+        elif cn_model == "depth_leres":
+            return [
+                gr.update(label="LeReS Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
+                gr.update(label="Remove Near %", value=0, minimum=0, maximum=100, step=0.1, interactive=True),
+                gr.update(label="Remove Background %", value=0, minimum=0, maximum=100, step=0.1, interactive=True),
+                gr.update(visible=True)
+            ]
+        elif cn_model == "normal_map":
+            return [
+                gr.update(label="Normal Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
+                gr.update(label="Normal background threshold", minimum=0.0, maximum=1.0, value=0.4, step=0.01, interactive=True),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=True)
+            ]
+        elif cn_model == "none":
+            return [
+                gr.update(label="Normal Resolution", value=64, minimum=64, maximum=2048, interactive=False),
+                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=False)
+            ]
+        else:
+            return [
+                gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
+                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=True)
+            ]
+            
 def setup_controlnet_ui():
     if not find_controlnet():
         gr.HTML("""
@@ -243,7 +226,6 @@ def setup_controlnet_ui():
         return {}
 
     return setup_controlnet_ui_raw()
-
 
 def controlnet_component_names():
     if not find_controlnet():
@@ -422,3 +404,17 @@ def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, 
 
         print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
         print(f'ControlNet video mask unpacked!')
+
+
+    # def svgPreprocess(inputs):
+    #     if (inputs):
+    #         if (inputs['image'].startswith("data:image/svg+xml;base64,") and svgsupport):
+    #             svg_data = base64.b64decode(inputs['image'].replace('data:image/svg+xml;base64,',''))
+    #             drawing = svg2rlg(io.BytesIO(svg_data))
+    #             png_data = renderPM.drawToString(drawing, fmt='PNG')
+    #             encoded_string = base64.b64encode(png_data)
+    #             base64_str = str(encoded_string, "utf-8")
+    #             base64_str = "data:image/png;base64,"+ base64_str
+    #             inputs['image'] = base64_str
+    #         return input_image.orgpreprocess(inputs)
+    #     return None
