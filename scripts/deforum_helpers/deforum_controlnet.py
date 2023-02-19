@@ -111,7 +111,7 @@ def setup_controlnet_ui_raw():
         weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05)
         guidance_strength =  gr.Slider(label="Guidance strength (T)", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
 
-        ctrls += (module, model, weight,)
+        # ctrls += (module, model, weight,)
         # model_dropdowns.append(model)
         
     def build_sliders(module):
