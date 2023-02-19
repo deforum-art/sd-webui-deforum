@@ -382,7 +382,7 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
     return processed
 
 import pathlib
-from video_audio_utilities import vid2frames
+from .video_audio_utilities import vid2frames
 
 def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     if controlnet_args.controlnet_input_video_chosen_file is not None and len(controlnet_args.controlnet_input_video_chosen_file.name) > 0:
