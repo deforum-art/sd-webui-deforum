@@ -53,13 +53,6 @@ def setup_controlnet_ui_raw():
 
     # Already under an accordion
 
-    # Video input to be fed into ControlNet
-    #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
-    with gr.Row():
-        controlnet_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file")
-    with gr.Row():
-        controlnet_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file")
-
     # Copying the main ControlNet widgets while getting rid of static elements such as the scribble pad
     with gr.Row():
         controlnet_enabled = gr.Checkbox(label='Enable', value=False)
@@ -212,7 +205,13 @@ def setup_controlnet_ui_raw():
     #         return input_image.orgpreprocess(inputs)
     #     return None
 
-    controlnet_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode")
+    with gr.Row():
+        controlnet_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode")
+
+    # Video input to be fed into ControlNet
+    #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
+    controlnet_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file")
+    controlnet_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file")
 
     return locals()
 
