@@ -23,6 +23,7 @@ from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_mo
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import get_keys_to_exclude
+from .deforum_controlnet import unpack_controlnet_vids
 # Webui
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
@@ -34,6 +35,12 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args, anim_args, inputfiles = hybrid_generation(args, anim_args, root)
             # path required by hybrid functions, even if hybrid_comp_save_extra_frames is False
             hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
+
+    # handle controlnet video input frames generation
+    if 'controlnet_enabled' in vars(controlnet_args) and controlnet_args.controlnet_enabled:
+        unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
+        controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes')
+        controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes')
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
