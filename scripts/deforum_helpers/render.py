@@ -23,7 +23,7 @@ from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_mo
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import get_keys_to_exclude
-from .deforum_controlnet import unpack_controlnet_vids
+from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 # Webui
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
@@ -37,10 +37,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
 
     # handle controlnet video input frames generation
-    if 'controlnet_enabled' in vars(controlnet_args) and controlnet_args.controlnet_enabled:
+    if is_controlnet_enabled(controlnet_args):
         unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
-        controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes')
-        controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes')
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
@@ -418,7 +416,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             sd_hijack.model_hijack.hijack(sd_model)
         
         # sample the diffusion model
-        image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
         # intercept and override to grayscale
@@ -433,7 +431,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 while not image.getbbox():
                     print("Rerolling with +1 seed...")
                     args.seed += 1
-                    image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+                    image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                     patience -= 1
                     if patience == 0:
                         print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")

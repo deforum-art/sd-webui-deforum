@@ -12,6 +12,7 @@ from .animation import sample_from_cv2, sample_to_cv2
 from modules import processing, sd_models
 from modules.shared import opts, sd_model
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
+from .deforum_controlnet import is_controlnet_enabled, process_txt2img_with_controlnet, process_img2img_with_controlnet
 
 import math, json, itertools
 import requests
@@ -176,8 +177,11 @@ def generate(args, anim_args, loop_args, controlnet_args, root, frame = 0, retur
             )
         # print dynamic table to cli
         print_generate_table(args, anim_args, p_txt)
-        
-        processed = processing.process_images(p_txt)
+
+        if is_controlnet_enabled(controlnet_args):
+            processed = process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame)
+        else:
+            processed = processing.process_images(p_txt)
 
     if processed is None:
         # Mask functions
@@ -201,7 +205,10 @@ def generate(args, anim_args, loop_args, controlnet_args, root, frame = 0, retur
         # print dynamic table to cli
         print_generate_table(args, anim_args, p)
        
-        processed = processing.process_images(p)
+        if is_controlnet_enabled(controlnet_args):
+            processed = process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame)
+        else:
+            processed = processing.process_images(p)
     
     if root.initial_info == None:
         root.initial_seed = processed.seed
