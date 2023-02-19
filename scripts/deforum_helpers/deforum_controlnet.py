@@ -272,6 +272,9 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 
     if not os.path.exists(controlnet_frame_path) and not os.path.exists(controlnet_mask_frame_path):
         print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
+        from .deforum_controlnet_hardcode import restore_networks
+        unet = p.sd_model.model.diffusion_model
+        restore_networks(unet)
         return process_images(p)
     
     if os.path.exists(controlnet_frame_path):
@@ -297,7 +300,6 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 
     from .deforum_controlnet_hardcode import process
     p.script_args = (
-        0, # todo: why
         cn_args["enabled"],
         cn_args["module"],
         cn_args["model"],
@@ -310,7 +312,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         cn_args["processor_res"],
         cn_args["threshold_a"],
         cn_args["threshold_b"],
-        0, False, False, False, False, '', 1, '', 0, '', 0, '', True, False, False, False # default args
+        1.0,
     )
 
     print(p.script_args) # TODO add pretty table
@@ -362,7 +364,6 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 
     from .deforum_controlnet_hardcode import process
     p.script_args = (
-        0, # todo: why
         cn_args["enabled"],
         cn_args["module"],
         cn_args["model"],
@@ -375,7 +376,7 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         cn_args["processor_res"],
         cn_args["threshold_a"],
         cn_args["threshold_b"],
-        0, False, False, False, False, '', 1, '', 0, '', 0, '', True, False, False, False # default args
+        1.0,
     )
 
     print(p.script_args) # TODO add pretty table

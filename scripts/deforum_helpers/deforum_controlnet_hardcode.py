@@ -1,11 +1,11 @@
 # TODO HACK FIXME HARDCODE — as using the scripts doesn't seem to work for some reason
-latest_network = None
-latest_params = (None, None)
+deforum_latest_network = None
+deforum_latest_params = (None, 'placeholder to trigger the model loading')
 from scripts.processor import unload_hed, unload_mlsd, unload_midas, unload_leres, unload_pidinet, unload_openpose, unload_uniformer, HWC3
-import shared, devices
+import modules.shared as shared
+import modules.devices as devices
 import modules.processing as processing
 from modules.processing import StableDiffusionProcessingImg2Img, StableDiffusionProcessingTxt2Img
-import cn_models
 import numpy as np
 from scripts.controlnet import update_cn_models, cn_models, cn_models_names
 import os
@@ -33,20 +33,25 @@ unloadable = {
 }
 latest_model_hash = ""
 
+def restore_networks(unet):
+    global deforum_latest_network
+    global deforum_latest_params
+    if deforum_latest_network is not None:
+        print("restoring last networks")
+        input_image = None
+        deforum_latest_network.restore(unet)
+        deforum_latest_network = None
+
+    last_module = deforum_latest_params[0]
+    if last_module is not None:
+        unloadable.get(last_module, lambda:None)()
+
 def process(p, *args):
+
+    global deforum_latest_network
+    global deforum_latest_params
     
     unet = p.sd_model.model.diffusion_model
-
-    def restore_networks():
-        if latest_network is not None:
-            print("restoring last networks")
-            input_image = None
-            latest_network.restore(unet)
-            latest_network = None
-
-        last_module = latest_params[0]
-        if last_module is not None:
-            unloadable.get(last_module, lambda:None)()
 
     enabled, module, model, weight, image, scribble_mode, \
         resize_mode, rgbbgr_mode, lowvram, pres, pthr_a, pthr_b, guidance_strength = args
@@ -72,17 +77,17 @@ def process(p, *args):
         input_image = None
 
     if not enabled:
-        restore_networks()
+        restore_networks(unet)
         return
 
-    models_changed = latest_params[1] != model \
-        or latest_model_hash != p.sd_model.sd_model_hash or latest_network == None \
-        or (latest_network is not None and latest_network.lowvram != lowvram)
+    models_changed = deforum_latest_params[1] != model \
+        or latest_model_hash != p.sd_model.sd_model_hash or deforum_latest_network == None \
+        or (deforum_latest_network is not None and deforum_latest_network.lowvram != lowvram)
 
-    latest_params = (module, model)
+    deforum_latest_params = (module, model)
     latest_model_hash = p.sd_model.sd_model_hash
     if models_changed:
-        restore_networks()
+        restore_networks(unet)
         model_path = cn_models.get(model, None)
 
         if model_path is None:
@@ -115,7 +120,7 @@ def process(p, *args):
         network.hook(unet, p.sd_model)
 
         print(f"ControlNet model {model} loaded.")
-        latest_network = network
+        deforum_latest_network = network
         
     if input_image is not None:
         input_image = HWC3(np.asarray(input_image))
@@ -137,7 +142,7 @@ def process(p, *args):
         detected_map[np.min(input_image, axis=2) < 127] = 255
         input_image = detected_map
             
-    preprocessor = preprocessor[latest_params[0]]
+    preprocessor = preprocessor[deforum_latest_params[0]]
     h, w, bsz = p.height, p.width, p.batch_size
     if pres > 64:
         detected_map = preprocessor(input_image, res=pres, thr_a=pthr_a, thr_b=pthr_b)
@@ -174,7 +179,7 @@ def process(p, *args):
     detected_map = rearrange(detected_map, 'c h w -> h w c').numpy().astype(np.uint8)
         
     # control = torch.stack([control for _ in range(bsz)], dim=0)
-    latest_network.notify(control, weight, guidance_strength)
+    deforum_latest_network.notify(control, weight, guidance_strength)
 
     if shared.opts.data.get("control_net_skip_img2img_processing") and hasattr(p, "init_images"):
         swap_img2img_pipeline(p)
