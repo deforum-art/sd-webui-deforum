@@ -3,6 +3,10 @@
 
 import os, sys
 import gradio as gr
+import scripts
+from PIL import Image
+import numpy as np
+from modules.processing import process_images
 
 has_controlnet = None
 
@@ -260,14 +264,122 @@ def is_controlnet_enabled(controlnet_args):
 def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame_idx = 0):
     controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:05}.jpg")
     controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:05}.jpg")
+    cn_mask_np = None
+    cn_image_np = None
+
+    if not os.path.exists(controlnet_frame_path) and not os.path.exists(controlnet_mask_frame_path):
+        print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
+        return process_images(p)
     
-    pass
+    if os.path.exists(controlnet_frame_path):
+        cn_image_np = Image.open(controlnet_frame_path).convert("RGB")
+    
+    if os.path.exists(controlnet_mask_frame_path):
+        cn_mask_np = Image.open(controlnet_mask_frame_path).convert("RGB")
+
+    cn_args = {
+        "enabled": True,
+        "module": controlnet_args.controlnet_module,
+        "model": controlnet_args.controlnet_model,
+        "weight": controlnet_args.controlnet_weight,
+        "input_image": {'image': cn_image_np, 'mask': cn_mask_np},
+        "scribble_mode": controlnet_args.controlnet_scribble_mode,
+        "resize_mode": controlnet_args.controlnet_resize_mode,
+        "rgbbgr_mode": controlnet_args.controlnet_rgbbgr_mode,
+        "lowvram": controlnet_args.controlnet_lowvram,
+        "processor_res": controlnet_args.controlnet_processor_res,
+        "threshold_a": controlnet_args.controlnet_threshold_a,
+        "threshold_b": controlnet_args.controlnet_threshold_b,
+    }
+
+    p.scripts = scripts.scripts_txt2img
+    p.script_args = (
+        0, # todo: why
+        cn_args["enabled"],
+        cn_args["module"],
+        cn_args["model"],
+        cn_args["weight"],
+        cn_args["input_image"],
+        cn_args["scribble_mode"],
+        cn_args["resize_mode"],
+        cn_args["rgbbgr_mode"],
+        cn_args["lowvram"],
+        cn_args["processor_res"],
+        cn_args["threshold_a"],
+        cn_args["threshold_b"],
+        0, False, False, False, False, '', 1, '', 0, '', 0, '', True, False, False, False # default args
+    )
+
+    print(p.script_args) # TODO add pretty table
+
+    processed = scripts.scripts_txt2img.run(p, *(p.script_args))
+
+    p.close()
+
+    if processed is None: # fall back
+        raise Exception("\033[31mFailed to process a frame with ControlNet enabled!\033[0m")
+
+    return processed
 
 def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame_idx = 0):
     controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:05}.jpg")
     controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:05}.jpg")
+    cn_mask_np = None
+    cn_image_np = None
 
-    pass
+    if not os.path.exists(controlnet_frame_path) and not os.path.exists(controlnet_mask_frame_path):
+        print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
+        return process_images(p)
+    
+    if os.path.exists(controlnet_frame_path):
+        cn_image_np = np.array(Image.open(controlnet_frame_path).convert("RGB")).astype('uint8')
+    
+    if os.path.exists(controlnet_mask_frame_path):
+        cn_mask_np = np.array(Image.open(controlnet_mask_frame_path).convert("RGB")).astype('uint8')
+
+    cn_args = {
+        "enabled": True,
+        "module": controlnet_args.controlnet_module,
+        "model": controlnet_args.controlnet_model,
+        "weight": controlnet_args.controlnet_weight,
+        "input_image": {'image': cn_image_np, 'mask': cn_mask_np},
+        "scribble_mode": controlnet_args.controlnet_scribble_mode,
+        "resize_mode": controlnet_args.controlnet_resize_mode,
+        "rgbbgr_mode": controlnet_args.controlnet_rgbbgr_mode,
+        "lowvram": controlnet_args.controlnet_lowvram,
+        "processor_res": controlnet_args.controlnet_processor_res,
+        "threshold_a": controlnet_args.controlnet_threshold_a,
+        "threshold_b": controlnet_args.controlnet_threshold_b,
+    }
+
+    p.scripts = scripts.scripts_txt2img # TODO: why txt2img here???
+    p.script_args = (
+        0, # todo: why
+        cn_args["enabled"],
+        cn_args["module"],
+        cn_args["model"],
+        cn_args["weight"],
+        cn_args["input_image"],
+        cn_args["scribble_mode"],
+        cn_args["resize_mode"],
+        cn_args["rgbbgr_mode"],
+        cn_args["lowvram"],
+        cn_args["processor_res"],
+        cn_args["threshold_a"],
+        cn_args["threshold_b"],
+        0, False, False, False, False, '', 1, '', 0, '', 0, '', True, False, False, False # default args
+    )
+
+    print(p.script_args) # TODO add pretty table
+
+    processed = scripts.scripts_img2img.run(p, *(p.script_args))
+
+    p.close()
+
+    if processed is None: # fall back
+        raise Exception("\033[31mFailed to process a frame with ControlNet enabled!\033[0m")
+
+    return processed
 
 import pathlib
 from video_audio_utilities import vid2frames
