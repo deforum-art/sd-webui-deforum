@@ -46,7 +46,7 @@ def render_input_video(args, anim_args, video_args, parseq_args, loop_args, cont
         args.overlay_mask = True
 
 
-    render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root)
+    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
 
 # Modified a copy of the above to allow using masking video with out a init video.
 def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
