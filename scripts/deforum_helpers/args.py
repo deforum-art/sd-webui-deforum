@@ -637,8 +637,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="Full res mask padding", value=d.full_res_mask_padding, interactive=True)
             with gr.Accordion('ControlNet (WIP)', open=True):
                 gr.HTML("""
-                Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed</p>
-                <p style="margin-top:1em">
+                Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
+                <p style="margin-top:0.2em">
                     *Work In Progress*. All the params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development. &#128521;
                 </p>
                 """)
