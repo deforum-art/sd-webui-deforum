@@ -7,6 +7,7 @@ import gradio as gr
 has_controlnet = None
 
 def find_controlnet():
+    global has_controlnet
     if has_controlnet is not None:
         return has_controlnet
     
