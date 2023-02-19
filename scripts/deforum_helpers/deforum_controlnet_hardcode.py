@@ -32,7 +32,7 @@ unloadable = {
     "openpose_hand": unload_openpose,
     "segmentation": unload_uniformer,
 }
-latest_model_hash = ""
+deforum_latest_model_hash = ""
 
 def restore_networks(unet):
     global deforum_latest_network
@@ -52,6 +52,7 @@ def process(p, *args):
     global deforum_latest_network
     global deforum_latest_params
     global deforum_input_image
+    global deforum_latest_model_hash
     
     unet = p.sd_model.model.diffusion_model
 
@@ -63,11 +64,11 @@ def process(p, *args):
         return
 
     models_changed = deforum_latest_params[1] != model \
-        or latest_model_hash != p.sd_model.sd_model_hash or deforum_latest_network == None \
+        or deforum_latest_model_hash != p.sd_model.sd_model_hash or deforum_latest_network == None \
         or (deforum_latest_network is not None and deforum_latest_network.lowvram != lowvram)
 
     deforum_latest_params = (module, model)
-    latest_model_hash = p.sd_model.sd_model_hash
+    deforum_latest_model_hash = p.sd_model.sd_model_hash
     if models_changed:
         restore_networks(unet)
         model_path = cn_models.get(model, None)
