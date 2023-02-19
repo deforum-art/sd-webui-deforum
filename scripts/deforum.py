@@ -1,6 +1,6 @@
 # Detach 'deforum_helpers' from 'scripts' to prevent "No module named 'scripts.deforum_helpers'"  error 
 # causing Deforum's tab not show up in some cases when you've might've broken the environment with webui packages updates
-import sys, os
+import sys, os, shutil
 
 basedirs = [os.getcwd()]
 if 'google.colab' in sys.modules:
@@ -27,6 +27,7 @@ import json
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
 from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif
+from deforum_helpers.upscaling import make_upscale_v2
 import gc
 import torch
 from webui import wrap_gradio_gpu_call
@@ -96,6 +97,9 @@ def run_deforum(*args, **kwargs):
     if video_args.add_soundtrack != 'None':
         real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
     
+    # Delete folder with duplicated imgs from OS temp folder
+    shutil.rmtree(root.tmp_deforum_run_duplicated_folder)
+    
     # Decide whether or not we need to try and frame interpolate laters
     need_to_frame_interpolate = False
     if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
@@ -156,6 +160,12 @@ def run_deforum(*args, **kwargs):
     
     if video_args.make_gif and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
+    
+    # Upscale video once generation is done:
+    if video_args.r_upscale_video and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
+        
+        # out mp4 path is defined in make_upscale func
+        make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=video_args.ffmpeg_location, stitch_from_frame=0, stitch_to_frame=max_video_frames, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track)
         
     root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
     root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
