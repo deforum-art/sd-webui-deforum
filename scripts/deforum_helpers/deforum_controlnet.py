@@ -104,9 +104,9 @@ def setup_controlnet_ui_raw():
     # Copying the main ControlNet widgets while getting rid of static elements such as the scribble pad
     with gr.Row():
         controlnet_enabled = gr.Checkbox(label='Enable', value=False)
-        controlnet_scribble_mode = gr.Checkbox(label='Scribble Mode (Invert colors)', value=False)
-        controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False)
-        controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False)
+        controlnet_scribble_mode = gr.Checkbox(label='Scribble Mode (Invert colors)', value=False, visible=False)
+        controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False)
+        controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False)
 
     def refresh_all_models(*inputs):
         update_cn_models()
@@ -115,13 +115,13 @@ def setup_controlnet_ui_raw():
         selected = dd if dd in cn_models else "None"
         return gr.Dropdown.update(value=selected, choices=list(cn_models.keys()))
 
-    with gr.Row():
+    with gr.Row(visible=False) as cn_mod_row:
         controlnet_module = gr.Dropdown(list(preprocessor.keys()), label=f"Preprocessor", value="none")
         controlnet_model = gr.Dropdown(list(cn_models.keys()), label=f"Model", value="None")
         refresh_models = ToolButton(value=refresh_symbol)
         refresh_models.click(refresh_all_models, controlnet_model, controlnet_model)
         # ctrls += (refresh_models, )
-    with gr.Row():
+    with gr.Row(visible=False) as cn_weight_row:
         controlnet_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05)
         controlnet_guidance_strength =  gr.Slider(label="Guidance strength (T)", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
         # ctrls += (module, model, weight,)
@@ -143,80 +143,20 @@ def setup_controlnet_ui_raw():
         (controlnet_weight, f"ControlNet Weight"),
     ])
 
-    with gr.Row():
+    with gr.Row(visible=False) as cn_env_row:
         controlnet_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode")
 
     # Video input to be fed into ControlNet
     #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
-    controlnet_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file")
-    controlnet_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file")
-
+    controlnet_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
+    controlnet_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
+   
+    cn_hide_output_list = [controlnet_scribble_mode,controlnet_rgbbgr_mode,controlnet_lowvram,cn_mod_row,cn_weight_row,cn_env_row] 
+    for cn_output in cn_hide_output_list:
+        controlnet_enabled.change(fn=hide_ui_by_cn_status, inputs=controlnet_enabled,outputs=cn_output)
+        
     return locals()
 
-def build_sliders(cn_model):
-        if cn_model == "canny":
-            return [
-                gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
-                gr.update(label="Canny low threshold", minimum=1, maximum=255, value=100, step=1, interactive=True),
-                gr.update(label="Canny high threshold", minimum=1, maximum=255, value=200, step=1, interactive=True),
-                gr.update(visible=True)
-            ]
-        elif cn_model == "mlsd": #Hough
-            return [
-                gr.update(label="Hough Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
-                gr.update(label="Hough value threshold (MLSD)", minimum=0.01, maximum=2.0, value=0.1, step=0.01, interactive=True),
-                gr.update(label="Hough distance threshold (MLSD)", minimum=0.01, maximum=20.0, value=0.1, step=0.01, interactive=True),
-                gr.update(visible=True)
-            ]
-        elif cn_model in ["hed", "fake_scribble"]:
-            return [
-                gr.update(label="HED Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
-                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=True)
-            ]
-        elif cn_model in ["openpose", "openpose_hand", "segmentation"]:
-            return [
-                gr.update(label="Annotator Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
-                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=True)
-            ]
-        elif cn_model == "depth":
-            return [
-                gr.update(label="Midas Resolution", minimum=64, maximum=2048, value=384, step=1, interactive=True),
-                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=True)
-            ]
-        elif cn_model == "depth_leres":
-            return [
-                gr.update(label="LeReS Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
-                gr.update(label="Remove Near %", value=0, minimum=0, maximum=100, step=0.1, interactive=True),
-                gr.update(label="Remove Background %", value=0, minimum=0, maximum=100, step=0.1, interactive=True),
-                gr.update(visible=True)
-            ]
-        elif cn_model == "normal_map":
-            return [
-                gr.update(label="Normal Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
-                gr.update(label="Normal background threshold", minimum=0.0, maximum=1.0, value=0.4, step=0.01, interactive=True),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=True)
-            ]
-        elif cn_model == "none":
-            return [
-                gr.update(label="Normal Resolution", value=64, minimum=64, maximum=2048, interactive=False),
-                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=False)
-            ]
-        else:
-            return [
-                gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
-                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
-                gr.update(visible=True)
-            ]
             
 def setup_controlnet_ui():
     if not find_controlnet():
@@ -405,6 +345,73 @@ def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, 
         print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
         print(f'ControlNet video mask unpacked!')
 
+def hide_ui_by_cn_status(choice):
+    return gr.update(visible=True) if choice else gr.update(visible=False)
+    
+def build_sliders(cn_model):
+        if cn_model == "canny":
+            return [
+                gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
+                gr.update(label="Canny low threshold", minimum=1, maximum=255, value=100, step=1, interactive=True),
+                gr.update(label="Canny high threshold", minimum=1, maximum=255, value=200, step=1, interactive=True),
+                gr.update(visible=True)
+            ]
+        elif cn_model == "mlsd": #Hough
+            return [
+                gr.update(label="Hough Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
+                gr.update(label="Hough value threshold (MLSD)", minimum=0.01, maximum=2.0, value=0.1, step=0.01, interactive=True),
+                gr.update(label="Hough distance threshold (MLSD)", minimum=0.01, maximum=20.0, value=0.1, step=0.01, interactive=True),
+                gr.update(visible=True)
+            ]
+        elif cn_model in ["hed", "fake_scribble"]:
+            return [
+                gr.update(label="HED Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
+                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=True)
+            ]
+        elif cn_model in ["openpose", "openpose_hand", "segmentation"]:
+            return [
+                gr.update(label="Annotator Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
+                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=True)
+            ]
+        elif cn_model == "depth":
+            return [
+                gr.update(label="Midas Resolution", minimum=64, maximum=2048, value=384, step=1, interactive=True),
+                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=True)
+            ]
+        elif cn_model == "depth_leres":
+            return [
+                gr.update(label="LeReS Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
+                gr.update(label="Remove Near %", value=0, minimum=0, maximum=100, step=0.1, interactive=True),
+                gr.update(label="Remove Background %", value=0, minimum=0, maximum=100, step=0.1, interactive=True),
+                gr.update(visible=True)
+            ]
+        elif cn_model == "normal_map":
+            return [
+                gr.update(label="Normal Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
+                gr.update(label="Normal background threshold", minimum=0.0, maximum=1.0, value=0.4, step=0.01, interactive=True),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=True)
+            ]
+        elif cn_model == "none":
+            return [
+                gr.update(label="Normal Resolution", value=64, minimum=64, maximum=2048, interactive=False),
+                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=False)
+            ]
+        else:
+            return [
+                gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
+                gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+                gr.update(visible=True)
+            ]
 
     # def svgPreprocess(inputs):
     #     if (inputs):
