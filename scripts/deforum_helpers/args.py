@@ -639,7 +639,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 gr.HTML("""
                 Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
                 <p style="margin-top:0.2em">
-                    *Work In Progress*. All the params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development. &#128521;
+                    *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development. &#128521;
                 </p>
                 """)
                 controlnet_dict = setup_controlnet_ui()
