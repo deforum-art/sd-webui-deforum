@@ -96,7 +96,7 @@ def setup_controlnet_ui_raw():
         "openpose": openpose,
         # "openpose_hand": openpose_hand,
         "pidinet": pidinet,
-        "scribble": simple_scribble,
+        # "scribble": simple_scribble,
         "fake_scribble": fake_scribble,
         "segmentation": uniformer,
     }
