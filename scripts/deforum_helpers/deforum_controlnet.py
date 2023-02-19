@@ -18,6 +18,7 @@ def find_controlnet():
         has_controlnet = False
         return False
     has_controlnet = True
+    print(f'Congratulations! You have ControlNet support for Deforum enabled!') # TODO: make green
     return True
 
 # The most parts below are plainly copied from controlnet.py
