@@ -288,6 +288,7 @@ def DeforumOutputArgs():
     # max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False #@param {type: 'boolean'}
     #@markdown **Interpolate Video Settings**
+    # todo: change them to support FILM interpolation as well
     frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
     frame_interpolation_x_amount = "Disabled" #"Disabled" #@param ["Disabled" + all values from x2 to x10]
     frame_interpolation_slow_mo_amount = "Disabled" #@param ["Disabled","x2","x4","x8"]
@@ -765,7 +766,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_location_row:
                         ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location)
             # RIFE TAB
-            with gr.Tab('RIFE') as rife_accord:
+            with gr.Tab('Frame Interoplation') as rife_accord:
                 with gr.Accordion('Important notes and Help', open=False):
                     gr.HTML("""
                     Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
