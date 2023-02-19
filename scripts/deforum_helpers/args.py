@@ -289,9 +289,10 @@ def DeforumOutputArgs():
     store_frames_in_ram = False #@param {type: 'boolean'}
     #@markdown **Interpolate Video Settings**
     # todo: change them to support FILM interpolation as well
-    frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
-    frame_interpolation_x_amount = "Disabled" #"Disabled" #@param ["Disabled" + all values from x2 to x10]
-    frame_interpolation_slow_mo_amount = "Disabled" #@param ["Disabled","x2","x4","x8"]
+    frame_interpolation_engine = "None" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6", "FILM"]
+    frame_interpolation_x_amount = 2 # [2 to 1000 depends on the engine]
+    frame_interpolation_slow_mo_enabled = False
+    frame_interpolation_slow_mo_amount = 2 #@param [2 to 10]
     frame_interpolation_keep_imgs = False #@param {type: 'boolean'}
     return locals()
     
@@ -788,11 +789,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Column():
                     with gr.Row(variant='compact'):
                         # Interpolation Engine
-                        frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['RIFE v4.0','RIFE v4.3','RIFE v4.6'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
+                        frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['RIFE v4.0','RIFE v4.3','RIFE v4.6', 'FILM'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
                         # How many times to interpolate (interp x)
-                        frame_interpolation_x_amount = gr.Dropdown(label="Interp x", choices=['Disabled','x2','x3','x4','x5','x6','x7','x8','x9','x10'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frame_interpolation_x_amount", interactive=True)
+                        # frame_interpolation_x_amount = gr.Dropdown(label="Interp x", choices=['Disabled','x2','x3','x4','x5','x6','x7','x8','x9','x10'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frame_interpolation_x_amount", interactive=True)
+                        frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp x", value=dv.frame_interpolation_x_amount, interactive=True)
                         # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE)
                         frame_interpolation_slow_mo_amount = gr.Dropdown(label="Slow-Mo x", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
+                        frame_interpolation_slow_mo_amount =  gr.Slider(minimum=0, maximum=10, step=1, label="Interp x", value=dv.frame_interpolation_x_amount, interactive=True)
                         # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
                         frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
                     with gr.Row():
