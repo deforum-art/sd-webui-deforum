@@ -4,6 +4,7 @@
 import os, sys
 import gradio as gr
 import scripts
+import modules.scripts as scrpts
 from PIL import Image
 import numpy as np
 from modules.processing import process_images
@@ -261,7 +262,9 @@ controlnet_threshold_a, controlnet_threshold_b, controlnet_resize_mode'''
 def is_controlnet_enabled(controlnet_args):
     return 'controlnet_enabled' in vars(controlnet_args) and controlnet_args.controlnet_enabled
 
-def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame_idx = 0):
+def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame_idx = 1):
+    # TODO: use init image and mask here
+    p.init_images = []
     controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:05}.jpg")
     controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:05}.jpg")
     cn_mask_np = None
@@ -292,7 +295,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         "threshold_b": controlnet_args.controlnet_threshold_b,
     }
 
-    p.scripts = scripts.scripts_txt2img
+    p.scripts = scrpts.scripts_txt2img
     p.script_args = (
         0, # todo: why
         cn_args["enabled"],
@@ -312,7 +315,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 
     print(p.script_args) # TODO add pretty table
 
-    processed = scripts.scripts_txt2img.run(p, *(p.script_args))
+    processed = scrpts.scripts_txt2img.run(p, *(p.script_args))
 
     p.close()
 
@@ -324,6 +327,10 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame_idx = 0):
     controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:05}.jpg")
     controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:05}.jpg")
+
+    print(f'Reading ControlNet base frame {frame_idx} at {controlnet_frame_path}')
+    print(f'Reading ControlNet mask frame {frame_idx} at {controlnet_mask_frame_path}')
+
     cn_mask_np = None
     cn_image_np = None
 
@@ -352,7 +359,7 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         "threshold_b": controlnet_args.controlnet_threshold_b,
     }
 
-    p.scripts = scripts.scripts_txt2img # TODO: why txt2img here???
+    p.scripts = scrpts.scripts_img2img
     p.script_args = (
         0, # todo: why
         cn_args["enabled"],
@@ -372,7 +379,7 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 
     print(p.script_args) # TODO add pretty table
 
-    processed = scripts.scripts_img2img.run(p, *(p.script_args))
+    processed = scrpts.scripts_img2img.run(p, *(p.script_args))
 
     p.close()
 
