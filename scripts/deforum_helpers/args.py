@@ -646,7 +646,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # PARSEQ ACCORD
             with gr.Accordion('Parseq', open=False):
                 gr.HTML("""
-                Use an <a style='color:blue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
+                Use an <a style='color:SteelBlue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
                 <p style="margin-top:1em">
                     Note that parseq overrides:
                     <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
