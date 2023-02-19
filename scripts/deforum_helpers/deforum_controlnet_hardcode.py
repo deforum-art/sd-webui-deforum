@@ -1,6 +1,7 @@
 # TODO HACK FIXME HARDCODE — as using the scripts doesn't seem to work for some reason
 deforum_latest_network = None
 deforum_latest_params = (None, 'placeholder to trigger the model loading')
+deforum_input_image = None
 from scripts.processor import unload_hed, unload_mlsd, unload_midas, unload_leres, unload_pidinet, unload_openpose, unload_uniformer, HWC3
 import modules.shared as shared
 import modules.devices as devices
@@ -38,7 +39,7 @@ def restore_networks(unet):
     global deforum_latest_params
     if deforum_latest_network is not None:
         print("restoring last networks")
-        input_image = None
+        deforum_input_image = None
         deforum_latest_network.restore(unet)
         deforum_latest_network = None
 
@@ -50,31 +51,12 @@ def process(p, *args):
 
     global deforum_latest_network
     global deforum_latest_params
+    global deforum_input_image
     
     unet = p.sd_model.model.diffusion_model
 
     enabled, module, model, weight, image, scribble_mode, \
         resize_mode, rgbbgr_mode, lowvram, pres, pthr_a, pthr_b, guidance_strength = args
-    
-    # Other scripts can control this extension now
-    if shared.opts.data.get("control_net_allow_script_control", False):
-        enabled = getattr(p, 'control_net_enabled', enabled)
-        module = getattr(p, 'control_net_module', module)
-        model = getattr(p, 'control_net_model', model)
-        weight = getattr(p, 'control_net_weight', weight)
-        image = getattr(p, 'control_net_image', image)
-        scribble_mode = getattr(p, 'control_net_scribble_mode', scribble_mode)
-        resize_mode = getattr(p, 'control_net_resize_mode', resize_mode)
-        rgbbgr_mode = getattr(p, 'control_net_rgbbgr_mode', rgbbgr_mode)
-        lowvram = getattr(p, 'control_net_lowvram', lowvram)
-        pres = getattr(p, 'control_net_pres', pres)
-        pthr_a = getattr(p, 'control_net_pthr_a', pthr_a)
-        pthr_b = getattr(p, 'control_net_pthr_b', pthr_b)
-        guidance_strength = getattr(p, 'control_net_guidance_strength', guidance_strength)
-
-        input_image = getattr(p, 'control_net_input_image', None)
-    else:
-        input_image = None
 
     if not enabled:
         restore_networks(unet)
@@ -122,32 +104,50 @@ def process(p, *args):
         print(f"ControlNet model {model} loaded.")
         deforum_latest_network = network
         
-    if input_image is not None:
-        input_image = HWC3(np.asarray(input_image))
+    if deforum_input_image is not None:
+        deforum_input_image = HWC3(np.asarray(deforum_input_image))
     elif image is not None:
-        input_image = HWC3(image['image'])
-        if not ((image['mask'][:, :, 0]==0).all() or (image['mask'][:, :, 0]==255).all()):
+        deforum_input_image = HWC3(image['image'])
+        if 'mask' in image and image['mask'] is not None and not ((image['mask'][:, :, 0]==0).all() or (image['mask'][:, :, 0]==255).all()):
             print("using mask as input")
-            input_image = HWC3(image['mask'][:, :, 0])
+            deforum_input_image = HWC3(image['mask'][:, :, 0])
             scribble_mode = True
     else:
         # use img2img init_image as default
-        input_image = getattr(p, "init_images", [None])[0]
-        if input_image is None:
+        deforum_input_image = getattr(p, "init_images", [None])[0]
+        if deforum_input_image is None:
             raise ValueError('controlnet is enabled but no input image is given')
-        input_image = HWC3(np.asarray(input_image))
+        deforum_input_image = HWC3(np.asarray(deforum_input_image))
             
     if scribble_mode:
-        detected_map = np.zeros_like(input_image, dtype=np.uint8)
-        detected_map[np.min(input_image, axis=2) < 127] = 255
-        input_image = detected_map
+        detected_map = np.zeros_like(deforum_input_image, dtype=np.uint8)
+        detected_map[np.min(deforum_input_image, axis=2) < 127] = 255
+        deforum_input_image = detected_map
+    
+    from scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
+    
+    preprocessor = {
+        "none": lambda x, *args, **kwargs: x,
+        "canny": canny,
+        "depth": midas,
+        "depth_leres": leres,
+        "hed": hed,
+        "mlsd": mlsd,
+        "normal_map": midas_normal,
+        "openpose": openpose,
+        # "openpose_hand": openpose_hand,
+        "pidinet": pidinet,
+        "scribble": simple_scribble,
+        "fake_scribble": fake_scribble,
+        "segmentation": uniformer,
+    }
             
     preprocessor = preprocessor[deforum_latest_params[0]]
     h, w, bsz = p.height, p.width, p.batch_size
     if pres > 64:
-        detected_map = preprocessor(input_image, res=pres, thr_a=pthr_a, thr_b=pthr_b)
+        detected_map = preprocessor(deforum_input_image, res=pres, thr_a=pthr_a, thr_b=pthr_b)
     else:
-        detected_map = preprocessor(input_image)
+        detected_map = preprocessor(deforum_input_image)
     detected_map = HWC3(detected_map)
     
     if module == "normal_map" or rgbbgr_mode:

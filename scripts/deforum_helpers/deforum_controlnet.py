@@ -264,6 +264,7 @@ def is_controlnet_enabled(controlnet_args):
 
 def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame_idx = 1):
     # TODO: use init image and mask here
+    p.control_net_enabled = False # we don't want to cause concurrence
     p.init_images = []
     controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:05}.jpg")
     controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:05}.jpg")
@@ -328,6 +329,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
     return processed
 
 def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame_idx = 0):
+    p.control_net_enabled = False # we don't want to cause concurrence
     controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:05}.jpg")
     controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:05}.jpg")
 
