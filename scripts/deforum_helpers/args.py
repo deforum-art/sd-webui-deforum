@@ -9,6 +9,7 @@ from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vi
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os
+from .deforum_controlnet import controlnet_component_names
 import tempfile
         
 def Root():
@@ -634,6 +635,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     full_res_mask = gr.Checkbox(label="Full res mask", value=d.full_res_mask, interactive=True)
                     full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="Full res mask padding", value=d.full_res_mask_padding, interactive=True)
+            with gr.Accordion('ControlNet (WIP)', open=True):
+                gr.HTML("""
+                Requires the <a style='color:blue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed</p>
+                <p style="margin-top:1em">
+                    Support is WIP, all the params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development
+                </p>
+                """)
+                with gr.Row():
+                    controlnet_dict = ... # TODO
             # PARSEQ ACCORD
             with gr.Accordion('Parseq', open=False):
                 gr.HTML("""
@@ -1027,7 +1037,7 @@ loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blen
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names + controlnet_component_names()
 settings_component_names = [name for name in component_names if name not in video_args_names]
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
