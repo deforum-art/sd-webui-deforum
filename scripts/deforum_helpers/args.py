@@ -9,7 +9,7 @@ from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vi
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os
-from .deforum_controlnet import controlnet_component_names
+from .deforum_controlnet import controlnet_component_names, setup_controlnet_ui
 import tempfile
         
 def Root():
@@ -643,7 +643,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 </p>
                 """)
                 with gr.Row():
-                    controlnet_dict = ... # TODO
+                    controlnet_dict = setup_controlnet_ui()
             # PARSEQ ACCORD
             with gr.Accordion('Parseq', open=False):
                 gr.HTML("""
@@ -965,7 +965,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     for output in skip_video_for_run_all_outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
     # END OF UI TABS
-    return locals()
+    stuff = locals()
+    stuff = {**stuff, **controlnet_dict}
+    stuff.pop('controlnet_dict')
+    return stuff
 
 ### SETTINGS STORAGE UPDATE! 2023-01-27
 ### To Reduce The Number Of Settings Overrides,
