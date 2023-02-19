@@ -317,9 +317,10 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 
     processed = scrpts.scripts_txt2img.run(p, *(p.script_args))
 
-    p.close()
-
-    if processed is None: # fall back
+    if processed is None: # the script just swaps the pipeline, so failing is OK for the first time
+        processed = process_images(p)
+    
+    if processed is None: # now it's definitely not OK
         raise Exception("\033[31mFailed to process a frame with ControlNet enabled!\033[0m")
 
     return processed
@@ -381,9 +382,10 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 
     processed = scrpts.scripts_img2img.run(p, *(p.script_args))
 
-    p.close()
-
-    if processed is None: # fall back
+    if processed is None: # the script just swaps the pipeline, so failing is OK for the first time
+        processed = process_images(p)
+    
+    if processed is None: # now it's definitely not OK
         raise Exception("\033[31mFailed to process a frame with ControlNet enabled!\033[0m")
 
     return processed
@@ -417,4 +419,3 @@ def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, 
 
         print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
         print(f'ControlNet video mask unpacked!')
-    
