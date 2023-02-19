@@ -23,7 +23,7 @@ def find_controlnet():
         has_controlnet = False
         return False
     has_controlnet = True
-    print(f'\033[0;32mCongratulations!\033[0m You have ControlNet support for Deforum enabled!')
+    print(f"\033[0;32m*Deforum ControlNet support: enabled*\033[0m")
     return True
 
 # The most parts below are plainly copied from controlnet.py
