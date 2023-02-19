@@ -642,8 +642,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     Support is WIP, all the params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development
                 </p>
                 """)
-                with gr.Row():
-                    controlnet_dict = setup_controlnet_ui()
+                controlnet_dict = setup_controlnet_ui()
             # PARSEQ ACCORD
             with gr.Accordion('Parseq', open=False):
                 gr.HTML("""
