@@ -27,7 +27,7 @@ from .settings import get_keys_to_exclude
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 
-def render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root):
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         if anim_args.hybrid_composite or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:

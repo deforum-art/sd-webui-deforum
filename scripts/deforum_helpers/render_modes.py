@@ -14,7 +14,7 @@ from .settings import get_keys_to_exclude
 # Webui
 from modules.shared import opts, cmd_opts, state
 
-def render_input_video(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root):
+def render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     # create a folder for the video input frames to live in
     video_in_frame_path = os.path.join(args.outdir, 'inputframes') 
     os.makedirs(video_in_frame_path, exist_ok=True)
@@ -49,7 +49,7 @@ def render_input_video(args, anim_args, video_args, parseq_args, loop_args, anim
     render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root)
 
 # Modified a copy of the above to allow using masking video with out a init video.
-def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root):
+def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     # create a folder for the video input frames to live in
     mask_in_frame_path = os.path.join(args.outdir, 'maskframes') 
     os.makedirs(mask_in_frame_path, exist_ok=True)
@@ -68,7 +68,7 @@ def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, l
     render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root)
 
 
-def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root):
+def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()

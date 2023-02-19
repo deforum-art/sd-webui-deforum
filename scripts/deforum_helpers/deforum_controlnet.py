@@ -44,6 +44,21 @@ try:
 except ImportError:
     pass
 
+def ControlnetArgs():
+    controlnet_enabled = False
+    controlnet_scribble_mode = False
+    controlnet_rgbbgr_mode = False
+    controlnet_lowvram = False
+    controlnet_module = "none"
+    controlnet_model = "None"
+    controlnet_weight = 1.0
+    controlnet_guidance_strength = 1.0
+    blendFactorMax = "0:(0.35)"
+    blendFactorSlope = "0:(0.25)"
+    tweening_frames_schedule = "0:(20)"
+    color_correction_factor = "0:(0.075)"
+    return locals()
+
 def setup_controlnet_ui_raw():
     from scripts import controlnet
     from scripts.controlnet import update_cn_models, cn_models, cn_models_names
@@ -238,3 +253,9 @@ controlnet_threshold_a, controlnet_threshold_b, controlnet_resize_mode'''
     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
     
     return controlnet_args_names
+
+def augment_txt2img_pipeline(p):
+    pass
+
+def augment_img2img_pipeline(p):
+    pass

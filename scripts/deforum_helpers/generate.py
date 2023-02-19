@@ -49,7 +49,7 @@ def pairwise_repl(iterable):
     next(b, None)
     return zip(a, b)
 
-def generate(args, anim_args, loop_args, root, frame = 0, return_sample=False, sampler_name=None):
+def generate(args, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
     assert args.prompt is not None
     
     # Setup the pipeline

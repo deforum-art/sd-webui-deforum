@@ -1075,6 +1075,9 @@ def pack_parseq_args(args_dict):
 def pack_loop_args(args_dict):
     return {name: args_dict[name] for name in loop_args_names}
 
+def pack_controlnet_args(args_dict):
+    return {name: args_dict[name] for name in controlnet_component_names()}
+
 def process_args(args_dict_main):
     override_settings_with_file = args_dict_main['override_settings_with_file']
     custom_settings_file = args_dict_main['custom_settings_file']
@@ -1083,6 +1086,7 @@ def process_args(args_dict_main):
     video_args_dict = pack_video_args(args_dict_main)
     parseq_args_dict = pack_parseq_args(args_dict_main)
     loop_args_dict = pack_loop_args(args_dict_main)
+    controlnet_args_dict = pack_controlnet_args(args_dict_main)
 
     import json
     
@@ -1100,7 +1104,7 @@ def process_args(args_dict_main):
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root)
+        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root)
     
     if not os.path.exists(root.models_path):
         os.mkdir(root.models_path)
@@ -1110,6 +1114,7 @@ def process_args(args_dict_main):
     video_args = SimpleNamespace(**video_args_dict)
     parseq_args = SimpleNamespace(**parseq_args_dict)
     loop_args = SimpleNamespace(**loop_args_dict)
+    controlnet_args = SimpleNamespace(**controlnet_args_dict)
 
     p.width, p.height = map(lambda x: x - x % 64, (args.W, args.H))
     p.steps = args.steps
@@ -1147,7 +1152,7 @@ def process_args(args_dict_main):
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
     
-    return root, args, anim_args, video_args, parseq_args, loop_args
+    return root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
 
 def print_args(args):
     print("ARGS: /n")
