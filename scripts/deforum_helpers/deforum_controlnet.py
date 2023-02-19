@@ -55,13 +55,15 @@ def setup_controlnet_ui_raw():
 
     # Video input to be fed into ControlNet
     #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
-    input_video_chosen_file = gr.File(label="ControlNet Video input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file")
+    with gr.Row():
+        input_video_chosen_file = gr.File(label="ControlNet Video input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file")
 
     # Copying the main ControlNet widgets while getting rid of static elements such as the scribble pad
-    enabled = gr.Checkbox(label='Enable', value=False)
-    scribble_mode = gr.Checkbox(label='Scribble Mode (Invert colors)', value=False)
-    rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False)
-    lowvram = gr.Checkbox(label='Low VRAM', value=False)
+    with gr.Row():
+        enabled = gr.Checkbox(label='Enable', value=False)
+        scribble_mode = gr.Checkbox(label='Scribble Mode (Invert colors)', value=False)
+        rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False)
+        lowvram = gr.Checkbox(label='Low VRAM', value=False)
 
     # Main part
     class ToolButton(gr.Button, gr.components.FormComponent):
