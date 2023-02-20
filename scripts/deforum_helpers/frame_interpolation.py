@@ -67,6 +67,13 @@ def process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_
 # handle params before talking with the actual interpolation module (rifee/film, more to be added)
 def process_video_interpolation(frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, orig_vid_fps, deforum_models_path, real_audio_track, raw_output_imgs_path, img_batch_id, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, keep_interp_imgs, orig_vid_name, resolution):
 
+     # set initial output vid fps
+    fps = float(orig_vid_fps) * frame_interpolation_x_amount
+    
+    # re-calculate fps param to pass if slow_mo mode is enabled
+    if frame_interpolation_slow_mo_enabled:
+        fps = float(orig_vid_fps) * frame_interpolation_x_amount / int(frame_interpolation_slow_mo_amount)
+
     if frame_interpolation_engine == 'None':
         return
     elif frame_interpolation_engine.startswith("RIFE"):
@@ -74,13 +81,6 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
         if frame_interpolation_x_amount not in range(2, 11):
             raise Error("frame_interpolation_x_amount must be between 2x and 10x")
 
-         # set initial output vid fps
-        fps = float(orig_vid_fps) * frame_interpolation_x_amount
-        
-        # re-calculate fps param to pass if slow_mo mode is enabled
-        if frame_interpolation_slow_mo_enabled:
-            fps = float(orig_vid_fps) * frame_interpolation_x_amount / int(frame_interpolation_slow_mo_amount)
-            
         # disable audio-adding by setting real_audio_track to None if slow-mo is enabled (not equal to -1 means enabled)
         if real_audio_track is not None and frame_interpolation_slow_mo_amount != -1:
             real_audio_track = None    
