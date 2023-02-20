@@ -115,4 +115,4 @@ def run_film_interp_infer(
                     cv2.imwrite(frame_path, frame)
             next_number += 1
 
-    print(f"Interpolation Finished in {time.time()-start_time:.2f} seconds!")
+    print(f"Interpolation \033[0;32mdone\033[0m in {time.time()-start_time:.2f} seconds!")
