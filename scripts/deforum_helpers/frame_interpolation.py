@@ -112,9 +112,9 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     
     film_model_name = 'film_net_fp16.pt'
     film_model_folder = os.path.join(deforum_models_path,'film_interpolation')
-    film_model_path = os.path.join(film_model_folder, film_model_name)
+    film_model_path = os.path.join(film_model_folder, film_model_name) # actual full path to the film .pt model file
     output_interp_imgs_folder = os.path.join(raw_output_imgs_path, 'interpolated_frames_film')
-    # set custom name depending on if we interpolate after a run, or interpolate a video (related/unrelated to deforum, we don't know) directly from within the RIFE tab
+    # set custom name depending on if we interpolate after a run, or interpolate a video (related/unrelated to deforum, we don't know) directly from within the interpolation tab
     # interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames_rife')
     if orig_vid_name is not None: # interpolating a video (deforum or unrelated)
         custom_interp_path = "{}_{}".format(output_interp_imgs_folder, orig_vid_name)
@@ -128,27 +128,25 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
         interp_vid_path = interp_vid_path + '_slomo_x' + str(sl_am)
     interp_vid_path = interp_vid_path + '.mp4'
 
-     # In this folder we temporarily keep the original frames (converted/ copy-pasted and img format depends on scenario)
+    # In this folder we temporarily keep the original frames (converted/ copy-pasted and img format depends on scenario)
     # the convertion case is done to avert a problem with 24 and 32 mixed outputs from the same animation run
     temp_convert_raw_png_path = os.path.join(raw_output_imgs_path, "tmp_film_folder")
     total_frames = duplicate_pngs_from_folder(raw_output_imgs_path, temp_convert_raw_png_path, img_batch_id, None)
-    check_and_download_film_model('film_net_fp16.pt', os.path.join(deforum_models_path, 'film_interpolation')) # TODO: split this part
+    check_and_download_film_model('film_net_fp16.pt', film_model_folder) # TODO: split this part
     
     # get number of in-between-frames to provide to FILM - mimics how RIFE works, we should get the same amount of total frames in the end
     film_in_between_frames_count = calculate_frames_to_add(total_frames, x_am)
-    
+    # Run actual FILM inference
     run_film_interp_infer(
     model_path = film_model_path,
     input_folder = temp_convert_raw_png_path,
     save_folder = custom_interp_path,
     inter_frames = film_in_between_frames_count)
-    
-    # todo: change location of these lines?
+
     add_soundtrack = 'None'
     if not audio_track is None:
         add_soundtrack = 'File'
-    
-    # TODO:  HANDLE AUDIO?!
+
     print (f"*Passing interpolated frames to ffmpeg...*")
     exception_raised = False
     try:
