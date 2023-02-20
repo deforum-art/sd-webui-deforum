@@ -17,23 +17,24 @@ def clean_folder_name(string):
         string = string.replace(char, "_")
     return string
 
-def set_interp_out_fps(interp_x, slom_x, in_vid_fps):
+def set_interp_out_fps(interp_x, slow_x_enabled, slom_x, in_vid_fps):
     if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
         return '---'
 
-    clean_interp_x = extract_number(interp_x)
-    clean_slom_x = extract_number(slom_x)
-    fps = float(in_vid_fps) * int(clean_interp_x)
-    if clean_slom_x != -1:
-        fps /= int(clean_slom_x)
+    # clean_interp_x = extract_number(interp_x)
+    # clean_slom_x = extract_number(slom_x)
+    fps = float(in_vid_fps) * int(interp_x)
+    # if slom_x != -1:
+    if slow_x_enabled:
+        fps /= int(slom_x)
     return int(fps) if fps.is_integer() else fps
     
 # get uploaded video frame count, fps, and return 3 valuees for the gradio UI: in fcount, in fps, out fps (using the set_interp_out_fps function above)
-def gradio_f_interp_get_fps_and_fcount(vid_path, interp_x, slom_x):
+def gradio_f_interp_get_fps_and_fcount(vid_path, interp_x, slow_x_enabled, slom_x):
     if vid_path is None:
         return '---', '---', '---'
     fps, fcount, resolution = get_quick_vid_info(vid_path.name)
-    expected_out_fps = set_interp_out_fps(interp_x, slom_x, fps)
+    expected_out_fps = set_interp_out_fps(interp_x, slow_x_enabled, slom_x, fps)
     return (fps if fps is not None else '---', fcount if fcount is not None else '---', expected_out_fps)
 
 # handle call to interpolate an uploaded video from gradio button in args.py (the function that calls this func is named 'upload_vid_to_rife')
@@ -59,7 +60,7 @@ def process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_
     if media_file_has_audio(file.name, f_location):
         audio_file_to_pass = file.name
     
-    process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=in_vid_fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution)
+    process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=in_vid_fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution)
 
 # handle params before talking with the actual rife module
 def process_video_interpolation(frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, orig_vid_fps, deforum_models_path, real_audio_track, raw_output_imgs_path, img_batch_id, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, keep_interp_imgs, orig_vid_name, resolution):
