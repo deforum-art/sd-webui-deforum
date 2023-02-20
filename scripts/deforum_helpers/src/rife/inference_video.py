@@ -12,6 +12,7 @@ import warnings
 import _thread
 from queue import Queue, Empty
 import subprocess
+import time
 from .model.pytorch_msssim import ssim_matlab
 
 sys.path.append('../../')
@@ -62,6 +63,8 @@ def run_rife_new_video_infer(
 
     if args.UHD and args.scale == 1.0:
         args.scale = 0.5
+        
+    start_time = time.time()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.set_grad_enabled(False)
@@ -184,13 +187,13 @@ def run_rife_new_video_infer(
             break
 
     write_buffer.put(lastframe)
-    import time
 
     while (not write_buffer.empty()):
         time.sleep(0.1)
     pbar.close()
     shutil.rmtree(temp_convert_raw_png_path)
     
+    print(f"Interpolation \033[0;32mdone\033[0m in {time.time()-start_time:.2f} seconds!")
     # stitch video from interpolated frames, and add audio if needed
     try:
         print (f"*Passing interpolated frames to ffmpeg...*")
@@ -200,7 +203,7 @@ def run_rife_new_video_infer(
             shutil.rmtree(raw_output_imgs_path)
     except Exception as e:
         print(f'Video stitching gone wrong. *Interpolated frames were saved to HD as backup!*. Actual error: {e}')
-
+    
 def clear_write_buffer(user_args, write_buffer, custom_interp_path):
     cnt = 0
 
