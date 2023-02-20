@@ -23,7 +23,7 @@ def run_film_interp_infer(
     args.save_folder = save_folder
     args.inter_frames = inter_frames
     
-# Check if the folder exists
+    # Check if the folder exists
     if not os.path.exists(args.input_folder):
         print(f"Error: Folder '{args.input_folder}' does not exist.")
         return
@@ -104,11 +104,11 @@ def run_film_interp_infer(
         else:
             next_number = 0
 
-        gs = i
+        outer_loop_count = i
         for i, frame in enumerate(frames):
             frame_path = os.path.join(args.save_folder, f"frame_{next_number:05d}.png") 
             # last pair, save all frames including the last one
-            if len(image_paths) - 2 == gs:
+            if len(image_paths) - 2 == outer_loop_count:
                 cv2.imwrite(frame_path, frame)
             else: # not last pair, don't save the last frame
                 if not i == len(frames) - 1:
