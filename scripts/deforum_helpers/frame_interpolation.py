@@ -156,10 +156,10 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
         print(f"An error occurred while stitching the video: {e}")
 
     if orig_vid_name and (keep_imgs or exception_raised):
-        # delete interp frames only if there was no error in the ffmpeg step and keep_imgs is False
         shutil.move(custom_interp_path, parent_folder) 
     if not keep_imgs and not exception_raised:
-        shutil.rmtree(custom_interp_path, ignore_errors=True)
+        if fps <= 450: # keep interp frames automatically if out_vid fps is above 450
+            shutil.rmtree(custom_interp_path, ignore_errors=True)
     # delete duplicated raw non-interpolated frames
     shutil.rmtree(temp_convert_raw_png_path, ignore_errors=True)
     # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
