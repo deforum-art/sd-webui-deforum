@@ -37,8 +37,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args)
-    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args)
+    keys = DeformAnimKeys(anim_args, args.seed) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args)
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
     # resume animation
     start_frame = 0
     if anim_args.resume_from_timestring:
