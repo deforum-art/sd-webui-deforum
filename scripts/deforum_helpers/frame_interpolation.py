@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from rife.inference_video import run_rife_new_video_infer
 from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio, extract_number
-from film_interpolation.film_inference import run_rife_new_video_infer
+from film_interpolation.film_inference import run_film_interp_infer
    
 # gets 'RIFE v4.3', returns: 'RIFE43'   
 def extract_rife_name(string):

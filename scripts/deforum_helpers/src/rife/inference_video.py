@@ -245,6 +245,7 @@ def pad_image(img, fp16, padding):
     else:
         return F.pad(img, padding)
 
+# TODO: move to fream_interpolation and add FILM to it!
 def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_enabled, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):        
     parent_folder = os.path.dirname(img_folder_path)
     grandparent_folder = os.path.dirname(parent_folder)
