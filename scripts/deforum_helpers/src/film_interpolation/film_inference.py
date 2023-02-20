@@ -36,12 +36,12 @@ def run_film_interp_infer(
     
     # Sort Jpg/Png images by name
     image_paths = sorted(glob(os.path.join(args.input_folder, "*.[jJ][pP][gG]")) + glob(os.path.join(args.input_folder, "*.[pP][nN][gG]")))
-    print(f"Got a request to FILM interpolate {len(image_paths)} frames.")
+    print(f"Total frames to FILM-interpolate: {len(image_paths)}. Total frame-pairs: {len(image_paths)-1}.")
     
     model = torch.jit.load(args.model_path, map_location='cpu')
     model.eval()   
 
-    for i in tqdm(range(len(image_paths) - 1), position=0, desc='Film total progress'):
+    for i in tqdm(range(len(image_paths) - 1), position=0, desc='FILM total progress'):
         img1 = image_paths[i]
         img2 = image_paths[i+1]
         img_batch_1, crop_region_1 = load_image(img1)
