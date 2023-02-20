@@ -130,26 +130,25 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     save_folder = final_output_interp_imgs_folder,
     inter_frames = film_in_between_frames_count)
     
-    # STITCH VIDEO?!
-    
-    if not keep_imgs:
+    # TODO:  HANDLE AUDIO?!
+    print (f"*Passing interpolated frames to ffmpeg...*")
+    exception_raised = False
+    try:
+        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=interp_vid_path, stitch_from_frame=0, stitch_to_frame=999999, imgs_path=img_path_for_ffmpeg, add_soundtrack='None', audio_path=None, crf=f_crf, preset=f_preset)
+    except Exception as e:
+        exception_raised = True
+        print(f"An error occurred while stitching the video: {e}")
+
+    # delete interp frames only if there was no error in the ffmpeg step and keep_imgs is False
+    if not keep_imgs and not exception_raised:
         try:
             shutil.rmtree(final_output_interp_imgs_folder)
         except:
             pass
-    try:
+    try: # delete duplicated raw non-interpolated frames
         shutil.rmtree(temp_convert_raw_png_path)
     except:
         pass
-    
-        
-            # if not exception_raised and not keep_imgs:
-        # shutil.rmtree(img_folder_path)
-
-    # if (keep_imgs and orig_vid_name is not None) or (orig_vid_name is not None and exception_raised is True):
-        # shutil.move(img_folder_path, grandparent_folder)
-        
-    
     
 def check_and_download_film_model(model_name, model_dest_folder):
     from basicsr.utils.download_util import load_file_from_url
