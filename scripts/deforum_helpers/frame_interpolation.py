@@ -108,6 +108,12 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     film_model_folder = os.path.join(deforum_models_path,'film_interpolation')
     film_model_path = os.path.join(film_model_folder, film_model_name)
     final_output_interp_imgs_folder = os.path.join(raw_output_imgs_path, 'interpolated_frames_film_' + str(img_batch_id))
+    interp_vid_path = os.path.join(raw_output_imgs_path, str(img_batch_id) + '_FILM_x' + str(x_am))
+    img_path_for_ffmpeg = os.path.join(final_output_interp_imgs_folder, "frame_%05d.png")
+
+    if sl_enabled:
+        interp_vid_path = interp_vid_path + '_slomo_x' + str(sl_am)
+    interp_vid_path = interp_vid_path + '.mp4'
 
      # In this folder we temporarily keep the original frames (converted/ copy-pasted and img format depends on scenario)
     # the convertion case is done to avert a problem with 24 and 32 mixed outputs from the same animation run
