@@ -18,8 +18,10 @@ def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_na
     if not os.path.exists(temp_convert_raw_png_path):
                 os.makedirs(temp_convert_raw_png_path)
                 
+    frames_handled = 0
     for f in os.listdir(from_folder):
         if ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and ((img_batch_id is not None and f.startswith(img_batch_id) or img_batch_id is None)):
+            frames_handled +=1
             original_img_path = os.path.join(from_folder, f)
             if orig_vid_name is not None:
                 shutil.copy(original_img_path, temp_convert_raw_png_path)
@@ -27,3 +29,4 @@ def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_na
                 image = cv2.imread(original_img_path)
                 new_path = os.path.join(temp_convert_raw_png_path, f)
                 cv2.imwrite(new_path, image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
+    return frames_handled

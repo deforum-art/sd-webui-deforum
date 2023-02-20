@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 from rife.inference_video import run_rife_new_video_infer
-from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio, extract_number
+from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio, extract_number, ffmpeg_stitch_video
 from film_interpolation.film_inference import run_film_interp_infer
 from .general_utils import duplicate_pngs_from_folder, checksum
 
@@ -102,7 +102,8 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
         return
         
 def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps):
-
+    import shutil 
+    
     film_model_name = 'film_net_fp16.pt'
     film_model_folder = os.path.join(deforum_models_path,'film_interpolation')
     film_model_path = os.path.join(film_model_folder, film_model_name)
@@ -111,15 +112,38 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
      # In this folder we temporarily keep the original frames (converted/ copy-pasted and img format depends on scenario)
     # the convertion case is done to avert a problem with 24 and 32 mixed outputs from the same animation run
     temp_convert_raw_png_path = os.path.join(raw_output_imgs_path, "tmp_film_folder")
-    duplicate_pngs_from_folder(raw_output_imgs_path, temp_convert_raw_png_path, img_batch_id, None)
+    total_frames = duplicate_pngs_from_folder(raw_output_imgs_path, temp_convert_raw_png_path, img_batch_id, None)
     check_and_download_film_model('film_net_fp16.pt', os.path.join(deforum_models_path, 'film_interpolation')) # TODO: split this part
     
-    sha = calculate_frames_to_add(5, x_am)
+    # get number of in-between-frames to provide to FILM - mimics how RIFE works, we should get the same amount of total frames in the end
+    film_in_between_frames_count = calculate_frames_to_add(total_frames, x_am)
+    
     run_film_interp_infer(
     model_path = film_model_path,
     input_folder = temp_convert_raw_png_path,
     save_folder = final_output_interp_imgs_folder,
-    inter_frames = sha)
+    inter_frames = film_in_between_frames_count)
+    
+    # STITCH VIDEO?!
+    
+    if not keep_imgs:
+        try:
+            shutil.rmtree(final_output_interp_imgs_folder)
+        except:
+            pass
+    try:
+        shutil.rmtree(temp_convert_raw_png_path)
+    except:
+        pass
+    
+        
+            # if not exception_raised and not keep_imgs:
+        # shutil.rmtree(img_folder_path)
+
+    # if (keep_imgs and orig_vid_name is not None) or (orig_vid_name is not None and exception_raised is True):
+        # shutil.move(img_folder_path, grandparent_folder)
+        
+    
     
 def check_and_download_film_model(model_name, model_dest_folder):
     from basicsr.utils.download_util import load_file_from_url
