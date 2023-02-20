@@ -252,8 +252,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
         mp4_path = os.path.join(grandparent_folder, str(orig_vid_name) +'_RIFE_' + 'x' + str(interp_x_amount))
     else:
         mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
-    
-    # if slow_mo_x_amount != -1:
+
     if slow_mo_enabled:
         mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)
     mp4_path = mp4_path + '.mp4'
