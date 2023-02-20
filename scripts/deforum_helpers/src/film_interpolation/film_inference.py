@@ -5,7 +5,7 @@ from tqdm import tqdm
 import torch
 import numpy as np
 import cv2
-from film_util import load_image
+from .film_util import load_image
 import time
 import warnings
 warnings.filterwarnings("ignore")
