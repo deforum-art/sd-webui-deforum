@@ -1,9 +1,9 @@
-#vid_to_rife_chosen_file .w-full, #vid_to_upscale_chosen_file .w-full {
+#vid_to_interpolate_chosen_file .w-full, #vid_to_upscale_chosen_file .w-full {
 		display: flex !important;
 		align-items: flex-start !important;
 		justify-content: center !important;
 }
-#vid_to_rife_chosen_file, #vid_to_upscale_chosen_file {
+#vid_to_interpolate_chosen_file, #vid_to_upscale_chosen_file {
 	height: 85px !important;
 }
 

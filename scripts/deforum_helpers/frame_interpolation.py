@@ -37,7 +37,7 @@ def gradio_f_interp_get_fps_and_fcount(vid_path, interp_x, slom_x):
     return (fps if fps is not None else '---', fcount if fcount is not None else '---', expected_out_fps)
 
 # handle call to interpolate an uploaded video from gradio button in args.py (the function that calls this func is named 'upload_vid_to_rife')
-def process_rife_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, vid_file_name):
+def process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, vid_file_name):
 
     print("got a request to *frame interpolate* an existing video.")
 
