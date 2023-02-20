@@ -789,10 +789,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact'):
                         # Interpolation Engine
                         frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['None','RIFE v4.0','RIFE v4.3','RIFE v4.6', 'FILM'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
-                        frame_interpolation_slow_mo_enabled = gr.Checkbox(label="Slow Mo", elem_id="frame_interpolation_slow_mo_enabled", value=dv.frame_interpolation_slow_mo_enabled, interactive=True)
+                        frame_interpolation_slow_mo_enabled = gr.Checkbox(label="Slow Mo", elem_id="frame_interpolation_slow_mo_enabled", value=dv.frame_interpolation_slow_mo_enabled, interactive=True, visible=False)
                         # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
-                        frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
-                    with gr.Row(variant='compact'):
+                        frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True, visible=False)
+                    with gr.Row(variant='compact', visible=False) as frame_interp_amounts_row:
                         with gr.Column(min_width=180) as frame_interp_x_amount_column:
                             # How many times to interpolate (interp x)
                             frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp x", value=dv.frame_interpolation_x_amount, interactive=True)
@@ -802,10 +802,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     # TODO: move these from here when done
                     def hide_slow_mo(choice):
                         return gr.update(visible=True) if choice else gr.update(visible=False)
+                    def hide_interp_by_interp_status(choice):
+                        return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
                     frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
-                    with gr.Row():
+                    interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row]
+                    for output in interp_hide_list:
+                        frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
+                    with gr.Row(visible=False) as interp_existing_video_row:
                         # Intrpolate any existing video from the connected PC
-                        with gr.Accordion('Interpolate an existing video', open=False):
+                        with gr.Accordion('Interpolate an existing video', open=False) as interp_existing_video_accord:
                             # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
                             vid_to_rife_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_rife_chosen_file")
                             with gr.Row(variant='compact'):
@@ -826,6 +831,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
                             # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
                             vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
+                    #TODO: move this from here
+                    interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row,interp_existing_video_row]
+                    for output in interp_hide_list:
+                        frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
             # VIDEO UPSCALE TAB
             with gr.Tab('Video Upscaling'):
