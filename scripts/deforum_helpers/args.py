@@ -788,7 +788,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Column(variant='compact'):
                     with gr.Row(variant='compact'):
                         # Interpolation Engine
-                        frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['None','RIFE v4.6','FILM','RIFE v4.0','RIFE v4.3'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
+                        frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['None','RIFE v4.6','FILM'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
                         frame_interpolation_slow_mo_enabled = gr.Checkbox(label="Slow Mo", elem_id="frame_interpolation_slow_mo_enabled", value=dv.frame_interpolation_slow_mo_enabled, interactive=True, visible=False)
                         # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
                         frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True, visible=False)
@@ -797,7 +797,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             # How many times to interpolate (interp X)
                             frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp X", value=dv.frame_interpolation_x_amount, interactive=True)
                         with gr.Column(min_width=180, visible=False) as frame_interp_slow_mo_amount_column:
-                            # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE)
+                            # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE/FILM)
                             frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo X", value=dv.frame_interpolation_x_amount, interactive=True)
                     # TODO: move these from here when done
                     def hide_slow_mo(choice):

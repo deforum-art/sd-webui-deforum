@@ -67,10 +67,6 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
     if frame_interpolation_engine == 'None':
         return
     elif frame_interpolation_engine.startswith("RIFE"):
-
-        # extract clean numbers from values of 'x2' etc'
-        # interp_amount = extract_number(frame_interpolation_x_amount)
-        # interp_slow_mo = extract_number(frame_interpolation_slow_mo_amount)
         # make sure interp_x is valid and in range
         if frame_interpolation_x_amount not in range(2, 11):
             raise Error("frame_interpolation_x_amount must be between 2x and 10x")
@@ -79,9 +75,7 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
         fps = float(orig_vid_fps) * frame_interpolation_x_amount
         
         # re-calculate fps param to pass if slow_mo mode is enabled
-        if frame_interpolation_slow_mo_amount != -1:
-            if frame_interpolation_slow_mo_amount not in [2, 4, 8]:
-                raise Error("frame_interpolation_slow_mo_amount must be 2x, 4x or 8x")
+        if frame_interpolation_slow_mo_enabled:
             fps = float(orig_vid_fps) * frame_interpolation_x_amount / int(frame_interpolation_slow_mo_amount)
             
         # disable audio-adding by setting real_audio_track to None if slow-mo is enabled (not equal to -1 means enabled)
@@ -97,7 +91,7 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
         actual_model_folder_name = extract_rife_name(frame_interpolation_engine)
         
         # run actual rife interpolation and video stitching etc - the whole suite
-        run_rife_new_video_infer(interp_x_amount=interp_amount, slow_mo_x_amount=frame_interpolation_slow_mo_amount, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs, orig_vid_name=orig_vid_name, UHD=UHD)
+        run_rife_new_video_infer(interp_x_amount=frame_interpolation_x_amount, slow_mo_enabled = frame_interpolation_slow_mo_enabled, slow_mo_x_amount=frame_interpolation_slow_mo_amount, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs, orig_vid_name=orig_vid_name, UHD=UHD)
     elif frame_interpolation_engine == 'FILM':
         return
     else:

@@ -33,7 +33,8 @@ def run_rife_new_video_infer(
         ffmpeg_location=None,
         audio_track=None,
         interp_x_amount=2,
-        slow_mo_x_amount=-1,
+        slow_mo_enabled=False,
+        slow_mo_x_amount=2,
         ffmpeg_crf=17,
         ffmpeg_preset='veryslow',
         keep_imgs=False,
@@ -52,6 +53,7 @@ def run_rife_new_video_infer(
     args.ffmpeg_location = ffmpeg_location
     args.audio_track = audio_track
     args.interp_x_amount = interp_x_amount
+    args.slow_mo_enabled = slow_mo_enabled
     args.slow_mo_x_amount = slow_mo_x_amount
     args.ffmpeg_crf = ffmpeg_crf
     args.ffmpeg_preset = ffmpeg_preset
@@ -192,7 +194,7 @@ def run_rife_new_video_infer(
     # stitch video from interpolated frames, and add audio if needed
     try:
         print (f"*Passing interpolated frames to ffmpeg...*")
-        vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs, args.orig_vid_name)
+        vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_enabled, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs, args.orig_vid_name)
         # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
         if orig_vid_name is not None:
             shutil.rmtree(raw_output_imgs_path)
@@ -243,7 +245,7 @@ def pad_image(img, fp16, padding):
     else:
         return F.pad(img, padding)
 
-def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):        
+def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_enabled, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):        
     parent_folder = os.path.dirname(img_folder_path)
     grandparent_folder = os.path.dirname(parent_folder)
     if orig_vid_name is not None:
@@ -251,7 +253,8 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
     else:
         mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
     
-    if slow_mo_x_amount != -1:
+    # if slow_mo_x_amount != -1:
+    if slow_mo_enabled:
         mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)
     mp4_path = mp4_path + '.mp4'
 
