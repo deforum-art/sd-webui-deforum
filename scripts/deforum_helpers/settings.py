@@ -65,7 +65,7 @@ def save_settings(*args, **kwargs):
     controlnet_dict = pack_controlnet_args(data)
     
     combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict}
-    exclude_keys = get_keys_to_exclude('general')
+    exclude_keys = get_keys_to_exclude('general') + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
     
     print(f"saving custom settings to {settings_path}")
