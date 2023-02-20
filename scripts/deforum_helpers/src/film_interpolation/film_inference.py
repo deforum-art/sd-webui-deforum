@@ -41,7 +41,7 @@ def run_film_interp_infer(
     model = torch.jit.load(args.model_path, map_location='cpu')
     model.eval()   
 
-    for i in range(len(image_paths) - 1):
+    for i in tqdm(range(len(image_paths) - 1), position=0, desc='Film total progress'):
         img1 = image_paths[i]
         img2 = image_paths[i+1]
         img_batch_1, crop_region_1 = load_image(img1)
@@ -63,9 +63,9 @@ def run_film_interp_infer(
         remains = list(range(1, inter_frames + 1))
 
         splits = torch.linspace(0, 1, inter_frames + 2)
-        
-        # print(len(remains))
-        for _ in tqdm(range(len(remains)), f'*FILM* generating in-between frames'):
+
+        inner_loop_progress = tqdm(range(len(remains)), position=1, leave=False, desc='Film frame-pair progress')
+        for _ in inner_loop_progress:
             starts = splits[idxes[:-1]]
             ends = splits[idxes[1:]]
             distances = ((splits[None, remains] - starts[:, None]) / (ends[:, None] - starts[:, None]) - .5).abs()
@@ -88,7 +88,9 @@ def run_film_interp_infer(
             insert_position = bisect.bisect_left(idxes, remains[step])
             idxes.insert(insert_position, remains[step])
             results.insert(insert_position, prediction.clamp(0, 1).cpu().float())
+            inner_loop_progress.update(1)
             del remains[step]
+        inner_loop_progress.close()
         # create output folder for interoplated imgs to live in
         os.makedirs(args.save_folder, exist_ok=True)
 
