@@ -166,15 +166,13 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
         except:
             pass
     try: # delete duplicated raw non-interpolated frames
-        shutil.rmtree(temp_convert_raw_png_path,  ignore_errors=True)
+        shutil.rmtree(temp_convert_raw_png_path, ignore_errors=True)
     except:
         pass
     # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
     if orig_vid_name is not None:
-        shutil.rmtree(raw_output_imgs_path,  ignore_errors=True)
-        
+        shutil.rmtree(raw_output_imgs_path, ignore_errors=True)
 
-    
 def check_and_download_film_model(model_name, model_dest_folder):
     from basicsr.utils.download_util import load_file_from_url
     if model_name == 'film_net_fp16.pt':

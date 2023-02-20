@@ -98,11 +98,8 @@ def run_deforum(*args, **kwargs):
         real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
     
     # Delete folder with duplicated imgs from OS temp folder
-    try:
-        shutil.rmtree(root.tmp_deforum_run_duplicated_folder)
-    except:
-        pass
-    
+    shutil.rmtree(root.tmp_deforum_run_duplicated_folder, ignore_errors=True)
+
     # Decide whether or not we need to try and frame interpolate laters
     need_to_frame_interpolate = False
     if video_args.frame_interpolation_engine != "None" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
