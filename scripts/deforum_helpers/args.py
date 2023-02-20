@@ -794,11 +794,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True, visible=False)
                     with gr.Row(variant='compact', visible=False) as frame_interp_amounts_row:
                         with gr.Column(min_width=180) as frame_interp_x_amount_column:
-                            # How many times to interpolate (interp x)
-                            frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp x", value=dv.frame_interpolation_x_amount, interactive=True)
+                            # How many times to interpolate (interp X)
+                            frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp X", value=dv.frame_interpolation_x_amount, interactive=True)
                         with gr.Column(min_width=180, visible=False) as frame_interp_slow_mo_amount_column:
                             # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE)
-                            frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo x", value=dv.frame_interpolation_x_amount, interactive=True)
+                            frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo X", value=dv.frame_interpolation_x_amount, interactive=True)
                     # TODO: move these from here when done
                     def hide_slow_mo(choice):
                         return gr.update(visible=True) if choice else gr.update(visible=False)
@@ -1167,15 +1167,15 @@ def print_args(args):
         print(f"{key}: {value}")
  
 # Local gradio-to-rife function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
-def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
+def upload_vid_to_rife(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
     # print msg and do nothing if vid not uploaded or interp_x not provided
     if not file or x_am == 'Disabled':
-        return print("Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)")
+        return print("Please upload a video and set a proper value for 'Interp X'. Can't interpolate x0 times :)")
 
     root_params = Root()
     f_models_path = root_params['models_path']
 
-    process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
+    process_rife_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
 
 # Local gradio-to-upscalers function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):

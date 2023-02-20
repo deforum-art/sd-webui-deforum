@@ -105,7 +105,7 @@ def run_deforum(*args, **kwargs):
     
     # Decide whether or not we need to try and frame interpolate laters
     need_to_frame_interpolate = False
-    if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
+    if video_args.frame_interpolation_engine != "None" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         need_to_frame_interpolate = True
         
     if video_args.skip_video_for_run_all:
@@ -159,7 +159,7 @@ def run_deforum(*args, **kwargs):
     # FRAME INTERPOLATION TIME
     if need_to_frame_interpolate: 
         print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
-        process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
+        process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount,frame_interpolation_slow_mo_enabled=video_args.frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
     
     if video_args.make_gif and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
