@@ -300,7 +300,7 @@ import os
 import time
 from types import SimpleNamespace
 
-i1_store_backup = "<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.1b</p>"
+i1_store_backup = "<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.2b</p>"
 i1_store = i1_store_backup
 
 mask_fill_choices=['fill', 'original', 'latent noise', 'latent nothing']
