@@ -808,7 +808,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact', visible=False) as frame_interp_amounts_row:
                         with gr.Column(min_width=180) as frame_interp_x_amount_column:
                             # How many times to interpolate (interp X)
-                            frame_interpolation_x_amount = gr.Slider(minimum=1, maximum=10, step=1, label="Interp X", value=dv.frame_interpolation_x_amount, interactive=True)
+                            frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp X", value=dv.frame_interpolation_x_amount, interactive=True)
                         with gr.Column(min_width=180, visible=False) as frame_interp_slow_mo_amount_column:
                             # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE/FILM)
                             frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo X", value=dv.frame_interpolation_x_amount, interactive=True)
