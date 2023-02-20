@@ -682,7 +682,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development. &#128521;
                 </p>
                 <p">
-                    Due to ControlNet base extension's inner works it needs its models to be located at 'extensions/deforum-for-automatic1111-webui/models'. So copy, symlink or move them there until a more elegant solution is found. And, as of now, it requires use_init checked for the first run.
+                    Due to ControlNet base extension's inner works it needs its models to be located at 'extensions/deforum-for-automatic1111-webui/models'. So copy, symlink or move them there until a more elegant solution is found. And, as of now, it requires use_init checked for the first run. The ControlNet extension version used in the dev process is a24089a62e70a7fae44b7bf35b51fd584dd55e25, if even with all the other options above used it still breaks, upgrade/downgrade your CN version to this one.
                 </p>
                 """)
                 controlnet_dict = setup_controlnet_ui()

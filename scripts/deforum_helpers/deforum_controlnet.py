@@ -86,13 +86,13 @@ def setup_controlnet_ui_raw():
         def get_block_name(self):
             return "button"
             
-    from scripts.processor import canny, midas, midas_normal, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
+    from scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
 
     preprocessor = {
         "none": lambda x, *args, **kwargs: x,
         "canny": canny,
         "depth": midas,
-        # "depth_leres": leres,
+        "depth_leres": leres,
         "hed": hed,
         "mlsd": mlsd,
         "normal_map": midas_normal,
