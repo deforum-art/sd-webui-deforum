@@ -95,7 +95,7 @@ def run_rife_new_video_infer(
     print(f"{args.modelDir}.pkl model successfully loaded into memory")
     print("Interpolation progress (it's OK if it finishes before 100%):")
    
-    interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames')
+    interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames_rife')
     # set custom name depending on if we interpolate after a run, or interpolate a video (related/unrelated to deforum, we don't know) directly from within the RIFE tab
     if args.orig_vid_name is not None: # interpolating a video (deforum or unrelated)
         custom_interp_path = "{}_{}".format(interpolated_path, args.orig_vid_name)

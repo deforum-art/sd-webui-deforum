@@ -73,18 +73,17 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
     # re-calculate fps param to pass if slow_mo mode is enabled
     if frame_interpolation_slow_mo_enabled:
         fps = float(orig_vid_fps) * frame_interpolation_x_amount / int(frame_interpolation_slow_mo_amount)
-
+    # disable audio-adding by setting real_audio_track to None if slow-mo is enabled
+    if real_audio_track is not None and frame_interpolation_slow_mo_enabled:
+        real_audio_track = None  
+            
     if frame_interpolation_engine == 'None':
         return
     elif frame_interpolation_engine.startswith("RIFE"):
         # make sure interp_x is valid and in range
         if frame_interpolation_x_amount not in range(2, 11):
             raise Error("frame_interpolation_x_amount must be between 2x and 10x")
-
-        # disable audio-adding by setting real_audio_track to None if slow-mo is enabled (not equal to -1 means enabled)
-        if real_audio_track is not None and frame_interpolation_slow_mo_amount != -1:
-            real_audio_track = None    
-            
+  
         # set UHD to True if res' is 2K or higher
         if resolution:
             UHD = resolution[0] >= 2048 and resolution[1] >= 2048
@@ -96,20 +95,27 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
         # run actual rife interpolation and video stitching etc - the whole suite
         run_rife_new_video_infer(interp_x_amount=frame_interpolation_x_amount, slow_mo_enabled = frame_interpolation_slow_mo_enabled, slow_mo_x_amount=frame_interpolation_slow_mo_amount, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs, orig_vid_name=orig_vid_name, UHD=UHD)
     elif frame_interpolation_engine == 'FILM':
-        prepare_film_inference(deforum_models_path=deforum_models_path, x_am=frame_interpolation_x_amount, sl_enabled=frame_interpolation_slow_mo_enabled, sl_am=frame_interpolation_slow_mo_amount, keep_imgs=keep_interp_imgs, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, f_location=ffmpeg_location, f_crf=ffmpeg_crf, f_preset=ffmpeg_preset, fps = fps)
+        prepare_film_inference(deforum_models_path=deforum_models_path, x_am=frame_interpolation_x_amount, sl_enabled=frame_interpolation_slow_mo_enabled, sl_am=frame_interpolation_slow_mo_amount, keep_imgs=keep_interp_imgs, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, f_location=ffmpeg_location, f_crf=ffmpeg_crf, f_preset=ffmpeg_preset, fps=fps, audio_track=real_audio_track, orig_vid_name=orig_vid_name)
     else:
         print("Unknown Frame Interpolation engine chosen. Doing nothing.")
         return
         
-def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps):
+def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps, audio_track, orig_vid_name):
     import shutil 
     
     film_model_name = 'film_net_fp16.pt'
     film_model_folder = os.path.join(deforum_models_path,'film_interpolation')
     film_model_path = os.path.join(film_model_folder, film_model_name)
-    final_output_interp_imgs_folder = os.path.join(raw_output_imgs_path, 'interpolated_frames_film_' + str(img_batch_id))
+    output_interp_imgs_folder = os.path.join(raw_output_imgs_path, 'interpolated_frames_film')
+    # set custom name depending on if we interpolate after a run, or interpolate a video (related/unrelated to deforum, we don't know) directly from within the RIFE tab
+    # interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames_rife')
+    if orig_vid_name is not None: # interpolating a video (deforum or unrelated)
+        custom_interp_path = "{}_{}".format(output_interp_imgs_folder, orig_vid_name)
+    else: # interpolating after a deforum run:
+        custom_interp_path = "{}_{}".format(output_interp_imgs_folder, img_batch_id)
+
     interp_vid_path = os.path.join(raw_output_imgs_path, str(img_batch_id) + '_FILM_x' + str(x_am))
-    img_path_for_ffmpeg = os.path.join(final_output_interp_imgs_folder, "frame_%05d.png")
+    img_path_for_ffmpeg = os.path.join(custom_interp_path, "frame_%05d.png")
 
     if sl_enabled:
         interp_vid_path = interp_vid_path + '_slomo_x' + str(sl_am)
@@ -127,14 +133,19 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     run_film_interp_infer(
     model_path = film_model_path,
     input_folder = temp_convert_raw_png_path,
-    save_folder = final_output_interp_imgs_folder,
+    save_folder = custom_interp_path,
     inter_frames = film_in_between_frames_count)
+    
+    # todo: change location of these lines?
+    add_soundtrack = 'None'
+    if not audio_track is None:
+        add_soundtrack = 'File'
     
     # TODO:  HANDLE AUDIO?!
     print (f"*Passing interpolated frames to ffmpeg...*")
     exception_raised = False
     try:
-        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=interp_vid_path, stitch_from_frame=0, stitch_to_frame=999999, imgs_path=img_path_for_ffmpeg, add_soundtrack='None', audio_path=None, crf=f_crf, preset=f_preset)
+        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=interp_vid_path, stitch_from_frame=0, stitch_to_frame=999999, imgs_path=img_path_for_ffmpeg, add_soundtrack=add_soundtrack, audio_path=audio_track, crf=f_crf, preset=f_preset)
     except Exception as e:
         exception_raised = True
         print(f"An error occurred while stitching the video: {e}")
@@ -142,7 +153,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     # delete interp frames only if there was no error in the ffmpeg step and keep_imgs is False
     if not keep_imgs and not exception_raised:
         try:
-            shutil.rmtree(final_output_interp_imgs_folder)
+            shutil.rmtree(custom_interp_path)
         except:
             pass
     try: # delete duplicated raw non-interpolated frames
