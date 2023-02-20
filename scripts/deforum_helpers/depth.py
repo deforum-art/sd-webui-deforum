@@ -3,6 +3,7 @@ import cv2
 import hashlib
 import numpy as np
 import torch
+import gc
 import torchvision.transforms as T
 from einops import rearrange, repeat
 from PIL import Image
@@ -57,8 +58,9 @@ class DepthModel():
         ])
 
         self.midas_model.eval()    
-        if half_precision and self.device == torch.device("cuda"):
+        if self.device == torch.device("cuda"):
             self.midas_model = self.midas_model.to(memory_format=torch.channels_last)
+        if half_precision:
             self.midas_model = self.midas_model.half()
         self.midas_model.to(self.device)
 
@@ -153,5 +155,12 @@ class DepthModel():
         denom = max(1e-8, self.depth_max - self.depth_min)
         temp = rearrange((depth - self.depth_min) / denom * 255, 'c h w -> h w c')
         temp = repeat(temp, 'h w 1 -> h w c', c=3)
-        Image.fromarray(temp.astype(np.uint8)).save(filename)    
-
+        Image.fromarray(temp.astype(np.uint8)).save(filename)
+    
+    def to(self, device):
+        self.device = device
+        self.midas_model.to(device)
+        if self.adabins_helper is not None:
+            self.adabins_helper.to(device)
+        gc.collect()
+        torch.cuda.empty_cache()
