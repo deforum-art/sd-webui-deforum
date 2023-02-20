@@ -804,10 +804,17 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         return gr.update(visible=True) if choice else gr.update(visible=False)
                     def hide_interp_by_interp_status(choice):
                         return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
+                    def change_interp_x_max_limit(engine_name, current_value):
+                        if engine_name == 'FILM':
+                            return gr.update(maximum=300)
+                        elif current_value > 10:
+                            return gr.update(maximum=10, value=2)
+                        return gr.update(maximum=10)
                     frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
                     interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row]
                     for output in interp_hide_list:
                         frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
+                    frame_interpolation_engine.change(fn=change_interp_x_max_limit,inputs=[frame_interpolation_engine,frame_interpolation_x_amount],outputs=frame_interpolation_x_amount)
                     with gr.Row(visible=False) as interp_existing_video_row:
                         # Intrpolate any existing video from the connected PC
                         with gr.Accordion('Interpolate an existing video', open=False) as interp_existing_video_accord:
