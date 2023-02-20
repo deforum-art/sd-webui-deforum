@@ -635,14 +635,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row():
                     full_res_mask = gr.Checkbox(label="Full res mask", value=d.full_res_mask, interactive=True)
                     full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="Full res mask padding", value=d.full_res_mask_padding, interactive=True)
-            with gr.Accordion('ControlNet (WIP)', open=True):
-                gr.HTML("""
-                Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
-                <p style="margin-top:0.2em">
-                    *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development. &#128521;
-                </p>
-                """)
-                controlnet_dict = setup_controlnet_ui()
             # PARSEQ ACCORD
             with gr.Accordion('Parseq', open=False):
                 gr.HTML("""
@@ -680,6 +672,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 return gr.update(visible=True) 
             else:
                 return gr.update(visible=False)
+        # CONTROLNET TAB
+        with gr.Tab('ControlNet'):
+                gr.HTML("""
+                Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
+                <p style="margin-top:0.2em">
+                    *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development. &#128521;
+                </p>
+                """)
+                controlnet_dict = setup_controlnet_ui()
         # HYBRID VIDEO TAB
         with gr.Tab('Hybrid Video'):
             # this html only shows when not in 2d/3d mode
