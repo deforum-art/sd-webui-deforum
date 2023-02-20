@@ -222,7 +222,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         "processor_res": controlnet_args.controlnet_processor_res,
         "threshold_a": controlnet_args.controlnet_threshold_a,
         "threshold_b": controlnet_args.controlnet_threshold_b,
-        "guidance_strength": controlnet_args.controlnet_guidance_strength,
+        "guidance_strength": controlnet_args.controlnet_guidance_strength,"guidance_strength": controlnet_args.controlnet_guidance_strength,
     }
 
     from .deforum_controlnet_hardcode import process
@@ -250,7 +250,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         table.add_column(field_name, justify="center")
     
     rows = []
-    rows += [cn_args[x] for x in field_names]
+    rows += [cn_args["module"], cn_args["model"], cn_args["weight"], cn_args["guidance_strength"], cn_args["scribble_mode"], cn_args["resize_mode"], cn_args["rgbbgr_mode"], cn_args["processor_res"], cn_args["threshold_a"], cn_args["threshold_b"]]
 
     table.add_row(*rows)
     
@@ -263,6 +263,8 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
     
     if processed is None: # now it's definitely not OK
         raise Exception("\033[31mFailed to process a frame with ControlNet enabled!\033[0m")
+    
+    p.close()
 
     return processed
 
@@ -300,6 +302,7 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         "processor_res": controlnet_args.controlnet_processor_res,
         "threshold_a": controlnet_args.controlnet_threshold_a,
         "threshold_b": controlnet_args.controlnet_threshold_b,
+        "guidance_strength": controlnet_args.controlnet_guidance_strength,
     }
 
     from .deforum_controlnet_hardcode import process
@@ -316,7 +319,7 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         cn_args["processor_res"],
         cn_args["threshold_a"],
         cn_args["threshold_b"],
-        1.0,
+        cn_args["guidance_strength"],
     )
 
     table = Table(title="ControlNet params",padding=0, box=box.ROUNDED)
@@ -327,7 +330,7 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         table.add_column(field_name, justify="center")
     
     rows = []
-    rows += [cn_args[x] for x in field_names]
+    rows += [cn_args["module"], cn_args["model"], cn_args["weight"], cn_args["guidance_strength"], cn_args["scribble_mode"], cn_args["resize_mode"], cn_args["rgbbgr_mode"], cn_args["processor_res"], cn_args["threshold_a"], cn_args["threshold_b"]]
 
     table.add_row(*rows)
     
@@ -340,6 +343,8 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
     
     if processed is None: # now it's definitely not OK
         raise Exception("\033[31mFailed to process a frame with ControlNet enabled!\033[0m")
+    
+    p.close()
 
     return processed
 
