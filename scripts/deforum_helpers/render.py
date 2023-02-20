@@ -2,7 +2,9 @@ import os
 import json
 import pandas as pd
 import cv2
+import re
 import numpy as np
+import numexpr
 from PIL import Image, ImageOps
 from .rich import console
 
@@ -360,7 +362,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
             
-        prompt_to_print, *after_neg = args.prompt.strip().split("--neg")
+        prompt_split = re.split("`(.*?)`", args.prompt)
+        if len(prompt_split) > 1:
+            prompt_parsed = ''.join([prompt_split[value-1]+f'{numexpr.evaluate(prompt_split[value].replace("t",f"{frame_idx}"))}' for value in (range(1, len(prompt_split), 2))])
+        else:
+            prompt_parsed = args.prompt
+
+        prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
         prompt_to_print = prompt_to_print.strip()
         after_neg = "".join(after_neg).strip()
 
