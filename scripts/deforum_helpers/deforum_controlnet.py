@@ -161,8 +161,8 @@ def setup_controlnet_ui_raw():
 def setup_controlnet_ui():
     if not find_controlnet():
         gr.HTML("""
-                <a style='color:red;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet not found! Please, install it</a>
-                """)
+                <a style='target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet not found. Please install it :)</a>
+                """, elem_id='controlnet_not_found_html_msg')
         return {}
 
     return setup_controlnet_ui_raw()

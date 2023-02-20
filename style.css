@@ -29,3 +29,7 @@
 #deforum_results .flex #image_buttons_deforum #extras_tab {
 	display: none !important;
 }
+
+#controlnet_not_found_html_msg {
+	color: Tomato;
+}
