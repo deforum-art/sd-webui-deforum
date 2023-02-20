@@ -219,6 +219,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         "processor_res": controlnet_args.controlnet_processor_res,
         "threshold_a": controlnet_args.controlnet_threshold_a,
         "threshold_b": controlnet_args.controlnet_threshold_b,
+        "guidance_strength": controlnet_args.controlnet_guidance_strength,
     }
 
     from .deforum_controlnet_hardcode import process
@@ -235,7 +236,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         cn_args["processor_res"],
         cn_args["threshold_a"],
         cn_args["threshold_b"],
-        1.0,
+        cn_args["guidance_strength"],
     )
 
     print(p.script_args) # TODO add *rich* table
