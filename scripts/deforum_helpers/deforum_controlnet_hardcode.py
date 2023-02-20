@@ -123,13 +123,13 @@ def process(p, *args):
         detected_map[np.min(deforum_input_image, axis=2) < 127] = 255
         deforum_input_image = detected_map
     
-    from scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
+    from scripts.processor import canny, midas, midas_normal, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
     
     preprocessor = {
         "none": lambda x, *args, **kwargs: x,
         "canny": canny,
         "depth": midas,
-        "depth_leres": leres,
+        # "depth_leres": leres,
         "hed": hed,
         "mlsd": mlsd,
         "normal_map": midas_normal,
