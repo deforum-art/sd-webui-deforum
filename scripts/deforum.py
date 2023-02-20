@@ -7,7 +7,7 @@ if 'google.colab' in sys.modules:
     basedirs.append('/content/gdrive/MyDrive/sd/stable-diffusion-webui') #hardcode as TheLastBen's colab seems to be the primal source
 
 for basedir in basedirs:
-    deforum_paths_to_ensure = [basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',basedir]
+    deforum_paths_to_ensure = [basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/sd-webui-controlnet', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',basedir]
 
     for deforum_scripts_path_fix in deforum_paths_to_ensure:
         if not deforum_scripts_path_fix in sys.path:
@@ -49,7 +49,7 @@ def run_deforum(*args, **kwargs):
     args_dict['self'] = None
     args_dict['p'] = p
     
-    root, args, anim_args, video_args, parseq_args, loop_args = deforum_args.process_args(args_dict)
+    root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict)
     root.clipseg_model = None
     root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
     root.basedirs = basedirs
@@ -75,13 +75,13 @@ def run_deforum(*args, **kwargs):
         # dispatch to appropriate renderer
         if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
             if anim_args.use_mask_video: 
-                render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root) # allow mask video without an input video
+                render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root) # allow mask video without an input video
             else:    
-                render_animation(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root)
+                render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)
         elif anim_args.animation_mode == 'Video Input':
-            render_input_video(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root)#TODO: prettify code
+            render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)#TODO: prettify code
         elif anim_args.animation_mode == 'Interpolation':
-            render_interpolation(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root)
+            render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)
         else:
             print('Other modes are not available yet!')
     finally:
