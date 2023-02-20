@@ -106,7 +106,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     parent_folder = os.path.dirname(raw_output_imgs_path)
     grandparent_folder = os.path.dirname(parent_folder)
     if orig_vid_name is not None:
-        interp_vid_path = os.path.join(grandparent_folder, str(orig_vid_name) +'_FILM_x' + str(x_am))
+        interp_vid_path = os.path.join(parent_folder, str(orig_vid_name) +'_FILM_x' + str(x_am))
     else:
         interp_vid_path = os.path.join(raw_output_imgs_path, str(img_batch_id) +'_FILM_x' + str(x_am))
     
