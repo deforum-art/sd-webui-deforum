@@ -140,7 +140,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     run_film_interp_infer(
     model_path = film_model_path,
     input_folder = temp_convert_raw_png_path,
-    save_folder = custom_interp_path,
+    save_folder = custom_interp_path, # output folder is created in the infer part
     inter_frames = film_in_between_frames_count)
 
     add_soundtrack = 'None'
@@ -186,6 +186,7 @@ def check_and_download_film_model(model_name, model_dest_folder):
     except Exception as e:
         raise Exception(f"Error while downloading {model_name}. Please download from: {download_url}, and put in: {model_dest_folder}")
         
-def calculate_frames_to_add(n, x):
-    frames_to_add = (n * x - n) / (n - 1)
+# get film no. of frames to add after each pic from tot frames in interp_x values
+def calculate_frames_to_add(total_frames, interp_x):
+    frames_to_add = (total_frames * interp_x - total_frames) / (total_frames - 1)
     return int(round(frames_to_add))

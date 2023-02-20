@@ -41,7 +41,7 @@ def run_film_interp_infer(
     model = torch.jit.load(args.model_path, map_location='cpu')
     model.eval()   
 
-    for i in tqdm(range(len(image_paths) - 1), position=0, desc='FILM progress'):
+    for i in tqdm(range(len(image_paths) - 1), desc='FILM progress'):
         img1 = image_paths[i]
         img2 = image_paths[i+1]
         img_batch_1, crop_region_1 = load_image(img1)
@@ -64,7 +64,7 @@ def run_film_interp_infer(
 
         splits = torch.linspace(0, 1, inter_frames + 2)
 
-        inner_loop_progress = tqdm(range(len(remains)), position=1, leave=False, desc='Film frame-pair progress', disable=True)
+        inner_loop_progress = tqdm(range(len(remains)), leave=False, disable=True)
         for _ in inner_loop_progress:
             starts = splits[idxes[:-1]]
             ends = splits[idxes[1:]]
