@@ -104,7 +104,7 @@ def run_film_interp_infer(
 
         gs = i
         for i, frame in enumerate(frames):
-            frame_path = os.path.join(args.save_folder, f"frame_{next_number:04d}.jpg") 
+            frame_path = os.path.join(args.save_folder, f"frame_{next_number:05d}.png") 
             # last pair, save all frames including the last one
             if len(image_paths) - 2 == gs:
                 cv2.imwrite(frame_path, frame)
