@@ -8,6 +8,9 @@ import modules.scripts as scrpts
 from PIL import Image
 import numpy as np
 from modules.processing import process_images
+from .rich import console
+from rich.table import Table
+from rich import box
 
 has_controlnet = None
 
@@ -239,7 +242,19 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         cn_args["guidance_strength"],
     )
 
-    print(p.script_args) # TODO add *rich* table
+    table = Table(title="ControlNet params",padding=0, box=box.ROUNDED)
+
+    field_names = []
+    field_names += ["module", "model", "weight", "guidance", "scribble", "resize", "rgb->bgr", "proc res", "thr a", "thr b"]
+    for field_name in field_names:
+        table.add_column(field_name, justify="center")
+    
+    rows = []
+    rows += [cn_args[x] for x in field_names]
+
+    table.add_row(*rows)
+    
+    console.print(table)
 
     processed = process(p, *(p.script_args))
 
@@ -304,7 +319,19 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         1.0,
     )
 
-    print(p.script_args) # TODO add pretty table
+    table = Table(title="ControlNet params",padding=0, box=box.ROUNDED)
+
+    field_names = []
+    field_names += ["module", "model", "weight", "guidance", "scribble", "resize", "rgb->bgr", "proc res", "thr a", "thr b"]
+    for field_name in field_names:
+        table.add_column(field_name, justify="center")
+    
+    rows = []
+    rows += [cn_args[x] for x in field_names]
+
+    table.add_row(*rows)
+    
+    console.print(table)
 
     processed = process(p, *(p.script_args))
 
