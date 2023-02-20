@@ -9,6 +9,7 @@ from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vi
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os
+from .deforum_controlnet import controlnet_component_names, setup_controlnet_ui
 import tempfile
         
 def Root():
@@ -637,7 +638,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # PARSEQ ACCORD
             with gr.Accordion('Parseq', open=False):
                 gr.HTML("""
-                Use an <a style='color:blue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
+                Use an <a style='color:SteelBlue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
                 <p style="margin-top:1em">
                     Note that parseq overrides:
                     <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
@@ -671,6 +672,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 return gr.update(visible=True) 
             else:
                 return gr.update(visible=False)
+        # CONTROLNET TAB
+        with gr.Tab('ControlNet'):
+                gr.HTML("""
+                Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
+                <p style="margin-top:0.2em">
+                    *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development. &#128521;
+                </p>
+                """)
+                controlnet_dict = setup_controlnet_ui()
         # HYBRID VIDEO TAB
         with gr.Tab('Hybrid Video'):
             # this html only shows when not in 2d/3d mode
@@ -955,7 +965,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     for output in skip_video_for_run_all_outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
     # END OF UI TABS
-    return locals()
+    stuff = locals()
+    stuff = {**stuff, **controlnet_dict}
+    stuff.pop('controlnet_dict')
+    return stuff
 
 ### SETTINGS STORAGE UPDATE! 2023-01-27
 ### To Reduce The Number Of Settings Overrides,
@@ -1027,7 +1040,7 @@ loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blen
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names + controlnet_component_names()
 settings_component_names = [name for name in component_names if name not in video_args_names]
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
@@ -1062,6 +1075,9 @@ def pack_parseq_args(args_dict):
 def pack_loop_args(args_dict):
     return {name: args_dict[name] for name in loop_args_names}
 
+def pack_controlnet_args(args_dict):
+    return {name: args_dict[name] for name in controlnet_component_names()}
+
 def process_args(args_dict_main):
     override_settings_with_file = args_dict_main['override_settings_with_file']
     custom_settings_file = args_dict_main['custom_settings_file']
@@ -1070,6 +1086,7 @@ def process_args(args_dict_main):
     video_args_dict = pack_video_args(args_dict_main)
     parseq_args_dict = pack_parseq_args(args_dict_main)
     loop_args_dict = pack_loop_args(args_dict_main)
+    controlnet_args_dict = pack_controlnet_args(args_dict_main)
 
     import json
     
@@ -1087,7 +1104,7 @@ def process_args(args_dict_main):
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root)
+        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root)
     
     if not os.path.exists(root.models_path):
         os.mkdir(root.models_path)
@@ -1097,6 +1114,7 @@ def process_args(args_dict_main):
     video_args = SimpleNamespace(**video_args_dict)
     parseq_args = SimpleNamespace(**parseq_args_dict)
     loop_args = SimpleNamespace(**loop_args_dict)
+    controlnet_args = SimpleNamespace(**controlnet_args_dict)
 
     p.width, p.height = map(lambda x: x - x % 64, (args.W, args.H))
     p.steps = args.steps
@@ -1134,7 +1152,7 @@ def process_args(args_dict_main):
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
     
-    return root, args, anim_args, video_args, parseq_args, loop_args
+    return root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
 
 def print_args(args):
     print("ARGS: /n")
