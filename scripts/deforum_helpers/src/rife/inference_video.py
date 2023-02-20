@@ -20,8 +20,6 @@ from deforum_helpers.general_utils import duplicate_pngs_from_folder
 
 warnings.filterwarnings("ignore")
 
-# film model location:
-#https://github.com/hithereai/frame-interpolation-pytorch/releases/download/film_net_fp16.pt/film_net_fp16.pt
 def run_rife_new_video_infer(
         output=None,
         model=None,

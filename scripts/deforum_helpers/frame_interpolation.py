@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from rife.inference_video import run_rife_new_video_infer
 from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio, extract_number
+from film_interpolation.film_inference import run_rife_new_video_infer
    
 # gets 'RIFE v4.3', returns: 'RIFE43'   
 def extract_rife_name(string):
@@ -62,7 +63,7 @@ def process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_
     
     process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=in_vid_fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution)
 
-# handle params before talking with the actual rife module
+# handle params before talking with the actual interpolation module (rifee/film, more to be added)
 def process_video_interpolation(frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, orig_vid_fps, deforum_models_path, real_audio_track, raw_output_imgs_path, img_batch_id, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, keep_interp_imgs, orig_vid_name, resolution):
 
     if frame_interpolation_engine == 'None':
@@ -98,3 +99,37 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
     else:
         print("Unknown Frame Interpolation engine chosen. Doing nothing.")
         return
+        
+def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
+
+    film_model_name = 'film_net_fp16.pt'
+    film_model_folder = os.path.join(deforum_models_path,'film_interpolation')
+    film_model_path = os.path.join(film_model_folder, film_model_name)
+    
+    
+    # todo: handle copy paste of imgs to a temp folder?
+    
+    run_film_interp_infer(
+    model_path = film_model_path,
+    input_folder = None,
+    save_folder = None,
+    inter_frames = None)
+    
+def check_and_download_film_model(model_name, model_dest_folder):
+    if model_name == 'film_net_fp16.pt'
+        model_dest_path = os.path.join(model_dest_folder, model_name)
+        download_url = 'https://github.com/hithereai/frame-interpolation-pytorch/releases/download/film_net_fp16.pt/film_net_fp16.pt'
+        film_model_hash = '0a823815b111488ac2b7dd7fe6acdd25d35a22b703e8253587764cf1ee3f8f93676d24154d9536d2ce5bc3b2f102fb36dfe0ca230dfbe289d5cd7bde5a34ec12'
+    else: # Unknown FILM model
+        raise Exception("Got a request to download an unknown FILM model. Can't proceed.")
+    if os.path.exists(model_dest_path):
+        return
+    try:
+        os.makedirs(model_dest_folder, exist_ok=True)
+        # download film model from url
+        load_file_from_url(download_url, model_dest_folder)
+        # verify checksum
+        if checksum(model_dest_path) != 'film_model_hash'
+            raise Exception(f"Error while downloading {model_name}. Please download from: {download_url}, and put in: {model_dest_folder}")
+    except Exception as e:
+        raise Exception(f"Error while downloading {model_name}. Please download from: {download_url}, and put in: {model_dest_folder}")
