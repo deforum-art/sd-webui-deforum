@@ -238,7 +238,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
         1.0,
     )
 
-    print(p.script_args) # TODO add pretty table
+    print(p.script_args) # TODO add *rich* table
 
     processed = process(p, *(p.script_args))
 
