@@ -103,6 +103,13 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
 def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps, audio_track, orig_vid_name):
     import shutil 
     
+    parent_folder = os.path.dirname(raw_output_imgs_path)
+    grandparent_folder = os.path.dirname(parent_folder)
+    if orig_vid_name is not None:
+        interp_vid_path = os.path.join(grandparent_folder, str(orig_vid_name) +'_FILM_x' + str(x_am))
+    else:
+        interp_vid_path = os.path.join(raw_output_imgs_path, str(img_batch_id) +'_FILM_x' + str(x_am))
+    
     film_model_name = 'film_net_fp16.pt'
     film_model_folder = os.path.join(deforum_models_path,'film_interpolation')
     film_model_path = os.path.join(film_model_folder, film_model_name)
@@ -114,7 +121,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     else: # interpolating after a deforum run:
         custom_interp_path = "{}_{}".format(output_interp_imgs_folder, img_batch_id)
 
-    interp_vid_path = os.path.join(raw_output_imgs_path, str(img_batch_id) + '_FILM_x' + str(x_am))
+    # interp_vid_path = os.path.join(raw_output_imgs_path, str(img_batch_id) + '_FILM_x' + str(x_am))
     img_path_for_ffmpeg = os.path.join(custom_interp_path, "frame_%05d.png")
 
     if sl_enabled:
