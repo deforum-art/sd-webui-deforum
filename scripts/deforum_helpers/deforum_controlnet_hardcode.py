@@ -105,9 +105,7 @@ def process(p, *args):
         print(f"ControlNet model {model} loaded.")
         deforum_latest_network = network
         
-    if deforum_input_image is not None:
-        deforum_input_image = HWC3(np.asarray(deforum_input_image))
-    elif image is not None:
+    if image is not None:
         deforum_input_image = HWC3(image['image'])
         if 'mask' in image and image['mask'] is not None and not ((image['mask'][:, :, 0]==0).all() or (image['mask'][:, :, 0]==255).all()):
             print("using mask as input")
