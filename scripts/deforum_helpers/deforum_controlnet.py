@@ -251,6 +251,7 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
     
     rows = []
     rows += [cn_args["module"], cn_args["model"], cn_args["weight"], cn_args["guidance_strength"], cn_args["scribble_mode"], cn_args["resize_mode"], cn_args["rgbbgr_mode"], cn_args["processor_res"], cn_args["threshold_a"], cn_args["threshold_b"]]
+    rows = [str(x) for x in rows]
 
     table.add_row(*rows)
     
@@ -331,6 +332,7 @@ def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
     
     rows = []
     rows += [cn_args["module"], cn_args["model"], cn_args["weight"], cn_args["guidance_strength"], cn_args["scribble_mode"], cn_args["resize_mode"], cn_args["rgbbgr_mode"], cn_args["processor_res"], cn_args["threshold_a"], cn_args["threshold_b"]]
+    rows = [str(x) for x in rows]
 
     table.add_row(*rows)
     
