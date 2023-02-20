@@ -796,7 +796,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         # How many times to interpolate (interp x)
                         frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp x", value=dv.frame_interpolation_x_amount, interactive=True)
                         # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE)
-                        frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo x", value=dv.frame_interpolation_x_amount, interactive=True)
+                        frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo x", value=dv.frame_interpolation_x_amount, interactive=True, visible=False)
+                    # TODO: move these from here when done
+                    def hide_slow_mo(choice):
+                        return gr.update(visible=True) if choice else gr.update(visible=False)
+                    frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interpolation_slow_mo_amount)
                     with gr.Row():
                         # Intrpolate any existing video from the connected PC
                         with gr.Accordion('Interpolate an existing video', open=False):
