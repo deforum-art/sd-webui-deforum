@@ -227,7 +227,7 @@ You agree not to use the Model or Derivatives of the Model:
 - To provide medical advice and medical results interpretation;
 - To generate or disseminate information for the purpose to be used for administration of justice, law enforcement, immigration or asylum processes, such as predicting an individual will commit fraud/crime commitment (e.g. by text profiling, drawing causal relationships between assertions made in documents, indiscriminate and arbitrarily-targeted use).
 
-transformers:
+transformers, FILM Interpolation:
 Copyright 2018- The Hugging Face team. All rights reserved.
 
                                  Apache License
