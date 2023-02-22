@@ -34,6 +34,7 @@ import modules.shared as shared
 from modules.shared import opts, cmd_opts, state
 from modules.ui import create_output_panel, plaintext_to_html, wrap_gradio_call
 from types import SimpleNamespace
+import deforum_helpers.live_editing
 
 def run_deforum(*args, **kwargs):
     args_dict = {deforum_args.component_names[i]: args[i+2] for i in range(0, len(deforum_args.component_names))}
