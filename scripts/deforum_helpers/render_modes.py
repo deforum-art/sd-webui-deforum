@@ -141,7 +141,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         if args.seed_behavior == 'schedule' or use_parseq:
             args.seed = int(keys.seed_schedule_series[frame_idx])
         
-        image = generate(args, anim_args, loop_args, root, frame_idx)
+        image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx)
         filename = f"{args.timestring}_{frame_idx:05}.png"
 
         save_image(image, 'PIL', filename, args, video_args, root)
