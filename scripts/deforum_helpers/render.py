@@ -5,7 +5,7 @@ import pandas as pd
 import cv2
 import numpy as np
 from PIL import Image, ImageOps
-from prettytable import PrettyTable
+from .rich import console
 
 from .generate import generate
 from .noise import add_noise
@@ -24,16 +24,22 @@ from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_mo
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import get_keys_to_exclude
+from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 # Webui
-from modules.shared import opts, cmd_opts, state
+from modules.shared import opts, cmd_opts, state, sd_model
+from modules import lowvram, devices, sd_hijack
 
-def render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root):
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         if anim_args.hybrid_composite or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
             args, anim_args, inputfiles = hybrid_generation(args, anim_args, root)
             # path required by hybrid functions, even if hybrid_comp_save_extra_frames is False
             hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
+
+    # handle controlnet video input frames generation
+    if is_controlnet_enabled(controlnet_args):
+        unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
@@ -94,7 +100,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
     predict_depths = predict_depths or (anim_args.hybrid_composite and anim_args.hybrid_comp_mask_type in ['Depth','Video Depth'])
     if predict_depths:
-        depth_model = DepthModel(root.device)
+        depth_model = DepthModel('cpu' if cmd_opts.lowvram or cmd_opts.medvram else root.device)
         depth_model.load_midas(root.models_path, root.half_precision)
         if anim_args.midas_weight < 1.0:
             depth_model.load_adabins(root.models_path)
@@ -205,6 +211,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             noise_mask_seq = mask_seq
         
         depth = None
+
+        if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
+            # Unload the main checkpoint and load the depth model
+            lowvram.send_everything_to_cpu()
+            sd_hijack.model_hijack.undo_hijack(sd_model)
+            devices.torch_gc()
+            depth_model.to(root.device)
         
         # emit in-between frames
         if turbo_steps > 1:
@@ -397,8 +410,14 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         if scheduled_clipskip is not None:
             opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip
         
+        if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
+            depth_model.to('cpu')
+            devices.torch_gc()
+            lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
+            sd_hijack.model_hijack.hijack(sd_model)
+        
         # sample the diffusion model
-        image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
         # intercept and override to grayscale
@@ -413,7 +432,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
                 while not image.getbbox():
                     print("Rerolling with +1 seed...")
                     args.seed += 1
-                    image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+                    image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                     patience -= 1
                     if patience == 0:
                         print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
@@ -441,8 +460,18 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             save_image(image, 'PIL', filename, args, video_args, root)
 
             if anim_args.save_depth_maps:
+                if cmd_opts.lowvram or cmd_opts.medvram:
+                    lowvram.send_everything_to_cpu()
+                    sd_hijack.model_hijack.undo_hijack(sd_model)
+                    devices.torch_gc()
+                    depth_model.to(root.device)
                 depth = depth_model.predict(opencv_image, anim_args, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
+                if cmd_opts.lowvram or cmd_opts.medvram:
+                    depth_model.to('cpu')
+                    devices.torch_gc()
+                    lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
+                    sd_hijack.model_hijack.hijack(sd_model)
             frame_idx += 1
 
         state.current_image = image
@@ -450,7 +479,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
         args.seed = next_seed(args)
 
 def print_render_table(anim_args, keys, frame_idx):
-    x = PrettyTable(padding_width=0)
+    from rich.table import Table
+    from rich import box
+    table = Table(padding=0, box=box.ROUNDED)
     field_names = []
     if anim_args.animation_mode == '2D':
         short_zoom = round(keys.zoom_series[frame_idx], 6)
@@ -460,17 +491,17 @@ def print_render_table(anim_args, keys, frame_idx):
         field_names += ["Tr Z", "Ro X", "Ro Y", "Ro Z"]
     if anim_args.enable_perspective_flip:
         field_names += ["Pf T", "Pf P", "Pf G", "Pf F"]
-
-    x.field_names = field_names
-
-    row = []
+    for field_name in field_names:
+        table.add_column(field_name, justify="center")
+    
+    rows = []
     if anim_args.animation_mode == '2D':
-        row += [keys.angle_series[frame_idx],short_zoom]
-    row += [keys.translation_x_series[frame_idx],keys.translation_y_series[frame_idx]]
+        rows += [str(keys.angle_series[frame_idx]),str(short_zoom)]
+    rows += [str(keys.translation_x_series[frame_idx]),str(keys.translation_y_series[frame_idx])]
     if anim_args.animation_mode == '3D':
-        row += [keys.translation_z_series[frame_idx],keys.rotation_3d_x_series[frame_idx],keys.rotation_3d_y_series[frame_idx],keys.rotation_3d_z_series[frame_idx]]
+        rows += [str(keys.translation_z_series[frame_idx]),str(keys.rotation_3d_x_series[frame_idx]),str(keys.rotation_3d_y_series[frame_idx]),str(keys.rotation_3d_z_series[frame_idx])]
     if anim_args.enable_perspective_flip:
-        row +=[keys.perspective_flip_theta_series[frame_idx], keys.perspective_flip_phi_series[frame_idx], keys.perspective_flip_gamma_series[frame_idx], keys.perspective_flip_fv_series[frame_idx]]
-        
-    x.add_row(row)
-    print(x)
+        rows +=[str(keys.perspective_flip_theta_series[frame_idx]), str(keys.perspective_flip_phi_series[frame_idx]), str(keys.perspective_flip_gamma_series[frame_idx]), str(keys.perspective_flip_fv_series[frame_idx])]
+    table.add_row(*rows)
+    
+    console.print(table)

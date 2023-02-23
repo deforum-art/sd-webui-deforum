@@ -64,7 +64,7 @@ deforum_titles = {
     //"far_schedule":  "",
     "Seed schedule": "allows you to specify seeds at a specific schedule, if seed_behavior is set to schedule.",
     "Color coherence": "The color coherence will attempt to sample the overall pixel color information, and trend those values analyzed in the first frame to be applied to future frames.",
-        "None": "Disable color coherence",
+        // "None": "Disable color coherence",
         "Match Frame 0 HSV": "HSV is a good method for balancing presence of vibrant colors, but may produce unrealistic results - (ie.blue apples)",
         "Match Frame 0 LAB": "LAB is a more linear approach to mimic human perception of color space - a good default setting for most users.",
         "Match Frame 0 RGB": "RGB is good for enforcing unbiased amounts of color in each red, green and blue channel - some images may yield colorized artifacts if sampling is too low.",
@@ -118,6 +118,9 @@ deforum_titles = {
     //Video Output
     "Skip video for run all": "when checked, do not output a video",
 	"Make GIF": "create a gif in addition to .mp4 file. supports up to 30 fps, will self-disable at higher fps values",
+	"Upscale":"upscale the images of the next run once it's finished + make a video out of them",
+	"Upscale model":"model of the upscaler to use. 'realesr-animevideov3' is much faster but yields smoother, less detailed results. the other models only do x4",
+	"Upscale factor":"how many times to upscale, actual options depend on the chosen upscale model",
     "FPS": "The frames per second that the video will run at",
     "Output format": "select the type of video file to output",
         "PIL gif": "create an animated GIF",
@@ -136,11 +139,13 @@ deforum_titles = {
 	"Engine": "choose the frame interpolation engine and version",
 	"Interp x":"how many times to interpolate the source video. e.g source video fps of 12 and a value of x2 will yield a 24fps interpolated video",
 	"Slow-Mo x":"how many times to slow-down the video. *Naturally affects output fps as well",
-	"Keep Imgs": "delete or keep raw interpolated png imgs. Default: False which means delete",
+	"Keep Imgs": "delete or keep raw affected (interpolated/ upscaled depending on the UI section) png imgs. Default: False which means delete",
 	"Interpolate an existing video":"This feature allows you to interpolate any video with a dedicated button. Video could be completly unrelated to deforum",
 	"In Frame Count": "uploaded video total frame count",
 	"In FPS":"uploaded video FPS",
 	"Interpolated Vid FPS":"calculated output-interpolated video FPS",
+	"In Res":"uploaded video resolution",
+	"Out Res":"output video resolution",
 
     // Looper Args
     // "use_looper": "",

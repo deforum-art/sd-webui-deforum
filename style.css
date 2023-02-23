@@ -1,13 +1,13 @@
-#vid_to_rife_chosen_file .w-full, #vid_to_upscale_chosen_file .w-full {
+#vid_to_rife_chosen_file .w-full, #vid_to_upscale_chosen_file .w-full, #controlnet_input_video_chosen_file .w-full, #controlnet_input_video_mask_chosen_file .w-full {
 		display: flex !important;
 		align-items: flex-start !important;
 		justify-content: center !important;
 }
-#vid_to_rife_chosen_file, #vid_to_upscale_chosen_file {
+#vid_to_rife_chosen_file, #vid_to_upscale_chosen_file, #controlnet_input_video_chosen_file, #controlnet_input_video_mask_chosen_file {
 	height: 85px !important;
 }
 
-#deforum_interrupt, #save_zip_deforum, #save_deforum  {
+#save_zip_deforum, #save_deforum  {
 	display: none;
 }
 
@@ -28,4 +28,8 @@
 #deforum_results .flex #image_buttons_deforum #inpaint_tab,
 #deforum_results .flex #image_buttons_deforum #extras_tab {
 	display: none !important;
+}
+
+#controlnet_not_found_html_msg {
+	color: Tomato;
 }
