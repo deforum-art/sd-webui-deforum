@@ -31,6 +31,7 @@ onUiLoaded(function () {
               var x = (event.offsetX - leftOffset) / containedSize[0] ;
               var y = (event.offsetY - topOffset) / containedSize[1] ;
               console.log("Clicked image: " + x + "," + y)
+              if(x && y)
               request("./deforum/live-edit/look-at", { "x": x, "y": y }, function (res) {
                 console.log("Set look at point",res)
               }, function(err){

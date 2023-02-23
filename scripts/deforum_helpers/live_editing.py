@@ -20,6 +20,10 @@ def live_edit_look_at(req: LiveEditRequest):
     print("Received lookat request, settign target point", req)
     global alignment_target_point_01
     alignment_target_point_01 = (req.x, req.y)
+    #uncomment when interupting is working
+    #if(start_frame is not None):
+    #    global was_interupted
+    #    was_interupted = True
     
 def rotate_to_align(targetPoint, toPoint, nearplaneDistance):
     # Get the angle between the two points
@@ -34,6 +38,10 @@ alignment_target_point_01 = None
 rad_distance_to_target = (0,0)
 start_frame = None
 look_at_duration = None
+
+was_interupted = False
+interruped_rotation_last_velocity01 = None
+resume_scaling_factor = 1
 
 #Call to start smoothly aligning the camera to the target point
 def rotate_to_align_smoothly(targetPoint, toPoint, nearplaneDistance, frame_idx):
@@ -58,6 +66,39 @@ def easeInQuad(x: float) -> float:
     return x ** 2
 def easeInSine(x: float) -> float:
     return 1 - math.cos((x * math.pi) / 2)
+#any function where f(0)=0 and f(1)=1
+easingFunction = lambda x: easeInOutSine(x)
+easingFunctionDerivative = lambda x, start, end: easingFunction(start) - easingFunction(end)
+
+def start_rotation_change(frame_idx, prev_img_cv2, keys):
+    global start_frame
+    global look_at_duration
+    global alignment_target_point_01
+    start_frame = frame_idx
+    look_at_duration = 47 #TODO make this a parameter in keys
+    alignment_to_point01 = (0.5,0.5)
+    nearplane_width = 2 * keys.near_series[frame_idx] * math.tan(math.radians(keys.fov_series[frame_idx]) / 2)
+    nearplane_height = nearplane_width / (prev_img_cv2.shape[1] / prev_img_cv2.shape[0])
+    alignment_target_point = (alignment_target_point_01[0] * nearplane_width, alignment_target_point_01[1] * nearplane_height)
+    to_point_nearplane_space = (alignment_to_point01[0] * nearplane_width, alignment_to_point01[1] * nearplane_height)
+    #print(f"--From: {alignment_target_point}")
+    #print(f"--To: {to_point_nearplane_space}")
+    rotate_to_align_smoothly(alignment_target_point, to_point_nearplane_space, keys.near_series[frame_idx], frame_idx)
+
+def finish_rotation_change():
+    print("Finished rotation")
+     # we are aligned now
+    global alignment_target_point_01
+    global start_frame
+    global look_at_duration
+    global rad_distance_to_target
+    global was_interupted
+    global resume_scaling_factor
+    start_frame = None
+    look_at_duration = None
+    alignment_target_point_01 = None
+    rad_distance_to_target = (0,0)
+    resume_scaling_factor = 1
 
 def live_edit_get_rotation_speed(prev_img_cv2, anim_args, keys, frame_idx):
     global rad_distance_to_target
@@ -67,37 +108,33 @@ def live_edit_get_rotation_speed(prev_img_cv2, anim_args, keys, frame_idx):
     if alignment_target_point_01 is None:
         print("No realgnment requested, not rotating")
         return (0,0,0)
+    
     if start_frame is None:
-        #print("Found a requested realignment but anim was not started, starting rotation")
-        #start the rotation
-        start_frame = frame_idx
-        look_at_duration = 60 #TODO make this a parameter in keys
-        alignment_to_point01 = (0.5,0.5)
-        nearplane_width = 2 * keys.near_series[frame_idx] * math.tan(math.radians(keys.fov_series[frame_idx]) / 2)
-        nearplane_height = nearplane_width / (prev_img_cv2.shape[1] / prev_img_cv2.shape[0])
-        alignment_target_point = (alignment_target_point_01[0] * nearplane_width, alignment_target_point_01[1] * nearplane_height)
-        to_point_nearplane_space = (alignment_to_point01[0] * nearplane_width, alignment_to_point01[1] * nearplane_height)
-        #print(f"--From: {alignment_target_point}")
-        #print(f"--To: {to_point_nearplane_space}")
-        rotate_to_align_smoothly(alignment_target_point, to_point_nearplane_space, keys.near_series[frame_idx], frame_idx)
+        print("Starting realignment")
+        start_rotation_change(frame_idx, prev_img_cv2, keys)
 
     startedNFramesAgo = frame_idx - start_frame
-    interpolationProgress = easeInOutSine(startedNFramesAgo / look_at_duration)
-    interpolationProgressSpeed =  easeInOutSine(startedNFramesAgo / look_at_duration) - easeInOutSine((startedNFramesAgo - 1) / look_at_duration)
+    interpolationProgress = easingFunction(startedNFramesAgo / look_at_duration)
+    global resume_scaling_factor
+    interpolationProgressSpeed = resume_scaling_factor * (easingFunction(startedNFramesAgo / look_at_duration) - easingFunction((startedNFramesAgo - 1) / look_at_duration))
     rotation_speed_cur_frame = (rad_distance_to_target[0] * interpolationProgressSpeed, rad_distance_to_target[1] * interpolationProgressSpeed, 0)
     print(f"Rotating to align to {alignment_target_point_01} ({startedNFramesAgo}/{look_at_duration}) - total rotation: {rad_distance_to_target}")
     #print(f"--Rotation speed this frame: {rotation_speed_cur_frame}")
     #print(f"--Rotation progress: {interpolationProgress}")
     #print(f"--Rotation progress speed: {interpolationProgressSpeed}")
     #print(f"--Nearplane: {keys.near_series[frame_idx]}")
-
+    global was_interupted
+    if was_interupted:
+        global interruped_rotation_last_velocity01
+        #save the last velocity, so we can resume with that
+        print(f"Interupted, prev velocity: {interruped_rotation_last_velocity01}, resuming at ")
+        was_interupted = False
+        interruped_rotation_last_velocity01 = interpolationProgressSpeed
+        #scaling factor for the rotation speed, so we can resume with the same speed and cover the same rotational distance
+        resume_scaling_factor=1 / (1-interruped_rotation_last_velocity01)
+        
     if startedNFramesAgo+1 > look_at_duration:
-        print("Finished rotation")
-         # we are aligned now
-        start_frame = None
-        look_at_duration = None
-        alignment_target_point_01 = None
-        rad_distance_to_target = (0,0)
+        finish_rotation_change()
     
     return rotation_speed_cur_frame
     
