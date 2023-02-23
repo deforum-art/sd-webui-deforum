@@ -12,6 +12,7 @@ import warnings
 import _thread
 from queue import Queue, Empty
 import subprocess
+import time
 from .model.pytorch_msssim import ssim_matlab
 
 sys.path.append('../../')
@@ -33,7 +34,8 @@ def run_rife_new_video_infer(
         ffmpeg_location=None,
         audio_track=None,
         interp_x_amount=2,
-        slow_mo_x_amount=-1,
+        slow_mo_enabled=False,
+        slow_mo_x_amount=2,
         ffmpeg_crf=17,
         ffmpeg_preset='veryslow',
         keep_imgs=False,
@@ -52,6 +54,7 @@ def run_rife_new_video_infer(
     args.ffmpeg_location = ffmpeg_location
     args.audio_track = audio_track
     args.interp_x_amount = interp_x_amount
+    args.slow_mo_enabled = slow_mo_enabled
     args.slow_mo_x_amount = slow_mo_x_amount
     args.ffmpeg_crf = ffmpeg_crf
     args.ffmpeg_preset = ffmpeg_preset
@@ -60,6 +63,8 @@ def run_rife_new_video_infer(
 
     if args.UHD and args.scale == 1.0:
         args.scale = 0.5
+        
+    start_time = time.time()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     torch.set_grad_enabled(False)
@@ -90,7 +95,7 @@ def run_rife_new_video_infer(
     print(f"{args.modelDir}.pkl model successfully loaded into memory")
     print("Interpolation progress (it's OK if it finishes before 100%):")
    
-    interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames')
+    interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames_rife')
     # set custom name depending on if we interpolate after a run, or interpolate a video (related/unrelated to deforum, we don't know) directly from within the RIFE tab
     if args.orig_vid_name is not None: # interpolating a video (deforum or unrelated)
         custom_interp_path = "{}_{}".format(interpolated_path, args.orig_vid_name)
@@ -182,23 +187,23 @@ def run_rife_new_video_infer(
             break
 
     write_buffer.put(lastframe)
-    import time
 
     while (not write_buffer.empty()):
         time.sleep(0.1)
     pbar.close()
     shutil.rmtree(temp_convert_raw_png_path)
     
+    print(f"Interpolation \033[0;32mdone\033[0m in {time.time()-start_time:.2f} seconds!")
     # stitch video from interpolated frames, and add audio if needed
     try:
         print (f"*Passing interpolated frames to ffmpeg...*")
-        vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs, args.orig_vid_name)
+        vid_out_path = stitch_video(args.img_batch_id, args.fps, custom_interp_path, args.audio_track, args.ffmpeg_location, args.interp_x_amount, args.slow_mo_enabled, args.slow_mo_x_amount, args.ffmpeg_crf, args.ffmpeg_preset, args.keep_imgs, args.orig_vid_name)
         # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
         if orig_vid_name is not None:
             shutil.rmtree(raw_output_imgs_path)
     except Exception as e:
         print(f'Video stitching gone wrong. *Interpolated frames were saved to HD as backup!*. Actual error: {e}')
-
+    
 def clear_write_buffer(user_args, write_buffer, custom_interp_path):
     cnt = 0
 
@@ -243,15 +248,16 @@ def pad_image(img, fp16, padding):
     else:
         return F.pad(img, padding)
 
-def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):        
+# TODO: move to fream_interpolation and add FILM to it!
+def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, interp_x_amount, slow_mo_enabled, slow_mo_x_amount, f_crf, f_preset, keep_imgs, orig_vid_name):        
     parent_folder = os.path.dirname(img_folder_path)
     grandparent_folder = os.path.dirname(parent_folder)
     if orig_vid_name is not None:
         mp4_path = os.path.join(grandparent_folder, str(orig_vid_name) +'_RIFE_' + 'x' + str(interp_x_amount))
     else:
         mp4_path = os.path.join(parent_folder, str(img_batch_id) +'_RIFE_' + 'x' + str(interp_x_amount))
-    
-    if slow_mo_x_amount != -1:
+
+    if slow_mo_enabled:
         mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)
     mp4_path = mp4_path + '.mp4'
 

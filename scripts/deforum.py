@@ -7,7 +7,7 @@ if 'google.colab' in sys.modules:
     basedirs.append('/content/gdrive/MyDrive/sd/stable-diffusion-webui') #hardcode as TheLastBen's colab seems to be the primal source
 
 for basedir in basedirs:
-    deforum_paths_to_ensure = [basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/sd-webui-controlnet', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',basedir]# + '/scripts/deforum_helpers/src/rife']
+    deforum_paths_to_ensure = [basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/sd-webui-controlnet', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',basedir]
 
     for deforum_scripts_path_fix in deforum_paths_to_ensure:
         if not deforum_scripts_path_fix in sys.path:
@@ -98,14 +98,11 @@ def run_deforum(*args, **kwargs):
         real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
     
     # Delete folder with duplicated imgs from OS temp folder
-    try:
-        shutil.rmtree(root.tmp_deforum_run_duplicated_folder)
-    except:
-        pass
-    
+    shutil.rmtree(root.tmp_deforum_run_duplicated_folder, ignore_errors=True)
+
     # Decide whether or not we need to try and frame interpolate laters
     need_to_frame_interpolate = False
-    if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
+    if video_args.frame_interpolation_engine != "None" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         need_to_frame_interpolate = True
         
     if video_args.skip_video_for_run_all:
@@ -159,7 +156,7 @@ def run_deforum(*args, **kwargs):
     # FRAME INTERPOLATION TIME
     if need_to_frame_interpolate: 
         print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
-        process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
+        process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount,frame_interpolation_slow_mo_enabled=video_args.frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
     
     if video_args.make_gif and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
