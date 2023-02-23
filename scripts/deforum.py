@@ -7,7 +7,7 @@ if 'google.colab' in sys.modules:
     basedirs.append('/content/gdrive/MyDrive/sd/stable-diffusion-webui') #hardcode as TheLastBen's colab seems to be the primal source
 
 for basedir in basedirs:
-    deforum_paths_to_ensure = [basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',basedir]# + '/scripts/deforum_helpers/src/rife']
+    deforum_paths_to_ensure = [basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/sd-webui-controlnet', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',basedir]
 
     for deforum_scripts_path_fix in deforum_paths_to_ensure:
         if not deforum_scripts_path_fix in sys.path:
@@ -45,11 +45,11 @@ def run_deforum(*args, **kwargs):
         #we'll setup the rest later
     )
     
-    print("\033[4;33mDeforum extension for auto1111 webui, v2.1b\033[0m")
+    print("\033[4;33mDeforum extension for auto1111 webui, v2.2b\033[0m")
     args_dict['self'] = None
     args_dict['p'] = p
     
-    root, args, anim_args, video_args, parseq_args, loop_args = deforum_args.process_args(args_dict)
+    root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict)
     root.clipseg_model = None
     root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
     root.basedirs = basedirs
@@ -75,13 +75,13 @@ def run_deforum(*args, **kwargs):
         # dispatch to appropriate renderer
         if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
             if anim_args.use_mask_video: 
-                render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root) # allow mask video without an input video
+                render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root) # allow mask video without an input video
             else:    
-                render_animation(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root)
+                render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)
         elif anim_args.animation_mode == 'Video Input':
-            render_input_video(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root)#TODO: prettify code
+            render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)#TODO: prettify code
         elif anim_args.animation_mode == 'Interpolation':
-            render_interpolation(args, anim_args, video_args, parseq_args, loop_args, root.animation_prompts, root)
+            render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)
         else:
             print('Other modes are not available yet!')
     finally:
@@ -98,14 +98,11 @@ def run_deforum(*args, **kwargs):
         real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
     
     # Delete folder with duplicated imgs from OS temp folder
-    try:
-        shutil.rmtree(root.tmp_deforum_run_duplicated_folder)
-    except:
-        pass
-    
+    shutil.rmtree(root.tmp_deforum_run_duplicated_folder, ignore_errors=True)
+
     # Decide whether or not we need to try and frame interpolate laters
     need_to_frame_interpolate = False
-    if video_args.frame_interpolation_x_amount != "Disabled" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
+    if video_args.frame_interpolation_engine != "None" and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         need_to_frame_interpolate = True
         
     if video_args.skip_video_for_run_all:
@@ -159,7 +156,7 @@ def run_deforum(*args, **kwargs):
     # FRAME INTERPOLATION TIME
     if need_to_frame_interpolate: 
         print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
-        process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
+        process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount,frame_interpolation_slow_mo_enabled=video_args.frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
     
     if video_args.make_gif and not video_args.skip_video_for_run_all and not video_args.store_frames_in_ram:
         make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
@@ -170,7 +167,8 @@ def run_deforum(*args, **kwargs):
         # out mp4 path is defined in make_upscale func
         make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=video_args.ffmpeg_location, stitch_from_frame=0, stitch_to_frame=max_video_frames, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track)
         
-    root.initial_info += "\n The animation is stored in " + args.outdir + '\n'
+    root.initial_info += "\n The animation is stored in " + args.outdir
+    root.initial_info += "\n Timestring = " + args.timestring + '\n'
     root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
     reset_frames_cache(root) # cleanup the RAM in any case
     processed = Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
