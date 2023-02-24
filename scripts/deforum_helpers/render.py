@@ -392,7 +392,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
         if anim_args.use_mask_video:
-            mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+            mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
 
         if args.use_mask:
             args.mask_image = compose_mask_with_check(root, args, mask_seq, mask_vals, args.init_sample) if args.init_sample is not None else None # we need it only after the first frame anyway
