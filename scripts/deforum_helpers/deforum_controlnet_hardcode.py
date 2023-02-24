@@ -1,19 +1,19 @@
 deforum_latest_network = None
 deforum_latest_params = (None, 'placeholder to trigger the model loading')
 deforum_input_image = None
-from sd_webui_controlnet.scripts.processor import unload_hed, unload_mlsd, unload_midas, unload_leres, unload_pidinet, unload_openpose, unload_uniformer, HWC3
+from sd_webui_controlnet.cn_scripts.processor import unload_hed, unload_mlsd, unload_midas, unload_leres, unload_pidinet, unload_openpose, unload_uniformer, HWC3
 import modules.shared as shared
 import modules.devices as devices
 import modules.processing as processing
 from modules.processing import StableDiffusionProcessingImg2Img, StableDiffusionProcessingTxt2Img
 import numpy as np
-from sd_webui_controlnet.scripts.controlnet import cn_models, cn_models_names
+from sd_webui_controlnet.cn_scripts.controlnet import cn_models, cn_models_names
 import os
 import modules.scripts as scrpts
 import torch
-from sd_webui_controlnet.scripts.cldm import PlugableControlModel
-from sd_webui_controlnet.scripts.adapter import PlugableAdapter
-from sd_webui_controlnet.scripts.utils import load_state_dict
+from sd_webui_controlnet.cn_scripts.cldm import PlugableControlModel
+from sd_webui_controlnet.cn_scripts.adapter import PlugableAdapter
+from sd_webui_controlnet.cn_scripts.utils import load_state_dict
 from torchvision.transforms import Resize, InterpolationMode, CenterCrop, Compose
 from einops import rearrange
 cn_models_dir = os.path.join(scrpts.basedir(), "models")
@@ -122,7 +122,7 @@ def process(p, *args):
         detected_map[np.min(deforum_input_image, axis=2) < 127] = 255
         deforum_input_image = detected_map
     
-    from sd_webui_controlnet.scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
+    from sd_webui_controlnet.cn_scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
     
     preprocessor = {
         "none": lambda x, *args, **kwargs: x,
@@ -193,15 +193,13 @@ def swap_img2img_pipeline(p: processing.StableDiffusionProcessingImg2Img):
 from collections import OrderedDict
 
 def update_cn_models():
-    from sd_webui_controlnet.scripts.controlnet import get_all_models
-    global cn_models, cn_models_names
+    print('Deforum: updating ControlNet paths')
+    from sd_webui_controlnet.cn_scripts.controlnet import get_all_models
     res = OrderedDict()
-    ext_dirs = [shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None)]
-    # Append hardcoded CN's dirs if it's installed as an extension
-    ext_dirs += ['extensions/sd-webui-controlnet/models', 'extensions/sd-webui-controlnet']
-
-    extra_lora_paths = [extra_lora_path for extra_lora_path in ext_dirs
-                if extra_lora_path is not None and os.path.exists(extra_lora_path)]
+    ext_dirs = ('extensions/sd-webui-controlnet', shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
+    #ext_dirs = (shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
+    extra_lora_paths = (extra_lora_path for extra_lora_path in ext_dirs
+                if extra_lora_path is not None and os.path.exists(extra_lora_path))
     paths = [cn_models_dir, *extra_lora_paths]
 
     for path in paths:
@@ -211,10 +209,10 @@ def update_cn_models():
         found = get_all_models(sort_by, filter_by, path)
         res = {**found, **res}
 
-    cn_models = OrderedDict(**{"None": None}, **res)
-    cn_models_names = {}
-    for name_and_hash, filename in cn_models.items():
+    sd_webui_controlnet.cn_scripts.controlnet.cn_models = OrderedDict(**{"None": None}, **res)
+    sd_webui_controlnet.cn_scripts.controlnet.cn_models_names = {}
+    for name_and_hash, filename in sd_webui_controlnet.cn_scripts.controlnet.cn_models.items():
         if filename == None:
             continue
         name = os.path.splitext(os.path.basename(filename))[0].lower()
-        cn_models_names[name] = name_and_hash
+        sd_webui_controlnet.cn_scripts.controlnet.cn_models_names[name] = name_and_hash
