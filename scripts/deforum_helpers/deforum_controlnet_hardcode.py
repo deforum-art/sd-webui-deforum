@@ -190,3 +190,31 @@ def swap_img2img_pipeline(p: processing.StableDiffusionProcessingImg2Img):
             continue
         setattr(p, k, v)
 
+from collections import OrderedDict
+
+def update_cn_models():
+    from sd_webui_controlnet.scripts.controlnet import get_all_models
+    global cn_models, cn_models_names
+    res = OrderedDict()
+    ext_dirs = [shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None)]
+    # Append hardcoded CN's dirs if it's installed as an extension
+    ext_dirs += ['extensions/sd-webui-controlnet/models', 'extensions/sd-webui-controlnet']
+
+    extra_lora_paths = [extra_lora_path for extra_lora_path in ext_dirs
+                if extra_lora_path is not None and os.path.exists(extra_lora_path)]
+    paths = [cn_models_dir, *extra_lora_paths]
+
+    for path in paths:
+        sort_by = shared.opts.data.get(
+            "control_net_models_sort_models_by", "name")
+        filter_by = shared.opts.data.get("control_net_models_name_filter", "")
+        found = get_all_models(sort_by, filter_by, path)
+        res = {**found, **res}
+
+    cn_models = OrderedDict(**{"None": None}, **res)
+    cn_models_names = {}
+    for name_and_hash, filename in cn_models.items():
+        if filename == None:
+            continue
+        name = os.path.splitext(os.path.basename(filename))[0].lower()
+        cn_models_names[name] = name_and_hash

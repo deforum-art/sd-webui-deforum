@@ -111,6 +111,7 @@ def setup_controlnet_ui_raw():
         controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False)
 
     def refresh_all_models(*inputs):
+        from .deforum_controlnet_hardcode import update_cn_models
         update_cn_models()
         
         dd = inputs[0]
