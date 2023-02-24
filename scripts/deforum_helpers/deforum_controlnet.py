@@ -3,7 +3,6 @@
 
 import os, sys
 import gradio as gr
-import scripts
 import modules.scripts as scrpts
 from PIL import Image
 import numpy as np
@@ -20,7 +19,7 @@ def find_controlnet():
         return has_controlnet
     
     try:
-        from scripts import controlnet
+        from sd_webui_controlnet.scripts import controlnet
     except Exception as e:
         print(f'\033[33mFailed to import controlnet! The exact error is {e}. Deforum support for ControlNet will not be activated\033[0m')
         has_controlnet = False
@@ -69,8 +68,8 @@ def ControlnetArgs():
 
 def setup_controlnet_ui_raw():
     # Already under an accordion
-    from scripts import controlnet
-    from scripts.controlnet import update_cn_models, cn_models, cn_models_names
+    from sd_webui_controlnet.scripts import controlnet
+    from sd_webui_controlnet.scripts.controlnet import cn_models, cn_models_names
 
     refresh_symbol = '\U0001f504'  # 🔄
     switch_values_symbol = '\U000021C5' # ⇅
@@ -86,7 +85,7 @@ def setup_controlnet_ui_raw():
         def get_block_name(self):
             return "button"
             
-    from scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
+    from sd_webui_controlnet.scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
 
     preprocessor = {
         "none": lambda x, *args, **kwargs: x,

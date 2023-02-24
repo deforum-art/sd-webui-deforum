@@ -1,20 +1,19 @@
-# TODO HACK FIXME HARDCODE — as using the scripts doesn't seem to work for some reason
 deforum_latest_network = None
 deforum_latest_params = (None, 'placeholder to trigger the model loading')
 deforum_input_image = None
-from scripts.processor import unload_hed, unload_mlsd, unload_midas, unload_leres, unload_pidinet, unload_openpose, unload_uniformer, HWC3
+from sd_webui_controlnet.scripts.processor import unload_hed, unload_mlsd, unload_midas, unload_leres, unload_pidinet, unload_openpose, unload_uniformer, HWC3
 import modules.shared as shared
 import modules.devices as devices
 import modules.processing as processing
 from modules.processing import StableDiffusionProcessingImg2Img, StableDiffusionProcessingTxt2Img
 import numpy as np
-from scripts.controlnet import update_cn_models, cn_models, cn_models_names
+from sd_webui_controlnet.scripts.controlnet import cn_models, cn_models_names
 import os
 import modules.scripts as scrpts
 import torch
-from scripts.cldm import PlugableControlModel
-from scripts.adapter import PlugableAdapter
-from scripts.utils import load_state_dict
+from sd_webui_controlnet.scripts.cldm import PlugableControlModel
+from sd_webui_controlnet.scripts.adapter import PlugableAdapter
+from sd_webui_controlnet.scripts.utils import load_state_dict
 from torchvision.transforms import Resize, InterpolationMode, CenterCrop, Compose
 from einops import rearrange
 cn_models_dir = os.path.join(scrpts.basedir(), "models")
@@ -123,7 +122,7 @@ def process(p, *args):
         detected_map[np.min(deforum_input_image, axis=2) < 127] = 255
         deforum_input_image = detected_map
     
-    from scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
+    from sd_webui_controlnet.scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
     
     preprocessor = {
         "none": lambda x, *args, **kwargs: x,
