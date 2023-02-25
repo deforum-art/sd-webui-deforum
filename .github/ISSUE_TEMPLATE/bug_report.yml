@@ -55,7 +55,7 @@ body:
   - type: textarea
     id: commits
     attributes:
-      label:
+      label: Commit ID
       description: Which commit of the webui are you running on? (Do not write *Latest version/repo/commit*, as this means nothing and will have changed by the time we read your issue. Rather, copy the **Commit** link at the bottom of the UI, or from the cmd/terminalw using the 'git rev-parse HEAD' command if you can't launch it.)
       value: |
         webui:\t
