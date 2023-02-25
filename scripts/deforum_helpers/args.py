@@ -832,7 +832,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 interpolate_button = gr.Button(value="*Interpolate Video*")
                                 interpolate_pics_button = gr.Button(value="*Interpolate Pics*")
                             # Show a text about CLI outputs:
-                            gr.HTML("* check your CLI for outputs")
+                            gr.HTML("* check your CLI for outputs", elem_id="below_interpolate_butts_msg") # TODO: CSS THIS TO CENTER OF ROW!
+                            
                             # make the functin call when the interpolation button is clicked
                             interpolate_button.click(upload_vid_to_interpolate,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, in_vid_fps_ui_window])
                             [change_fn.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps) for change_fn in [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_slow_mo_enabled]]
