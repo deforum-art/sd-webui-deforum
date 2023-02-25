@@ -3,3 +3,6 @@ contact_links:
   - name: Deforum Github discussions
     url: https://github.com/deforum-art/deforum-for-automatic1111-webui/discussions
     about: Please ask and answer questions here.
+  - name: Deforum Discord
+    url: https://discord.gg/deforum
+    about: Or here :)
