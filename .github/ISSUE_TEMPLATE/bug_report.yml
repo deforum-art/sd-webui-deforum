@@ -57,7 +57,8 @@ body:
     attributes:
       label: WebUI and Deforum extension Commit IDs
       description: Which commit of the webui/deforum extension are you running on? (Do not write *Latest version/repo/commit*, as this means nothing and will have changed by the time we read your issue. Rather, copy the **Commit** link at the bottom of the UI, or if you can't launch the webui at all, enter your cmd/terminal, CD into the main webui folder to get the webui commit id, and cd into the extensions/deforum folder to get the deforum commit id, both using the command 'git rev-parse HEAD'.)
-      value: webui commit id - 
+      value: |
+             webui commit id - 
              deforum exten commit id - 
     validations:
       required: true
