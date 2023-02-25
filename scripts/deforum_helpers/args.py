@@ -827,8 +827,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
                                 # Non interactive textbox showing expected output interpolated video FPS
                                 out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS", value='---')
-                            # This is the actual button that's pressed to initiate the interpolation:
-                            interpolate_button = gr.Button(value="*Interpolate uploaded video*")
+                            with gr.Row() as interp_buttons_row:
+                                # This is the actual button that's pressed to initiate the interpolation:
+                                interpolate_button = gr.Button(value="*Interpolate Video*")
+                                interpolate_pics_button = gr.Button(value="*Interpolate Pics*")
                             # Show a text about CLI outputs:
                             gr.HTML("* check your CLI for outputs")
                             # make the functin call when the interpolation button is clicked
