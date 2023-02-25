@@ -814,7 +814,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo X", value=dv.frame_interpolation_x_amount, interactive=True)
                     with gr.Row(visible=False) as interp_existing_video_row:
                         # Intrpolate any existing video from the connected PC
-                        with gr.Accordion('Interpolate an existing video', open=False) as interp_existing_video_accord:
+                        with gr.Accordion('Interpolate existing video/images', open=False) as interp_existing_video_accord:
                             with gr.Row() as interpolate_upload_files_row:
                                 # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
                                 vid_to_interpolate_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_interpolate_chosen_file")
