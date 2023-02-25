@@ -78,7 +78,7 @@ body:
     id: customsettings
     attributes:
       label: Webui core settings
-      description: "Send here a link to your ui-config.json file in the core 'stable-diffusion-webui' folder (ideally, upload it to GitHub gists). Friendly reminder\: if you have 'With img2img, do exactly the amount of steps the slider specified' checked, your issue will be discarded immediately. 😉"
+      description: "Send here a link to your ui-config.json file in the core 'stable-diffusion-webui' folder (ideally, upload it to GitHub gists). Friendly reminder: if you have 'With img2img, do exactly the amount of steps the slider specified' checked, your issue will be discarded immediately. 😉"
     validations:
       required: true
   - type: textarea
