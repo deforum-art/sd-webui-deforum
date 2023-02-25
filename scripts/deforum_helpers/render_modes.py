@@ -65,7 +65,7 @@ def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, l
     #args.use_init = True
     print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
 
-    render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root)
+    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
 
 
 def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):

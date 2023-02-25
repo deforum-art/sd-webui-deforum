@@ -336,7 +336,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             # apply scaling
             contrast_image = (prev_img * contrast).round().astype(np.uint8)
             # anti-blur
-            contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold, args.mask_image if args.use_mask else None)
+            if amount > 0:
+                contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold, mask_image if args.use_mask else None)
             # apply frame noising
             if args.use_mask or anim_args.use_noise_mask:
                 args.noise_mask = compose_mask_with_check(root, args, noise_mask_seq, noise_mask_vals, Image.fromarray(cv2.cvtColor(contrast_image, cv2.COLOR_BGR2RGB)))
@@ -400,7 +401,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
         if anim_args.use_mask_video:
-            mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+            mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
 
         if args.use_mask:
             args.mask_image = compose_mask_with_check(root, args, mask_seq, mask_vals, args.init_sample) if args.init_sample is not None else None # we need it only after the first frame anyway
