@@ -334,7 +334,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             # apply scaling
             contrast_image = (prev_img * contrast).round().astype(np.uint8)
             # anti-blur
-            contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold, args.mask_image if args.use_mask else None)
+            if amount > 0:
+                contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold, mask_image if args.use_mask else None)
             # apply frame noising
             if args.use_mask or anim_args.use_noise_mask:
                 args.noise_mask = compose_mask_with_check(root, args, noise_mask_seq, noise_mask_vals, Image.fromarray(cv2.cvtColor(contrast_image, cv2.COLOR_BGR2RGB)))
