@@ -812,27 +812,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(min_width=180, visible=False) as frame_interp_slow_mo_amount_column:
                             # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE/FILM)
                             frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo X", value=dv.frame_interpolation_x_amount, interactive=True)
-                    # TODO: move these from here when done
-                    def hide_slow_mo(choice):
-                        return gr.update(visible=True) if choice else gr.update(visible=False)
-                    def hide_interp_by_interp_status(choice):
-                        return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
-                    def change_interp_x_max_limit(engine_name, current_value):
-                        if engine_name == 'FILM':
-                            return gr.update(maximum=300)
-                        elif current_value > 10:
-                            return gr.update(maximum=10, value=2)
-                        return gr.update(maximum=10)
-                    frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
-                    interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row]
-                    for output in interp_hide_list:
-                        frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
-                    frame_interpolation_engine.change(fn=change_interp_x_max_limit,inputs=[frame_interpolation_engine,frame_interpolation_x_amount],outputs=frame_interpolation_x_amount)
                     with gr.Row(visible=False) as interp_existing_video_row:
                         # Intrpolate any existing video from the connected PC
                         with gr.Accordion('Interpolate an existing video', open=False) as interp_existing_video_accord:
-                            # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
-                            vid_to_interpolate_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_interpolate_chosen_file")
+                            with gr.Row() as interpolate_upload_files_row:
+                                # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
+                                vid_to_interpolate_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_interpolate_chosen_file")
+                                # A drag-n-drop UI box to which the user uploads a pictures to interpolate
+                                pics_to_interpolate_chosen_file = gr.File(label="Pics to Interpolate", interactive=True, file_count="multiple", file_types=["image"], elem_id="pics_to_interpolate_chosen_file")
                             with gr.Row(variant='compact'):
                                 # Non interactive textbox showing uploaded input vid total Frame Count
                                 in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
@@ -990,6 +977,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     skip_video_for_run_all_outputs = [fps_out_format_row, soundtrack_row, ffmpeg_quality_accordion, store_frames_in_ram, make_gif, r_upscale_row]
     for output in skip_video_for_run_all_outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
+    frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
+    interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row]
+    for output in interp_hide_list:
+        frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
+    frame_interpolation_engine.change(fn=change_interp_x_max_limit,inputs=[frame_interpolation_engine,frame_interpolation_x_amount],outputs=frame_interpolation_x_amount)
     # END OF UI TABS
     stuff = locals()
     stuff = {**stuff, **controlnet_dict}

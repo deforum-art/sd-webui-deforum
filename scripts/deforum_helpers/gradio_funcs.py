@@ -81,3 +81,15 @@ def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
         return '---'
     factor = 2 if upscale_model_name == 'realesr-animevideov3' else 4
     return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
+
+def hide_slow_mo(choice):
+    return gr.update(visible=True) if choice else gr.update(visible=False)
+def hide_interp_by_interp_status(choice):
+    return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
+    
+def change_interp_x_max_limit(engine_name, current_value):
+    if engine_name == 'FILM':
+        return gr.update(maximum=300)
+    elif current_value > 10:
+        return gr.update(maximum=10, value=2)
+    return gr.update(maximum=10)
