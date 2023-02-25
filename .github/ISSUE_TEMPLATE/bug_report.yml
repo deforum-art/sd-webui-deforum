@@ -6,10 +6,24 @@ labels: ["bug-report"]
 body:
   - type: checkboxes
     attributes:
+      label: Have you read the latest version of the FAQ?
+      description: Please visit the page called FAQ & Troubleshooting on the Deforum wiki in this repository and see if your problem has already been described there.
+      options:
+        - label: I have visited the FAQ page right now and my issue is not present there
+          required: true
+  - type: checkboxes
+    attributes:
       label: Is there an existing issue for this?
-      description: Please search to see if an issue already exists for the bug you encountered, and that it hasn't been fixed in a recent build/commit.
+      description: Please search to see if an issue already exists for the bug you encountered (including the closed issues).
       options:
         - label: I have searched the existing issues and checked the recent builds/commits of both this extension and the webui
+          required: true
+  - type: checkboxes
+    attributes:
+      label: Are you using the latest version of the Deforum extension?
+      description: Please, check if your Deforum is based on the latest repo commit (git log) or update it through the 'Extensions' tab and check if the issue still persist. Otherwise, check this box.
+      options:
+        - label: I have Deforum updated to the lastest version and I still have the issue.
           required: true
   - type: markdown
     attributes:
@@ -38,43 +52,40 @@ body:
     attributes:
       label: What should have happened?
       description: Tell what you think the normal behavior should be
-    validations:
-      required: true
   - type: textarea
     id: commits
     attributes:
-      label: Commit where the problem happens
-      description: Which commit of the extension are you running on? Please include the commit of both the extension and the webui (Do not write *Latest version/repo/commit*, as this means nothing and will have changed by the time we read your issue. Rather, copy the **Commit** link at the bottom of the UI, or from the cmd/terminalw using the 'git rev-parse HEAD' command if you can't launch it.)
+      label:
+      description: Which commit of the webui are you running on? (Do not write *Latest version/repo/commit*, as this means nothing and will have changed by the time we read your issue. Rather, copy the **Commit** link at the bottom of the UI, or from the cmd/terminalw using the 'git rev-parse HEAD' command if you can't launch it.)
       value: |
-        webui:\t\t
-        deforum:\t
+        webui:\t
     validations:
       required: true
   - type: dropdown
-    id: browsers
+    id: where
     attributes:
-      label: What browsers do you use to access the UI ?
+      label: On which platform are you launching the webui with the extension?
       multiple: true
       options:
-        - Mozilla Firefox
-        - Google Chrome
-        - Brave
-        - Apple Safari
-        - Microsoft Edge
+        - Local PC setup (Windows)
+        - Local PC setup (Linux)
+        - Local PC setup (Mac)
+        - Google Colab (The Last Ben's)
+        - Google Colab (Other)
+        - Cloud server (Linux)
         - Other (please specify in "additional information")
   - type: textarea
-    id: cmdargs
+    id: customsettings
     attributes:
-      label: Command Line Arguments
-      description: Are you using any launching parameters/command line arguments (modified webui-user .bat/.sh) ? If yes, please write them below. Write "No" otherwise.
-      render: Shell
+      label: Webui core settings
+      description: Send here a link to your ui-config.json file in the core 'stable-diffusion-webui' folder (ideally, upload it to GitHub gists). Friendly reminder: if you have 'With img2img, do exactly the amount of steps the slider specified' checked, your issue will be discarded immediately. 😉
     validations:
       required: true
   - type: textarea
     id: logs
     attributes:
       label: Console logs
-      description: Please provide **full** cmd/terminal logs from the moment you started UI to the end of it, after your bug happened. If it's very long, provide a link to pastebin or similar service.
+      description: Please provide **full** cmd/terminal logs from the moment you started UI to the end of it, after your bug happened. If it's very long, provide a link to GitHub gists or similar service.
       render: Shell
     validations:
       required: true
