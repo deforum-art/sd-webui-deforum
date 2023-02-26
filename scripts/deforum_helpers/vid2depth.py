@@ -66,7 +66,7 @@ def process_video_depth(mode, thresholding, threshold_value, threshold_value_max
         model = (load_depth_model(f_models_path, midas_weight_vid2depth), load_anime_model())
     elif 'Depth' in mode:
         model = load_depth_model(f_models_path, midas_weight_vid2depth)
-    else:
+    elif 'Anime' in mode:
         model = load_anime_model()
 
     # Upscaling is a slow and demanding operation, so we don't need as much parallelization here
