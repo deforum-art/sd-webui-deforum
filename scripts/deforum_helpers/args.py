@@ -6,6 +6,7 @@ import modules.paths as ph
 import os
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_interp_vid_upload_logic
 from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vid_upload_logic
+from .vid2depth import process_depth_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os
@@ -903,6 +904,31 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             gr.HTML("* check your CLI for outputs")
                             # make the function call when the UPSCALE button is clicked
                             upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                    # Vid2Depth TAB
+            with gr.Tab('Vid2depth'):
+                vid_to_depth_chosen_file = gr.File(label="Video to get Depth from", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_depth_chosen_file")
+                with gr.Row():
+                    mode = gr.Dropdown(label='Mode', elem_id="mode", choices=['Depth (Midas/Adabins)', 'Anime Remove Background', 'Mixed', 'None (just grayscale)'], value='Depth (Midas/Adabins)')
+                    threshold_value = gr.Slider(label="Threshold Value Lower", value=127, minimum=0, maximum=255, step=1)
+                    threshold_value_max = gr.Slider(label="Threshold Value Upper", value=255, minimum=0, maximum=255, step=1)
+                with gr.Row():
+                    thresholding = gr.Radio(['None', 'Simple', 'Simple (Auto-value)', 'Adaptive (Mean)', 'Adaptive (Gaussian)'], label="Thresholding Mode", value='None')
+                with gr.Row():
+                    adapt_block_size = gr.Number(label="Block size", value=11)
+                    adapt_c = gr.Number(label="C", value=2)
+                    invert = gr.Checkbox(label='Closer is brighter', value=True, elem_id="invert")
+                with gr.Row():
+                    end_blur = gr.Slider(label="End blur width", value=0, minimum=0, maximum=255, step=1)
+                    midas_weight_vid2depth = gr.Slider(label="MiDaS weight (vid2depth)", value=da.midas_weight, minimum=0, maximum=1, step=0.05, interactive=True)
+                    depth_keep_imgs = gr.Checkbox(label='Keep Imgs', value=True, elem_id="depth_keep_imgs")
+                with gr.Row():
+                    # This is the actual button that's pressed to initiate the Upscaling:
+                    depth_btn = gr.Button(value="*Get depth from uploaded video*")
+                with gr.Row():
+                    # Show a text about CLI outputs:
+                    gr.HTML("* check your CLI for outputs")
+                    # make the function call when the UPSCALE button is clicked
+                depth_btn.click(upload_vid_to_depth,inputs=[vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
             # STITCH FRAMES TO VID TAB
             with gr.Tab('Frames to Video') as stitch_imgs_to_vid_row:
                 with gr.Row(visible=False):
@@ -1196,13 +1222,22 @@ def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, 
 
     process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
 
-# Local gradio-to-upscalers function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
     # print msg and do nothing if vid not uploaded
     if not vid_to_upscale_chosen_file:
         return print("Please upload a video :)")
     
     process_upscale_vid_upload_logic(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_to_upscale_chosen_file.orig_name, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset)
+
+def upload_vid_to_depth(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
+    # print msg and do nothing if vid not uploaded
+    if not vid_to_depth_chosen_file:
+        return print("Please upload a video :()")
+    
+    root_params = Root()
+    f_models_path = root_params['models_path']
+    
+    process_depth_vid_upload_logic(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, vid_to_depth_chosen_file.orig_name, depth_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, f_models_path)
 
 def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
     if vid_path is None:
