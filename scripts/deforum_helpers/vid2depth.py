@@ -98,7 +98,9 @@ def process_video_depth(mode, thresholding, threshold_value, threshold_value_max
 
 def process_frame(model, image, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth):
     # Get grayscale foreground map
-    if not 'Mixed' in mode:
+    if 'None' in mode:
+        depth = process_depth(image, 'None', thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur)
+    elif not 'Mixed' in mode:
         depth = process_frame_depth(model, np.array(image), midas_weight_vid2depth) if 'Depth' in mode else process_frame_anime(model, np.array(image))
         depth = process_depth(depth, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur)
     else:
@@ -116,7 +118,7 @@ def process_depth(depth, mode, thresholding, threshold_value, threshold_value_ma
     depth = depth.convert('L')
     # Depth mode need inverting whereas Anime mode doesn't
     # (invert and 'Depth' in mode) or (not invert and not 'Depth' in mode)
-    if invert is ('Depth' in mode):
+    if (invert and 'None' in mode) or (invert is ('Depth' in mode)):
         depth = ImageOps.invert(depth)
     
     depth = np.array(depth)
