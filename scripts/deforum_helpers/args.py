@@ -4,12 +4,13 @@ from modules.ui_components import FormRow
 import modules.shared as sh
 import modules.paths as ph
 import os
-from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_rife_vid_upload_logic
+from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_interp_vid_upload_logic
 from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vid_upload_logic
 from .vid2depth import process_depth_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os
+from .deforum_controlnet import controlnet_component_names, setup_controlnet_ui
 import tempfile
         
 def Root():
@@ -289,9 +290,11 @@ def DeforumOutputArgs():
     # max_video_frames = 200 #@param {type:"string"}
     store_frames_in_ram = False #@param {type: 'boolean'}
     #@markdown **Interpolate Video Settings**
-    frame_interpolation_engine = "RIFE v4.6" #@param ["RIFE v4.0","RIFE v4.3","RIFE v4.6"]
-    frame_interpolation_x_amount = "Disabled" #"Disabled" #@param ["Disabled" + all values from x2 to x10]
-    frame_interpolation_slow_mo_amount = "Disabled" #@param ["Disabled","x2","x4","x8"]
+    # todo: change them to support FILM interpolation as well
+    frame_interpolation_engine = "None" #@param ["None", "RIFE v4.6", "FILM"]
+    frame_interpolation_x_amount = 2 # [2 to 1000 depends on the engine]
+    frame_interpolation_slow_mo_enabled = False
+    frame_interpolation_slow_mo_amount = 2 #@param [2 to 10]
     frame_interpolation_keep_imgs = False #@param {type: 'boolean'}
     return locals()
     
@@ -300,7 +303,7 @@ import os
 import time
 from types import SimpleNamespace
 
-i1_store_backup = "<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.1b</p>"
+i1_store_backup = "<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.2b</p>"
 i1_store = i1_store_backup
 
 mask_fill_choices=['fill', 'original', 'latent noise', 'latent nothing']
@@ -638,7 +641,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # PARSEQ ACCORD
             with gr.Accordion('Parseq', open=False):
                 gr.HTML("""
-                Use an <a style='color:blue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
+                Use an <a style='color:SteelBlue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
                 <p style="margin-top:1em">
                     Note that parseq overrides:
                     <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
@@ -672,6 +675,18 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 return gr.update(visible=True) 
             else:
                 return gr.update(visible=False)
+        # CONTROLNET TAB
+        with gr.Tab('ControlNet'):
+                gr.HTML("""
+                Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
+                <p style="margin-top:0.2em">
+                    *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development. &#128521;
+                </p>
+                <p">
+                    Due to ControlNet base extension's inner works it needs its models to be located at 'extensions/deforum-for-automatic1111-webui/models'. So copy, symlink or move them there until a more elegant solution is found. And, as of now, it requires use_init checked for the first run. The ControlNet extension version used in the dev process is a24089a62e70a7fae44b7bf35b51fd584dd55e25, if even with all the other options above used it still breaks, upgrade/downgrade your CN version to this one.
+                </p>
+                """)
+                controlnet_dict = setup_controlnet_ui()
         # HYBRID VIDEO TAB
         with gr.Tab('Hybrid Video'):
             # this html only shows when not in 2d/3d mode
@@ -743,7 +758,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
                     # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
                     output_format = gr.Dropdown(visible=False, label="Output format", choices=['FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
-                
                 with gr.Column(variant='compact'):
                     with gr.Row(variant='compact') as soundtrack_row:
                         add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="Add soundtrack", value=dv.add_soundtrack)
@@ -765,15 +779,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
                     with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_location_row:
                         ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location)
-            # RIFE TAB
-            with gr.Tab('RIFE') as rife_accord:
+            # FRAME INTERPOLATION TAB
+            with gr.Tab('Frame Interoplation') as frame_interp_tab:
                 with gr.Accordion('Important notes and Help', open=False):
                     gr.HTML("""
-                    Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
+                    Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> / <a href="https://film-net.github.io/">FILM</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
                      <p style="margin-top:1em">
                         Supported engines:
                         <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
-                            <li>RIFE v4.6, v4.3 and v4.0. Recommended for now: v4.6.</li>
+                            <li>RIFE v4.6 and FILM.</li>
                         </ul>
                     </p>
                      <p style="margin-top:1em">
@@ -785,21 +799,41 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         </ul>
                     </p>
                     """)
-                with gr.Column():
+                with gr.Column(variant='compact'):
                     with gr.Row(variant='compact'):
                         # Interpolation Engine
-                        frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['RIFE v4.0','RIFE v4.3','RIFE v4.6'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
-                        # How many times to interpolate (interp x)
-                        frame_interpolation_x_amount = gr.Dropdown(label="Interp x", choices=['Disabled','x2','x3','x4','x5','x6','x7','x8','x9','x10'], value=dv.frame_interpolation_x_amount, type="value", elem_id="frame_interpolation_x_amount", interactive=True)
-                        # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE)
-                        frame_interpolation_slow_mo_amount = gr.Dropdown(label="Slow-Mo x", choices=['Disabled','x2','x4','x8'], value=dv.frame_interpolation_slow_mo_amount, type="value", elem_id="frame_interpolation_slow_mo_amount", interactive=True)
+                        frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['None','RIFE v4.6','FILM'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
+                        frame_interpolation_slow_mo_enabled = gr.Checkbox(label="Slow Mo", elem_id="frame_interpolation_slow_mo_enabled", value=dv.frame_interpolation_slow_mo_enabled, interactive=True, visible=False)
                         # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
-                        frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True)
-                    with gr.Row():
+                        frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True, visible=False)
+                    with gr.Row(variant='compact', visible=False) as frame_interp_amounts_row:
+                        with gr.Column(min_width=180) as frame_interp_x_amount_column:
+                            # How many times to interpolate (interp X)
+                            frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp X", value=dv.frame_interpolation_x_amount, interactive=True)
+                        with gr.Column(min_width=180, visible=False) as frame_interp_slow_mo_amount_column:
+                            # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE/FILM)
+                            frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo X", value=dv.frame_interpolation_x_amount, interactive=True)
+                    # TODO: move these from here when done
+                    def hide_slow_mo(choice):
+                        return gr.update(visible=True) if choice else gr.update(visible=False)
+                    def hide_interp_by_interp_status(choice):
+                        return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
+                    def change_interp_x_max_limit(engine_name, current_value):
+                        if engine_name == 'FILM':
+                            return gr.update(maximum=300)
+                        elif current_value > 10:
+                            return gr.update(maximum=10, value=2)
+                        return gr.update(maximum=10)
+                    frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
+                    interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row]
+                    for output in interp_hide_list:
+                        frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
+                    frame_interpolation_engine.change(fn=change_interp_x_max_limit,inputs=[frame_interpolation_engine,frame_interpolation_x_amount],outputs=frame_interpolation_x_amount)
+                    with gr.Row(visible=False) as interp_existing_video_row:
                         # Intrpolate any existing video from the connected PC
-                        with gr.Accordion('Interpolate an existing video', open=False):
+                        with gr.Accordion('Interpolate an existing video', open=False) as interp_existing_video_accord:
                             # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
-                            vid_to_rife_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_rife_chosen_file")
+                            vid_to_interpolate_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_interpolate_chosen_file")
                             with gr.Row(variant='compact'):
                                 # Non interactive textbox showing uploaded input vid total Frame Count
                                 in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
@@ -808,16 +842,18 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 # Non interactive textbox showing expected output interpolated video FPS
                                 out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS", value='---')
                             # This is the actual button that's pressed to initiate the interpolation:
-                            rife_btn = gr.Button(value="*Interpolate uploaded video*")
+                            interpolate_button = gr.Button(value="*Interpolate uploaded video*")
                             # Show a text about CLI outputs:
                             gr.HTML("* check your CLI for outputs")
-                            # make the functin call when the RIFE button is clicked
-                            rife_btn.click(upload_vid_to_rife,inputs=[vid_to_rife_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, in_vid_fps_ui_window])
-                            # update output fps field upon changing of interp_x and/ or slow_mo_x
-                            frame_interpolation_x_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
-                            frame_interpolation_slow_mo_amount.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps)
-                            # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_rife_chosen_file)
-                            vid_to_rife_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_rife_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
+                            # make the functin call when the interpolation button is clicked
+                            interpolate_button.click(upload_vid_to_interpolate,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, in_vid_fps_ui_window])
+                            [change_fn.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps) for change_fn in [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_slow_mo_enabled]]
+                            # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_interpolate_chosen_file)
+                            vid_to_interpolate_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
+                    #TODO: move this from here
+                    interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row,interp_existing_video_row]
+                    for output in interp_hide_list:
+                        frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
             # TODO: add upscalers parameters to the settings and make them a part of the pipeline
             # VIDEO UPSCALE TAB
             with gr.Tab('Video Upscaling'):
@@ -981,7 +1017,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     for output in skip_video_for_run_all_outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
     # END OF UI TABS
-    return locals()
+    stuff = locals()
+    stuff = {**stuff, **controlnet_dict}
+    stuff.pop('controlnet_dict')
+    return stuff
 
 ### SETTINGS STORAGE UPDATE! 2023-01-27
 ### To Reduce The Number Of Settings Overrides,
@@ -1044,7 +1083,7 @@ video_args_names =  str(r'''skip_video_for_run_all,
                             r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
                             render_steps,
                             path_name_modifier, image_path, mp4_path, store_frames_in_ram,
-                            frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_amount,
+                            frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount,
                             frame_interpolation_keep_imgs'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
@@ -1053,7 +1092,7 @@ loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blen
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names + controlnet_component_names()
 settings_component_names = [name for name in component_names if name not in video_args_names]
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
@@ -1088,6 +1127,9 @@ def pack_parseq_args(args_dict):
 def pack_loop_args(args_dict):
     return {name: args_dict[name] for name in loop_args_names}
 
+def pack_controlnet_args(args_dict):
+    return {name: args_dict[name] for name in controlnet_component_names()}
+
 def process_args(args_dict_main):
     override_settings_with_file = args_dict_main['override_settings_with_file']
     custom_settings_file = args_dict_main['custom_settings_file']
@@ -1096,6 +1138,7 @@ def process_args(args_dict_main):
     video_args_dict = pack_video_args(args_dict_main)
     parseq_args_dict = pack_parseq_args(args_dict_main)
     loop_args_dict = pack_loop_args(args_dict_main)
+    controlnet_args_dict = pack_controlnet_args(args_dict_main)
 
     import json
     
@@ -1113,7 +1156,7 @@ def process_args(args_dict_main):
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root)
+        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root)
     
     if not os.path.exists(root.models_path):
         os.mkdir(root.models_path)
@@ -1123,6 +1166,7 @@ def process_args(args_dict_main):
     video_args = SimpleNamespace(**video_args_dict)
     parseq_args = SimpleNamespace(**parseq_args_dict)
     loop_args = SimpleNamespace(**loop_args_dict)
+    controlnet_args = SimpleNamespace(**controlnet_args_dict)
 
     p.width, p.height = map(lambda x: x - x % 64, (args.W, args.H))
     p.steps = args.steps
@@ -1160,23 +1204,23 @@ def process_args(args_dict_main):
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
     
-    return root, args, anim_args, video_args, parseq_args, loop_args
+    return root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
 
 def print_args(args):
     print("ARGS: /n")
     for key, value in args.__dict__.items():
         print(f"{key}: {value}")
  
-# Local gradio-to-rife function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
-def upload_vid_to_rife(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
+# Local gradio-to-frame-interoplation function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
+def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
     # print msg and do nothing if vid not uploaded or interp_x not provided
-    if not file or x_am == 'Disabled':
-        return print("Please upload a video and set a proper value for 'Interp x'. Can't interpolate x0 times :)")
+    if not file or engine == 'None':
+        return print("Please upload a video and set a proper value for 'Interp X'. Can't interpolate x0 times :)")
 
     root_params = Root()
     f_models_path = root_params['models_path']
 
-    process_rife_vid_upload_logic(file, engine, x_am, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
+    process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
 
 def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
     # print msg and do nothing if vid not uploaded
