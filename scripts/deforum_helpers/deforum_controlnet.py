@@ -19,7 +19,7 @@ def find_controlnet():
         return has_controlnet
     
     try:
-        from sd_webui_controlnet.cn_scripts import controlnet
+        from controlnet_embedded.scripts import controlnet
     except Exception as e:
         print(f'\033[33mFailed to import controlnet! The exact error is {e}. Deforum support for ControlNet will not be activated\033[0m')
         has_controlnet = False
