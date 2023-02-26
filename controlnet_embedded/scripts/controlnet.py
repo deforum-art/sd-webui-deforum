@@ -43,7 +43,8 @@ except ImportError:
 CN_MODEL_EXTS = [".pt", ".pth", ".ckpt", ".safetensors"]
 cn_models = {}      # "My_Lora(abcd1234)" -> C:/path/to/model.safetensors
 cn_models_names = {}  # "my_lora" -> "My_Lora(abcd1234)"
-cn_models_dir = os.path.join(scripts.basedir(), "models")
+# cn_models_dir = os.path.join(scripts.basedir(), "models")
+cn_models_dir = os.path.join(os.getcwd(),'models','Stable-diffusion') # dirty hack?
 os.makedirs(cn_models_dir, exist_ok=True)
 cn_detectedmap_dir = os.path.join(scripts.basedir(), "detected_maps")
 os.makedirs(cn_detectedmap_dir, exist_ok=True)
