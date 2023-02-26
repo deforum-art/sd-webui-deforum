@@ -4,9 +4,10 @@ def check_is_number(value):
     float_pattern = r'^(?=.)([+-]?([0-9]*)(\.([0-9]+))?)$'
     return re.match(float_pattern, value)
 
-def parse_weight(match, frame = 0)->float:
+def parse_weight(match, frame = 0, max_frames = 0)->float:
     import numexpr
     w_raw = match.group("weight")
+    max_f = max_frames
     if w_raw == None:
         return 1
     if check_is_number(w_raw):
@@ -18,7 +19,7 @@ def parse_weight(match, frame = 0)->float:
             return 1
         return float(numexpr.evaluate(w_raw[1:-1]))
 
-def split_weighted_subprompts(text, frame = 0):
+def split_weighted_subprompts(text, frame = 0, max_frames = 0):
     """
     splits the prompt based on deforum webui implementation, moved from generate.py 
     """

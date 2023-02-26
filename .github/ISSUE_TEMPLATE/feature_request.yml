@@ -38,3 +38,10 @@ body:
     attributes:
       label: Additional information
       description: Add any other context or screenshots about the feature request here.
+  - type: textarea
+    id: help
+    attributes:
+      label: Are you going to help adding it? If not, tell why.
+      description: Let us know if you're willing to add the desired feature. Our community is welcoming and ready to provide you with any information on the project structure or how the code works; ideally, leave your Discord handle here, so we'll contact you directly. If not, excuses like 'I don't know how to code' or 'I work full-time and have absolutely no time' are perfectly fine and we'll understand. However, keep in mind that if you don't want to do your new feature yourself, you'll have to wait until the team picks up your issue.
+    validations:
+      required: true
