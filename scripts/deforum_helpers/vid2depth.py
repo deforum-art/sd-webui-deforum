@@ -68,6 +68,8 @@ def process_video_depth(mode, thresholding, threshold_value, threshold_value_max
         model = load_depth_model(f_models_path, midas_weight_vid2depth)
     elif 'Anime' in mode:
         model = load_anime_model()
+    else:
+        model = None
 
     # Upscaling is a slow and demanding operation, so we don't need as much parallelization here
     for i in tqdm(range(len(videogen)), desc="Vid2depth"):
