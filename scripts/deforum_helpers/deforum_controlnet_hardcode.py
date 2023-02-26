@@ -194,10 +194,9 @@ from collections import OrderedDict
 
 def update_cn_models():
     print('Deforum: updating ControlNet paths')
-    from controlnet_embedded.scripts.controlnet import get_all_models
+    import controlnet_embedded.scripts.controlnet as cntr #get_all_models
     res = OrderedDict()
     ext_dirs = ('extensions/sd-webui-controlnet', shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
-    #ext_dirs = (shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
     extra_lora_paths = (extra_lora_path for extra_lora_path in ext_dirs
                 if extra_lora_path is not None and os.path.exists(extra_lora_path))
     paths = [cn_models_dir, *extra_lora_paths]
@@ -206,13 +205,13 @@ def update_cn_models():
         sort_by = shared.opts.data.get(
             "control_net_models_sort_models_by", "name")
         filter_by = shared.opts.data.get("control_net_models_name_filter", "")
-        found = get_all_models(sort_by, filter_by, path)
+        found = cntr.get_all_models(sort_by, filter_by, path)
         res = {**found, **res}
 
-    controlnet_embedded.scripts.controlnet.cn_models = OrderedDict(**{"None": None}, **res)
-    controlnet_embedded.scripts.controlnet.cn_models_names = {}
-    for name_and_hash, filename in sd_webui_controlnet.cn_scripts.controlnet.cn_models.items():
+    cntr.cn_models = OrderedDict(**{"None": None}, **res)
+    cntr.cn_models_names = {}
+    for name_and_hash, filename in cntr.cn_models.items():
         if filename == None:
             continue
         name = os.path.splitext(os.path.basename(filename))[0].lower()
-        controlnet_embedded.scripts.controlnet.cn_models_names[name] = name_and_hash
+        cntr.cn_models_names[name] = name_and_hash
