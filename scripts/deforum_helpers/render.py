@@ -90,8 +90,12 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
+        max_f = anim_args.max_frames - 1
         for i, prompt in animation_prompts.items():
-            prompt_series[int(i)] = prompt
+            if str(i).isdigit():
+                prompt_series[int(i)] = prompt
+            else:
+                prompt_series[int(numexpr.evaluate(i))] = prompt
         prompt_series = prompt_series.ffill().bfill()
 
     # check for video inits
@@ -375,10 +379,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
-            
+        
+        max_f = anim_args.max_frames - 1
         prompt_split = re.split("`(.*?)`", args.prompt)
         if len(prompt_split) > 1:
-            prompt_parsed = ''.join([prompt_split[value-1]+f'{numexpr.evaluate(prompt_split[value].replace("t",f"{frame_idx}"))}' for value in (range(1, len(prompt_split), 2))])
+            prompt_parsed = ''.join([prompt_split[value-1]+f'{numexpr.evaluate(prompt_split[value].replace("t",f"{frame_idx}").replace("max_f" , f"{max_f}"))}' for value in (range(1, len(prompt_split), 2))])
         else:
             prompt_parsed = args.prompt
         prompt_parsed += prompt_split[-1] if len(prompt_split) % 2 == 1 else "" # append last )
