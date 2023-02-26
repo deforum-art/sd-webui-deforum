@@ -111,7 +111,6 @@ def DeforumAnimArgs():
     #@markdown ####**3D Depth Warping:**
     use_depth_warping = True #@param {type:"boolean"}
     midas_weight = 0.2 #@param {type:"number"}
-    normalize_depth = 'Normalize' #@param {type:"string"}
 
     padding_mode = 'border'#@param ['border', 'reflection', 'zeros'] {type:'string'}
     sampling_mode = 'bicubic'#@param ['bicubic', 'bilinear', 'nearest'] {type:'string'}
@@ -501,8 +500,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Row(variant='compact'):
                             use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
                             midas_weight = gr.Number(label="MiDaS weight", value=da.midas_weight, interactive=True)
-                        with gr.Row(variant='compact'):
-                            normalize_depth = gr.Radio(['Normalize', 'Remap and clip'], label="Depth normalization", value=da.normalize_depth, elem_id="normalize_depth")
                         with gr.Row(variant='compact'):
                             padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode")
                             sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="Sampling mode", value=da.sampling_mode, elem_id="sampling_mode")
@@ -1014,7 +1011,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         color_coherence, color_coherence_video_every_N_frames, color_force_grayscale,
                         diffusion_cadence,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
-                        use_depth_warping, midas_weight, normalize_depth,
+                        use_depth_warping, midas_weight,
                         padding_mode, sampling_mode, save_depth_maps,
                         video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames,
                         use_mask_video, video_mask_path,
