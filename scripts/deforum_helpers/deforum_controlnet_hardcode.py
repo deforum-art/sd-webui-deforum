@@ -122,7 +122,7 @@ def process(p, *args):
         detected_map[np.min(deforum_input_image, axis=2) < 127] = 255
         deforum_input_image = detected_map
     
-    from sd_webui_controlnet.cn_scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
+    from controlnet_embedded.scripts.processor import canny, midas, midas_normal, leres, hed, mlsd, openpose, pidinet, simple_scribble, fake_scribble, uniformer
     
     preprocessor = {
         "none": lambda x, *args, **kwargs: x,
@@ -194,7 +194,7 @@ from collections import OrderedDict
 
 def update_cn_models():
     print('Deforum: updating ControlNet paths')
-    from sd_webui_controlnet.cn_scripts.controlnet import get_all_models
+    from controlnet_embedded.scripts.controlnet import get_all_models
     res = OrderedDict()
     ext_dirs = ('extensions/sd-webui-controlnet', shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
     #ext_dirs = (shared.opts.data.get("control_net_models_path", None), getattr(shared.cmd_opts, 'controlnet_dir', None))
@@ -209,10 +209,10 @@ def update_cn_models():
         found = get_all_models(sort_by, filter_by, path)
         res = {**found, **res}
 
-    sd_webui_controlnet.cn_scripts.controlnet.cn_models = OrderedDict(**{"None": None}, **res)
-    sd_webui_controlnet.cn_scripts.controlnet.cn_models_names = {}
+    controlnet_embedded.scripts.controlnet.cn_models = OrderedDict(**{"None": None}, **res)
+    controlnet_embedded.scripts.controlnet.cn_models_names = {}
     for name_and_hash, filename in sd_webui_controlnet.cn_scripts.controlnet.cn_models.items():
         if filename == None:
             continue
         name = os.path.splitext(os.path.basename(filename))[0].lower()
-        sd_webui_controlnet.cn_scripts.controlnet.cn_models_names[name] = name_and_hash
+        controlnet_embedded.scripts.controlnet.cn_models_names[name] = name_and_hash

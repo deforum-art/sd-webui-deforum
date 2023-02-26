@@ -11,7 +11,7 @@ def canny(img, res=512, thr_a=100, thr_b=200, **kwargs):
     img = resize_image(HWC3(img), res)
     global model_canny
     if model_canny is None:
-        from annotator.canny import apply_canny
+        from controlnet_embedded.annotator.canny import apply_canny
         model_canny = apply_canny
     result = model_canny(img, l, h)
     return result
@@ -30,7 +30,7 @@ def hed(img, res=512, **kwargs):
     img = resize_image(HWC3(img), res)
     global model_hed
     if model_hed is None:
-        from annotator.hed import apply_hed
+        from controlnet_embedded.annotator.hed import apply_hed
         model_hed = apply_hed
     result = model_hed(img)
     return result
@@ -38,13 +38,13 @@ def hed(img, res=512, **kwargs):
 def unload_hed():
     global model_hed
     if model_hed is not None:
-        from annotator.hed import unload_hed_model
+        from controlnet_embedded.annotator.hed import unload_hed_model
         unload_hed_model()
 
 def fake_scribble(img, res=512, **kwargs):
     result = hed(img, res)
     import cv2
-    from annotator.hed import nms
+    from controlnet_embedded.annotator.hed import nms
     result = nms(result, 127, 3.0)
     result = cv2.GaussianBlur(result, (0, 0), 3.0)
     result[result > 10] = 255
@@ -60,7 +60,7 @@ def mlsd(img, res=512, thr_a=0.1, thr_b=0.1, **kwargs):
     img = resize_image(HWC3(img), res)
     global model_mlsd
     if model_mlsd is None:
-        from annotator.mlsd import apply_mlsd
+        from controlnet_embedded.annotator.mlsd import apply_mlsd
         model_mlsd = apply_mlsd
     result = model_mlsd(img, thr_v, thr_d)
     return result
@@ -68,7 +68,7 @@ def mlsd(img, res=512, thr_a=0.1, thr_b=0.1, **kwargs):
 def unload_mlsd():
     global model_mlsd
     if model_mlsd is not None:
-        from annotator.mlsd import unload_mlsd_model
+        from controlnet_embedded.annotator.mlsd import unload_mlsd_model
         unload_mlsd_model()
 
 
@@ -79,7 +79,7 @@ def midas(img, res=512, a=np.pi * 2.0, **kwargs):
     img = resize_image(HWC3(img), res)
     global model_midas
     if model_midas is None:
-        from annotator.midas import apply_midas
+        from controlnet_embedded.annotator.midas import apply_midas
         model_midas = apply_midas
     results, _ = model_midas(img, a)
     return results
@@ -91,7 +91,7 @@ def leres(img, res=512, a=np.pi * 2.0, thr_a=0, thr_b=0, **kwargs):
     img = resize_image(HWC3(img), res)
     global model_leres
     if model_leres is None:
-        from annotator.leres import apply_leres
+        from controlnet_embedded.annotator.leres import apply_leres
         model_leres = apply_leres
     results = model_leres(img, thr_a, thr_b)
     return results
@@ -101,7 +101,7 @@ def midas_normal(img, res=512, a=np.pi * 2.0, thr_a=0.4, **kwargs): # bg_th -> t
     img = resize_image(HWC3(img), res)
     global model_midas
     if model_midas is None:
-        from annotator.midas import apply_midas
+        from controlnet_embedded.annotator.midas import apply_midas
         model_midas = apply_midas
     _, results  = model_midas(img, a, bg_th)
     return results
@@ -109,13 +109,13 @@ def midas_normal(img, res=512, a=np.pi * 2.0, thr_a=0.4, **kwargs): # bg_th -> t
 def unload_midas():
     global model_midas
     if model_midas is not None:
-        from annotator.midas import unload_midas_model
+        from controlnet_embedded.annotator.midas import unload_midas_model
         unload_midas_model()
 
 def unload_leres():
     global model_leres
     if model_leres is not None:
-        from annotator.leres import unload_leres_model
+        from controlnet_embedded.annotator.leres import unload_leres_model
         unload_leres_model()
 
 model_openpose = None
@@ -125,7 +125,7 @@ def openpose(img, res=512, has_hand=False, **kwargs):
     img = resize_image(HWC3(img), res)
     global model_openpose
     if model_openpose is None:
-        from annotator.openpose import apply_openpose
+        from controlnet_embedded.annotator.openpose import apply_openpose
         model_openpose = apply_openpose
     result, _ = model_openpose(img, has_hand)
     return result
@@ -134,7 +134,7 @@ def openpose_hand(img, res=512, has_hand=True, **kwargs):
     img = resize_image(HWC3(img), res)
     global model_openpose
     if model_openpose is None:
-        from annotator.openpose import apply_openpose
+        from controlnet_embedded.annotator.openpose import apply_openpose
         model_openpose = apply_openpose
     result, _ = model_openpose(img, has_hand)
     return result
@@ -142,7 +142,7 @@ def openpose_hand(img, res=512, has_hand=True, **kwargs):
 def unload_openpose():
     global model_openpose
     if model_openpose is not None:
-        from annotator.openpose import unload_openpose_model
+        from controlnet_embedded.annotator.openpose import unload_openpose_model
         unload_openpose_model()
 
 
@@ -153,7 +153,7 @@ def uniformer(img, res=512, **kwargs):
     img = resize_image(HWC3(img), res)
     global model_uniformer
     if model_uniformer is None:
-        from annotator.uniformer import apply_uniformer
+        from controlnet_embedded.annotator.uniformer import apply_uniformer
         model_uniformer = apply_uniformer
     result = model_uniformer(img)
     return result
@@ -161,7 +161,7 @@ def uniformer(img, res=512, **kwargs):
 def unload_uniformer():
     global model_uniformer
     if model_uniformer is not None:
-        from annotator.uniformer import unload_uniformer_model
+        from controlnet_embedded.annotator.uniformer import unload_uniformer_model
         unload_uniformer_model()
         
         
@@ -172,7 +172,7 @@ def pidinet(img, res=512, **kwargs):
     img = resize_image(HWC3(img), res)
     global model_pidinet
     if model_pidinet is None:
-        from annotator.pidinet import apply_pidinet
+        from controlnet_embedded.annotator.pidinet import apply_pidinet
         model_pidinet = apply_pidinet
     result = model_pidinet(img)
     return result
@@ -180,5 +180,5 @@ def pidinet(img, res=512, **kwargs):
 def unload_pidinet():
     global model_pidinet
     if model_pidinet is not None:
-        from annotator.pidinet import unload_pid_model
+        from controlnet_embedded.annotator.pidinet import unload_pid_model
         unload_pid_model()
