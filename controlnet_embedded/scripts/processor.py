@@ -1,6 +1,6 @@
 
 import numpy as np
-from annotator.util import resize_image, HWC3
+from controlnet_embedded.annotator.util import resize_image, HWC3
 
 
 model_canny = None
