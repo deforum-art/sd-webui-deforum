@@ -1,0 +1,97 @@
+name: Bug Report
+description: Create a bug report for the Deforum extension
+title: "[Bug]: "
+labels: ["bug-report"]
+
+body:
+  - type: checkboxes
+    attributes:
+      label: Have you read the latest version of the FAQ?
+      description: Please visit the page called FAQ & Troubleshooting on the Deforum wiki in this repository and see if your problem has already been described there.
+      options:
+        - label: I have visited the FAQ page right now and my issue is not present there
+          required: true
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered (including the closed issues).
+      options:
+        - label: I have searched the existing issues and checked the recent builds/commits of both this extension and the webui
+          required: true
+  - type: checkboxes
+    attributes:
+      label: Are you using the latest version of the Deforum extension?
+      description: Please, check if your Deforum is based on the latest repo commit (git log) or update it through the 'Extensions' tab and check if the issue still persist. Otherwise, check this box.
+      options:
+        - label: I have Deforum updated to the lastest version and I still have the issue.
+          required: true
+  - type: markdown
+    attributes:
+      value: |
+        *Please fill this form with as much information as possible, don't forget to fill "What OS..." and "What browsers" and *provide screenshots if possible**
+  - type: textarea
+    id: what-did
+    attributes:
+      label: What happened?
+      description: Tell us what happened in a very clear and simple way
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce the problem
+      description: Please provide us with precise step by step information on how to reproduce the bug
+      value: |
+        1. Go to .... 
+        2. Press ....
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: what-should
+    attributes:
+      label: What should have happened?
+      description: Tell what you think the normal behavior should be
+  - type: textarea
+    id: commits
+    attributes:
+      label: WebUI and Deforum extension Commit IDs
+      description: Which commit of the webui/deforum extension are you running on? (Do not write *Latest version/repo/commit*, as this means nothing and will have changed by the time we read your issue. Rather, copy the **Commit** link at the bottom of the UI, or if you can't launch the webui at all, enter your cmd/terminal, CD into the main webui folder to get the webui commit id, and cd into the extensions/deforum folder to get the deforum commit id, both using the command 'git rev-parse HEAD'.)
+      value: |
+             webui commit id - 
+             deforum exten commit id - 
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: On which platform are you launching the webui with the extension?
+      multiple: true
+      options:
+        - Local PC setup (Windows)
+        - Local PC setup (Linux)
+        - Local PC setup (Mac)
+        - Google Colab (The Last Ben's)
+        - Google Colab (Other)
+        - Cloud server (Linux)
+        - Other (please specify in "additional information")
+  - type: textarea
+    id: customsettings
+    attributes:
+      label: Webui core settings
+      description: Send here a link to your ui-config.json file in the core 'stable-diffusion-webui' folder (ideally, upload it to GitHub gists). Friendly reminder - if you have 'With img2img, do exactly the amount of steps the slider specified' checked, your issue will be discarded immediately. 😉
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console logs
+      description: Please provide **full** cmd/terminal logs from the moment you started UI to the end of it, after your bug happened. If it's very long, provide a link to GitHub gists or similar service.
+      render: Shell
+    validations:
+      required: true
+  - type: textarea
+    id: misc
+    attributes:
+      label: Additional information
+      description: Please provide us with any relevant additional info or context.
