@@ -386,7 +386,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             prompt_parsed = ''.join([prompt_split[value-1]+f'{numexpr.evaluate(prompt_split[value].replace("t",f"{frame_idx}").replace("max_f" , f"{max_f}"))}' for value in (range(1, len(prompt_split), 2))])
         else:
             prompt_parsed = args.prompt
-        prompt_parsed += prompt_split[-1] if len(prompt_split) % 2 == 1 else "" # append last )
+        prompt_parsed += ')' if ')' in prompt_split[-1] else "" # append last )
 
         prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
         prompt_to_print = prompt_to_print.strip()
