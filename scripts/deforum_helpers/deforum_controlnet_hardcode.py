@@ -1,19 +1,19 @@
 deforum_latest_network = None
 deforum_latest_params = (None, 'placeholder to trigger the model loading')
 deforum_input_image = None
-from sd_webui_controlnet.cn_scripts.processor import unload_hed, unload_mlsd, unload_midas, unload_leres, unload_pidinet, unload_openpose, unload_uniformer, HWC3
+from controlnet_embedded.scripts.processor import unload_hed, unload_mlsd, unload_midas, unload_leres, unload_pidinet, unload_openpose, unload_uniformer, HWC3
 import modules.shared as shared
 import modules.devices as devices
 import modules.processing as processing
 from modules.processing import StableDiffusionProcessingImg2Img, StableDiffusionProcessingTxt2Img
 import numpy as np
-from sd_webui_controlnet.cn_scripts.controlnet import cn_models, cn_models_names
+from controlnet_embedded.scripts.controlnet import cn_models, cn_models_names
 import os
 import modules.scripts as scrpts
 import torch
-from sd_webui_controlnet.cn_scripts.cldm import PlugableControlModel
-from sd_webui_controlnet.cn_scripts.adapter import PlugableAdapter
-from sd_webui_controlnet.cn_scripts.utils import load_state_dict
+from controlnet_embedded.scripts.cldm import PlugableControlModel
+from controlnet_embedded.scripts.adapter import PlugableAdapter
+from controlnet_embedded.scripts.utils import load_state_dict
 from torchvision.transforms import Resize, InterpolationMode, CenterCrop, Compose
 from einops import rearrange
 cn_models_dir = os.path.join(scrpts.basedir(), "models")
