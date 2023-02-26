@@ -1,7 +1,7 @@
 name: Bug Report
 description: Create a bug report for the Deforum extension
 title: "[Bug]: "
-labels: ["bug-report"]
+labels: ["bug"]
 
 body:
   - type: checkboxes
