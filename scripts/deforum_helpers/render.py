@@ -25,17 +25,22 @@ from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_mo
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import get_keys_to_exclude
+from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 # Webui
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 
-def render_animation(args, anim_args, video_args, parseq_args, loop_args, animation_prompts, root):
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         if anim_args.hybrid_composite or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
             args, anim_args, inputfiles = hybrid_generation(args, anim_args, root)
             # path required by hybrid functions, even if hybrid_comp_save_extra_frames is False
             hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
+
+    # handle controlnet video input frames generation
+    if is_controlnet_enabled(controlnet_args):
+        unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
@@ -227,7 +232,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
 
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
-                    depth = depth_model.predict(turbo_next_image, anim_args, root.half_precision)
+                    depth = depth_model.predict(turbo_next_image, anim_args.midas_weight, root.half_precision)
                 
                 if advance_prev:
                     turbo_prev_image, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
@@ -331,7 +336,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             # apply scaling
             contrast_image = (prev_img * contrast).round().astype(np.uint8)
             # anti-blur
-            contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold, args.mask_image if args.use_mask else None)
+            if amount > 0:
+                contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold, mask_image if args.use_mask else None)
             # apply frame noising
             if args.use_mask or anim_args.use_noise_mask:
                 args.noise_mask = compose_mask_with_check(root, args, noise_mask_seq, noise_mask_vals, Image.fromarray(cv2.cvtColor(contrast_image, cv2.COLOR_BGR2RGB)))
@@ -395,7 +401,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
         if anim_args.use_mask_video:
-            mask_vals['video_mask'] = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+            mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
 
         if args.use_mask:
             args.mask_image = compose_mask_with_check(root, args, mask_seq, mask_vals, args.init_sample) if args.init_sample is not None else None # we need it only after the first frame anyway
@@ -419,7 +425,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
             sd_hijack.model_hijack.hijack(sd_model)
         
         # sample the diffusion model
-        image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
         # intercept and override to grayscale
@@ -434,7 +440,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, animat
                 while not image.getbbox():
                     print("Rerolling with +1 seed...")
                     args.seed += 1
-                    image = generate(args, anim_args, loop_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+                    image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                     patience -= 1
                     if patience == 0:
                         print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Deforum Github discussions
+    url: https://github.com/deforum-art/deforum-for-automatic1111-webui/discussions
+    about: Please ask and answer questions here. If you want to complain about something, don't try to circumvent issue filling by starting a discussion here 🙃
+  - name: Deforum Discord
+    url: https://discord.gg/deforum
+    about: Here is our main community where we chat, discuss development and share experiments and results
