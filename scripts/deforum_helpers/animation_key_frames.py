@@ -65,21 +65,22 @@ class FrameInterpolater():
     def get_inbetweens(self, key_frames, integer=False, interp_method='Linear', is_single_string = False):
         key_frame_series = pd.Series([np.nan for a in range(self.max_frames)])
         for i in range(0, self.max_frames):
+            # get our ui variables set for numexpr.evaluate
+            max_f = self.max_frames
+            t = i
+            s = self.seed
             if i in key_frames:
                 value = key_frames[i]
                 value_is_number = check_is_number(value)
                 # if it's only a number, leave the rest for the default interpolation
                 if value_is_number:
-                    t = i
                     key_frame_series[i] = value
             if not value_is_number:
-                t = i
                 if is_single_string:
                     if value.find("'") > -1:
                         value = value.replace("'","")
                     if value.find('"') > -1:
                         value = value.replace('"',"")
-                s = self.seed
                 key_frame_series[i] = numexpr.evaluate(value) if not is_single_string else value # workaround for values formatted like 0:("I am test") //used for sampler schedules
         key_frame_series = key_frame_series.astype(float) if not is_single_string else key_frame_series # as string
         
