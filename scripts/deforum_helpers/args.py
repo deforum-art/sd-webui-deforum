@@ -1203,6 +1203,9 @@ def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_i
     pic_sizes = [Image.open(picture_path).size for picture_path in pic_list]
     if len(set(pic_sizes)) != 1:
         return print("All uploaded pics need to be of the same Width and Height / resolution.")
+        
+    root_params = Root()
+    f_models_path = root_params['models_path']
 
 # Local gradio-to-upscalers function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
