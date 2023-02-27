@@ -159,7 +159,7 @@ def anim_frame_warp(prev_img_cv2, args, anim_args, keys, frame_idx, depth_model=
 
     if anim_args.use_depth_warping:
         if depth is None and depth_model is not None:
-            depth = depth_model.predict(prev_img_cv2, anim_args, half_precision)
+            depth = depth_model.predict(prev_img_cv2, anim_args.midas_weight, half_precision)
     else:
         depth = None
 
@@ -216,7 +216,7 @@ def transform_image_3d(device, prev_img_cv2, depth_tensor, rot_mat, translate, a
     # adapted and optimized version of transform_image_3d from Disco Diffusion https://github.com/alembics/disco-diffusion 
     w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
 
-    aspect_ratio = float(w)/float(h)
+    aspect_ratio = 1
     near = keys.near_series[frame_idx]
     far = keys.far_series[frame_idx]
     fov_deg = keys.fov_series[frame_idx]

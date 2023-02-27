@@ -86,7 +86,7 @@ def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_c
     if anim_args.hybrid_comp_mask_type == 'Depth': # get depth from last generation
         hybrid_mask = Image.open(depth_frame)
     elif anim_args.hybrid_comp_mask_type == 'Video Depth': # get video depth
-        video_depth = depth_model.predict(np.array(video_image), anim_args, root.half_precision)
+        video_depth = depth_model.predict(np.array(video_image), anim_args.midas_weight, root.half_precision)
         depth_model.save(video_depth_frame, video_depth)
         hybrid_mask = Image.open(video_depth_frame)
     elif anim_args.hybrid_comp_mask_type == 'Blend': # create blend mask image

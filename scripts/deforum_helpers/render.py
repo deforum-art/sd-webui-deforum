@@ -236,7 +236,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
-                    depth = depth_model.predict(turbo_next_image, anim_args, root.half_precision)
+                    depth = depth_model.predict(turbo_next_image, anim_args.midas_weight, root.half_precision)
                 
                 if advance_prev:
                     turbo_prev_image, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
@@ -479,7 +479,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     sd_hijack.model_hijack.undo_hijack(sd_model)
                     devices.torch_gc()
                     depth_model.to(root.device)
-                depth = depth_model.predict(opencv_image, anim_args, root.half_precision)
+                depth = depth_model.predict(opencv_image, anim_args.midas_weight, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
                 if cmd_opts.lowvram or cmd_opts.medvram:
                     depth_model.to('cpu')
