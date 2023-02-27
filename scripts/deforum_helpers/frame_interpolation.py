@@ -194,18 +194,15 @@ def calculate_frames_to_add(total_frames, interp_x):
     
     
     
-def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution):
+def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_soundtrack, audio_track):
 
-    # print(pic_list)
     pic_path_list = [pic.name for pic in pic_list]
-    # print(file_path_list)
-    # return
+
     print(f"got a request to *frame interpolate* a set of {len(pic_list)} images.")
     
     folder_name = clean_folder_name(Path(pic_list[0].name).stem)
     print(folder_name)
-    # return
-    
+
     outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
     i = 1
     while os.path.exists(outdir_no_tmp):
@@ -214,16 +211,14 @@ def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, 
 
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
     os.makedirs(outdir, exist_ok=True)
-    
-    
-    convert_images(paths=pic_path_list, output_dir=outdir,format='png')
-    # return
 
-    
+    convert_images(paths=pic_path_list, output_dir=outdir,format='png')
+
     # check if the uploaded vid has an audio stream. If it doesn't, set audio param to None so that ffmpeg won't try to add non-existing audio to final video.
     audio_file_to_pass = None
-    # if media_file_has_audio(file.name, f_location):
-        # audio_file_to_pass = file.name
+    if add_soundtrack:
+        audio_file_to_pass = audio_track
+         # if media_file_has_audio(audio_track, f_location):
     
     # pass param so it won't duplicate the images at all as we already do it in here?!
     process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution, dont_change_fps=True)
