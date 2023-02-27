@@ -193,16 +193,9 @@ def calculate_frames_to_add(total_frames, interp_x):
     return int(round(frames_to_add))
  
 def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_soundtrack, audio_track):
-
     pic_path_list = [pic.name for pic in pic_list]
-
     print(f"got a request to *frame interpolate* a set of {len(pic_list)} images.")
-    
-    # print(Path(pic_list[0].orig_name).stem)
-    # return
     folder_name = clean_folder_name(Path(pic_list[0].orig_name).stem)
-    # print(folder_name)
-
     outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
     i = 1
     while os.path.exists(outdir_no_tmp):
@@ -214,11 +207,11 @@ def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, 
 
     convert_images_from_list(paths=pic_path_list, output_dir=outdir,format='png')
 
-    # check if the uploaded vid has an audio stream. If it doesn't, set audio param to None so that ffmpeg won't try to add non-existing audio to final video.
     audio_file_to_pass = None
     # todo? add handling of vid input sound? if needed at all...
     if add_soundtrack == 'File':
         audio_file_to_pass = audio_track
+         # todo: upgrade function so it takes url and check if audio really exist before passing? not crucial as ffmpeg sofly fallbacks if needed
          # if media_file_has_audio(audio_track, f_location):
     
     # pass param so it won't duplicate the images at all as we already do it in here?!
