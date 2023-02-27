@@ -198,8 +198,10 @@ def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, 
 
     print(f"got a request to *frame interpolate* a set of {len(pic_list)} images.")
     
-    folder_name = clean_folder_name(Path(pic_list[0].name).stem)
-    print(folder_name)
+    # print(Path(pic_list[0].orig_name).stem)
+    # return
+    folder_name = clean_folder_name(Path(pic_list[0].orig_name).stem)
+    # print(folder_name)
 
     outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
     i = 1

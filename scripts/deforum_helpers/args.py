@@ -821,7 +821,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 vid_to_interpolate_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_interpolate_chosen_file")
                                 # A drag-n-drop UI box to which the user uploads a pictures to interpolate
                                 pics_to_interpolate_chosen_file = gr.File(label="Pics to Interpolate", interactive=True, file_count="multiple", file_types=["image"], elem_id="pics_to_interpolate_chosen_file")
-                            with gr.Row(variant='compact'):
+                            with gr.Row(variant='compact', visible=False) as interp_live_stats_row:
                                 # Non interactive textbox showing uploaded input vid total Frame Count
                                 in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
                                 # Non interactive textbox showing uploaded input vid FPS
@@ -842,6 +842,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             [change_fn.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps) for change_fn in [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_slow_mo_enabled]]
                             # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_interpolate_chosen_file)
                             vid_to_interpolate_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
+                            def tsfn (choice):
+                                if choice is not None:
+                                    return gr.update(visible=True)
+                                else:
+                                    return gr.update(visible=False)
+                            vid_to_interpolate_chosen_file.change(fn=tsfn,inputs=[vid_to_interpolate_chosen_file],outputs=[interp_live_stats_row])
                     #TODO: move this from here
                     interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row,interp_existing_video_row]
                     for output in interp_hide_list:
