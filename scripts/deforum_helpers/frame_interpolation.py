@@ -3,7 +3,7 @@ from pathlib import Path
 from rife.inference_video import run_rife_new_video_infer
 from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio, extract_number, ffmpeg_stitch_video
 from film_interpolation.film_inference import run_film_interp_infer
-from .general_utils import duplicate_pngs_from_folder, checksum
+from .general_utils import duplicate_pngs_from_folder, checksum, convert_images_from_list
 
 # gets 'RIFE v4.3', returns: 'RIFE43'   
 def extract_rife_name(string):
@@ -191,9 +191,7 @@ def check_and_download_film_model(model_name, model_dest_folder):
 def calculate_frames_to_add(total_frames, interp_x):
     frames_to_add = (total_frames * interp_x - total_frames) / (total_frames - 1)
     return int(round(frames_to_add))
-    
-    
-    
+ 
 def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_soundtrack, audio_track):
 
     pic_path_list = [pic.name for pic in pic_list]
@@ -212,28 +210,14 @@ def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, 
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
     os.makedirs(outdir, exist_ok=True)
 
-    convert_images(paths=pic_path_list, output_dir=outdir,format='png')
+    convert_images_from_list(paths=pic_path_list, output_dir=outdir,format='png')
 
     # check if the uploaded vid has an audio stream. If it doesn't, set audio param to None so that ffmpeg won't try to add non-existing audio to final video.
     audio_file_to_pass = None
-    if add_soundtrack:
+    # todo? add handling of vid input sound? if needed at all...
+    if add_soundtrack == 'File':
         audio_file_to_pass = audio_track
          # if media_file_has_audio(audio_track, f_location):
     
     # pass param so it won't duplicate the images at all as we already do it in here?!
     process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution, dont_change_fps=True)
-
-def convert_images(paths, output_dir, format):
-    from PIL import Image
-    # Ensure that the output directory exists
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    # Loop over all input images
-    for i, path in enumerate(paths):
-        # Open the image
-        with Image.open(path) as img:
-            # Generate the output filename
-            filename = f"{i+1:07d}.{format}"
-            # Save the image to the output directory
-            img.save(os.path.join(output_dir, filename))
