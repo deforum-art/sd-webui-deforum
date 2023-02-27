@@ -116,7 +116,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     output_interp_imgs_folder = os.path.join(raw_output_imgs_path, 'interpolated_frames_film')
     # set custom name depending on if we interpolate after a run, or interpolate a video (related/unrelated to deforum, we don't know) directly from within the interpolation tab
     # interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames_rife')
-    if orig_vid_name is not None: # interpolating a video (deforum or unrelated)
+    if orig_vid_name is not None: # interpolating a video/ set of pictures (deforum or unrelated)
         custom_interp_path = "{}_{}".format(output_interp_imgs_folder, orig_vid_name)
     else: # interpolating after a deforum run:
         custom_interp_path = "{}_{}".format(output_interp_imgs_folder, img_batch_id)
@@ -190,3 +190,31 @@ def check_and_download_film_model(model_name, model_dest_folder):
 def calculate_frames_to_add(total_frames, interp_x):
     frames_to_add = (total_frames * interp_x - total_frames) / (total_frames - 1)
     return int(round(frames_to_add))
+    
+    
+    
+def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution):
+
+    print(f"got a request to *frame interpolate* a set of {len(pic_list)} images.")
+    
+    folder_name = clean_folder_name(Path(pic_list[0].name).stem)
+    print(folder_name)
+    # return
+    
+    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
+    i = 1
+    while os.path.exists(outdir_no_tmp):
+        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
+        i += 1
+
+    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
+    os.makedirs(outdir, exist_ok=True)
+    
+    # vid2frames(video_path=file.name, video_in_frame_path=outdir, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
+    
+    # check if the uploaded vid has an audio stream. If it doesn't, set audio param to None so that ffmpeg won't try to add non-existing audio to final video.
+    audio_file_to_pass = None
+    if media_file_has_audio(file.name, f_location):
+        audio_file_to_pass = file.name
+    
+    process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=in_vid_fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution)
