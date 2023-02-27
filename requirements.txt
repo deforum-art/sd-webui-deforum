@@ -5,3 +5,5 @@ av
 pims
 imageio_ffmpeg
 rich
+svglib
+reportlab
