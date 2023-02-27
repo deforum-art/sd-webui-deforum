@@ -159,7 +159,7 @@ def anim_frame_warp(prev_img_cv2, args, anim_args, keys, frame_idx, depth_model=
 
     if anim_args.use_depth_warping:
         if depth is None and depth_model is not None:
-            depth = depth_model.predict(prev_img_cv2, anim_args, half_precision)
+            depth = depth_model.predict(prev_img_cv2, anim_args.midas_weight, half_precision)
     else:
         depth = None
 

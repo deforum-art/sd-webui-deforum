@@ -479,7 +479,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     sd_hijack.model_hijack.undo_hijack(sd_model)
                     devices.torch_gc()
                     depth_model.to(root.device)
-                depth = depth_model.predict(opencv_image, anim_args, root.half_precision)
+                depth = depth_model.predict(opencv_image, anim_args.midas_weight, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
                 if cmd_opts.lowvram or cmd_opts.medvram:
                     depth_model.to('cpu')
