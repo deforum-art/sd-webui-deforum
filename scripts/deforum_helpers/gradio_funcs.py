@@ -70,12 +70,14 @@ def vid_upscale_gradio_update_stats(vid_path, upscale_factor):
     in_res_str = f"{resolution[0]}*{resolution[1]}"
     out_res_str = f"{resolution[0] * factor}*{resolution[1] * factor}"
     return fps, fcount, in_res_str, out_res_str
+    
 def update_upscale_out_res(in_res, upscale_factor):
     if not in_res:
         return '---'
     factor = extract_number(upscale_factor)
     w, h = [int(x) * factor for x in in_res.split('*')]
     return f"{w}*{h}"
+    
 def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
     if not upscale_model_name or in_res == '---':
         return '---'
@@ -84,6 +86,7 @@ def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
 
 def hide_slow_mo(choice):
     return gr.update(visible=True) if choice else gr.update(visible=False)
+    
 def hide_interp_by_interp_status(choice):
     return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
     
@@ -93,3 +96,6 @@ def change_interp_x_max_limit(engine_name, current_value):
     elif current_value > 10:
         return gr.update(maximum=10, value=2)
     return gr.update(maximum=10)
+    
+def hide_interp_stats(choice):
+    return gr.update(visible=True) if choice is not None else gr.update(visible=False)
