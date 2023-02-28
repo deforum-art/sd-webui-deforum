@@ -482,13 +482,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Tab('Motion') as motion_tab:
                 with gr.Column(visible=True) as only_2d_motion_column:
                     with gr.Row(variant='compact'):
-                        angle = gr.Textbox(label="Angle", lines=1, value = da.angle, interactive=True)
-                    with gr.Row(variant='compact'):
                         zoom = gr.Textbox(label="Zoom", lines=1, value = da.zoom, interactive=True)
                     with gr.Row(variant='compact'):
-                        rotation_center_x = gr.Textbox(label="rotation_center_x", lines=1, value = da.rotation_center_x, interactive=True)
+                        angle = gr.Textbox(label="Angle", lines=1, value = da.angle, interactive=True)
                     with gr.Row(variant='compact'):
-                        rotation_center_y = gr.Textbox(label="rotation_center_y", lines=1, value = da.rotation_center_y, interactive=True)
+                        rotation_center_x = gr.Textbox(label="Rotation Center X", lines=1, value = da.rotation_center_x, interactive=True)
+                    with gr.Row(variant='compact'):
+                        rotation_center_y = gr.Textbox(label="Rotation Center Y", lines=1, value = da.rotation_center_y, interactive=True)
                 with gr.Column(visible=True) as both_anim_mode_motion_params_column:
                     with gr.Row(variant='compact'):
                         translation_x = gr.Textbox(label="Translation X", lines=1, value = da.translation_x, interactive=True)
