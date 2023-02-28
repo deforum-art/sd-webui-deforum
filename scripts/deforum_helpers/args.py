@@ -43,6 +43,8 @@ def DeforumAnimArgs():
     translation_x = "0:(0)"#@param {type:"string"}
     translation_y = "0:(0)"#@param {type:"string"}
     translation_z = "0:(1.75)"#@param {type:"string"}
+    rotation_center_x = "0:(0.5)"
+    rotation_center_y = "0:(0.5)"
     rotation_3d_x = "0:(0)"#@param {type:"string"}
     rotation_3d_y = "0:(0)"#@param {type:"string"}
     rotation_3d_z = "0:(0)"#@param {type:"string"}
@@ -483,6 +485,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         angle = gr.Textbox(label="Angle", lines=1, value = da.angle, interactive=True)
                     with gr.Row(variant='compact'):
                         zoom = gr.Textbox(label="Zoom", lines=1, value = da.zoom, interactive=True)
+                    with gr.Row(variant='compact'):
+                        rotation_center_x = gr.Textbox(label="rotation_center_x", lines=1, value = da.rotation_center_x, interactive=True)
+                    with gr.Row(variant='compact'):
+                        rotation_center_y = gr.Textbox(label="rotation_center_y", lines=1, value = da.rotation_center_y, interactive=True)
                 with gr.Column(visible=True) as both_anim_mode_motion_params_column:
                     with gr.Row(variant='compact'):
                         translation_x = gr.Textbox(label="Translation X", lines=1, value = da.translation_x, interactive=True)
@@ -1033,7 +1039,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 ### besides writing it in the setup functions above
 
 anim_args_names =   str(r'''animation_mode, max_frames, border,
-                        angle, zoom, translation_x, translation_y, translation_z,
+                        angle, zoom, translation_x, translation_y, translation_z, rotation_center_x, rotation_center_y,
                         rotation_3d_x, rotation_3d_y, rotation_3d_z,
                         enable_perspective_flip,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
