@@ -58,6 +58,7 @@ def DeforumAnimArgs():
     enable_steps_scheduling = False#@param {type:"boolean"}
     steps_schedule = "0: (25)"#@param {type:"string"}
     fov_schedule = "0: (70)"
+    aspect_ratio_schedule = "0: (1)"
     near_schedule = "0: (200)"
     far_schedule = "0: (10000)"
     seed_schedule = "0:(5), 1:(-1), 219:(-1), 220:(5)"
@@ -509,6 +510,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Tab('Field Of View', visible=False, open=False) as fov_accord:
                         with gr.Row(variant='compact'):
                             fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True)
+                        with gr.Row():
+                            aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value = da.aspect_ratio_schedule, interactive=True)
                         with gr.Row():
                             near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
                         with gr.Row():
@@ -1040,7 +1043,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
                         enable_subseed_scheduling, subseed_schedule, subseed_strength_schedule,
                         enable_steps_scheduling, steps_schedule,
-                        fov_schedule, near_schedule, far_schedule,
+                        fov_schedule, aspect_ratio_schedule, near_schedule, far_schedule,
                         seed_schedule,
                         enable_sampler_scheduling, sampler_schedule,
                         mask_schedule, use_noise_mask, noise_mask_schedule,

@@ -60,6 +60,7 @@ deforum_titles = {
     "Contrast schedule": "adjusts the overall contrast per frame [default neutral at 1.0]",
     "CFG scale schedule": "how closely the image should conform to the prompt. Lower values produce more creative results. (recommended range 5-15)",
     "FOV schedule": "adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]",
+    "Aspect Ratio schedule": "adjusts the aspect ratio for the depth calculation (normally 1)",
     //"near_schedule": "",
     //"far_schedule":  "",
     "Seed schedule": "allows you to specify seeds at a specific schedule, if seed_behavior is set to schedule.",
