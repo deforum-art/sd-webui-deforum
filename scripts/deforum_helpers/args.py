@@ -796,6 +796,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             <li>Frame Interpolation will *not* run if any of the following are enabled: 'Store frames in ram' / 'Skip video for run all'.</li>
                             <li>Audio (if provided) will *not* be transferred to the interpolated video if Slow-Mo is enabled.</li>
                             <li>'add_soundtrack' and 'soundtrack_path' aren't being honoured in "Interpolate an existing video" mode. Original vid audio will be used instead with the same slow-mo rules above.</li>
+                            <li>In "Interpolate existing pics" mode, FPS is determined *only* by Output FPS slider and slow_mo value, if enabled. Interp X doesn't effect video FPS in this mode.</li>
                         </ul>
                     </p>
                     """)
