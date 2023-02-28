@@ -67,7 +67,9 @@ def process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_
 # handle params before talking with the actual interpolation module (rifee/film, more to be added)
 def process_video_interpolation(frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, orig_vid_fps, deforum_models_path, real_audio_track, raw_output_imgs_path, img_batch_id, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, keep_interp_imgs, orig_vid_name, resolution, dont_change_fps=False):
 
+    is_random_pics_run = False
     if dont_change_fps:
+        is_random_pics_run = True
         fps = float(orig_vid_fps)
     else:
         fps = float(orig_vid_fps) * frame_interpolation_x_amount
@@ -96,12 +98,12 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
         # run actual rife interpolation and video stitching etc - the whole suite
         run_rife_new_video_infer(interp_x_amount=frame_interpolation_x_amount, slow_mo_enabled = frame_interpolation_slow_mo_enabled, slow_mo_x_amount=frame_interpolation_slow_mo_amount, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs, orig_vid_name=orig_vid_name, UHD=UHD)
     elif frame_interpolation_engine == 'FILM':
-        prepare_film_inference(deforum_models_path=deforum_models_path, x_am=frame_interpolation_x_amount, sl_enabled=frame_interpolation_slow_mo_enabled, sl_am=frame_interpolation_slow_mo_amount, keep_imgs=keep_interp_imgs, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, f_location=ffmpeg_location, f_crf=ffmpeg_crf, f_preset=ffmpeg_preset, fps=fps, audio_track=real_audio_track, orig_vid_name=orig_vid_name)
+        prepare_film_inference(deforum_models_path=deforum_models_path, x_am=frame_interpolation_x_amount, sl_enabled=frame_interpolation_slow_mo_enabled, sl_am=frame_interpolation_slow_mo_amount, keep_imgs=keep_interp_imgs, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, f_location=ffmpeg_location, f_crf=ffmpeg_crf, f_preset=ffmpeg_preset, fps=fps, audio_track=real_audio_track, orig_vid_name=orig_vid_name, is_random_pics_run=is_random_pics_run)
     else:
         print("Unknown Frame Interpolation engine chosen. Doing nothing.")
         return
         
-def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps, audio_track, orig_vid_name):
+def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps, audio_track, orig_vid_name, is_random_pics_run):
     import shutil 
     
     parent_folder = os.path.dirname(raw_output_imgs_path)
@@ -130,9 +132,11 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     interp_vid_path = interp_vid_path + '.mp4'
 
     # In this folder we temporarily keep the original frames (converted/ copy-pasted and img format depends on scenario)
-    # the convertion case is done to avert a problem with 24 and 32 mixed outputs from the same animation run
     temp_convert_raw_png_path = os.path.join(raw_output_imgs_path, "tmp_film_folder")
-    total_frames = duplicate_pngs_from_folder(raw_output_imgs_path, temp_convert_raw_png_path, img_batch_id, None)
+    if is_random_pics_run: # pass dummy so it just copy-paste the imgs instead of re-writing them
+        total_frames = duplicate_pngs_from_folder(raw_output_imgs_path, temp_convert_raw_png_path, img_batch_id, 'DUMMY')
+    else: #re-write pics as png to avert a problem with 24 and 32 mixed outputs from the same animation run
+        total_frames = duplicate_pngs_from_folder(raw_output_imgs_path, temp_convert_raw_png_path, img_batch_id, None)
     check_and_download_film_model('film_net_fp16.pt', film_model_folder) # TODO: split this part
     
     # get number of in-between-frames to provide to FILM - mimics how RIFE works, we should get the same amount of total frames in the end
