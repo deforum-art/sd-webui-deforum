@@ -66,15 +66,10 @@ def process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_
 
 # handle params before talking with the actual interpolation module (rifee/film, more to be added)
 def process_video_interpolation(frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, orig_vid_fps, deforum_models_path, real_audio_track, raw_output_imgs_path, img_batch_id, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, keep_interp_imgs, orig_vid_name, resolution, dont_change_fps=False):
-
-    is_random_pics_run = False
-    if dont_change_fps:
-        is_random_pics_run = True
-        fps = float(orig_vid_fps)
-    else:
-        fps = float(orig_vid_fps) * frame_interpolation_x_amount
-    if frame_interpolation_slow_mo_enabled:
-        fps /= int(frame_interpolation_slow_mo_amount)
+        
+    is_random_pics_run = dont_change_fps
+    fps = float(orig_vid_fps) * (1 if is_random_pics_run else frame_interpolation_x_amount)
+    fps /= int(frame_interpolation_slow_mo_amount) if frame_interpolation_slow_mo_enabled and not is_random_pics_run else 1
 
     # disable audio-adding by setting real_audio_track to None if slow-mo is enabled
     if real_audio_track is not None and frame_interpolation_slow_mo_enabled:
