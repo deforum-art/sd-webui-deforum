@@ -17,9 +17,6 @@ from .deforum_controlnet import is_controlnet_enabled, process_txt2img_with_cont
 import math, json, itertools
 import requests
 
-import numexpr
-from .prompt import check_is_number
-
 def load_mask_latent(mask_input, shape):
     # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
     # shape (list-like len(4)): shape of the image to match, usually latent_image.shape
@@ -58,7 +55,7 @@ def generate(args, anim_args, loop_args, controlnet_args, root, frame = 0, retur
     
     # Setup the pipeline
     p = get_webui_sd_pipeline(args, root, frame)
-    p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame, anim_args.max_frames)
+    p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame)
     
     if not args.use_init and args.strength > 0 and args.strength_0_no_init:
         print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
@@ -82,19 +79,9 @@ def generate(args, anim_args, loop_args, controlnet_args, root, frame = 0, retur
         blendFactor = .07
         colorCorrectionFactor = loop_args.colorCorrectionFactor
         jsonImages = json.loads(loop_args.imagesToKeyframe)
+        framesToImageSwapOn = list(map(int, list(jsonImages.keys())))
         # find which image to show
-        parsedImages = {}
         frameToChoose = 0
-        max_f = anim_args.max_frames - 1
-        
-        for key, value in jsonImages.items():
-            if check_is_number(key):# default case 0:(1 + t %5), 30:(5-t%2)
-                parsedImages[key] = value
-            else:# math on the left hand side case 0:(1 + t %5), maxKeyframes/2:(5-t%2)
-                parsedImages[int(numexpr.evaluate(key))] = value
-
-        framesToImageSwapOn = list(map(int, list(parsedImages.keys())))
-
         for swappingFrame in framesToImageSwapOn[1:]:
             frameToChoose += (frame >= int(swappingFrame))
         
