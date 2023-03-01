@@ -30,3 +30,19 @@ def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_na
                 new_path = os.path.join(temp_convert_raw_png_path, f)
                 cv2.imwrite(new_path, image, [cv2.IMWRITE_PNG_COMPRESSION, 0])
     return frames_handled
+    
+def convert_images_from_list(paths, output_dir, format):
+    import os
+    from PIL import Image
+    # Ensure that the output directory exists
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Loop over all input images
+    for i, path in enumerate(paths):
+        # Open the image
+        with Image.open(path) as img:
+            # Generate the output filename
+            filename = f"{i+1:07d}.{format}"
+            # Save the image to the output directory
+            img.save(os.path.join(output_dir, filename))
