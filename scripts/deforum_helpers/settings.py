@@ -13,7 +13,7 @@ def get_keys_to_exclude(setting_type):
     else: #video
         return ["mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
 
-def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom_settings_file, root):
+def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
     if not os.path.isfile(custom_settings_file):
         print('The custom settings file does not exist. The in-notebook settings will be used instead')
@@ -55,7 +55,7 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, custom
 def save_settings(*args, **kwargs):
     settings_path = args[0].strip()
     data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
-    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args
+    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args
     args_dict = pack_args(data)
     anim_args_dict = pack_anim_args(data)
     parseq_dict = pack_parseq_args(data)
@@ -63,9 +63,10 @@ def save_settings(*args, **kwargs):
     args_dict["animation_prompts_positive"] = data['animation_prompts_positive']
     args_dict["animation_prompts_negative"] = data['animation_prompts_negative']
     loop_dict = pack_loop_args(data)
+    controlnet_dict = pack_controlnet_args(data)
     
-    combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict}
-    exclude_keys = get_keys_to_exclude('general')
+    combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict}
+    exclude_keys = get_keys_to_exclude('general') + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
     
     print(f"saving custom settings to {settings_path}")

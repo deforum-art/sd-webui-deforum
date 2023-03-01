@@ -1,0 +1,47 @@
+name: Feature request
+description: Suggest an idea for the Deforum extension
+title: "[Feature Request]: "
+labels: ["enhancement"]
+
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the feature you want, and that it's not implemented in a recent build/commit.
+      options:
+        - label: I have searched the existing issues and checked the recent builds/commits
+          required: true
+  - type: markdown
+    attributes:
+      value: |
+        *Please fill this form with as much information as possible, provide screenshots and/or illustrations of the feature if possible*
+  - type: textarea
+    id: feature
+    attributes:
+      label: What would your feature do ?
+      description: Tell us about your feature in a very clear and simple way, and what problem it would solve
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Proposed workflow
+      description: Please provide us with step by step information on how you'd like the feature to be accessed and used
+      value: |
+        1. Go to .... 
+        2. Press ....
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: misc
+    attributes:
+      label: Additional information
+      description: Add any other context or screenshots about the feature request here.
+  - type: textarea
+    id: help
+    attributes:
+      label: Are you going to help adding it? If not, tell why.
+      description: Let us know if you're willing to add the desired feature. Our community is welcoming and ready to provide you with any information on the project structure or how the code works; ideally, leave your Discord handle here, so we'll contact you directly. If not, excuses like 'I don't know how to code' or 'I work full-time and have absolutely no time' are perfectly fine and we'll understand. However, keep in mind that if you don't want to do your new feature yourself, you'll have to wait until the team picks up your issue.
+    validations:
+      required: true

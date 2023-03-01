@@ -3,22 +3,15 @@ import cv2
 import hashlib
 import numpy as np
 import torch
+import gc
 import torchvision.transforms as T
-
 from einops import rearrange, repeat
 from PIL import Image
-
 from infer import InferenceHelper
 from midas.dpt_depth import DPTDepthModel
 from midas.transforms import Resize, NormalizeImage, PrepareForNet
 import torchvision.transforms.functional as TF
-
-def checksum(filename, hash_factory=hashlib.blake2b, chunk_num_blocks=128):
-    h = hash_factory()
-    with open(filename,'rb') as f: 
-        while chunk := f.read(chunk_num_blocks*h.block_size): 
-            h.update(chunk)
-    return h.hexdigest()
+from .general_utils import checksum
 
 class DepthModel():
     def __init__(self, device):
@@ -65,16 +58,17 @@ class DepthModel():
         ])
 
         self.midas_model.eval()    
-        if half_precision and self.device == torch.device("cuda"):
+        if self.device == torch.device("cuda"):
             self.midas_model = self.midas_model.to(memory_format=torch.channels_last)
+        if half_precision:
             self.midas_model = self.midas_model.half()
         self.midas_model.to(self.device)
 
-    def predict(self, prev_img_cv2, anim_args, half_precision) -> torch.Tensor:
+    def predict(self, prev_img_cv2, midas_weight, half_precision) -> torch.Tensor:
         w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
 
         # predict depth with AdaBins    
-        use_adabins = anim_args.midas_weight < 1.0 and self.adabins_helper is not None
+        use_adabins = midas_weight < 1.0 and self.adabins_helper is not None
         if use_adabins:
             MAX_ADABINS_AREA = 500000
             MIN_ADABINS_AREA = 448*448
@@ -140,7 +134,7 @@ class DepthModel():
 
             # blend between MiDaS and AdaBins predictions
             if use_adabins:
-                depth_map = midas_depth*anim_args.midas_weight + adabins_depth*(1.0-anim_args.midas_weight)
+                depth_map = midas_depth*midas_weight + adabins_depth*(1.0-midas_weight)
             else:
                 depth_map = midas_depth
 
@@ -151,7 +145,7 @@ class DepthModel():
         
         return depth_tensor
 
-    def save(self, filename: str, depth: torch.Tensor):
+    def to_image(self, depth: torch.Tensor):
         depth = depth.cpu().numpy()
         if len(depth.shape) == 2:
             depth = np.expand_dims(depth, axis=0)
@@ -161,5 +155,15 @@ class DepthModel():
         denom = max(1e-8, self.depth_max - self.depth_min)
         temp = rearrange((depth - self.depth_min) / denom * 255, 'c h w -> h w c')
         temp = repeat(temp, 'h w 1 -> h w c', c=3)
-        Image.fromarray(temp.astype(np.uint8)).save(filename)    
+        return Image.fromarray(temp.astype(np.uint8))
+        
+    def save(self, filename: str, depth: torch.Tensor):
+        self.to_image(depth).save(filename)    
 
+    def to(self, device):
+        self.device = device
+        self.midas_model.to(device)
+        if self.adabins_helper is not None:
+            self.adabins_helper.to(device)
+        gc.collect()
+        torch.cuda.empty_cache()

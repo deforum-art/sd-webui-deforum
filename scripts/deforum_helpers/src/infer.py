@@ -146,6 +146,10 @@ class InferenceHelper:
             save_path = os.path.join(out_dir, basename + ".png")
 
             Image.fromarray(final.squeeze()).save(save_path)
+    
+    def to(self, device):
+        self.device = device
+        self.model.to(device)
 
 
 if __name__ == '__main__':
