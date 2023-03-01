@@ -4,7 +4,7 @@ from modules.ui_components import FormRow
 import modules.shared as sh
 import modules.paths as ph
 import os
-from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_interp_vid_upload_logic
+from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_interp_vid_upload_logic, process_interp_pics_upload_logic
 from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vid_upload_logic
 from .vid2depth import process_depth_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
@@ -43,6 +43,8 @@ def DeforumAnimArgs():
     translation_x = "0:(0)"#@param {type:"string"}
     translation_y = "0:(0)"#@param {type:"string"}
     translation_z = "0:(1.75)"#@param {type:"string"}
+    transform_center_x = "0:(0.5)"
+    transform_center_y = "0:(0.5)"
     rotation_3d_x = "0:(0)"#@param {type:"string"}
     rotation_3d_y = "0:(0)"#@param {type:"string"}
     rotation_3d_z = "0:(0)"#@param {type:"string"}
@@ -58,6 +60,7 @@ def DeforumAnimArgs():
     enable_steps_scheduling = False#@param {type:"boolean"}
     steps_schedule = "0: (25)"#@param {type:"string"}
     fov_schedule = "0: (70)"
+    aspect_ratio_schedule = "0: (1)"
     near_schedule = "0: (200)"
     far_schedule = "0: (10000)"
     seed_schedule = "0:(5), 1:(-1), 219:(-1), 220:(5)"
@@ -480,9 +483,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Tab('Motion') as motion_tab:
                 with gr.Column(visible=True) as only_2d_motion_column:
                     with gr.Row(variant='compact'):
+                        zoom = gr.Textbox(label="Zoom", lines=1, value = da.zoom, interactive=True)
+                    with gr.Row(variant='compact'):
                         angle = gr.Textbox(label="Angle", lines=1, value = da.angle, interactive=True)
                     with gr.Row(variant='compact'):
-                        zoom = gr.Textbox(label="Zoom", lines=1, value = da.zoom, interactive=True)
+                        transform_center_x = gr.Textbox(label="Transform Center X", lines=1, value = da.transform_center_x, interactive=True)
+                    with gr.Row(variant='compact'):
+                        transform_center_y = gr.Textbox(label="Transform Center Y", lines=1, value = da.transform_center_y, interactive=True)
                 with gr.Column(visible=True) as both_anim_mode_motion_params_column:
                     with gr.Row(variant='compact'):
                         translation_x = gr.Textbox(label="Translation X", lines=1, value = da.translation_x, interactive=True)
@@ -509,9 +516,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Tab('Field Of View', visible=False, open=False) as fov_accord:
                         with gr.Row(variant='compact'):
                             fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True)
-                        with gr.Row():
+                        with gr.Row(variant='compact'):
+                            aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value = da.aspect_ratio_schedule, interactive=True)
+                        with gr.Row(variant='compact'):
                             near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
-                        with gr.Row():
+                        with gr.Row(variant='compact'):
                             far_schedule = gr.Textbox(label="Far schedule", lines=1, value = da.far_schedule, interactive=True)
                 # PERSPECTIVE FLIP ACCORD
                 with gr.Accordion('Perspective Flip', open=False) as perspective_flip_accord:
@@ -792,6 +801,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             <li>Frame Interpolation will *not* run if any of the following are enabled: 'Store frames in ram' / 'Skip video for run all'.</li>
                             <li>Audio (if provided) will *not* be transferred to the interpolated video if Slow-Mo is enabled.</li>
                             <li>'add_soundtrack' and 'soundtrack_path' aren't being honoured in "Interpolate an existing video" mode. Original vid audio will be used instead with the same slow-mo rules above.</li>
+                            <li>In "Interpolate existing pics" mode, FPS is determined *only* by output FPS slider. Audio will be added if requested even with slow-mo "enabled", as it does *nothing* in this mode.</li>
                         </ul>
                     </p>
                     """)
@@ -809,48 +819,30 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(min_width=180, visible=False) as frame_interp_slow_mo_amount_column:
                             # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE/FILM)
                             frame_interpolation_slow_mo_amount =  gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo X", value=dv.frame_interpolation_x_amount, interactive=True)
-                    # TODO: move these from here when done
-                    def hide_slow_mo(choice):
-                        return gr.update(visible=True) if choice else gr.update(visible=False)
-                    def hide_interp_by_interp_status(choice):
-                        return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
-                    def change_interp_x_max_limit(engine_name, current_value):
-                        if engine_name == 'FILM':
-                            return gr.update(maximum=300)
-                        elif current_value > 10:
-                            return gr.update(maximum=10, value=2)
-                        return gr.update(maximum=10)
-                    frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
-                    interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row]
-                    for output in interp_hide_list:
-                        frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
-                    frame_interpolation_engine.change(fn=change_interp_x_max_limit,inputs=[frame_interpolation_engine,frame_interpolation_x_amount],outputs=frame_interpolation_x_amount)
                     with gr.Row(visible=False) as interp_existing_video_row:
                         # Intrpolate any existing video from the connected PC
-                        with gr.Accordion('Interpolate an existing video', open=False) as interp_existing_video_accord:
-                            # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
-                            vid_to_interpolate_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_interpolate_chosen_file")
-                            with gr.Row(variant='compact'):
+                        with gr.Accordion('Interpolate existing Video/ Images', open=False) as interp_existing_video_accord:
+                            with gr.Row() as interpolate_upload_files_row:
+                                # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
+                                vid_to_interpolate_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_interpolate_chosen_file")
+                                # A drag-n-drop UI box to which the user uploads a pictures to interpolate
+                                pics_to_interpolate_chosen_file = gr.File(label="Pics to Interpolate", interactive=True, file_count="multiple", file_types=["image"], elem_id="pics_to_interpolate_chosen_file")
+                            with gr.Row(variant='compact', visible=False) as interp_live_stats_row:
                                 # Non interactive textbox showing uploaded input vid total Frame Count
                                 in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
                                 # Non interactive textbox showing uploaded input vid FPS
                                 in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
                                 # Non interactive textbox showing expected output interpolated video FPS
                                 out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS", value='---')
-                            # This is the actual button that's pressed to initiate the interpolation:
-                            interpolate_button = gr.Button(value="*Interpolate uploaded video*")
+                            with gr.Row() as interp_buttons_row:
+                                # This is the actual button that's pressed to initiate the interpolation:
+                                interpolate_button = gr.Button(value="*Interpolate Video*")
+                                interpolate_pics_button = gr.Button(value="*Interpolate Pics*")
                             # Show a text about CLI outputs:
-                            gr.HTML("* check your CLI for outputs")
+                            gr.HTML("* check your CLI for outputs *", elem_id="below_interpolate_butts_msg") # TODO: CSS THIS TO CENTER OF ROW!
                             # make the functin call when the interpolation button is clicked
                             interpolate_button.click(upload_vid_to_interpolate,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, in_vid_fps_ui_window])
-                            [change_fn.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps) for change_fn in [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_slow_mo_enabled]]
-                            # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_interpolate_chosen_file)
-                            vid_to_interpolate_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
-                    #TODO: move this from here
-                    interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row,interp_existing_video_row]
-                    for output in interp_hide_list:
-                        frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
-            # TODO: add upscalers parameters to the settings and make them a part of the pipeline
+                            interpolate_pics_button.click(upload_pics_to_interpolate,inputs=[pics_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, fps, add_soundtrack, soundtrack_path])
             # VIDEO UPSCALE TAB
             with gr.Tab('Video Upscaling'):
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
@@ -1012,6 +1004,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     skip_video_for_run_all_outputs = [fps_out_format_row, soundtrack_row, ffmpeg_quality_accordion, store_frames_in_ram, make_gif, r_upscale_row]
     for output in skip_video_for_run_all_outputs:
         skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
+    frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
+    frame_interpolation_engine.change(fn=change_interp_x_max_limit,inputs=[frame_interpolation_engine,frame_interpolation_x_amount],outputs=frame_interpolation_x_amount)
+    [change_fn.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps) for change_fn in [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_slow_mo_enabled]]
+    # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_interpolate_chosen_file)
+    vid_to_interpolate_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
+    vid_to_interpolate_chosen_file.change(fn=hide_interp_stats,inputs=[vid_to_interpolate_chosen_file],outputs=[interp_live_stats_row])
+    interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row,interp_existing_video_row]
+    for output in interp_hide_list:
+        frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
     # END OF UI TABS
     stuff = locals()
     stuff = {**stuff, **controlnet_dict}
@@ -1029,14 +1030,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 ### besides writing it in the setup functions above
 
 anim_args_names =   str(r'''animation_mode, max_frames, border,
-                        angle, zoom, translation_x, translation_y, translation_z,
+                        angle, zoom, translation_x, translation_y, translation_z, transform_center_x, transform_center_y,
                         rotation_3d_x, rotation_3d_y, rotation_3d_z,
                         enable_perspective_flip,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
                         enable_subseed_scheduling, subseed_schedule, subseed_strength_schedule,
                         enable_steps_scheduling, steps_schedule,
-                        fov_schedule, near_schedule, far_schedule,
+                        fov_schedule, aspect_ratio_schedule, near_schedule, far_schedule,
                         seed_schedule,
                         enable_sampler_scheduling, sampler_schedule,
                         mask_schedule, use_noise_mask, noise_mask_schedule,
@@ -1218,6 +1219,25 @@ def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, 
 
     process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
 
+def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, add_audio, audio_track):
+    from PIL import Image
+    
+    if pic_list is None or len(pic_list) < 2:
+        return print("Please upload at least 2 pics for interpolation.")
+        
+    # make sure all uploaded pics have the same resolution
+    pic_sizes = [Image.open(picture_path).size for picture_path in pic_list]
+    if len(set(pic_sizes)) != 1:
+        return print("All uploaded pics need to be of the same Width and Height / resolution.")
+        
+    resolution = pic_sizes[0]
+     
+    root_params = Root()
+    f_models_path = root_params['models_path']
+    
+    process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_audio, audio_track)
+
+# Local gradio-to-upscalers function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
     # print msg and do nothing if vid not uploaded
     if not vid_to_upscale_chosen_file:

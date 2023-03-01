@@ -8,7 +8,10 @@ outputs
 
 # Log files for colab-convert
 cc-outputs.log
+
 models/control_canny-fp16.safetensors
 models/control_depth-fp16.safetensors
 models/control_hed-fp16.safetensors
 models/control_openpose-fp16.safetensors
+cc-outputs.log
+
