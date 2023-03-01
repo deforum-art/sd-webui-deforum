@@ -1,10 +1,11 @@
-#vid_to_interpolate_chosen_file .w-full, #vid_to_upscale_chosen_file .w-full, #controlnet_input_video_chosen_file .w-full, #controlnet_input_video_mask_chosen_file .w-full,#vid_to_depth_chosen_file .w-full {
+#vid_to_interpolate_chosen_file .w-full, #pics_to_interpolate_chosen_file .w-full,  #vid_to_upscale_chosen_file .w-full, #controlnet_input_video_chosen_file .w-full, #controlnet_input_video_mask_chosen_file .w-full,#vid_to_depth_chosen_file .w-full {
 	display: flex !important;
 	align-items: flex-start !important;
 	justify-content: center !important;
+	height: 85px !important;
 }
 
-#vid_to_interpolate_chosen_file, #vid_to_upscale_chosen_file, #controlnet_input_video_chosen_file, #controlnet_input_video_mask_chosen_file, #vid_to_depth_chosen_file {
+#vid_to_interpolate_chosen_file, #pics_to_interpolate_chosen_file, #vid_to_upscale_chosen_file,  #controlnet_input_video_chosen_file, #controlnet_input_video_mask_chosen_file, #vid_to_depth_chosen_file {
 	height: 85px !important;
 }
 
@@ -33,4 +34,8 @@
 
 #controlnet_not_found_html_msg {
 	color: Tomato;
+}
+
+#below_interpolate_butts_msg {
+	text-align: center !important;
 }

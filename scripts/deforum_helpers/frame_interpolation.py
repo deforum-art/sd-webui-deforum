@@ -3,7 +3,7 @@ from pathlib import Path
 from rife.inference_video import run_rife_new_video_infer
 from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio, extract_number, ffmpeg_stitch_video
 from film_interpolation.film_inference import run_film_interp_infer
-from .general_utils import duplicate_pngs_from_folder, checksum
+from .general_utils import duplicate_pngs_from_folder, checksum, convert_images_from_list
 
 # gets 'RIFE v4.3', returns: 'RIFE43'   
 def extract_rife_name(string):
@@ -65,14 +65,12 @@ def process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_
     process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=in_vid_fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution)
 
 # handle params before talking with the actual interpolation module (rifee/film, more to be added)
-def process_video_interpolation(frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, orig_vid_fps, deforum_models_path, real_audio_track, raw_output_imgs_path, img_batch_id, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, keep_interp_imgs, orig_vid_name, resolution):
+def process_video_interpolation(frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, orig_vid_fps, deforum_models_path, real_audio_track, raw_output_imgs_path, img_batch_id, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, keep_interp_imgs, orig_vid_name, resolution, dont_change_fps=False):
+        
+    is_random_pics_run = dont_change_fps
+    fps = float(orig_vid_fps) * (1 if is_random_pics_run else frame_interpolation_x_amount)
+    fps /= int(frame_interpolation_slow_mo_amount) if frame_interpolation_slow_mo_enabled and not is_random_pics_run else 1
 
-     # set initial output vid fps
-    fps = float(orig_vid_fps) * frame_interpolation_x_amount
-    
-    # re-calculate fps param to pass if slow_mo mode is enabled
-    if frame_interpolation_slow_mo_enabled:
-        fps = float(orig_vid_fps) * frame_interpolation_x_amount / int(frame_interpolation_slow_mo_amount)
     # disable audio-adding by setting real_audio_track to None if slow-mo is enabled
     if real_audio_track is not None and frame_interpolation_slow_mo_enabled:
         real_audio_track = None  
@@ -95,12 +93,12 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
         # run actual rife interpolation and video stitching etc - the whole suite
         run_rife_new_video_infer(interp_x_amount=frame_interpolation_x_amount, slow_mo_enabled = frame_interpolation_slow_mo_enabled, slow_mo_x_amount=frame_interpolation_slow_mo_amount, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs, orig_vid_name=orig_vid_name, UHD=UHD)
     elif frame_interpolation_engine == 'FILM':
-        prepare_film_inference(deforum_models_path=deforum_models_path, x_am=frame_interpolation_x_amount, sl_enabled=frame_interpolation_slow_mo_enabled, sl_am=frame_interpolation_slow_mo_amount, keep_imgs=keep_interp_imgs, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, f_location=ffmpeg_location, f_crf=ffmpeg_crf, f_preset=ffmpeg_preset, fps=fps, audio_track=real_audio_track, orig_vid_name=orig_vid_name)
+        prepare_film_inference(deforum_models_path=deforum_models_path, x_am=frame_interpolation_x_amount, sl_enabled=frame_interpolation_slow_mo_enabled, sl_am=frame_interpolation_slow_mo_amount, keep_imgs=keep_interp_imgs, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, f_location=ffmpeg_location, f_crf=ffmpeg_crf, f_preset=ffmpeg_preset, fps=fps, audio_track=real_audio_track, orig_vid_name=orig_vid_name, is_random_pics_run=is_random_pics_run)
     else:
         print("Unknown Frame Interpolation engine chosen. Doing nothing.")
         return
         
-def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps, audio_track, orig_vid_name):
+def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps, audio_track, orig_vid_name, is_random_pics_run):
     import shutil 
     
     parent_folder = os.path.dirname(raw_output_imgs_path)
@@ -116,7 +114,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     output_interp_imgs_folder = os.path.join(raw_output_imgs_path, 'interpolated_frames_film')
     # set custom name depending on if we interpolate after a run, or interpolate a video (related/unrelated to deforum, we don't know) directly from within the interpolation tab
     # interpolated_path = os.path.join(args.raw_output_imgs_path, 'interpolated_frames_rife')
-    if orig_vid_name is not None: # interpolating a video (deforum or unrelated)
+    if orig_vid_name is not None: # interpolating a video/ set of pictures (deforum or unrelated)
         custom_interp_path = "{}_{}".format(output_interp_imgs_folder, orig_vid_name)
     else: # interpolating after a deforum run:
         custom_interp_path = "{}_{}".format(output_interp_imgs_folder, img_batch_id)
@@ -129,9 +127,11 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     interp_vid_path = interp_vid_path + '.mp4'
 
     # In this folder we temporarily keep the original frames (converted/ copy-pasted and img format depends on scenario)
-    # the convertion case is done to avert a problem with 24 and 32 mixed outputs from the same animation run
     temp_convert_raw_png_path = os.path.join(raw_output_imgs_path, "tmp_film_folder")
-    total_frames = duplicate_pngs_from_folder(raw_output_imgs_path, temp_convert_raw_png_path, img_batch_id, None)
+    if is_random_pics_run: # pass dummy so it just copy-paste the imgs instead of re-writing them
+        total_frames = duplicate_pngs_from_folder(raw_output_imgs_path, temp_convert_raw_png_path, img_batch_id, 'DUMMY')
+    else: #re-write pics as png to avert a problem with 24 and 32 mixed outputs from the same animation run
+        total_frames = duplicate_pngs_from_folder(raw_output_imgs_path, temp_convert_raw_png_path, img_batch_id, None)
     check_and_download_film_model('film_net_fp16.pt', film_model_folder) # TODO: split this part
     
     # get number of in-between-frames to provide to FILM - mimics how RIFE works, we should get the same amount of total frames in the end
@@ -190,3 +190,28 @@ def check_and_download_film_model(model_name, model_dest_folder):
 def calculate_frames_to_add(total_frames, interp_x):
     frames_to_add = (total_frames * interp_x - total_frames) / (total_frames - 1)
     return int(round(frames_to_add))
+ 
+def process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_soundtrack, audio_track):
+    pic_path_list = [pic.name for pic in pic_list]
+    print(f"got a request to *frame interpolate* a set of {len(pic_list)} images.")
+    folder_name = clean_folder_name(Path(pic_list[0].orig_name).stem)
+    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
+    i = 1
+    while os.path.exists(outdir_no_tmp):
+        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
+        i += 1
+
+    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
+    os.makedirs(outdir, exist_ok=True)
+
+    convert_images_from_list(paths=pic_path_list, output_dir=outdir,format='png')
+
+    audio_file_to_pass = None
+    # todo? add handling of vid input sound? if needed at all...
+    if add_soundtrack == 'File':
+        audio_file_to_pass = audio_track
+         # todo: upgrade function so it takes url and check if audio really exist before passing? not crucial as ffmpeg sofly fallbacks if needed
+         # if media_file_has_audio(audio_track, f_location):
+    
+    # pass param so it won't duplicate the images at all as we already do it in here?!
+    process_video_interpolation(frame_interpolation_engine=engine, frame_interpolation_x_amount=x_am, frame_interpolation_slow_mo_enabled = sl_enabled,frame_interpolation_slow_mo_amount=sl_am, orig_vid_fps=fps, deforum_models_path=f_models_path, real_audio_track=audio_file_to_pass, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=keep_imgs, orig_vid_name=folder_name, resolution=resolution, dont_change_fps=True)
