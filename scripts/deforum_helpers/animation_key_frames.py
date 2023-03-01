@@ -39,6 +39,7 @@ class DeformAnimKeys():
         self.amount_schedule_series = get_inbetweens(parse_key_frames(anim_args.amount_schedule), anim_args.max_frames)
         self.threshold_schedule_series = get_inbetweens(parse_key_frames(anim_args.threshold_schedule), anim_args.max_frames)
         self.fov_series = get_inbetweens(parse_key_frames(anim_args.fov_schedule), anim_args.max_frames)
+        self.aspect_ratio_series = get_inbetweens(parse_key_frames(anim_args.aspect_ratio_schedule), anim_args.max_frames)
         self.near_series = get_inbetweens(parse_key_frames(anim_args.near_schedule), anim_args.max_frames)
         self.far_series = get_inbetweens(parse_key_frames(anim_args.far_schedule), anim_args.max_frames)
         self.hybrid_comp_alpha_schedule_series = get_inbetweens(parse_key_frames(anim_args.hybrid_comp_alpha_schedule), anim_args.max_frames)
