@@ -236,7 +236,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
-                    depth = depth_model.predict(turbo_next_image, anim_args, root.half_precision)
+                    depth = depth_model.predict(turbo_next_image, anim_args.midas_weight, root.half_precision)
                 
                 if advance_prev:
                     turbo_prev_image, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
@@ -479,7 +479,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     sd_hijack.model_hijack.undo_hijack(sd_model)
                     devices.torch_gc()
                     depth_model.to(root.device)
-                depth = depth_model.predict(opencv_image, anim_args, root.half_precision)
+                depth = depth_model.predict(opencv_image, anim_args.midas_weight, root.half_precision)
                 depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
                 if cmd_opts.lowvram or cmd_opts.medvram:
                     depth_model.to('cpu')
@@ -503,6 +503,8 @@ def print_render_table(anim_args, keys, frame_idx):
     field_names += ["Tr X", "Tr Y"]
     if anim_args.animation_mode == '3D':
         field_names += ["Tr Z", "Ro X", "Ro Y", "Ro Z"]
+        if anim_args.aspect_ratio_schedule.replace(" ", "") != '0:(1)':
+            field_names += ["Asp. Ratio"]
     if anim_args.enable_perspective_flip:
         field_names += ["Pf T", "Pf P", "Pf G", "Pf F"]
     for field_name in field_names:
@@ -514,6 +516,8 @@ def print_render_table(anim_args, keys, frame_idx):
     rows += [str(keys.translation_x_series[frame_idx]),str(keys.translation_y_series[frame_idx])]
     if anim_args.animation_mode == '3D':
         rows += [str(keys.translation_z_series[frame_idx]),str(keys.rotation_3d_x_series[frame_idx]),str(keys.rotation_3d_y_series[frame_idx]),str(keys.rotation_3d_z_series[frame_idx])]
+        if anim_args.aspect_ratio_schedule.replace(" ", "") != '0:(1)':
+            rows += [str(keys.aspect_ratio_series[frame_idx])]
     if anim_args.enable_perspective_flip:
         rows +=[str(keys.perspective_flip_theta_series[frame_idx]), str(keys.perspective_flip_phi_series[frame_idx]), str(keys.perspective_flip_gamma_series[frame_idx]), str(keys.perspective_flip_fv_series[frame_idx])]
     table.add_row(*rows)
