@@ -510,11 +510,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Tab('Field Of View', visible=False, open=False) as fov_accord:
                         with gr.Row(variant='compact'):
                             fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True)
-                        with gr.Row():
+                        with gr.Row(variant='compact'):
                             aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value = da.aspect_ratio_schedule, interactive=True)
-                        with gr.Row():
+                        with gr.Row(variant='compact'):
                             near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
-                        with gr.Row():
+                        with gr.Row(variant='compact'):
                             far_schedule = gr.Textbox(label="Far schedule", lines=1, value = da.far_schedule, interactive=True)
                 # PERSPECTIVE FLIP ACCORD
                 with gr.Accordion('Perspective Flip', open=False) as perspective_flip_accord:
