@@ -175,10 +175,11 @@ def anim_frame_warp_2d(prev_img_cv2, args, anim_args, keys, frame_idx):
     zoom = keys.zoom_series[frame_idx]
     translation_x = keys.translation_x_series[frame_idx]
     translation_y = keys.translation_y_series[frame_idx]
-
-    center = (args.W // 2, args.H // 2)
+    center_x = keys.center_x_series[frame_idx]
+    center_y = keys.center_y_series[frame_idx]
+    center_point = (args.W * center_x, args.H * center_y)
+    rot_mat = cv2.getRotationMatrix2D(center_point, angle, zoom)
     trans_mat = np.float32([[1, 0, translation_x], [0, 1, translation_y]])
-    rot_mat = cv2.getRotationMatrix2D(center, angle, zoom)
     trans_mat = np.vstack([trans_mat, [0,0,1]])
     rot_mat = np.vstack([rot_mat, [0,0,1]])
     if anim_args.enable_perspective_flip:
