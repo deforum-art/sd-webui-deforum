@@ -8,6 +8,8 @@ class DeformAnimKeys():
     def __init__(self, anim_args, seed=-1):
         self.fi = FrameInterpolater(anim_args.max_frames, seed)
         self.angle_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.angle))
+        self.transform_center_x_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.transform_center_x))
+        self.transform_center_y_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.transform_center_y))
         self.zoom_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.zoom))
         self.translation_x_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.translation_x))
         self.translation_y_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.translation_y))
