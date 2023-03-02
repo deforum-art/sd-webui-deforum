@@ -32,9 +32,9 @@ def Root():
     return locals()
 
 def DeforumAnimArgs():
-    animation_mode = '2D' #['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
+    animation_mode = '2D' # ['None', '2D', '3D', 'Video Input', 'Interpolation']
     max_frames = 120 
-    border = 'replicate' #['wrap', 'replicate'] {type:'string'}
+    border = 'replicate' # ['wrap', 'replicate']
     angle = "0:(0)"
     zoom = "0:(1.0025+0.002*sin(1.25*3.14*t/30))"
     translation_x = "0:(0)"
@@ -94,24 +94,20 @@ def DeforumAnimArgs():
     color_coherence = 'Match Frame 0 LAB' #['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'] {type:'string'}
     color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
-    diffusion_cadence = '2' #['1','2','3','4','5','6','7','8'] {type:'string'}
-
+    diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
     #**Noise settings:**
-    noise_type = 'perlin' #['uniform', 'perlin'] {type:'string'}
+    noise_type = 'perlin' # ['uniform', 'perlin']
     # Perlin params
     perlin_w = 8 
     perlin_h = 8 
     perlin_octaves = 4 
     perlin_persistence = 0.5 
-
     #**3D Depth Warping:**
     use_depth_warping = True 
     midas_weight = 0.2 
-
-    padding_mode = 'border'#['border', 'reflection', 'zeros'] {type:'string'}
-    sampling_mode = 'bicubic'#['bicubic', 'bilinear', 'nearest'] {type:'string'}
+    padding_mode = 'border' # ['border', 'reflection', 'zeros'] 
+    sampling_mode = 'bicubic' # ['bicubic', 'bilinear', 'nearest']
     save_depth_maps = False 
-
     #**Video Input:**
     video_init_path ='https://github.com/hithereai/d/releases/download/m/vid.mp4' 
     extract_nth_frame = 1
@@ -120,7 +116,6 @@ def DeforumAnimArgs():
     overwrite_extracted_frames = True 
     use_mask_video = False 
     video_mask_path ='/content/video_in.mp4'
-
     #**Hybrid Video for 2D/3D Animation Mode:**
     hybrid_generate_inputframes = False 
     hybrid_generate_human_masks = "None" #['None','PNGs','Video', 'Both']
@@ -134,10 +129,9 @@ def DeforumAnimArgs():
     hybrid_comp_mask_equalize = "None" # ['None','Before','After','Both']
     hybrid_comp_mask_auto_contrast = False 
     hybrid_comp_save_extra_frames = False 
-
     #**Resume Animation:**
     resume_from_timestring = False 
-    resume_timestring = "20220829210106" 
+    resume_timestring = "20230129210106" 
 
     return locals()
     
@@ -167,7 +161,7 @@ def DeforumArgs():
     
     #**Sampling Settings**
     seed = -1 #
-    sampler = 'euler_ancestral' #["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
+    sampler = 'euler_ancestral' # ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
     steps = 25 #
     scale = 7 #
     ddim_eta = 0.0 #
@@ -189,8 +183,8 @@ def DeforumArgs():
     #**Batch Settings**
     n_batch = 1 #
     batch_name = "Deforum" 
-    filename_format = "{timestring}_{index}_{prompt}.png" #["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
-    seed_behavior = "iter" #["iter","fixed","random","ladder","alternate","schedule"]
+    filename_format = "{timestring}_{index}_{prompt}.png" # ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
+    seed_behavior = "iter" # ["iter","fixed","random","ladder","alternate","schedule"]
     seed_iter_N = 1
     outdir = ""
 
@@ -208,9 +202,9 @@ def DeforumArgs():
     mask_contrast_adjust = 1.0  
     mask_brightness_adjust = 1.0  
     # Overlay the masked image at the end of the generation so it does not get degraded by encoding and decoding
-    overlay_mask = True  # {type:"boolean"}
+    overlay_mask = True 
     # Blur edges of final overlay mask, if used. Minimum = 0 (no blur)
-    mask_overlay_blur = 4 # {type:"number"}
+    mask_overlay_blur = 4
 
     fill = 1 #MASKARGSEXPANSION Todo : Rename and convert to same formatting as used in img2img masked content
     full_res_mask = True
@@ -266,7 +260,7 @@ def DeforumOutputArgs():
     ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
     ffmpeg_preset = 'slow'
-    add_soundtrack = 'None' #["File","Init Video"]
+    add_soundtrack = 'None' # ["File","Init Video"]
     soundtrack_path = "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_1MB_MP3.mp3"
     # End-Run upscaling
     r_upscale_video = False
@@ -276,11 +270,9 @@ def DeforumOutputArgs():
     
     render_steps = False
     path_name_modifier = "x0_pred" #["x0_pred","x"]
-    # max_video_frames = 200 
     store_frames_in_ram = False
     #**Interpolate Video Settings**
-    # todo: change them to support FILM interpolation as well
-    frame_interpolation_engine = "None" #["None", "RIFE v4.6", "FILM"]
+    frame_interpolation_engine = "None" # ["None", "RIFE v4.6", "FILM"]
     frame_interpolation_x_amount = 2 # [2 to 1000 depends on the engine]
     frame_interpolation_slow_mo_enabled = False
     frame_interpolation_slow_mo_amount = 2 #[2 to 10]
@@ -288,7 +280,6 @@ def DeforumOutputArgs():
     return locals()
     
 import gradio as gr
-import os
 import time
 from types import SimpleNamespace
 
