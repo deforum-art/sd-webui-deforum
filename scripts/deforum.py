@@ -70,7 +70,7 @@ def run_deforum(*args, **kwargs):
     from deforum_helpers.render_modes import render_input_video, render_animation_with_video_mask, render_interpolation
 
     tqdm_backup = shared.total_tqdm
-    shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args)
+    shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args, video_args)
     try:
         # dispatch to appropriate renderer
         if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
