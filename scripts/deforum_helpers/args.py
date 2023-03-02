@@ -38,27 +38,27 @@ def DeforumAnimArgs():
     max_frames = 120 #@param {type:"number"}
     border = 'replicate' #@param ['wrap', 'replicate'] {type:'string'}
     #@markdown ####**Motion Parameters:**
-    angle = "0:(0)"#@param {type:"string"}
-    zoom = "0:(1.0025+0.002*sin(1.25*3.14*t/30))"#@param {type:"string"}
-    translation_x = "0:(0)"#@param {type:"string"}
-    translation_y = "0:(0)"#@param {type:"string"}
-    translation_z = "0:(1.75)"#@param {type:"string"}
+    angle = "0:(0)"
+    zoom = "0:(1.0025+0.002*sin(1.25*3.14*t/30))"
+    translation_x = "0:(0)"
+    translation_y = "0:(0)"
+    translation_z = "0:(1.75)"
     transform_center_x = "0:(0.5)"
     transform_center_y = "0:(0.5)"
-    rotation_3d_x = "0:(0)"#@param {type:"string"}
-    rotation_3d_y = "0:(0)"#@param {type:"string"}
-    rotation_3d_z = "0:(0)"#@param {type:"string"}
-    enable_perspective_flip = False #@param {type:"boolean"}
-    perspective_flip_theta = "0:(0)"#@param {type:"string"}
-    perspective_flip_phi = "0:(0)"#@param {type:"string"}
-    perspective_flip_gamma = "0:(0)"#@param {type:"string"}
-    perspective_flip_fv = "0:(53)"#@param {type:"string"}
-    noise_schedule = "0: (0.065)"#@param {type:"string"}
-    strength_schedule = "0: (0.65)"#@param {type:"string"}
-    contrast_schedule = "0: (1.0)"#@param {type:"string"}
+    rotation_3d_x = "0:(0)"
+    rotation_3d_y = "0:(0)"
+    rotation_3d_z = "0:(0)"
+    enable_perspective_flip = False 
+    perspective_flip_theta = "0:(0)"
+    perspective_flip_phi = "0:(0)"
+    perspective_flip_gamma = "0:(0)"
+    perspective_flip_fv = "0:(53)"
+    noise_schedule = "0: (0.065)"
+    strength_schedule = "0: (0.65)"
+    contrast_schedule = "0: (1.0)"
     cfg_scale_schedule = "0: (7)"
-    enable_steps_scheduling = False#@param {type:"boolean"}
-    steps_schedule = "0: (25)"#@param {type:"string"}
+    enable_steps_scheduling = False
+    steps_schedule = "0: (25)"
     fov_schedule = "0: (70)"
     aspect_ratio_schedule = "0: (1)"
     near_schedule = "0: (200)"
@@ -71,7 +71,7 @@ def DeforumAnimArgs():
     subseed_strength_schedule = "0:(0)"
     
     # Sampler Scheduling
-    enable_sampler_scheduling = False #@param {type:"boolean"}
+    enable_sampler_scheduling = False 
     sampler_schedule = '0: ("Euler a")'
 
     # Composable mask scheduling
@@ -79,11 +79,11 @@ def DeforumAnimArgs():
     mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
     noise_mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
     # Checkpoint Scheduling
-    enable_checkpoint_scheduling = False#@param {type:"boolean"}
+    enable_checkpoint_scheduling = False
     checkpoint_schedule = '0: ("model1.ckpt"), 100: ("model2.ckpt")'
     
     # CLIP skip Scheduling
-    enable_clipskip_scheduling = False #@param {type:"boolean"}
+    enable_clipskip_scheduling = False 
     clipskip_schedule = '0: (2)'
 
     # Anti-blur
@@ -92,16 +92,16 @@ def DeforumAnimArgs():
     amount_schedule = "0: (0.35)"
     threshold_schedule = "0: (0.0)"
     # Hybrid video
-    hybrid_comp_alpha_schedule = "0:(1)" #@param {type:"string"}
-    hybrid_comp_mask_blend_alpha_schedule = "0:(0.5)" #@param {type:"string"}
-    hybrid_comp_mask_contrast_schedule = "0:(1)" #@param {type:"string"}
-    hybrid_comp_mask_auto_contrast_cutoff_high_schedule =  "0:(100)" #@param {type:"string"}
-    hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" #@param {type:"string"}
+    hybrid_comp_alpha_schedule = "0:(1)" 
+    hybrid_comp_mask_blend_alpha_schedule = "0:(0.5)" 
+    hybrid_comp_mask_contrast_schedule = "0:(1)" 
+    hybrid_comp_mask_auto_contrast_cutoff_high_schedule =  "0:(100)" 
+    hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" 
 
     #@markdown ####**Coherence:**
     color_coherence = 'Match Frame 0 LAB' #@param ['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'] {type:'string'}
     color_coherence_video_every_N_frames = 1 #@param {type:"integer"}
-    color_force_grayscale = False #@param {type:"boolean"}
+    color_force_grayscale = False 
     diffusion_cadence = '2' #@param ['1','2','3','4','5','6','7','8'] {type:'string'}
 
     #@markdown ####**Noise settings:**
@@ -113,39 +113,39 @@ def DeforumAnimArgs():
     perlin_persistence = 0.5 #@param {type:"number"}
 
     #@markdown ####**3D Depth Warping:**
-    use_depth_warping = True #@param {type:"boolean"}
+    use_depth_warping = True 
     midas_weight = 0.2 #@param {type:"number"}
 
     padding_mode = 'border'#@param ['border', 'reflection', 'zeros'] {type:'string'}
     sampling_mode = 'bicubic'#@param ['bicubic', 'bilinear', 'nearest'] {type:'string'}
-    save_depth_maps = False #@param {type:"boolean"}
+    save_depth_maps = False 
 
     #@markdown ####**Video Input:**
-    video_init_path ='https://github.com/hithereai/d/releases/download/m/vid.mp4' #@param {type:"string"}
+    video_init_path ='https://github.com/hithereai/d/releases/download/m/vid.mp4' 
     extract_nth_frame = 1#@param {type:"number"}
     extract_from_frame = 0 #@param {type:"number"}
     extract_to_frame = -1 #@param {type:"number"} minus 1 for unlimited frames
-    overwrite_extracted_frames = True #@param {type:"boolean"}
-    use_mask_video = False #@param {type:"boolean"}
-    video_mask_path ='/content/video_in.mp4'#@param {type:"string"}
+    overwrite_extracted_frames = True 
+    use_mask_video = False 
+    video_mask_path ='/content/video_in.mp4'
 
     #@markdown ####**Hybrid Video for 2D/3D Animation Mode:**
-    hybrid_generate_inputframes = False #@param {type:"boolean"}
+    hybrid_generate_inputframes = False 
     hybrid_generate_human_masks = "None" #@param ['None','PNGs','Video', 'Both']
-    hybrid_use_first_frame_as_init_image = True #@param {type:"boolean"}
+    hybrid_use_first_frame_as_init_image = True 
     hybrid_motion = "None" #@param ['None','Optical Flow','Perspective','Affine']
-    hybrid_motion_use_prev_img = False #@param {type:"boolean"}
+    hybrid_motion_use_prev_img = False 
     hybrid_flow_method = "Farneback" #@param ['DIS Medium','Farneback']
-    hybrid_composite = False #@param {type:"boolean"}
+    hybrid_composite = False 
     hybrid_comp_mask_type = "None" #@param ['None', 'Depth', 'Video Depth', 'Blend', 'Difference']
-    hybrid_comp_mask_inverse = False #@param {type:"boolean"}
+    hybrid_comp_mask_inverse = False 
     hybrid_comp_mask_equalize = "None" #@param  ['None','Before','After','Both']
-    hybrid_comp_mask_auto_contrast = False #@param {type:"boolean"}
-    hybrid_comp_save_extra_frames = False #@param {type:"boolean"}
+    hybrid_comp_mask_auto_contrast = False 
+    hybrid_comp_save_extra_frames = False 
 
     #@markdown ####**Resume Animation:**
-    resume_from_timestring = False #@param {type:"boolean"}
-    resume_timestring = "20220829210106" #@param {type:"string"}
+    resume_from_timestring = False 
+    resume_timestring = "20220829210106" 
 
     return locals()
 
@@ -186,37 +186,37 @@ def DeforumArgs():
     static_threshold = None
 
     #@markdown **Save & Display Settings**
-    save_samples = True #@param {type:"boolean"}
-    save_settings = True #@param {type:"boolean"}
-    display_samples = True #@param {type:"boolean"}
-    save_sample_per_step = False #@param {type:"boolean"}
-    show_sample_per_step = False #@param {type:"boolean"}
+    save_samples = True 
+    save_settings = True 
+    display_samples = True 
+    save_sample_per_step = False 
+    show_sample_per_step = False 
 
     #@markdown **Prompt Settings**
-    prompt_weighting = False #@param {type:"boolean"}
-    normalize_prompt_weights = True #@param {type:"boolean"}
-    log_weighted_subprompts = False #@param {type:"boolean"}
+    prompt_weighting = False 
+    normalize_prompt_weights = True 
+    log_weighted_subprompts = False 
 
     #@markdown **Batch Settings**
     n_batch = 1 #@param
-    batch_name = "Deforum" #@param {type:"string"}
+    batch_name = "Deforum" 
     filename_format = "{timestring}_{index}_{prompt}.png" #@param ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
     seed_behavior = "iter" #@param ["iter","fixed","random","ladder","alternate","schedule"]
     seed_iter_N = 1 #@param {type:'integer'}
-    # make_grid = False #@param {type:"boolean"}
+    # make_grid = False 
     # grid_rows = 2 #@param 
     outdir = ""#get_output_folder(output_path, batch_name)
 
     #@markdown **Init Settings**
-    use_init = False #@param {type:"boolean"}
+    use_init = False 
     strength = 0.0 #@param {type:"number"}
     strength_0_no_init = True # Set the strength to 0 automatically when no init image is used
-    init_image = "https://github.com/hithereai/d/releases/download/m/kaba.png" #@param {type:"string"}
+    init_image = "https://github.com/hithereai/d/releases/download/m/kaba.png" 
     # Whiter areas of the mask are areas that change more
-    use_mask = False #@param {type:"boolean"}
+    use_mask = False 
     use_alpha_as_mask = False # use the alpha channel of the init image as the mask
-    mask_file = "https://github.com/hithereai/d/releases/download/m/mask.jpg" #@param {type:"string"}
-    invert_mask = False #@param {type:"boolean"}
+    mask_file = "https://github.com/hithereai/d/releases/download/m/mask.jpg" 
+    invert_mask = False 
     # Adjust mask image, 1.0 is no adjustment. Should be positive numbers.
     mask_contrast_adjust = 1.0  #@param {type:"number"}
     mask_brightness_adjust = 1.0  #@param {type:"number"}
@@ -274,8 +274,8 @@ def DeforumOutputArgs():
     skip_video_for_run_all = False #@param {type: 'boolean'}
     fps = 15 #@param {type:"number"}
     make_gif = False
-    image_path = "C:/SD/20230124234916_%05d.png" #@param {type:"string"}
-    mp4_path = "testvidmanualsettings.mp4" #@param {type:"string"}
+    image_path = "C:/SD/20230124234916_%05d.png" 
+    mp4_path = "testvidmanualsettings.mp4" 
     ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
     ffmpeg_preset = 'slow'
@@ -290,7 +290,7 @@ def DeforumOutputArgs():
     
     render_steps = False  #@param {type: 'boolean'}
     path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
-    # max_video_frames = 200 #@param {type:"string"}
+    # max_video_frames = 200 
     store_frames_in_ram = False #@param {type: 'boolean'}
     #@markdown **Interpolate Video Settings**
     # todo: change them to support FILM interpolation as well
