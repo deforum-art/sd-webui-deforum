@@ -263,12 +263,6 @@ def on_ui_tabs():
                     save_video_settings_btn = gr.Button('Save Video Settings', elem_id='deforum_save_video_settings_btn')
                     load_video_settings_btn = gr.Button('Load Video Settings', elem_id='deforum_load_video_settings_btn')
 
-                # components['prompts'].visible = False#hide prompts for the time being
-                #TODO clean up the code
-                components['save_sample_per_step'].visible = False
-                components['show_sample_per_step'].visible = False
-                components['display_samples'].visible = False
-
         component_list = [components[name] for name in deforum_args.component_names]
 
         submit.click(
