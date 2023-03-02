@@ -9,7 +9,7 @@ import logging
 
 def get_keys_to_exclude(setting_type):
     if setting_type == 'general':
-        return ["n_batch", "restore_faces", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal", "animation_prompts_df"]
+        return ["n_batch", "restore_faces", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal", "animation_prompts_df", "perlin_w", "perlin_h"]
     else: #video
         return ["mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
 
