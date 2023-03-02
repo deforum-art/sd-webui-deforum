@@ -43,7 +43,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args)
+    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
     loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args)
     # resume animation
     start_frame = 0
@@ -84,7 +84,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         anim_args.flip_2d_perspective = True        
 
     # expand prompts out to per-frame
-    if use_parseq:
+    if use_parseq and keys.manages_prompts():
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])

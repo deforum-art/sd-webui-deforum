@@ -74,7 +74,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
 
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args)
+    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
@@ -92,7 +92,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         json.dump(s, f, ensure_ascii=False, indent=4)
 
     # Compute interpolated prompts
-    if use_parseq:
+    if use_parseq and keys.manages_prompts():
         print("Parseq prompts are assumed to already be interpolated - not doing any additional prompt interpolation")
         prompt_series = keys.prompts
     else: 
