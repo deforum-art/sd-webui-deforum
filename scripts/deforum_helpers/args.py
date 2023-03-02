@@ -1127,8 +1127,7 @@ def process_args(args_dict_main):
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
     positive_prompts = args_dict_main['animation_prompts_positive']
     negative_prompts = args_dict_main['animation_prompts_negative']
-    # remove --neg from negative_prompts if recieved by mistake
-    negative_prompts = negative_prompts.replace('--neg', '')
+    negative_prompts = negative_prompts.replace('--neg', '') # remove --neg from negative_prompts if recieved by mistake
     for key in root.animation_prompts:
         animationPromptCurr = root.animation_prompts[key]
         root.animation_prompts[key] = f"{positive_prompts} {animationPromptCurr} {'' if '--neg' in animationPromptCurr else '--neg'} {negative_prompts}"
@@ -1162,7 +1161,6 @@ def process_args(args_dict_main):
     p.fill = args.fill
     p.ddim_eta = args.ddim_eta
 
-    # TODO: Handle batch name dynamically?
     current_arg_list = [args, anim_args, video_args, parseq_args]
     args.outdir = os.path.join(p.outpath_samples, args.batch_name)
     root.outpath_samples = args.outdir
