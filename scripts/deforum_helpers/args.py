@@ -92,7 +92,7 @@ def DeforumAnimArgs():
     hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" 
     #Coherence
     color_coherence = 'Match Frame 0 LAB' #['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'] {type:'string'}
-    color_coherence_video_every_N_frames = 1 #{type:"integer"}
+    color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
     diffusion_cadence = '2' #['1','2','3','4','5','6','7','8'] {type:'string'}
 
@@ -156,7 +156,7 @@ def DeforumArgs():
     H = 512 #
     W, H = map(lambda x: x - x % 64, (W, H))  # resize to integer multiple of 64
 
-    #@markdonw **Webui stuff**
+    #**Webui stuff**
     tiling = False
     restore_faces = False
     seed_enable_extras = False
@@ -191,8 +191,8 @@ def DeforumArgs():
     batch_name = "Deforum" 
     filename_format = "{timestring}_{index}_{prompt}.png" #["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
     seed_behavior = "iter" #["iter","fixed","random","ladder","alternate","schedule"]
-    seed_iter_N = 1 #{type:'integer'}
-    outdir = ""#get_output_folder(output_path, batch_name)
+    seed_iter_N = 1
+    outdir = ""
 
     #**Init Settings**
     use_init = False 
@@ -258,7 +258,7 @@ def ParseqArgs():
     return locals()
     
 def DeforumOutputArgs():
-    skip_video_for_run_all = False #{type: 'boolean'}
+    skip_video_for_run_all = False
     fps = 15 
     make_gif = False
     image_path = "C:/SD/20230124234916_%05d.png" 
@@ -271,21 +271,20 @@ def DeforumOutputArgs():
     # End-Run upscaling
     r_upscale_video = False
     r_upscale_factor = 'x2' # ['2x', 'x3', 'x4']
-    # **model below** - 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest do only 4x: 'realesrgan-x4plus', 'realesrgan-x4plus-anime'
-    r_upscale_model = 'realesr-animevideov3' 
+    r_upscale_model = 'realesr-animevideov3' # 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest do only 4x: 'realesrgan-x4plus', 'realesrgan-x4plus-anime'
     r_upscale_keep_imgs = True
     
-    render_steps = False  #{type: 'boolean'}
+    render_steps = False
     path_name_modifier = "x0_pred" #["x0_pred","x"]
     # max_video_frames = 200 
-    store_frames_in_ram = False #{type: 'boolean'}
+    store_frames_in_ram = False
     #**Interpolate Video Settings**
     # todo: change them to support FILM interpolation as well
     frame_interpolation_engine = "None" #["None", "RIFE v4.6", "FILM"]
     frame_interpolation_x_amount = 2 # [2 to 1000 depends on the engine]
     frame_interpolation_slow_mo_enabled = False
     frame_interpolation_slow_mo_amount = 2 #[2 to 10]
-    frame_interpolation_keep_imgs = False #{type: 'boolean'}
+    frame_interpolation_keep_imgs = False
     return locals()
     
 import gradio as gr
