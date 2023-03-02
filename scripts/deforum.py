@@ -71,8 +71,7 @@ def run_deforum(*args, **kwargs):
 
     tqdm_backup = shared.total_tqdm
     shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args, video_args)
-    try:
-        # dispatch to appropriate renderer
+    try: # dispatch to appropriate renderer
         if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
             if anim_args.use_mask_video: 
                 render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root) # allow mask video without an input video
@@ -305,7 +304,6 @@ def on_ui_tabs():
                     inputs=[video_settings_path] + video_settings_component_list,
                     outputs=video_settings_component_list + [stuff],
                 )
-
 
     return [(deforum_interface, "Deforum", "deforum_interface")]
 
