@@ -32,33 +32,30 @@ def Root():
     return locals()
 
 def DeforumAnimArgs():
-
-    #@markdown ####**Animation:**
-    animation_mode = '2D' #@param ['None', '2D', '3D', 'Video Input', 'Interpolation'] {type:'string'}
-    max_frames = 120 #@param {type:"number"}
-    border = 'replicate' #@param ['wrap', 'replicate'] {type:'string'}
-    #@markdown ####**Motion Parameters:**
-    angle = "0:(0)"#@param {type:"string"}
-    zoom = "0:(1.0025+0.002*sin(1.25*3.14*t/30))"#@param {type:"string"}
-    translation_x = "0:(0)"#@param {type:"string"}
-    translation_y = "0:(0)"#@param {type:"string"}
-    translation_z = "0:(1.75)"#@param {type:"string"}
+    animation_mode = '2D' # ['None', '2D', '3D', 'Video Input', 'Interpolation']
+    max_frames = 120 
+    border = 'replicate' # ['wrap', 'replicate']
+    angle = "0:(0)"
+    zoom = "0:(1.0025+0.002*sin(1.25*3.14*t/30))"
+    translation_x = "0:(0)"
+    translation_y = "0:(0)"
+    translation_z = "0:(1.75)"
     transform_center_x = "0:(0.5)"
     transform_center_y = "0:(0.5)"
-    rotation_3d_x = "0:(0)"#@param {type:"string"}
-    rotation_3d_y = "0:(0)"#@param {type:"string"}
-    rotation_3d_z = "0:(0)"#@param {type:"string"}
-    enable_perspective_flip = False #@param {type:"boolean"}
-    perspective_flip_theta = "0:(0)"#@param {type:"string"}
-    perspective_flip_phi = "0:(0)"#@param {type:"string"}
-    perspective_flip_gamma = "0:(0)"#@param {type:"string"}
-    perspective_flip_fv = "0:(53)"#@param {type:"string"}
-    noise_schedule = "0: (0.065)"#@param {type:"string"}
-    strength_schedule = "0: (0.65)"#@param {type:"string"}
-    contrast_schedule = "0: (1.0)"#@param {type:"string"}
+    rotation_3d_x = "0:(0)"
+    rotation_3d_y = "0:(0)"
+    rotation_3d_z = "0:(0)"
+    enable_perspective_flip = False 
+    perspective_flip_theta = "0:(0)"
+    perspective_flip_phi = "0:(0)"
+    perspective_flip_gamma = "0:(0)"
+    perspective_flip_fv = "0:(53)"
+    noise_schedule = "0: (0.065)"
+    strength_schedule = "0: (0.65)"
+    contrast_schedule = "0: (1.0)"
     cfg_scale_schedule = "0: (7)"
-    enable_steps_scheduling = False#@param {type:"boolean"}
-    steps_schedule = "0: (25)"#@param {type:"string"}
+    enable_steps_scheduling = False
+    steps_schedule = "0: (25)"
     fov_schedule = "0: (70)"
     aspect_ratio_schedule = "0: (1)"
     near_schedule = "0: (200)"
@@ -69,88 +66,74 @@ def DeforumAnimArgs():
     enable_subseed_scheduling = False
     subseed_schedule = "0:(1)"
     subseed_strength_schedule = "0:(0)"
-    
     # Sampler Scheduling
-    enable_sampler_scheduling = False #@param {type:"boolean"}
+    enable_sampler_scheduling = False 
     sampler_schedule = '0: ("Euler a")'
-
     # Composable mask scheduling
     use_noise_mask = False
     mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
     noise_mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
     # Checkpoint Scheduling
-    enable_checkpoint_scheduling = False#@param {type:"boolean"}
+    enable_checkpoint_scheduling = False
     checkpoint_schedule = '0: ("model1.ckpt"), 100: ("model2.ckpt")'
-    
     # CLIP skip Scheduling
-    enable_clipskip_scheduling = False #@param {type:"boolean"}
+    enable_clipskip_scheduling = False 
     clipskip_schedule = '0: (2)'
-
     # Anti-blur
     kernel_schedule = "0: (5)"
     sigma_schedule = "0: (1.0)"
     amount_schedule = "0: (0.35)"
     threshold_schedule = "0: (0.0)"
     # Hybrid video
-    hybrid_comp_alpha_schedule = "0:(1)" #@param {type:"string"}
-    hybrid_comp_mask_blend_alpha_schedule = "0:(0.5)" #@param {type:"string"}
-    hybrid_comp_mask_contrast_schedule = "0:(1)" #@param {type:"string"}
-    hybrid_comp_mask_auto_contrast_cutoff_high_schedule =  "0:(100)" #@param {type:"string"}
-    hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" #@param {type:"string"}
-
-    #@markdown ####**Coherence:**
-    color_coherence = 'Match Frame 0 LAB' #@param ['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'] {type:'string'}
-    color_coherence_video_every_N_frames = 1 #@param {type:"integer"}
-    color_force_grayscale = False #@param {type:"boolean"}
-    diffusion_cadence = '2' #@param ['1','2','3','4','5','6','7','8'] {type:'string'}
-
-    #@markdown ####**Noise settings:**
-    noise_type = 'perlin' #@param ['uniform', 'perlin'] {type:'string'}
+    hybrid_comp_alpha_schedule = "0:(1)" 
+    hybrid_comp_mask_blend_alpha_schedule = "0:(0.5)" 
+    hybrid_comp_mask_contrast_schedule = "0:(1)" 
+    hybrid_comp_mask_auto_contrast_cutoff_high_schedule =  "0:(100)" 
+    hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" 
+    #Coherence
+    color_coherence = 'Match Frame 0 LAB' #['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'] {type:'string'}
+    color_coherence_video_every_N_frames = 1
+    color_force_grayscale = False 
+    diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
+    #**Noise settings:**
+    noise_type = 'perlin' # ['uniform', 'perlin']
     # Perlin params
-    perlin_w = 8 #@param {type:"number"}
-    perlin_h = 8 #@param {type:"number"}
-    perlin_octaves = 4 #@param {type:"number"}
-    perlin_persistence = 0.5 #@param {type:"number"}
-
-    #@markdown ####**3D Depth Warping:**
-    use_depth_warping = True #@param {type:"boolean"}
-    midas_weight = 0.2 #@param {type:"number"}
-
-    padding_mode = 'border'#@param ['border', 'reflection', 'zeros'] {type:'string'}
-    sampling_mode = 'bicubic'#@param ['bicubic', 'bilinear', 'nearest'] {type:'string'}
-    save_depth_maps = False #@param {type:"boolean"}
-
-    #@markdown ####**Video Input:**
-    video_init_path ='https://github.com/hithereai/d/releases/download/m/vid.mp4' #@param {type:"string"}
-    extract_nth_frame = 1#@param {type:"number"}
-    extract_from_frame = 0 #@param {type:"number"}
-    extract_to_frame = -1 #@param {type:"number"} minus 1 for unlimited frames
-    overwrite_extracted_frames = True #@param {type:"boolean"}
-    use_mask_video = False #@param {type:"boolean"}
-    video_mask_path ='/content/video_in.mp4'#@param {type:"string"}
-
-    #@markdown ####**Hybrid Video for 2D/3D Animation Mode:**
-    hybrid_generate_inputframes = False #@param {type:"boolean"}
-    hybrid_generate_human_masks = "None" #@param ['None','PNGs','Video', 'Both']
-    hybrid_use_first_frame_as_init_image = True #@param {type:"boolean"}
-    hybrid_motion = "None" #@param ['None','Optical Flow','Perspective','Affine']
-    hybrid_motion_use_prev_img = False #@param {type:"boolean"}
-    hybrid_flow_method = "Farneback" #@param ['DIS Medium','Farneback']
-    hybrid_composite = False #@param {type:"boolean"}
-    hybrid_comp_mask_type = "None" #@param ['None', 'Depth', 'Video Depth', 'Blend', 'Difference']
-    hybrid_comp_mask_inverse = False #@param {type:"boolean"}
-    hybrid_comp_mask_equalize = "None" #@param  ['None','Before','After','Both']
-    hybrid_comp_mask_auto_contrast = False #@param {type:"boolean"}
-    hybrid_comp_save_extra_frames = False #@param {type:"boolean"}
-
-    #@markdown ####**Resume Animation:**
-    resume_from_timestring = False #@param {type:"boolean"}
-    resume_timestring = "20220829210106" #@param {type:"string"}
+    perlin_w = 8 
+    perlin_h = 8 
+    perlin_octaves = 4 
+    perlin_persistence = 0.5 
+    #**3D Depth Warping:**
+    use_depth_warping = True 
+    midas_weight = 0.2 
+    padding_mode = 'border' # ['border', 'reflection', 'zeros'] 
+    sampling_mode = 'bicubic' # ['bicubic', 'bilinear', 'nearest']
+    save_depth_maps = False 
+    #**Video Input:**
+    video_init_path ='https://github.com/hithereai/d/releases/download/m/vid.mp4' 
+    extract_nth_frame = 1
+    extract_from_frame = 0 
+    extract_to_frame = -1  # minus 1 for unlimited frames
+    overwrite_extracted_frames = True 
+    use_mask_video = False 
+    video_mask_path ='/content/video_in.mp4'
+    #**Hybrid Video for 2D/3D Animation Mode:**
+    hybrid_generate_inputframes = False 
+    hybrid_generate_human_masks = "None" #['None','PNGs','Video', 'Both']
+    hybrid_use_first_frame_as_init_image = True 
+    hybrid_motion = "None" #['None','Optical Flow','Perspective','Affine']
+    hybrid_motion_use_prev_img = False 
+    hybrid_flow_method = "Farneback" #['DIS Medium','Farneback']
+    hybrid_composite = False 
+    hybrid_comp_mask_type = "None" #['None', 'Depth', 'Video Depth', 'Blend', 'Difference']
+    hybrid_comp_mask_inverse = False 
+    hybrid_comp_mask_equalize = "None" # ['None','Before','After','Both']
+    hybrid_comp_mask_auto_contrast = False 
+    hybrid_comp_save_extra_frames = False 
+    #**Resume Animation:**
+    resume_from_timestring = False 
+    resume_timestring = "20230129210106" 
 
     return locals()
-
-# def DeforumPrompts():
-    # return
     
 def DeforumAnimPrompts():
     return r"""{
@@ -162,12 +145,12 @@ def DeforumAnimPrompts():
     """
 
 def DeforumArgs():
-    #@markdown **Image Settings**
-    W = 512 #@param
-    H = 512 #@param
+    #**Image Settings**
+    W = 512 #
+    H = 512 #
     W, H = map(lambda x: x - x % 64, (W, H))  # resize to integer multiple of 64
 
-    #@markdonw **Webui stuff**
+    #**Webui stuff**
     tiling = False
     restore_faces = False
     seed_enable_extras = False
@@ -176,54 +159,52 @@ def DeforumArgs():
     seed_resize_from_w = 0
     seed_resize_from_h = 0
     
-    #@markdown **Sampling Settings**
-    seed = -1 #@param
-    sampler = 'euler_ancestral' #@param ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
-    steps = 25 #@param
-    scale = 7 #@param
-    ddim_eta = 0.0 #@param
+    #**Sampling Settings**
+    seed = -1 #
+    sampler = 'euler_ancestral' # ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
+    steps = 25 #
+    scale = 7 #
+    ddim_eta = 0.0 #
     dynamic_threshold = None
     static_threshold = None
 
-    #@markdown **Save & Display Settings**
-    save_samples = True #@param {type:"boolean"}
-    save_settings = True #@param {type:"boolean"}
-    display_samples = True #@param {type:"boolean"}
-    save_sample_per_step = False #@param {type:"boolean"}
-    show_sample_per_step = False #@param {type:"boolean"}
+    #**Save & Display Settings**
+    save_samples = True 
+    save_settings = True 
+    display_samples = True 
+    save_sample_per_step = False 
+    show_sample_per_step = False 
 
-    #@markdown **Prompt Settings**
-    prompt_weighting = False #@param {type:"boolean"}
-    normalize_prompt_weights = True #@param {type:"boolean"}
-    log_weighted_subprompts = False #@param {type:"boolean"}
+    #**Prompt Settings**
+    prompt_weighting = False 
+    normalize_prompt_weights = True 
+    log_weighted_subprompts = False 
 
-    #@markdown **Batch Settings**
-    n_batch = 1 #@param
-    batch_name = "Deforum" #@param {type:"string"}
-    filename_format = "{timestring}_{index}_{prompt}.png" #@param ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
-    seed_behavior = "iter" #@param ["iter","fixed","random","ladder","alternate","schedule"]
-    seed_iter_N = 1 #@param {type:'integer'}
-    # make_grid = False #@param {type:"boolean"}
-    # grid_rows = 2 #@param 
-    outdir = ""#get_output_folder(output_path, batch_name)
+    #**Batch Settings**
+    n_batch = 1 #
+    batch_name = "Deforum" 
+    filename_format = "{timestring}_{index}_{prompt}.png" # ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
+    seed_behavior = "iter" # ["iter","fixed","random","ladder","alternate","schedule"]
+    seed_iter_N = 1
+    outdir = ""
 
-    #@markdown **Init Settings**
-    use_init = False #@param {type:"boolean"}
-    strength = 0.0 #@param {type:"number"}
+    #**Init Settings**
+    use_init = False 
+    strength = 0.0 
     strength_0_no_init = True # Set the strength to 0 automatically when no init image is used
-    init_image = "https://github.com/hithereai/d/releases/download/m/kaba.png" #@param {type:"string"}
+    init_image = "https://github.com/hithereai/d/releases/download/m/kaba.png" 
     # Whiter areas of the mask are areas that change more
-    use_mask = False #@param {type:"boolean"}
+    use_mask = False 
     use_alpha_as_mask = False # use the alpha channel of the init image as the mask
-    mask_file = "https://github.com/hithereai/d/releases/download/m/mask.jpg" #@param {type:"string"}
-    invert_mask = False #@param {type:"boolean"}
+    mask_file = "https://github.com/hithereai/d/releases/download/m/mask.jpg" 
+    invert_mask = False 
     # Adjust mask image, 1.0 is no adjustment. Should be positive numbers.
-    mask_contrast_adjust = 1.0  #@param {type:"number"}
-    mask_brightness_adjust = 1.0  #@param {type:"number"}
+    mask_contrast_adjust = 1.0  
+    mask_brightness_adjust = 1.0  
     # Overlay the masked image at the end of the generation so it does not get degraded by encoding and decoding
-    overlay_mask = True  # {type:"boolean"}
+    overlay_mask = True 
     # Blur edges of final overlay mask, if used. Minimum = 0 (no blur)
-    mask_overlay_blur = 4 # {type:"number"}
+    mask_overlay_blur = 4
 
     fill = 1 #MASKARGSEXPANSION Todo : Rename and convert to same formatting as used in img2img masked content
     full_res_mask = True
@@ -271,38 +252,34 @@ def ParseqArgs():
     return locals()
     
 def DeforumOutputArgs():
-    skip_video_for_run_all = False #@param {type: 'boolean'}
-    fps = 15 #@param {type:"number"}
+    skip_video_for_run_all = False
+    fps = 15 
     make_gif = False
-    image_path = "C:/SD/20230124234916_%05d.png" #@param {type:"string"}
-    mp4_path = "testvidmanualsettings.mp4" #@param {type:"string"}
+    image_path = "C:/SD/20230124234916_%05d.png" 
+    mp4_path = "testvidmanualsettings.mp4" 
     ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
     ffmpeg_preset = 'slow'
-    add_soundtrack = 'None' #@param ["File","Init Video"]
+    add_soundtrack = 'None' # ["File","Init Video"]
     soundtrack_path = "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_1MB_MP3.mp3"
     # End-Run upscaling
     r_upscale_video = False
     r_upscale_factor = 'x2' # ['2x', 'x3', 'x4']
-    # **model below** - 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest do only 4x: 'realesrgan-x4plus', 'realesrgan-x4plus-anime'
-    r_upscale_model = 'realesr-animevideov3' 
+    r_upscale_model = 'realesr-animevideov3' # 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest do only 4x: 'realesrgan-x4plus', 'realesrgan-x4plus-anime'
     r_upscale_keep_imgs = True
     
-    render_steps = False  #@param {type: 'boolean'}
-    path_name_modifier = "x0_pred" #@param ["x0_pred","x"]
-    # max_video_frames = 200 #@param {type:"string"}
-    store_frames_in_ram = False #@param {type: 'boolean'}
-    #@markdown **Interpolate Video Settings**
-    # todo: change them to support FILM interpolation as well
-    frame_interpolation_engine = "None" #@param ["None", "RIFE v4.6", "FILM"]
+    render_steps = False
+    path_name_modifier = "x0_pred" #["x0_pred","x"]
+    store_frames_in_ram = False
+    #**Interpolate Video Settings**
+    frame_interpolation_engine = "None" # ["None", "RIFE v4.6", "FILM"]
     frame_interpolation_x_amount = 2 # [2 to 1000 depends on the engine]
     frame_interpolation_slow_mo_enabled = False
-    frame_interpolation_slow_mo_amount = 2 #@param [2 to 10]
-    frame_interpolation_keep_imgs = False #@param {type: 'boolean'}
+    frame_interpolation_slow_mo_amount = 2 #[2 to 10]
+    frame_interpolation_keep_imgs = False
     return locals()
     
 import gradio as gr
-import os
 import time
 from types import SimpleNamespace
 
@@ -773,7 +750,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
                         # the following param only shows for windows and linux users!
                         make_gif = gr.Checkbox(label="Make GIF", value=dv.make_gif, interactive=True)
-                with gr.Row(equal_height=True, variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux", "Mac"] else False)) as r_upscale_row:
+                with gr.Row(equal_height=True, variant='compact', visible=True) as r_upscale_row:
                     r_upscale_video = gr.Checkbox(label="Upscale", value=dv.r_upscale_video, interactive=True)
                     r_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
                     r_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
@@ -785,7 +762,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_location_row:
                         ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location)
             # FRAME INTERPOLATION TAB
-            with gr.Tab('Frame Interoplation') as frame_interp_tab:
+            with gr.Tab('Frame Interpolation') as frame_interp_tab:
                 with gr.Accordion('Important notes and Help', open=False):
                     gr.HTML("""
                     Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> / <a href="https://film-net.github.io/">FILM</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
@@ -859,7 +836,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             # Non interactive textbox showing expected output resolution
                             ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')
                         with gr.Column():
-                            with gr.Row(variant='compact', visible=(True if dr.current_user_os in ["Windows", "Linux", "Mac"] else False)) as ncnn_actual_upscale_row:
+                            with gr.Row(variant='compact', visible=True) as ncnn_actual_upscale_row:
                                 ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = "realesr-animevideov3", type="value")
                                 ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value="x2", type="value")
                                 ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=True, interactive=True) # fix value
@@ -930,41 +907,25 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     """)
                 with gr.Row(variant='compact'):
                       image_path = gr.Textbox(label="Image path", lines=1, interactive=True, value = dv.image_path)
-                with gr.Row(visible=False):
-                    mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
-                # not visible as of 06-02-23 since render_steps is disabled as well and they work together. Need to fix both.
-                with gr.Row(visible=False):
-                    # rend_step Never worked - set to visible false 28-1-23 # MOVE OUT FROM HERE!
-                    render_steps = gr.Checkbox(label="Render steps", value=dv.render_steps, interactive=True, visible=False)
                 ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
                 ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path])
             # **OLD + NON ACTIVES AREA**
             with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
-                # NOT VISIBLE AS OF 09-02-23
-                mask_contrast_adjust = gr.Slider(label="Mask contrast adjust", minimum=0, maximum=1, step=0.01, value=d.mask_contrast_adjust, interactive=True)
-                mask_brightness_adjust = gr.Slider(label="Mask brightness adjust", minimum=0, maximum=1, step=0.01, value=d.mask_brightness_adjust, interactive=True)
-                from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
-                # INVISIBLE AS OF 08-02 (with static value of 8 for both W and H). Was in Perlin section before Perlin Octaves/Persistence
-                with gr.Column(min_width=200, visible=False):
+                    mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
+                    render_steps = gr.Checkbox(label="Render steps", value=dv.render_steps, interactive=True, visible=False)
+                    mask_contrast_adjust = gr.Slider(label="Mask contrast adjust", minimum=0, maximum=1, step=0.01, value=d.mask_contrast_adjust, interactive=True)
+                    mask_brightness_adjust = gr.Slider(label="Mask brightness adjust", minimum=0, maximum=1, step=0.01, value=d.mask_brightness_adjust, interactive=True)
+                    from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
                     perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                     perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
-                with gr.Row(visible=False):
                     filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
-                with gr.Row(visible=False):
                     save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
-                with gr.Row(visible=False):
                     save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
                     display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
-            # NOT VISIBLE 11-02-23 htai
-            with gr.Accordion('Subseed controls & More', open=False, visible=False):
-                # Not visible until fixed, 06-02-23
-                # NOT VISIBLE as of 11-02 - we have sch now. will delete the actual params in a later date
-                with gr.Row(variant='compact', visible=False):
                     seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
                     n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
-            with gr.Row(visible=False):
-                save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
-                show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
+                    save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
+                    show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
     fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
     r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
@@ -974,6 +935,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence)
+    animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=guided_images_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
@@ -1007,7 +969,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
     frame_interpolation_engine.change(fn=change_interp_x_max_limit,inputs=[frame_interpolation_engine,frame_interpolation_x_amount],outputs=frame_interpolation_x_amount)
     [change_fn.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps) for change_fn in [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_slow_mo_enabled]]
-    # Populate the above FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_interpolate_chosen_file)
+    # Populate the FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_interpolate_chosen_file)
     vid_to_interpolate_chosen_file.change(gradio_f_interp_get_fps_and_fcount,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount],outputs=[in_vid_fps_ui_window,in_vid_frame_count_window, out_interp_vid_estimated_fps])
     vid_to_interpolate_chosen_file.change(fn=hide_interp_stats,inputs=[vid_to_interpolate_chosen_file],outputs=[interp_live_stats_row])
     interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row,interp_existing_video_row]
@@ -1145,8 +1107,7 @@ def process_args(args_dict_main):
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
     positive_prompts = args_dict_main['animation_prompts_positive']
     negative_prompts = args_dict_main['animation_prompts_negative']
-    # remove --neg from negative_prompts if recieved by mistake
-    negative_prompts = negative_prompts.replace('--neg', '')
+    negative_prompts = negative_prompts.replace('--neg', '') # remove --neg from negative_prompts if recieved by mistake
     for key in root.animation_prompts:
         animationPromptCurr = root.animation_prompts[key]
         root.animation_prompts[key] = f"{positive_prompts} {animationPromptCurr} {'' if '--neg' in animationPromptCurr else '--neg'} {negative_prompts}"
@@ -1180,7 +1141,6 @@ def process_args(args_dict_main):
     p.fill = args.fill
     p.ddim_eta = args.ddim_eta
 
-    # TODO: Handle batch name dynamically?
     current_arg_list = [args, anim_args, video_args, parseq_args]
     args.outdir = os.path.join(p.outpath_samples, args.batch_name)
     root.outpath_samples = args.outdir
