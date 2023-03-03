@@ -69,7 +69,7 @@ def generate(args, anim_args, loop_args, controlnet_args, root, frame = 0, retur
     init_image = None
     image_init0 = None
 
-    if loop_args.use_looper:
+    if loop_args.use_looper and anim_args.animation_mode in ['2D','3D']:
         # TODO find out why we need to set this in the init tab
         if args.strength == 0:
             raise RuntimeError("Strength needs to be greater than 0 in Init tab and strength_0_no_init should *not* be checked")
@@ -149,13 +149,13 @@ def generate(args, anim_args, loop_args, controlnet_args, root, frame = 0, retur
         img = args.init_sample
         init_image = img
         image_init0 = img
-        if loop_args.use_looper and isJson(loop_args.imagesToKeyframe):
+        if loop_args.use_looper and isJson(loop_args.imagesToKeyframe) and anim_args.animation_mode in ['2D','3D']:
             init_image = Image.blend(init_image, init_image2, blendFactor)
             correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
             p.color_corrections = [processing.setup_color_correction(correction_colors)]
 
     # this is the first pass
-    elif loop_args.use_looper or (args.use_init and ((args.init_image != None and args.init_image != ''))):
+    elif (loop_args.use_looper and anim_args.animation_mode in ['2D','3D']) or (args.use_init and ((args.init_image != None and args.init_image != ''))):
         init_image, mask_image = load_img(image_init0, # initial init image
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
