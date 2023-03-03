@@ -68,7 +68,7 @@ class FrameInterpolater():
     def get_inbetweens(self, key_frames, integer=False, interp_method='Linear', is_single_string = False):
         key_frame_series = pd.Series([np.nan for a in range(self.max_frames)])
         # get our ui variables set for numexpr.evaluate
-        max_f = self.max_frames
+        max_f = self.max_frames -1
         s = self.seed
         for i in range(0, self.max_frames):
             t = i
@@ -102,7 +102,7 @@ class FrameInterpolater():
         frames = dict()
         for match_object in string.split(","):
             frameParam = match_object.split(":")
-            max_f = self.max_frames
+            max_f = self.max_frames -1
             s = self.seed
             frame = int(frameParam[0]) if check_is_number(frameParam[0].strip()) else int(numexpr.evaluate(frameParam[0].strip()))
             param = frameParam[1].strip()
