@@ -229,7 +229,7 @@ def on_ui_tabs():
                         [i1, close_btn, btn],
                         )
                 id_part = 'deforum'
-                with gr.Row(elem_id=f"{id_part}_generate_box"):
+                with gr.Row(elem_id=f"{id_part}_generate_box", variant='compact'):
                     skip = gr.Button('Skip', elem_id=f"{id_part}_skip", visible=False)
                     interrupt = gr.Button('Interrupt', elem_id=f"{id_part}_interrupt", visible=True)
                     submit = gr.Button('Generate', elem_id=f"{id_part}_generate", variant='primary')
