@@ -381,12 +381,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
         
         max_f = anim_args.max_frames - 1
-        prompt_split = re.split("`(.*?)`", args.prompt)
-        if len(prompt_split) > 1:
-            prompt_parsed = ''.join([prompt_split[value-1]+f'{numexpr.evaluate(prompt_split[value].replace("t",f"{frame_idx}").replace("max_f" , f"{max_f}"))}' for value in (range(1, len(prompt_split), 2))])
-        else:
-            prompt_parsed = args.prompt
-        prompt_parsed += ')' if ')' in prompt_split[-1] else "" # append last )
+        pattern = re.compile(r'`.*?`')
+        prompt_parsed = re.sub(pattern, lambda m: m.group(0)
+                               .replace('t', f'{frame_idx}')
+                               .replace("max_f" , f"{max_f}")
+                               .replace('`',''), args.prompt)
 
         prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
         prompt_to_print = prompt_to_print.strip()
