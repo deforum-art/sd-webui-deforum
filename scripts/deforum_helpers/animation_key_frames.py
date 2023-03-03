@@ -74,13 +74,11 @@ class FrameInterpolater():
             if i in key_frames:
                 value = key_frames[i]
                 value_is_number = check_is_number(value)
-                # if it's only a number, leave the rest for the default interpolation
-                if value_is_number:
+                if value_is_number: # if it's only a number, leave the rest for the default interpolation
                     key_frame_series[i] = value
-                if not value_is_number:
-                    if is_single_string:
-                        value = value.replace("'","").replace('"',"")
-                    key_frame_series[i] = numexpr.evaluate(value) if not is_single_string else value # workaround for values formatted like 0:("I am test") //used for sampler schedules
+                if not value_is_number: # workaround for values formatted like 0:("I am test") //used for sampler schedules
+                    key_frame_series[i] = numexpr.evaluate(value) if not is_single_string else value.replace("'","").replace('"',"")
+        
         key_frame_series = key_frame_series.astype(float) if not is_single_string else key_frame_series # as string
         
         if interp_method == 'Cubic' and len(key_frames.items()) <= 3:
