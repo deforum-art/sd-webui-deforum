@@ -431,7 +431,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             sd_hijack.model_hijack.hijack(sd_model)
         
         # sample the diffusion model
-        image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
         # intercept and override to grayscale
@@ -446,7 +446,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 while not image.getbbox():
                     print("Rerolling with +1 seed...")
                     args.seed += 1
-                    image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+                    image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                     patience -= 1
                     if patience == 0:
                         print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
