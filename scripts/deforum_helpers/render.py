@@ -2,7 +2,9 @@ import os
 import json
 import pandas as pd
 import cv2
+import re
 import numpy as np
+import numexpr
 from PIL import Image, ImageOps
 from .rich import console
 
@@ -43,8 +45,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
-    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args)
+    keys = DeformAnimKeys(anim_args, args.seed) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
     # resume animation
     start_frame = 0
     if anim_args.resume_from_timestring:
@@ -88,8 +90,12 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
+        max_f = anim_args.max_frames - 1
         for i, prompt in animation_prompts.items():
-            prompt_series[int(i)] = prompt
+            if str(i).isdigit():
+                prompt_series[int(i)] = prompt
+            else:
+                prompt_series[int(numexpr.evaluate(i))] = prompt
         prompt_series = prompt_series.ffill().bfill()
 
     # check for video inits
@@ -373,8 +379,16 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
-            
-        prompt_to_print, *after_neg = args.prompt.strip().split("--neg")
+        
+        max_f = anim_args.max_frames - 1
+        prompt_split = re.split("`(.*?)`", args.prompt)
+        if len(prompt_split) > 1:
+            prompt_parsed = ''.join([prompt_split[value-1]+f'{numexpr.evaluate(prompt_split[value].replace("t",f"{frame_idx}").replace("max_f" , f"{max_f}"))}' for value in (range(1, len(prompt_split), 2))])
+        else:
+            prompt_parsed = args.prompt
+        prompt_parsed += ')' if ')' in prompt_split[-1] else "" # append last )
+
+        prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
         prompt_to_print = prompt_to_print.strip()
         after_neg = "".join(after_neg).strip()
 
