@@ -39,3 +39,7 @@
 #below_interpolate_butts_msg {
 	text-align: center !important;
 }
+
+#tab_deforum_interface .p-3 {
+  padding: 0.5rem;
+}
