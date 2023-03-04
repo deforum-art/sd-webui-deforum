@@ -9,7 +9,7 @@ import requests
 import traceback
 import sys
 
-from .animation_key_frames import DeforumAnimKeys
+from .animation_key_frames import DeformAnimKeys
 from .rich import console
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -44,7 +44,7 @@ class ParseqAnimKeys():
         else:
             self.parseq_json = json.loads(manifestOrUrl)
 
-        self.default_anim_keys = DeforumAnimKeys(anim_args)
+        self.default_anim_keys = DeformAnimKeys(anim_args)
         self.rendered_frames = self.parseq_json['rendered_frames']       
         self.max_frame = self.get_max('frame')
         self.required_frames = anim_args.max_frames
