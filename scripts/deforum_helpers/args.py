@@ -559,23 +559,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, value = "")
             with gr.Row(variant='compact'):
                 animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, value = "")
-            # COMPOSABLE MASK SCHEDULING ACCORD
-            with gr.Accordion('Composable Mask scheduling', open=False):
-                gr.HTML("""
-                        <ul style="list-style-type:circle; margin-left:0.75em; margin-bottom:0.2em">
-                        <li>To enable, check use_mask in the Init tab</li>
-                        <li>Supports boolean operations: (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations)</li>
-                        <li>default variables: in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}</li>
-                        <li>masks from files: in [], like [mask1.png]</li>
-                        <li>description-based: <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt</li>
-                        </ul>
-                        """)
-                with gr.Row(variant='compact'):
-                    mask_schedule = gr.Textbox(label="Mask schedule", lines=1, value = da.mask_schedule, interactive=True)
-                with gr.Row(variant='compact'):
-                    use_noise_mask = gr.Checkbox(label="Use noise mask", value=da.use_noise_mask, interactive=True)
-                with gr.Row(variant='compact'):
-                    noise_mask_schedule = gr.Textbox(label="Noise mask schedule", lines=1, value = da.noise_mask_schedule, interactive=True)
         # INIT MAIN TAB
         with gr.Tab('Init'):
             # IMAGE INIT INNER-TAB
