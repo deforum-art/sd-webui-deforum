@@ -240,7 +240,7 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
     field_names1 += ["Subseed", "Subs. str"] * (anim_args.enable_subseed_scheduling)
     field_names1 += ["Sampler"] * anim_args.enable_sampler_scheduling
     field_names1 += ["Checkpoint"] * anim_args.enable_checkpoint_scheduling
-    
+
     if anim_args.animation_mode == '2D':
         short_zoom = round(keys.zoom_series[frame_idx], 6)
         field_names2 = ["Angle", "Zoom"]
@@ -278,59 +278,4 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
                   str(keys.perspective_flip_gamma_series[frame_idx]), str(keys.perspective_flip_fv_series[frame_idx])]
 
     table.add_row(*rows1, *rows2)
-    console.print(table)
-
-
-def print_generate_table(args, anim_args, p):
-    from rich.table import Table
-    from rich import box
-    table = Table(padding=0, box=box.ROUNDED)
-    field_names = ["Steps", "CFG"]
-    if anim_args.animation_mode != 'Interpolation':
-        field_names.append("Denoise")
-    field_names += ["Subseed", "Subs. str"] * (anim_args.enable_subseed_scheduling)
-    field_names += ["Sampler"] * anim_args.enable_sampler_scheduling
-    field_names += ["Checkpoint"] * anim_args.enable_checkpoint_scheduling
-    for field_name in field_names:
-        table.add_column(field_name, justify="center")
-    rows = [str(p.steps), str(p.cfg_scale)]
-    if anim_args.animation_mode != 'Interpolation':
-        rows.append(str(p.denoising_strength))
-    rows += [str(p.subseed), str(p.subseed_strength)] * (anim_args.enable_subseed_scheduling)
-    rows += [p.sampler_name] * anim_args.enable_sampler_scheduling
-    rows += [str(args.checkpoint)] * anim_args.enable_checkpoint_scheduling
-    table.add_row(*rows)
-
-    console.print(table)
-    
-def print_render_table(anim_args, keys, frame_idx):
-    from rich.table import Table
-    from rich import box
-    table = Table(padding=0, box=box.ROUNDED)
-    field_names = []
-    if anim_args.animation_mode == '2D':
-        short_zoom = round(keys.zoom_series[frame_idx], 6)
-        field_names += ["Angle", "Zoom"]
-    field_names += ["Tr X", "Tr Y"]
-    if anim_args.animation_mode == '3D':
-        field_names += ["Tr Z", "Ro X", "Ro Y", "Ro Z"]
-        if anim_args.aspect_ratio_schedule.replace(" ", "") != '0:(1)':
-            field_names += ["Asp. Ratio"]
-    if anim_args.enable_perspective_flip:
-        field_names += ["Pf T", "Pf P", "Pf G", "Pf F"]
-    for field_name in field_names:
-        table.add_column(field_name, justify="center")
-    
-    rows = []
-    if anim_args.animation_mode == '2D':
-        rows += [str(keys.angle_series[frame_idx]),str(short_zoom)]
-    rows += [str(keys.translation_x_series[frame_idx]),str(keys.translation_y_series[frame_idx])]
-    if anim_args.animation_mode == '3D':
-        rows += [str(keys.translation_z_series[frame_idx]),str(keys.rotation_3d_x_series[frame_idx]),str(keys.rotation_3d_y_series[frame_idx]),str(keys.rotation_3d_z_series[frame_idx])]
-        if anim_args.aspect_ratio_schedule.replace(" ", "") != '0:(1)':
-            rows += [str(keys.aspect_ratio_series[frame_idx])]
-    if anim_args.enable_perspective_flip:
-        rows +=[str(keys.perspective_flip_theta_series[frame_idx]), str(keys.perspective_flip_phi_series[frame_idx]), str(keys.perspective_flip_gamma_series[frame_idx]), str(keys.perspective_flip_fv_series[frame_idx])]
-    table.add_row(*rows)
-    
     console.print(table)

@@ -383,10 +383,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
         if after_neg and after_neg.strip():
             print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
-        # if not using_vid_init:
-            # print motion table to cli if anim mode = 2D or 3D
-            # if anim_args.animation_mode in ['2D','3D']:
-                # print_render_table(anim_args, keys, frame_idx)
 
         # grab init image for current frame
         elif using_vid_init:
@@ -478,35 +474,3 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         state.current_image = image
 
         args.seed = next_seed(args)
-
-# def print_render_table(anim_args, keys, frame_idx):
-    # from rich.table import Table
-    # from rich import box
-    # table = Table(padding=0, box=box.ROUNDED)
-    # field_names = []
-    # if anim_args.animation_mode == '2D':
-        # short_zoom = round(keys.zoom_series[frame_idx], 6)
-        # field_names += ["Angle", "Zoom"]
-    # field_names += ["Tr X", "Tr Y"]
-    # if anim_args.animation_mode == '3D':
-        # field_names += ["Tr Z", "Ro X", "Ro Y", "Ro Z"]
-        # if anim_args.aspect_ratio_schedule.replace(" ", "") != '0:(1)':
-            # field_names += ["Asp. Ratio"]
-    # if anim_args.enable_perspective_flip:
-        # field_names += ["Pf T", "Pf P", "Pf G", "Pf F"]
-    # for field_name in field_names:
-        # table.add_column(field_name, justify="center")
-    
-    # rows = []
-    # if anim_args.animation_mode == '2D':
-        # rows += [str(keys.angle_series[frame_idx]),str(short_zoom)]
-    # rows += [str(keys.translation_x_series[frame_idx]),str(keys.translation_y_series[frame_idx])]
-    # if anim_args.animation_mode == '3D':
-        # rows += [str(keys.translation_z_series[frame_idx]),str(keys.rotation_3d_x_series[frame_idx]),str(keys.rotation_3d_y_series[frame_idx]),str(keys.rotation_3d_z_series[frame_idx])]
-        # if anim_args.aspect_ratio_schedule.replace(" ", "") != '0:(1)':
-            # rows += [str(keys.aspect_ratio_series[frame_idx])]
-    # if anim_args.enable_perspective_flip:
-        # rows +=[str(keys.perspective_flip_theta_series[frame_idx]), str(keys.perspective_flip_phi_series[frame_idx]), str(keys.perspective_flip_gamma_series[frame_idx]), str(keys.perspective_flip_fv_series[frame_idx])]
-    # table.add_row(*rows)
-    
-    # console.print(table)
