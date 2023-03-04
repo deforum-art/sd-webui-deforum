@@ -273,7 +273,7 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
 
         if anim_args.animation_mode == '2D':
             rows2 += [str(keys.angle_series[frame_idx]), str(short_zoom)]
-        rows2 += [str(keys.translation_x_series[frame_idx]), str(keys.translation_y_series[frame_idx])]
+        rows2 += [str(keys.translation_x_series[frame_idx]), str(keys.translation_y_series[frame_idx])] # add trans_z and y
         if anim_args.animation_mode == '3D':
             rows2 += [str(keys.translation_z_series[frame_idx]), str(keys.rotation_3d_x_series[frame_idx]),
                       str(keys.rotation_3d_y_series[frame_idx]), str(keys.rotation_3d_z_series[frame_idx])]
