@@ -204,7 +204,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
             args.steps = int(keys.steps_schedule_series[frame_idx])
         if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
+            print(f"scheduled_sampler_name: {keys.sampler_schedule_series[frame_idx]}")
             scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
+            
         if anim_args.enable_clipskip_scheduling and keys.clipskip_schedule_series[frame_idx] is not None:
             scheduled_clipskip = int(keys.clipskip_schedule_series[frame_idx])
         if args.use_mask and keys.mask_schedule_series[frame_idx] is not None:
@@ -396,10 +398,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
         if after_neg and after_neg.strip():
             print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
-        if not using_vid_init:
+        # if not using_vid_init:
             # print motion table to cli if anim mode = 2D or 3D
-            if anim_args.animation_mode in ['2D','3D']:
-                print_render_table(anim_args, keys, frame_idx)
+            # if anim_args.animation_mode in ['2D','3D']:
+                # print_render_table(anim_args, keys, frame_idx)
 
         # grab init image for current frame
         elif using_vid_init:
