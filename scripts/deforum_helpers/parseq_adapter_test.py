@@ -4,7 +4,7 @@
 
 import unittest
 from .parseq_adapter import ParseqAnimKeys 
-from .animation_key_frames import DeformAnimKeys 
+from .animation_key_frames import DeforumAnimKeys 
 from unittest.mock import patch
 from unittest.mock import MagicMock, PropertyMock
 
@@ -12,7 +12,7 @@ from types import SimpleNamespace
 
 class TestParseqAnimKeys(unittest.TestCase):
 
-    @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
+    @patch('deforum_helpers.parseq_adapter.DeforumAnimKeys')
     def test_withprompt(self, mock_deformanimkeys):
         parseq_args = SimpleNamespace(parseq_use_deltas=True, parseq_manifest=""" 
             {                
@@ -37,8 +37,8 @@ class TestParseqAnimKeys(unittest.TestCase):
         self.assertTrue(parseq_anim_keys.manages_prompts())
 
 
-    @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
-    def test_withoutprompt(self, mock_deformanimkeys):
+    @patch('deforum_helpers.parseq_adapter.DeforumAnimKeys')
+    def test_withoutprompt(self, mock_deforumanimkeys):
         parseq_args = SimpleNamespace(parseq_use_deltas=True, parseq_manifest=""" 
             {                
                 "options": {
@@ -59,8 +59,8 @@ class TestParseqAnimKeys(unittest.TestCase):
         parseq_anim_keys = ParseqAnimKeys(parseq_args, anim_args, video_args)
         self.assertFalse(parseq_anim_keys.manages_prompts())
 
-    @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
-    def test_usedelta(self, mock_deformanimkeys):
+    @patch('deforum_helpers.parseq_adapter.DeforumAnimKeys')
+    def test_usedelta(self, mock_deforumanimkeys):
         parseq_args = SimpleNamespace(parseq_use_deltas=True, parseq_manifest=""" 
             {                
                 "options": {
@@ -85,8 +85,8 @@ class TestParseqAnimKeys(unittest.TestCase):
         parseq_anim_keys = ParseqAnimKeys(parseq_args, anim_args, video_args)
         self.assertEqual(parseq_anim_keys.angle_series[1], 90)
 
-    @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
-    def test_usenondelta(self, mock_deformanimkeys):
+    @patch('deforum_helpers.parseq_adapter.DeforumAnimKeys')
+    def test_usenondelta(self, mock_deforumanimkeys):
         parseq_args = SimpleNamespace(parseq_use_deltas=False, parseq_manifest=""" 
             {                
                 "options": {
@@ -111,8 +111,8 @@ class TestParseqAnimKeys(unittest.TestCase):
         parseq_anim_keys = ParseqAnimKeys(parseq_args, anim_args, video_args)
         self.assertEqual(parseq_anim_keys.angle_series[1], 180)
 
-    @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
-    def test_fallbackonundefined(self, mock_deformanimkeys):
+    @patch('deforum_helpers.parseq_adapter.DeforumAnimKeys')
+    def test_fallbackonundefined(self, mock_deforumanimkeys):
         parseq_args = SimpleNamespace(parseq_use_deltas=False, parseq_manifest=""" 
             {                
                 "options": {

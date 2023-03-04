@@ -203,12 +203,12 @@ class DeforumTQDM:
         self._video_args = video_args
 
     def reset(self):
-        from .animation_key_frames import DeformAnimKeys
+        from .animation_key_frames import DeforumAnimKeys
         from .parseq_adapter import ParseqAnimKeys
         deforum_total = 0
         # FIXME: get only amount of steps
         use_parseq = self._parseq_args.parseq_manifest != None and self._parseq_args.parseq_manifest.strip()
-        keys = DeformAnimKeys(self._anim_args) if not use_parseq else ParseqAnimKeys(self._parseq_args, self._anim_args, self._video_args, mute=True)
+        keys = DeforumAnimKeys(self._anim_args) if not use_parseq else ParseqAnimKeys(self._parseq_args, self._anim_args, self._video_args, mute=True)
         
         start_frame = 0
         if self._anim_args.resume_from_timestring:

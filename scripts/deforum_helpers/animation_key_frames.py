@@ -4,7 +4,7 @@ import numexpr
 import pandas as pd
 from .prompt import check_is_number
 
-class DeformAnimKeys():
+class DeforumAnimKeys():
     def __init__(self, anim_args):
         self.angle_series = get_inbetweens(parse_key_frames(anim_args.angle), anim_args.max_frames)
         self.zoom_series = get_inbetweens(parse_key_frames(anim_args.zoom), anim_args.max_frames)

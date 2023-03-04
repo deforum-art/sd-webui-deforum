@@ -6,7 +6,7 @@ from .seed import next_seed
 from .video_audio_utilities import vid2frames
 from .prompt import interpolate_prompts
 from .generate import generate
-from .animation_key_frames import DeformAnimKeys
+from .animation_key_frames import DeforumAnimKeys
 from .parseq_adapter import ParseqAnimKeys
 from .save_images import save_image
 from .settings import get_keys_to_exclude
@@ -74,7 +74,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
 
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
+    keys = DeforumAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
