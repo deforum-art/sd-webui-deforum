@@ -241,7 +241,7 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
         rows1.append(f"{p.denoising_strength:.5g}" if p.denoising_strength is not None else "None")
 
     rows1 += [str(p.subseed), f"{p.subseed_strength:.5g}"] * (anim_args.enable_subseed_scheduling)
-    rows1 += [p.sampler_name] * anim_args.enable_sampler_scheduling
+    rows1 += [args.sampler] * anim_args.enable_sampler_scheduling
     rows1 += [str(args.checkpoint)] * anim_args.enable_checkpoint_scheduling
     
     rows2 = []
