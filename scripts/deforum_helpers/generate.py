@@ -253,7 +253,7 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
     rows1 += [str(args.checkpoint)] * anim_args.enable_checkpoint_scheduling
     
     rows2 = []
-    if anim_args.animation_mode not in ['Video Input']:
+    if anim_args.animation_mode not in ['Video Input', 'Interpolation']:
         if anim_args.animation_mode == '2D':
             short_zoom = round(keys.zoom_series[frame_idx], 6)
             field_names2 = ["Angle", "Zoom"]
