@@ -238,15 +238,15 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
 
     rows1 = [str(p.steps), str(p.cfg_scale)]
     if anim_args.animation_mode != 'Interpolation':
-        rows1.append(str(p.denoising_strength))
-    rows1 += [str(p.subseed), str(p.subseed_strength)] * (anim_args.enable_subseed_scheduling)
+        rows1.append(f"{p.denoising_strength:.5g}" if p.denoising_strength is not None else "None")
+
+    rows1 += [str(p.subseed), f"{p.subseed_strength:.5g}"] * (anim_args.enable_subseed_scheduling)
     rows1 += [p.sampler_name] * anim_args.enable_sampler_scheduling
     rows1 += [str(args.checkpoint)] * anim_args.enable_checkpoint_scheduling
     
     rows2 = []
     if anim_args.animation_mode not in ['Video Input', 'Interpolation']:
         if anim_args.animation_mode == '2D':
-            short_zoom = round(keys.zoom_series[frame_idx], 6)
             field_names2 = ["Angle", "Zoom"]
         else:
             field_names2 = []
@@ -262,16 +262,17 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
             table.add_column(field_name, justify="center")
 
         if anim_args.animation_mode == '2D':
-            rows2 += [str(keys.angle_series[frame_idx]), str(short_zoom)]
-        rows2 += [str(keys.translation_x_series[frame_idx]), str(keys.translation_y_series[frame_idx])] # add trans_z and y
+            rows2 += [f"{keys.angle_series[frame_idx]:.5g}", f"{keys.zoom_series[frame_idx]:.5g}"]
+        rows2 += [f"{keys.translation_x_series[frame_idx]:.5g}", f"{keys.translation_y_series[frame_idx]:.5g}"]
+ 
         if anim_args.animation_mode == '3D':
-            rows2 += [str(keys.translation_z_series[frame_idx]), str(keys.rotation_3d_x_series[frame_idx]),
-                      str(keys.rotation_3d_y_series[frame_idx]), str(keys.rotation_3d_z_series[frame_idx])]
+            rows2 += [f"{keys.translation_z_series[frame_idx]:.5g}", f"{keys.rotation_3d_x_series[frame_idx]:.5g}",
+                      f"{keys.rotation_3d_y_series[frame_idx]:.5g}", f"{keys.rotation_3d_z_series[frame_idx]:.5g}"]
             if anim_args.aspect_ratio_schedule.replace(" ", "") != '0:(1)':
-                rows2 += [str(keys.aspect_ratio_series[frame_idx])]
+                rows2 += [f"{keys.aspect_ratio_series[frame_idx]:.5g}"]
         if anim_args.enable_perspective_flip:
-            rows2 += [str(keys.perspective_flip_theta_series[frame_idx]), str(keys.perspective_flip_phi_series[frame_idx]),
-                      str(keys.perspective_flip_gamma_series[frame_idx]), str(keys.perspective_flip_fv_series[frame_idx])]
+            rows2 += [f"{keys.perspective_flip_theta_series[frame_idx]:.5g}", f"{keys.perspective_flip_phi_series[frame_idx]:.5g}",
+                      f"{keys.perspective_flip_gamma_series[frame_idx]:.5g}", f"{keys.perspective_flip_fv_series[frame_idx]:.5g}"]
 
     table.add_row(*rows1, *rows2)
     console.print(table)
