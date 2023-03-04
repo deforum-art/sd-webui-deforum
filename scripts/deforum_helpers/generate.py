@@ -52,11 +52,7 @@ def pairwise_repl(iterable):
 
 def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
     assert args.prompt is not None
-    
-    # if anim_args.animation_mode == 'Video Input'
-        # if anim_args.animation_mode in ['2D','3D']:
-            # print_render_table(anim_args, keys, frame)
-    
+
     # Setup the pipeline
     p = get_webui_sd_pipeline(args, root, frame)
     p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame)
