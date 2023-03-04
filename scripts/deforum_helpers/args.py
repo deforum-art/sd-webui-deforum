@@ -17,7 +17,6 @@ def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
     half_precision = not cmd_opts.no_half
-    mask_preset_names = ['everywhere','init_mask','video_mask']
     p = None
     frames_cache = []
     initial_seed = None
@@ -69,10 +68,6 @@ def DeforumAnimArgs():
     # Sampler Scheduling
     enable_sampler_scheduling = False 
     sampler_schedule = '0: ("Euler a")'
-    # Composable mask scheduling
-    use_noise_mask = False
-    mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
-    noise_mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
     # Checkpoint Scheduling
     enable_checkpoint_scheduling = False
     checkpoint_schedule = '0: ("model1.ckpt"), 100: ("model2.ckpt")'
@@ -221,7 +216,6 @@ def DeforumArgs():
     init_latent = None
     init_sample = None
     init_c = None
-    mask_image = None
     noise_mask = None
     seed_internal = 0
 
@@ -1009,7 +1003,6 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         fov_schedule, aspect_ratio_schedule, near_schedule, far_schedule,
                         seed_schedule,
                         enable_sampler_scheduling, sampler_schedule,
-                        mask_schedule, use_noise_mask, noise_mask_schedule,
                         enable_checkpoint_scheduling, checkpoint_schedule,
                         enable_clipskip_scheduling, clipskip_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,

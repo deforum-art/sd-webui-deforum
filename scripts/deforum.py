@@ -36,6 +36,7 @@ from modules.shared import opts, cmd_opts, state
 from modules.ui import create_output_panel, plaintext_to_html, wrap_gradio_call
 from types import SimpleNamespace
 
+# TODO: test if gradio passes its stuff as named kwargs and if so, replace the args to **kwargs
 def run_deforum(*args, **kwargs):
     args_dict = {deforum_args.component_names[i]: args[i+2] for i in range(0, len(deforum_args.component_names))}
     p = StableDiffusionProcessingImg2Img(
@@ -50,9 +51,8 @@ def run_deforum(*args, **kwargs):
     args_dict['p'] = p
     
     root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict)
-    root.clipseg_model = None
     root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
-    root.basedirs = basedirs
+    root.basedirs = basedirs # do we need this line?! 04-03-23
 
     for basedir in basedirs:
         sys.path.extend([
@@ -275,6 +275,7 @@ def on_ui_tabs():
                          html_log,
                     ],
                 )
+        
         
         settings_component_list = [components[name] for name in deforum_args.settings_component_names]
         video_settings_component_list = [components[name] for name in deforum_args.video_args_names]

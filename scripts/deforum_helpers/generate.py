@@ -61,6 +61,7 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
         print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
         print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
         args.strength = 0
+    
     processed = None
     mask_image = None
     init_image = None
@@ -186,7 +187,16 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
     if processed is None:
         # Mask functions
         if args.use_mask:
-            mask = args.mask_image
+            assert args.mask_file is not None or mask_image is not None, "use_mask==True: An mask image is required for a mask. Please enter a mask_file or use an init image with an alpha channel"
+            assert args.use_init, "use_mask==True: use_init is required for a mask"
+            mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
+                                (args.W, args.H),
+                                args.mask_contrast_adjust, 
+                                args.mask_brightness_adjust)
+            #prevent loaded mask from throwing errors in Image operations if completely black and crop and resize in webui pipeline
+            #doing this after contrast and brightness adjustments to ensure that mask is not passed as black or blank
+            mask = check_mask_for_errors(mask, args.invert_mask)
+            args.noise_mask = mask
             #assign masking options to pipeline
             if mask is not None:
                 p.inpainting_mask_invert = args.invert_mask
@@ -196,7 +206,7 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
         else:
             mask = None
 
-        assert not ( (mask is not None and args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
+        assert not ( (args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
         
         p.init_images = [init_image]
         p.image_mask = mask

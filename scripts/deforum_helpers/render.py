@@ -135,34 +135,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     args.n_samples = 1
     frame_idx = start_frame
-
-    # reset the mask vals as they are overwritten in the compose_mask algorithm
-    mask_vals = {}
-    noise_mask_vals = {}
-
-    mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
-    noise_mask_vals['everywhere'] = Image.new('1', (args.W, args.H), 1)
-
-    mask_image = None
     
-    if args.use_init and args.init_image != None and args.init_image != '':
-        _, mask_image = load_img(args.init_image, 
-                                        shape=(args.W, args.H),  
-                                        use_alpha_as_mask=args.use_alpha_as_mask)
-        mask_vals['init_mask'] = mask_image
-        noise_mask_vals['init_mask'] = mask_image
-    
-    # Grab the first frame masks since they wont be provided until next frame
-    if mask_image is None and args.use_mask:
-        mask_vals['init_mask'] = get_mask(args)
-        noise_mask_vals['init_mask'] = get_mask(args) # TODO?: add a different default noise mask
-
-    if anim_args.use_mask_video:
-        mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
-        noise_mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
-    else:
-        mask_vals['video_mask'] = None
-        noise_mask_vals['video_mask'] = None
+    # Grab the first frame noise mask since it wont be provided until next frame
+    if args.use_mask and not anim_args.use_mask_video:
+        args.noise_mask = get_mask(args)
+    elif args.use_mask and anim_args.use_mask_video:
+        args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
+        args.noise_mask = get_mask(args)
 
     #Webui
     state.job_count = anim_args.max_frames
@@ -192,24 +171,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             "mask_auto_contrast_cutoff_high": int(keys.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx]),
         }        
         scheduled_sampler_name = None
+
         scheduled_clipskip = None
-        mask_seq = None
-        noise_mask_seq = None
+
         if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
             args.steps = int(keys.steps_schedule_series[frame_idx])
         if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
             scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
-            
+
         if anim_args.enable_clipskip_scheduling and keys.clipskip_schedule_series[frame_idx] is not None:
             scheduled_clipskip = int(keys.clipskip_schedule_series[frame_idx])
-        if args.use_mask and keys.mask_schedule_series[frame_idx] is not None:
-            mask_seq = keys.mask_schedule_series[frame_idx]
-        if anim_args.use_noise_mask and keys.noise_mask_schedule_series[frame_idx] is not None:
-            noise_mask_seq = keys.noise_mask_schedule_series[frame_idx]
-        
-        if args.use_mask and not anim_args.use_noise_mask:
-            noise_mask_seq = mask_seq
-        
+       
         depth = None
 
         if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
@@ -338,8 +310,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             if amount > 0:
                 contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold, mask_image if args.use_mask else None)
             # apply frame noising
-            if args.use_mask or anim_args.use_noise_mask:
-                args.noise_mask = compose_mask_with_check(root, args, noise_mask_seq, noise_mask_vals, Image.fromarray(cv2.cvtColor(contrast_image, cv2.COLOR_BGR2RGB)))
             noised_image = add_noise(contrast_image, noise, args.seed, anim_args.noise_type,
                             (anim_args.perlin_w, anim_args.perlin_h, anim_args.perlin_octaves, anim_args.perlin_persistence),
                              args.noise_mask, args.invert_mask)
@@ -385,15 +355,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
 
         # grab init image for current frame
-        elif using_vid_init:
+        if using_vid_init:
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
-        if anim_args.use_mask_video:
-            mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
 
-        if args.use_mask:
-            args.mask_image = compose_mask_with_check(root, args, mask_seq, mask_vals, args.init_sample) if args.init_sample is not None else None # we need it only after the first frame anyway
+            if anim_args.use_mask_video:
+                args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
 
         # setting up some arguments for the looper
         loop_args.imageStrength = loopSchedulesAndData.image_strength_schedule_series[frame_idx]
