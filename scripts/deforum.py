@@ -190,7 +190,7 @@ def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
         components = {}
         dummy_component = gr.Label(visible=False)
-        with gr.Row(elem_id='deforum_progress_row').style(equal_height=False): # DONT ADD VARIANT COMPACT HERE!
+        with gr.Row(elem_id='deforum_progress_row').style(equal_height=False, variant='compact'):
             with gr.Column(scale=1, variant='panel'):
                 components = deforum_args.setup_deforum_setting_dictionary(None, True, True)
         
