@@ -90,7 +90,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
                 if key not in exclude_keys:
                     s[key] = value
         json.dump(s, f, ensure_ascii=False, indent=4)
-
+        
     # Compute interpolated prompts
     if use_parseq and keys.manages_prompts():
         print("Parseq prompts are assumed to already be interpolated - not doing any additional prompt interpolation")
@@ -103,6 +103,11 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
     frame_idx = 0
     # INTERPOLATION MODE
     while frame_idx < anim_args.max_frames:
+    
+        if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
+            args.steps = int(keys.steps_schedule_series[frame_idx])
+        if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
+            scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
         # print data to cli
         prompt_to_print = prompt_series[frame_idx].strip()
         if prompt_to_print.endswith("--neg"):
@@ -141,7 +146,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         if args.seed_behavior == 'schedule' or use_parseq:
             args.seed = int(keys.seed_schedule_series[frame_idx])
         
-        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx)
+        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         filename = f"{args.timestring}_{frame_idx:05}.png"
 
         save_image(image, 'PIL', filename, args, video_args, root)
