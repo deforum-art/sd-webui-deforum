@@ -77,9 +77,10 @@ class FrameInterpolater():
                 value_is_number = check_is_number(value)
                 if value_is_number: # if it's only a number, leave the rest for the default interpolation
                     key_frame_series[i] = value
-                if not value_is_number: # workaround for values formatted like 0:("I am test") //used for sampler schedules
-                    key_frame_series[i] = numexpr.evaluate(value) if not is_single_string else value.replace("'","").replace('"',"")
-        
+                else: # workaround for values formatted like 0:("I am test") //used for sampler schedules
+                    key_frame_series[i] = numexpr.evaluate(value) if not is_single_string else value.replace("'","").replace('"',"").replace('(',"").replace(')',"")
+            elif is_single_string:# take previous string value and replicate it
+                key_frame_series[i] = key_frame_series[i-1]
         key_frame_series = key_frame_series.astype(float) if not is_single_string else key_frame_series # as string
         
         if interp_method == 'Cubic' and len(key_frames.items()) <= 3:
@@ -105,8 +106,7 @@ class FrameInterpolater():
             max_f = self.max_frames -1
             s = self.seed
             frame = int(frameParam[0]) if check_is_number(frameParam[0].strip()) else int(numexpr.evaluate(frameParam[0].strip()))
-            param = frameParam[1].strip()
-            frames[frame] = param.replace(" ", "")
+            frames[frame] = frameParam[1].strip()
         if frames == {} and len(string) != 0:
             raise RuntimeError('Key Frame string not correctly formatted')
         return frames
