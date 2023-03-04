@@ -104,6 +104,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
     # INTERPOLATION MODE
     while frame_idx < anim_args.max_frames:
     
+        scheduled_sampler_name = None
         if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
             args.steps = int(keys.steps_schedule_series[frame_idx])
         if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
