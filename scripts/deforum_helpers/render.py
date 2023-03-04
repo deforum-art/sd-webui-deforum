@@ -307,7 +307,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             contrast_image = (prev_img * contrast).round().astype(np.uint8)
             # anti-blur
             if amount > 0:
-                contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold, mask_image if args.use_mask else None)
+                contrast_image = unsharp_mask(contrast_image, (kernel, kernel), sigma, amount, threshold)
             # apply frame noising
             noised_image = add_noise(contrast_image, noise, args.seed, anim_args.noise_type,
                             (anim_args.perlin_w, anim_args.perlin_h, anim_args.perlin_octaves, anim_args.perlin_persistence),
