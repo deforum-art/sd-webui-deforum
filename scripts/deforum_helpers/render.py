@@ -381,11 +381,14 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
         
         max_f = anim_args.max_frames - 1
-        pattern = re.compile(r'`.*?`')
-        prompt_parsed = re.sub(pattern, lambda m: m.group(0)
-                               .replace('t', f'{frame_idx}')
-                               .replace("max_f" , f"{max_f}")
-                               .replace('`',''), args.prompt)
+        pattern = r'`.*?`'
+        regex = re.compile(pattern)
+        prompt_parsed = args.prompt
+        for match in regex.finditer(prompt_parsed):
+            matched_string = match.group(0)
+            parsed_string = matched_string.replace('t', f'{frame_idx}').replace("max_f" , f"{max_f}").replace('`','')
+            parsed_value = numexpr.evaluate(parsed_string)
+            prompt_parsed = prompt_parsed.replace(matched_string, str(parsed_value))
 
         prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
         prompt_to_print = prompt_to_print.strip()
