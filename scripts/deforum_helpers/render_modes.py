@@ -123,37 +123,22 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         args.prompt = prompt_series[frame_idx]
         args.scale = keys.cfg_scale_schedule_series[frame_idx]
         args.pix2pix_img_cfg_scale = keys.pix2pix_img_cfg_scale_series[frame_idx]
-        
-        scheduled_sampler_name = None
-        scheduled_clipskip = None
-        if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
-            args.steps = int(keys.steps_schedule_series[frame_idx])
-        if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
-            scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
-        if anim_args.enable_clipskip_scheduling and keys.clipskip_schedule_series[frame_idx] is not None:
-            scheduled_clipskip = int(keys.clipskip_schedule_series[frame_idx])
-        
-        if anim_args.enable_checkpoint_scheduling:
-            args.checkpoint = keys.checkpoint_schedule_series[frame_idx]
-            print(f"Checkpoint changed to: {args.checkpoint}")
-        else:
-            args.checkpoint = None
-            
+
+        scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold() if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None else None
+        args.steps = int(keys.steps_schedule_series[frame_idx]) if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None else args.steps
+        scheduled_clipskip = int(keys.clipskip_schedule_series[frame_idx]) if anim_args.enable_clipskip_scheduling and keys.clipskip_schedule_series[frame_idx] is not None else None
+        args.checkpoint = keys.checkpoint_schedule_series[frame_idx] if anim_args.enable_checkpoint_scheduling else None
         if anim_args.enable_subseed_scheduling:
-            args.subseed = keys.subseed_schedule_series[frame_idx]
+            args.subseed = int(keys.subseed_schedule_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
-            
+        else:
+            args.subseed, args.subseed_strength = keys.subseed_schedule_series[frame_idx], keys.subseed_strength_schedule_series[frame_idx]
         if use_parseq:
             anim_args.enable_subseed_scheduling = True
-            args.subseed = int(keys.subseed_series[frame_idx])
-            args.subseed_strength = keys.subseed_strength_series[frame_idx]
-            
-        if args.seed_behavior == 'schedule' or use_parseq:
-            args.seed = int(keys.seed_schedule_series[frame_idx])
-        
-        if scheduled_clipskip is not None:
-            opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip
-        
+            args.subseed, args.subseed_strength = int(keys.subseed_series[frame_idx]), keys.subseed_strength_series[frame_idx]
+        args.seed = int(keys.seed_schedule_series[frame_idx]) if args.seed_behavior == 'schedule' or use_parseq else args.seed
+        opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip if scheduled_clipskip is not None else opts.data["CLIP_stop_at_last_layers"]
+
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         filename = f"{args.timestring}_{frame_idx:05}.png"
 
