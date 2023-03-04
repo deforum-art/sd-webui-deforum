@@ -175,9 +175,8 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
                 enable_hr=None,
                 denoising_strength=None,
             )
-        # print dynamic table to cli
-        # print_generate_table(args, anim_args, p_txt)
-        print_combined_table(args, anim_args, p_txt, keys, frame)
+            
+        print_combined_table(args, anim_args, p_txt, keys, frame) # print dynamic table to cli
 
         if is_controlnet_enabled(controlnet_args):
             processed = process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame)
@@ -203,9 +202,7 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
         p.image_mask = mask
         p.image_cfg_scale = args.pix2pix_img_cfg_scale
         
-        # print dynamic table to cli
-        print_combined_table(args, anim_args, p, keys, frame)
-        # print_generate_table(args, anim_args, p)
+        print_combined_table(args, anim_args, p, keys, frame) # print dynamic table to cli
        
         if is_controlnet_enabled(controlnet_args):
             processed = process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame)
@@ -229,7 +226,6 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
 
     table = Table(padding=0, box=box.ROUNDED)
     
-    # Add columns from the first table
     field_names1 = ["Steps", "CFG"]
     if anim_args.animation_mode != 'Interpolation':
         field_names1.append("Denoise")
@@ -240,7 +236,6 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
     for field_name in field_names1:
         table.add_column(field_name, justify="center")
 
-    # Add rows from the first table
     rows1 = [str(p.steps), str(p.cfg_scale)]
     if anim_args.animation_mode != 'Interpolation':
         rows1.append(str(p.denoising_strength))
@@ -263,7 +258,6 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
         if anim_args.enable_perspective_flip:
             field_names2 += ["Pf T", "Pf P", "Pf G", "Pf F"]
         
-        # add columns to table
         for field_name in field_names2:
             table.add_column(field_name, justify="center")
 
