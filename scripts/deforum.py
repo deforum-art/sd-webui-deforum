@@ -105,7 +105,7 @@ def run_deforum(*args, **kwargs):
         need_to_frame_interpolate = True
         
     if video_args.skip_video_for_run_all:
-        print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
+        print("\nSkipping video creation, uncheck 'Skip video for run all' in 'Output' tab if you want to get a video too :)")
     else:
         import subprocess
 
