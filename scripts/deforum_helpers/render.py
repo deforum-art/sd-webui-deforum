@@ -385,7 +385,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
 
         # grab init image for current frame
-        elif using_vid_init:
+        if using_vid_init:
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
