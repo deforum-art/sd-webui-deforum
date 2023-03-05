@@ -123,7 +123,9 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
     }
     if sampler_name is not None:
         if sampler_name in available_samplers.keys():
-            args.sampler = available_samplers[sampler_name]
+            p.sampler_name = available_samplers[sampler_name]
+        else:
+            raise RuntimeError(f"Sampler name '{sampler_name}' is invalid. Please check the available sampler list in the 'Run' tab")
 
     if args.checkpoint is not None:
         info = sd_models.get_closet_checkpoint_match(args.checkpoint)
