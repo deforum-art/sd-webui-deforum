@@ -211,7 +211,7 @@ def clear_write_buffer(user_args, write_buffer, custom_interp_path):
         item = write_buffer.get()
         if item is None:
             break
-        filename = '{}/{:0>7d}.png'.format(custom_interp_path, cnt)
+        filename = '{}/{:0>9d}.png'.format(custom_interp_path, cnt)
 
         cv2.imwrite(filename, item[:, :, ::-1])
 
@@ -261,7 +261,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
         mp4_path = mp4_path + '_slomo_x' + str(slow_mo_x_amount)
     mp4_path = mp4_path + '.mp4'
 
-    t = os.path.join(img_folder_path, "%07d.png")
+    t = os.path.join(img_folder_path, "%09d.png")
     add_soundtrack = 'None'
     if not audio_path is None:
         add_soundtrack = 'File'
