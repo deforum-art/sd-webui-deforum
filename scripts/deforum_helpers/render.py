@@ -145,10 +145,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     mask_image = None
     
-    if args.use_mask and anim_args.use_mask_video:
-        args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+    # if args.use_mask and anim_args.use_mask_video:
+        # args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
         # args.mask_file = get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True)
-        args.noise_mask = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+        # args.noise_mask = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
         # get_mask(args)
     
     if args.use_init and args.init_image != None and args.init_image != '':
@@ -164,6 +164,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         noise_mask_vals['init_mask'] = get_mask(args) # TODO?: add a different default noise mask
 
     if anim_args.use_mask_video:
+    
+        args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+        args.noise_mask = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+        
         mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
         noise_mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
     else:
