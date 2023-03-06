@@ -4,6 +4,7 @@ from rife.inference_video import run_rife_new_video_infer
 from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio, extract_number, ffmpeg_stitch_video
 from film_interpolation.film_inference import run_film_interp_infer
 from .general_utils import duplicate_pngs_from_folder, checksum, convert_images_from_list
+from modules.shared import opts
 
 # gets 'RIFE v4.3', returns: 'RIFE43'   
 def extract_rife_name(string):
@@ -23,8 +24,6 @@ def set_interp_out_fps(interp_x, slow_x_enabled, slom_x, in_vid_fps):
     if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
         return '---'
 
-    # clean_interp_x = extract_number(interp_x)
-    # clean_slom_x = extract_number(slom_x)
     fps = float(in_vid_fps) * int(interp_x)
     # if slom_x != -1:
     if slow_x_enabled:
@@ -46,10 +45,11 @@ def process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_
 
     _, _, resolution = get_quick_vid_info(file.name)
     folder_name = clean_folder_name(Path(vid_file_name).stem)
-    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
+    outdir = opts.outdir_samples or os.path.join(os.getcwd(), 'outputs')
+    outdir_no_tmp = outdir + f'/frame-interpolation/{folder_name}'
     i = 1
     while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
+        outdir_no_tmp = f"{outdir}/frame-interpolation/{folder_name}_{i}"
         i += 1
 
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
