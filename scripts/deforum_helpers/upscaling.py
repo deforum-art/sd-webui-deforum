@@ -17,16 +17,18 @@ from basicsr.utils.download_util import load_file_from_url
 from .rich import console
 import time
 import subprocess
+from modules.shared import opts
 
 def process_upscale_vid_upload_logic(file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_file_name, keep_imgs, f_location, f_crf, f_preset):
     print("Got a request to *upscale* an existing video.")
-
+    
     in_vid_fps, _, _ = get_quick_vid_info(file.name)
     folder_name = clean_folder_name(Path(vid_file_name).stem)
-    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-upscaling', folder_name)
+    outdir = opts.outdir_samples or os.path.join(os.getcwd(), 'outputs')
+    outdir_no_tmp = outdir + f'/frame-upscaling/{folder_name}'
     i = 1
     while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-upscaling', folder_name + '_' + str(i))
+        outdir_no_tmp = f"{outdir}/frame-upscaling/{folder_name}_{i}"
         i += 1
 
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
@@ -125,10 +127,11 @@ def process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_
     print(f"Got a request to *upscale* a video using {upscale_model} at {upscale_factor}")
 
     folder_name = clean_folder_name(Path(vid_path.orig_name).stem)
-    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-upscaling', folder_name)
+    outdir = opts.outdir_samples or os.path.join(os.getcwd(), 'outputs')
+    outdir_no_tmp = outdir + f'/frame-upscaling/{folder_name}'
     i = 1
     while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-upscaling', folder_name + '_' + str(i))
+        outdir_no_tmp = f"{outdir}/frame-upscaling/{folder_name}_{i}"
         i += 1
 
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
