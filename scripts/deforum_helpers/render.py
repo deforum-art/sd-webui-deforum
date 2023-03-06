@@ -122,7 +122,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         last_frame = start_frame-1
         if turbo_steps > 1:
             last_frame -= last_frame%turbo_steps
-        path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:05}.png")
+        path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:09}.png")
         img = cv2.imread(path)
         #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Changed the colors on resume
         prev_img = img
@@ -281,10 +281,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2GRAY)
                     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
-                filename = f"{args.timestring}_{tween_frame_idx:05}.png"
+                filename = f"{args.timestring}_{tween_frame_idx:09}.png"
                 cv2.imwrite(os.path.join(args.outdir, filename), img)
                 if anim_args.save_depth_maps:
-                    depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:05}.png"), depth)
+                    depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:09}.png"), depth)
             if turbo_next_image is not None:
                 prev_img = turbo_next_image
 
@@ -318,7 +318,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 if anim_args.color_coherence == 'Video Input' and hybrid_available:
                     video_color_coherence_frame = int(frame_idx) % int(anim_args.color_coherence_video_every_N_frames) == 0
                     if video_color_coherence_frame:
-                        prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:05}.jpg"))
+                        prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg"))
                         prev_vid_img = prev_vid_img.resize((args.W, args.H), Image.Resampling.LANCZOS)
                         color_match_sample = np.asarray(prev_vid_img)
                         color_match_sample = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2BGR)
@@ -453,7 +453,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             turbo_next_image, turbo_next_frame_idx = opencv_image, frame_idx
             frame_idx += turbo_steps
         else:    
-            filename = f"{args.timestring}_{frame_idx:05}.png"
+            filename = f"{args.timestring}_{frame_idx:09}.png"
             save_image(image, 'PIL', filename, args, video_args, root)
 
             if anim_args.save_depth_maps:
@@ -463,7 +463,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     devices.torch_gc()
                     depth_model.to(root.device)
                 depth = depth_model.predict(opencv_image, anim_args.midas_weight, root.half_precision)
-                depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
+                depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:09}.png"), depth)
                 if cmd_opts.lowvram or cmd_opts.medvram:
                     depth_model.to('cpu')
                     devices.torch_gc()
