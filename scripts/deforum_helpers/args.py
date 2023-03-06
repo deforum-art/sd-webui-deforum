@@ -255,7 +255,7 @@ def DeforumOutputArgs():
     skip_video_for_run_all = False
     fps = 15 
     make_gif = False
-    image_path = "C:/SD/20230124234916_%05d.png" 
+    image_path = "C:/SD/20230124234916_%09d.png" 
     mp4_path = "testvidmanualsettings.mp4" 
     ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
@@ -416,9 +416,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # EXTA SCHEDULES TABS
             with gr.Tabs(elem_id='extra_schedules'):
                 with gr.TabItem('Strength'):
-                    strength_schedule = gr.Textbox(label="Strength schedule", lines=1, value = da.strength_schedule, interactive=True)
+                    with gr.Row(variant='compact'):
+                        strength_schedule = gr.Textbox(label="Strength schedule", lines=1, value = da.strength_schedule, interactive=True)
                 with gr.TabItem('CFG'):
-                    cfg_scale_schedule = gr.Textbox(label="CFG scale schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
+                    with gr.Row(variant='compact'):
+                        cfg_scale_schedule = gr.Textbox(label="CFG scale schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
                 with gr.TabItem('Seed') as a3:
                     with gr.Row(variant='compact'):
                         seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="Seed behavior", value=d.seed_behavior, elem_id="seed_behavior")
@@ -427,9 +429,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(visible=False) as seed_schedule_row:
                         seed_schedule = gr.Textbox(label="Seed schedule", lines=1, value = da.seed_schedule, interactive=True)
                 with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
-                    enable_subseed_scheduling = gr.Checkbox(label="Enable Subseed scheduling", value=da.enable_subseed_scheduling, interactive=True)
-                    subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value = da.subseed_schedule, interactive=True)
-                    subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value = da.subseed_strength_schedule, interactive=True)
+                    with gr.Row(variant='compact'):
+                        enable_subseed_scheduling = gr.Checkbox(label="Enable Subseed scheduling", value=da.enable_subseed_scheduling, interactive=True)
+                        subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value = da.subseed_schedule, interactive=True)
+                        subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value = da.subseed_strength_schedule, interactive=True)
                     with gr.Row(variant='compact'):
                         seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
                         seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
@@ -911,7 +914,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                  <p style="margin-top:0em">
                     Important Notes:
                     <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
-                        <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID. The %05d is important, don't forget it!</li>
+                        <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%09d.png', just replace 20230124234916 with your batch ID. The %05d is important, don't forget it!</li>
                     </ul>
                     """)
                 with gr.Row(variant='compact'):
