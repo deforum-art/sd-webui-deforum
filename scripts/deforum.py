@@ -51,7 +51,10 @@ def run_deforum(*args, **kwargs):
     
     root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict)
     root.clipseg_model = None
-    root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
+    try:
+        root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
+    except:
+        root.initial_clipskip = 1
     root.basedirs = basedirs
 
     for basedir in basedirs:
