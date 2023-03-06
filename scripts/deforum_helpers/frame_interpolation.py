@@ -120,7 +120,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
         custom_interp_path = "{}_{}".format(output_interp_imgs_folder, img_batch_id)
 
     # interp_vid_path = os.path.join(raw_output_imgs_path, str(img_batch_id) + '_FILM_x' + str(x_am))
-    img_path_for_ffmpeg = os.path.join(custom_interp_path, "frame_%05d.png")
+    img_path_for_ffmpeg = os.path.join(custom_interp_path, "frame_%09d.png")
 
     if sl_enabled:
         interp_vid_path = interp_vid_path + '_slomo_x' + str(sl_am)
@@ -150,7 +150,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     print (f"*Passing interpolated frames to ffmpeg...*")
     exception_raised = False
     try:
-        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=interp_vid_path, stitch_from_frame=0, stitch_to_frame=999999, imgs_path=img_path_for_ffmpeg, add_soundtrack=add_soundtrack, audio_path=audio_track, crf=f_crf, preset=f_preset)
+        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=interp_vid_path, stitch_from_frame=0, stitch_to_frame=999999999, imgs_path=img_path_for_ffmpeg, add_soundtrack=add_soundtrack, audio_path=audio_track, crf=f_crf, preset=f_preset)
     except Exception as e:
         exception_raised = True
         print(f"An error occurred while stitching the video: {e}")

@@ -100,7 +100,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
     
     mp4_path = mp4_path + '.mp4'
 
-    t = os.path.join(img_folder_path, "%07d.png")
+    t = os.path.join(img_folder_path, "%09d.png")
     add_soundtrack = 'None'
     if not audio_path is None:
         add_soundtrack = 'File'
@@ -162,7 +162,7 @@ def process_ncnn_video_upscaling(vid_path, outdir, in_vid_fps, in_vid_res, out_v
     print(f"\r{msg_to_print}", flush=True)
     print(f"\rUpscaling \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
     # set custom path for ffmpeg func below
-    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, "%05d.png")
+    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, "%09d.png")
     add_soundtrack = 'None'
     # don't pass add_soundtrack to ffmpeg if orig video doesn't contain any audio, so we won't get a message saying audio couldn't be added :)
     if media_file_has_audio(vid_path.name, f_location):
@@ -252,7 +252,7 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
     print(f"\r{msg_to_print}", flush=True)
     print(f"\rUpscaling \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
     # set custom path for ffmpeg func below
-    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, f"{imgs_batch_id}_%05d.png")
+    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, f"{imgs_batch_id}_%09d.png")
     # stitch video from upscaled pngs 
     ffmpeg_stitch_video(ffmpeg_location=ffmpeg_location, fps=fps, outmp4_path=out_upscaled_mp4_path, stitch_from_frame=stitch_from_frame, stitch_to_frame=stitch_to_frame, imgs_path=upscaled_imgs_path_for_ffmpeg, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=ffmpeg_crf, preset=ffmpeg_preset)
 
