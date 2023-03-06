@@ -105,7 +105,7 @@ def run_deforum(*args, **kwargs):
         need_to_frame_interpolate = True
         
     if video_args.skip_video_for_run_all:
-        print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
+        print("\nSkipping video creation, uncheck 'Skip video for run all' in 'Output' tab if you want to get a video too :)")
     else:
         import subprocess
 
@@ -190,16 +190,16 @@ def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
         components = {}
         dummy_component = gr.Label(visible=False)
-        with gr.Row(elem_id='deforum_progress_row').style(equal_height=False):
+        with gr.Row(elem_id='deforum_progress_row').style(equal_height=False, variant='compact'):
             with gr.Column(scale=1, variant='panel'):
                 components = deforum_args.setup_deforum_setting_dictionary(None, True, True)
         
             with gr.Column(scale=1):
-                with gr.Row():
+                with gr.Row(variant='compact'):
                     btn = gr.Button("Click here after the generation to show the video")
                     components['btn'] = btn
                     close_btn = gr.Button("Close the video", visible=False)
-                with gr.Row():
+                with gr.Row(variant='compact'):
                     i1 = gr.HTML(deforum_args.i1_store, elem_id='deforum_header')
                     components['i1'] = i1
                     # Show video
@@ -229,7 +229,7 @@ def on_ui_tabs():
                         [i1, close_btn, btn],
                         )
                 id_part = 'deforum'
-                with gr.Row(elem_id=f"{id_part}_generate_box"):
+                with gr.Row(elem_id=f"{id_part}_generate_box", variant='compact'):
                     skip = gr.Button('Skip', elem_id=f"{id_part}_skip", visible=False)
                     interrupt = gr.Button('Interrupt', elem_id=f"{id_part}_interrupt", visible=True)
                     submit = gr.Button('Generate', elem_id=f"{id_part}_generate", variant='primary')
@@ -249,16 +249,16 @@ def on_ui_tabs():
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
 
                 gr.HTML("<p>* Paths can be relative to webui folder OR full - absolute </p>")
-                with gr.Row():
+                with gr.Row(variant='compact'):
                     settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="General Settings File")
                     #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
-                with gr.Row():
+                with gr.Row(variant='compact'):
                     save_settings_btn = gr.Button('Save Settings', elem_id='deforum_save_settings_btn')
                     load_settings_btn = gr.Button('Load Settings', elem_id='deforum_load_settings_btn')
-                with gr.Row():
+                with gr.Row(variant='compact'):
                     video_settings_path = gr.Textbox("deforum_video-settings.txt", elem_id='deforum_video_settings_path', label="Video Settings File")
                     #reuse_latest_video_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_video_settings_btn')#TODO
-                with gr.Row():
+                with gr.Row(variant='compact'):
                     save_video_settings_btn = gr.Button('Save Video Settings', elem_id='deforum_save_video_settings_btn')
                     load_video_settings_btn = gr.Button('Load Video Settings', elem_id='deforum_load_video_settings_btn')
 
