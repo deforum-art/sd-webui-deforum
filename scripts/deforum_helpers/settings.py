@@ -6,11 +6,8 @@ from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 from .deprecation_utils import handle_deprecated_settings
 import logging
 
-def get_keys_to_exclude(setting_type):
-    if setting_type == 'general':
-        return ["n_batch", "restore_faces", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal", "perlin_w", "perlin_h"]
-    else: #video
-        return ["mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
+def get_keys_to_exclude():
+    return ["n_batch", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal", "perlin_w", "perlin_h", "mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
 
 def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
@@ -50,11 +47,20 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, contro
             print(parseq_args_dict)
             print(loop_args_dict)
 
+def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args):
+    exclude_keys = get_keys_to_exclude()
+    settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
+    with open(settings_filename, "w+", encoding="utf-8") as f:
+        s = {}
+        for d in (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, video_args.__dict__):
+            s.update({k: v for k, v in d.items() if k not in exclude_keys})
+        json.dump(s, f, ensure_ascii=False, indent=4)
+
 # In gradio gui settings save/ load funs:
 def save_settings(*args, **kwargs):
+    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args, pack_video_args
     settings_path = args[0].strip()
     data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
-    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args
     args_dict = pack_args(data)
     anim_args_dict = pack_anim_args(data)
     parseq_dict = pack_parseq_args(data)
@@ -63,27 +69,16 @@ def save_settings(*args, **kwargs):
     args_dict["animation_prompts_negative"] = data['animation_prompts_negative']
     loop_dict = pack_loop_args(data)
     controlnet_dict = pack_controlnet_args(data)
+    video_args_dict = pack_video_args(data)
     
-    combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict}
-    exclude_keys = get_keys_to_exclude('general') + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
+    combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict, **video_args_dict}
+    exclude_keys = get_keys_to_exclude() + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
     
     print(f"saving custom settings to {settings_path}")
     with open(settings_path, "w") as f:
         f.write(json.dumps(filtered_combined, ensure_ascii=False, indent=4))
     
-    return [""]
-
-def save_video_settings(*args, **kwargs):
-    video_settings_path = args[0].strip()
-    data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
-    from deforum_helpers.args import pack_video_args
-    video_args_dict = pack_video_args(data)
-    exclude_keys = get_keys_to_exclude('video')
-    filtered_data = video_args_dict if exclude_keys is None else {k: v for k, v in video_args_dict.items() if k not in exclude_keys}
-    print(f"saving video settings to {video_settings_path}")
-    with open(video_settings_path, "w") as f:
-        f.write(json.dumps(filtered_data, ensure_ascii=False, indent=4))
     return [""]
 
 def load_settings(*args, **kwargs):
