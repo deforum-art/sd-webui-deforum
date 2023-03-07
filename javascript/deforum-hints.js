@@ -19,8 +19,6 @@ deforum_titles = {
     "Steps": "How many times to improve the generated image iteratively; higher values take longer; very low values can produce bad results",
     //"ddim_eta": "";
     //"n_batch": "",
-    //"make_grid": "",
-    //"grid_rows": "",
     //"save_settings": "",
     //"save_samples": "",
     "Batch name": "output images will be placed in a folder with this name, inside of the img2img output folder",
@@ -31,7 +29,6 @@ deforum_titles = {
         "fixed": "the seed will remain fixed across all frames of animation",
         "random": "a random seed will be used on each frame of the animation",
 		"schedule": "specify your own seed schedule (found on the Keyframes page)",
-
     //Keyframes
     "Animation mode": "selects the type of animation",
         "2D": "only 2D motion parameters will be used, but this mode uses the least amount of VRAM. You can optionally enable flip_2d_perspective to enable some psuedo-3d animation parameters while in 2D mode.",
@@ -159,9 +156,10 @@ deforum_titles = {
     "Blend factor max": "blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))",
     "Blend factor slope": "blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))",
     "Tweening frames schedule": "number of the frames that we will blend between current imagined image and input frame image",
-    "Color correction factor": "how close to get to the colors of the input frame image/ the amount each frame during a tweening step to use the new images colors"
+    "Color correction factor": "how close to get to the colors of the input frame image/ the amount each frame during a tweening step to use the new images colors",
+	// deforum.py / right side of the ui:
+	"Settings File": "Path to settings file you want to load. Path can be relative to webui folder OR full - absolute",
 }
-
 
 onUiUpdate(function(){
 	gradioApp().querySelectorAll('span, button, select, p').forEach(function(span){
