@@ -255,7 +255,7 @@ def DeforumOutputArgs():
     skip_video_for_run_all = False
     fps = 15 
     make_gif = False
-    image_path = "C:/SD/20230124234916_%05d.png" 
+    image_path = "C:/SD/20230124234916_%09d.png" 
     mp4_path = "testvidmanualsettings.mp4" 
     ffmpeg_location = find_ffmpeg_binary()
     ffmpeg_crf = '17'
@@ -416,9 +416,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # EXTA SCHEDULES TABS
             with gr.Tabs(elem_id='extra_schedules'):
                 with gr.TabItem('Strength'):
-                    strength_schedule = gr.Textbox(label="Strength schedule", lines=1, value = da.strength_schedule, interactive=True)
+                    with gr.Row(variant='compact'):
+                        strength_schedule = gr.Textbox(label="Strength schedule", lines=1, value = da.strength_schedule, interactive=True)
                 with gr.TabItem('CFG'):
-                    cfg_scale_schedule = gr.Textbox(label="CFG scale schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
+                    with gr.Row(variant='compact'):
+                        cfg_scale_schedule = gr.Textbox(label="CFG scale schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
                 with gr.TabItem('Seed') as a3:
                     with gr.Row(variant='compact'):
                         seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="Seed behavior", value=d.seed_behavior, elem_id="seed_behavior")
@@ -427,9 +429,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(visible=False) as seed_schedule_row:
                         seed_schedule = gr.Textbox(label="Seed schedule", lines=1, value = da.seed_schedule, interactive=True)
                 with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
-                    enable_subseed_scheduling = gr.Checkbox(label="Enable Subseed scheduling", value=da.enable_subseed_scheduling, interactive=True)
-                    subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value = da.subseed_schedule, interactive=True)
-                    subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value = da.subseed_strength_schedule, interactive=True)
+                    with gr.Row(variant='compact'):
+                        enable_subseed_scheduling = gr.Checkbox(label="Enable Subseed scheduling", value=da.enable_subseed_scheduling, interactive=True)
+                        subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value = da.subseed_schedule, interactive=True)
+                        subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value = da.subseed_strength_schedule, interactive=True)
                     with gr.Row(variant='compact'):
                         seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
                         seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
@@ -624,6 +627,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row(variant='compact'):
                     full_res_mask = gr.Checkbox(label="Full res mask", value=d.full_res_mask, interactive=True)
                     full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="Full res mask padding", value=d.full_res_mask_padding, interactive=True)
+                with gr.Row(variant='compact'):
+                    with gr.Column(min_width=240):
+                        mask_contrast_adjust = gr.Number(label="Mask contrast adjust", value=d.mask_contrast_adjust, interactive=True)
+                    with gr.Column(min_width=250):
+                        mask_brightness_adjust = gr.Number(label="Mask brightness adjust", value=d.mask_brightness_adjust, interactive=True)
             # PARSEQ ACCORD
             with gr.Accordion('Parseq', open=False):
                 gr.HTML("""
@@ -825,50 +833,50 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                 with gr.Column():
                     # NCNN UPSCALE TAB
-                    with gr.Tab('Upscale V2') as ncnn_upscale_tab:
-                        with gr.Row(variant='compact') as ncnn_upload_vid_stats_row:
-                            # Non interactive textbox showing uploaded input vid total Frame Count
-                            ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing uploaded input vid FPS
-                            ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing uploaded input resolution
-                            ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing expected output resolution
-                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')
-                        with gr.Column():
-                            with gr.Row(variant='compact', visible=True) as ncnn_actual_upscale_row:
-                                ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = "realesr-animevideov3", type="value")
-                                ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value="x2", type="value")
-                                ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=True, interactive=True) # fix value
-                        ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
-                        ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model, ncnn_upscale_factor, ncnn_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
-                    with gr.Tab('Upscale V1'):
-                        with gr.Column():
-                            selected_tab = gr.State(value=0)
-                            with gr.Tabs(elem_id="extras_resize_mode"):
-                                with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
-                                    upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
-                                with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
-                                    with FormRow():
-                                        upscaling_resize_w = gr.Slider(label="Width", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_w")
-                                        upscaling_resize_h = gr.Slider(label="Height", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_h")
-                                        upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
-                            with FormRow():
-                                extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
-                                extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
-                            with FormRow():
-                                with gr.Column(scale=3):
-                                    extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
-                                with gr.Column(scale=1, min_width=80):
-                                    upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
-                            tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
-                            tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
-                            # This is the actual button that's pressed to initiate the Upscaling:
-                            upscale_btn = gr.Button(value="*Upscale uploaded video*")
-                            # Show a text about CLI outputs:
-                            gr.HTML("* check your CLI for outputs")
-                            # make the function call when the UPSCALE button is clicked
-                            upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                    # with gr.Tab('Upscale V2') as ncnn_upscale_tab:
+                    with gr.Row(variant='compact') as ncnn_upload_vid_stats_row:
+                        # Non interactive textbox showing uploaded input vid total Frame Count
+                        ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
+                        # Non interactive textbox showing uploaded input vid FPS
+                        ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
+                        # Non interactive textbox showing uploaded input resolution
+                        ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---')
+                        # Non interactive textbox showing expected output resolution
+                        ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')
+                    with gr.Column():
+                        with gr.Row(variant='compact', visible=True) as ncnn_actual_upscale_row:
+                            ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = "realesr-animevideov3", type="value")
+                            ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value="x2", type="value")
+                            ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=True, interactive=True) # fix value
+                    ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
+                    ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model, ncnn_upscale_factor, ncnn_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                    # with gr.Tab('Upscale V1'):
+                    with gr.Column(visible=False): # Disabled 06-03-23
+                        selected_tab = gr.State(value=0)
+                        with gr.Tabs(elem_id="extras_resize_mode"):
+                            with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
+                                upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
+                            with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
+                                with FormRow():
+                                    upscaling_resize_w = gr.Slider(label="Width", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_w")
+                                    upscaling_resize_h = gr.Slider(label="Height", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_h")
+                                    upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
+                        with FormRow():
+                            extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
+                            extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
+                        with FormRow():
+                            with gr.Column(scale=3):
+                                extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
+                            with gr.Column(scale=1, min_width=80):
+                                upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
+                        tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
+                        tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
+                        # This is the actual button that's pressed to initiate the Upscaling:
+                        upscale_btn = gr.Button(value="*Upscale uploaded video*")
+                        # Show a text about CLI outputs:
+                        gr.HTML("* check your CLI for outputs")
+                        # make the function call when the UPSCALE button is clicked
+                        upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
                     # Vid2Depth TAB
             with gr.Tab('Vid2depth'):
                 vid_to_depth_chosen_file = gr.File(label="Video to get Depth from", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_depth_chosen_file")
@@ -902,7 +910,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                  <p style="margin-top:0em">
                     Important Notes:
                     <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
-                        <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%05d.png', just replace 20230124234916 with your batch ID. The %05d is important, don't forget it!</li>
+                        <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%09d.png', just replace 20230124234916 with your batch ID. The %05d is important, don't forget it!</li>
                     </ul>
                     """)
                 with gr.Row(variant='compact'):
@@ -913,8 +921,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
                     mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
                     render_steps = gr.Checkbox(label="Render steps", value=dv.render_steps, interactive=True, visible=False)
-                    mask_contrast_adjust = gr.Slider(label="Mask contrast adjust", minimum=0, maximum=1, step=0.01, value=d.mask_contrast_adjust, interactive=True)
-                    mask_brightness_adjust = gr.Slider(label="Mask brightness adjust", minimum=0, maximum=1, step=0.01, value=d.mask_brightness_adjust, interactive=True)
                     from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
                     perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                     perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)

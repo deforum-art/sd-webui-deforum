@@ -2,9 +2,7 @@ import os
 import json
 import pandas as pd
 import cv2
-import re
 import numpy as np
-import numexpr
 from PIL import Image, ImageOps
 from .rich import console
 
@@ -45,8 +43,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args, args.seed) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
-    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
+    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args)
     # resume animation
     start_frame = 0
     if anim_args.resume_from_timestring:
@@ -90,12 +88,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
-        max_f = anim_args.max_frames - 1
         for i, prompt in animation_prompts.items():
-            if str(i).isdigit():
-                prompt_series[int(i)] = prompt
-            else:
-                prompt_series[int(numexpr.evaluate(i))] = prompt
+            prompt_series[int(i)] = prompt
         prompt_series = prompt_series.ffill().bfill()
 
     # check for video inits
@@ -128,7 +122,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         last_frame = start_frame-1
         if turbo_steps > 1:
             last_frame -= last_frame%turbo_steps
-        path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:05}.png")
+        path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:09}.png")
         img = cv2.imread(path)
         #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Changed the colors on resume
         prev_img = img
@@ -205,6 +199,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.steps = int(keys.steps_schedule_series[frame_idx])
         if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
             scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
+            
         if anim_args.enable_clipskip_scheduling and keys.clipskip_schedule_series[frame_idx] is not None:
             scheduled_clipskip = int(keys.clipskip_schedule_series[frame_idx])
         if args.use_mask and keys.mask_schedule_series[frame_idx] is not None:
@@ -286,10 +281,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2GRAY)
                     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
-                filename = f"{args.timestring}_{tween_frame_idx:05}.png"
+                filename = f"{args.timestring}_{tween_frame_idx:09}.png"
                 cv2.imwrite(os.path.join(args.outdir, filename), img)
                 if anim_args.save_depth_maps:
-                    depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:05}.png"), depth)
+                    depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:09}.png"), depth)
             if turbo_next_image is not None:
                 prev_img = turbo_next_image
 
@@ -323,7 +318,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 if anim_args.color_coherence == 'Video Input' and hybrid_available:
                     video_color_coherence_frame = int(frame_idx) % int(anim_args.color_coherence_video_every_N_frames) == 0
                     if video_color_coherence_frame:
-                        prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:05}.jpg"))
+                        prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg"))
                         prev_vid_img = prev_vid_img.resize((args.W, args.H), Image.Resampling.LANCZOS)
                         color_match_sample = np.asarray(prev_vid_img)
                         color_match_sample = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2BGR)
@@ -379,16 +374,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
-        
-        max_f = anim_args.max_frames - 1
-        prompt_split = re.split("`(.*?)`", args.prompt)
-        if len(prompt_split) > 1:
-            prompt_parsed = ''.join([prompt_split[value-1]+f'{numexpr.evaluate(prompt_split[value].replace("t",f"{frame_idx}").replace("max_f" , f"{max_f}"))}' for value in (range(1, len(prompt_split), 2))])
-        else:
-            prompt_parsed = args.prompt
-        prompt_parsed += ')' if ')' in prompt_split[-1] else "" # append last )
-
-        prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
+            
+        prompt_to_print, *after_neg = args.prompt.strip().split("--neg")
         prompt_to_print = prompt_to_print.strip()
         after_neg = "".join(after_neg).strip()
 
@@ -396,13 +383,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
         if after_neg and after_neg.strip():
             print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
-        if not using_vid_init:
-            # print motion table to cli if anim mode = 2D or 3D
-            if anim_args.animation_mode in ['2D','3D']:
-                print_render_table(anim_args, keys, frame_idx)
 
         # grab init image for current frame
-        elif using_vid_init:
+        if using_vid_init:
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
@@ -431,7 +414,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             sd_hijack.model_hijack.hijack(sd_model)
         
         # sample the diffusion model
-        image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
         # intercept and override to grayscale
@@ -446,7 +429,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 while not image.getbbox():
                     print("Rerolling with +1 seed...")
                     args.seed += 1
-                    image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+                    image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                     patience -= 1
                     if patience == 0:
                         print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
@@ -470,7 +453,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             turbo_next_image, turbo_next_frame_idx = opencv_image, frame_idx
             frame_idx += turbo_steps
         else:    
-            filename = f"{args.timestring}_{frame_idx:05}.png"
+            filename = f"{args.timestring}_{frame_idx:09}.png"
             save_image(image, 'PIL', filename, args, video_args, root)
 
             if anim_args.save_depth_maps:
@@ -480,7 +463,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     devices.torch_gc()
                     depth_model.to(root.device)
                 depth = depth_model.predict(opencv_image, anim_args.midas_weight, root.half_precision)
-                depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
+                depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:09}.png"), depth)
                 if cmd_opts.lowvram or cmd_opts.medvram:
                     depth_model.to('cpu')
                     devices.torch_gc()
@@ -491,35 +474,3 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         state.current_image = image
 
         args.seed = next_seed(args)
-
-def print_render_table(anim_args, keys, frame_idx):
-    from rich.table import Table
-    from rich import box
-    table = Table(padding=0, box=box.ROUNDED)
-    field_names = []
-    if anim_args.animation_mode == '2D':
-        short_zoom = round(keys.zoom_series[frame_idx], 6)
-        field_names += ["Angle", "Zoom"]
-    field_names += ["Tr X", "Tr Y"]
-    if anim_args.animation_mode == '3D':
-        field_names += ["Tr Z", "Ro X", "Ro Y", "Ro Z"]
-        if anim_args.aspect_ratio_schedule.replace(" ", "") != '0:(1)':
-            field_names += ["Asp. Ratio"]
-    if anim_args.enable_perspective_flip:
-        field_names += ["Pf T", "Pf P", "Pf G", "Pf F"]
-    for field_name in field_names:
-        table.add_column(field_name, justify="center")
-    
-    rows = []
-    if anim_args.animation_mode == '2D':
-        rows += [str(keys.angle_series[frame_idx]),str(short_zoom)]
-    rows += [str(keys.translation_x_series[frame_idx]),str(keys.translation_y_series[frame_idx])]
-    if anim_args.animation_mode == '3D':
-        rows += [str(keys.translation_z_series[frame_idx]),str(keys.rotation_3d_x_series[frame_idx]),str(keys.rotation_3d_y_series[frame_idx]),str(keys.rotation_3d_z_series[frame_idx])]
-        if anim_args.aspect_ratio_schedule.replace(" ", "") != '0:(1)':
-            rows += [str(keys.aspect_ratio_series[frame_idx])]
-    if anim_args.enable_perspective_flip:
-        rows +=[str(keys.perspective_flip_theta_series[frame_idx]), str(keys.perspective_flip_phi_series[frame_idx]), str(keys.perspective_flip_gamma_series[frame_idx]), str(keys.perspective_flip_fv_series[frame_idx])]
-    table.add_row(*rows)
-    
-    console.print(table)

@@ -51,7 +51,10 @@ def run_deforum(*args, **kwargs):
     
     root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict)
     root.clipseg_model = None
-    root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
+    try:
+        root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
+    except:
+        root.initial_clipskip = 1
     root.basedirs = basedirs
 
     for basedir in basedirs:
@@ -105,13 +108,13 @@ def run_deforum(*args, **kwargs):
         need_to_frame_interpolate = True
         
     if video_args.skip_video_for_run_all:
-        print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
+        print("\nSkipping video creation, uncheck 'Skip video for run all' in 'Output' tab if you want to get a video too :)")
     else:
         import subprocess
 
         path_name_modifier = video_args.path_name_modifier
         if video_args.render_steps: # render steps from a single image
-            fname = f"{path_name_modifier}_%05d.png"
+            fname = f"{path_name_modifier}_%09d.png"
             all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
             newest_dir = max(all_step_dirs, key=os.path.getmtime)
             image_path = os.path.join(newest_dir, fname)
@@ -119,7 +122,7 @@ def run_deforum(*args, **kwargs):
             mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
             max_video_frames = args.steps
         else: # render images for a video
-            image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
+            image_path = os.path.join(args.outdir, f"{args.timestring}_%09d.png")
             mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
             max_video_frames = anim_args.max_frames
 
@@ -190,7 +193,7 @@ def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
         components = {}
         dummy_component = gr.Label(visible=False)
-        with gr.Row(variant='compact', elem_id='deforum_progress_row').style(equal_height=False):
+        with gr.Row(elem_id='deforum_progress_row').style(equal_height=False, variant='compact'):
             with gr.Column(scale=1, variant='panel'):
                 components = deforum_args.setup_deforum_setting_dictionary(None, True, True)
         

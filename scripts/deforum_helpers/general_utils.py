@@ -43,6 +43,6 @@ def convert_images_from_list(paths, output_dir, format):
         # Open the image
         with Image.open(path) as img:
             # Generate the output filename
-            filename = f"{i+1:07d}.{format}"
+            filename = f"{i+1:09d}.{format}"
             # Save the image to the output directory
             img.save(os.path.join(output_dir, filename))
