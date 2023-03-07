@@ -188,7 +188,7 @@ def on_ui_tabs():
             with gr.Column(scale=1, variant='panel'):
                 components = deforum_args.setup_deforum_setting_dictionary(None, True, True)
         
-            with gr.Column(scale=1):
+            with gr.Column(scale=1, variant='compact'):
                 with gr.Row(variant='compact'):
                     btn = gr.Button("Click here after the generation to show the video")
                     components['btn'] = btn
