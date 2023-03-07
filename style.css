@@ -50,3 +50,7 @@
 	align-items: flex-start;
 	justify-content: center;
 }
+
+#deforum_results .flex {
+	gap:0px;
+}
