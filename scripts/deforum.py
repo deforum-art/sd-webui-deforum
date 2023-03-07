@@ -27,6 +27,7 @@ import json
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
 from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif
+from deforum_helpers.general_utils import get_deforum_version
 from deforum_helpers.upscaling import make_upscale_v2
 import gc
 import torch
@@ -45,7 +46,8 @@ def run_deforum(*args, **kwargs):
         #we'll setup the rest later
     )
     
-    print("\033[4;33mDeforum extension for auto1111 webui, v2.2b\033[0m")
+    print(f"\033[4;33mDeforum extension for auto1111 webui, v2.2b\033[0m")
+    print(f"GitHub commit: {get_deforum_version()}")
     args_dict['self'] = None
     args_dict['p'] = p
     
