@@ -43,3 +43,14 @@
 #tab_deforum_interface .p-3 {
   padding: 0.5rem;
 }
+
+#settings_path_msg {
+	margin: 0.6em;
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+}
+
+#deforum_results .flex {
+	gap:0px;
+}
