@@ -188,13 +188,19 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
     if processed is None:
         # Mask functions
         if args.use_mask:
-            mask = args.mask_image
-            #assign masking options to pipeline
-            if mask is not None:
-                p.inpainting_mask_invert = args.invert_mask
-                p.inpainting_fill = args.fill 
-                p.inpaint_full_res= args.full_res_mask 
-                p.inpaint_full_res_padding = args.full_res_mask_padding
+            mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
+                                (args.W, args.H),
+                                args.mask_contrast_adjust, 
+                                args.mask_brightness_adjust)
+            p.inpainting_mask_invert = args.invert_mask
+            p.inpainting_fill = args.fill 
+            p.inpaint_full_res= args.full_res_mask 
+            p.inpaint_full_res_padding = args.full_res_mask_padding
+            #prevent loaded mask from throwing errors in Image operations if completely black and crop and resize in webui pipeline
+            #doing this after contrast and brightness adjustments to ensure that mask is not passed as black or blank
+            mask = check_mask_for_errors(mask, args.invert_mask)
+            args.noise_mask = mask
+
         else:
             mask = None
 
