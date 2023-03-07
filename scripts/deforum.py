@@ -251,18 +251,13 @@ def on_ui_tabs():
                 
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
 
-                gr.HTML("<p>* Paths can be relative to webui folder OR full - absolute </p>")
+                gr.HTML("<p>* Path can be relative to webui folder OR full - absolute </p>")
                 with gr.Row(variant='compact'):
-                    settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="General Settings File")
+                    settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="Settings File")
                     #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
                 with gr.Row(variant='compact'):
                     save_settings_btn = gr.Button('Save Settings', elem_id='deforum_save_settings_btn')
-                    load_settings_btn = gr.Button('Load Settings', elem_id='deforum_load_settings_btn')
-                with gr.Row(variant='compact'):
-                    video_settings_path = gr.Textbox("deforum_video-settings.txt", elem_id='deforum_video_settings_path', label="Video Settings File")
-                    #reuse_latest_video_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_video_settings_btn')#TODO
-                with gr.Row(variant='compact'):
-                    save_video_settings_btn = gr.Button('Save Video Settings', elem_id='deforum_save_video_settings_btn')
+                    load_settings_btn = gr.Button('Load All Settings', elem_id='deforum_load_settings_btn')
                     load_video_settings_btn = gr.Button('Load Video Settings', elem_id='deforum_load_video_settings_btn')
 
         component_list = [components[name] for name in deforum_args.component_names]
@@ -286,7 +281,7 @@ def on_ui_tabs():
         
         save_settings_btn.click(
                     fn=wrap_gradio_call(deforum_settings.save_settings),
-                    inputs=[settings_path] + settings_component_list,
+                    inputs=[settings_path] + settings_component_list + video_settings_component_list,
                     outputs=[stuff],
                 )
         
@@ -296,15 +291,9 @@ def on_ui_tabs():
                     outputs=settings_component_list + [stuff],
                 )
         
-        save_video_settings_btn.click(
-                    fn=wrap_gradio_call(deforum_settings.save_video_settings),
-                    inputs=[video_settings_path] + video_settings_component_list,
-                    outputs=[stuff],
-                )
-        
         load_video_settings_btn.click(
                     fn=wrap_gradio_call(deforum_settings.load_video_settings),
-                    inputs=[video_settings_path] + video_settings_component_list,
+                    inputs=[settings_path] + video_settings_component_list,
                     outputs=video_settings_component_list + [stuff],
                 )
 
