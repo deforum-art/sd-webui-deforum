@@ -61,17 +61,15 @@ def save_settings(*args, **kwargs):
     from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args, pack_video_args
     settings_path = args[0].strip()
     data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
-    data_vid = {deforum_args.video_args_names[i]: args[i+len(deforum_args.settings_component_names)+1] for i in range(0, len(deforum_args.video_args_names))}
-    tst = data | data_vid
-    args_dict = pack_args(tst)
-    anim_args_dict = pack_anim_args(tst)
-    parseq_dict = pack_parseq_args(tst)
-    args_dict["prompts"] = json.loads(tst['animation_prompts'])
-    args_dict["animation_prompts_positive"] = tst['animation_prompts_positive']
-    args_dict["animation_prompts_negative"] = tst['animation_prompts_negative']
-    loop_dict = pack_loop_args(tst)
-    controlnet_dict = pack_controlnet_args(tst)
-    video_args_dict = pack_video_args(tst)
+    args_dict = pack_args(data)
+    anim_args_dict = pack_anim_args(data)
+    parseq_dict = pack_parseq_args(data)
+    args_dict["prompts"] = json.loads(data['animation_prompts'])
+    args_dict["animation_prompts_positive"] = data['animation_prompts_positive']
+    args_dict["animation_prompts_negative"] = data['animation_prompts_negative']
+    loop_dict = pack_loop_args(data)
+    controlnet_dict = pack_controlnet_args(data)
+    video_args_dict = pack_video_args(data)
     
     combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict, **video_args_dict}
     exclude_keys = get_keys_to_exclude() + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
