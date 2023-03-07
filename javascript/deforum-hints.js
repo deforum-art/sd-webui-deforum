@@ -2,6 +2,7 @@
 
 deforum_titles = {
     //Run
+	"Settings File": "Path to settings file you want to load. Path can be relative to webui folder OR full - absolute",
     "Override settings": "specify a custom settings file and ignore settings displayed in the interface",
 	"Custom settings file": "the path to a custom settings file",
     "Width": "The width of the output images, in pixels (must be a multiple of 64)",
