@@ -66,9 +66,9 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
                     return
                 if (count <= extract_to_frame or extract_to_frame == -1) and count % n == 0:
                     if numeric_files_output == True:
-                        cv2.imwrite(video_in_frame_path + os.path.sep + f"{t:05}.{out_img_format}" , image) # save frame as file
+                        cv2.imwrite(video_in_frame_path + os.path.sep + f"{t:09}.{out_img_format}" , image) # save frame as file
                     else:
-                        cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:05}.{out_img_format}" , image) # save frame as file
+                        cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:09}.{out_img_format}" , image) # save frame as file
                     t += 1
                 success,image = vidcap.read()
                 count += 1
@@ -122,7 +122,7 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
     msg_to_print = f"Stitching *video*..."
     console.print(msg_to_print, style="blink yellow", end="") 
     if stitch_to_frame == -1:
-        stitch_to_frame = 9999999
+        stitch_to_frame = 999999999
     try:
         cmd = [
             ffmpeg_location,
@@ -195,7 +195,7 @@ def get_frame_name(path):
 def get_next_frame(outdir, video_path, frame_idx, mask=False):
     frame_path = 'inputframes'
     if (mask): frame_path = 'maskframes'
-    return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:05}.jpg")
+    return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:09}.jpg")
      
 def find_ffmpeg_binary():
     try:
