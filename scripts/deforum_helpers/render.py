@@ -24,7 +24,7 @@ from .hybrid_video import hybrid_generation, hybrid_composite
 from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion, get_flow_for_hybrid_motion_prev, image_transform_ransac, image_transform_optical_flow
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
-from .settings import get_keys_to_exclude
+from .settings import save_settings_from_animation_run
 from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 # Webui
 from modules.shared import opts, cmd_opts, state, sd_model
@@ -63,18 +63,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
     print(f"Saving animation frames to:\n{args.outdir}")
-
-    # save settings for the batch
-    exclude_keys = get_keys_to_exclude('general')
-    settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
-    with open(settings_filename, "w+", encoding="utf-8") as f:
-        args.__dict__["prompts"] = animation_prompts
-        s = {}
-        for d in [dict(args.__dict__), dict(anim_args.__dict__), dict(parseq_args.__dict__), dict(loop_args.__dict__)]:
-            for key, value in d.items():
-                if key not in exclude_keys:
-                    s[key] = value
-        json.dump(s, f, ensure_ascii=False, indent=4)
+    
+    # save settings.txt file for the current run
+    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args)
 
     # resume from timestring
     if anim_args.resume_from_timestring:
