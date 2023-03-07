@@ -191,8 +191,8 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
     # TODO: use init image and mask here
     p.control_net_enabled = False # we don't want to cause concurrence
     p.init_images = []
-    controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:05}.jpg")
-    controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:05}.jpg")
+    controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:09}.jpg")
+    controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:09}.jpg")
     cn_mask_np = None
     cn_image_np = None
 
@@ -271,8 +271,8 @@ def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_ar
 
 def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame_idx = 0):
     p.control_net_enabled = False # we don't want to cause concurrence
-    controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:05}.jpg")
-    controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:05}.jpg")
+    controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:09}.jpg")
+    controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:09}.jpg")
 
     print(f'Reading ControlNet base frame {frame_idx} at {controlnet_frame_path}')
     print(f'Reading ControlNet mask frame {frame_idx} at {controlnet_mask_frame_path}')

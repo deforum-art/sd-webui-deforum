@@ -140,7 +140,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip if scheduled_clipskip is not None else opts.data["CLIP_stop_at_last_layers"]
 
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
-        filename = f"{args.timestring}_{frame_idx:05}.png"
+        filename = f"{args.timestring}_{frame_idx:09}.png"
 
         save_image(image, 'PIL', filename, args, video_args, root)
 

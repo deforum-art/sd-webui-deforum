@@ -4,6 +4,7 @@ from rife.inference_video import run_rife_new_video_infer
 from .video_audio_utilities import get_quick_vid_info, vid2frames, media_file_has_audio, extract_number, ffmpeg_stitch_video
 from film_interpolation.film_inference import run_film_interp_infer
 from .general_utils import duplicate_pngs_from_folder, checksum, convert_images_from_list
+from modules.shared import opts
 
 # gets 'RIFE v4.3', returns: 'RIFE43'   
 def extract_rife_name(string):
@@ -23,8 +24,6 @@ def set_interp_out_fps(interp_x, slow_x_enabled, slom_x, in_vid_fps):
     if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):
         return '---'
 
-    # clean_interp_x = extract_number(interp_x)
-    # clean_slom_x = extract_number(slom_x)
     fps = float(in_vid_fps) * int(interp_x)
     # if slom_x != -1:
     if slow_x_enabled:
@@ -46,10 +45,11 @@ def process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_
 
     _, _, resolution = get_quick_vid_info(file.name)
     folder_name = clean_folder_name(Path(vid_file_name).stem)
-    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name)
+    outdir = opts.outdir_samples or os.path.join(os.getcwd(), 'outputs')
+    outdir_no_tmp = outdir + f'/frame-interpolation/{folder_name}'
     i = 1
     while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-interpolation', folder_name + '_' + str(i))
+        outdir_no_tmp = f"{outdir}/frame-interpolation/{folder_name}_{i}"
         i += 1
 
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
@@ -120,7 +120,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
         custom_interp_path = "{}_{}".format(output_interp_imgs_folder, img_batch_id)
 
     # interp_vid_path = os.path.join(raw_output_imgs_path, str(img_batch_id) + '_FILM_x' + str(x_am))
-    img_path_for_ffmpeg = os.path.join(custom_interp_path, "frame_%05d.png")
+    img_path_for_ffmpeg = os.path.join(custom_interp_path, "frame_%09d.png")
 
     if sl_enabled:
         interp_vid_path = interp_vid_path + '_slomo_x' + str(sl_am)
@@ -150,7 +150,7 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     print (f"*Passing interpolated frames to ffmpeg...*")
     exception_raised = False
     try:
-        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=interp_vid_path, stitch_from_frame=0, stitch_to_frame=999999, imgs_path=img_path_for_ffmpeg, add_soundtrack=add_soundtrack, audio_path=audio_track, crf=f_crf, preset=f_preset)
+        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=interp_vid_path, stitch_from_frame=0, stitch_to_frame=999999999, imgs_path=img_path_for_ffmpeg, add_soundtrack=add_soundtrack, audio_path=audio_track, crf=f_crf, preset=f_preset)
     except Exception as e:
         exception_raised = True
         print(f"An error occurred while stitching the video: {e}")

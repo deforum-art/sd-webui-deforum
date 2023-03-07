@@ -70,12 +70,12 @@ def hybrid_generation(args, anim_args, root):
     return args, anim_args, inputfiles
 
 def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_comp_schedules, root):
-    video_frame = os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:05}.jpg")
-    video_depth_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_vid_depth{frame_idx:05}.jpg")
-    depth_frame = os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx-1:05}.png")
-    mask_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_mask{frame_idx:05}.jpg")
-    comp_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_comp{frame_idx:05}.jpg")
-    prev_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_prev{frame_idx:05}.jpg")
+    video_frame = os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg")
+    video_depth_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_vid_depth{frame_idx:09}.jpg")
+    depth_frame = os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx-1:09}.png")
+    mask_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_mask{frame_idx:09}.jpg")
+    comp_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_comp{frame_idx:09}.jpg")
+    prev_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_prev{frame_idx:09}.jpg")
     prev_img = cv2.cvtColor(prev_img, cv2.COLOR_BGR2RGB)
     prev_img_hybrid = Image.fromarray(prev_img)
     video_image = Image.open(video_frame)
@@ -298,7 +298,7 @@ def get_flow_from_images_Farneback(i1, i2, preset="normal", last_flow=None, pyr_
     return flow
 
 def save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_frame_path):
-    flow_img_file = os.path.join(hybrid_frame_path, f"flow{frame_idx:05}.jpg")
+    flow_img_file = os.path.join(hybrid_frame_path, f"flow{frame_idx:09}.jpg")
     flow_img = cv2.imread(str(inputfiles[frame_idx]))
     flow_img = cv2.resize(flow_img, (dimensions[0], dimensions[1]), cv2.INTER_AREA)
     flow_img = cv2.cvtColor(flow_img, cv2.COLOR_RGB2GRAY)
