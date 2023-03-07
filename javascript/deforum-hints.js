@@ -2,7 +2,6 @@
 
 deforum_titles = {
     //Run
-	"Settings File": "Path to settings file you want to load. Path can be relative to webui folder OR full - absolute",
     "Override settings": "specify a custom settings file and ignore settings displayed in the interface",
 	"Custom settings file": "the path to a custom settings file",
     "Width": "The width of the output images, in pixels (must be a multiple of 64)",
@@ -159,7 +158,9 @@ deforum_titles = {
     "Blend factor max": "blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))",
     "Blend factor slope": "blendFactor = blendFactorMax - blendFactorSlope * cos((frame % tweening_frames_schedule) / (tweening_frames_schedule / 2))",
     "Tweening frames schedule": "number of the frames that we will blend between current imagined image and input frame image",
-    "Color correction factor": "how close to get to the colors of the input frame image/ the amount each frame during a tweening step to use the new images colors"
+    "Color correction factor": "how close to get to the colors of the input frame image/ the amount each frame during a tweening step to use the new images colors",
+	// deforum.py / right side of the ui:
+	"Settings File": "Path to settings file you want to load. Path can be relative to webui folder OR full - absolute",
 }
 
 
