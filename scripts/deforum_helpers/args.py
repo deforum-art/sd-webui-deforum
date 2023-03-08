@@ -255,6 +255,7 @@ def DeforumOutputArgs():
     skip_video_for_run_all = False
     fps = 15 
     make_gif = False
+    delete_imgs = False # True will delete all imgs after a successful mp4 creation
     image_path = "C:/SD/20230124234916_%09d.png" 
     mp4_path = "testvidmanualsettings.mp4" 
     ffmpeg_location = find_ffmpeg_binary()
@@ -762,6 +763,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
                         # the following param only shows for windows and linux users!
                         make_gif = gr.Checkbox(label="Make GIF", value=dv.make_gif, interactive=True)
+                        delete_imgs = gr.Checkbox(label="Del Imgs", value=dv.delete_imgs, interactive=True)
                 with gr.Row(equal_height=True, variant='compact', visible=True) as r_upscale_row:
                     r_upscale_video = gr.Checkbox(label="Upscale", value=dv.r_upscale_video, interactive=True)
                     r_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
@@ -1047,7 +1049,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         reroll_blank_frames'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_for_run_all,
-                            fps, make_gif, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
+                            fps, make_gif, delete_imgs, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
                             add_soundtrack, soundtrack_path,
                             r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
                             render_steps,
