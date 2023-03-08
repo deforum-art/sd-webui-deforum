@@ -47,8 +47,10 @@ def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, contro
             print(parseq_args_dict)
             print(loop_args_dict)
 
-def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, animation_prompts):
-    args.__dict__["prompts"] = animation_prompts
+def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root):
+    args.__dict__["prompts"] = root.animation_prompts
+    args.__dict__["positive_prompts"] = root.positive_prompts
+    args.__dict__["negative_prompts"] = root.negative_prompts
     exclude_keys = get_keys_to_exclude()
     settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:

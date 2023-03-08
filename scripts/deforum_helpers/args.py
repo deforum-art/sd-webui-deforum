@@ -1121,6 +1121,8 @@ def process_args(args_dict_main):
     for key in root.animation_prompts:
         animationPromptCurr = root.animation_prompts[key]
         root.animation_prompts[key] = f"{positive_prompts} {animationPromptCurr} {'' if '--neg' in animationPromptCurr else '--neg'} {negative_prompts}"
+    root.positive_prompts = positive_prompts
+    root.negative_prompts = negative_prompts
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
