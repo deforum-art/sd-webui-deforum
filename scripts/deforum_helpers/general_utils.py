@@ -46,3 +46,13 @@ def convert_images_from_list(paths, output_dir, format):
             filename = f"{i+1:09d}.{format}"
             # Save the image to the output directory
             img.save(os.path.join(output_dir, filename))
+            
+def get_deforum_version():
+    from modules import extensions as mext
+    try:
+        for ext in mext.extensions:
+            if ext.name in ["deforum", "deforum-for-automatic1111-webui"] and ext.enabled:
+                return ext.version
+        return "Unknown"
+    except:
+        return "Unknown"
