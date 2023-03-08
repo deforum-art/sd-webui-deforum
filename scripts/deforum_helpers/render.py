@@ -65,7 +65,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     print(f"Saving animation frames to:\n{args.outdir}")
     
     # save settings.txt file for the current run
-    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args)
+    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root)
 
     # resume from timestring
     if anim_args.resume_from_timestring:

@@ -9,7 +9,7 @@ from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vi
 from .vid2depth import process_depth_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
-from .general_utils import get_os
+from .general_utils import get_os, get_deforum_version
 from .deforum_controlnet import controlnet_component_names, setup_controlnet_ui
 import tempfile
         
@@ -283,7 +283,7 @@ import gradio as gr
 import time
 from types import SimpleNamespace
 
-i1_store_backup = "<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.2b</p>"
+i1_store_backup = f"<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.2b | Git commit: {get_deforum_version()}</p>"
 i1_store = i1_store_backup
 
 mask_fill_choices=['fill', 'original', 'latent noise', 'latent nothing']
@@ -1121,6 +1121,8 @@ def process_args(args_dict_main):
     for key in root.animation_prompts:
         animationPromptCurr = root.animation_prompts[key]
         root.animation_prompts[key] = f"{positive_prompts} {animationPromptCurr} {'' if '--neg' in animationPromptCurr else '--neg'} {negative_prompts}"
+    root.positive_prompts = positive_prompts
+    root.negative_prompts = negative_prompts
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
