@@ -188,7 +188,7 @@ def on_ui_tabs():
             with gr.Column(scale=1, variant='panel'):
                 components = deforum_args.setup_deforum_setting_dictionary(None, True, True)
         
-            with gr.Column(scale=1):
+            with gr.Column(scale=1, variant='compact'):
                 with gr.Row(variant='compact'):
                     btn = gr.Button("Click here after the generation to show the video")
                     components['btn'] = btn
@@ -242,7 +242,7 @@ def on_ui_tabs():
                 
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
 
-                gr.HTML("<p>* Path can be relative to webui folder OR full - absolute </p>")
+                gr.HTML("<p>Settings file Path can be relative to webui folder OR full - absolute </p>", elem_id='settings_path_msg')
                 with gr.Row(variant='compact'):
                     settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="Settings File")
                     #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
