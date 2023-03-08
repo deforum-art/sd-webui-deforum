@@ -51,7 +51,10 @@ def run_deforum(*args, **kwargs):
     
     root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict)
     root.clipseg_model = None
-    root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
+    try:
+        root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
+    except:
+        root.initial_clipskip = 1
     root.basedirs = basedirs
 
     for basedir in basedirs:
@@ -105,13 +108,13 @@ def run_deforum(*args, **kwargs):
         need_to_frame_interpolate = True
         
     if video_args.skip_video_for_run_all:
-        print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
+        print("\nSkipping video creation, uncheck 'Skip video for run all' in 'Output' tab if you want to get a video too :)")
     else:
         import subprocess
 
         path_name_modifier = video_args.path_name_modifier
         if video_args.render_steps: # render steps from a single image
-            fname = f"{path_name_modifier}_%05d.png"
+            fname = f"{path_name_modifier}_%09d.png"
             all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
             newest_dir = max(all_step_dirs, key=os.path.getmtime)
             image_path = os.path.join(newest_dir, fname)
@@ -119,18 +122,9 @@ def run_deforum(*args, **kwargs):
             mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
             max_video_frames = args.steps
         else: # render images for a video
-            image_path = os.path.join(args.outdir, f"{args.timestring}_%05d.png")
+            image_path = os.path.join(args.outdir, f"{args.timestring}_%09d.png")
             mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
             max_video_frames = anim_args.max_frames
-
-        exclude_keys = deforum_settings.get_keys_to_exclude('video')
-        video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
-        with open(video_settings_filename, "w+", encoding="utf-8") as f:
-            s = {}
-            for key, value in dict(video_args.__dict__).items():
-                if key not in exclude_keys:
-                    s[key] = value
-            json.dump(s, f, ensure_ascii=False, indent=4)
 
         # Stitch video using ffmpeg!
         try:
@@ -194,7 +188,7 @@ def on_ui_tabs():
             with gr.Column(scale=1, variant='panel'):
                 components = deforum_args.setup_deforum_setting_dictionary(None, True, True)
         
-            with gr.Column(scale=1):
+            with gr.Column(scale=1, variant='compact'):
                 with gr.Row(variant='compact'):
                     btn = gr.Button("Click here after the generation to show the video")
                     components['btn'] = btn
@@ -248,18 +242,13 @@ def on_ui_tabs():
                 
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
 
-                gr.HTML("<p>* Paths can be relative to webui folder OR full - absolute </p>")
+                gr.HTML("<p>Settings file Path can be relative to webui folder OR full - absolute </p>", elem_id='settings_path_msg')
                 with gr.Row(variant='compact'):
-                    settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="General Settings File")
+                    settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="Settings File")
                     #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
                 with gr.Row(variant='compact'):
                     save_settings_btn = gr.Button('Save Settings', elem_id='deforum_save_settings_btn')
-                    load_settings_btn = gr.Button('Load Settings', elem_id='deforum_load_settings_btn')
-                with gr.Row(variant='compact'):
-                    video_settings_path = gr.Textbox("deforum_video-settings.txt", elem_id='deforum_video_settings_path', label="Video Settings File")
-                    #reuse_latest_video_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_video_settings_btn')#TODO
-                with gr.Row(variant='compact'):
-                    save_video_settings_btn = gr.Button('Save Video Settings', elem_id='deforum_save_video_settings_btn')
+                    load_settings_btn = gr.Button('Load All Settings', elem_id='deforum_load_settings_btn')
                     load_video_settings_btn = gr.Button('Load Video Settings', elem_id='deforum_load_video_settings_btn')
 
         component_list = [components[name] for name in deforum_args.component_names]
@@ -283,7 +272,7 @@ def on_ui_tabs():
         
         save_settings_btn.click(
                     fn=wrap_gradio_call(deforum_settings.save_settings),
-                    inputs=[settings_path] + settings_component_list,
+                    inputs=[settings_path] + settings_component_list + video_settings_component_list,
                     outputs=[stuff],
                 )
         
@@ -293,15 +282,9 @@ def on_ui_tabs():
                     outputs=settings_component_list + [stuff],
                 )
         
-        save_video_settings_btn.click(
-                    fn=wrap_gradio_call(deforum_settings.save_video_settings),
-                    inputs=[video_settings_path] + video_settings_component_list,
-                    outputs=[stuff],
-                )
-        
         load_video_settings_btn.click(
                     fn=wrap_gradio_call(deforum_settings.load_video_settings),
-                    inputs=[video_settings_path] + video_settings_component_list,
+                    inputs=[settings_path] + video_settings_component_list,
                     outputs=video_settings_component_list + [stuff],
                 )
 

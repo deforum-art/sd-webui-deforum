@@ -123,7 +123,9 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
     }
     if sampler_name is not None:
         if sampler_name in available_samplers.keys():
-            args.sampler = available_samplers[sampler_name]
+            p.sampler_name = available_samplers[sampler_name]
+        else:
+            raise RuntimeError(f"Sampler name '{sampler_name}' is invalid. Please check the available sampler list in the 'Run' tab")
 
     if args.checkpoint is not None:
         info = sd_models.get_closet_checkpoint_match(args.checkpoint)
@@ -241,7 +243,7 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
         rows1.append(f"{p.denoising_strength:.5g}" if p.denoising_strength is not None else "None")
 
     rows1 += [str(p.subseed), f"{p.subseed_strength:.5g}"] * (anim_args.enable_subseed_scheduling)
-    rows1 += [args.sampler] * anim_args.enable_sampler_scheduling
+    rows1 += [p.sampler_name] * anim_args.enable_sampler_scheduling
     rows1 += [str(args.checkpoint)] * anim_args.enable_checkpoint_scheduling
     
     rows2 = []

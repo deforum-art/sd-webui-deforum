@@ -17,16 +17,18 @@ from basicsr.utils.download_util import load_file_from_url
 from .rich import console
 import time
 import subprocess
+from modules.shared import opts
 
 def process_upscale_vid_upload_logic(file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_file_name, keep_imgs, f_location, f_crf, f_preset):
     print("Got a request to *upscale* an existing video.")
-
+    
     in_vid_fps, _, _ = get_quick_vid_info(file.name)
     folder_name = clean_folder_name(Path(vid_file_name).stem)
-    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-upscaling', folder_name)
+    outdir = opts.outdir_samples or os.path.join(os.getcwd(), 'outputs')
+    outdir_no_tmp = outdir + f'/frame-upscaling/{folder_name}'
     i = 1
     while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-upscaling', folder_name + '_' + str(i))
+        outdir_no_tmp = f"{outdir}/frame-upscaling/{folder_name}_{i}"
         i += 1
 
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
@@ -100,7 +102,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
     
     mp4_path = mp4_path + '.mp4'
 
-    t = os.path.join(img_folder_path, "%07d.png")
+    t = os.path.join(img_folder_path, "%09d.png")
     add_soundtrack = 'None'
     if not audio_path is None:
         add_soundtrack = 'File'
@@ -125,10 +127,11 @@ def process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_
     print(f"Got a request to *upscale* a video using {upscale_model} at {upscale_factor}")
 
     folder_name = clean_folder_name(Path(vid_path.orig_name).stem)
-    outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-upscaling', folder_name)
+    outdir = opts.outdir_samples or os.path.join(os.getcwd(), 'outputs')
+    outdir_no_tmp = outdir + f'/frame-upscaling/{folder_name}'
     i = 1
     while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = os.path.join(os.getcwd(), 'outputs', 'frame-upscaling', folder_name + '_' + str(i))
+        outdir_no_tmp = f"{outdir}/frame-upscaling/{folder_name}_{i}"
         i += 1
 
     outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
@@ -162,7 +165,7 @@ def process_ncnn_video_upscaling(vid_path, outdir, in_vid_fps, in_vid_res, out_v
     print(f"\r{msg_to_print}", flush=True)
     print(f"\rUpscaling \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
     # set custom path for ffmpeg func below
-    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, "%05d.png")
+    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, "%09d.png")
     add_soundtrack = 'None'
     # don't pass add_soundtrack to ffmpeg if orig video doesn't contain any audio, so we won't get a message saying audio couldn't be added :)
     if media_file_has_audio(vid_path.name, f_location):
@@ -252,7 +255,7 @@ def make_upscale_v2(upscale_factor, upscale_model, keep_imgs, imgs_raw_path, img
     print(f"\r{msg_to_print}", flush=True)
     print(f"\rUpscaling \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
     # set custom path for ffmpeg func below
-    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, f"{imgs_batch_id}_%05d.png")
+    upscaled_imgs_path_for_ffmpeg = os.path.join(upscaled_folder_path, f"{imgs_batch_id}_%09d.png")
     # stitch video from upscaled pngs 
     ffmpeg_stitch_video(ffmpeg_location=ffmpeg_location, fps=fps, outmp4_path=out_upscaled_mp4_path, stitch_from_frame=stitch_from_frame, stitch_to_frame=stitch_to_frame, imgs_path=upscaled_imgs_path_for_ffmpeg, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=ffmpeg_crf, preset=ffmpeg_preset)
 

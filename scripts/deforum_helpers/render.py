@@ -22,7 +22,7 @@ from .hybrid_video import hybrid_generation, hybrid_composite
 from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion, get_flow_for_hybrid_motion_prev, image_transform_ransac, image_transform_optical_flow
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
-from .settings import get_keys_to_exclude
+from .settings import save_settings_from_animation_run
 from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 # Webui
 from modules.shared import opts, cmd_opts, state, sd_model
@@ -61,18 +61,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
     print(f"Saving animation frames to:\n{args.outdir}")
-
-    # save settings for the batch
-    exclude_keys = get_keys_to_exclude('general')
-    settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
-    with open(settings_filename, "w+", encoding="utf-8") as f:
-        args.__dict__["prompts"] = animation_prompts
-        s = {}
-        for d in [dict(args.__dict__), dict(anim_args.__dict__), dict(parseq_args.__dict__), dict(loop_args.__dict__)]:
-            for key, value in d.items():
-                if key not in exclude_keys:
-                    s[key] = value
-        json.dump(s, f, ensure_ascii=False, indent=4)
+    
+    # save settings.txt file for the current run
+    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args)
 
     # resume from timestring
     if anim_args.resume_from_timestring:
@@ -122,7 +113,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         last_frame = start_frame-1
         if turbo_steps > 1:
             last_frame -= last_frame%turbo_steps
-        path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:05}.png")
+        path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:09}.png")
         img = cv2.imread(path)
         #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) # Changed the colors on resume
         prev_img = img
@@ -281,10 +272,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2GRAY)
                     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
-                filename = f"{args.timestring}_{tween_frame_idx:05}.png"
+                filename = f"{args.timestring}_{tween_frame_idx:09}.png"
                 cv2.imwrite(os.path.join(args.outdir, filename), img)
                 if anim_args.save_depth_maps:
-                    depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:05}.png"), depth)
+                    depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:09}.png"), depth)
             if turbo_next_image is not None:
                 prev_img = turbo_next_image
 
@@ -318,7 +309,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 if anim_args.color_coherence == 'Video Input' and hybrid_available:
                     video_color_coherence_frame = int(frame_idx) % int(anim_args.color_coherence_video_every_N_frames) == 0
                     if video_color_coherence_frame:
-                        prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:05}.jpg"))
+                        prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg"))
                         prev_vid_img = prev_vid_img.resize((args.W, args.H), Image.Resampling.LANCZOS)
                         color_match_sample = np.asarray(prev_vid_img)
                         color_match_sample = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2BGR)
@@ -385,7 +376,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
 
         # grab init image for current frame
-        elif using_vid_init:
+        if using_vid_init:
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
@@ -453,7 +444,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             turbo_next_image, turbo_next_frame_idx = opencv_image, frame_idx
             frame_idx += turbo_steps
         else:    
-            filename = f"{args.timestring}_{frame_idx:05}.png"
+            filename = f"{args.timestring}_{frame_idx:09}.png"
             save_image(image, 'PIL', filename, args, video_args, root)
 
             if anim_args.save_depth_maps:
@@ -463,7 +454,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     devices.torch_gc()
                     depth_model.to(root.device)
                 depth = depth_model.predict(opencv_image, anim_args.midas_weight, root.half_precision)
-                depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:05}.png"), depth)
+                depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx:09}.png"), depth)
                 if cmd_opts.lowvram or cmd_opts.medvram:
                     depth_model.to('cpu')
                     devices.torch_gc()
