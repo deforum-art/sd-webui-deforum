@@ -758,7 +758,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="Add soundtrack", value=dv.add_soundtrack)
                         soundtrack_path = gr.Textbox(label="Soundtrack path", lines=1, interactive=True, value = dv.soundtrack_path)
                     with gr.Row(variant='compact'):
-                        skip_video_for_run_all = gr.Checkbox(label="Skip video for run all", value=dv.skip_video_for_run_all, interactive=True)
+                        skip_video_for_run_all = gr.Checkbox(label="Skip video creation", value=dv.skip_video_for_run_all, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
                         # the following param only shows for windows and linux users!
