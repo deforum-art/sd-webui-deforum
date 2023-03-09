@@ -136,6 +136,7 @@ deforum_titles = {
     //"path_name_modifier": "",
     "Image path": "the location of images to create the video from, when use_manual_settings is checked",
     "MP4 path": "the output location of the mp4 file, when use_manual_settings is checked",
+	"Delete Imgs": "if enabled, raw imgs will be deleted after a successful video/ videos (upsacling, interpolation, gif) creation",
 	"Engine": "choose the frame interpolation engine and version",
 	"Interp X":"how many times to interpolate the source video. e.g source video fps of 12 and a value of x2 will yield a 24fps interpolated video",
 	"Slow-Mo X":"how many times to slow-down the video. *Naturally affects output fps as well",

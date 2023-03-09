@@ -759,11 +759,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         soundtrack_path = gr.Textbox(label="Soundtrack path", lines=1, interactive=True, value = dv.soundtrack_path)
                     with gr.Row(variant='compact'):
                         skip_video_creation = gr.Checkbox(label="Skip video creation", value=dv.skip_video_creation, interactive=True)
+                        delete_imgs = gr.Checkbox(label="Delete Imgs", value=dv.delete_imgs, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
                         # the following param only shows for windows and linux users!
                         make_gif = gr.Checkbox(label="Make GIF", value=dv.make_gif, interactive=True)
-                        delete_imgs = gr.Checkbox(label="Del Imgs", value=dv.delete_imgs, interactive=True)
                 with gr.Row(equal_height=True, variant='compact', visible=True) as r_upscale_row:
                     r_upscale_video = gr.Checkbox(label="Upscale", value=dv.r_upscale_video, interactive=True)
                     r_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
@@ -975,7 +975,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
-    skip_video_creation_outputs = [fps_out_format_row, soundtrack_row, ffmpeg_quality_accordion, store_frames_in_ram, make_gif, r_upscale_row]
+    skip_video_creation_outputs = [fps_out_format_row, soundtrack_row, ffmpeg_quality_accordion, store_frames_in_ram, make_gif, r_upscale_row, delete_imgs]
     for output in skip_video_creation_outputs:
         skip_video_creation.change(fn=change_visibility_from_skip_video, inputs=skip_video_creation, outputs=output)  
     frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)

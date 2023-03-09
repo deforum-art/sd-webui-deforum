@@ -26,7 +26,7 @@ import json
 
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
-from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif
+from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion
 from deforum_helpers.upscaling import make_upscale_v2
 import gc
 import torch
@@ -159,6 +159,9 @@ def run_deforum(*args, **kwargs):
         
         # out mp4 path is defined in make_upscale func
         make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=video_args.ffmpeg_location, stitch_from_frame=0, stitch_to_frame=max_video_frames, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track)
+        
+    if video_args.delete_imgs and not video_args.skip_video_creation:
+        handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, run_id=args.timestring)
         
     root.initial_info += "\n The animation is stored in " + args.outdir
     root.initial_info += "\n Timestring = " + args.timestring + '\n'
