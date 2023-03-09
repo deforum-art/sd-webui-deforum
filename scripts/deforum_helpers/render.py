@@ -252,8 +252,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 if anim_args.optical_flow_cadence and cadence_flow is not None:
                     cadence_flow = abs_flow_to_rel_flow(cadence_flow)
                     cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
-                    cadence_flow = rel_flow_to_abs_flow(cadence_flow)
-                    cadence_flow_inc = cadence_flow * tween / 2
+                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow) * tween / 2
                     if advance_prev and tween > 0:
                         turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc)
                     if advance_next and tween < 1:
