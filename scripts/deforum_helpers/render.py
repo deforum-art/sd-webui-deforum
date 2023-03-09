@@ -222,6 +222,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if turbo_steps > 1:
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
             cadence_flow = None
+            if anim_args.optical_flow_cadence:
+                print("Optical Flow cadence:")
+            else:
+                print("Cadence:")
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
                 tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
                 print(f" Creating in-between frame: {tween_frame_idx}; tween:{tween:0.2f};")
