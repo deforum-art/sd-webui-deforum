@@ -948,9 +948,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
     vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
-    animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence)
-    animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=guided_images_accord)
-    animation_mode.change(fn=change_optical_flow_cadence_visibility, inputs=animation_mode, outputs=optical_flow_cadence)
+    diffusen_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence ]
+    for output in diffusen_cadence_outputs:
+        animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=output)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
