@@ -1,6 +1,5 @@
 # At the moment there are three types of masks: mask from variable, file mask and word mask
-# Variable masks include init_mask for the predefined whole-video mask, frame_mask from video-masking system
-# and human_mask for a model which better segments people in the background video
+# Variable masks include video_mask (which can be set to auto-generated human masks) and everywhere
 # They are put in {}-brackets
 # Word masks are framed with <>-bracets, like: <cat>, <anime girl>
 # File masks are put in []-brackes
