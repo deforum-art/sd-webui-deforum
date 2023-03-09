@@ -116,7 +116,7 @@ deforum_titles = {
     "Resume timestring": "the required timestamp to reference when resuming. Currently only available in 2D & 3D mode, the timestamp is saved as the settings .txt file name as well as images produced during your previous run. The format follows: yyyymmddhhmmss - a timestamp of when the run was started to diffuse.",
 	
     //Video Output
-    "Skip video for run all": "when checked, do not output a video",
+    "Skip video creation": "when checked, do not output a video",
 	"Make GIF": "create a gif in addition to .mp4 file. supports up to 30 fps, will self-disable at higher fps values",
 	"Upscale":"upscale the images of the next run once it's finished + make a video out of them",
 	"Upscale model":"model of the upscaler to use. 'realesr-animevideov3' is much faster but yields smoother, less detailed results. the other models only do x4",
