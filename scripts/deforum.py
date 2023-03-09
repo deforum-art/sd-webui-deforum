@@ -27,6 +27,7 @@ import json
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
 from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif
+from deforum_helpers.general_utils import get_deforum_version
 from deforum_helpers.upscaling import make_upscale_v2
 import gc
 import torch
@@ -45,7 +46,8 @@ def run_deforum(*args, **kwargs):
         #we'll setup the rest later
     )
     
-    print("\033[4;33mDeforum extension for auto1111 webui, v2.2b\033[0m")
+    print(f"\033[4;33mDeforum extension for auto1111 webui, v2.2b\033[0m")
+    print(f"Git commit: {get_deforum_version()}")
     args_dict['self'] = None
     args_dict['p'] = p
     
@@ -131,7 +133,7 @@ def run_deforum(*args, **kwargs):
             ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
             mp4 = open(mp4_path,'rb').read()
             data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
+            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.2b </p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
         except Exception as e:
             if need_to_frame_interpolate:
                 print(f"FFMPEG DID NOT STITCH ANY VIDEO. However, you requested to frame interpolate  - so we will continue to frame interpolation, but you'll be left only with the interpolated frames and not a video, since ffmpeg couldn't run. Original ffmpeg error: {e}")
