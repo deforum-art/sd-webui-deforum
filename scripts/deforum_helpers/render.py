@@ -4,6 +4,7 @@ import pandas as pd
 import cv2
 import re
 import numpy as np
+import itertools
 import numexpr
 from PIL import Image, ImageOps
 from .rich import console
@@ -390,6 +391,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
         if after_neg and after_neg.strip():
             print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
+            prompt_to_print += f"--neg {after_neg}"
+
+        # set value back into the prompt
+        args.prompt = prompt_to_print
 
         # grab init image for current frame
         if using_vid_init:
