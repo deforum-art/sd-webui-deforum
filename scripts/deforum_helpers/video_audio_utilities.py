@@ -304,15 +304,15 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
         print(f"\r{msg_to_print}", flush=True)
         print(f"GIF stitching *failed* with error:\n{e}")
         
-def handle_imgs_deletion(vid_path=None, imgs_folder_path=None, run_id=None):
+def handle_imgs_deletion(vid_path=None, imgs_folder_path=None, batch_id=None):
     try:
-        total_imgs_to_delete = count_matching_frames(imgs_folder_path, run_id)
+        total_imgs_to_delete = count_matching_frames(imgs_folder_path, batch_id)
         if total_imgs_to_delete is None or total_imgs_to_delete == 0:
             return
         print("Deleting raw images, as requested:")
         _, fcount, _ = get_quick_vid_info(vid_path)
         if fcount == total_imgs_to_delete:
-            total_imgs_deleted = delete_matching_frames(imgs_folder_path, run_id)
+            total_imgs_deleted = delete_matching_frames(imgs_folder_path, batch_id)
             print(f"Deleted {total_imgs_deleted} out of {total_imgs_to_delete} imgs!")
         else:
             print("Did not delete imgs as there was a mismatch between # of frames in folder, and # of frames in actual video. Please check and delete manually. ")
