@@ -28,6 +28,9 @@ def change_max_frames_visibility(choice):
 def change_diffusion_cadence_visibility(choice):
     return gr.update(visible=choice not in ['Video Input', 'Interpolation'])
     
+def change_optical_flow_cadence_visibility(choice):
+    return gr.update(visible=choice not in ['Video Input', 'Interpolation'])
+
 def disble_3d_related_stuff(choice):
     return gr.update(visible=False) if choice != '3D' else gr.update(visible=True)
     

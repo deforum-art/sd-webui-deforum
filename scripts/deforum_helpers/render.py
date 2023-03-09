@@ -19,7 +19,8 @@ from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
 from .load_images import get_mask, load_img, get_mask_from_file
 from .hybrid_video import hybrid_generation, hybrid_composite
-from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion, get_flow_for_hybrid_motion_prev, image_transform_ransac, image_transform_optical_flow
+from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion, get_flow_for_hybrid_motion_prev
+from .hybrid_video import image_transform_ransac, image_transform_optical_flow, get_flow_from_images, abs_flow_to_rel_flow, rel_flow_to_abs_flow
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import save_settings_from_animation_run
@@ -213,6 +214,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         # emit in-between frames
         if turbo_steps > 1:
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
+            cadence_flow = None
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
                 tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
                 print(f" Creating in-between frame: {tween_frame_idx}; tween:{tween:0.2f};")
@@ -220,14 +222,31 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 advance_prev = turbo_prev_image is not None and tween_frame_idx > turbo_prev_frame_idx
                 advance_next = tween_frame_idx > turbo_next_frame_idx
 
+                # optical flow cadence setup
+                if anim_args.optical_flow_cadence:
+                    if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
+                        cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, "DIS Medium")
+                        turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow)
+
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
                     depth = depth_model.predict(turbo_next_image, anim_args.midas_weight, root.half_precision)
-                
+                    
                 if advance_prev:
                     turbo_prev_image, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
                 if advance_next:
                     turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+
+                # do optical flow cadence
+                if anim_args.optical_flow_cadence and cadence_flow is not None:
+                    cadence_flow = abs_flow_to_rel_flow(cadence_flow)
+                    cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+                    cadence_flow = rel_flow_to_abs_flow(cadence_flow)
+                    cadence_flow_inc = cadence_flow * tween / 2
+                    if advance_prev and tween > 0:
+                        turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc)
+                    if advance_next and tween < 1:
+                        turbo_next_image = image_transform_optical_flow(turbo_next_image, cadence_flow_inc)
 
                 # hybrid video motion - warps turbo_prev_image or turbo_next_image to match motion
                 if tween_frame_idx > 0:

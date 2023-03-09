@@ -95,6 +95,7 @@ def DeforumAnimArgs():
     color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
     diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
+    optical_flow_cadence = False
     #**Noise settings:**
     noise_type = 'perlin' # ['uniform', 'perlin']
     # Perlin params
@@ -371,6 +372,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     border = gr.Radio(['replicate', 'wrap'], label="Border", value=da.border, elem_id="border")
             with gr.Row(variant='compact'):
                 diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
+                optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, interactive=True, elem_id='optical_flow_cadence')
                 max_frames = gr.Number(label="Max frames", lines=1, value = da.max_frames, interactive=True, precision=0)
             # GUIDED IMAGES ACCORD
             with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
@@ -946,6 +948,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence)
     animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=guided_images_accord)
+    animation_mode.change(fn=change_optical_flow_cadence_visibility, inputs=animation_mode, outputs=optical_flow_cadence)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
@@ -1017,7 +1020,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_clipskip_scheduling, clipskip_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         color_coherence, color_coherence_video_every_N_frames, color_force_grayscale,
-                        diffusion_cadence,
+                        diffusion_cadence, optical_flow_cadence,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
                         use_depth_warping, midas_weight,
                         padding_mode, sampling_mode, save_depth_maps,
