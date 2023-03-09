@@ -9,7 +9,7 @@ from .generate import generate
 from .animation_key_frames import DeformAnimKeys
 from .parseq_adapter import ParseqAnimKeys
 from .save_images import save_image
-from .settings import get_keys_to_exclude
+from .settings import save_settings_from_animation_run
 
 # Webui
 from modules.shared import opts, cmd_opts, state
@@ -45,7 +45,6 @@ def render_input_video(args, anim_args, video_args, parseq_args, loop_args, cont
         args.use_mask = True
         args.overlay_mask = True
 
-
     render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
 
 # Modified a copy of the above to allow using masking video with out a init video.
@@ -80,16 +79,8 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
     os.makedirs(args.outdir, exist_ok=True)
     print(f"Saving interpolation animation frames to {args.outdir}")
 
-    # save settings for the batch
-    exclude_keys = get_keys_to_exclude('general')
-    settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
-    with open(settings_filename, "w+", encoding="utf-8") as f:
-        s = {}
-        for d in [dict(args.__dict__), dict(anim_args.__dict__), dict(parseq_args.__dict__)]:
-            for key, value in d.items():
-                if key not in exclude_keys:
-                    s[key] = value
-        json.dump(s, f, ensure_ascii=False, indent=4)
+    # save settings.txt file for the current run
+    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root)
         
     # Compute interpolated prompts
     if use_parseq and keys.manages_prompts():

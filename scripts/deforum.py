@@ -27,6 +27,7 @@ import json
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
 from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif
+from deforum_helpers.general_utils import get_deforum_version
 from deforum_helpers.upscaling import make_upscale_v2
 import gc
 import torch
@@ -45,7 +46,8 @@ def run_deforum(*args, **kwargs):
         #we'll setup the rest later
     )
     
-    print("\033[4;33mDeforum extension for auto1111 webui, v2.2b\033[0m")
+    print(f"\033[4;33mDeforum extension for auto1111 webui, v2.2b\033[0m")
+    print(f"Git commit: {get_deforum_version()}")
     args_dict['self'] = None
     args_dict['p'] = p
     
@@ -126,21 +128,12 @@ def run_deforum(*args, **kwargs):
             mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
             max_video_frames = anim_args.max_frames
 
-        exclude_keys = deforum_settings.get_keys_to_exclude('video')
-        video_settings_filename = os.path.join(args.outdir, f"{args.timestring}_video-settings.txt")
-        with open(video_settings_filename, "w+", encoding="utf-8") as f:
-            s = {}
-            for key, value in dict(video_args.__dict__).items():
-                if key not in exclude_keys:
-                    s[key] = value
-            json.dump(s, f, ensure_ascii=False, indent=4)
-
         # Stitch video using ffmpeg!
         try:
             ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
             mp4 = open(mp4_path,'rb').read()
             data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum v0.5-webui-beta</p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
+            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.2b </p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
         except Exception as e:
             if need_to_frame_interpolate:
                 print(f"FFMPEG DID NOT STITCH ANY VIDEO. However, you requested to frame interpolate  - so we will continue to frame interpolation, but you'll be left only with the interpolated frames and not a video, since ffmpeg couldn't run. Original ffmpeg error: {e}")
@@ -197,7 +190,7 @@ def on_ui_tabs():
             with gr.Column(scale=1, variant='panel'):
                 components = deforum_args.setup_deforum_setting_dictionary(None, True, True)
         
-            with gr.Column(scale=1):
+            with gr.Column(scale=1, variant='compact'):
                 with gr.Row(variant='compact'):
                     btn = gr.Button("Click here after the generation to show the video")
                     components['btn'] = btn
@@ -251,18 +244,13 @@ def on_ui_tabs():
                 
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
 
-                gr.HTML("<p>* Paths can be relative to webui folder OR full - absolute </p>")
+                gr.HTML("<p>Settings file Path can be relative to webui folder OR full - absolute </p>", elem_id='settings_path_msg')
                 with gr.Row(variant='compact'):
-                    settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="General Settings File")
+                    settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="Settings File")
                     #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
                 with gr.Row(variant='compact'):
                     save_settings_btn = gr.Button('Save Settings', elem_id='deforum_save_settings_btn')
-                    load_settings_btn = gr.Button('Load Settings', elem_id='deforum_load_settings_btn')
-                with gr.Row(variant='compact'):
-                    video_settings_path = gr.Textbox("deforum_video-settings.txt", elem_id='deforum_video_settings_path', label="Video Settings File")
-                    #reuse_latest_video_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_video_settings_btn')#TODO
-                with gr.Row(variant='compact'):
-                    save_video_settings_btn = gr.Button('Save Video Settings', elem_id='deforum_save_video_settings_btn')
+                    load_settings_btn = gr.Button('Load All Settings', elem_id='deforum_load_settings_btn')
                     load_video_settings_btn = gr.Button('Load Video Settings', elem_id='deforum_load_video_settings_btn')
 
         component_list = [components[name] for name in deforum_args.component_names]
@@ -286,7 +274,7 @@ def on_ui_tabs():
         
         save_settings_btn.click(
                     fn=wrap_gradio_call(deforum_settings.save_settings),
-                    inputs=[settings_path] + settings_component_list,
+                    inputs=[settings_path] + settings_component_list + video_settings_component_list,
                     outputs=[stuff],
                 )
         
@@ -296,15 +284,9 @@ def on_ui_tabs():
                     outputs=settings_component_list + [stuff],
                 )
         
-        save_video_settings_btn.click(
-                    fn=wrap_gradio_call(deforum_settings.save_video_settings),
-                    inputs=[video_settings_path] + video_settings_component_list,
-                    outputs=[stuff],
-                )
-        
         load_video_settings_btn.click(
                     fn=wrap_gradio_call(deforum_settings.load_video_settings),
-                    inputs=[video_settings_path] + video_settings_component_list,
+                    inputs=[settings_path] + video_settings_component_list,
                     outputs=video_settings_component_list + [stuff],
                 )
 
