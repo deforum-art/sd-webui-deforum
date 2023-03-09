@@ -21,9 +21,9 @@ from .seed import next_seed
 from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
 from .load_images import get_mask, load_img, get_mask_from_file
-from .hybrid_video import hybrid_generation, hybrid_composite
-from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion, get_flow_for_hybrid_motion_prev
-from .hybrid_video import image_transform_ransac, image_transform_optical_flow, get_flow_from_images, abs_flow_to_rel_flow, rel_flow_to_abs_flow
+from .hybrid_video import (
+    hybrid_generation, hybrid_composite, get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion,get_flow_for_hybrid_motion_prev,
+    image_transform_ransac, image_transform_optical_flow, get_flow_from_images, abs_flow_to_rel_flow, rel_flow_to_abs_flow)
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import save_settings_from_animation_run
