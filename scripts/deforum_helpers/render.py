@@ -2,10 +2,7 @@ import os
 import json
 import pandas as pd
 import cv2
-import re
 import numpy as np
-import itertools
-import numexpr
 from PIL import Image, ImageOps
 from .rich import console
 
@@ -46,8 +43,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args, args.seed) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
-    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
+    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args)
     # resume animation
     start_frame = 0
     if anim_args.resume_from_timestring:
@@ -82,12 +79,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
-        max_f = anim_args.max_frames - 1
         for i, prompt in animation_prompts.items():
-            if str(i).isdigit():
-                prompt_series[int(i)] = prompt
-            else:
-                prompt_series[int(numexpr.evaluate(i))] = prompt
+            prompt_series[int(i)] = prompt
         prompt_series = prompt_series.ffill().bfill()
 
     # check for video inits
@@ -372,18 +365,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
-        
-        max_f = anim_args.max_frames - 1
-        pattern = r'`.*?`'
-        regex = re.compile(pattern)
-        prompt_parsed = args.prompt
-        for match in regex.finditer(prompt_parsed):
-            matched_string = match.group(0)
-            parsed_string = matched_string.replace('t', f'{frame_idx}').replace("max_f" , f"{max_f}").replace('`','')
-            parsed_value = numexpr.evaluate(parsed_string)
-            prompt_parsed = prompt_parsed.replace(matched_string, str(parsed_value))
-
-        prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
+            
+        prompt_to_print, *after_neg = args.prompt.strip().split("--neg")
         prompt_to_print = prompt_to_print.strip()
         after_neg = "".join(after_neg).strip()
 
@@ -391,10 +374,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
         if after_neg and after_neg.strip():
             print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
-            prompt_to_print += f"--neg {after_neg}"
-
-        # set value back into the prompt
-        args.prompt = prompt_to_print
 
         # grab init image for current frame
         if using_vid_init:
