@@ -110,7 +110,7 @@ def DeforumAnimArgs():
     sampling_mode = 'bicubic' # ['bicubic', 'bilinear', 'nearest']
     save_depth_maps = False 
     #**Video Input:**
-    video_init_path ='https://github.com/hithereai/d/releases/download/m/vid.mp4' 
+    video_init_path ='https://deforum.github.io/a1/V1.mp4' 
     extract_nth_frame = 1
     extract_from_frame = 0 
     extract_to_frame = -1  # minus 1 for unlimited frames
@@ -193,11 +193,11 @@ def DeforumArgs():
     use_init = False 
     strength = 0.0 
     strength_0_no_init = True # Set the strength to 0 automatically when no init image is used
-    init_image = "https://github.com/hithereai/d/releases/download/m/kaba.png" 
+    init_image = "https://deforum.github.io/a1/I1.png" 
     # Whiter areas of the mask are areas that change more
     use_mask = False 
     use_alpha_as_mask = False # use the alpha channel of the init image as the mask
-    mask_file = "https://github.com/hithereai/d/releases/download/m/mask.jpg" 
+    mask_file = "https://deforum.github.io/a1/M1.jpg" 
     invert_mask = False 
     # Adjust mask image, 1.0 is no adjustment. Should be positive numbers.
     mask_contrast_adjust = 1.0  
@@ -263,7 +263,7 @@ def DeforumOutputArgs():
     ffmpeg_crf = '17'
     ffmpeg_preset = 'slow'
     add_soundtrack = 'None' # ["File","Init Video"]
-    soundtrack_path = "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_1MB_MP3.mp3"
+    soundtrack_path = "https://deforum.github.io/a1/A1.mp3"
     # End-Run upscaling
     r_upscale_video = False
     r_upscale_factor = 'x2' # ['2x', 'x3', 'x4']
