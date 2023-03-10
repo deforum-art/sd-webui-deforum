@@ -142,7 +142,7 @@ def load_settings(*args, **kwargs):
                 logging.debug(f"Noise type not found in load file, using default value: {noise_type_default}")
                 ret.append(noise_type_default)
             
-        elif key in jdata:
+        elif key in jdata and key != 'ffmpeg_location':
             ret.append(jdata[key])
         else:
             if key == 'animation_prompts':

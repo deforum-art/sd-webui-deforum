@@ -2,12 +2,10 @@
 # and print a message containing the old and the new names
 # if the latter is removed completely, put a warning
 
-# as of 2023-02-05
-# "histogram_matching" -> None
-
 deprecation_map = {
     "histogram_matching": None,
-    "flip_2d_perspective": "enable_perspective_flip"
+    "flip_2d_perspective": "enable_perspective_flip",
+    "skip_video_for_run_all": "skip_video_creation"    
 }
 
 def handle_deprecated_settings(settings_json):

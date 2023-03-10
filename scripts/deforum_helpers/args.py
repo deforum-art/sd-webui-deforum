@@ -95,6 +95,7 @@ def DeforumAnimArgs():
     color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
     diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
+    optical_flow_cadence = False
     #**Noise settings:**
     noise_type = 'perlin' # ['uniform', 'perlin']
     # Perlin params
@@ -252,9 +253,10 @@ def ParseqArgs():
     return locals()
     
 def DeforumOutputArgs():
-    skip_video_for_run_all = False
+    skip_video_creation = False
     fps = 15 
     make_gif = False
+    delete_imgs = False # True will delete all imgs after a successful mp4 creation
     image_path = "C:/SD/20230124234916_%09d.png" 
     mp4_path = "testvidmanualsettings.mp4" 
     ffmpeg_location = find_ffmpeg_binary()
@@ -371,6 +373,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     border = gr.Radio(['replicate', 'wrap'], label="Border", value=da.border, elem_id="border")
             with gr.Row(variant='compact'):
                 diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
+                # optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, interactive=True, elem_id='optical_flow_cadence')
                 max_frames = gr.Number(label="Max frames", lines=1, value = da.max_frames, interactive=True, precision=0)
             # GUIDED IMAGES ACCORD
             with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
@@ -527,15 +530,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
             # COHERENCE INNER TAB
             with gr.Tab('Coherence', open=False) as coherence_accord:
-                with gr.Row(equal_height=True):
+                with gr.Row(variant='compact'):
                     # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
                     color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
-                    with gr.Column() as force_grayscale_column:
-                        color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True)
+                    # with gr.Column(variant='compact') as force_grayscale_column:
+                    color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True)
                 with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
                     color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
                 with gr.Row(variant='compact'):
                     contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value = da.contrast_schedule, interactive=True)
+                    optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, interactive=True, elem_id='optical_flow_cadence')
                 with gr.Row(variant='compact'):
                     # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                     reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
@@ -757,7 +761,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="Add soundtrack", value=dv.add_soundtrack)
                         soundtrack_path = gr.Textbox(label="Soundtrack path", lines=1, interactive=True, value = dv.soundtrack_path)
                     with gr.Row(variant='compact'):
-                        skip_video_for_run_all = gr.Checkbox(label="Skip video for run all", value=dv.skip_video_for_run_all, interactive=True)
+                        skip_video_creation = gr.Checkbox(label="Skip video creation", value=dv.skip_video_creation, interactive=True)
+                        delete_imgs = gr.Checkbox(label="Delete Imgs", value=dv.delete_imgs, interactive=True)
                         store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
                         save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
                         # the following param only shows for windows and linux users!
@@ -944,13 +949,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
     vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
-    animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence)
-    animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=guided_images_accord)
+    diffusen_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence ]
+    for output in diffusen_cadence_outputs:
+        animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=output)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
-    animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
+    # animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
+    animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=color_force_grayscale)
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=both_anim_mode_motion_params_column)
     #Hybrid related:
@@ -973,9 +980,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
-    skip_video_for_run_all_outputs = [fps_out_format_row, soundtrack_row, ffmpeg_quality_accordion, store_frames_in_ram, make_gif, r_upscale_row]
-    for output in skip_video_for_run_all_outputs:
-        skip_video_for_run_all.change(fn=change_visibility_from_skip_video, inputs=skip_video_for_run_all, outputs=output)  
+    skip_video_creation_outputs = [fps_out_format_row, soundtrack_row, ffmpeg_quality_accordion, store_frames_in_ram, make_gif, r_upscale_row, delete_imgs]
+    for output in skip_video_creation_outputs:
+        skip_video_creation.change(fn=change_visibility_from_skip_video, inputs=skip_video_creation, outputs=output)  
     frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
     frame_interpolation_engine.change(fn=change_interp_x_max_limit,inputs=[frame_interpolation_engine,frame_interpolation_x_amount],outputs=frame_interpolation_x_amount)
     [change_fn.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps) for change_fn in [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_slow_mo_enabled]]
@@ -1017,7 +1024,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_clipskip_scheduling, clipskip_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         color_coherence, color_coherence_video_every_N_frames, color_force_grayscale,
-                        diffusion_cadence,
+                        diffusion_cadence, optical_flow_cadence,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
                         use_depth_warping, midas_weight,
                         padding_mode, sampling_mode, save_depth_maps,
@@ -1046,8 +1053,8 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         fill, full_res_mask, full_res_mask_padding,
                         reroll_blank_frames'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
-video_args_names =  str(r'''skip_video_for_run_all,
-                            fps, make_gif, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
+video_args_names =  str(r'''skip_video_creation,
+                            fps, make_gif, delete_imgs, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
                             add_soundtrack, soundtrack_path,
                             r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
                             render_steps,

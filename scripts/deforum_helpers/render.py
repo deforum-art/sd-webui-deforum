@@ -2,10 +2,7 @@ import os
 import json
 import pandas as pd
 import cv2
-import re
 import numpy as np
-import itertools
-import numexpr
 from PIL import Image, ImageOps
 from .rich import console
 
@@ -21,8 +18,9 @@ from .seed import next_seed
 from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
 from .load_images import get_mask, load_img, get_mask_from_file
-from .hybrid_video import hybrid_generation, hybrid_composite
-from .hybrid_video import get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion, get_flow_for_hybrid_motion_prev, image_transform_ransac, image_transform_optical_flow
+from .hybrid_video import (
+    hybrid_generation, hybrid_composite, get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion,get_flow_for_hybrid_motion_prev,
+    image_transform_ransac, image_transform_optical_flow, get_flow_from_images, abs_flow_to_rel_flow, rel_flow_to_abs_flow)
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import save_settings_from_animation_run
@@ -46,8 +44,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args, args.seed) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
-    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
+    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args)
     # resume animation
     start_frame = 0
     if anim_args.resume_from_timestring:
@@ -82,12 +80,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
-        max_f = anim_args.max_frames - 1
         for i, prompt in animation_prompts.items():
-            if str(i).isdigit():
-                prompt_series[int(i)] = prompt
-            else:
-                prompt_series[int(numexpr.evaluate(i))] = prompt
+            prompt_series[int(i)] = prompt
         prompt_series = prompt_series.ffill().bfill()
 
     # check for video inits
@@ -218,6 +212,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         # emit in-between frames
         if turbo_steps > 1:
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
+            cadence_flow = None
+            if anim_args.optical_flow_cadence:
+                print("Optical Flow cadence:")
+            else:
+                print("Cadence:")
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
                 tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
                 print(f" Creating in-between frame: {tween_frame_idx}; tween:{tween:0.2f};")
@@ -225,14 +224,30 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 advance_prev = turbo_prev_image is not None and tween_frame_idx > turbo_prev_frame_idx
                 advance_next = tween_frame_idx > turbo_next_frame_idx
 
+                # optical flow cadence setup
+                if anim_args.optical_flow_cadence:
+                    if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
+                        cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, "DIS Medium")
+                        turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow)
+
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
                     depth = depth_model.predict(turbo_next_image, anim_args.midas_weight, root.half_precision)
-                
+                    
                 if advance_prev:
                     turbo_prev_image, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
                 if advance_next:
                     turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+
+                # do optical flow cadence
+                if anim_args.optical_flow_cadence and cadence_flow is not None:
+                    cadence_flow = abs_flow_to_rel_flow(cadence_flow)
+                    cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow) * tween / 2
+                    if advance_prev and tween > 0:
+                        turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc)
+                    if advance_next and tween < 1:
+                        turbo_next_image = image_transform_optical_flow(turbo_next_image, cadence_flow_inc)
 
                 # hybrid video motion - warps turbo_prev_image or turbo_next_image to match motion
                 if tween_frame_idx > 0:
@@ -370,18 +385,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
-        
-        max_f = anim_args.max_frames - 1
-        pattern = r'`.*?`'
-        regex = re.compile(pattern)
-        prompt_parsed = args.prompt
-        for match in regex.finditer(prompt_parsed):
-            matched_string = match.group(0)
-            parsed_string = matched_string.replace('t', f'{frame_idx}').replace("max_f" , f"{max_f}").replace('`','')
-            parsed_value = numexpr.evaluate(parsed_string)
-            prompt_parsed = prompt_parsed.replace(matched_string, str(parsed_value))
-
-        prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
+            
+        prompt_to_print, *after_neg = args.prompt.strip().split("--neg")
         prompt_to_print = prompt_to_print.strip()
         after_neg = "".join(after_neg).strip()
 
@@ -389,10 +394,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
         if after_neg and after_neg.strip():
             print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
-            prompt_to_print += f"--neg {after_neg}"
-
-        # set value back into the prompt
-        args.prompt = prompt_to_print
 
         # grab init image for current frame
         if using_vid_init:
