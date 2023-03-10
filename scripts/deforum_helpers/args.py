@@ -463,96 +463,97 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact'):
                         clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
             # MOTION INNER TAB
-            with gr.Tab('Motion') as motion_tab:
-                with gr.Column(visible=True) as only_2d_motion_column:
-                    with gr.Row(variant='compact'):
-                        zoom = gr.Textbox(label="Zoom", lines=1, value = da.zoom, interactive=True)
-                    with gr.Row(variant='compact'):
-                        angle = gr.Textbox(label="Angle", lines=1, value = da.angle, interactive=True)
-                    with gr.Row(variant='compact'):
-                        transform_center_x = gr.Textbox(label="Transform Center X", lines=1, value = da.transform_center_x, interactive=True)
-                    with gr.Row(variant='compact'):
-                        transform_center_y = gr.Textbox(label="Transform Center Y", lines=1, value = da.transform_center_y, interactive=True)
-                with gr.Column(visible=True) as both_anim_mode_motion_params_column:
-                    with gr.Row(variant='compact'):
-                        translation_x = gr.Textbox(label="Translation X", lines=1, value = da.translation_x, interactive=True)
-                    with gr.Row(variant='compact'):
-                        translation_y = gr.Textbox(label="Translation Y", lines=1, value = da.translation_y, interactive=True)
-                with gr.Column(visible=False) as only_3d_motion_column:
-                    with gr.Row(variant='compact'):
-                        translation_z = gr.Textbox(label="Translation Z", lines=1, value = da.translation_z, interactive=True)
-                    with gr.Row(variant='compact'):
-                        rotation_3d_x = gr.Textbox(label="Rotation 3D X", lines=1, value = da.rotation_3d_x, interactive=True)
-                    with gr.Row(variant='compact'):
-                        rotation_3d_y = gr.Textbox(label="Rotation 3D Y", lines=1, value = da.rotation_3d_y, interactive=True)
-                    with gr.Row(variant='compact'):
-                        rotation_3d_z = gr.Textbox(label="Rotation 3D Z", lines=1, value = da.rotation_3d_z, interactive=True)
-                # 3D DEPTH & FOV ACCORD
-                with gr.Accordion('Depth Warping & FOV', visible=False, open=False) as depth_3d_warping_accord:
-                    with gr.Tab('Depth Warping'): 
+            with gr.Tabs(elem_id='motion_noise_etc'):
+                with gr.TabItem('Motion') as motion_tab:
+                    with gr.Column(visible=True) as only_2d_motion_column:
                         with gr.Row(variant='compact'):
-                            use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
-                            midas_weight = gr.Number(label="MiDaS weight", value=da.midas_weight, interactive=True)
+                            zoom = gr.Textbox(label="Zoom", lines=1, value = da.zoom, interactive=True)
                         with gr.Row(variant='compact'):
-                            padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode")
-                            sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="Sampling mode", value=da.sampling_mode, elem_id="sampling_mode")
-                    with gr.Tab('Field Of View', visible=False, open=False) as fov_accord:
+                            angle = gr.Textbox(label="Angle", lines=1, value = da.angle, interactive=True)
                         with gr.Row(variant='compact'):
-                            fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True)
+                            transform_center_x = gr.Textbox(label="Transform Center X", lines=1, value = da.transform_center_x, interactive=True)
                         with gr.Row(variant='compact'):
-                            aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value = da.aspect_ratio_schedule, interactive=True)
+                            transform_center_y = gr.Textbox(label="Transform Center Y", lines=1, value = da.transform_center_y, interactive=True)
+                    with gr.Column(visible=True) as both_anim_mode_motion_params_column:
                         with gr.Row(variant='compact'):
-                            near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
+                            translation_x = gr.Textbox(label="Translation X", lines=1, value = da.translation_x, interactive=True)
                         with gr.Row(variant='compact'):
-                            far_schedule = gr.Textbox(label="Far schedule", lines=1, value = da.far_schedule, interactive=True)
-                # PERSPECTIVE FLIP ACCORD
-                with gr.Accordion('Perspective Flip', open=False) as perspective_flip_accord:
+                            translation_y = gr.Textbox(label="Translation Y", lines=1, value = da.translation_y, interactive=True)
+                    with gr.Column(visible=False) as only_3d_motion_column:
+                        with gr.Row(variant='compact'):
+                            translation_z = gr.Textbox(label="Translation Z", lines=1, value = da.translation_z, interactive=True)
+                        with gr.Row(variant='compact'):
+                            rotation_3d_x = gr.Textbox(label="Rotation 3D X", lines=1, value = da.rotation_3d_x, interactive=True)
+                        with gr.Row(variant='compact'):
+                            rotation_3d_y = gr.Textbox(label="Rotation 3D Y", lines=1, value = da.rotation_3d_y, interactive=True)
+                        with gr.Row(variant='compact'):
+                            rotation_3d_z = gr.Textbox(label="Rotation 3D Z", lines=1, value = da.rotation_3d_z, interactive=True)
+                    # 3D DEPTH & FOV ACCORD
+                    with gr.Accordion('Depth Warping & FOV', visible=False, open=False) as depth_3d_warping_accord:
+                        with gr.TabItem('Depth Warping'): 
+                            with gr.Row(variant='compact'):
+                                use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
+                                midas_weight = gr.Number(label="MiDaS weight", value=da.midas_weight, interactive=True)
+                            with gr.Row(variant='compact'):
+                                padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode")
+                                sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="Sampling mode", value=da.sampling_mode, elem_id="sampling_mode")
+                        with gr.TabItem('Field Of View', visible=False, open=False) as fov_accord:
+                            with gr.Row(variant='compact'):
+                                fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True)
+                            with gr.Row(variant='compact'):
+                                aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value = da.aspect_ratio_schedule, interactive=True)
+                            with gr.Row(variant='compact'):
+                                near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
+                            with gr.Row(variant='compact'):
+                                far_schedule = gr.Textbox(label="Far schedule", lines=1, value = da.far_schedule, interactive=True)
+                    # PERSPECTIVE FLIP ACCORD
+                    with gr.Accordion('Perspective Flip', open=False) as perspective_flip_accord:
+                        with gr.Row(variant='compact'):
+                            enable_perspective_flip = gr.Checkbox(label="Enable perspective flip", value=da.enable_perspective_flip, interactive=True)
+                        with gr.Row(variant='compact'):
+                            perspective_flip_theta = gr.Textbox(label="Perspective flip theta", lines=1, value = da.perspective_flip_theta, interactive=True)
+                        with gr.Row(variant='compact'):
+                            perspective_flip_phi = gr.Textbox(label="Perspective flip phi", lines=1, value = da.perspective_flip_phi, interactive=True)
+                        with gr.Row(variant='compact'):
+                            perspective_flip_gamma = gr.Textbox(label="Perspective flip gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
+                        with gr.Row(variant='compact'):
+                            perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value = da.perspective_flip_fv, interactive=True)
+                # NOISE INNER TAB
+                with gr.TabItem('Noise') as a8:
                     with gr.Row(variant='compact'):
-                        enable_perspective_flip = gr.Checkbox(label="Enable perspective flip", value=da.enable_perspective_flip, interactive=True)
+                        noise_type = gr.Radio(['uniform', 'perlin'], label="Noise type", value=da.noise_type, elem_id="noise_type")
                     with gr.Row(variant='compact'):
-                        perspective_flip_theta = gr.Textbox(label="Perspective flip theta", lines=1, value = da.perspective_flip_theta, interactive=True)
+                        noise_schedule = gr.Textbox(label="Noise schedule", lines=1, value = da.noise_schedule, interactive=True)
+                    with gr.Row(variant='compact') as perlin_row:
+                        with gr.Column(min_width=220):
+                            perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
+                        with gr.Column(min_width=220):
+                            perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
+                # COHERENCE INNER TAB
+                with gr.TabItem('Coherence', open=False) as coherence_accord:
                     with gr.Row(variant='compact'):
-                        perspective_flip_phi = gr.Textbox(label="Perspective flip phi", lines=1, value = da.perspective_flip_phi, interactive=True)
+                        # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
+                        color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
+                        # with gr.Column(variant='compact') as force_grayscale_column:
+                        color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True)
+                    with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
+                        color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
                     with gr.Row(variant='compact'):
-                        perspective_flip_gamma = gr.Textbox(label="Perspective flip gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
+                        contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value = da.contrast_schedule, interactive=True)
+                        optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, interactive=True, elem_id='optical_flow_cadence')
                     with gr.Row(variant='compact'):
-                        perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value = da.perspective_flip_fv, interactive=True)
-            # NOISE INNER TAB
-            with gr.Tab('Noise', open=True) as a8:
-                with gr.Row(variant='compact'):
-                    noise_type = gr.Radio(['uniform', 'perlin'], label="Noise type", value=da.noise_type, elem_id="noise_type")
-                with gr.Row(variant='compact'):
-                    noise_schedule = gr.Textbox(label="Noise schedule", lines=1, value = da.noise_schedule, interactive=True)
-                with gr.Row(variant='compact') as perlin_row:
-                    with gr.Column(min_width=220):
-                        perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
-                    with gr.Column(min_width=220):
-                        perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
-            # COHERENCE INNER TAB
-            with gr.Tab('Coherence', open=False) as coherence_accord:
-                with gr.Row(variant='compact'):
-                    # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
-                    color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
-                    # with gr.Column(variant='compact') as force_grayscale_column:
-                    color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True)
-                with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
-                    color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
-                with gr.Row(variant='compact'):
-                    contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value = da.contrast_schedule, interactive=True)
-                    optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, interactive=True, elem_id='optical_flow_cadence')
-                with gr.Row(variant='compact'):
-                    # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
-                    reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
-            # ANTI BLUR INNER TAB  
-            with gr.Tab('Anti Blur', open=False, elem_id='anti_blur_accord') as anti_blur_tab:
-                with gr.Row(variant='compact'):
-                    kernel_schedule = gr.Textbox(label="Kernel schedule", lines=1, value = da.kernel_schedule, interactive=True)
-                with gr.Row(variant='compact'):
-                    sigma_schedule = gr.Textbox(label="Sigma schedule", lines=1, value = da.sigma_schedule, interactive=True)
-                with gr.Row(variant='compact'):
-                    amount_schedule = gr.Textbox(label="Amount schedule", lines=1, value = da.amount_schedule, interactive=True)
-                with gr.Row(variant='compact'):
-                    threshold_schedule = gr.Textbox(label="Threshold schedule", lines=1, value = da.threshold_schedule, interactive=True)
+                        # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
+                        reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
+                # ANTI BLUR INNER TAB  
+                with gr.TabItem('Anti Blur', open=False, elem_id='anti_blur_accord') as anti_blur_tab:
+                    with gr.Row(variant='compact'):
+                        kernel_schedule = gr.Textbox(label="Kernel schedule", lines=1, value = da.kernel_schedule, interactive=True)
+                    with gr.Row(variant='compact'):
+                        sigma_schedule = gr.Textbox(label="Sigma schedule", lines=1, value = da.sigma_schedule, interactive=True)
+                    with gr.Row(variant='compact'):
+                        amount_schedule = gr.Textbox(label="Amount schedule", lines=1, value = da.amount_schedule, interactive=True)
+                    with gr.Row(variant='compact'):
+                        threshold_schedule = gr.Textbox(label="Threshold schedule", lines=1, value = da.threshold_schedule, interactive=True)
         # PROMPTS TAB    
         with gr.Tab('Prompts'):
             # PROMPTS INFO ACCORD  
