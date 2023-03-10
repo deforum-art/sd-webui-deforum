@@ -44,6 +44,10 @@
   padding: 0.5rem;
 }
 
+#tab_deforum_interface .flex {
+	grid-gap: 2.25px !important;
+}
+
 #settings_path_msg {
 	margin: 0.6em;
 	display: flex;
