@@ -113,7 +113,7 @@ class DepthModel():
 
             # MiDaS depth estimation implementation
             sample = torch.from_numpy(img_midas_input).float().to(self.device).unsqueeze(0)
-            if self.device == torch.device("cuda"):
+            if self.device == torch.device("cuda") or self.device == torch.device("mps"):
                 sample = sample.to(memory_format=torch.channels_last)  
                 if half_precision:
                     sample = sample.half()
