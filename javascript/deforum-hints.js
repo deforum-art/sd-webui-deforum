@@ -116,7 +116,7 @@ deforum_titles = {
     "Resume timestring": "the required timestamp to reference when resuming. Currently only available in 2D & 3D mode, the timestamp is saved as the settings .txt file name as well as images produced during your previous run. The format follows: yyyymmddhhmmss - a timestamp of when the run was started to diffuse.",
 	
     //Video Output
-    "Skip video for run all": "when checked, do not output a video",
+    "Skip video creation": "when checked, do not output a video",
 	"Make GIF": "create a gif in addition to .mp4 file. supports up to 30 fps, will self-disable at higher fps values",
 	"Upscale":"upscale the images of the next run once it's finished + make a video out of them",
 	"Upscale model":"model of the upscaler to use. 'realesr-animevideov3' is much faster but yields smoother, less detailed results. the other models only do x4",
@@ -136,6 +136,7 @@ deforum_titles = {
     //"path_name_modifier": "",
     "Image path": "the location of images to create the video from, when use_manual_settings is checked",
     "MP4 path": "the output location of the mp4 file, when use_manual_settings is checked",
+	"Delete Imgs": "if enabled, raw imgs will be deleted after a successful video/ videos (upsacling, interpolation, gif) creation",
 	"Engine": "choose the frame interpolation engine and version",
 	"Interp X":"how many times to interpolate the source video. e.g source video fps of 12 and a value of x2 will yield a 24fps interpolated video",
 	"Slow-Mo X":"how many times to slow-down the video. *Naturally affects output fps as well",
