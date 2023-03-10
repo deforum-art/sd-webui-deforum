@@ -69,6 +69,7 @@ deforum_titles = {
         "Match Frame 0 LAB": "LAB is a more linear approach to mimic human perception of color space - a good default setting for most users.",
         "Match Frame 0 RGB": "RGB is good for enforcing unbiased amounts of color in each red, green and blue channel - some images may yield colorized artifacts if sampling is too low.",
     "Cadence": "A setting of 1 will cause every frame to receive diffusion in the sequence of image outputs. A setting of 2 will only diffuse on every other frame, yet motion will still be in effect. The output of images during the cadence sequence will be automatically blended, additively and saved to the specified drive. This may improve the illusion of coherence in some workflows as the content and context of an image will not change or diffuse during frames that were skipped. Higher values of 4-8 cadence will skip over a larger amount of frames and only diffuse the “Nth” frame as set by the diffusion_cadence value. This may produce more continuity in an animation, at the cost of little opportunity to add more diffused content. In extreme examples, motion within a frame will fail to produce diverse prompt context, and the space will be filled with lines or approximations of content - resulting in unexpected animation patterns and artifacts. Video Input & Interpolation modes are not affected by diffusion_cadence.",
+    "Optical flow cadence": "Whether to use optical flow to blend frames during cadence (if cadence more than 1)",
     "Noise type": "Selects the type of noise being added to each frame",
         "uniform": "Uniform noise covers the entire frame. It somewhat flattens and sharpens the video over time, but may be good for cartoonish look. This is the old default setting.",
         "perlin": "Perlin noise is a more natural looking noise. It is heterogeneous and less sharp than uniform noise, this way it is more likely that new details will appear in a more coherent way. This is the new default setting.",
@@ -117,7 +118,7 @@ deforum_titles = {
     "Resume timestring": "the required timestamp to reference when resuming. Currently only available in 2D & 3D mode, the timestamp is saved as the settings .txt file name as well as images produced during your previous run. The format follows: yyyymmddhhmmss - a timestamp of when the run was started to diffuse.",
 	
     //Video Output
-    "Skip video for run all": "when checked, do not output a video",
+    "Skip video creation": "when checked, do not output a video",
 	"Make GIF": "create a gif in addition to .mp4 file. supports up to 30 fps, will self-disable at higher fps values",
 	"Upscale":"upscale the images of the next run once it's finished + make a video out of them",
 	"Upscale model":"model of the upscaler to use. 'realesr-animevideov3' is much faster but yields smoother, less detailed results. the other models only do x4",
@@ -137,6 +138,7 @@ deforum_titles = {
     //"path_name_modifier": "",
     "Image path": "the location of images to create the video from, when use_manual_settings is checked",
     "MP4 path": "the output location of the mp4 file, when use_manual_settings is checked",
+	"Delete Imgs": "if enabled, raw imgs will be deleted after a successful video/ videos (upsacling, interpolation, gif) creation",
 	"Engine": "choose the frame interpolation engine and version",
 	"Interp X":"how many times to interpolate the source video. e.g source video fps of 12 and a value of x2 will yield a 24fps interpolated video",
 	"Slow-Mo X":"how many times to slow-down the video. *Naturally affects output fps as well",

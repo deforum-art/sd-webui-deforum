@@ -22,16 +22,15 @@ def find_controlnet():
     try:
         from scripts import controlnet
     except Exception as e:
-        print(f'\033[33mFailed to import controlnet! The exact error is {e}. Deforum support for ControlNet will not be activated\033[0m')
+        # print(f'\033[33mFailed to import controlnet! The exact error is {e}. Deforum support for ControlNet will not be activated\033[0m')
         has_controlnet = False
         return False
     has_controlnet = True
-    print(f"\033[0;32m*Deforum ControlNet support: enabled*\033[0m")
+    # print(f"\033[0;32m*Deforum ControlNet support: enabled*\033[0m")
     return True
 
 # The most parts below are plainly copied from controlnet.py
 # TODO: come up with a cleaner way
-
 gradio_compat = True
 try:
     from distutils.version import LooseVersion
