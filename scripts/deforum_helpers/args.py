@@ -116,7 +116,7 @@ def DeforumAnimArgs():
     extract_to_frame = -1  # minus 1 for unlimited frames
     overwrite_extracted_frames = True 
     use_mask_video = False 
-    video_mask_path ='/content/video_in.mp4'
+    video_mask_path ='https://deforum.github.io/a1/VM1.mp4'
     #**Hybrid Video for 2D/3D Animation Mode:**
     hybrid_generate_inputframes = False 
     hybrid_generate_human_masks = "None" #['None','PNGs','Video', 'Both']
