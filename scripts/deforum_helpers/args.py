@@ -95,6 +95,7 @@ def DeforumAnimArgs():
     color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
     diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
+    optical_flow_cadence = False
     #**Noise settings:**
     noise_type = 'perlin' # ['uniform', 'perlin']
     # Perlin params
@@ -372,6 +373,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     border = gr.Radio(['replicate', 'wrap'], label="Border", value=da.border, elem_id="border")
             with gr.Row(variant='compact'):
                 diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
+                # optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, interactive=True, elem_id='optical_flow_cadence')
                 max_frames = gr.Number(label="Max frames", lines=1, value = da.max_frames, interactive=True, precision=0)
             # GUIDED IMAGES ACCORD
             with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
@@ -528,15 +530,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
             # COHERENCE INNER TAB
             with gr.Tab('Coherence', open=False) as coherence_accord:
-                with gr.Row(equal_height=True):
+                with gr.Row(variant='compact'):
                     # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
                     color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
-                    with gr.Column() as force_grayscale_column:
-                        color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True)
+                    # with gr.Column(variant='compact') as force_grayscale_column:
+                    color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True)
                 with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
                     color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
                 with gr.Row(variant='compact'):
                     contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value = da.contrast_schedule, interactive=True)
+                    optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, interactive=True, elem_id='optical_flow_cadence')
                 with gr.Row(variant='compact'):
                     # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                     reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
@@ -946,13 +949,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
     vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
-    animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=diffusion_cadence)
-    animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=guided_images_accord)
+    diffusen_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence ]
+    for output in diffusen_cadence_outputs:
+        animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=output)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
-    animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
+    # animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
+    animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=color_force_grayscale)
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=both_anim_mode_motion_params_column)
     #Hybrid related:
@@ -1019,7 +1024,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_clipskip_scheduling, clipskip_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         color_coherence, color_coherence_video_every_N_frames, color_force_grayscale,
-                        diffusion_cadence,
+                        diffusion_cadence, optical_flow_cadence,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
                         use_depth_warping, midas_weight,
                         padding_mode, sampling_mode, save_depth_maps,
