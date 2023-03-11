@@ -260,6 +260,7 @@ def DeforumOutputArgs():
     image_path = "C:/SD/20230124234916_%09d.png" 
     mp4_path = "testvidmanualsettings.mp4" 
     ffmpeg_location = find_ffmpeg_binary()
+    ffmpeg_output_location = ""
     ffmpeg_crf = '17'
     ffmpeg_preset = 'slow'
     add_soundtrack = 'None' # ["File","Init Video"]
@@ -779,19 +780,21 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True)
                             ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
                         with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_location_row:
-                            ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location)
+                            ffmpeg_location = gr.Textbox(label="Executible location", lines=1, interactive=True, value = dv.ffmpeg_location)
+                        with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_output_location_row:
+                            ffmpeg_output_location = gr.Textbox(label="Output location", lines=1, interactive=True, value = dv.ffmpeg_output_location)
                 # FRAME INTERPOLATION TAB
                 with gr.Tab('Frame Interpolation') as frame_interp_tab:
                     with gr.Accordion('Important notes and Help', open=False):
                         gr.HTML("""
                         Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> / <a href="https://film-net.github.io/">FILM</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
-                         <p style="margin-top:1em">
+                          <p style="margin-top:1em">
                             Supported engines:
                             <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
                                 <li>RIFE v4.6 and FILM.</li>
                             </ul>
                         </p>
-                         <p style="margin-top:1em">
+                          <p style="margin-top:1em">
                             Important notes:
                             <ul style="list-style-type:circle; margin-left:1em; margin-bottom:1em">
                                 <li>Frame Interpolation will *not* run if any of the following are enabled: 'Store frames in ram' / 'Skip video for run all'.</li>
@@ -918,7 +921,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(visible=False):
                         path_name_modifier = gr.Dropdown(label="Path name modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
                     gr.HTML("""
-                     <p style="margin-top:0em">
+                      <p style="margin-top:0em">
                         Important Notes:
                         <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
                             <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%09d.png', just replace 20230124234916 with your batch ID. The %05d is important, don't forget it!</li>
@@ -1056,7 +1059,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         reroll_blank_frames'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_creation,
-                            fps, make_gif, delete_imgs, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
+                            fps, make_gif, delete_imgs, output_format, ffmpeg_location, ffmpeg_output_location, ffmpeg_crf, ffmpeg_preset,
                             add_soundtrack, soundtrack_path,
                             r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
                             render_steps,
@@ -1188,7 +1191,7 @@ def print_args(args):
     print("ARGS: /n")
     for key, value in args.__dict__.items():
         print(f"{key}: {value}")
- 
+
 # Local gradio-to-frame-interoplation function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
     # print msg and do nothing if vid not uploaded or interp_x not provided
@@ -1212,7 +1215,7 @@ def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_i
         return print("All uploaded pics need to be of the same Width and Height / resolution.")
         
     resolution = pic_sizes[0]
-     
+
     root_params = Root()
     f_models_path = root_params['models_path']
     

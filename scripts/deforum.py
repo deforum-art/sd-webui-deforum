@@ -114,18 +114,24 @@ def run_deforum(*args, **kwargs):
     else:
         import subprocess
 
+        # create video output directory if it doesn't exist
+        if video_args.ffmpeg_output_location:
+          os.makedirs(video_args.ffmpeg_output_location, exist_ok=True)
+        ffmpeg_output_directory = video_args.ffmpeg_output_location or args.outdir
+
         path_name_modifier = video_args.path_name_modifier
+        # This is DEPRECATED, should be deleted 
         if video_args.render_steps: # render steps from a single image
             fname = f"{path_name_modifier}_%09d.png"
             all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
             newest_dir = max(all_step_dirs, key=os.path.getmtime)
             image_path = os.path.join(newest_dir, fname)
             print(f"Reading images from {image_path}")
-            mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
+            mp4_path = os.path.join(video_args.ffmpeg_output_location or newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
             max_video_frames = args.steps
         else: # render images for a video
             image_path = os.path.join(args.outdir, f"{args.timestring}_%09d.png")
-            mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
+            mp4_path = os.path.join(ffmpeg_output_directory, f"{args.timestring}.mp4")
             max_video_frames = anim_args.max_frames
 
         # Stitch video using ffmpeg!
