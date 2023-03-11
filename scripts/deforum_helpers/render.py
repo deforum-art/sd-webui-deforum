@@ -148,6 +148,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # Video mask overrides the init image mask, also, won't be searching for init_mask if use_mask_video is set
     # Made to solve https://github.com/deforum-art/deforum-for-automatic1111-webui/issues/386
     if anim_args.use_mask_video:
+
+        args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+        args.noise_mask = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+
         mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
         noise_mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
     elif mask_image is None and args.use_mask:
@@ -401,6 +405,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
         if anim_args.use_mask_video:
+            args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+            args.noise_mask = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+
             mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
 
         if args.use_mask:
