@@ -251,7 +251,7 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         ),
     ]
 
-    cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img)
+    cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
 
 import pathlib
 from .video_audio_utilities import vid2frames
