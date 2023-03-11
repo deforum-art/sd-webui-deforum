@@ -12,6 +12,7 @@ import importlib
 from .rich import console
 from rich.table import Table
 from rich import box
+from modules import scripts
 
 cnet = None
 cnet_import_failure_count = 0
@@ -223,6 +224,10 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
     table.add_row(*rows)
     
     console.print(table)
+
+    if p.script_args is None:
+        p.script_args = []
+    p.scripts = scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img
 
     cn_units = [
         cnet.ControlNetUnit(
