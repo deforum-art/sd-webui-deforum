@@ -108,11 +108,11 @@ def setup_controlnet_ui_raw():
 
     # # Copying the main ControlNet widgets while getting rid of static elements such as the scribble pad
     with gr.Row():
-        controlnet_enabled = gr.Checkbox(label='Enable', value=False)
-        controlnet_guess_mode = gr.Checkbox(label='Guess Mode', value=True, visible=False)
-        controlnet_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False)
-        controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False)
-        controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False)
+        controlnet_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
+        controlnet_guess_mode = gr.Checkbox(label='Guess Mode', value=True, visible=False, interactive=True)
+        controlnet_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
+        controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
+        controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
 
     def refresh_all_models(*inputs):
         cn_models = cnet.get_models(update=True)
@@ -121,13 +121,13 @@ def setup_controlnet_ui_raw():
         return gr.Dropdown.update(value=selected, choices=cn_models)
 
     with gr.Row(visible=False) as cn_mod_row:
-        controlnet_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none")
-        controlnet_model = gr.Dropdown(cn_models, label=f"Model", value="None")
+        controlnet_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
+        controlnet_model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
         refresh_models = ToolButton(value=refresh_symbol)
         refresh_models.click(refresh_all_models, controlnet_model, controlnet_model)
         #ctrls += (refresh_models, )
     with gr.Row(visible=False) as cn_weight_row:
-        controlnet_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05)
+        controlnet_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05, interactive=True)
         controlnet_guidance_start =  gr.Slider(label="Guidance start", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
         controlnet_guidance_end =  gr.Slider(label="Guidance end", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
         #ctrls += (controlnet_module, controlnet_model, controlnet_weight,)
@@ -150,7 +150,7 @@ def setup_controlnet_ui_raw():
     ])
 
     with gr.Row(visible=False) as cn_env_row:
-        controlnet_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode")
+        controlnet_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode", interactive=True)
 
     # Video input to be fed into ControlNet
     #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
