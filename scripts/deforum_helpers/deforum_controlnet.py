@@ -55,7 +55,7 @@ except ImportError:
 
 def ControlnetArgs():
     controlnet_enabled = False
-    controlnet_scribble_mode = False
+    controlnet_guess_mode = True
     controlnet_rgbbgr_mode = False
     controlnet_lowvram = False
     controlnet_module = "none"
@@ -109,7 +109,8 @@ def setup_controlnet_ui_raw():
     # # Copying the main ControlNet widgets while getting rid of static elements such as the scribble pad
     with gr.Row():
         controlnet_enabled = gr.Checkbox(label='Enable', value=False)
-        controlnet_scribble_mode = gr.Checkbox(label='Scribble Mode (Invert colors)', value=False, visible=False)
+        controlnet_guess_mode = gr.Checkbox(label='Guess Mode', value=True, visible=False)
+        controlnet_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False)
         controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False)
         controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False)
 
@@ -127,7 +128,8 @@ def setup_controlnet_ui_raw():
         #ctrls += (refresh_models, )
     with gr.Row(visible=False) as cn_weight_row:
         controlnet_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05)
-        controlnet_guidance_strength =  gr.Slider(label="Guidance strength (T)", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
+        controlnet_guidance_start =  gr.Slider(label="Guidance start", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
+        controlnet_guidance_end =  gr.Slider(label="Guidance end", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
         #ctrls += (controlnet_module, controlnet_model, controlnet_weight,)
         model_dropdowns.append(controlnet_model)
   
@@ -155,7 +157,7 @@ def setup_controlnet_ui_raw():
     controlnet_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
     controlnet_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
    
-    cn_hide_output_list = [controlnet_scribble_mode,controlnet_rgbbgr_mode,controlnet_lowvram,cn_mod_row,cn_weight_row,cn_env_row,controlnet_input_video_chosen_file,controlnet_input_video_mask_chosen_file] 
+    cn_hide_output_list = [controlnet_guess_mode,controlnet_invert_image,controlnet_rgbbgr_mode,controlnet_lowvram,cn_mod_row,cn_weight_row,cn_env_row,controlnet_input_video_chosen_file,controlnet_input_video_mask_chosen_file] 
     for cn_output in cn_hide_output_list:
         controlnet_enabled.change(fn=hide_ui_by_cn_status, inputs=controlnet_enabled,outputs=cn_output)
         
@@ -176,9 +178,9 @@ def controlnet_component_names():
         return []
 
     controlnet_args_names = str(r'''controlnet_input_video_chosen_file, controlnet_input_video_mask_chosen_file,
-controlnet_enabled, controlnet_scribble_mode, controlnet_rgbbgr_mode, controlnet_lowvram,
+controlnet_enabled, controlnet_guess_mode, controlnet_invert_image, controlnet_rgbbgr_mode, controlnet_lowvram,
 controlnet_module, controlnet_model,
-controlnet_weight, controlnet_guidance_strength,
+controlnet_weight, controlnet_guidance_start, controlnet_guidance_end,
 controlnet_processor_res, 
 controlnet_threshold_a, controlnet_threshold_b, controlnet_resize_mode'''
     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
@@ -188,168 +190,65 @@ controlnet_threshold_a, controlnet_threshold_b, controlnet_resize_mode'''
 def is_controlnet_enabled(controlnet_args):
     return 'controlnet_enabled' in vars(controlnet_args) and controlnet_args.controlnet_enabled
 
-# def process_txt2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame_idx = 1):
-    # # TODO: use init image and mask here
-    # p.control_net_enabled = False # we don't want to cause concurrence
-    # p.init_images = []
-    # controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:09}.jpg")
-    # controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:09}.jpg")
-    # cn_mask_np = None
-    # cn_image_np = None
+def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img = True, frame_idx = 1):
+    cnet = find_controlnet()
 
-    # if not os.path.exists(controlnet_frame_path) and not os.path.exists(controlnet_mask_frame_path):
-        # print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
-        # from .deforum_controlnet_hardcode import restore_networks
-        # unet = p.sd_model.model.diffusion_model
-        # restore_networks(unet)
-        # return process_images(p)
+    controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:09}.jpg")
+    controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:09}.jpg")
+
+    print(f'Reading ControlNet base frame {frame_idx} at {controlnet_frame_path}')
+    print(f'Reading ControlNet mask frame {frame_idx} at {controlnet_mask_frame_path}')
+
+    cn_mask_np = None
+    cn_image_np = None
+
+    if not os.path.exists(controlnet_frame_path) and not os.path.exists(controlnet_mask_frame_path):
+        print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
+        return
     
-    # if os.path.exists(controlnet_frame_path):
-        # cn_image_np = Image.open(controlnet_frame_path).convert("RGB")
+    if os.path.exists(controlnet_frame_path):
+        cn_image_np = np.array(Image.open(controlnet_frame_path).convert("RGB")).astype('uint8')
     
-    # if os.path.exists(controlnet_mask_frame_path):
-        # cn_mask_np = Image.open(controlnet_mask_frame_path).convert("RGB")
-
-    # cn_args = {
-        # "enabled": True,
-        # "module": controlnet_args.controlnet_module,
-        # "model": controlnet_args.controlnet_model,
-        # "weight": controlnet_args.controlnet_weight,
-        # "input_image": {'image': cn_image_np, 'mask': cn_mask_np},
-        # "scribble_mode": controlnet_args.controlnet_scribble_mode,
-        # "resize_mode": controlnet_args.controlnet_resize_mode,
-        # "rgbbgr_mode": controlnet_args.controlnet_rgbbgr_mode,
-        # "lowvram": controlnet_args.controlnet_lowvram,
-        # "processor_res": controlnet_args.controlnet_processor_res,
-        # "threshold_a": controlnet_args.controlnet_threshold_a,
-        # "threshold_b": controlnet_args.controlnet_threshold_b,
-        # "guidance_strength": controlnet_args.controlnet_guidance_strength,"guidance_strength": controlnet_args.controlnet_guidance_strength,
-    # }
-
-    # from .deforum_controlnet_hardcode import process
-    # p.script_args = (
-        # cn_args["enabled"],
-        # cn_args["module"],
-        # cn_args["model"],
-        # cn_args["weight"],
-        # cn_args["input_image"],
-        # cn_args["scribble_mode"],
-        # cn_args["resize_mode"],
-        # cn_args["rgbbgr_mode"],
-        # cn_args["lowvram"],
-        # cn_args["processor_res"],
-        # cn_args["threshold_a"],
-        # cn_args["threshold_b"],
-        # cn_args["guidance_strength"],
-    # )
-
-    # table = Table(title="ControlNet params",padding=0, box=box.ROUNDED)
-
-    # field_names = []
-    # field_names += ["module", "model", "weight", "guidance", "scribble", "resize", "rgb->bgr", "proc res", "thr a", "thr b"]
-    # for field_name in field_names:
-        # table.add_column(field_name, justify="center")
+    if os.path.exists(controlnet_mask_frame_path):
+        cn_mask_np = np.array(Image.open(controlnet_mask_frame_path).convert("RGB")).astype('uint8')
     
-    # rows = []
-    # rows += [cn_args["module"], cn_args["model"], cn_args["weight"], cn_args["guidance_strength"], cn_args["scribble_mode"], cn_args["resize_mode"], cn_args["rgbbgr_mode"], cn_args["processor_res"], cn_args["threshold_a"], cn_args["threshold_b"]]
-    # rows = [str(x) for x in rows]
+    table = Table(title="ControlNet params",padding=0, box=box.ROUNDED)
 
-    # table.add_row(*rows)
+    # TODO: auto infer the names and the values for the table
+    field_names = []
+    field_names += ["module", "model", "weight", "inv", "guide_start", "guide_end", "guess", "resize", "rgb_bgr", "proc res", "thr a", "thr b"]
+    for field_name in field_names:
+        table.add_column(field_name, justify="center")
     
-    # console.print(table)
+    rows = []
+    rows += [controlnet_args.controlnet_module, controlnet_args.controlnet_model, controlnet_args.controlnet_weight, controlnet_args.controlnet_guidance_start, controlnet_args.controlnet_guidance_end, controlnet_args.controlnet_guess_mode, controlnet_args.controlnet_resize_mode, controlnet_args.controlnet_rgbbgr_mode, controlnet_args.controlnet_processor_res, controlnet_args.controlnet_threshold_a, controlnet_args.controlnet_threshold_b]
+    rows = [str(x) for x in rows]
 
-    # processed = process(p, *(p.script_args))
-
-    # if processed is None: # the script just swaps the pipeline, so failing is OK for the first time
-        # processed = process_images(p)
+    table.add_row(*rows)
     
-    # if processed is None: # now it's definitely not OK
-        # raise Exception("\033[31mFailed to process a frame with ControlNet enabled!\033[0m")
-    
-    # p.close()
+    console.print(table)
 
-    # return processed
+    cn_units = [
+        cnet.ControlNetUnit(
+            enabled=True,
+            module=controlnet_args.controlnet_module,
+            model=controlnet_args.controlnet_model,
+            weight=controlnet_args.controlnet_weight,
+            image={'image': cn_image_np, 'mask': cn_mask_np},
+            invert_image=controlnet_args.controlnet_invert_image,
+            guess_mode=controlnet_args.controlnet_guess_mode,
+            resize_mode=controlnet_args.controlnet_resize_mode,
+            rgbbgr_mode=controlnet_args.controlnet_rgbbgr_mode,
+            lowvram=controlnet_args.controlnet_lowvram,
+            processor_res=controlnet_args.controlnet_processor_res,
+            threshold_a=controlnet_args.controlnet_threshold_a,
+            threshold_b=controlnet_args.controlnet_threshold_b,
+            guidance_start=controlnet_args.controlnet_guidance_start,
+            guidance_end=controlnet_args.controlnet_guidance_end,
+        ),
+    ]
 
-# def process_img2img_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, frame_idx = 0):
-    # p.control_net_enabled = False # we don't want to cause concurrence
-    # controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:09}.jpg")
-    # controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:09}.jpg")
-
-    # print(f'Reading ControlNet base frame {frame_idx} at {controlnet_frame_path}')
-    # print(f'Reading ControlNet mask frame {frame_idx} at {controlnet_mask_frame_path}')
-
-    # cn_mask_np = None
-    # cn_image_np = None
-
-    # if not os.path.exists(controlnet_frame_path) and not os.path.exists(controlnet_mask_frame_path):
-        # print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
-        # return process_images(p)
-    
-    # if os.path.exists(controlnet_frame_path):
-        # cn_image_np = np.array(Image.open(controlnet_frame_path).convert("RGB")).astype('uint8')
-    
-    # if os.path.exists(controlnet_mask_frame_path):
-        # cn_mask_np = np.array(Image.open(controlnet_mask_frame_path).convert("RGB")).astype('uint8')
-
-    # cn_args = {
-        # "enabled": True,
-        # "module": controlnet_args.controlnet_module,
-        # "model": controlnet_args.controlnet_model,
-        # "weight": controlnet_args.controlnet_weight,
-        # "input_image": {'image': cn_image_np, 'mask': cn_mask_np},
-        # "scribble_mode": controlnet_args.controlnet_scribble_mode,
-        # "resize_mode": controlnet_args.controlnet_resize_mode,
-        # "rgbbgr_mode": controlnet_args.controlnet_rgbbgr_mode,
-        # "lowvram": controlnet_args.controlnet_lowvram,
-        # "processor_res": controlnet_args.controlnet_processor_res,
-        # "threshold_a": controlnet_args.controlnet_threshold_a,
-        # "threshold_b": controlnet_args.controlnet_threshold_b,
-        # "guidance_strength": controlnet_args.controlnet_guidance_strength,
-    # }
-
-    # from .deforum_controlnet_hardcode import process
-    # p.script_args = (
-        # cn_args["enabled"],
-        # cn_args["module"],
-        # cn_args["model"],
-        # cn_args["weight"],
-        # cn_args["input_image"],
-        # cn_args["scribble_mode"],
-        # cn_args["resize_mode"],
-        # cn_args["rgbbgr_mode"],
-        # cn_args["lowvram"],
-        # cn_args["processor_res"],
-        # cn_args["threshold_a"],
-        # cn_args["threshold_b"],
-        # cn_args["guidance_strength"],
-    # )
-
-    # table = Table(title="ControlNet params",padding=0, box=box.ROUNDED)
-
-    # field_names = []
-    # field_names += ["module", "model", "weight", "guidance", "scribble", "resize", "rgb->bgr", "proc res", "thr a", "thr b"]
-    # for field_name in field_names:
-        # table.add_column(field_name, justify="center")
-    
-    # rows = []
-    # rows += [cn_args["module"], cn_args["model"], cn_args["weight"], cn_args["guidance_strength"], cn_args["scribble_mode"], cn_args["resize_mode"], cn_args["rgbbgr_mode"], cn_args["processor_res"], cn_args["threshold_a"], cn_args["threshold_b"]]
-    # rows = [str(x) for x in rows]
-
-    # table.add_row(*rows)
-    
-    # console.print(table)
-
-    # processed = process(p, *(p.script_args))
-
-    # if processed is None: # the script just swaps the pipeline, so failing is OK for the first time
-        # processed = process_images(p)
-    
-    # if processed is None: # now it's definitely not OK
-        # raise Exception("\033[31mFailed to process a frame with ControlNet enabled!\033[0m")
-    
-    # p.close()
-
-    # return processed
+    cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img)
 
 import pathlib
 from .video_audio_utilities import vid2frames
@@ -463,15 +362,3 @@ def build_sliders(module):
             gr.update(visible=True)
         ]
 
-# def svgPreprocess(inputs):
-#     if (inputs):
-#         if (inputs['image'].startswith("data:image/svg+xml;base64,") and svgsupport):
-#             svg_data = base64.b64decode(inputs['image'].replace('data:image/svg+xml;base64,',''))
-#             drawing = svg2rlg(io.BytesIO(svg_data))
-#             png_data = renderPM.drawToString(drawing, fmt='PNG')
-#             encoded_string = base64.b64encode(png_data)
-#             base64_str = str(encoded_string, "utf-8")
-#             base64_str = "data:image/png;base64,"+ base64_str
-#             inputs['image'] = base64_str
-#         return input_image.orgpreprocess(inputs)
-#     return None
