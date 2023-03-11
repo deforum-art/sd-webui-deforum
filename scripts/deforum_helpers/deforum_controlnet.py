@@ -227,28 +227,46 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
     
     console.print(table)
 
-    if p.script_args is None:
-        p.script_args = []
     p.scripts = scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img
 
+    cnu = {
+        "enabled":True,
+        "module":controlnet_args.controlnet_module,
+        "model":controlnet_args.controlnet_model,
+        "weight":controlnet_args.controlnet_weight,
+        "image":{'image': cn_image_np, 'mask': cn_mask_np} if cn_mask_np is not None else cn_image_np,
+        "invert_image":controlnet_args.controlnet_invert_image,
+        "guess_mode":controlnet_args.controlnet_guess_mode,
+        "resize_mode":controlnet_args.controlnet_resize_mode,
+        "rgbbgr_mode":controlnet_args.controlnet_rgbbgr_mode,
+        "low_vram":controlnet_args.controlnet_lowvram,
+        "processor_res":controlnet_args.controlnet_processor_res,
+        "threshold_a":controlnet_args.controlnet_threshold_a,
+        "threshold_b":controlnet_args.controlnet_threshold_b,
+        "guidance_start":controlnet_args.controlnet_guidance_start,
+        "guidance_end":controlnet_args.controlnet_guidance_end,
+    }
+
+    p.script_args = (
+        cnu["enabled"],
+        cnu["module"],
+        cnu["model"],
+        cnu["weight"],
+        cnu["invert_image"],
+        cnu["image"],
+        cnu["guess_mode"],
+        cnu["resize_mode"],
+        cnu["rgbbgr_mode"],
+        cnu["low_vram"],
+        cnu["processor_res"],
+        cnu["threshold_a"],
+        cnu["threshold_b"],
+        cnu["guidance_start"],
+        cnu["guidance_end"],
+    )
+
     cn_units = [
-        cnet.ControlNetUnit(
-            enabled=True,
-            module=controlnet_args.controlnet_module,
-            model=controlnet_args.controlnet_model,
-            weight=controlnet_args.controlnet_weight,
-            image={'image': cn_image_np, 'mask': cn_mask_np} if cn_mask_np is not None else cn_image_np,
-            invert_image=controlnet_args.controlnet_invert_image,
-            guess_mode=controlnet_args.controlnet_guess_mode,
-            resize_mode=controlnet_args.controlnet_resize_mode,
-            rgbbgr_mode=controlnet_args.controlnet_rgbbgr_mode,
-            low_vram=controlnet_args.controlnet_lowvram,
-            processor_res=controlnet_args.controlnet_processor_res,
-            threshold_a=controlnet_args.controlnet_threshold_a,
-            threshold_b=controlnet_args.controlnet_threshold_b,
-            guidance_start=controlnet_args.controlnet_guidance_start,
-            guidance_end=controlnet_args.controlnet_guidance_end,
-        ),
+        cnet.ControlNetUnit(**cnu),
     ]
 
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
