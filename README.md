@@ -54,7 +54,12 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 ## Screenshots
 
-https://user-images.githubusercontent.com/121192995/215522284-d6fbedd5-09e2-4d2c-bd10-f9bbb4a20f82.mp4
+Amazing raw Deforum animation by [Pxl.Pshr](https://www.instagram.com/pxl.pshr):
+* Turn Audio ON!
+
+https://user-images.githubusercontent.com/121192995/224450647-39529b28-be04-4871-bb7a-faf7afda2ef2.mp4
+
+<br>
 
 Main extension tab:
 
