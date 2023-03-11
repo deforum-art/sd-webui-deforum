@@ -124,11 +124,11 @@ def setup_controlnet_ui_raw():
         controlnet_model = gr.Dropdown(cn_models, label=f"Model", value="None")
         refresh_models = ToolButton(value=refresh_symbol)
         refresh_models.click(refresh_all_models, controlnet_model, controlnet_model)
-        ctrls += (refresh_models, )
+        #ctrls += (refresh_models, )
     with gr.Row(visible=False) as cn_weight_row:
         controlnet_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05)
         controlnet_guidance_strength =  gr.Slider(label="Guidance strength (T)", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
-        ctrls += (controlnet_module, controlnet_model, controlnet_weight,)
+        #ctrls += (controlnet_module, controlnet_model, controlnet_weight,)
         model_dropdowns.append(controlnet_model)
   
     # advanced options    
