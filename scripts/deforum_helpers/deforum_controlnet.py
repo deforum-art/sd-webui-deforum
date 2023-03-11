@@ -230,7 +230,7 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
             module=controlnet_args.controlnet_module,
             model=controlnet_args.controlnet_model,
             weight=controlnet_args.controlnet_weight,
-            image={'image': cn_image_np, 'mask': cn_mask_np},
+            image={'image': cn_image_np, 'mask': cn_mask_np} if cn_mask_np is not None else cn_image_np,
             invert_image=controlnet_args.controlnet_invert_image,
             guess_mode=controlnet_args.controlnet_guess_mode,
             resize_mode=controlnet_args.controlnet_resize_mode,
