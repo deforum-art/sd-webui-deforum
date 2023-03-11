@@ -4,6 +4,7 @@ import json
 import deforum_helpers.args as deforum_args
 from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 from .deprecation_utils import handle_deprecated_settings
+from .general_utils import get_deforum_version
 import logging
 
 def get_keys_to_exclude():
@@ -57,6 +58,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
         s = {}
         for d in (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, video_args.__dict__):
             s.update({k: v for k, v in d.items() if k not in exclude_keys})
+        s["deforum_git_commit_id"] = get_deforum_version()
         json.dump(s, f, ensure_ascii=False, indent=4)
 
 # In gradio gui settings save/ load funs:
@@ -73,11 +75,10 @@ def save_settings(*args, **kwargs):
     loop_dict = pack_loop_args(data)
     controlnet_dict = pack_controlnet_args(data)
     video_args_dict = pack_video_args(data)
-    
     combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict, **video_args_dict}
     exclude_keys = get_keys_to_exclude() + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
-    
+    filtered_combined["deforum_git_commit_id"] = get_deforum_version()
     print(f"saving custom settings to {settings_path}")
     with open(settings_path, "w") as f:
         f.write(json.dumps(filtered_combined, ensure_ascii=False, indent=4))
