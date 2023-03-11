@@ -181,7 +181,7 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
         print_combined_table(args, anim_args, p_txt, keys, frame) # print dynamic table to cli
 
         if is_controlnet_enabled(controlnet_args):
-            process_with_controlnet(p, args, args, anim_args, loop_args, controlnet_args, root, is_img2img=False, frame_idx=frame+1)
+            process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=False, frame_idx=frame+1)
     
         processed = processing.process_images(p_txt)
 

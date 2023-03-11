@@ -52,7 +52,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
     args.__dict__["prompts"] = root.animation_prompts
     args.__dict__["positive_prompts"] = root.positive_prompts
     args.__dict__["negative_prompts"] = root.negative_prompts
-    exclude_keys = get_keys_to_exclude()
+    exclude_keys = get_keys_to_exclude() + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
     settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         s = {}
@@ -65,7 +65,8 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
 def save_settings(*args, **kwargs):
     from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args, pack_video_args
     settings_path = args[0].strip()
-    data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
+    settings_component_names = deforum_args.get_settings_component_names()
+    data = {settings_component_names[i]: args[i+1] for i in range(0, len(settings_component_names))}
     args_dict = pack_args(data)
     anim_args_dict = pack_anim_args(data)
     parseq_dict = pack_parseq_args(data)
@@ -87,12 +88,13 @@ def save_settings(*args, **kwargs):
 
 def load_settings(*args, **kwargs):
     settings_path = args[0].strip()
-    data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
+    settings_component_names = deforum_args.get_settings_component_names()
+    data = {settings_component_names[i]: args[i+1] for i in range(0, len(settings_component_names))}
     print(f"reading custom settings from {settings_path}")
     jdata = {}
     if not os.path.isfile(settings_path):
         print('The custom settings file does not exist. The values will be unchanged.')
-        return [data[name] for name in deforum_args.settings_component_names] + [""]
+        return [data[name] for name in settings_component_names] + [""]
     else:
         with open(settings_path, "r") as f:
             jdata = json.loads(f.read())

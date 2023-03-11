@@ -38,7 +38,8 @@ from modules.ui import create_output_panel, plaintext_to_html, wrap_gradio_call
 from types import SimpleNamespace
 
 def run_deforum(*args, **kwargs):
-    args_dict = {deforum_args.component_names[i]: args[i+2] for i in range(0, len(deforum_args.component_names))}
+    component_names = deforum_args.get_component_names()
+    args_dict = {component_names[i]: args[i+2] for i in range(0, len(component_names))}
     p = StableDiffusionProcessingImg2Img(
         sd_model=shared.sd_model,
         outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
@@ -256,7 +257,7 @@ def on_ui_tabs():
                     load_settings_btn = gr.Button('Load All Settings', elem_id='deforum_load_settings_btn')
                     load_video_settings_btn = gr.Button('Load Video Settings', elem_id='deforum_load_video_settings_btn')
 
-        component_list = [components[name] for name in deforum_args.component_names]
+        component_list = [components[name] for name in deforum_args.get_component_names()]
 
         submit.click(
                     fn=wrap_gradio_gpu_call(run_deforum, extra_outputs=[None, '', '']),
@@ -270,7 +271,7 @@ def on_ui_tabs():
                     ],
                 )
         
-        settings_component_list = [components[name] for name in deforum_args.settings_component_names]
+        settings_component_list = [components[name] for name in deforum_args.get_settings_component_names()]
         video_settings_component_list = [components[name] for name in deforum_args.video_args_names]
         stuff = gr.HTML("") # wrap gradio call garbage
         stuff.visible = False

@@ -26,11 +26,7 @@ def find_controlnet():
         print(f"\033[0;32m*Deforum ControlNet support: enabled*\033[0m")
         return True
     except Exception as e:
-        cnet_import_failure_count += 1
-        if cnet_import_failure_count == 1:
-            print(f"Failed to import controlnet! The exact error is {e}, failure count is {cnet_import_failure_count}. It's okay for this check to fail once.")
-        else:
-            print(f'\033[33mFailed to import controlnet! The exact error is {e}, failure count is {cnet_import_failure_count}. Deforum support for ControlNet will not be activated!\033[0m')
+        print(f'\033[33mFailed to import controlnet! The exact error is {e}, failure count is {cnet_import_failure_count}. Deforum support for ControlNet will not be activated!\033[0m')
         return None
 
 gradio_compat = True
