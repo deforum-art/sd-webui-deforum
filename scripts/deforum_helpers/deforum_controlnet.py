@@ -52,7 +52,7 @@ except ImportError:
 
 def ControlnetArgs():
     controlnet_enabled = False
-    controlnet_guess_mode = True
+    controlnet_guess_mode = False
     controlnet_rgbbgr_mode = False
     controlnet_lowvram = False
     controlnet_module = "none"
@@ -106,7 +106,7 @@ def setup_controlnet_ui_raw():
     # # Copying the main ControlNet widgets while getting rid of static elements such as the scribble pad
     with gr.Row():
         controlnet_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
-        controlnet_guess_mode = gr.Checkbox(label='Guess Mode', value=True, visible=False, interactive=True)
+        controlnet_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
         controlnet_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
         controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
         controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
