@@ -217,8 +217,10 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
     for field_name in field_names:
         table.add_column(field_name, justify="center")
     
+    cn_model_name = str(controlnet_args.controlnet_model)
+
     rows = []
-    rows += [controlnet_args.controlnet_module, controlnet_args.controlnet_model, controlnet_args.controlnet_weight, controlnet_args.controlnet_guidance_start, controlnet_args.controlnet_guidance_end, controlnet_args.controlnet_guess_mode, controlnet_args.controlnet_resize_mode, controlnet_args.controlnet_rgbbgr_mode, controlnet_args.controlnet_processor_res, controlnet_args.controlnet_threshold_a, controlnet_args.controlnet_threshold_b]
+    rows += [controlnet_args.controlnet_module, cn_model_name[len('control_'):] if 'control_' in cn_model_name else cn_model_name, controlnet_args.controlnet_weight, controlnet_args.controlnet_invert_image, controlnet_args.controlnet_guidance_start, controlnet_args.controlnet_guidance_end, controlnet_args.controlnet_guess_mode, controlnet_args.controlnet_resize_mode, controlnet_args.controlnet_rgbbgr_mode, controlnet_args.controlnet_processor_res, controlnet_args.controlnet_threshold_a, controlnet_args.controlnet_threshold_b]
     rows = [str(x) for x in rows]
 
     table.add_row(*rows)
