@@ -235,7 +235,7 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
             guess_mode=controlnet_args.controlnet_guess_mode,
             resize_mode=controlnet_args.controlnet_resize_mode,
             rgbbgr_mode=controlnet_args.controlnet_rgbbgr_mode,
-            lowvram=controlnet_args.controlnet_lowvram,
+            low_vram=controlnet_args.controlnet_lowvram,
             processor_res=controlnet_args.controlnet_processor_res,
             threshold_a=controlnet_args.controlnet_threshold_a,
             threshold_b=controlnet_args.controlnet_threshold_b,
