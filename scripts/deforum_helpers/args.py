@@ -10,7 +10,7 @@ from .vid2depth import process_depth_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os, get_deforum_version
-from .deforum_controlnet import setup_controlnet_ui
+from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names
 # controlnet_component_names, setup_controlnet_ui
 import tempfile
         
@@ -678,15 +678,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     return gr.update(visible=False)
             # CONTROLNET TAB
             with gr.TabItem('ControlNet'):
-                    # gr.HTML("""
-                    # Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
-                    # <p style="margin-top:0.2em">
-                        # *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development. &#128521;
-                    # </p>
-                    # <p">
-                        # Due to ControlNet base extension's inner works it needs its models to be located at 'extensions/deforum-for-automatic1111-webui/models'. So copy, symlink or move them there until a more elegant solution is found. And, as of now, it requires use_init checked for the first run. The ControlNet extension version used in the dev process is a24089a62e70a7fae44b7bf35b51fd584dd55e25, if even with all the other options above used it still breaks, upgrade/downgrade your CN version to this one.
-                    # </p>
-                    # """)
+                    gr.HTML("""
+                    Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
+                    <p style="margin-top:0.2em">
+                        *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, *especially* if you want to bring new features sooner, <a style='color:Violet;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/'>join Deforum's development</a>. &#128521;
+                    </p>
+                    <p">
+                        Note that CN's API may breakingly change at any time. If Deforum crashes due to CN updates, go <a style='color:Orange;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/issues'>here</a> and report your problem.
+                    </p>
+                    """)
                     controlnet_dict = setup_controlnet_ui()
             # HYBRID VIDEO TAB
             with gr.TabItem('Hybrid Video'):
@@ -997,8 +997,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
     # END OF UI TABS
     stuff = locals()
-    stuff = {**stuff }#, **controlnet_dict}
-    # stuff.pop('controlnet_dict')
+    stuff = {**stuff, **controlnet_dict}
+    stuff.pop('controlnet_dict')
     return stuff
 
 ### SETTINGS STORAGE UPDATE! 2023-01-27
@@ -1071,7 +1071,7 @@ loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blen
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names # + controlnet_component_names()
+component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names + controlnet_component_names()
 settings_component_names = [name for name in component_names] #if name not in video_args_names]
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
