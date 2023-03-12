@@ -281,6 +281,13 @@ def DeforumOutputArgs():
     frame_interpolation_keep_imgs = False
     return locals()
     
+def fragment_shader():
+    return """out vec4 FragColor;
+void main()
+{
+    FragColor = vec4(1.0, 0.5, 0.2, 1.0);
+}"""
+
 import gradio as gr
 import time
 from types import SimpleNamespace
@@ -638,6 +645,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             mask_contrast_adjust = gr.Number(label="Mask contrast adjust", value=d.mask_contrast_adjust, interactive=True)
                         with gr.Column(min_width=250):
                             mask_brightness_adjust = gr.Number(label="Mask brightness adjust", value=d.mask_brightness_adjust, interactive=True)
+                with gr.Tab('GLSL settings'):
+                    with gr.Row(variant='compact'):
+                        glsl = gr.Textbox(label="fragment shader", lines=15, interactive=True, value=fragment_shader())
                 # PARSEQ ACCORD
                 with gr.Accordion('Parseq', open=False):
                     gr.HTML("""
