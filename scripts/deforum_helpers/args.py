@@ -425,6 +425,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.TabItem('CFG'):
                         with gr.Row(variant='compact'):
                             cfg_scale_schedule = gr.Textbox(label="CFG scale schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
+                        with gr.Row(variant='compact'):
+                            enable_clipskip_scheduling = gr.Checkbox(label="Enable CLIP skip scheduling", value=da.enable_clipskip_scheduling, interactive=True)
+                        with gr.Row(variant='compact'):
+                            clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
                     with gr.TabItem('Seed') as a3:
                         with gr.Row(variant='compact'):
                             seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="Seed behavior", value=d.seed_behavior, elem_id="seed_behavior")
@@ -458,11 +462,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             enable_checkpoint_scheduling = gr.Checkbox(label="Enable checkpoint scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
                         with gr.Row(variant='compact'):
                             checkpoint_schedule = gr.Textbox(label="Checkpoint schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
-                    with gr.TabItem('CLIP Skip', open=False) as a16:
-                        with gr.Row(variant='compact'):
-                            enable_clipskip_scheduling = gr.Checkbox(label="Enable CLIP skip scheduling", value=da.enable_clipskip_scheduling, interactive=True)
-                        with gr.Row(variant='compact'):
-                            clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
                 # MOTION INNER TAB
                 with gr.Tabs(elem_id='motion_noise_etc'):
                     with gr.TabItem('Motion') as motion_tab:
