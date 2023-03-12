@@ -230,11 +230,11 @@ def DeforumArgs():
 
 def keyframeExamples():
     return '''{
-    "0": "https://user-images.githubusercontent.com/121192995/215279228-1673df8a-f919-4380-b04c-19379b2041ff.png",
-    "50": "https://user-images.githubusercontent.com/121192995/215279281-7989fd6f-4b9b-4d90-9887-b7960edd59f8.png",
-    "100": "https://user-images.githubusercontent.com/121192995/215279284-afc14543-d220-4142-bbf4-503776ca2b8b.png",
-    "150": "https://user-images.githubusercontent.com/121192995/215279286-23378635-85b3-4457-b248-23e62c048049.jpg",
-    "200": "https://user-images.githubusercontent.com/121192995/215279228-1673df8a-f919-4380-b04c-19379b2041ff.png"
+    "0": "https://deforum.github.io/a1/Gi1.png",
+    "50": "https://deforum.github.io/a1/Gi2.png",
+    "100": "https://deforum.github.io/a1/Gi3.png",
+    "150": "https://deforum.github.io/a1/Gi4.jpg",
+    "200": "https://deforum.github.io/a1/Gi1.png"
 }'''
 
 def LoopArgs():
