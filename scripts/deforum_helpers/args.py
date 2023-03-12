@@ -532,10 +532,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                             with gr.Column(min_width=220):
                                 perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
-                        with gr.Row(variant='compact'):
-                            enable_noise_multiplier_scheduling =  gr.Checkbox(label="Enable noise multiplier scheduling", value=da.enable_noise_multiplier_scheduling, interactive=True)
-                        with gr.Row(variant='compact'):
-                            noise_multiplier_schedule =  gr.Textbox(label="Noise multiplier schedule", lines=1, value = da.noise_multiplier_schedule, interactive=True)
+                        with gr.Column() as noise_multiplier_column:
+                            with gr.Row(variant='compact'):
+                                enable_noise_multiplier_scheduling =  gr.Checkbox(label="Enable noise multiplier scheduling", value=da.enable_noise_multiplier_scheduling, interactive=True)
+                            with gr.Row(variant='compact'):
+                                noise_multiplier_schedule =  gr.Textbox(label="Noise multiplier schedule", lines=1, value = da.noise_multiplier_schedule, interactive=True)
                     # COHERENCE INNER TAB
                     with gr.TabItem('Coherence', open=False) as coherence_accord:
                         with gr.Row(variant='compact'):
@@ -963,8 +964,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
     animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
-    # animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=color_force_grayscale)
+    animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=noise_multiplier_column)
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=both_anim_mode_motion_params_column)
     #Hybrid related:
