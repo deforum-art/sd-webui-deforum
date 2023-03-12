@@ -83,9 +83,9 @@ def DeforumAnimArgs():
     enable_noise_multiplier_scheduling = True
     noise_multiplier_schedule = '0: (1.05)'
     # Anti-blur
+    amount_schedule = "0: (0.1)"
     kernel_schedule = "0: (5)"
     sigma_schedule = "0: (1.0)"
-    amount_schedule = "0: (0.35)"
     threshold_schedule = "0: (0.0)"
     # Hybrid video
     hybrid_comp_alpha_schedule = "0:(1)" 
