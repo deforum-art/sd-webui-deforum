@@ -196,11 +196,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
         if anim_args.enable_clipskip_scheduling and keys.clipskip_schedule_series[frame_idx] is not None:
             scheduled_clipskip = int(keys.clipskip_schedule_series[frame_idx])
-            
-        # NOISE MULTIPLIER
         if anim_args.enable_noise_multiplier_scheduling and keys.noise_multiplier_schedule_series[frame_idx] is not None:
             scheduled_noise_multiplier = float(keys.noise_multiplier_schedule_series[frame_idx])
-        
         if args.use_mask and keys.mask_schedule_series[frame_idx] is not None:
             mask_seq = keys.mask_schedule_series[frame_idx]
         if anim_args.use_noise_mask and keys.noise_mask_schedule_series[frame_idx] is not None:
