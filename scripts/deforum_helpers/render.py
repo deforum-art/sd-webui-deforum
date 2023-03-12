@@ -217,7 +217,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if turbo_steps > 1:
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
             cadence_flow = None
-            if anim_args.optical_flow_cadence:
+            if anim_args.optical_flow_cadence and anim_args.animation_mode == '3D':
                 print("Optical Flow cadence:")
             else:
                 print("Cadence:")
