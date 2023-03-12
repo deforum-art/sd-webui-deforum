@@ -850,7 +850,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                     with gr.Column():
                         # NCNN UPSCALE TAB
-                        # with gr.Tab('Upscale V2') as ncnn_upscale_tab:
                         with gr.Row(variant='compact') as ncnn_upload_vid_stats_row:
                             ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---') # Non interactive textbox showing uploaded input vid Frame Count
                             ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---') # Non interactive textbox showing uploaded input vid FPS
@@ -863,8 +862,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=True, interactive=True) # fix value
                         ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
                         ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model, ncnn_upscale_factor, ncnn_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
-                        # with gr.Tab('Upscale V1'):
-                        with gr.Column(visible=False): # Disabled 06-03-23
+                        with gr.Column(visible=False): # Upscale V1. Disabled 06-03-23
                             selected_tab = gr.State(value=0)
                             with gr.Tabs(elem_id="extras_resize_mode"):
                                 with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
