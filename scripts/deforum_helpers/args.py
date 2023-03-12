@@ -522,7 +522,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.Row(variant='compact'):
                                 perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value = da.perspective_flip_fv, interactive=True)
                     # NOISE INNER TAB
-                    with gr.TabItem('Noise') as a8:
+                    with gr.TabItem('Noise'):
                         with gr.Column() as noise_tab_column:
                             with gr.Row(variant='compact'):
                                 noise_type = gr.Radio(['uniform', 'perlin'], label="Noise type", value=da.noise_type, elem_id="noise_type")
