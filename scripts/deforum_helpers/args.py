@@ -79,6 +79,8 @@ def DeforumAnimArgs():
     # CLIP skip Scheduling
     enable_clipskip_scheduling = False 
     clipskip_schedule = '0: (2)'
+    enable_noise_multiplier_scheduling = False
+    noise_multiplier_schedule = '0: (1)'
     # Anti-blur
     kernel_schedule = "0: (5)"
     sigma_schedule = "0: (1.0)"
@@ -529,6 +531,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
                             with gr.Column(min_width=220):
                                 perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
+                        with gr.Row(variant='compact'):
+                            enable_noise_multiplier_scheduling =  gr.Checkbox(label="Enable Noise Multiplier Schedule", value=da.enable_noise_multiplier_scheduling, interactive=True)
+                        with gr.Row(variant='compact'):
+                            noise_multiplier_schedule =  gr.Textbox(label="Noise multiplier schedule", lines=1, value = da.noise_multiplier_schedule, interactive=True)
                     # COHERENCE INNER TAB
                     with gr.TabItem('Coherence', open=False) as coherence_accord:
                         with gr.Row(variant='compact'):
@@ -1022,7 +1028,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_sampler_scheduling, sampler_schedule,
                         mask_schedule, use_noise_mask, noise_mask_schedule,
                         enable_checkpoint_scheduling, checkpoint_schedule,
-                        enable_clipskip_scheduling, clipskip_schedule,
+                        enable_clipskip_scheduling, clipskip_schedule, enable_noise_multiplier_scheduling, noise_multiplier_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         color_coherence, color_coherence_video_every_N_frames, color_force_grayscale,
                         diffusion_cadence, optical_flow_cadence,
