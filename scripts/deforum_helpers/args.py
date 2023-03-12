@@ -81,7 +81,7 @@ def DeforumAnimArgs():
     clipskip_schedule = '0: (2)'
     # Noise Multiplier Scheduling
     enable_noise_multiplier_scheduling = True
-    noise_multiplier_schedule = '0: (1)'
+    noise_multiplier_schedule = '0: (1.05)'
     # Anti-blur
     kernel_schedule = "0: (5)"
     sigma_schedule = "0: (1.0)"
