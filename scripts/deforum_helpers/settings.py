@@ -52,7 +52,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
     args.__dict__["prompts"] = root.animation_prompts
     args.__dict__["positive_prompts"] = root.positive_prompts
     args.__dict__["negative_prompts"] = root.negative_prompts
-    exclude_keys = get_keys_to_exclude()
+    exclude_keys = get_keys_to_exclude() + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
     settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         s = {}
