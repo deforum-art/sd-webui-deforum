@@ -852,14 +852,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         # NCNN UPSCALE TAB
                         # with gr.Tab('Upscale V2') as ncnn_upscale_tab:
                         with gr.Row(variant='compact') as ncnn_upload_vid_stats_row:
-                            # Non interactive textbox showing uploaded input vid total Frame Count
-                            ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing uploaded input vid FPS
-                            ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing uploaded input resolution
-                            ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing expected output resolution
-                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')
+                            ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---') # Non interactive textbox showing uploaded input vid Frame Count
+                            ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---') # Non interactive textbox showing uploaded input vid FPS
+                            ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---') # Non interactive textbox showing uploaded input resolution
+                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---') # Non interactive textbox showing expected output resolution
                         with gr.Column():
                             with gr.Row(variant='compact', visible=True) as ncnn_actual_upscale_row:
                                 ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = "realesr-animevideov3", type="value")
