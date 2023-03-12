@@ -233,7 +233,7 @@ def keyframeExamples():
     "0": "https://deforum.github.io/a1/Gi1.png",
     "50": "https://deforum.github.io/a1/Gi2.png",
     "100": "https://deforum.github.io/a1/Gi3.png",
-    "150": "https://deforum.github.io/a1/Gi4.png",
+    "150": "https://deforum.github.io/a1/Gi4.jpg",
     "200": "https://deforum.github.io/a1/Gi1.png"
 }'''
 
