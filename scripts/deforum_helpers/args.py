@@ -553,11 +553,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     # ANTI BLUR INNER TAB  
                     with gr.TabItem('Anti Blur', open=False, elem_id='anti_blur_accord') as anti_blur_tab:
                         with gr.Row(variant='compact'):
+                            amount_schedule = gr.Textbox(label="Amount schedule", lines=1, value = da.amount_schedule, interactive=True)
+                        with gr.Row(variant='compact'):
                             kernel_schedule = gr.Textbox(label="Kernel schedule", lines=1, value = da.kernel_schedule, interactive=True)
                         with gr.Row(variant='compact'):
                             sigma_schedule = gr.Textbox(label="Sigma schedule", lines=1, value = da.sigma_schedule, interactive=True)
-                        with gr.Row(variant='compact'):
-                            amount_schedule = gr.Textbox(label="Amount schedule", lines=1, value = da.amount_schedule, interactive=True)
                         with gr.Row(variant='compact'):
                             threshold_schedule = gr.Textbox(label="Threshold schedule", lines=1, value = da.threshold_schedule, interactive=True)
             # PROMPTS TAB    
