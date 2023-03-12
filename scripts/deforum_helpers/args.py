@@ -17,7 +17,7 @@ def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
     half_precision = not cmd_opts.no_half
-    mask_preset_names = ['everywhere','init_mask','video_mask']
+    mask_preset_names = ['everywhere','video_mask']
     p = None
     frames_cache = []
     initial_seed = None
@@ -71,8 +71,8 @@ def DeforumAnimArgs():
     sampler_schedule = '0: ("Euler a")'
     # Composable mask scheduling
     use_noise_mask = False
-    mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
-    noise_mask_schedule = '0: ("!({everywhere}^({init_mask}|{video_mask}) ) ")'
+    mask_schedule = '0: ("{video_mask}")'
+    noise_mask_schedule = '0: ("{video_mask}")'
     # Checkpoint Scheduling
     enable_checkpoint_scheduling = False
     checkpoint_schedule = '0: ("model1.ckpt"), 100: ("model2.ckpt")'
@@ -230,11 +230,11 @@ def DeforumArgs():
 
 def keyframeExamples():
     return '''{
-    "0": "https://user-images.githubusercontent.com/121192995/215279228-1673df8a-f919-4380-b04c-19379b2041ff.png",
-    "50": "https://user-images.githubusercontent.com/121192995/215279281-7989fd6f-4b9b-4d90-9887-b7960edd59f8.png",
-    "100": "https://user-images.githubusercontent.com/121192995/215279284-afc14543-d220-4142-bbf4-503776ca2b8b.png",
-    "150": "https://user-images.githubusercontent.com/121192995/215279286-23378635-85b3-4457-b248-23e62c048049.jpg",
-    "200": "https://user-images.githubusercontent.com/121192995/215279228-1673df8a-f919-4380-b04c-19379b2041ff.png"
+    "0": "https://deforum.github.io/a1/Gi1.png",
+    "50": "https://deforum.github.io/a1/Gi2.png",
+    "100": "https://deforum.github.io/a1/Gi3.png",
+    "150": "https://deforum.github.io/a1/Gi4.jpg",
+    "200": "https://deforum.github.io/a1/Gi1.png"
 }'''
 
 def LoopArgs():
@@ -374,7 +374,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         border = gr.Radio(['replicate', 'wrap'], label="Border", value=da.border, elem_id="border")
                 with gr.Row(variant='compact'):
                     diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
-                    # optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, interactive=True, elem_id='optical_flow_cadence')
                     max_frames = gr.Number(label="Max frames", lines=1, value = da.max_frames, interactive=True, precision=0)
                 # GUIDED IMAGES ACCORD
                 with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
@@ -541,7 +540,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
                         with gr.Row(variant='compact'):
                             contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value = da.contrast_schedule, interactive=True)
-                            optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, interactive=True, elem_id='optical_flow_cadence')
+                            optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, visible=False, interactive=True, elem_id='optical_flow_cadence')
                         with gr.Row(variant='compact'):
                             # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                             reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
@@ -951,14 +950,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
     vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
-    diffusen_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence ]
-    for output in diffusen_cadence_outputs:
+    diffusion_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence]
+    for output in diffusion_cadence_outputs:
         animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=output)
-    animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=depth_3d_warping_accord)
-    animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=fov_accord)
-    animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=only_3d_motion_column)
+    three_d_related_outputs = [depth_3d_warping_accord,fov_accord,optical_flow_cadence,only_3d_motion_column]
+    for output in three_d_related_outputs:
+        animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=output)
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
-    # animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=force_grayscale_column)
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=color_force_grayscale)
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=both_anim_mode_motion_params_column)

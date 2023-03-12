@@ -141,25 +141,27 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         _, mask_image = load_img(args.init_image, 
                                         shape=(args.W, args.H),  
                                         use_alpha_as_mask=args.use_alpha_as_mask)
-        mask_vals['init_mask'] = mask_image
-        noise_mask_vals['init_mask'] = mask_image
+        mask_vals['video_mask'] = mask_image
+        noise_mask_vals['video_mask'] = mask_image
     
-    # Grab the first frame masks since they wont be provided until next frame
-    if mask_image is None and args.use_mask:
-        mask_vals['init_mask'] = get_mask(args)
-        noise_mask_vals['init_mask'] = get_mask(args) # TODO?: add a different default noise mask
-
+    # Grab the first frame masks since they wont be provided until next frame    
+    # Video mask overrides the init image mask, also, won't be searching for init_mask if use_mask_video is set
+    # Made to solve https://github.com/deforum-art/deforum-for-automatic1111-webui/issues/386
     if anim_args.use_mask_video:
+
+        args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+        args.noise_mask = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+
         mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
         noise_mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
-    else:
-        mask_vals['video_mask'] = None
-        noise_mask_vals['video_mask'] = None
+    elif mask_image is None and args.use_mask:
+        mask_vals['video_mask'] = get_mask(args)
+        noise_mask_vals['video_mask'] = get_mask(args) # TODO?: add a different default noisc mask
 
     #Webui
     state.job_count = anim_args.max_frames
     
-    while frame_idx < anim_args.max_frames:
+    while frame_idx < (anim_args.max_frames if not anim_args.use_mask_video else anim_args.max_frames - 1):
         #Webui
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
         state.job_no = frame_idx + 1
@@ -215,7 +217,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if turbo_steps > 1:
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
             cadence_flow = None
-            if anim_args.optical_flow_cadence:
+            if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence:
                 print("Optical Flow cadence:")
             else:
                 print("Cadence:")
@@ -227,7 +229,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 advance_next = tween_frame_idx > turbo_next_frame_idx
 
                 # optical flow cadence setup before animation warping
-                if anim_args.optical_flow_cadence:
+                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence:
                     if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
                         cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, "DIS Medium") / 2
                         turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow)
@@ -242,7 +244,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
 
                 # do optical flow cadence after animation warping
-                if anim_args.optical_flow_cadence and cadence_flow is not None:
+                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence and cadence_flow is not None:
                     cadence_flow = abs_flow_to_rel_flow(cadence_flow)
                     cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
                     cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow) * tween
@@ -403,6 +405,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
         if anim_args.use_mask_video:
+            args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+            args.noise_mask = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
+
             mask_vals['video_mask'] = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
 
         if args.use_mask:
