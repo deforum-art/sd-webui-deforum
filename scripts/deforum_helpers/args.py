@@ -647,7 +647,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             mask_brightness_adjust = gr.Number(label="Mask brightness adjust", value=d.mask_brightness_adjust, interactive=True)
                 with gr.Tab('GLSL settings'):
                     with gr.Row(variant='compact'):
-                        glsl = gr.Textbox(label="fragment shader", lines=15, interactive=True, value=fragment_shader())
+                        use_shaders = gr.Radio(['No', 'Image', 'Mask'], label="Use shader image input", value='No', interactive=True)
+                    with gr.Row(variant='compact'):
+                        mix_schedule = gr.Textbox(label="shader mix schedule", lines=1, interactive=True, value="0:(.5)")
+                    with gr.Row(variant='compact'):
+                        glsl_shader = gr.Textbox(label="fragment shader", lines=15, interactive=True, value=fragment_shader())
                 # PARSEQ ACCORD
                 with gr.Accordion('Parseq', open=False):
                     gr.HTML("""
