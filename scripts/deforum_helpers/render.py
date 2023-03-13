@@ -46,7 +46,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 raise RuntimeError("Strength needs to be greater than 0 in Init tab")
             args.strength_0_no_init = False
             args.seed_behavior = "schedule"
-            if not isJson(loop_args.imagesToKeyframe):
+            if not isJson(loop_args.init_images):
                 raise RuntimeError("The images set for use with keyframe-guidance are not in a proper JSON format")
 
     # handle controlnet video input frames generation
