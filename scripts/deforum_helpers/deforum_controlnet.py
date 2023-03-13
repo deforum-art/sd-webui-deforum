@@ -172,7 +172,15 @@ def setup_controlnet_ui():
                 """, elem_id='controlnet_not_found_html_msg')
         return {}
 
-    return setup_controlnet_ui_raw()
+    try:
+        return setup_controlnet_ui_raw()
+    except Exception as e:
+        print(f"'ControlNet UI setup failed due to '{e}'!")
+        gr.HTML(f"""
+                Failed to setup ControlNet UI, check the reason in your commandline log. Please, downgrade your CN extension to <a style='color:Orange;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet/archive/c9340671d6d59e5a79fc404f78f747f969f87374.zip'>c9340671d6d59e5a79fc404f78f747f969f87374</a> or report the problem <a style='color:Orange;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet/issues'>here</a>.
+                """, elem_id='controlnet_not_found_html_msg')
+        return {}
+
 
 def controlnet_component_names():
     if not find_controlnet():
