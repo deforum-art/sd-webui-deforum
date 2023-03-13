@@ -189,9 +189,6 @@ def controlnet_infotext():
                 *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, *especially* if you want to bring new features sooner, <a style='color:Violet;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/'>join Deforum's development</a>. &#128521;
             </p>
             <p">
-                &#10071;Important: make sure the option 'With img2img, do exactly the amount of steps the slider specified' is *NOT CHECKED* in the webui's 'Settings' tab (the checkbox should be empty).&#10071;
-            </p>
-            <p">
                 If you previously downgraded the CN extension to use it in Deforum, upgrade it to the latest version for the API communication to work. Note that CN's API may breakingly change at any time. If Deforum crashes due to CN updates, go <a style='color:Orange;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/issues'>here</a> and report your problem.
             </p>
            """
