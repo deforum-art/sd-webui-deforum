@@ -9,7 +9,7 @@ import numexpr
 from PIL import Image, ImageOps
 from .rich import console
 
-from .generate import generate
+from .generate import generate, isJson
 from .noise import add_noise
 from .animation import sample_from_cv2, sample_to_cv2, anim_frame_warp
 from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
@@ -39,6 +39,15 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args, anim_args, inputfiles = hybrid_generation(args, anim_args, root)
             # path required by hybrid functions, even if hybrid_comp_save_extra_frames is False
             hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
+
+        if loop_args.use_looper:
+            print("Using Guided Images mode: seed_behavior will be set to 'schedule' and 'strength_0_no_init' to False")
+            if args.strength == 0:
+                raise RuntimeError("Strength needs to be greater than 0 in Init tab")
+            args.strength_0_no_init = False
+            args.seed_behavior = "schedule"
+            if not isJson(loop_args.imagesToKeyframe):
+                raise RuntimeError("The images set for use with keyframe-guidance are not in a proper JSON format")
 
     # handle controlnet video input frames generation
     if is_controlnet_enabled(controlnet_args):

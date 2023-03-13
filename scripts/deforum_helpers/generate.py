@@ -70,13 +70,6 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
     image_init0 = None
 
     if loop_args.use_looper and anim_args.animation_mode in ['2D','3D']:
-        # TODO find out why we need to set this in the init tab
-        if args.strength == 0:
-            raise RuntimeError("Strength needs to be greater than 0 in Init tab and strength_0_no_init should *not* be checked")
-        if args.seed_behavior != "schedule":
-            raise RuntimeError("seed_behavior needs to be set to schedule in under 'Keyframes' tab --> 'Seed scheduling'")
-        if not isJson(loop_args.imagesToKeyframe):
-            raise RuntimeError("The images set for use with keyframe-guidance are not in a proper JSON format")
         args.strength = loop_args.imageStrength
         tweeningFrames = loop_args.tweeningFrameSchedule
         blendFactor = .07
