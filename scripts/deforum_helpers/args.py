@@ -195,7 +195,7 @@ def DeforumArgs():
 
     #**Init Settings**
     use_init = False 
-    strength = 0.0 
+    strength = 0.8
     strength_0_no_init = True # Set the strength to 0 automatically when no init image is used
     init_image = "https://deforum.github.io/a1/I1.png" 
     # Whiter areas of the mask are areas that change more
