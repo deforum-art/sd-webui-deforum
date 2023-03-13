@@ -4,7 +4,6 @@ import cv2
 from pathlib import Path
 from tqdm import tqdm
 from PIL import Image
-from modules.scripts_postprocessing import PostprocessedImage
 from modules import devices
 import shutil
 from queue import Queue, Empty
@@ -18,79 +17,6 @@ from .rich import console
 import time
 import subprocess
 from modules.shared import opts
-
-def process_upscale_vid_upload_logic(file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_file_name, keep_imgs, f_location, f_crf, f_preset):
-    print("Got a request to *upscale* an existing video.")
-    
-    in_vid_fps, _, _ = get_quick_vid_info(file.name)
-    folder_name = clean_folder_name(Path(vid_file_name).stem)
-    outdir = opts.outdir_samples or os.path.join(os.getcwd(), 'outputs')
-    outdir_no_tmp = outdir + f'/frame-upscaling/{folder_name}'
-    i = 1
-    while os.path.exists(outdir_no_tmp):
-        outdir_no_tmp = f"{outdir}/frame-upscaling/{folder_name}_{i}"
-        i += 1
-
-    outdir = os.path.join(outdir_no_tmp, 'tmp_input_frames')
-    os.makedirs(outdir, exist_ok=True)
-    
-    vid2frames(video_path=file.name, video_in_frame_path=outdir, overwrite=True, extract_from_frame=0, extract_to_frame=-1, numeric_files_output=True, out_img_format='png')
-    
-    process_video_upscaling(selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, orig_vid_fps=in_vid_fps, real_audio_track=file.name, raw_output_imgs_path=outdir, img_batch_id=None, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_upscale_imgs=keep_imgs, orig_vid_name=folder_name)
-
-def process_video_upscaling(resize_mode, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, orig_vid_fps, real_audio_track, raw_output_imgs_path, img_batch_id, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, keep_upscale_imgs, orig_vid_name):
-    devices.torch_gc()
-
-    print("Upscaling progress (it's OK if it finishes before 100%):")
-
-    upscaled_path = os.path.join(raw_output_imgs_path, 'upscaled_frames')
-    if orig_vid_name is not None: # upscaling a video (deforum or unrelated)
-        custom_upscale_path = "{}_{}".format(upscaled_path, orig_vid_name)
-    else: # upscaling after a deforum run:
-        custom_upscale_path = "{}_{}".format(upscaled_path, img_batch_id)
-    
-    temp_convert_raw_png_path = os.path.join(raw_output_imgs_path, "tmp_upscale_folder")
-    duplicate_pngs_from_folder(raw_output_imgs_path, temp_convert_raw_png_path, img_batch_id, orig_vid_name)
-
-    videogen = []
-    for f in os.listdir(temp_convert_raw_png_path):
-        # double check for old _depth_ files, not really needed probably but keeping it for now
-        if '_depth_' not in f:
-            videogen.append(f)
-            
-    videogen.sort(key= lambda x:int(x.split('.')[0]))
-    vid_out = None
-
-    if not os.path.exists(custom_upscale_path):
-        os.mkdir(custom_upscale_path)
-
-    # Upscaling is a slow and demanding operation, so we don't need as much parallelization here
-    for i in tqdm(range(len(videogen)), desc="Upscaling"):
-        lastframe = videogen[i]
-        img_path = os.path.join(temp_convert_raw_png_path, lastframe)
-        image = process_frame(resize_mode, Image.open(img_path).convert("RGB"), upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility)
-        filename = '{}/{:0>7d}.png'.format(custom_upscale_path, i)
-        image.save(filename)
-
-    shutil.rmtree(temp_convert_raw_png_path)
-    # stitch video from upscaled frames, and add audio if needed
-    try:
-        print (f"*Passing upsc frames to ffmpeg...*")
-        vid_out_path = stitch_video(img_batch_id, orig_vid_fps, custom_upscale_path, real_audio_track, ffmpeg_location, resize_mode, upscaling_resize, upscaling_resize_w, upscaling_resize_h, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, ffmpeg_crf, ffmpeg_preset, keep_upscale_imgs, orig_vid_name)
-        # remove folder with raw (non-upscaled) vid input frames in case of input VID and not PNGs
-        if orig_vid_name is not None:
-            shutil.rmtree(raw_output_imgs_path)
-    except Exception as e:
-        print(f'Video stitching gone wrong. *Upscaled frames were saved to HD as backup!*. Actual error: {e}')
-
-    devices.torch_gc()
-
-def process_frame(resize_mode, image, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility):
-    pp = PostprocessedImage(image)
-    postproc = scr.scripts_postproc
-    upscaler_script = next(s for s in postproc.scripts if s.name == "Upscale")
-    upscaler_script.process(pp, resize_mode, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility)
-    return pp.image
 
 def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, resize_mode, upscaling_resize, upscaling_resize_w, upscaling_resize_h, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, f_crf, f_preset, keep_imgs, orig_vid_name):        
     parent_folder = os.path.dirname(img_folder_path)
