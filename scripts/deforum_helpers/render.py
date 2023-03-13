@@ -166,7 +166,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     #Webui
     state.job_count = anim_args.max_frames
-    
+
     while frame_idx < (anim_args.max_frames if not anim_args.use_mask_video else anim_args.max_frames - 1):
         #Webui
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
@@ -193,15 +193,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         }        
         scheduled_sampler_name = None
         scheduled_clipskip = None
+        scheduled_noise_multiplier = None
         mask_seq = None
         noise_mask_seq = None
         if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
             args.steps = int(keys.steps_schedule_series[frame_idx])
         if anim_args.enable_sampler_scheduling and keys.sampler_schedule_series[frame_idx] is not None:
             scheduled_sampler_name = keys.sampler_schedule_series[frame_idx].casefold()
-            
         if anim_args.enable_clipskip_scheduling and keys.clipskip_schedule_series[frame_idx] is not None:
             scheduled_clipskip = int(keys.clipskip_schedule_series[frame_idx])
+        if anim_args.enable_noise_multiplier_scheduling and keys.noise_multiplier_schedule_series[frame_idx] is not None:
+            scheduled_noise_multiplier = float(keys.noise_multiplier_schedule_series[frame_idx])
         if args.use_mask and keys.mask_schedule_series[frame_idx] is not None:
             mask_seq = keys.mask_schedule_series[frame_idx]
         if anim_args.use_noise_mask and keys.noise_mask_schedule_series[frame_idx] is not None:
@@ -223,22 +225,19 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if turbo_steps > 1:
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
             cadence_flow = None
-            if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence:
-                print("Optical Flow cadence:")
-            else:
-                print("Cadence:")
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
                 tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
-                print(f" Creating in-between frame: {tween_frame_idx}; tween:{tween:0.2f};")
-
                 advance_prev = turbo_prev_image is not None and tween_frame_idx > turbo_prev_frame_idx
                 advance_next = tween_frame_idx > turbo_next_frame_idx
 
                 # optical flow cadence setup before animation warping
                 if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence:
-                    if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
-                        cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, "DIS Medium") / 2
-                        turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow)
+                    if keys.strength_schedule_series[tween_frame_start_idx] > 0:
+                        if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
+                            cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, "DIS Medium") / 2
+                            turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow)
+
+                print(f"Creating in-between {'' if cadence_flow is None else 'optical flow '}cadence frame: {tween_frame_idx}; tween:{tween:0.2f};")
 
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
@@ -250,7 +249,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
 
                 # do optical flow cadence after animation warping
-                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence and cadence_flow is not None:
+                if cadence_flow is not None:
                     cadence_flow = abs_flow_to_rel_flow(cadence_flow)
                     cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
                     cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow) * tween
@@ -427,9 +426,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         loop_args.colorCorrectionFactor = loopSchedulesAndData.color_correction_factor_series[frame_idx]
         loop_args.use_looper = loopSchedulesAndData.use_looper
         loop_args.imagesToKeyframe = loopSchedulesAndData.imagesToKeyframe
-        
+
+        if opts.data["img2img_fix_steps"] == True: # disable "with img2img do exactly x steps" from general setting, as it *ruins* deforum animations
+            opts.data["img2img_fix_steps"] = False
         if scheduled_clipskip is not None:
             opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip
+        if scheduled_noise_multiplier is not None:
+            opts.data["initial_noise_multiplier"] = scheduled_noise_multiplier
         
         if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
             depth_model.to('cpu')
@@ -445,6 +448,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if anim_args.color_force_grayscale:
             image = ImageOps.grayscale(image)
             image = ImageOps.colorize(image, black ="black", white ="white")
+
+        # on strength 0, set color match to generation
+        if strength == 0:
+            color_match_sample = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
 
         # reroll blank frame 
         if not image.getbbox():
