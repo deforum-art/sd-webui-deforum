@@ -66,7 +66,7 @@ class FrameInterpolater():
         self.max_frames = max_frames
         self.seed = seed
 
-    def sanitize_value_for_check_is_number(value):
+    def sanitize_value_for_check_is_number(self, value):
         return value.replace("'","").replace('"',"").replace('(',"").replace(')',"")
 
     def get_inbetweens(self, key_frames, integer=False, interp_method='Linear', is_single_string = False):
