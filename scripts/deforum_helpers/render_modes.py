@@ -14,7 +14,7 @@ from .settings import save_settings_from_animation_run
 # Webui
 from modules.shared import opts, cmd_opts, state
 
-def render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+def render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, glsl_args, animation_prompts, root):
     # create a folder for the video input frames to live in
     video_in_frame_path = os.path.join(args.outdir, 'inputframes') 
     os.makedirs(video_in_frame_path, exist_ok=True)
@@ -67,7 +67,7 @@ def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, l
     render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
 
 
-def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, glsl_args, controlnet_args, animation_prompts, root):
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
@@ -130,7 +130,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         args.seed = int(keys.seed_schedule_series[frame_idx]) if args.seed_behavior == 'schedule' or use_parseq else args.seed
         opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip if scheduled_clipskip is not None else opts.data["CLIP_stop_at_last_layers"]
 
-        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, keys, anim_args, loop_args, controlnet_args, args, root, frame_idx, sampler_name=scheduled_sampler_name)
         filename = f"{args.timestring}_{frame_idx:09}.png"
 
         save_image(image, 'PIL', filename, args, video_args, root)

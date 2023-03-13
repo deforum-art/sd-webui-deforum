@@ -10,7 +10,7 @@ from .rich import console
 from .generate import generate
 from .noise import add_noise
 from .animation import sample_from_cv2, sample_to_cv2, anim_frame_warp
-from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
+from .animation_key_frames import DeformAnimKeys, LooperAnimKeys, GLSLKeys
 from .video_audio_utilities import get_frame_name, get_next_frame
 from .depth import DepthModel
 from .colors import maintain_colors
@@ -47,6 +47,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
     loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args)
+    glslSchedulesAndData = GLSLKeys(args, anim_args)
     # resume animation
     start_frame = 0
     if anim_args.resume_from_timestring:
@@ -160,7 +161,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         noise_mask_vals['video_mask'] = get_mask(args) # TODO?: add a different default noisc mask
 
     # call glsl to run shader
-    run_glsl(args, anim_args.max_frames)
+    if glslSchedulesAndData.use_shaders:
+        run_glsl(args, anim_args.max_frames, glslSchedulesAndData)
 
     #Webui
     state.job_count = anim_args.max_frames
@@ -436,7 +438,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             sd_hijack.model_hijack.hijack(sd_model)
         
         # sample the diffusion model
-        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, keys, anim_args, loop_args, controlnet_args, glslSchedulesAndData, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
         # intercept and override to grayscale
@@ -451,7 +453,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 while not image.getbbox():
                     print("Rerolling with +1 seed...")
                     args.seed += 1
-                    image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+                    image = generate(args, keys, anim_args, loop_args, controlnet_args, glslSchedulesAndData, root, frame_idx, sampler_name=scheduled_sampler_name)
                     patience -= 1
                     if patience == 0:
                         print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
@@ -497,7 +499,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         args.seed = next_seed(args)
 
-def run_glsl(args, max_frames):
+def run_glsl(args, max_frames, glslSchedulesAndData):
     vertex_shader_code = """
     #version 330 core
 
@@ -512,13 +514,12 @@ def run_glsl(args, max_frames):
         TexCoords = aTexCoords;
     }
     """
-    fragment_shader_code = args.glsl_shader
+    fragment_shader_code = glslSchedulesAndData.glsl_shader
     ctx = moderngl.create_standalone_context()
     prog = ctx.program(vertex_shader=vertex_shader_code, fragment_shader=fragment_shader_code)
     vbo = np.array([-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0], dtype=np.float32)
     vao = ctx.simple_vertex_array(prog, ctx.buffer(vbo), 'aPos')
 
-    timeFactor = .1#args.time_factor
     time = 0
     resolution = (args.W, args.H)
     try:
@@ -528,6 +529,7 @@ def run_glsl(args, max_frames):
     ctx.enable(moderngl.BLEND)
     os.makedirs(f"{args.outdir}/glslOutput", exist_ok=True)
     for i in range(max_frames):
+        timeFactor = glslSchedulesAndData.time_factor[i]
         try:
             prog["time"].value = time
         except KeyError:

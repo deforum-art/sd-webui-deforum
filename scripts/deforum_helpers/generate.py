@@ -50,7 +50,7 @@ def pairwise_repl(iterable):
     next(b, None)
     return zip(a, b)
 
-def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
+def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root, frame = 0, return_sample=False, sampler_name=None):
     assert args.prompt is not None
 
     # Setup the pipeline
@@ -138,6 +138,12 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
         img = args.init_sample
         init_image = img
         image_init0 = img
+        if glsl_args.use_shaders:
+            init_image = Image.blend(init_image, 
+                                     load_img(f"{args.outdir}/glslOutput/frame_{frame:05d}.png",
+                                              shape=(args.W, args.H),
+                                              use_alpha_as_mask=args.use_alpha_as_mask)[0],
+                                     max(0,min(1,glsl_args.mix_schedule[frame])))
         if loop_args.use_looper and isJson(loop_args.imagesToKeyframe) and anim_args.animation_mode in ['2D','3D']:
             init_image = Image.blend(init_image, init_image2, blendFactor)
             correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
@@ -148,9 +154,11 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
         init_image, mask_image = load_img(image_init0, # initial init image
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
-                                          
+        if glsl_args.use_shaders:
+            init_image = Image.blend(init_image, Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png"), max(0,min(1,glsl_args.mix_schedule[frame])))
+    elif glsl_args.use_shaders:
+        init_image = Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png")
     else:
-        
         if anim_args.animation_mode != 'Interpolation':
             print(f"Not using an init image (doing pure txt2img)")
         p_txt = StableDiffusionProcessingTxt2Img(
