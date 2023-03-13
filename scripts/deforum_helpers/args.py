@@ -282,10 +282,21 @@ def DeforumOutputArgs():
     return locals()
     
 def fragment_shader():
-    return """out vec4 FragColor;
+    return """#version 330 core
+
+uniform float time;
+uniform vec2 resolution;
+out vec4 fragColor;
+
 void main()
 {
-    FragColor = vec4(1.0, 0.5, 0.2, 1.0);
+    vec2 uv = resolution.xy;
+
+    // Time varying pixel color
+    vec3 col = 0.5 + 0.5*cos(time+uv.xyx+vec3(0,2,4));
+
+    // Output to screen
+    fragColor = vec4(col,1.0);
 }"""
 
 import gradio as gr
@@ -646,10 +657,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(min_width=250):
                             mask_brightness_adjust = gr.Number(label="Mask brightness adjust", value=d.mask_brightness_adjust, interactive=True)
                 with gr.Tab('GLSL settings'):
-                    with gr.Row(variant='compact'):
-                        use_shaders = gr.Radio(['No', 'Image', 'Mask'], label="Use shader image input", value='No', interactive=True)
+                    with gr.Row(variant='compact'):# , 'Mask' we will add mask in after it works again
+                        use_shaders = gr.Radio(['No', 'Image'], label="Use shader image input", value='No', interactive=True)
                     with gr.Row(variant='compact'):
                         mix_schedule = gr.Textbox(label="shader mix schedule", lines=1, interactive=True, value="0:(.5)")
+                    with gr.Row(variant='compact'):
+                        time_factor = gr.Textbox(label="time factor", lines=1, interactive=True, value="0:(.1)")
                     with gr.Row(variant='compact'):
                         glsl_shader = gr.Textbox(label="fragment shader", lines=15, interactive=True, value=fragment_shader())
                 # PARSEQ ACCORD
@@ -1067,7 +1080,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         use_mask, use_alpha_as_mask, invert_mask, overlay_mask,
                         mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
                         fill, full_res_mask, full_res_mask_padding,
-                        reroll_blank_frames'''
+                        reroll_blank_frames, use_shaders, mix_schedule, time_factor, glsl_shader'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_creation,
                             fps, make_gif, delete_imgs, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
