@@ -605,9 +605,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(min_width=150):
                             use_init = gr.Checkbox(label="Use init", value=d.use_init, interactive=True, visible=True)
                         with gr.Column(min_width=150):
-                            strength_0_no_init = gr.Checkbox(label="Strength 0 no init", value=True, interactive=True)
+                            strength_0_no_init = gr.Checkbox(label="Strength 0 no init", value=d.strength_0_no_init, interactive=True)
                         with gr.Column(min_width=170):
-                            strength = gr.Slider(label="Strength", minimum=0, maximum=1, step=0.01, value=0, interactive=True)
+                            strength = gr.Slider(label="Strength", minimum=0, maximum=1, step=0.01, value=d.strength, interactive=True)
                     with gr.Row(variant='compact'):
                         init_image = gr.Textbox(label="Init image", lines=1, interactive=True, value = d.init_image)
                 # VIDEO INIT INNER-TAB
