@@ -290,17 +290,30 @@ def fragment_shader():
 
 uniform float time;
 uniform vec2 resolution;
-out vec4 fragColor;
+out vec4 out_color;
+
+// A function to generate Perlin noise
+float noise(vec2 p)
+{
+    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
 
 void main()
 {
-    vec2 uv = resolution.xy;
-
+    vec2 uv = (gl_FragCoord.xy / resolution.xy) * 2.0 - 1.0;
+    // Generate a Perlin noise value to use as an offset for the color
+    float noise_value = noise(gl_FragCoord.xy * 0.01 + time);
     // Time varying pixel color
-    vec3 col = 0.5 + 0.5*cos(time+uv.xyx+vec3(0,2,4));
+    vec3 col = 0.5 + noise_value*cos(time+uv.xyx+vec3(0,2,4));
 
     // Output to screen
-    fragColor = vec4(col,1.0);
+    // create a transparent hole in the center of the shader
+    if (length(uv) < .5) {
+        out_color = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+    else{
+        out_color = vec4(col,0.5);
+    }
 }"""
 
 import gradio as gr
@@ -666,7 +679,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact'):# , 'Mask' we will add mask in after it works again
                         use_shaders = gr.Radio(['No', 'Image'], label="Use shader image input", value='No', interactive=True)
                     with gr.Row(variant='compact'):
-                        mix_schedule = gr.Textbox(label="shader mix schedule", lines=1, interactive=True, value="0:(.5)")
+                        mix_schedule = gr.Textbox(label="shader mix schedule", lines=1, interactive=True, value="0:(.333)")
                     with gr.Row(variant='compact'):
                         time_factor = gr.Textbox(label="time factor", lines=1, interactive=True, value="0:(.1)")
                     with gr.Row(variant='compact'):
