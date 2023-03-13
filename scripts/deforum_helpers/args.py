@@ -10,7 +10,8 @@ from .vid2depth import process_depth_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
 from .general_utils import get_os, get_deforum_version
-from .deforum_controlnet import controlnet_component_names, setup_controlnet_ui
+from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names, controlnet_infotext
+# controlnet_component_names, setup_controlnet_ui
 import tempfile
         
 def Root():
@@ -79,10 +80,13 @@ def DeforumAnimArgs():
     # CLIP skip Scheduling
     enable_clipskip_scheduling = False 
     clipskip_schedule = '0: (2)'
+    # Noise Multiplier Scheduling
+    enable_noise_multiplier_scheduling = True
+    noise_multiplier_schedule = '0: (1.05)'
     # Anti-blur
+    amount_schedule = "0: (0.1)"
     kernel_schedule = "0: (5)"
     sigma_schedule = "0: (1.0)"
-    amount_schedule = "0: (0.35)"
     threshold_schedule = "0: (0.0)"
     # Hybrid video
     hybrid_comp_alpha_schedule = "0:(1)" 
@@ -424,6 +428,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.TabItem('CFG'):
                         with gr.Row(variant='compact'):
                             cfg_scale_schedule = gr.Textbox(label="CFG scale schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
+                        with gr.Row(variant='compact'):
+                            enable_clipskip_scheduling = gr.Checkbox(label="Enable CLIP skip scheduling", value=da.enable_clipskip_scheduling, interactive=True)
+                        with gr.Row(variant='compact'):
+                            clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
                     with gr.TabItem('Seed') as a3:
                         with gr.Row(variant='compact'):
                             seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="Seed behavior", value=d.seed_behavior, elem_id="seed_behavior")
@@ -457,11 +465,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             enable_checkpoint_scheduling = gr.Checkbox(label="Enable checkpoint scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
                         with gr.Row(variant='compact'):
                             checkpoint_schedule = gr.Textbox(label="Checkpoint schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
-                    with gr.TabItem('CLIP Skip', open=False) as a16:
-                        with gr.Row(variant='compact'):
-                            enable_clipskip_scheduling = gr.Checkbox(label="Enable CLIP skip scheduling", value=da.enable_clipskip_scheduling, interactive=True)
-                        with gr.Row(variant='compact'):
-                            clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
                 # MOTION INNER TAB
                 with gr.Tabs(elem_id='motion_noise_etc'):
                     with gr.TabItem('Motion') as motion_tab:
@@ -519,22 +522,26 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.Row(variant='compact'):
                                 perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value = da.perspective_flip_fv, interactive=True)
                     # NOISE INNER TAB
-                    with gr.TabItem('Noise') as a8:
-                        with gr.Row(variant='compact'):
-                            noise_type = gr.Radio(['uniform', 'perlin'], label="Noise type", value=da.noise_type, elem_id="noise_type")
-                        with gr.Row(variant='compact'):
-                            noise_schedule = gr.Textbox(label="Noise schedule", lines=1, value = da.noise_schedule, interactive=True)
-                        with gr.Row(variant='compact') as perlin_row:
-                            with gr.Column(min_width=220):
-                                perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
-                            with gr.Column(min_width=220):
-                                perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
+                    with gr.TabItem('Noise'):
+                        with gr.Column() as noise_tab_column:
+                            with gr.Row(variant='compact'):
+                                noise_type = gr.Radio(['uniform', 'perlin'], label="Noise type", value=da.noise_type, elem_id="noise_type")
+                            with gr.Row(variant='compact'):
+                                noise_schedule = gr.Textbox(label="Noise schedule", lines=1, value = da.noise_schedule, interactive=True)
+                            with gr.Row(variant='compact') as perlin_row:
+                                with gr.Column(min_width=220):
+                                    perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
+                                with gr.Column(min_width=220):
+                                    perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
+                            with gr.Row(variant='compact'):
+                                enable_noise_multiplier_scheduling =  gr.Checkbox(label="Enable noise multiplier scheduling", value=da.enable_noise_multiplier_scheduling, interactive=True)
+                            with gr.Row(variant='compact'):
+                                noise_multiplier_schedule =  gr.Textbox(label="Noise multiplier schedule", lines=1, value = da.noise_multiplier_schedule, interactive=True)
                     # COHERENCE INNER TAB
                     with gr.TabItem('Coherence', open=False) as coherence_accord:
                         with gr.Row(variant='compact'):
                             # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
                             color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
-                            # with gr.Column(variant='compact') as force_grayscale_column:
                             color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True)
                         with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
                             color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
@@ -547,11 +554,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     # ANTI BLUR INNER TAB  
                     with gr.TabItem('Anti Blur', open=False, elem_id='anti_blur_accord') as anti_blur_tab:
                         with gr.Row(variant='compact'):
+                            amount_schedule = gr.Textbox(label="Amount schedule", lines=1, value = da.amount_schedule, interactive=True)
+                        with gr.Row(variant='compact'):
                             kernel_schedule = gr.Textbox(label="Kernel schedule", lines=1, value = da.kernel_schedule, interactive=True)
                         with gr.Row(variant='compact'):
                             sigma_schedule = gr.Textbox(label="Sigma schedule", lines=1, value = da.sigma_schedule, interactive=True)
-                        with gr.Row(variant='compact'):
-                            amount_schedule = gr.Textbox(label="Amount schedule", lines=1, value = da.amount_schedule, interactive=True)
                         with gr.Row(variant='compact'):
                             threshold_schedule = gr.Textbox(label="Threshold schedule", lines=1, value = da.threshold_schedule, interactive=True)
             # PROMPTS TAB    
@@ -676,15 +683,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     return gr.update(visible=False)
             # CONTROLNET TAB
             with gr.TabItem('ControlNet'):
-                    gr.HTML("""
-                    Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
-                    <p style="margin-top:0.2em">
-                        *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, join Deforum's development. &#128521;
-                    </p>
-                    <p">
-                        Due to ControlNet base extension's inner works it needs its models to be located at 'extensions/deforum-for-automatic1111-webui/models'. So copy, symlink or move them there until a more elegant solution is found. And, as of now, it requires use_init checked for the first run. The ControlNet extension version used in the dev process is a24089a62e70a7fae44b7bf35b51fd584dd55e25, if even with all the other options above used it still breaks, upgrade/downgrade your CN version to this one.
-                    </p>
-                    """)
+                    gr.HTML(controlnet_infotext())
                     controlnet_dict = setup_controlnet_ui()
             # HYBRID VIDEO TAB
             with gr.TabItem('Hybrid Video'):
@@ -843,16 +842,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
                     with gr.Column():
                         # NCNN UPSCALE TAB
-                        # with gr.Tab('Upscale V2') as ncnn_upscale_tab:
                         with gr.Row(variant='compact') as ncnn_upload_vid_stats_row:
-                            # Non interactive textbox showing uploaded input vid total Frame Count
-                            ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing uploaded input vid FPS
-                            ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing uploaded input resolution
-                            ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing expected output resolution
-                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')
+                            ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---') # Non interactive textbox showing uploaded input vid Frame Count
+                            ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---') # Non interactive textbox showing uploaded input vid FPS
+                            ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---') # Non interactive textbox showing uploaded input resolution
+                            ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---') # Non interactive textbox showing expected output resolution
                         with gr.Column():
                             with gr.Row(variant='compact', visible=True) as ncnn_actual_upscale_row:
                                 ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = "realesr-animevideov3", type="value")
@@ -860,8 +854,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=True, interactive=True) # fix value
                         ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
                         ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model, ncnn_upscale_factor, ncnn_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
-                        # with gr.Tab('Upscale V1'):
-                        with gr.Column(visible=False): # Disabled 06-03-23
+                        with gr.Column(visible=False): # Upscale V1. Disabled 06-03-23
                             selected_tab = gr.State(value=0)
                             with gr.Tabs(elem_id="extras_resize_mode"):
                                 with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
@@ -958,6 +951,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=output)
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=color_force_grayscale)
+    animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=noise_tab_column)
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=both_anim_mode_motion_params_column)
     #Hybrid related:
@@ -1021,7 +1015,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_sampler_scheduling, sampler_schedule,
                         mask_schedule, use_noise_mask, noise_mask_schedule,
                         enable_checkpoint_scheduling, checkpoint_schedule,
-                        enable_clipskip_scheduling, clipskip_schedule,
+                        enable_clipskip_scheduling, clipskip_schedule, enable_noise_multiplier_scheduling, noise_multiplier_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         color_coherence, color_coherence_video_every_N_frames, color_force_grayscale,
                         diffusion_cadence, optical_flow_cadence,
@@ -1068,12 +1062,15 @@ loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blen
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 
-component_names =   ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names + controlnet_component_names()
-settings_component_names = [name for name in component_names] #if name not in video_args_names]
+def get_component_names():
+    return ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names + controlnet_component_names()
+
+def get_settings_component_names():
+    return [name for name in get_component_names()] #if name not in video_args_names]
 
 def setup_deforum_setting_ui(self, is_img2img, is_extension = True):
     ds = setup_deforum_setting_dictionary(self, is_img2img, is_extension)
-    return [ds[name] for name in (['btn'] + component_names)]
+    return [ds[name] for name in (['btn'] + get_component_names())]
 
 def pack_anim_args(args_dict):
     return {name: args_dict[name] for name in (anim_args_names + hybrid_args_names)}

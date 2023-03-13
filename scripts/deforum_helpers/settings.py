@@ -10,43 +10,26 @@ import logging
 def get_keys_to_exclude():
     return ["n_batch", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal", "perlin_w", "perlin_h", "mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
 
-def load_args(args_dict,anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root):
+def load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
     if not os.path.isfile(custom_settings_file):
-        print('The custom settings file does not exist. The in-notebook settings will be used instead')
-    else:
-        with open(custom_settings_file, "r") as f:
-            jdata = json.loads(f.read())
-            handle_deprecated_settings(jdata)
-            root.animation_prompts = jdata["prompts"]
-            if "animation_prompts_positive" in jdata:
-                root.animation_prompts_positive = jdata["animation_prompts_positive"]
-            if "animation_prompts_negative" in jdata:
-                root.animation_prompts_negative = jdata["animation_prompts_negative"]
-            for i, k in enumerate(args_dict):
+        print('Custom settings file does not exist. Using in-notebook settings.')
+        return
+    with open(custom_settings_file, "r") as f:
+        jdata = json.loads(f.read())
+        handle_deprecated_settings(jdata)
+        root.animation_prompts = jdata.get("prompts", root.animation_prompts)
+        if "animation_prompts_positive" in jdata:
+            root.animation_prompts_positive = jdata["animation_prompts_positive"]
+        if "animation_prompts_negative" in jdata:
+            root.animation_prompts_negative = jdata["animation_prompts_negative"]
+        for dicts in [args_dict, anim_args_dict, parseq_args_dict, loop_args_dict]:
+            for k, v in dicts.items():
                 if k in jdata:
-                    args_dict[k] = jdata[k]
+                    dicts[k] = jdata[k]
                 else:
-                    print(f"key {k} doesn't exist in the custom settings data! using the default value of {args_dict[k]}")
-            for i, k in enumerate(anim_args_dict):
-                if k in jdata:
-                    anim_args_dict[k] = jdata[k]
-                else:
-                    print(f"key {k} doesn't exist in the custom settings data! using the default value of {anim_args_dict[k]}")
-            for i, k in enumerate(parseq_args_dict):
-                if k in jdata:
-                    parseq_args_dict[k] = jdata[k]
-                else:
-                    print(f"key {k} doesn't exist in the custom settings data! using the default value of {parseq_args_dict[k]}")                    
-            for i, k in enumerate(loop_args_dict):
-                if k in jdata:
-                    loop_args_dict[k] = jdata[k]
-                else:
-                    print(f"key {k} doesn't exist in the custom settings data! using the default value of {loop_args_dict[k]}")                    
-            print(args_dict)
-            print(anim_args_dict)
-            print(parseq_args_dict)
-            print(loop_args_dict)
+                    print(f"Key {k} doesn't exist in the custom settings data! Using default value of {v}")
+        print(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict)
 
 def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root):
     args.__dict__["prompts"] = root.animation_prompts
@@ -65,7 +48,8 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
 def save_settings(*args, **kwargs):
     from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args, pack_video_args
     settings_path = args[0].strip()
-    data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
+    settings_component_names = deforum_args.get_settings_component_names()
+    data = {settings_component_names[i]: args[i+1] for i in range(0, len(settings_component_names))}
     args_dict = pack_args(data)
     anim_args_dict = pack_anim_args(data)
     parseq_dict = pack_parseq_args(data)
@@ -87,12 +71,13 @@ def save_settings(*args, **kwargs):
 
 def load_settings(*args, **kwargs):
     settings_path = args[0].strip()
-    data = {deforum_args.settings_component_names[i]: args[i+1] for i in range(0, len(deforum_args.settings_component_names))}
+    settings_component_names = deforum_args.get_settings_component_names()
+    data = {settings_component_names[i]: args[i+1] for i in range(0, len(settings_component_names))}
     print(f"reading custom settings from {settings_path}")
     jdata = {}
     if not os.path.isfile(settings_path):
         print('The custom settings file does not exist. The values will be unchanged.')
-        return [data[name] for name in deforum_args.settings_component_names] + [""]
+        return [data[name] for name in settings_component_names] + [""]
     else:
         with open(settings_path, "r") as f:
             jdata = json.loads(f.read())
