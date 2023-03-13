@@ -161,7 +161,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         noise_mask_vals['video_mask'] = get_mask(args) # TODO?: add a different default noisc mask
 
     # call glsl to run shader
-    if glslSchedulesAndData.use_shaders:
+    if glslSchedulesAndData.use_shaders != 'No':
         run_glsl(args, anim_args.max_frames, glslSchedulesAndData)
 
     #Webui
