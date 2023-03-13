@@ -390,8 +390,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         gr.HTML("""Prerequisites and Important Info: 
                                    <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0em">
                                        <li>This mode works ONLY with 2D/3D animation modes. Interpolation and Video Input modes aren't supported.</ li>
-                                       <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
-                                       <li>Set 'seed_behavior' to 'schedule' under the Seed Scheduling section below.</li>
+                                       <li>Init tab's strength slider should be greater than 0. Recommended value (.65 - .80).</ li>
+                                       <li>'seed_behavior' will be forcibly set to 'schedule'.</li>
                                     </ul>
                                 """)
                         gr.HTML("""Looping recommendations: 
