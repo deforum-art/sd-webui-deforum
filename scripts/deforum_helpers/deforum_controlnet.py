@@ -147,13 +147,18 @@ def setup_controlnet_ui_raw():
 
     with gr.Row(visible=False) as cn_env_row:
         controlnet_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode", interactive=True)
+    
+    with gr.Row(visible=False) as cn_vid_settings_row:
+        controlnet_overwrite_frames = gr.Checkbox(label='Overwrite input frames', value=True, interactive=False)
+        controlnet_vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=False)
+        controlnet_mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=False)
 
     # Video input to be fed into ControlNet
     #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
     controlnet_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
     controlnet_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
    
-    cn_hide_output_list = [controlnet_guess_mode,controlnet_invert_image,controlnet_rgbbgr_mode,controlnet_lowvram,cn_mod_row,cn_weight_row,cn_env_row,controlnet_input_video_chosen_file,controlnet_input_video_mask_chosen_file] 
+    cn_hide_output_list = [controlnet_guess_mode,controlnet_invert_image,controlnet_rgbbgr_mode,controlnet_lowvram,cn_mod_row,cn_weight_row,cn_env_row,cn_vid_settings_row,controlnet_input_video_chosen_file,controlnet_input_video_mask_chosen_file] 
     for cn_output in cn_hide_output_list:
         controlnet_enabled.change(fn=hide_ui_by_cn_status, inputs=controlnet_enabled,outputs=cn_output)
         
@@ -174,6 +179,7 @@ def controlnet_component_names():
         return []
 
     controlnet_args_names = str(r'''controlnet_input_video_chosen_file, controlnet_input_video_mask_chosen_file,
+controlnet_overwrite_frames,controlnet_vid_path,controlnet_mask_vid_path,
 controlnet_enabled, controlnet_guess_mode, controlnet_invert_image, controlnet_rgbbgr_mode, controlnet_lowvram,
 controlnet_module, controlnet_model,
 controlnet_weight, controlnet_guidance_start, controlnet_guidance_end,
@@ -284,7 +290,10 @@ import pathlib
 from .video_audio_utilities import vid2frames
 
 def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    if controlnet_args.controlnet_input_video_chosen_file is not None and len(controlnet_args.controlnet_input_video_chosen_file.name) > 0:
+    if not controlnet_args.controlnet_overwrite_frames:
+        return
+
+    if controlnet_args.controlnet_input_video_chosen_file is not None and len(controlnet_args.controlnet_input_video_chosen_file.name) > 0 or len(controlnet_args.controlnet_vid_path) > 0:
         print(f'Unpacking ControlNet base video')
         # create a folder for the video input frames to live in
         mask_in_frame_path = os.path.join(args.outdir, 'controlnet_inputframes') 
@@ -292,12 +301,12 @@ def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, 
 
         # save the video frames from mask video
         print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
-        vid2frames(video_path=controlnet_args.controlnet_input_video_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=anim_args.overwrite_extracted_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
+        vid2frames(video_path=controlnet_args.controlnet_vid_path if len(controlnet_args.controlnet_vid_path) > 0 else controlnet_args.controlnet_input_video_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=anim_args.overwrite_extracted_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
 
         print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
         print(f'ControlNet base video unpacked!')
     
-    if controlnet_args.controlnet_input_video_mask_chosen_file is not None and len(controlnet_args.controlnet_input_video_mask_chosen_file.name) > 0:
+    if controlnet_args.controlnet_input_video_mask_chosen_file is not None and len(controlnet_args.controlnet_input_video_mask_chosen_file.name) > 0 or len(controlnet_args.controlnet_mask_vid_path) > 0:
         print(f'Unpacking ControlNet video mask')
         # create a folder for the video input frames to live in
         mask_in_frame_path = os.path.join(args.outdir, 'controlnet_maskframes') 
@@ -305,7 +314,7 @@ def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, 
 
         # save the video frames from mask video
         print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
-        vid2frames(video_path=controlnet_args.controlnet_input_video_mask_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=anim_args.overwrite_extracted_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
+        vid2frames(video_path=controlnet_args.controlnet_mask_vid_path if len(controlnet_args.controlnet_mask_vid_path) > 0 else controlnet_args.controlnet_input_video_mask_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=anim_args.overwrite_extracted_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
 
         print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
         print(f'ControlNet video mask unpacked!')
