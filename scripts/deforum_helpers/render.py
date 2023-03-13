@@ -160,7 +160,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     #Webui
     state.job_count = anim_args.max_frames
-    
+
     while frame_idx < (anim_args.max_frames if not anim_args.use_mask_video else anim_args.max_frames - 1):
         #Webui
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
@@ -217,22 +217,19 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if turbo_steps > 1:
             tween_frame_start_idx = max(0, frame_idx-turbo_steps)
             cadence_flow = None
-            if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence:
-                print("Optical Flow cadence:")
-            else:
-                print("Cadence:")
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
                 tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
-                print(f" Creating in-between frame: {tween_frame_idx}; tween:{tween:0.2f};")
-
                 advance_prev = turbo_prev_image is not None and tween_frame_idx > turbo_prev_frame_idx
                 advance_next = tween_frame_idx > turbo_next_frame_idx
 
                 # optical flow cadence setup before animation warping
-                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence and strength > 0:
-                    if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
-                        cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, "DIS Medium") / 2
-                        turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow)
+                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence:
+                    if keys.strength_schedule_series[tween_frame_start_idx] > 0:
+                        if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
+                            cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, "DIS Medium") / 2
+                            turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow)
+
+                print(f"Creating in-between {'' if cadence_flow is None else 'optical flow '}cadence frame: {tween_frame_idx}; tween:{tween:0.2f};")
 
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
@@ -244,7 +241,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
 
                 # do optical flow cadence after animation warping
-                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence and strength > 0 and cadence_flow is not None:
+                if cadence_flow is not None:
                     cadence_flow = abs_flow_to_rel_flow(cadence_flow)
                     cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
                     cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow) * tween
