@@ -138,7 +138,7 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
         img = args.init_sample
         init_image = img
         image_init0 = img
-        if glsl_args.use_shaders:
+        if glsl_args.use_shaders != "No":
             init_image = Image.blend(init_image, 
                                      load_img(f"{args.outdir}/glslOutput/frame_{frame:05d}.png",
                                               shape=(args.W, args.H),
