@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import cv2
 import numpy as np
+import moderngl
 from PIL import Image, ImageOps
 from .rich import console
 
@@ -155,6 +156,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     else:
         mask_vals['video_mask'] = None
         noise_mask_vals['video_mask'] = None
+
+    # call glsl to run shader
+    run_glsl(args, anim_args.max_frames)
 
     #Webui
     state.job_count = anim_args.max_frames
@@ -487,3 +491,50 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         state.current_image = image
 
         args.seed = next_seed(args)
+
+def run_glsl(args, max_frames):
+    vertex_shader_code = """
+    #version 330 core
+
+    layout (location = 0) in vec3 aPos;
+    layout (location = 1) in vec2 aTexCoords;
+
+    out vec2 TexCoords;
+
+    void main()
+    {
+        gl_Position = vec4(aPos, 1.0);
+        TexCoords = aTexCoords;
+    }
+    """
+    fragment_shader_code = args.glsl_shader
+    ctx = moderngl.create_standalone_context()
+    prog = ctx.program(vertex_shader=vertex_shader_code, fragment_shader=fragment_shader_code)
+    vbo = np.array([-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0], dtype=np.float32)
+    vao = ctx.simple_vertex_array(prog, ctx.buffer(vbo), 'aPos')
+
+    timeFactor = .1#args.time_factor
+    time = 0
+    resolution = (args.W, args.H)
+    try:
+        prog["resolution"].value = resolution
+    except KeyError:
+        print("had a keyerror on resolution")
+    ctx.enable(moderngl.BLEND)
+    os.makedirs(f"{args.outdir}/glslOutput", exist_ok=True)
+    for i in range(max_frames):
+        try:
+            prog["time"].value = time
+        except KeyError:
+            print("had a keyerror on time")
+
+        # Render the scene to a framebuffer
+        fbo = ctx.simple_framebuffer(resolution)
+        fbo.use()
+        ctx.clear(0.0, 0.0, 0.0, 0.0)
+        vao.render(mode=moderngl.TRIANGLE_STRIP)
+        
+        # Save the framebuffer as a PNG file
+        img = Image.frombytes("RGBA", resolution, fbo.read(components=4,dtype='f1'), "raw", "RGBA", 0, -1)
+        img.save(f"{args.outdir}/glslOutput/frame_{i:05d}.png")
+        time += timeFactor
