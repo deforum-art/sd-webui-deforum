@@ -15,7 +15,6 @@ from rich import box
 from modules import scripts
 
 cnet = None
-cnet_import_failure_count = 0
 
 def find_controlnet():
     global cnet
@@ -27,7 +26,7 @@ def find_controlnet():
         print(f"\033[0;32m*Deforum ControlNet support: enabled*\033[0m")
         return True
     except Exception as e:
-        print(f'\033[33mFailed to import controlnet! The exact error is {e}, failure count is {cnet_import_failure_count}. Deforum support for ControlNet will not be activated!\033[0m')
+        # the tab will be disactivated anyway, so we don't need the error message
         return None
 
 gradio_compat = True
