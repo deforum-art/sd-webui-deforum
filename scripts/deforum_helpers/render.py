@@ -229,7 +229,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 advance_next = tween_frame_idx > turbo_next_frame_idx
 
                 # optical flow cadence setup before animation warping
-                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence:
+                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence and strength > 0:
                     if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
                         cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, "DIS Medium") / 2
                         turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow)
@@ -244,7 +244,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
 
                 # do optical flow cadence after animation warping
-                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence and cadence_flow is not None:
+                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence and strength > 0 and cadence_flow is not None:
                     cadence_flow = abs_flow_to_rel_flow(cadence_flow)
                     cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
                     cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow) * tween
@@ -439,6 +439,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if anim_args.color_force_grayscale:
             image = ImageOps.grayscale(image)
             image = ImageOps.colorize(image, black ="black", white ="white")
+
+        # on strength 0, set color match to generation
+        if strength == 0:
+            color_match_sample = np.asarray(image)
 
         # reroll blank frame 
         if not image.getbbox():
