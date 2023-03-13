@@ -73,7 +73,7 @@ class FrameInterpolater():
         s = self.seed
         for i in range(0, self.max_frames):
             if i in key_frames:
-                value = key_frames[i]
+                value = key_frames[i].replace("'","").replace('"',"").replace('(',"").replace(')',"")
                 value_is_number = check_is_number(value)
                 if value_is_number: # if it's only a number, leave the rest for the default interpolation
                     key_frame_series[i] = value
