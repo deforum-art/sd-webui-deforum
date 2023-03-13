@@ -61,7 +61,7 @@ def DeforumAnimArgs():
     aspect_ratio_schedule = "0: (1)"
     near_schedule = "0: (200)"
     far_schedule = "0: (10000)"
-    seed_schedule = "0:(5), 1:(-1), 219:(-1), 220:(5)"
+    seed_schedule = '0:(s), 1:(-1), "max_f-2":(-1), "max_f-1":(s)'
     pix2pix_img_cfg_scale = "1.5"
     pix2pix_img_cfg_scale_schedule = "0:(1.5)"
     enable_subseed_scheduling = False
@@ -235,10 +235,10 @@ def DeforumArgs():
 def keyframeExamples():
     return '''{
     "0": "https://deforum.github.io/a1/Gi1.png",
-    "50": "https://deforum.github.io/a1/Gi2.png",
-    "100": "https://deforum.github.io/a1/Gi3.png",
-    "150": "https://deforum.github.io/a1/Gi4.jpg",
-    "200": "https://deforum.github.io/a1/Gi1.png"
+    "max_f/4-5": "https://deforum.github.io/a1/Gi2.png",
+    "max_f/2-10": "https://deforum.github.io/a1/Gi3.png",
+    "3*max_f/4-15": "https://deforum.github.io/a1/Gi4.jpg",
+    "max_f-20": "https://deforum.github.io/a1/Gi1.png"
 }'''
 
 def LoopArgs():
