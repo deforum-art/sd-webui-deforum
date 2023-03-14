@@ -5,7 +5,7 @@ import modules.shared as sh
 import modules.paths as ph
 import os
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_interp_vid_upload_logic, process_interp_pics_upload_logic
-from .upscaling import process_upscale_vid_upload_logic, process_ncnn_upscale_vid_upload_logic
+from .upscaling import process_ncnn_upscale_vid_upload_logic
 from .vid2depth import process_depth_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
@@ -919,7 +919,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             # Show a text about CLI outputs:
                             gr.HTML("* check your CLI for outputs")
                             # make the function call when the UPSCALE button is clicked
-                            upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                            #upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
                         # Vid2Depth TAB
                 with gr.TabItem('Vid2depth'):
                     vid_to_depth_chosen_file = gr.File(label="Video to get Depth from", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_depth_chosen_file")
@@ -1252,14 +1252,6 @@ def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_i
     f_models_path = root_params['models_path']
     
     process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_audio, audio_track)
-
-# Local gradio-to-upscalers function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
-def upload_vid_to_upscale(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
-    # print msg and do nothing if vid not uploaded
-    if not vid_to_upscale_chosen_file:
-        return print("Please upload a video :)")
-    
-    process_upscale_vid_upload_logic(vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, vid_to_upscale_chosen_file.orig_name, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset)
 
 def upload_vid_to_depth(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
     # print msg and do nothing if vid not uploaded
