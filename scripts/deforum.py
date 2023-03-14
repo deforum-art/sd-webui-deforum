@@ -47,7 +47,7 @@ def run_deforum(*args, **kwargs):
         #we'll setup the rest later
     )
     
-    print(f"\033[4;33mDeforum extension for auto1111 webui, v2.2b\033[0m")
+    print(f"\033[4;33mDeforum extension for auto1111 webui, v2.3b\033[0m")
     print(f"Git commit: {get_deforum_version()}")
     args_dict['self'] = None
     args_dict['p'] = p
