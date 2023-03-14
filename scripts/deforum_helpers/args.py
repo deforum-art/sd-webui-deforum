@@ -313,7 +313,7 @@ void main()
         out_color = vec4(0.0, 0.0, 0.0, 0.0);
     }
     else{
-        out_color = vec4(col,0.75);
+        out_color = vec4(col,0.5);
     }
 }"""
 
