@@ -61,8 +61,6 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
     p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame, anim_args.max_frames)
     
     if not args.use_init and args.strength > 0 and args.strength_0_no_init:
-        print("\nNo init image, but strength > 0. Strength has been auto set to 0, since use_init is False.")
-        print("If you want to force strength > 0 with no init, please set strength_0_no_init to False.\n")
         args.strength = 0
     processed = None
     mask_image = None
