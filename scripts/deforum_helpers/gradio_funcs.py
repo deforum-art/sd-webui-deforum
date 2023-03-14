@@ -10,6 +10,9 @@ def update_r_upscale_factor(choice):
 def change_perlin_visibility(choice):
     return gr.update(visible=choice=="perlin")
 
+def change_color_coherence_image_path_visibility(choice):
+    return gr.update(visible=choice=="Image")
+
 def change_color_coherence_video_every_N_frames_visibility(choice):
     return gr.update(visible=choice=="Video Input")
 
