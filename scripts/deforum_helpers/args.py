@@ -61,7 +61,7 @@ def DeforumAnimArgs():
     aspect_ratio_schedule = "0: (1)"
     near_schedule = "0: (200)"
     far_schedule = "0: (10000)"
-    seed_schedule = "0:(5), 1:(-1), 219:(-1), 220:(5)"
+    seed_schedule = '0:(s), 1:(-1), "max_f-2":(-1), "max_f-1":(s)'
     pix2pix_img_cfg_scale = "1.5"
     pix2pix_img_cfg_scale_schedule = "0:(1.5)"
     enable_subseed_scheduling = False
@@ -195,7 +195,7 @@ def DeforumArgs():
 
     #**Init Settings**
     use_init = False 
-    strength = 0.0 
+    strength = 0.8
     strength_0_no_init = True # Set the strength to 0 automatically when no init image is used
     init_image = "https://deforum.github.io/a1/I1.png" 
     # Whiter areas of the mask are areas that change more
@@ -235,10 +235,10 @@ def DeforumArgs():
 def keyframeExamples():
     return '''{
     "0": "https://deforum.github.io/a1/Gi1.png",
-    "50": "https://deforum.github.io/a1/Gi2.png",
-    "100": "https://deforum.github.io/a1/Gi3.png",
-    "150": "https://deforum.github.io/a1/Gi4.jpg",
-    "200": "https://deforum.github.io/a1/Gi1.png"
+    "max_f/4-5": "https://deforum.github.io/a1/Gi2.png",
+    "max_f/2-10": "https://deforum.github.io/a1/Gi3.png",
+    "3*max_f/4-15": "https://deforum.github.io/a1/Gi4.jpg",
+    "max_f-20": "https://deforum.github.io/a1/Gi1.png"
 }'''
 
 def LoopArgs():
@@ -390,8 +390,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         gr.HTML("""Prerequisites and Important Info: 
                                    <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0em">
                                        <li>This mode works ONLY with 2D/3D animation modes. Interpolation and Video Input modes aren't supported.</ li>
-                                       <li>Set Init tab's strength slider greater than 0. Recommended value (.65 - .80).</ li>
-                                       <li>Set 'seed_behavior' to 'schedule' under the Seed Scheduling section below.</li>
+                                       <li>Init tab's strength slider should be greater than 0. Recommended value (.65 - .80).</ li>
+                                       <li>'seed_behavior' will be forcibly set to 'schedule'.</li>
                                     </ul>
                                 """)
                         gr.HTML("""Looping recommendations: 
@@ -605,9 +605,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(min_width=150):
                             use_init = gr.Checkbox(label="Use init", value=d.use_init, interactive=True, visible=True)
                         with gr.Column(min_width=150):
-                            strength_0_no_init = gr.Checkbox(label="Strength 0 no init", value=True, interactive=True)
+                            strength_0_no_init = gr.Checkbox(label="Strength 0 no init", value=d.strength_0_no_init, interactive=True)
                         with gr.Column(min_width=170):
-                            strength = gr.Slider(label="Strength", minimum=0, maximum=1, step=0.01, value=0, interactive=True)
+                            strength = gr.Slider(label="Strength", minimum=0, maximum=1, step=0.01, value=d.strength, interactive=True)
                     with gr.Row(variant='compact'):
                         init_image = gr.Textbox(label="Init image", lines=1, interactive=True, value = d.init_image)
                 # VIDEO INIT INNER-TAB
