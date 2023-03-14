@@ -155,7 +155,7 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
         if glsl_args.use_shaders:
-            init_image = Image.blend(init_image, Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png"), max(0,min(1,glsl_args.mix_schedule[frame])))
+            init_image = Image.blend(init_image.convert('RGBA'), Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png"), max(0,min(1,glsl_args.mix_schedule[frame])))
     elif glsl_args.use_shaders:
         init_image = Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png")
     else:

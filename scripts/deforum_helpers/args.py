@@ -305,14 +305,15 @@ void main()
     float noise_value = noise(gl_FragCoord.xy * 0.01 + time);
     // Time varying pixel color
     vec3 col = 0.5 + noise_value*cos(time+uv.xyx+vec3(0,2,4));
+    float transparentCircleSize = 0.5;
 
     // Output to screen
-    // create a transparent hole in the center of the shader
-    if (length(uv) < .5) {
+    if (length(uv) < transparentCircleSize) {
+        // create a transparent hole in the center of the shader
         out_color = vec4(0.0, 0.0, 0.0, 0.0);
     }
     else{
-        out_color = vec4(col,0.5);
+        out_color = vec4(col,0.75);
     }
 }"""
 
