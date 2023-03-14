@@ -433,6 +433,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
+            args.strength = max(0.0, min(1.0, strength))
         if anim_args.use_mask_video:
             args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
             args.noise_mask = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
