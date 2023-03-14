@@ -2,11 +2,14 @@ import os
 import json
 import pandas as pd
 import cv2
+import re
 import numpy as np
+import itertools
+import numexpr
 from PIL import Image, ImageOps
 from .rich import console
 
-from .generate import generate
+from .generate import generate, isJson
 from .noise import add_noise
 from .animation import sample_from_cv2, sample_to_cv2, anim_frame_warp
 from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
@@ -37,6 +40,15 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             # path required by hybrid functions, even if hybrid_comp_save_extra_frames is False
             hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
 
+        if loop_args.use_looper:
+            print("Using Guided Images mode: seed_behavior will be set to 'schedule' and 'strength_0_no_init' to False")
+            if args.strength == 0:
+                raise RuntimeError("Strength needs to be greater than 0 in Init tab")
+            args.strength_0_no_init = False
+            args.seed_behavior = "schedule"
+            if not isJson(loop_args.init_images):
+                raise RuntimeError("The images set for use with keyframe-guidance are not in a proper JSON format")
+
     # handle controlnet video input frames generation
     if is_controlnet_enabled(controlnet_args):
         unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
@@ -44,8 +56,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
-    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args)
+    keys = DeformAnimKeys(anim_args, args.seed) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
     # resume animation
     start_frame = 0
     if anim_args.resume_from_timestring:
@@ -80,8 +92,12 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
+        max_f = anim_args.max_frames - 1
         for i, prompt in animation_prompts.items():
-            prompt_series[int(i)] = prompt
+            if str(i).isdigit():
+                prompt_series[int(i)] = prompt
+            else:
+                prompt_series[int(numexpr.evaluate(i))] = prompt
         prompt_series = prompt_series.ffill().bfill()
 
     # check for video inits
@@ -388,8 +404,18 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.seed_enable_extras = True
             args.subseed = int(keys.subseed_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_series[frame_idx]
-            
-        prompt_to_print, *after_neg = args.prompt.strip().split("--neg")
+        
+        max_f = anim_args.max_frames - 1
+        pattern = r'`.*?`'
+        regex = re.compile(pattern)
+        prompt_parsed = args.prompt
+        for match in regex.finditer(prompt_parsed):
+            matched_string = match.group(0)
+            parsed_string = matched_string.replace('t', f'{frame_idx}').replace("max_f" , f"{max_f}").replace('`','')
+            parsed_value = numexpr.evaluate(parsed_string)
+            prompt_parsed = prompt_parsed.replace(matched_string, str(parsed_value))
+
+        prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
         prompt_to_print = prompt_to_print.strip()
         after_neg = "".join(after_neg).strip()
 
@@ -397,12 +423,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
         if after_neg and after_neg.strip():
             print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
+            prompt_to_print += f"--neg {after_neg}"
+
+        # set value back into the prompt
+        args.prompt = prompt_to_print
 
         # grab init image for current frame
         if using_vid_init:
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
+            args.strength = max(0.0, min(1.0, strength))
         if anim_args.use_mask_video:
             args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
             args.noise_mask = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
