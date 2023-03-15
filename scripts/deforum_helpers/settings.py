@@ -68,7 +68,7 @@ def save_settings(*args, **kwargs):
         f.write(json.dumps(filtered_combined, ensure_ascii=False, indent=4))
     
     return [""]
- 
+
 def load_settings(*args, **kwargs):
     settings_path = args[0].strip()
     settings_component_names = deforum_args.get_settings_component_names()
@@ -82,7 +82,8 @@ def load_settings(*args, **kwargs):
     with open(settings_path, "r") as f:
         jdata = json.load(f)
         handle_deprecated_settings(jdata)
-        jdata['prompts'] = jdata.get('animation_prompts')
+        if 'animation_prompts' in jdata:
+            jdata['prompts'] = jdata['animation_prompts']
 
     ret = []
     for key, default_val in data.items():
@@ -96,12 +97,16 @@ def load_settings(*args, **kwargs):
             default_key_val = (DeforumArgs if key != 'noise_type' else DeforumAnimArgs)[key]
             logging.debug(f"{key} not found in load file, using default value: {default_key_val}")
             val = default_key_val
+        elif key in {'animation_prompts_positive', 'animation_prompts_negative'}:
+            val = jdata.get(key, default_val)
+        elif key == 'animation_prompts':
+            val = json.dumps(jdata['prompts'], ensure_ascii=False, indent=4)
         
         ret.append(val)
 
     ret.append("")
     return ret
-    
+
 def load_video_settings(*args, **kwargs):
     video_settings_path = args[0].strip()
     data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
