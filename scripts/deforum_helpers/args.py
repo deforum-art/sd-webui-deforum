@@ -95,7 +95,7 @@ def DeforumAnimArgs():
     hybrid_comp_mask_auto_contrast_cutoff_high_schedule =  "0:(100)" 
     hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" 
     #Coherence
-    color_coherence = 'Match Frame 0 LAB' #['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input', 'Image'] {type:'string'}
+    color_coherence = 'LAB' # ['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image']
     color_coherence_image_path = ""
     color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
@@ -541,8 +541,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     # COHERENCE INNER TAB
                     with gr.TabItem('Coherence', open=False) as coherence_accord:
                         with gr.Row(variant='compact'):
-                            # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
-                            color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input', 'Image'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
+                            color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
                             color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True)
                         with gr.Row(visible=False) as color_coherence_image_path_row:
                             color_coherence_image_path = gr.Textbox(label="Color coherence image path", lines=1, value=da.color_coherence_image_path, interactive=True)
