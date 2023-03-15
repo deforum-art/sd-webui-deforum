@@ -72,77 +72,39 @@ def save_settings(*args, **kwargs):
 def load_settings(*args, **kwargs):
     settings_path = args[0].strip()
     settings_component_names = deforum_args.get_settings_component_names()
-    data = {settings_component_names[i]: args[i+1] for i in range(0, len(settings_component_names))}
+    data = {settings_component_names[i]: args[i+1] for i in range(len(settings_component_names))}
     print(f"reading custom settings from {settings_path}")
-    jdata = {}
+
     if not os.path.isfile(settings_path):
         print('The custom settings file does not exist. The values will be unchanged.')
-        return [data[name] for name in settings_component_names] + [""]
-    else:
-        with open(settings_path, "r") as f:
-            jdata = json.loads(f.read())
-            handle_deprecated_settings(jdata)
+        return list(data.values()) + [""]
+    
+    with open(settings_path, "r") as f:
+        jdata = json.load(f)
+        handle_deprecated_settings(jdata)
+        if 'animation_prompts' in jdata:
+            jdata['prompts'] = jdata['animation_prompts']
+
     ret = []
-    if 'animation_prompts' in jdata:
-        jdata['prompts'] = jdata['animation_prompts']#compatibility with old versions
-    if 'animation_prompts_positive' in jdata:
-        data["animation_prompts_positive"] = jdata['animation_prompts_positive']
-    if 'animation_prompts_negative' in jdata:
-        data["animation_prompts_negative"] = jdata['animation_prompts_negative']
-    for key in data:
-        if key == 'sampler':
-            sampler_val = jdata[key]
-            if type(sampler_val) == int:
-                from modules.sd_samplers import samplers_for_img2img
-                ret.append(samplers_for_img2img[sampler_val].name)
-            else:
-                ret.append(sampler_val)
+    for key, default_val in data.items():
+        val = jdata.get(key, default_val)
+        if key == 'sampler' and isinstance(val, int):
+            from modules.sd_samplers import samplers_for_img2img
+            val = samplers_for_img2img[val].name
+        elif key == 'fill' and isinstance(val, int):
+            val = mask_fill_choices[val]
+        elif key in {'reroll_blank_frames', 'noise_type'} and key not in jdata:
+            default_key_val = (DeforumArgs if key != 'noise_type' else DeforumAnimArgs)[key]
+            logging.debug(f"{key} not found in load file, using default value: {default_key_val}")
+            val = default_key_val
+        elif key in {'animation_prompts_positive', 'animation_prompts_negative'}:
+            val = jdata.get(key, default_val)
+        elif key == 'animation_prompts':
+            val = json.dumps(jdata['prompts'], ensure_ascii=False, indent=4)
         
-        elif key == 'fill':
-            if key in jdata:
-                fill_val = jdata[key]
-                if type(fill_val) == int:                    
-                    ret.append(mask_fill_choices[fill_val])
-                else:
-                    ret.append(fill_val)
-            else:
-                fill_default = DeforumArgs()['fill']
-                logging.debug(f"Fill not found in load file, using default value: {fill_default}")
-                ret.append(mask_fill_choices[fill_default])
-        
-        elif key == 'reroll_blank_frames':
-            if key in jdata:
-                reroll_blank_frames_val = jdata[key]
-                ret.append(reroll_blank_frames_val)
-            else:
-                reroll_blank_frames_default = DeforumArgs()['reroll_blank_frames']
-                logging.debug(f"Reroll blank frames not found in load file, using default value: {reroll_blank_frames_default}")
-                ret.append(reroll_blank_frames_default)
-        
-        elif key == 'noise_type':
-            if key in jdata:
-                noise_type_val = jdata[key]
-                ret.append(noise_type_val)
-            else:
-                noise_type_default = DeforumAnimArgs()['noise_type']
-                logging.debug(f"Noise type not found in load file, using default value: {noise_type_default}")
-                ret.append(noise_type_default)
-            
-        elif key in jdata and key != 'ffmpeg_location':
-            ret.append(jdata[key])
-        else:
-            if key == 'animation_prompts':
-                ret.append(json.dumps(jdata['prompts'], ensure_ascii=False, indent=4))
-            elif key == 'animation_prompts_positive' and 'animation_prompts_positive' in jdata:
-                ret.append(jdata['animation_prompts_positive'])
-            elif key == 'animation_prompts_negative' and 'animation_prompts_negative' in jdata:
-                ret.append(jdata['animation_prompts_negative'])
-            else:
-                ret.append(data[key])
+        ret.append(val)
 
-    #stuff
     ret.append("")
-
     return ret
 
 def load_video_settings(*args, **kwargs):

@@ -95,7 +95,8 @@ def DeforumAnimArgs():
     hybrid_comp_mask_auto_contrast_cutoff_high_schedule =  "0:(100)" 
     hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" 
     #Coherence
-    color_coherence = 'Match Frame 0 LAB' #['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'] {type:'string'}
+    color_coherence = 'LAB' # ['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image']
+    color_coherence_image_path = ""
     color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
     diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
@@ -572,9 +573,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     # COHERENCE INNER TAB
                     with gr.TabItem('Coherence', open=False) as coherence_accord:
                         with gr.Row(variant='compact'):
-                            # Future TODO: remove 'match frame 0' prefix (after we manage the deprecated-names settings import), then convert from Dropdown to Radio!
-                            color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'Match Frame 0 HSV', 'Match Frame 0 LAB', 'Match Frame 0 RGB', 'Video Input'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
+                            color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
                             color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True)
+                        with gr.Row(visible=False) as color_coherence_image_path_row:
+                            color_coherence_image_path = gr.Textbox(label="Color coherence image path", lines=1, value=da.color_coherence_image_path, interactive=True)
                         with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
                             color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
                         with gr.Row(variant='compact'):
@@ -1014,6 +1016,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row) 
     seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
+    color_coherence.change(fn=change_color_coherence_image_path_visibility, inputs=color_coherence, outputs=color_coherence_image_path_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
     skip_video_creation_outputs = [fps_out_format_row, soundtrack_row, ffmpeg_quality_accordion, store_frames_in_ram, make_gif, r_upscale_row, delete_imgs]
     for output in skip_video_creation_outputs:
@@ -1058,7 +1061,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_checkpoint_scheduling, checkpoint_schedule,
                         enable_clipskip_scheduling, clipskip_schedule, enable_noise_multiplier_scheduling, noise_multiplier_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
-                        color_coherence, color_coherence_video_every_N_frames, color_force_grayscale,
+                        color_coherence, color_coherence_image_path, color_coherence_video_every_N_frames, color_force_grayscale,
                         diffusion_cadence, optical_flow_cadence,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
                         use_depth_warping, midas_weight,
