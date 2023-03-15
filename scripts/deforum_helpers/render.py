@@ -20,7 +20,7 @@ from .parseq_adapter import ParseqAnimKeys
 from .seed import next_seed
 from .blank_frame_reroll import blank_frame_reroll
 from .image_sharpening import unsharp_mask
-from .load_images import get_mask, load_img, get_mask_from_file
+from .load_images import get_mask, load_img, load_image, get_mask_from_file
 from .hybrid_video import (
     hybrid_generation, hybrid_composite, get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion,get_flow_for_hybrid_motion_prev,
     image_transform_ransac, image_transform_optical_flow, get_flow_from_images, abs_flow_to_rel_flow, rel_flow_to_abs_flow)
@@ -174,6 +174,12 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         mask_vals['video_mask'] = get_mask(args)
         noise_mask_vals['video_mask'] = get_mask(args) # TODO?: add a different default noisc mask
 
+    # get color match for 'Image' color coherence only once, before loop
+    if anim_args.color_coherence == 'Image':
+        color_match_sample = load_image(anim_args.color_coherence_image_path)
+        color_match_sample = color_match_sample.resize((args.W, args.H), Image.Resampling.LANCZOS)
+        color_match_sample = cv2.cvtColor(np.array(color_match_sample), cv2.COLOR_RGB2BGR)
+
     #Webui
     state.job_count = anim_args.max_frames
 
@@ -318,6 +324,15 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             if turbo_next_image is not None:
                 prev_img = turbo_next_image
 
+        # get color match for video outside of prev_img conditional
+        hybrid_available = anim_args.hybrid_composite or anim_args.hybrid_motion in ['Optical Flow', 'Affine', 'Perspective']
+        if anim_args.color_coherence == 'Video Input' and hybrid_available:
+            if int(frame_idx) % int(anim_args.color_coherence_video_every_N_frames) == 0:
+                prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx+1:09}.jpg"))
+                prev_vid_img = prev_vid_img.resize((args.W, args.H), Image.Resampling.LANCZOS)
+                color_match_sample = np.asarray(prev_vid_img)
+                color_match_sample = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2BGR)
+
         # apply transforms to previous frame
         if prev_img is not None:
             prev_img, depth = anim_frame_warp(prev_img, args, anim_args, keys, frame_idx, depth_model, depth=None, device=root.device, half_precision=root.half_precision)
@@ -343,15 +358,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
             # apply color matching
             if anim_args.color_coherence != 'None':
-                # video color matching
-                hybrid_available = anim_args.hybrid_composite or anim_args.hybrid_motion in ['Optical Flow', 'Affine', 'Perspective']
-                if anim_args.color_coherence == 'Video Input' and hybrid_available:
-                    video_color_coherence_frame = int(frame_idx) % int(anim_args.color_coherence_video_every_N_frames) == 0
-                    if video_color_coherence_frame:
-                        prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg"))
-                        prev_vid_img = prev_vid_img.resize((args.W, args.H), Image.Resampling.LANCZOS)
-                        color_match_sample = np.asarray(prev_vid_img)
-                        color_match_sample = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2BGR)
                 if color_match_sample is None:
                     color_match_sample = prev_img.copy()
                 else:
@@ -468,6 +474,14 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         # sample the diffusion model
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
+
+        # color matching on first frame is after generation, color match was collected earlier
+        if frame_idx == 0:
+            if anim_args.color_coherence == 'Image' or (anim_args.color_coherence == 'Video Input' and hybrid_available):
+                image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+                image = maintain_colors(image, color_match_sample, anim_args.color_coherence)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                image = Image.fromarray(image)
 
         # intercept and override to grayscale
         if anim_args.color_force_grayscale:
