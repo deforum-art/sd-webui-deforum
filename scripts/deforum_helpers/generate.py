@@ -97,9 +97,9 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
 
         if frame % skipFrame <= tweeningFrames: # number of tweening frames
             blendFactor = loop_args.blendFactorMax - loop_args.blendFactorSlope*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
-        init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
+        init_image2 = load_img(list(jsonImages.values())[frameToChoose],
                                 shape=(args.W, args.H),
-                                use_alpha_as_mask=args.use_alpha_as_mask)
+                                use_alpha_as_mask=args.use_alpha_as_mask)[0]
         image_init0 = list(jsonImages.values())[0]
             
     else: # they passed in a single init image
@@ -142,12 +142,6 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
         img = args.init_sample
         init_image = img
         image_init0 = img
-        if glsl_args.use_shaders != "No":
-            init_image = Image.blend(init_image, 
-                                     load_img(f"{args.outdir}/glslOutput/frame_{frame:05d}.png",
-                                              shape=(args.W, args.H),
-                                              use_alpha_as_mask=args.use_alpha_as_mask)[0],
-                                     max(0,min(1,glsl_args.mix_schedule[frame])))
         if loop_args.use_looper and isJson(loop_args.imagesToKeyframe) and anim_args.animation_mode in ['2D','3D']:
             init_image = Image.blend(init_image, init_image2, blendFactor)
             correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
@@ -158,10 +152,7 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
         init_image, mask_image = load_img(image_init0, # initial init image
                                           shape=(args.W, args.H),  
                                           use_alpha_as_mask=args.use_alpha_as_mask)
-        if glsl_args.use_shaders:
-            init_image = Image.blend(init_image.convert('RGBA'), Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png"), max(0,min(1,glsl_args.mix_schedule[frame])))
-            init_image.putalpha(255)
-    elif glsl_args.use_shaders:
+    elif glsl_args.use_shaders != "No":
         init_image = Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png")
     else:
         if anim_args.animation_mode != 'Interpolation':
@@ -218,6 +209,11 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
             mask = None
 
         assert not ( (mask is not None and args.use_mask and args.overlay_mask) and (args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
+        
+        if glsl_args.use_shaders != "No":
+            glsl_image = Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png")
+            init_image.paste(glsl_image, (0, 0), glsl_image)
+            init_image.convert('RGB')
         
         p.init_images = [init_image]
         p.image_mask = mask
