@@ -76,6 +76,13 @@ body:
         - Cloud server (Linux)
         - Other (please specify in "additional information")
   - type: textarea
+    id: deforumsettings
+    attributes:
+      label: Deforum settings
+      description: Send here a link to your used settings file or the latest generated one in the 'outputs/img2img-images/Deforum/' folder (ideally, upload it to GitHub gists).
+    validations:
+      required: true
+  - type: textarea
     id: customsettings
     attributes:
       label: Webui core settings
