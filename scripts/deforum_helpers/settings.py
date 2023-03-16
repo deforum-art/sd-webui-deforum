@@ -64,7 +64,7 @@ def save_settings(*args, **kwargs):
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
     filtered_combined["deforum_git_commit_id"] = get_deforum_version()
     print(f"saving custom settings to {settings_path}")
-    with open(settings_path, "w") as f:
+    with open(settings_path, "w", encoding='utf-8') as f:
         f.write(json.dumps(filtered_combined, ensure_ascii=False, indent=4))
     
     return [""]
@@ -79,7 +79,7 @@ def load_settings(*args, **kwargs):
         print('The custom settings file does not exist. The values will be unchanged.')
         return list(data.values()) + [""]
     
-    with open(settings_path, "r") as f:
+    with open(settings_path, "r", encoding='utf-8') as f:
         jdata = json.load(f)
         handle_deprecated_settings(jdata)
         if 'animation_prompts' in jdata:
