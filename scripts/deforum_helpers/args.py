@@ -11,7 +11,6 @@ from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, dire
 from .gradio_funcs import *
 from .general_utils import get_os, get_deforum_version
 from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names, controlnet_infotext
-# controlnet_component_names, setup_controlnet_ui
 import tempfile
         
 def Root():
@@ -1159,18 +1158,12 @@ def process_args(args_dict_main):
     p.seed_resize_from_h = args.seed_resize_from_h
     p.fill = args.fill
     p.ddim_eta = args.ddim_eta
-
-    current_arg_list = [args, anim_args, video_args, parseq_args]
-    args.outdir = os.path.join(p.outpath_samples, args.batch_name)
-    root.outpath_samples = args.outdir
-    args.outdir = os.path.join(os.getcwd(), args.outdir)
-    if not os.path.exists(args.outdir):
-        os.makedirs(args.outdir)
-    
     args.seed = get_fixed_seed(args.seed)
-        
     args.timestring = time.strftime('%Y%m%d%H%M%S')
     args.strength = max(0.0, min(1.0, args.strength))
+    args.prompts = json.loads(args_dict_main['animation_prompts'])
+    args.positive_prompts = args_dict_main['animation_prompts_positive']
+    args.negative_prompts = args_dict_main['animation_prompts_negative']
 
     if not args.use_init:
         args.init_image = None
@@ -1179,14 +1172,38 @@ def process_args(args_dict_main):
         anim_args.max_frames = 1
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
+
+    current_arg_list = [args, anim_args, video_args, parseq_args]
+    
+    args.batch_name = substitute_placeholders(args.batch_name, current_arg_list)
+    args.outdir = os.path.join(p.outpath_samples, str(args.batch_name))
+    root.outpath_samples = args.outdir
+    args.outdir = os.path.join(os.getcwd(), args.outdir)
+    if not os.path.exists(args.outdir):
+        os.makedirs(args.outdir)
     
     return root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
+   
+def custom_placeholder_format(value_dict, placeholder_match):
+    key = placeholder_match.group(1).lower()
+    value = value_dict.get(key, key)
+    if value == "": # return _ if placeholder is actually empty
+        value = "_"
+    # Check if the value is a dictionary or a list, and return the first element accordingly
+    return str(value[list(value.keys())[0]][0]) if isinstance(value, dict) and value and isinstance(value[list(value.keys())[0]], list) and value[list(value.keys())[0]] else str(value)
 
-def print_args(args):
-    print("ARGS: /n")
-    for key, value in args.__dict__.items():
-        print(f"{key}: {value}")
- 
+def substitute_placeholders(template, arg_list):
+    import re
+    # Generate a values dictionary containing the lowercased attributes from the argument objects
+    values = {attr.lower(): getattr(arg_obj, attr)
+              for arg_obj in arg_list
+              for attr in dir(arg_obj) if not callable(getattr(arg_obj, attr)) and not attr.startswith('__')}
+    # Replace the placeholders in the template string with their corresponding values from the values dictionary
+    formatted_string = re.sub(r"{(\w+)}", lambda m: custom_placeholder_format(values, m), template)
+    # Remove any invalid characters for folder names
+    formatted_string = re.sub(r'[<>:"/\\|?*]', '', formatted_string)
+    return formatted_string
+
 # Local gradio-to-frame-interoplation function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
     # print msg and do nothing if vid not uploaded or interp_x not provided
