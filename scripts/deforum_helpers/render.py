@@ -6,6 +6,7 @@ import re
 import numpy as np
 import itertools
 import numexpr
+import PIL
 from PIL import Image, ImageOps
 from .rich import console
 
@@ -177,7 +178,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # get color match for 'Image' color coherence only once, before loop
     if anim_args.color_coherence == 'Image':
         color_match_sample = load_image(anim_args.color_coherence_image_path)
-        color_match_sample = color_match_sample.resize((args.W, args.H), Image.Resampling.LANCZOS)
+        color_match_sample = color_match_sample.resize((args.W, args.H), PIL.Image.LANCZOS)
         color_match_sample = cv2.cvtColor(np.array(color_match_sample), cv2.COLOR_RGB2BGR)
 
     #Webui
@@ -329,7 +330,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if anim_args.color_coherence == 'Video Input' and hybrid_available:
             if int(frame_idx) % int(anim_args.color_coherence_video_every_N_frames) == 0:
                 prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx+1:09}.jpg"))
-                prev_vid_img = prev_vid_img.resize((args.W, args.H), Image.Resampling.LANCZOS)
+                prev_vid_img = prev_vid_img.resize((args.W, args.H), PIL.Image.LANCZOS)
                 color_match_sample = np.asarray(prev_vid_img)
                 color_match_sample = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2BGR)
 

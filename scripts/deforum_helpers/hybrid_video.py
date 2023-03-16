@@ -3,6 +3,7 @@ import os
 import pathlib
 import numpy as np
 import random
+import PIL
 from PIL import Image, ImageChops, ImageOps, ImageEnhance
 from .video_audio_utilities import vid2frames, get_quick_vid_info, get_frame_name, get_next_frame
 from .human_masking import video2humanmasks
@@ -79,7 +80,7 @@ def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_c
     prev_img = cv2.cvtColor(prev_img, cv2.COLOR_BGR2RGB)
     prev_img_hybrid = Image.fromarray(prev_img)
     video_image = Image.open(video_frame)
-    video_image = video_image.resize((args.W, args.H), Image.Resampling.LANCZOS)
+    video_image = video_image.resize((args.W, args.H), PIL.Image.LANCZOS)
     hybrid_mask = None
 
     # composite mask types
