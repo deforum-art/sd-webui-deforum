@@ -499,7 +499,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             image = ImageOps.colorize(image, black ="black", white ="white")
 
         # on strength 0, set color match to generation
-        if strength == 0:
+        if strength == 0 and not anim_args.color_coherence in ['Image', 'Video Input']:
             color_match_sample = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
 
         # reroll blank frame 
