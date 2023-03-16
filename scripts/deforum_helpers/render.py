@@ -471,7 +471,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
             sd_hijack.model_hijack.hijack(sd_model)
         
-        # sample the diffusion model
+        # optical flow redo before generation
+        if anim_args.optical_flow_redo_generation and prev_img is not None:
+            print("Optical Flow redo creating disposable diffusion before actual diffusion for flow estimate.")
+            disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+            disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
+            disposable_flow = get_flow_from_images(prev_img, disposable_image, "DIS Medium")
+            noised_image = image_transform_optical_flow(noised_image, disposable_flow)
+            args.init_sample = Image.fromarray(cv2.cvtColor(noised_image, cv2.COLOR_BGR2RGB))
+            del(disposable_image,disposable_flow)
+
+        # generation
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
