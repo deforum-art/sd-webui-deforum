@@ -1,4 +1,6 @@
+import os, shutil
 import hashlib
+
 def checksum(filename, hash_factory=hashlib.blake2b, chunk_num_blocks=128):
     h = hash_factory()
     with open(filename,'rb') as f: 
@@ -12,7 +14,7 @@ def get_os():
 
 # used in src/rife/inference_video.py and more, soon
 def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_name):
-    import os, cv2, shutil #, subprocess
+    import cv2
     #TODO: don't copy-paste at all if the input is a video (now it copy-pastes, and if input is deforum run is also converts to make sure no errors rise cuz of 24-32 bit depth differences)
     temp_convert_raw_png_path = os.path.join(from_folder, to_folder)
     if not os.path.exists(temp_convert_raw_png_path):
@@ -56,3 +58,36 @@ def get_deforum_version():
         return "Unknown"
     except:
         return "Unknown"
+        
+def custom_placeholder_format(value_dict, placeholder_match):
+    key = placeholder_match.group(1).lower()
+    value = value_dict.get(key, key) or "_"
+    if isinstance(value, dict) and value:
+        first_key = list(value.keys())[0]
+        value = str(value[first_key][0]) if isinstance(value[first_key], list) and value[first_key] else str(value[first_key])
+    return str(value)[:50]
+
+def test_long_path_support(base_folder_path):
+    long_folder_name = 'A' * 300
+    long_path = os.path.join(base_folder_path, long_folder_name)
+    try:
+        os.makedirs(long_path)
+        shutil.rmtree(long_path)
+        return True
+    except OSError:
+        return False
+
+def get_max_path_length(base_folder_path):
+    if get_os() == 'Windows':
+        return (32767 if test_long_path_support(base_folder_path) else 260) - len(base_folder_path) - 1
+    return 4096 - len(base_folder_path) - 1
+
+def substitute_placeholders(template, arg_list, base_folder_path):
+    import re
+    max_length = get_max_path_length(base_folder_path)
+    values = {attr.lower(): getattr(arg_obj, attr)
+              for arg_obj in arg_list
+              for attr in dir(arg_obj) if not callable(getattr(arg_obj, attr)) and not attr.startswith('__')}
+    formatted_string = re.sub(r"{(\w+)}", lambda m: custom_placeholder_format(values, m), template)
+    formatted_string = re.sub(r'[<>:"/\\|?*]', '', formatted_string)
+    return formatted_string[:max_length]

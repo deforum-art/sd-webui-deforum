@@ -9,7 +9,7 @@ from .upscaling import process_ncnn_upscale_vid_upload_logic
 from .vid2depth import process_depth_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
-from .general_utils import get_os, get_deforum_version
+from .general_utils import get_os, get_deforum_version, custom_placeholder_format, test_long_path_support, get_max_path_length, substitute_placeholders
 from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names, controlnet_infotext
 import tempfile
         
@@ -1174,8 +1174,8 @@ def process_args(args_dict_main):
         args.use_init = True
 
     current_arg_list = [args, anim_args, video_args, parseq_args]
-    
-    args.batch_name = substitute_placeholders(args.batch_name, current_arg_list)
+    full_base_folder_path = os.path.join(os.getcwd(), p.outpath_samples)
+    args.batch_name = substitute_placeholders(args.batch_name, current_arg_list, full_base_folder_path)
     args.outdir = os.path.join(p.outpath_samples, str(args.batch_name))
     root.outpath_samples = args.outdir
     args.outdir = os.path.join(os.getcwd(), args.outdir)
@@ -1183,35 +1183,7 @@ def process_args(args_dict_main):
         os.makedirs(args.outdir)
     
     return root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
-   
-def custom_placeholder_format(value_dict, placeholder_match):
-    key = placeholder_match.group(1).lower()
-    value = value_dict.get(key, key)
-    if value == "":  # return _ if placeholder is actually empty
-        value = "_"
-    # Check if the value is a dictionary, and return the first value accordingly
-    if isinstance(value, dict) and value:
-        first_key = list(value.keys())[0]
-        # Handle the case where the value is a list inside a dictionary
-        if isinstance(value[first_key], list) and value[first_key]:
-            value = str(value[first_key][0])
-        # Handle the case where the value is a JSON dictionary
-        else:
-            value = str(value[first_key])
-    return str(value)[:50]  # Ensure the returned string is never more than 50 characters long
-
-def substitute_placeholders(template, arg_list):
-    import re
-    # Generate a values dictionary containing the lowercased attributes from the argument objects
-    values = {attr.lower(): getattr(arg_obj, attr)
-              for arg_obj in arg_list
-              for attr in dir(arg_obj) if not callable(getattr(arg_obj, attr)) and not attr.startswith('__')}
-    # Replace the placeholders in the template string with their corresponding values from the values dictionary
-    formatted_string = re.sub(r"{(\w+)}", lambda m: custom_placeholder_format(values, m), template)
-    # Remove any invalid characters for folder names
-    formatted_string = re.sub(r'[<>:"/\\|?*]', '', formatted_string)
-    return formatted_string
-
+    
 # Local gradio-to-frame-interoplation function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
     # print msg and do nothing if vid not uploaded or interp_x not provided
