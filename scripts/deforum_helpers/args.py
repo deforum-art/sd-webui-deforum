@@ -89,11 +89,12 @@ def DeforumAnimArgs():
     sigma_schedule = "0: (1.0)"
     threshold_schedule = "0: (0.0)"
     # Hybrid video
-    hybrid_comp_alpha_schedule = "0:(1)" 
+    hybrid_comp_alpha_schedule = "0:(0.5)" 
     hybrid_comp_mask_blend_alpha_schedule = "0:(0.5)" 
     hybrid_comp_mask_contrast_schedule = "0:(1)" 
-    hybrid_comp_mask_auto_contrast_cutoff_high_schedule =  "0:(100)" 
-    hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" 
+    hybrid_comp_mask_auto_contrast_cutoff_high_schedule = "0:(100)" 
+    hybrid_comp_mask_auto_contrast_cutoff_low_schedule = "0:(0)"
+    hybrid_flow_factor_schedule = "0:(1)"
     #Coherence
     color_coherence = 'LAB' # ['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image']
     color_coherence_image_path = ""
@@ -129,7 +130,7 @@ def DeforumAnimArgs():
     hybrid_use_first_frame_as_init_image = True 
     hybrid_motion = "None" #['None','Optical Flow','Perspective','Affine']
     hybrid_motion_use_prev_img = False 
-    hybrid_flow_method = "Farneback" #['DIS Medium','Farneback']
+    hybrid_flow_method = "DIS Fine" #@param ['DIS Fine', 'DIS Medium', 'Farneback']
     hybrid_composite = False 
     hybrid_comp_mask_type = "None" #['None', 'Depth', 'Video Depth', 'Blend', 'Difference']
     hybrid_comp_mask_inverse = False 
@@ -727,7 +728,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(variant='compact'):
                             with gr.Row(variant='compact'):
                                 with gr.Column(scale=1):
-                                    hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method", visible=False)
+                                    hybrid_flow_method = gr.Radio(['DIS Fine', 'DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method", visible=False)
                                     hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type", visible=False)
                     with gr.Row(visible=False, variant='compact') as hybrid_comp_mask_row:
                         hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="Comp mask equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
@@ -740,6 +741,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Accordion("Hybrid Schedules", open=False, visible=False) as hybrid_sch_accord:
                     with gr.Row(variant='compact') as hybrid_comp_alpha_schedule_row:
                         hybrid_comp_alpha_schedule = gr.Textbox(label="Comp alpha schedule", lines=1, value = da.hybrid_comp_alpha_schedule, interactive=True)
+                    with gr.Row(variant='compact') as hybrid_flow_factor_schedule_row:
+                        hybrid_flow_factor_schedule = gr.Textbox(label="Flow factor schedule", lines=1, value = da.hybrid_flow_factor_schedule, interactive=True)
                     with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_blend_alpha_schedule_row:
                         hybrid_comp_mask_blend_alpha_schedule = gr.Textbox(label="Comp mask blend alpha schedule", lines=1, value = da.hybrid_comp_mask_blend_alpha_schedule, interactive=True, elem_id="hybridelemtest")
                     with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_contrast_schedule_row:
@@ -1034,7 +1037,8 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
 hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
                         hybrid_motion, hybrid_motion_use_prev_img, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
                         hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames,
-                        hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
+                        hybrid_comp_alpha_schedule, hybrid_flow_factor_schedule,
+                        hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
                         hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 args_names =    str(r'''W, H, tiling, restore_faces,
