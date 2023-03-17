@@ -682,8 +682,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact'):# , 'Mask' we will add mask in after it works again
                         use_shaders = gr.Radio(['No', 'Image'], label="Use shader image input", value='No', interactive=True)
                     with gr.Row(variant='compact'):
-                        mix_schedule = gr.Textbox(label="shader mix schedule", lines=1, interactive=True, value="0:(.333)")
-                    with gr.Row(variant='compact'):
                         time_factor = gr.Textbox(label="time factor", lines=1, interactive=True, value="0:(.1)")
                     with gr.Row(variant='compact'):
                         glsl_shader = gr.Textbox(label="fragment shader", lines=15, interactive=True, value=fragment_shader())
@@ -1089,7 +1087,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         use_mask, use_alpha_as_mask, invert_mask, overlay_mask,
                         mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
                         fill, full_res_mask, full_res_mask_padding,
-                        reroll_blank_frames, use_shaders, mix_schedule, time_factor, glsl_shader'''
+                        reroll_blank_frames, use_shaders, time_factor, glsl_shader'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_creation,
                             fps, make_gif, delete_imgs, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
