@@ -1187,10 +1187,18 @@ def process_args(args_dict_main):
 def custom_placeholder_format(value_dict, placeholder_match):
     key = placeholder_match.group(1).lower()
     value = value_dict.get(key, key)
-    if value == "": # return _ if placeholder is actually empty
+    if value == "":  # return _ if placeholder is actually empty
         value = "_"
-    # Check if the value is a dictionary or a list, and return the first element accordingly
-    return str(value[list(value.keys())[0]][0]) if isinstance(value, dict) and value and isinstance(value[list(value.keys())[0]], list) and value[list(value.keys())[0]] else str(value)
+    # Check if the value is a dictionary, and return the first value accordingly
+    if isinstance(value, dict) and value:
+        first_key = list(value.keys())[0]
+        # Handle the case where the value is a list inside a dictionary
+        if isinstance(value[first_key], list) and value[first_key]:
+            value = str(value[first_key][0])
+        # Handle the case where the value is a JSON dictionary
+        else:
+            value = str(value[first_key])
+    return str(value)[:50]  # Ensure the returned string is never more than 50 characters long
 
 def substitute_placeholders(template, arg_list):
     import re
