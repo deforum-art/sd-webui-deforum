@@ -278,7 +278,6 @@ def check_and_download_gifski(models_folder, current_user_os):
            
 # create a gif using gifski - limited to up to 30 fps (from the ui; if users wanna try to hack it, results are not good, but possible up to 100 fps theoretically)   
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
-    import glob
     msg_to_print = f"Stitching *gif* from frames using Gifski..."
     # blink the msg in the cli until action is done
     console.print(msg_to_print, style="blink yellow", end="") 
