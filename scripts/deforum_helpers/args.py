@@ -187,7 +187,7 @@ def DeforumArgs():
 
     #**Batch Settings**
     n_batch = 1 #
-    batch_name = "Deforum" 
+    batch_name = "Deforum_{timestring}" 
     filename_format = "{timestring}_{index}_{prompt}.png" # ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
     seed_behavior = "iter" # ["iter","fixed","random","ladder","alternate","schedule"]
     seed_iter_N = 1
