@@ -490,7 +490,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
             disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
             disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)
-            disposable_flow = get_flow_from_images(prev_img, disposable_image, "DIS Fine") * 2
+            disposable_flow = get_flow_from_images(prev_img, disposable_image, "DIS Fine")
             noised_image = image_transform_optical_flow(noised_image, disposable_flow, 1)
             args.init_sample = Image.fromarray(cv2.cvtColor(noised_image, cv2.COLOR_BGR2RGB))
             args.seed = stored_seed
