@@ -490,7 +490,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
             disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
             disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)
-            disposable_flow = get_flow_from_images(prev_img, disposable_image, "DIS Fine")
+            disposable_flow = get_flow_from_images(prev_img, disposable_image, "DIS Fine") * 2
             noised_image = image_transform_optical_flow(noised_image, disposable_flow, 1)
             args.init_sample = Image.fromarray(cv2.cvtColor(noised_image, cv2.COLOR_BGR2RGB))
             args.seed = stored_seed
@@ -499,7 +499,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         # diffusion redo
         if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0:
             stored_seed = args.seed
-            for n in range(1,int(anim_args.diffusion_redo)):
+            for n in range(0,int(anim_args.diffusion_redo)):
                 args.seed = random.randint(0, 2**32 - 1)
                 disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                 disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
@@ -507,7 +507,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 if (n == int(anim_args.diffusion_redo)):
                     disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)                
                 args.init_sample = Image.fromarray(cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB))
-            del(disposable_image)
+                del(disposable_image)
             args.seed = stored_seed
 
         # generation
