@@ -6,6 +6,7 @@ import re
 import numpy as np
 import itertools
 import numexpr
+import random
 import PIL
 from PIL import Image, ImageOps
 from .rich import console
@@ -484,12 +485,26 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         # optical flow redo before generation
         if anim_args.optical_flow_redo_generation and prev_img is not None and strength > 0:
             print("Optical Flow redo creating disposable diffusion before actual diffusion for flow estimate.")
+            stored_seed = args.seed
+            args.seed = random.randint(0, 2**32 - 1)
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
             disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
             disposable_flow = get_flow_from_images(prev_img, disposable_image, "DIS Fine")
             noised_image = image_transform_optical_flow(noised_image, disposable_flow, 1)
             args.init_sample = Image.fromarray(cv2.cvtColor(noised_image, cv2.COLOR_BGR2RGB))
-            del(disposable_image,disposable_flow)
+            args.seed = stored_seed
+            del(disposable_image,disposable_flow,stored_seed)
+
+        # diffusion redo
+        if int(anim_args.diffusion_redo) > 0 and frame_idx > 0 and strength > 0:
+            stored_seed = args.seed
+            for n in range(1,int(anim_args.diffusion_redo)):
+                args.seed = random.randint(0, 2**32 - 1)
+                disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+                disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
+                args.init_sample = Image.fromarray(cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB))
+            del(disposable_image)
+            args.seed = stored_seed
 
         # generation
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)

@@ -102,6 +102,7 @@ def DeforumAnimArgs():
     color_force_grayscale = False 
     diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
     optical_flow_cadence = False
+    diffusion_redo = '0'
     optical_flow_redo_generation = False
     #**Noise settings:**
     noise_type = 'perlin' # ['uniform', 'perlin']
@@ -552,6 +553,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Row(variant='compact'):
                             contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value = da.contrast_schedule, interactive=True)
                             optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, visible=False, interactive=True, elem_id='optical_flow_cadence')
+                        with gr.Row(variant='compact'):
+                            diffusion_redo = gr.Slider(label="Redo", minimum=0, maximum=50, step=1, value=da.diffusion_redo, interactive=True)
                             optical_flow_redo_generation = gr.Checkbox(label="Optical flow redo generation", value=False, visible=True, interactive=True, elem_id='optical_flow_redo_generation')
                         with gr.Row(variant='compact'):
                             # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
@@ -950,7 +953,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
     vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
-    diffusion_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence,optical_flow_redo_generation]
+    diffusion_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence,
+    optical_flow_redo_generation,diffusion_redo]
     for output in diffusion_cadence_outputs:
         animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=output)
     three_d_related_outputs = [depth_3d_warping_accord,fov_accord,optical_flow_cadence,only_3d_motion_column]
@@ -1026,7 +1030,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_clipskip_scheduling, clipskip_schedule, enable_noise_multiplier_scheduling, noise_multiplier_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         color_coherence, color_coherence_image_path, color_coherence_video_every_N_frames, color_force_grayscale,
-                        diffusion_cadence, optical_flow_cadence,optical_flow_redo_generation,
+                        diffusion_cadence, optical_flow_cadence,optical_flow_redo_generation,diffusion_redo,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
                         use_depth_warping, midas_weight,
                         padding_mode, sampling_mode, save_depth_maps,
