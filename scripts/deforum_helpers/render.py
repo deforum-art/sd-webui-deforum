@@ -503,7 +503,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 args.seed = random.randint(0, 2**32 - 1)
                 disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                 disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
-                disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)                
+                # color match on last one only
+                if (n == int(anim_args.diffusion_redo)):
+                    disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)                
                 args.init_sample = Image.fromarray(cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB))
             del(disposable_image)
             args.seed = stored_seed
