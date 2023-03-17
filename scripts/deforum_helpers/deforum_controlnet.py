@@ -275,9 +275,8 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         cnu["module"],
         cnu["model"],
         cnu["weight"],
-        cnu["invert_image"],
         cnu["image"],
-        cnu["guess_mode"],
+        cnu["invert_image"],
         cnu["resize_mode"],
         cnu["rgbbgr_mode"],
         cnu["low_vram"],
@@ -286,6 +285,7 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         cnu["threshold_b"],
         cnu["guidance_start"],
         cnu["guidance_end"],
+        cnu["guess_mode"],
     )
 
     cn_units = [
