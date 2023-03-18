@@ -360,7 +360,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         ddim_eta = gr.Number(label="DDIM Eta", value=d.ddim_eta, interactive=True)
                     with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
                         pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
-                        keep_3d_models_in_vram = gr.Checkbox(label="keep_3d_models_in_vram", value=d.keep_3d_models_in_vram, interactive=True, visible=(True if not (sh.cmd_opts.lowvram or sh.cmd_opts.medvram) else False))
+                        keep_3d_models_in_vram = gr.Checkbox(label="Keep 3D models in VRAM", value=d.keep_3d_models_in_vram, interactive=True, visible=(True if not (sh.cmd_opts.lowvram or sh.cmd_opts.medvram) else False))
                 # RUN FROM SETTING FILE ACCORD
                 with gr.Accordion('Resume & Run from file', open=False):
                     with gr.Tab('Run from Settings file'):
