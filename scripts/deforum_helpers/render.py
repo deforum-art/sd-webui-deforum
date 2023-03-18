@@ -33,7 +33,6 @@ from modules import lowvram, devices, sd_hijack
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
-    print(f"keep in vram: {keep_in_vram}") # TODO: remove me
     
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:

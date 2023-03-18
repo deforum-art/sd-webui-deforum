@@ -18,9 +18,13 @@ class MidasModel:
     _instance = None
 
     def __new__(cls, *args, **kwargs):
-        if not cls._instance or not kwargs.get('keep_in_vram', True):
+        keep_in_vram = kwargs.get('keep_in_vram', False)
+        if not cls._instance:
             cls._instance = super().__new__(cls)
             cls._instance._initialize(*args, **kwargs)
+        elif not keep_in_vram or not hasattr(cls._instance, 'midas_model'):
+            cls._instance._initialize(*args, **kwargs)
+        
         return cls._instance
 
     def _initialize(self, models_path, device, half_precision=True, keep_in_vram=False):
