@@ -6,7 +6,7 @@ import cv2
 from pathlib import Path
 from tqdm import tqdm
 from PIL import Image, ImageOps, ImageChops
-from modules.shared import cmd_opts
+from modules.shared import cmd_opts, device as sh_device
 from modules.scripts_postprocessing import PostprocessedImage
 from modules import devices
 import shutil
@@ -176,10 +176,9 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
 
 # Midas/Adabins Depth mode with the usual workflow
 def load_depth_model(models_path, midas_weight_vid2depth):
-    keep_in_vram = False
+    device = ('cpu' if cmd_opts.lowvram or cmd_opts.medvram else sh_device)
+    keep_in_vram = False # TODO: Future  - handle this too?
     print('Loading Depth Model')
-    import torch # TODO CHANGE THESE?!
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     depth_model = MidasModel(models_path, device, not cmd_opts.no_half, keep_in_vram=keep_in_vram)
     if midas_weight_vid2depth < 1.0:
         adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
