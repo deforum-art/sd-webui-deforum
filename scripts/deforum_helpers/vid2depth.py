@@ -12,7 +12,7 @@ from modules import devices
 import shutil
 from queue import Queue, Empty
 import modules.scripts as scr
-from .depth import DepthModel
+from .depth import MidasModel, AdaBinsModel
 from .frame_interpolation import clean_folder_name
 from rife.inference_video import duplicate_pngs_from_folder
 from .video_audio_utilities import get_quick_vid_info, vid2frames, ffmpeg_stitch_video
@@ -176,11 +176,13 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
 
 # Midas/Adabins Depth mode with the usual workflow
 def load_depth_model(models_path, midas_weight_vid2depth):
+    keep_in_vram = False
     print('Loading Depth Model')
-    depth_model = DepthModel(devices.device)
-    depth_model.load_midas(models_path, not cmd_opts.no_half)
+    import torch # TODO CHANGE THESE?!
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    depth_model = MidasModel(models_path, device, not cmd_opts.no_half, keep_in_vram=keep_in_vram)
     if midas_weight_vid2depth < 1.0:
-        depth_model.load_adabins(models_path)
+        adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
     return depth_model
 
 # Anime Remove Background by skytnt and onnx model
