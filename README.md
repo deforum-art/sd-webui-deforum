@@ -65,11 +65,11 @@ https://user-images.githubusercontent.com/121192995/224450647-39529b28-be04-4871
 
 Main extension tab:
 
-![maintab](https://user-images.githubusercontent.com/121192995/215362176-4e5599c1-9cb6-4bf9-964d-0ff882661993.png)
+![image](https://user-images.githubusercontent.com/121192995/226101131-43bf594a-3152-45dd-a5d1-2538d0bc221d.png)
 
 Keyframes tab:
 
-![keyframes](https://user-images.githubusercontent.com/121192995/215362228-c239c43a-d565-4862-b490-d18b19eaaaa5.png)
+![image](https://user-images.githubusercontent.com/121192995/226101140-bfe6cce7-9b78-4a1d-be9a-43e1fc78239e.png)
 
 Math evaluation:
 
