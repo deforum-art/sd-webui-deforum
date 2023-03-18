@@ -57,6 +57,8 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 Amazing raw Deforum animation by [Pxl.Pshr](https://www.instagram.com/pxl.pshr):
 * Turn Audio ON!
 
+(Audio credits: SKRILLEX, FRED AGAIN & FLOWDAN - RUMBLE (PHACE'S DNB FLIP))
+
 https://user-images.githubusercontent.com/121192995/224450647-39529b28-be04-4871-bb7a-faf7afda2ef2.mp4
 
 <br>
