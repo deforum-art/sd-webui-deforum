@@ -71,11 +71,6 @@ Keyframes tab:
 
 ![image](https://user-images.githubusercontent.com/121192995/226101140-bfe6cce7-9b78-4a1d-be9a-43e1fc78239e.png)
 
-Math evaluation:
-
-![math-eval](https://user-images.githubusercontent.com/121192995/215362467-481127a4-247a-4b0d-924a-d10719aa4c01.png)
-
-
 ## Benchmarks
 
 3D mode without additional WebUI flags
