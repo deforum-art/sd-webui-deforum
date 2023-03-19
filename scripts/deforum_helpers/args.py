@@ -101,7 +101,7 @@ def DeforumAnimArgs():
     color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
     diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
-    optical_flow_cadence = False
+    optical_flow_cadence = 'None' #['None', 'DIS Fine', 'DIS Medium', 'Farneback']
     diffusion_redo = '0'
     optical_flow_redo_generation = False
     #**Noise settings:**
@@ -131,7 +131,7 @@ def DeforumAnimArgs():
     hybrid_use_first_frame_as_init_image = True 
     hybrid_motion = "None" #['None','Optical Flow','Perspective','Affine']
     hybrid_motion_use_prev_img = False 
-    hybrid_flow_method = "DIS Fine" #@param ['DIS Fine', 'DIS Medium', 'Farneback']
+    hybrid_flow_method = "DIS Fine" #['DIS Fine', 'DIS Medium', 'Farneback']
     hybrid_composite = False 
     hybrid_comp_mask_type = "None" #['None', 'Depth', 'Video Depth', 'Blend', 'Difference']
     hybrid_comp_mask_inverse = False 
@@ -552,7 +552,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
                         with gr.Row(variant='compact'):
                             contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value = da.contrast_schedule, interactive=True)
-                            optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, visible=False, interactive=True, elem_id='optical_flow_cadence')
+                            optical_flow_cadence = gr.Radio(['None', 'DIS Fine', 'DIS Medium', 'Farneback'], label="Optical flow cadence", value=da.optical_flow_cadence, elem_id="optical_flow_cadence", visible=True)
                         with gr.Row(variant='compact'):
                             diffusion_redo = gr.Slider(label="Redo", minimum=0, maximum=50, step=1, value=da.diffusion_redo, interactive=True)
                             optical_flow_redo_generation = gr.Checkbox(label="Optical flow redo generation", value=False, visible=True, interactive=True, elem_id='optical_flow_redo_generation')
@@ -1030,7 +1030,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_clipskip_scheduling, clipskip_schedule, enable_noise_multiplier_scheduling, noise_multiplier_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         color_coherence, color_coherence_image_path, color_coherence_video_every_N_frames, color_force_grayscale,
-                        diffusion_cadence, optical_flow_cadence,optical_flow_redo_generation,diffusion_redo,
+                        diffusion_cadence, optical_flow_cadence, optical_flow_redo_generation, diffusion_redo,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
                         use_depth_warping, midas_weight,
                         padding_mode, sampling_mode, save_depth_maps,

@@ -256,13 +256,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 advance_next = tween_frame_idx > turbo_next_frame_idx
 
                 # optical flow cadence setup before animation warping
-                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence:
+                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence != 'None':
                     if keys.strength_schedule_series[tween_frame_start_idx] > 0:
                         if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
-                            cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, "DIS Fine") / 2
+                            cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, anim_args.optical_flow_cadence) / 2
                             turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow, 1)
 
-                print(f"Creating in-between {'' if cadence_flow is None else 'optical flow '}cadence frame: {tween_frame_idx}; tween:{tween:0.2f};")
+                print(f"Creating in-between {'' if cadence_flow is None else anim_args.optical_flow_cadence + ' optical flow '}cadence frame: {tween_frame_idx}; tween:{tween:0.2f};")
 
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
