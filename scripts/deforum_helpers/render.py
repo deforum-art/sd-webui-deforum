@@ -519,23 +519,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
-        # color matching on first frame is after generation, color match was collected earlier
-        if frame_idx == 0:
-            if anim_args.color_coherence == 'Image' or (anim_args.color_coherence == 'Video Input' and hybrid_available):
-                image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-                image = maintain_colors(image, color_match_sample, anim_args.color_coherence)
-                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                image = Image.fromarray(image)
-
-        # intercept and override to grayscale
-        if anim_args.color_force_grayscale:
-            image = ImageOps.grayscale(image)
-            image = ImageOps.colorize(image, black ="black", white ="white")
-
-        # on strength 0, set color match to generation
-        if strength == 0 and not anim_args.color_coherence in ['Image', 'Video Input']:
-            color_match_sample = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
-
         # reroll blank frame 
         if not image.getbbox():
             print("Blank frame detected! If you don't have the NSFW filter enabled, this may be due to a glitch!")
@@ -557,6 +540,23 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             image = blank_frame_reroll(image, args, root, frame_idx)
             if image == None:
                 return
+
+        # color matching on first frame is after generation, color match was collected earlier
+        if frame_idx == 0:
+            if anim_args.color_coherence == 'Image' or (anim_args.color_coherence == 'Video Input' and hybrid_available):
+                image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+                image = maintain_colors(image, color_match_sample, anim_args.color_coherence)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                image = Image.fromarray(image)
+
+        # intercept and override to grayscale
+        if anim_args.color_force_grayscale:
+            image = ImageOps.grayscale(image)
+            image = ImageOps.colorize(image, black ="black", white ="white")
+
+        # on strength 0, set color match to generation
+        if strength == 0 and not anim_args.color_coherence in ['Image', 'Video Input']:
+            color_match_sample = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
 
         opencv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
         if not using_vid_init:
