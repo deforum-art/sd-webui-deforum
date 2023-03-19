@@ -296,4 +296,10 @@ def on_ui_tabs():
 
     return [(deforum_interface, "Deforum", "deforum_interface")]
 
+def on_ui_settings():
+    section = ('deforum', "Deforum")
+    shared.opts.add_option("deforum_keep_3d_models_in_vram", shared.OptionInfo(
+        False, "Keep 3D models in VRAM between runs", gr.Checkbox, {"interactive": True, "visible": True if not (cmd_opts.lowvram or cmd_opts.medvram) else False}, section=section))
+        
 script_callbacks.on_ui_tabs(on_ui_tabs)
+script_callbacks.on_ui_settings(on_ui_settings)
