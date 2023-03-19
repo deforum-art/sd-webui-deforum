@@ -6,6 +6,7 @@ import re
 import numpy as np
 import itertools
 import numexpr
+import gc
 import random
 import PIL
 from PIL import Image, ImageOps
@@ -497,6 +498,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.init_sample = Image.fromarray(cv2.cvtColor(noised_image, cv2.COLOR_BGR2RGB))
             args.seed = stored_seed
             del(disposable_image,disposable_flow,stored_seed)
+            gc.collect()
 
         # diffusion redo
         if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0:
@@ -510,6 +512,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)                
                 args.init_sample = Image.fromarray(cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB))
                 del(disposable_image)
+                gc.collect()
             args.seed = stored_seed
 
         # generation
