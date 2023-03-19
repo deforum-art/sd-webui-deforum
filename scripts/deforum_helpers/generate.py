@@ -81,7 +81,6 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
     return image
 
 def generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
-    caught_vae_exception = False
     if cmd_opts.disable_nan_check:
         image = generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame, return_sample, sampler_name)
     else:
@@ -89,10 +88,11 @@ def generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, 
             image = generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame, return_sample, sampler_name)
         except Exception as e:
             if "A tensor with all NaNs was produced in VAE." in repr(e):
-                caught_vae_exception = True
+                print(e)
+                return None, True
             else:
                 raise e
-    return image, caught_vae_exception
+    return image, False
 
 def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
     assert args.prompt is not None
