@@ -89,5 +89,5 @@ def substitute_placeholders(template, arg_list, base_folder_path):
               for arg_obj in arg_list
               for attr in dir(arg_obj) if not callable(getattr(arg_obj, attr)) and not attr.startswith('__')}
     formatted_string = re.sub(r"{(\w+)}", lambda m: custom_placeholder_format(values, m), template)
-    formatted_string = re.sub(r'[<>:"/\\|?*]', '', formatted_string)
+    formatted_string = re.sub(r'[<>:"/\\|?*\s,]', '_', formatted_string)
     return formatted_string[:max_length]
