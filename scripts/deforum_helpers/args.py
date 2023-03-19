@@ -219,6 +219,7 @@ def DeforumArgs():
     full_res_mask = True
     full_res_mask_padding = 4
     reroll_blank_frames = 'reroll' # reroll, interrupt, or ignore
+    reroll_patience = 10
 
     n_samples = 1 # doesnt do anything
     precision = 'autocast' 
@@ -559,6 +560,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Row(variant='compact'):
                             # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                             reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
+                            reroll_patience = gr.Number(value=d.reroll_patience, label="Reroll patience", interactive=True)
                     # ANTI BLUR INNER TAB  
                     with gr.TabItem('Anti Blur', open=False, elem_id='anti_blur_accord') as anti_blur_tab:
                         with gr.Row(variant='compact'):
@@ -1058,7 +1060,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         use_mask, use_alpha_as_mask, invert_mask, overlay_mask,
                         mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
                         fill, full_res_mask, full_res_mask_padding,
-                        reroll_blank_frames'''
+                        reroll_blank_frames,reroll_patience'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_creation,
                             fps, make_gif, delete_imgs, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
