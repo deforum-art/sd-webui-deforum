@@ -9,9 +9,8 @@ from .upscaling import process_ncnn_upscale_vid_upload_logic
 from .vid2depth import process_depth_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
 from .gradio_funcs import *
-from .general_utils import get_os, get_deforum_version
+from .general_utils import get_os, get_deforum_version, custom_placeholder_format, test_long_path_support, get_max_path_length, substitute_placeholders
 from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names, controlnet_infotext
-# controlnet_component_names, setup_controlnet_ui
 import tempfile
         
 def Root():
@@ -191,7 +190,7 @@ def DeforumArgs():
 
     #**Batch Settings**
     n_batch = 1 #
-    batch_name = "Deforum" 
+    batch_name = "Deforum_{timestring}" 
     filename_format = "{timestring}_{index}_{prompt}.png" # ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
     seed_behavior = "iter" # ["iter","fixed","random","ladder","alternate","schedule"]
     seed_iter_N = 1
@@ -1169,18 +1168,12 @@ def process_args(args_dict_main):
     p.seed_resize_from_h = args.seed_resize_from_h
     p.fill = args.fill
     p.ddim_eta = args.ddim_eta
-
-    current_arg_list = [args, anim_args, video_args, parseq_args]
-    args.outdir = os.path.join(p.outpath_samples, args.batch_name)
-    root.outpath_samples = args.outdir
-    args.outdir = os.path.join(os.getcwd(), args.outdir)
-    if not os.path.exists(args.outdir):
-        os.makedirs(args.outdir)
-    
     args.seed = get_fixed_seed(args.seed)
-        
     args.timestring = time.strftime('%Y%m%d%H%M%S')
     args.strength = max(0.0, min(1.0, args.strength))
+    args.prompts = json.loads(args_dict_main['animation_prompts'])
+    args.positive_prompts = args_dict_main['animation_prompts_positive']
+    args.negative_prompts = args_dict_main['animation_prompts_negative']
 
     if not args.use_init:
         args.init_image = None
@@ -1189,14 +1182,18 @@ def process_args(args_dict_main):
         anim_args.max_frames = 1
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
+
+    current_arg_list = [args, anim_args, video_args, parseq_args]
+    full_base_folder_path = os.path.join(os.getcwd(), p.outpath_samples)
+    args.batch_name = substitute_placeholders(args.batch_name, current_arg_list, full_base_folder_path)
+    args.outdir = os.path.join(p.outpath_samples, str(args.batch_name))
+    root.outpath_samples = args.outdir
+    args.outdir = os.path.join(os.getcwd(), args.outdir)
+    if not os.path.exists(args.outdir):
+        os.makedirs(args.outdir)
     
     return root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
-
-def print_args(args):
-    print("ARGS: /n")
-    for key, value in args.__dict__.items():
-        print(f"{key}: {value}")
- 
+    
 # Local gradio-to-frame-interoplation function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
     # print msg and do nothing if vid not uploaded or interp_x not provided
