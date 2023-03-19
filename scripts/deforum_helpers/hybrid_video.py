@@ -3,6 +3,7 @@ import os
 import pathlib
 import numpy as np
 import random
+import PIL
 from PIL import Image, ImageChops, ImageOps, ImageEnhance
 from .video_audio_utilities import vid2frames, get_quick_vid_info, get_frame_name, get_next_frame
 from .human_masking import video2humanmasks
@@ -79,7 +80,7 @@ def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_c
     prev_img = cv2.cvtColor(prev_img, cv2.COLOR_BGR2RGB)
     prev_img_hybrid = Image.fromarray(prev_img)
     video_image = Image.open(video_frame)
-    video_image = video_image.resize((args.W, args.H), Image.Resampling.LANCZOS)
+    video_image = video_image.resize((args.W, args.H), PIL.Image.LANCZOS)
     hybrid_mask = None
 
     # composite mask types
@@ -153,16 +154,16 @@ def get_matrix_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, prev_im
         print(f"Calculating {hybrid_motion} RANSAC matrix for frames {frame_idx} to {frame_idx+1}")
         return matrix
 
-def get_flow_for_hybrid_motion(frame_idx, dimensions, inputfiles, hybrid_frame_path, method, do_flow_visualization=False):
+def get_flow_for_hybrid_motion(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, method, do_flow_visualization=False):
     print(f"Calculating {method} optical flow for frames {frame_idx} to {frame_idx+1}")
     i1 = get_resized_image_from_filename(str(inputfiles[frame_idx]), dimensions)
     i2 = get_resized_image_from_filename(str(inputfiles[frame_idx+1]), dimensions)
-    flow = get_flow_from_images(i1, i2, method)
+    flow = get_flow_from_images(i1, i2, method, prev_flow)
     if do_flow_visualization:
         save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_frame_path)
     return flow
 
-def get_flow_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_img, method, do_flow_visualization=False):
+def get_flow_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, prev_img, method, do_flow_visualization=False):
     print(f"Calculating {method} optical flow for frames {frame_idx} to {frame_idx+1}")
     # first handle invalid images from cadence by returning default matrix
     height, width = prev_img.shape[:2]   
@@ -171,7 +172,7 @@ def get_flow_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, hybrid_fr
     else:
         i1 = prev_img.astype(np.uint8)
         i2 = get_resized_image_from_filename(str(inputfiles[frame_idx]), dimensions)
-        flow = get_flow_from_images(i1, i2, method)
+        flow = get_flow_from_images(i1, i2, method, prev_flow)
     if do_flow_visualization:
         save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_frame_path)
     return flow
@@ -182,9 +183,12 @@ def image_transform_ransac(image_cv2, xform, hybrid_motion, border_mode=cv2.BORD
     else: # Affine
         return image_transform_affine(image_cv2, xform, border_mode=border_mode)
 
-def image_transform_optical_flow(img, flow, border_mode=cv2.BORDER_REPLICATE, flow_reverse=False):
-    if not flow_reverse:
-        flow = -flow
+def image_transform_optical_flow(img, flow, flow_factor, border_mode=cv2.BORDER_REPLICATE):
+    # if flow factor not normal, calculate flow factor
+    if flow_factor != 1:
+        flow = flow * flow_factor
+    # flow is reversed, so you need to reverse it:
+    flow = -flow
     h, w = img.shape[:2]
     flow[:, :, 0] += np.arange(w)
     flow[:, :, 1] += np.arange(h)[:,np.newaxis]
@@ -247,28 +251,51 @@ def get_transformation_matrix_from_images(img1, img2, hybrid_motion, max_corners
         transformation_rigid_matrix, rigid_mask = cv2.estimateAffinePartial2D(prev_pts, curr_pts)
         return transformation_rigid_matrix
 
-def get_flow_from_images(i1, i2, method):
+def get_flow_from_images(i1, i2, method, prev_flow=None):
+    # Unused presets are included for this function's use in other applications (or real-time applications).
     if method =="DIS Medium":
-        r = get_flow_from_images_DIS(i1, i2, cv2.DISOPTICAL_FLOW_PRESET_MEDIUM)
-    elif method =="DIS Fast":
-        r = get_flow_from_images_DIS(i1, i2, cv2.DISOPTICAL_FLOW_PRESET_FAST)
-    elif method =="DIS UltraFast":
-        r = get_flow_from_images_DIS(i1, i2, cv2.DISOPTICAL_FLOW_PRESET_ULTRAFAST)
-    elif method == "DenseRLOF": # requires running opencv-contrib-python (full opencv) INSTEAD of opencv-python
-        r = get_flow_from_images_Dense_RLOF(i1, i2)
-    elif method == "SF": # requires running opencv-contrib-python (full opencv) INSTEAD of opencv-python
-        r = get_flow_from_images_SF(i1, i2)
-    elif method =="Farneback Fine":
-        r = get_flow_from_images_Farneback(i1, i2, 'fine')
+        r = get_flow_from_images_DIS(i1, i2, 'medium', prev_flow)
+    elif method =="DIS Fast": # Unused
+        r = get_flow_from_images_DIS(i1, i2, 'fast', prev_flow)
+    elif method =="DIS UltraFast": # Unused
+        r = get_flow_from_images_DIS(i1, i2, 'ultrafast', prev_flow)
+    elif method =="DIS Slow": # Unused
+        r = get_flow_from_images_DIS(i1, i2, 'slow', prev_flow)
+    elif method =="DIS Fine":
+        r = get_flow_from_images_DIS(i1, i2, 'fine', prev_flow)
+    elif method == "DenseRLOF": # Unused - requires running opencv-contrib-python (full opencv) INSTEAD of opencv-python
+        r = get_flow_from_images_Dense_RLOF(i1, i2, prev_flow)
+    elif method == "SF": # Unused - requires running opencv-contrib-python (full opencv) INSTEAD of opencv-python
+        r = get_flow_from_images_SF(i1, i2, prev_flow)
+    elif method =="Farneback Fine": # Unused
+        r = get_flow_from_images_Farneback(i1, i2, 'fine', prev_flow)
     else: # Farneback Normal:
-        r = get_flow_from_images_Farneback(i1, i2)
+        r = get_flow_from_images_Farneback(i1, i2, prev_flow)
     return r
+    # return detect_scene_change_abs(r)
 
-def get_flow_from_images_DIS(i1, i2, preset):
+def get_flow_from_images_DIS(i1, i2, preset, prev_flow):
+    # DIS PRESETS CHART KEY: finest scale, grad desc its, patch size
+    # DIS_MEDIUM: 1, 25, 8 | DIS_FAST: 2, 16, 8 | DIS_ULTRAFAST: 2, 12, 8
+    if preset == 'medium': preset_code = cv2.DISOPTICAL_FLOW_PRESET_MEDIUM    
+    elif preset == 'fast': preset_code = cv2.DISOPTICAL_FLOW_PRESET_FAST    
+    elif preset == 'ultrafast': preset_code = cv2.DISOPTICAL_FLOW_PRESET_ULTRAFAST   
+    elif preset in ['slow','fine']: preset_code = None
     i1 = cv2.cvtColor(i1, cv2.COLOR_BGR2GRAY)
     i2 = cv2.cvtColor(i2, cv2.COLOR_BGR2GRAY)
-    dis=cv2.DISOpticalFlow_create(preset)
-    return dis.calc(i1, i2, None)
+    dis = cv2.DISOpticalFlow_create(preset_code)
+    # custom presets
+    if preset == 'slow':
+        dis.setGradientDescentIterations(192)
+        dis.setFinestScale(1)
+        dis.setPatchSize(8)
+        dis.setPatchStride(4)
+    if preset == 'fine':
+        dis.setGradientDescentIterations(192)
+        dis.setFinestScale(0)
+        dis.setPatchSize(8)
+        dis.setPatchStride(4)
+    return dis.calc(i1, i2, prev_flow)
 
 def get_flow_from_images_Dense_RLOF(i1, i2, last_flow=None):
     return cv2.optflow.calcOpticalFlowDenseRLOF(i1, i2, flow = last_flow)

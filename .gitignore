@@ -9,3 +9,4 @@ outputs
 # Log files for colab-convert
 cc-outputs.log
 *.safetensors
+scripts/deforum_helpers/navigation.py
