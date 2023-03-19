@@ -89,18 +89,21 @@ def DeforumAnimArgs():
     sigma_schedule = "0: (1.0)"
     threshold_schedule = "0: (0.0)"
     # Hybrid video
-    hybrid_comp_alpha_schedule = "0:(1)" 
+    hybrid_comp_alpha_schedule = "0:(0.5)" 
     hybrid_comp_mask_blend_alpha_schedule = "0:(0.5)" 
     hybrid_comp_mask_contrast_schedule = "0:(1)" 
-    hybrid_comp_mask_auto_contrast_cutoff_high_schedule =  "0:(100)" 
-    hybrid_comp_mask_auto_contrast_cutoff_low_schedule =  "0:(0)" 
+    hybrid_comp_mask_auto_contrast_cutoff_high_schedule = "0:(100)" 
+    hybrid_comp_mask_auto_contrast_cutoff_low_schedule = "0:(0)"
+    hybrid_flow_factor_schedule = "0:(1)"
     #Coherence
     color_coherence = 'LAB' # ['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image']
     color_coherence_image_path = ""
     color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
     diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
-    optical_flow_cadence = False
+    optical_flow_cadence = 'None' #['None', 'DIS Fine', 'DIS Medium', 'Farneback']
+    diffusion_redo = '0'
+    optical_flow_redo_generation = False
     #**Noise settings:**
     noise_type = 'perlin' # ['uniform', 'perlin']
     # Perlin params
@@ -128,7 +131,7 @@ def DeforumAnimArgs():
     hybrid_use_first_frame_as_init_image = True 
     hybrid_motion = "None" #['None','Optical Flow','Perspective','Affine']
     hybrid_motion_use_prev_img = False 
-    hybrid_flow_method = "Farneback" #['DIS Medium','Farneback']
+    hybrid_flow_method = "DIS Fine" #['DIS Fine', 'DIS Medium', 'Farneback']
     hybrid_composite = False 
     hybrid_comp_mask_type = "None" #['None', 'Depth', 'Video Depth', 'Blend', 'Difference']
     hybrid_comp_mask_inverse = False 
@@ -549,7 +552,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
                         with gr.Row(variant='compact'):
                             contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value = da.contrast_schedule, interactive=True)
-                            optical_flow_cadence = gr.Checkbox(label="Optical flow cadence", value=False, visible=False, interactive=True, elem_id='optical_flow_cadence')
+                            optical_flow_cadence = gr.Radio(['None', 'DIS Fine', 'DIS Medium', 'Farneback'], label="Optical flow cadence", value=da.optical_flow_cadence, elem_id="optical_flow_cadence", visible=True)
+                        with gr.Row(variant='compact'):
+                            diffusion_redo = gr.Slider(label="Redo", minimum=0, maximum=50, step=1, value=da.diffusion_redo, interactive=True)
+                            optical_flow_redo_generation = gr.Checkbox(label="Optical flow redo generation", value=False, visible=True, interactive=True, elem_id='optical_flow_redo_generation')
                         with gr.Row(variant='compact'):
                             # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                             reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
@@ -725,7 +731,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(variant='compact'):
                             with gr.Row(variant='compact'):
                                 with gr.Column(scale=1):
-                                    hybrid_flow_method = gr.Radio(['DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method", visible=False)
+                                    hybrid_flow_method = gr.Radio(['DIS Fine', 'DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method", visible=False)
                                     hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type", visible=False)
                     with gr.Row(visible=False, variant='compact') as hybrid_comp_mask_row:
                         hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="Comp mask equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
@@ -738,6 +744,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Accordion("Hybrid Schedules", open=False, visible=False) as hybrid_sch_accord:
                     with gr.Row(variant='compact') as hybrid_comp_alpha_schedule_row:
                         hybrid_comp_alpha_schedule = gr.Textbox(label="Comp alpha schedule", lines=1, value = da.hybrid_comp_alpha_schedule, interactive=True)
+                    with gr.Row(variant='compact') as hybrid_flow_factor_schedule_row:
+                        hybrid_flow_factor_schedule = gr.Textbox(label="Flow factor schedule", lines=1, value = da.hybrid_flow_factor_schedule, interactive=True)
                     with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_blend_alpha_schedule_row:
                         hybrid_comp_mask_blend_alpha_schedule = gr.Textbox(label="Comp mask blend alpha schedule", lines=1, value = da.hybrid_comp_mask_blend_alpha_schedule, interactive=True, elem_id="hybridelemtest")
                     with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_contrast_schedule_row:
@@ -945,7 +953,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
     vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
-    diffusion_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence]
+    diffusion_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence,
+    optical_flow_redo_generation,diffusion_redo]
     for output in diffusion_cadence_outputs:
         animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=output)
     three_d_related_outputs = [depth_3d_warping_accord,fov_accord,optical_flow_cadence,only_3d_motion_column]
@@ -1021,7 +1030,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_clipskip_scheduling, clipskip_schedule, enable_noise_multiplier_scheduling, noise_multiplier_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
                         color_coherence, color_coherence_image_path, color_coherence_video_every_N_frames, color_force_grayscale,
-                        diffusion_cadence, optical_flow_cadence,
+                        diffusion_cadence, optical_flow_cadence, optical_flow_redo_generation, diffusion_redo,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
                         use_depth_warping, midas_weight,
                         padding_mode, sampling_mode, save_depth_maps,
@@ -1032,7 +1041,8 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
 hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
                         hybrid_motion, hybrid_motion_use_prev_img, hybrid_flow_method, hybrid_composite, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
                         hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames,
-                        hybrid_comp_alpha_schedule, hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
+                        hybrid_comp_alpha_schedule, hybrid_flow_factor_schedule,
+                        hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
                         hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 args_names =    str(r'''W, H, tiling, restore_faces,

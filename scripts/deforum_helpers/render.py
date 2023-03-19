@@ -6,6 +6,8 @@ import re
 import numpy as np
 import itertools
 import numexpr
+import random
+import PIL
 from PIL import Image, ImageOps
 from .rich import console
 from .generate import generate, isJson
@@ -38,6 +40,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args, anim_args, inputfiles = hybrid_generation(args, anim_args, root)
             # path required by hybrid functions, even if hybrid_comp_save_extra_frames is False
             hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
+        # initialize prev_flow
+        if anim_args.hybrid_motion == 'Optical Flow':
+            prev_flow = None
 
         if loop_args.use_looper:
             print("Using Guided Images mode: seed_behavior will be set to 'schedule' and 'strength_0_no_init' to False")
@@ -179,8 +184,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # get color match for 'Image' color coherence only once, before loop
     if anim_args.color_coherence == 'Image':
         color_match_sample = load_image(anim_args.color_coherence_image_path)
-        color_match_sample = color_match_sample.resize((args.W, args.H), Image.Resampling.LANCZOS)
+        color_match_sample = color_match_sample.resize((args.W, args.H), PIL.Image.LANCZOS)
         color_match_sample = cv2.cvtColor(np.array(color_match_sample), cv2.COLOR_RGB2BGR)
+
+    # initialize cv2 border mode based on args
+    cv2_border_mode = cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE
 
     #Webui
     state.job_count = anim_args.max_frames
@@ -208,6 +216,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             "mask_contrast": keys.hybrid_comp_mask_contrast_schedule_series[frame_idx],
             "mask_auto_contrast_cutoff_low": int(keys.hybrid_comp_mask_auto_contrast_cutoff_low_schedule_series[frame_idx]),
             "mask_auto_contrast_cutoff_high": int(keys.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx]),
+            "flow_factor": int(keys.hybrid_flow_factor_schedule_series[frame_idx])
         }        
         scheduled_sampler_name = None
         scheduled_clipskip = None
@@ -249,13 +258,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 advance_next = tween_frame_idx > turbo_next_frame_idx
 
                 # optical flow cadence setup before animation warping
-                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence:
+                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence != 'None':
                     if keys.strength_schedule_series[tween_frame_start_idx] > 0:
                         if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
-                            cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, "DIS Medium") / 2
-                            turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow)
+                            cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, anim_args.optical_flow_cadence) / 2
+                            turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow, 1)
 
-                print(f"Creating in-between {'' if cadence_flow is None else 'optical flow '}cadence frame: {tween_frame_idx}; tween:{tween:0.2f};")
+                print(f"Creating in-between {'' if cadence_flow is None else anim_args.optical_flow_cadence + ' optical flow '}cadence frame: {tween_frame_idx}; tween:{tween:0.2f};")
 
                 if depth_model is not None:
                     assert(turbo_next_image is not None)
@@ -272,9 +281,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
                     cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow) * tween
                     if advance_prev:
-                        turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc)
+                        turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc, 1)
                     if advance_next:
-                        turbo_next_image = image_transform_optical_flow(turbo_next_image, cadence_flow_inc)
+                        turbo_next_image = image_transform_optical_flow(turbo_next_image, cadence_flow_inc, 1)
 
                 # hybrid video motion - warps turbo_prev_image or turbo_next_image to match motion
                 if tween_frame_idx > 0:
@@ -282,31 +291,32 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                         if anim_args.hybrid_motion_use_prev_img:
                             if advance_prev:
                                 matrix = get_matrix_for_hybrid_motion_prev(tween_frame_idx, (args.W, args.H), inputfiles, turbo_prev_image, anim_args.hybrid_motion)
-                                turbo_prev_image = image_transform_ransac(turbo_prev_image, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                                turbo_prev_image = image_transform_ransac(turbo_prev_image, matrix, anim_args.hybrid_motion, cv2_border_mode)
                             if advance_next:
                                 matrix = get_matrix_for_hybrid_motion_prev(tween_frame_idx, (args.W, args.H), inputfiles, turbo_next_image, anim_args.hybrid_motion)
-                                turbo_next_image = image_transform_ransac(turbo_next_image, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                                turbo_next_image = image_transform_ransac(turbo_next_image, matrix, anim_args.hybrid_motion, cv2_border_mode)
                         else:
                             matrix = get_matrix_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, anim_args.hybrid_motion)
                             if advance_prev:
-                                turbo_prev_image = image_transform_ransac(turbo_prev_image, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                                turbo_prev_image = image_transform_ransac(turbo_prev_image, matrix, anim_args.hybrid_motion, cv2_border_mode)
                             if advance_next:
-                                turbo_next_image = image_transform_ransac(turbo_next_image, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                                turbo_next_image = image_transform_ransac(turbo_next_image, matrix, anim_args.hybrid_motion, cv2_border_mode)
                     if anim_args.hybrid_motion in ['Optical Flow']:
                         if anim_args.hybrid_motion_use_prev_img:
                             if advance_prev:
-                                flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, turbo_prev_image, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
-                                turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                                flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, turbo_prev_image, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                                turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, hybrid_comp_schedules['flow_factor'], cv2_border_mode)
                             if advance_next:
-                                flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, turbo_next_image, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
-                                turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                                flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, turbo_next_image, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                                turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, hybrid_comp_schedules['flow_factor'], cv2_border_mode)
                         else:
-                            flow = get_flow_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                            flow = get_flow_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
                             if advance_prev:
-                                turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                                turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, hybrid_comp_schedules['flow_factor'], cv2_border_mode)
                             if advance_next:
-                                turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
-                      
+                                turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, hybrid_comp_schedules['flow_factor'], cv2_border_mode)
+                        prev_flow = flow
+
                 turbo_prev_frame_idx = turbo_next_frame_idx = tween_frame_idx
 
                 if turbo_prev_image is not None and tween < 1.0:
@@ -331,7 +341,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if anim_args.color_coherence == 'Video Input' and hybrid_available:
             if int(frame_idx) % int(anim_args.color_coherence_video_every_N_frames) == 0:
                 prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx+1:09}.jpg"))
-                prev_vid_img = prev_vid_img.resize((args.W, args.H), Image.Resampling.LANCZOS)
+                prev_vid_img = prev_vid_img.resize((args.W, args.H), PIL.Image.LANCZOS)
                 color_match_sample = np.asarray(prev_vid_img)
                 color_match_sample = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2BGR)
 
@@ -346,13 +356,14 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                         matrix = get_matrix_for_hybrid_motion_prev(frame_idx, (args.W, args.H), inputfiles, prev_img, anim_args.hybrid_motion)
                     else:
                         matrix = get_matrix_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, anim_args.hybrid_motion)
-                    prev_img = image_transform_ransac(prev_img, matrix, anim_args.hybrid_motion, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)    
+                    prev_img = image_transform_ransac(prev_img, matrix, anim_args.hybrid_motion, cv2_border_mode)    
                 if anim_args.hybrid_motion in ['Optical Flow']:
                     if anim_args.hybrid_motion_use_prev_img:
-                        flow = get_flow_for_hybrid_motion_prev(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_img, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                        flow = get_flow_for_hybrid_motion_prev(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, prev_img, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
                     else:
-                        flow = get_flow_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
-                    prev_img = image_transform_optical_flow(prev_img, flow, cv2.BORDER_WRAP if anim_args.border == 'wrap' else cv2.BORDER_REPLICATE)
+                        flow = get_flow_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                    prev_img = image_transform_optical_flow(prev_img, flow, hybrid_comp_schedules['flow_factor'], cv2_border_mode)
+                    prev_flow = flow
 
             # do hybrid video - composites video frame into prev_img (now warped if using motion)
             if anim_args.hybrid_composite:
@@ -473,7 +484,35 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
             sd_hijack.model_hijack.hijack(sd_model)
         
-        # sample the diffusion model
+        # optical flow redo before generation
+        if anim_args.optical_flow_redo_generation and prev_img is not None and strength > 0:
+            print("Optical Flow redo creating disposable diffusion before actual diffusion for flow estimate.")
+            stored_seed = args.seed
+            args.seed = random.randint(0, 2**32 - 1)
+            disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+            disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
+            disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)
+            disposable_flow = get_flow_from_images(prev_img, disposable_image, "DIS Fine")
+            noised_image = image_transform_optical_flow(noised_image, disposable_flow, 1)
+            args.init_sample = Image.fromarray(cv2.cvtColor(noised_image, cv2.COLOR_BGR2RGB))
+            args.seed = stored_seed
+            del(disposable_image,disposable_flow,stored_seed)
+
+        # diffusion redo
+        if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0:
+            stored_seed = args.seed
+            for n in range(0,int(anim_args.diffusion_redo)):
+                args.seed = random.randint(0, 2**32 - 1)
+                disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+                disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
+                # color match on last one only
+                if (n == int(anim_args.diffusion_redo)):
+                    disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)                
+                args.init_sample = Image.fromarray(cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB))
+                del(disposable_image)
+            args.seed = stored_seed
+
+        # generation
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
 
@@ -491,7 +530,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             image = ImageOps.colorize(image, black ="black", white ="white")
 
         # on strength 0, set color match to generation
-        if strength == 0:
+        if strength == 0 and not anim_args.color_coherence in ['Image', 'Video Input']:
             color_match_sample = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
 
         # reroll blank frame 

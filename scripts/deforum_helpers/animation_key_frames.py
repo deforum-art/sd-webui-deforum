@@ -49,6 +49,7 @@ class DeformAnimKeys():
         self.hybrid_comp_mask_contrast_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.hybrid_comp_mask_contrast_schedule))
         self.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.hybrid_comp_mask_auto_contrast_cutoff_high_schedule))
         self.hybrid_comp_mask_auto_contrast_cutoff_low_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.hybrid_comp_mask_auto_contrast_cutoff_low_schedule))
+        self.hybrid_flow_factor_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.hybrid_flow_factor_schedule))
 
 class LooperAnimKeys():
     def __init__(self, loop_args, anim_args, seed):
