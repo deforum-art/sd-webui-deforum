@@ -32,8 +32,6 @@ from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
-    
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         if anim_args.hybrid_composite or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
@@ -108,6 +106,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
     predict_depths = predict_depths or (anim_args.hybrid_composite and anim_args.hybrid_comp_mask_type in ['Depth','Video Depth'])
     if predict_depths:
+        keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
         
         device = ('cpu' if cmd_opts.lowvram or cmd_opts.medvram else root.device)
         depth_model = MidasModel(root.models_path, device, root.half_precision, keep_in_vram=keep_in_vram)
@@ -548,7 +547,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         args.seed = next_seed(args)
         
-    if not keep_in_vram:
+    if predict_depths and not keep_in_vram:
         depth_model.delete_model
         if anim_args.midas_weight < 1.0:
             adabins_model.delete_model()
