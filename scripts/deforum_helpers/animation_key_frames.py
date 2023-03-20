@@ -67,6 +67,7 @@ class GLSLKeys():
         self.fi = FrameInterpolater(anim_args.max_frames, args.seed)
         self.use_shaders = args.use_shaders
         self.time_factor = self.fi.get_inbetweens(self.fi.parse_key_frames(args.time_factor))
+        self.alpha = self.fi.get_inbetweens(self.fi.parse_key_frames(args.alpha_schedule))
         self.glsl_shader = args.glsl_shader
 
 class FrameInterpolater():
