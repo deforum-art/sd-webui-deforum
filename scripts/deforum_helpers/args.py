@@ -294,34 +294,29 @@ def DeforumOutputArgs():
     return locals()
     
 def fragment_shader():
-    return """#version 330 core
-
-uniform float time;
-uniform vec2 resolution;
-out vec4 out_color;
-
+    return """
 // A function to generate Perlin noise
 float noise(vec2 p)
 {
     return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-void main()
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
-    vec2 uv = (gl_FragCoord.xy / resolution.xy) * 2.0 - 1.0;
+    vec2 uv = (gl_FragCoord.xy / iResolution.xy) * 2.0 - 1.0;
     // Generate a Perlin noise value to use as an offset for the color
-    float noise_value = noise(gl_FragCoord.xy * 0.01 + time);
+    float noise_value = noise(gl_FragCoord.xy * 0.01 + iTime);
     // Time varying pixel color
-    vec3 col = 0.5 + noise_value*cos(time+uv.xyx+vec3(0,2,4));
+    vec3 col = 0.5 + noise_value*cos(iTime+uv.xyx+vec3(0,2,4));
     float transparentCircleSize = 0.5;
 
     // Output to screen
     if (length(uv) < transparentCircleSize) {
         // create a transparent hole in the center of the shader
-        out_color = vec4(0.0, 0.0, 0.0, 0.0);
+        fragColor = vec4(0.0, 0.0, 0.0, 0.0);
     }
     else{
-        out_color = vec4(col,0.5);
+        fragColor = vec4(col,0.5);
     }
 }"""
 

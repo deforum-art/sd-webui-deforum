@@ -573,7 +573,13 @@ def run_glsl(args, max_frames, glslSchedulesAndData):
         TexCoords = aTexCoords;
     }
     """
-    fragment_shader_code = glslSchedulesAndData.glsl_shader
+    fragment_shader_code = """#version 330 core
+
+uniform float iTime;
+uniform vec2 iResolution;
+out vec4 fragColor;
+""" +glslSchedulesAndData.glsl_shader + """
+    void main(){ mainImage(fragColor, gl_FragCoord.xy); }"""
     ctx = moderngl.create_standalone_context()
     prog = ctx.program(vertex_shader=vertex_shader_code, fragment_shader=fragment_shader_code)
     vbo = np.array([-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0], dtype=np.float32)
@@ -582,7 +588,7 @@ def run_glsl(args, max_frames, glslSchedulesAndData):
     time = 0
     resolution = (args.W, args.H)
     try:
-        prog["resolution"].value = resolution
+        prog["iResolution"].value = resolution
     except KeyError:
         print("had a keyerror on resolution")
     ctx.enable(moderngl.BLEND)
@@ -590,7 +596,7 @@ def run_glsl(args, max_frames, glslSchedulesAndData):
     for i in range(max_frames):
         timeFactor = glslSchedulesAndData.time_factor[i]
         try:
-            prog["time"].value = time
+            prog["iTime"].value = time
         except KeyError:
             print("had a keyerror on time")
 
