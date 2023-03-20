@@ -320,7 +320,7 @@ def on_ui_settings():
     shared.opts.add_option("deforum_keep_3d_models_in_vram", shared.OptionInfo(
         False, "Keep 3D models in VRAM between runs", gr.Checkbox, {"interactive": True, "visible": True if not (cmd_opts.lowvram or cmd_opts.medvram) else False}, section=section))
     shared.opts.add_option("deforum_enable_persistent_settings", shared.OptionInfo(
-        False, "Keep settings persistent upon refresh/relaunch of webui", gr.Checkbox, {"interactive": True}, section=section))
+        False, "Keep settings persistent upon relaunch of webui", gr.Checkbox, {"interactive": True}, section=section))
     shared.opts.add_option("deforum_persistent_settings_path", shared.OptionInfo(
         "models/Deforum/deforum_persistent_settings.txt", "Path for saving your persistent settings file:", section=section))
         
