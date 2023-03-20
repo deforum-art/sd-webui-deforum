@@ -162,6 +162,26 @@ deforum_titles = {
     "Color correction factor": "how close to get to the colors of the input frame image/ the amount each frame during a tweening step to use the new images colors",
 	// deforum.py / right side of the ui:
 	"Settings File": "Path to settings file you want to load. Path can be relative to webui folder OR full - absolute",
+
+    // Hybrid Video
+    "Generate inputframes": "Initiates extraction of video frames from your video_init_path to the inputframes folder. You only need to do this once and then you can change it to False and re-render",
+    "Hybrid composite": "Engages hybrid compositing of video into animation in various ways with comp alpha as a master mix control.",
+    "First Frame as init image": "If True, uses the first frame of the video as the init_image. False can create interesting transition effects into the video, depending on settings.",
+    "Motion use prev img": "If enabled, changes the behavior or hybrid_motion to captures motion by comparing the current video frame to the previous rendered image, instead of the previous video frame.",
+    "Hybrid motion": "Analyzes video frames for camera motion during generation that are used in rendering to match movement.",
+    "Flow method": "Selects the type of Optical Flow to use if Optical Flow is selected in Hybrid motion.",
+    "Comp mask type": "You don't need a mask to composite video. But, Mask types can control the way that video is composited with the previous image each frame.",
+    "Comp mask equalize": "Equalizes the mask for the composite before or after autocontrast operation (or both)",
+    "Comp mask auto contrast": "Auto-contrasts the mask for the composite. If enabled, uses the low/high autocontrast cutoff schedules.",
+    "Comp mask inverse": "Inverts the composite mask.",
+    "Comp save extra frames": "If this option is selected, many extra frames will be output for the various processes into the hybridframes folder.",
+    "Comp alpha schedule": "Schedule controls how much the composite video is mixed in, whether set to mask is None or using a mask. This is the master mix.",
+    "Flow factor schedule": "Affects optical flow hybrid motion. 1 is normal flow. -1 is negative flow. 0.5 is half flow, etc...",
+    "Comp mask blend alpha schedule": "If using a blend mask, this controls the blend amount of the video and render for the composite mask.",
+    "Comp mask contrast schedule": "Controls the contrast of the composite mask. 0.5 if half, 1 is normal contrast, 2 is double, etc.",
+    "Comp mask auto contrast cutoff high schedule": "If using autocontrast option, this is the high cutoff for the operation.",
+    "Comp mask auto contrast cutoff low schedule": "If using autocontrast option, this is the low cutoff for the operation.",
+    "Generate human masks": "This will generate masks of all the humans in a video. Created at generation of hybrid video. Not yet integrated for auto-masking, but it will create the masks, and you can then use the mask video manually.",
 }
 
 onUiUpdate(function(){
