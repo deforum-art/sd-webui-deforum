@@ -32,8 +32,7 @@ def load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, contr
         print(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict)
 
 def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, full_out_file_path = None):
-    print(full_out_file_path)
-    if full_out_file_path is not None:
+    if full_out_file_path:
         args.__dict__["seed"] = root.raw_seed
         args.__dict__["batch_name"] = root.raw_batch_name
     args.__dict__["prompts"] = root.animation_prompts
