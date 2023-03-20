@@ -154,6 +154,7 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
                                           use_alpha_as_mask=args.use_alpha_as_mask)
     elif glsl_args.use_shaders != "No":
         init_image = Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png")
+        init_image = init_image.convert("RGB")
     else:
         if anim_args.animation_mode != 'Interpolation':
             print(f"Not using an init image (doing pure txt2img)")
@@ -188,7 +189,7 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
             process_with_controlnet(p_txt, args, anim_args, loop_args, controlnet_args, root, is_img2img=False, frame_idx=frame+1)
     
         processed = processing.process_images(p_txt)
-
+        init_image = processed.images[0]
     if processed is None:
         # Mask functions
         if args.use_mask:
@@ -212,8 +213,8 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
         
         if glsl_args.use_shaders != "No":
             glsl_image = Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png")
-            init_image.paste(glsl_image, (0, 0), glsl_image)
-            init_image.convert('RGB')
+            init_image.paste(glsl_image)
+            init_image = init_image.convert('RGB')
         
         p.init_images = [init_image]
         p.image_mask = mask
