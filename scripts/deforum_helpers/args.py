@@ -654,24 +654,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 # PARSEQ ACCORD
                 with gr.Accordion('Parseq', open=False):
                     gr.HTML("""
-                    Use an <a style='color:SteelBlue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
-                    <p style="margin-top:1em">
-                        Note that parseq overrides:
-                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                            <li>Run: seed, subseed, subseed strength.</li>
-                            <li>Keyframes: generation settings (noise, strength, contrast, scale).</li>
-                            <li>Keyframes: motion parameters for 2D and 3D (angle, zoom, translation, rotation, perspective flip).</li>
-                        </ul>
-                    </p>
-                    <p">
-                        Parseq does <strong><em>not</em></strong> override:
-                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                            <li>Run: Sampler, Width, Height, tiling, resize seed.</li>
-                            <li>Keyframes: animation settings (animation mode, max frames, border) </li>
-                            <li>Keyframes: coherence (color coherence & cadence) </li>
-                            <li>Keyframes: depth warping</li>
-                            <li>Output settings: all settings (including fps and max frames)</li>
-                        </ul>
+                    <p>Use a <a style='color:SteelBlue;' target='_blank' href='https://sd-parseq.web.app/deforum'>Parseq</a> manifest for your animation (leave blank to ignore).</p>
+                    <p style="margin-top:1em; margin-bottom:1em;">
+                        Fields managed in your Parseq manifest override the values and schedules set in other parts of this UI. You can select which values to override by using the "Managed Fields" section in Parseq.
                     </p>
                     """)
                     with gr.Row(variant='compact'):
