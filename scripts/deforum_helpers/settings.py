@@ -72,6 +72,44 @@ def save_settings(*args, **kwargs):
     
     return [""]
 
+def load_settings_on_ui_launch(*args, **kwargs):
+    import gradio as gr
+    settings_path = args[0].strip()
+    settings_component_names = deforum_args.get_settings_component_names()
+    data = {settings_component_names[i]: args[i+1] for i in range(len(settings_component_names))}
+    print(f"reading custom settings from {settings_path}")
+
+    if not os.path.isfile(settings_path):
+        print('The custom settings file does not exist. The values will be unchanged.')
+        return ({key: gr.update(value=value) for key, value in data.items()},)
+    
+    with open(settings_path, "r", encoding='utf-8') as f:
+        jdata = json.load(f)
+        handle_deprecated_settings(jdata)
+        if 'animation_prompts' in jdata:
+            jdata['prompts'] = jdata['animation_prompts']
+
+    updated_values = {}
+    for key, default_val in data.items():
+        val = jdata.get(key, default_val)
+        if key == 'sampler' and isinstance(val, int):
+            from modules.sd_samplers import samplers_for_img2img
+            val = samplers_for_img2img[val].name
+        elif key == 'fill' and isinstance(val, int):
+            val = mask_fill_choices[val]
+        elif key in {'reroll_blank_frames', 'noise_type'} and key not in jdata:
+            default_key_val = (DeforumArgs if key != 'noise_type' else DeforumAnimArgs)[key]
+            logging.debug(f"{key} not found in load file, using default value: {default_key_val}")
+            val = default_key_val
+        elif key in {'animation_prompts_positive', 'animation_prompts_negative'}:
+            val = jdata.get(key, default_val)
+        elif key == 'animation_prompts':
+            val = json.dumps(jdata['prompts'], ensure_ascii=False, indent=4)
+        
+        updated_values[key] = gr.update(value=val)
+
+    return (updated_values,)
+
 def load_settings(*args, **kwargs):
     settings_path = args[0].strip()
     settings_component_names = deforum_args.get_settings_component_names()
