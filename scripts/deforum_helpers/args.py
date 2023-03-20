@@ -1,19 +1,26 @@
+import os
+import time
+import json
+import tempfile
+
+import gradio as gr
+from types import SimpleNamespace
+from PIL import Image
+
 from modules.shared import cmd_opts
 from modules.processing import get_fixed_seed
 from modules.ui_components import FormRow
 import modules.shared as sh
 import modules.paths as ph
-import os
+
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_interp_vid_upload_logic, process_interp_pics_upload_logic
 from .upscaling import process_ncnn_upscale_vid_upload_logic
 from .vid2depth import process_depth_vid_upload_logic
-from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
+from .video_audio_utilities import find_ffmpeg_binary, direct_stitch_vid_from_frames
 from .gradio_funcs import *
 from .general_utils import get_os, get_deforum_version
 from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names, controlnet_infotext
-# controlnet_component_names, setup_controlnet_ui
-import tempfile
-        
+
 def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
@@ -317,10 +324,6 @@ void main()
         out_color = vec4(col,0.5);
     }
 }"""
-
-import gradio as gr
-import time
-from types import SimpleNamespace
 
 i1_store_backup = f"<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.3b | Git commit: {get_deforum_version()}</p>"
 i1_store = i1_store_backup
@@ -1154,8 +1157,6 @@ def process_args(args_dict_main):
     parseq_args_dict = pack_parseq_args(args_dict_main)
     loop_args_dict = pack_loop_args(args_dict_main)
     controlnet_args_dict = pack_controlnet_args(args_dict_main)
-
-    import json
     
     root = SimpleNamespace(**Root())
     root.p = args_dict_main['p']
@@ -1238,7 +1239,6 @@ def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, 
     process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
 
 def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, add_audio, audio_track):
-    from PIL import Image
     
     if pic_list is None or len(pic_list) < 2:
         return print("Please upload at least 2 pics for interpolation.")
