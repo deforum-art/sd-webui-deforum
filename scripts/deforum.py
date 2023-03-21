@@ -288,9 +288,9 @@ def on_ui_tabs():
         )
         
         load_settings_btn.click(
-            fn=wrap_gradio_call(deforum_settings.load_settings),
-            inputs=[settings_path]+ settings_component_list,
-            outputs=settings_component_list + [stuff],
+        fn=wrap_gradio_call(lambda *args, **kwargs: deforum_settings.load_all_settings(*args, ui_launch=False, **kwargs)),
+        inputs=[settings_path] + settings_component_list,
+        outputs=settings_component_list + [stuff],
         )
 
         load_video_settings_btn.click(
@@ -301,7 +301,7 @@ def on_ui_tabs():
         
     def trigger_load_general_settings():
         print("Loading general settings...")
-        wrapped_fn = wrap_gradio_call(deforum_settings.load_settings_on_ui_launch)
+        wrapped_fn = wrap_gradio_call(lambda *args, **kwargs: deforum_settings.load_all_settings(*args, ui_launch=True, **kwargs))
         inputs = [settings_path.value] + [component.value for component in settings_component_list]
         outputs = settings_component_list + [stuff]
         updated_values = wrapped_fn(*inputs, *outputs)[0]
@@ -309,6 +309,7 @@ def on_ui_tabs():
         settings_component_name_to_obj = {name: component for name, component in zip(deforum_args.get_settings_component_names(), settings_component_list)}
         for key, value in updated_values.items():
             settings_component_name_to_obj[key].value = value['value']
+
             
     if opts.data.get("deforum_enable_persistent_settings"):
         trigger_load_general_settings()
