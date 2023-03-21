@@ -213,9 +213,14 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
         
         if glsl_args.use_shaders != "No":
             glsl_image = Image.open(f"{args.outdir}/glslOutput/frame_{frame:05d}.png")
-            init_image.paste(glsl_image)
-            init_image = init_image.convert('RGB')
+            glsl_image.putalpha(int(max(min(255*glsl_args.alpha[frame], 255), 0)))
+            init_image = Image.alpha_composite(init_image.convert('RGBA'), glsl_image)
         
+        try:
+            r, g, b, a = init_image.split()
+            init_image = Image.merge('RGB', (r, g, b))# Merge RGB channels
+        except:
+            pass #"no alpha to remove"
         p.init_images = [init_image]
         p.image_mask = mask
         p.image_cfg_scale = args.pix2pix_img_cfg_scale
@@ -235,7 +240,6 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root,
         root.first_frame = processed.images[0]
     
     results = processed.images[0]
-    
     return results
     
 def print_combined_table(args, anim_args, p, keys, frame_idx):

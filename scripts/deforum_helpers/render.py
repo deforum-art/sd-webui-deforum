@@ -618,11 +618,10 @@ def run_glsl(args, max_frames, glslSchedulesAndData):
     fragment_shader_code = """#version 330 core
 
 uniform float iTime;
-uniform float alpha;
 uniform vec2 iResolution;
 out vec4 fragColor;
 """ +glslSchedulesAndData.glsl_shader + """
-    void main(){ mainImage(fragColor, gl_FragCoord.xy); fragColor.a = alpha;}"""
+    void main(){ mainImage(fragColor, gl_FragCoord.xy); }"""
     ctx = moderngl.create_standalone_context()
     prog = ctx.program(vertex_shader=vertex_shader_code, fragment_shader=fragment_shader_code)
     vbo = np.array([-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, -1.0, 1.0, 0.0, 1.0, 1.0, 0.0], dtype=np.float32)
@@ -640,7 +639,6 @@ out vec4 fragColor;
         timeFactor = glslSchedulesAndData.time_factor[i]
         try:
             prog["iTime"].value = time
-            prog["alpha"].value = glslSchedulesAndData.alpha[i]
         except KeyError:
             print("had a keyerror on time")
 
@@ -651,6 +649,6 @@ out vec4 fragColor;
         vao.render(mode=moderngl.TRIANGLE_STRIP)
         
         # Save the framebuffer as a PNG file
-        img = Image.frombytes("RGBA", resolution, fbo.read(components=4,dtype='f1'), "raw", "RGBA", 0, -1)
+        img = Image.frombytes("RGB", resolution, fbo.read(components=3,dtype='f1'))
         img.save(f"{args.outdir}/glslOutput/frame_{i:05d}.png")
         time += timeFactor
