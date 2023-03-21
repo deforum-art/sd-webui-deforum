@@ -21,7 +21,7 @@ deforum_titles = {
     //"n_batch": "",
     //"save_settings": "",
     //"save_samples": "",
-    "Batch name": "output images will be placed in a folder with this name, inside of the img2img output folder",
+    "Batch name": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports placeholders like {seed}, {w}, {h}, {prompts} and more",
 	"Pix2Pix img CFG schedule": "*Only in use with pix2pix checkpoints!*",
     "Filename format": "specify the format of the filename for output images",
     "Seed behavior": "defines the seed behavior that is used for animations",
@@ -69,7 +69,9 @@ deforum_titles = {
         "LAB": "LAB is a more linear approach to mimic human perception of color space - a good default setting for most users.",
         "RGB": "RGB is good for enforcing unbiased amounts of color in each red, green and blue channel - some images may yield colorized artifacts if sampling is too low.",
     "Cadence": "A setting of 1 will cause every frame to receive diffusion in the sequence of image outputs. A setting of 2 will only diffuse on every other frame, yet motion will still be in effect. The output of images during the cadence sequence will be automatically blended, additively and saved to the specified drive. This may improve the illusion of coherence in some workflows as the content and context of an image will not change or diffuse during frames that were skipped. Higher values of 4-8 cadence will skip over a larger amount of frames and only diffuse the “Nth” frame as set by the diffusion_cadence value. This may produce more continuity in an animation, at the cost of little opportunity to add more diffused content. In extreme examples, motion within a frame will fail to produce diverse prompt context, and the space will be filled with lines or approximations of content - resulting in unexpected animation patterns and artifacts. Video Input & Interpolation modes are not affected by diffusion_cadence.",
-    "Optical flow cadence": "Whether to use optical flow to blend frames during cadence in 3D animation mode (if cadence more than 1)",
+    "Optical flow cadence": "Optional method for optical flow used to blend frames during cadence in 3D animation mode (if cadence more than 1).",
+    "Optical flow redo generation": "This option takes twice as long because it generates twice in order to capture the optical flow from the previous image to the first generation, then warps the previous image and redoes the generation. Works in 2D/3D animation modes.",
+    "Redo": "Diffusion Redo. This option renders N times before the final render. It is suggested to lower your steps if you up your redo. Seed is randomized during redo generations and restored afterwards.",
     "Noise type": "Selects the type of noise being added to each frame",
         "uniform": "Uniform noise covers the entire frame. It somewhat flattens and sharpens the video over time, but may be good for cartoonish look. This is the old default setting.",
         "perlin": "Perlin noise is a more natural looking noise. It is heterogeneous and less sharp than uniform noise, this way it is more likely that new details will appear in a more coherent way. This is the new default setting.",
@@ -160,6 +162,26 @@ deforum_titles = {
     "Color correction factor": "how close to get to the colors of the input frame image/ the amount each frame during a tweening step to use the new images colors",
 	// deforum.py / right side of the ui:
 	"Settings File": "Path to settings file you want to load. Path can be relative to webui folder OR full - absolute",
+
+    // Hybrid Video
+    "Generate inputframes": "Initiates extraction of video frames from your video_init_path to the inputframes folder. You only need to do this once and then you can change it to False and re-render",
+    "Hybrid composite": "Engages hybrid compositing of video into animation in various ways with comp alpha as a master mix control.",
+    "First Frame as init image": "If True, uses the first frame of the video as the init_image. False can create interesting transition effects into the video, depending on settings.",
+    "Motion use prev img": "If enabled, changes the behavior or hybrid_motion to captures motion by comparing the current video frame to the previous rendered image, instead of the previous video frame.",
+    "Hybrid motion": "Analyzes video frames for camera motion during generation that are used in rendering to match movement.",
+    "Flow method": "Selects the type of Optical Flow to use if Optical Flow is selected in Hybrid motion.",
+    "Comp mask type": "You don't need a mask to composite video. But, Mask types can control the way that video is composited with the previous image each frame.",
+    "Comp mask equalize": "Equalizes the mask for the composite before or after autocontrast operation (or both)",
+    "Comp mask auto contrast": "Auto-contrasts the mask for the composite. If enabled, uses the low/high autocontrast cutoff schedules.",
+    "Comp mask inverse": "Inverts the composite mask.",
+    "Comp save extra frames": "If this option is selected, many extra frames will be output for the various processes into the hybridframes folder.",
+    "Comp alpha schedule": "Schedule controls how much the composite video is mixed in, whether set to mask is None or using a mask. This is the master mix.",
+    "Flow factor schedule": "Affects optical flow hybrid motion. 1 is normal flow. -1 is negative flow. 0.5 is half flow, etc...",
+    "Comp mask blend alpha schedule": "If using a blend mask, this controls the blend amount of the video and render for the composite mask.",
+    "Comp mask contrast schedule": "Controls the contrast of the composite mask. 0.5 if half, 1 is normal contrast, 2 is double, etc.",
+    "Comp mask auto contrast cutoff high schedule": "If using autocontrast option, this is the high cutoff for the operation.",
+    "Comp mask auto contrast cutoff low schedule": "If using autocontrast option, this is the low cutoff for the operation.",
+    "Generate human masks": "This will generate masks of all the humans in a video. Created at generation of hybrid video. Not yet integrated for auto-masking, but it will create the masks, and you can then use the mask video manually.",
 }
 
 onUiUpdate(function(){
