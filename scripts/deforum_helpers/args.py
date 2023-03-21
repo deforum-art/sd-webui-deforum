@@ -29,6 +29,8 @@ def Root():
     mask_preset_names = ['everywhere','video_mask']
     p = None
     frames_cache = []
+    raw_batch_name = None
+    raw_seed = None
     initial_seed = None
     initial_info = None
     first_frame = None
@@ -695,24 +697,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 # PARSEQ ACCORD
                 with gr.Accordion('Parseq', open=False):
                     gr.HTML("""
-                    Use an <a style='color:SteelBlue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
-                    <p style="margin-top:1em">
-                        Note that parseq overrides:
-                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                            <li>Run: seed, subseed, subseed strength.</li>
-                            <li>Keyframes: generation settings (noise, strength, contrast, scale).</li>
-                            <li>Keyframes: motion parameters for 2D and 3D (angle, zoom, translation, rotation, perspective flip).</li>
-                        </ul>
-                    </p>
-                    <p">
-                        Parseq does <strong><em>not</em></strong> override:
-                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                            <li>Run: Sampler, Width, Height, tiling, resize seed.</li>
-                            <li>Keyframes: animation settings (animation mode, max frames, border) </li>
-                            <li>Keyframes: coherence (color coherence & cadence) </li>
-                            <li>Keyframes: depth warping</li>
-                            <li>Output settings: all settings (including fps and max frames)</li>
-                        </ul>
+                    <p>Use a <a style='color:SteelBlue;' target='_blank' href='https://sd-parseq.web.app/deforum'>Parseq</a> manifest for your animation (leave blank to ignore).</p>
+                    <p style="margin-top:1em; margin-bottom:1em;">
+                        Fields managed in your Parseq manifest override the values and schedules set in other parts of this UI. You can select which values to override by using the "Managed Fields" section in Parseq.
                     </p>
                     """)
                     with gr.Row(variant='compact'):
@@ -1207,7 +1194,11 @@ def process_args(args_dict_main):
     p.seed_resize_from_h = args.seed_resize_from_h
     p.fill = args.fill
     p.ddim_eta = args.ddim_eta
+    if args.seed == -1:
+        root.raw_seed = -1
     args.seed = get_fixed_seed(args.seed)
+    if root.raw_seed != -1:
+        root.raw_seed = args.seed
     args.timestring = time.strftime('%Y%m%d%H%M%S')
     args.strength = max(0.0, min(1.0, args.strength))
     args.prompts = json.loads(args_dict_main['animation_prompts'])
@@ -1221,9 +1212,10 @@ def process_args(args_dict_main):
         anim_args.max_frames = 1
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
-
+    
     current_arg_list = [args, anim_args, video_args, parseq_args]
     full_base_folder_path = os.path.join(os.getcwd(), p.outpath_samples)
+    root.raw_batch_name = args.batch_name
     args.batch_name = substitute_placeholders(args.batch_name, current_arg_list, full_base_folder_path)
     args.outdir = os.path.join(p.outpath_samples, str(args.batch_name))
     root.outpath_samples = args.outdir
