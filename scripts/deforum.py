@@ -53,6 +53,7 @@ def run_deforum(*args, **kwargs):
     args_dict['p'] = p
     
     root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict)
+
     root.clipseg_model = None
     try:
         root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
@@ -71,7 +72,7 @@ def run_deforum(*args, **kwargs):
     reset_frames_cache(root)
     gc.collect()
     torch.cuda.empty_cache()
-    
+
     from deforum_helpers.render import render_animation
     from deforum_helpers.render_modes import render_input_video, render_animation_with_video_mask, render_interpolation
 
@@ -183,6 +184,10 @@ def run_deforum(*args, **kwargs):
 
     if opts.do_not_show_images:
         processed.images = []
+        
+    if opts.data.get("deforum_enable_persistent_settings"):
+        persistent_sett_path = opts.data.get("deforum_persistent_settings_path")
+        deforum_settings.save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
 
     return processed.images, generation_info_js, plaintext_to_html(processed.info), plaintext_to_html('')
 
@@ -275,31 +280,50 @@ def on_ui_tabs():
         video_settings_component_list = [components[name] for name in deforum_args.video_args_names]
         stuff = gr.HTML("") # wrap gradio call garbage
         stuff.visible = False
-        
+
         save_settings_btn.click(
-                    fn=wrap_gradio_call(deforum_settings.save_settings),
-                    inputs=[settings_path] + settings_component_list + video_settings_component_list,
-                    outputs=[stuff],
-                )
+            fn=wrap_gradio_call(deforum_settings.save_settings),
+            inputs=[settings_path] + settings_component_list + video_settings_component_list,
+            outputs=[stuff],
+        )
         
         load_settings_btn.click(
-                    fn=wrap_gradio_call(deforum_settings.load_settings),
-                    inputs=[settings_path]+ settings_component_list,
-                    outputs=settings_component_list + [stuff],
-                )
-        
-        load_video_settings_btn.click(
-                    fn=wrap_gradio_call(deforum_settings.load_video_settings),
-                    inputs=[settings_path] + video_settings_component_list,
-                    outputs=video_settings_component_list + [stuff],
-                )
+        fn=wrap_gradio_call(lambda *args, **kwargs: deforum_settings.load_all_settings(*args, ui_launch=False, **kwargs)),
+        inputs=[settings_path] + settings_component_list,
+        outputs=settings_component_list + [stuff],
+        )
 
+        load_video_settings_btn.click(
+            fn=wrap_gradio_call(deforum_settings.load_video_settings),
+            inputs=[settings_path] + video_settings_component_list,
+            outputs=video_settings_component_list + [stuff],
+        )
+        
+    def trigger_load_general_settings():
+        print("Loading general settings...")
+        wrapped_fn = wrap_gradio_call(lambda *args, **kwargs: deforum_settings.load_all_settings(*args, ui_launch=True, **kwargs))
+        inputs = [settings_path.value] + [component.value for component in settings_component_list]
+        outputs = settings_component_list + [stuff]
+        updated_values = wrapped_fn(*inputs, *outputs)[0]
+
+        settings_component_name_to_obj = {name: component for name, component in zip(deforum_args.get_settings_component_names(), settings_component_list)}
+        for key, value in updated_values.items():
+            settings_component_name_to_obj[key].value = value['value']
+
+            
+    if opts.data.get("deforum_enable_persistent_settings"):
+        trigger_load_general_settings()
+        
     return [(deforum_interface, "Deforum", "deforum_interface")]
 
 def on_ui_settings():
     section = ('deforum', "Deforum")
     shared.opts.add_option("deforum_keep_3d_models_in_vram", shared.OptionInfo(
         False, "Keep 3D models in VRAM between runs", gr.Checkbox, {"interactive": True, "visible": True if not (cmd_opts.lowvram or cmd_opts.medvram) else False}, section=section))
+    shared.opts.add_option("deforum_enable_persistent_settings", shared.OptionInfo(
+        False, "Keep settings persistent upon relaunch of webui", gr.Checkbox, {"interactive": True}, section=section))
+    shared.opts.add_option("deforum_persistent_settings_path", shared.OptionInfo(
+        "models/Deforum/deforum_persistent_settings.txt", "Path for saving your persistent settings file:", section=section))
         
 script_callbacks.on_ui_tabs(on_ui_tabs)
 script_callbacks.on_ui_settings(on_ui_settings)
