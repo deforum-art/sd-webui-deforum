@@ -649,6 +649,6 @@ out vec4 fragColor;
         vao.render(mode=moderngl.TRIANGLE_STRIP)
         
         # Save the framebuffer as a PNG file
-        img = Image.frombytes("RGB", resolution, fbo.read(components=3,dtype='f1'))
+        img = Image.frombytes("RGB", resolution, fbo.read(components=3,dtype='f1')).transpose(Image.FLIP_TOP_BOTTOM)
         img.save(f"{args.outdir}/glslOutput/frame_{i:05d}.png")
         time += timeFactor
