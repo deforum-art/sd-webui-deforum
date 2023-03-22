@@ -636,7 +636,7 @@ out vec4 fragColor;
     ctx.enable(moderngl.BLEND)
     os.makedirs(f"{args.outdir}/glslOutput", exist_ok=True)
     for i in range(max_frames):
-        timeFactor = glslSchedulesAndData.time_factor[i]
+        timeFactor = 1/max(.001, glslSchedulesAndData.time_factor[i]) # convert from fps
         try:
             prog["iTime"].value = time
         except KeyError:

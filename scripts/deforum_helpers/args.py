@@ -689,7 +689,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact'):# , 'Mask' we will add mask in after it works again
                         use_shaders = gr.Radio(['No', 'Image'], label="Use shader image input", value='No', interactive=True)
                     with gr.Row(variant='compact'):
-                        time_factor = gr.Textbox(label="time factor", lines=1, interactive=True, value="0:(.1)")
+                        time_factor = gr.Textbox(label="fps", lines=1, interactive=True, value="0:(10)")
                     with gr.Row(variant='compact'):
                         alpha_schedule = gr.Textbox(label="shader alpha", lines=1, interactive=True, value="0:(.7)")
                     with gr.Row(variant='compact'):
