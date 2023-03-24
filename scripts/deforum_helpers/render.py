@@ -35,7 +35,7 @@ from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 
-def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, glsl_args, animation_prompts, root):
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         if anim_args.hybrid_composite or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
@@ -64,7 +64,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args, args.seed) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
     loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
-    glslSchedulesAndData = GLSLKeys(args, anim_args)
+    glslSchedulesAndData = GLSLKeys(glsl_args, anim_args, args.seed)
     # resume animation
     start_frame = 0
     if anim_args.resume_from_timestring:
@@ -649,6 +649,6 @@ out vec4 fragColor;
         vao.render(mode=moderngl.TRIANGLE_STRIP)
         
         # Save the framebuffer as a PNG file
-        img = Image.frombytes("RGB", resolution, fbo.read(components=3,dtype='f1')).transpose(Image.FLIP_TOP_BOTTOM)
+        img = Image.frombytes("RGBA", resolution, fbo.read(components=4,dtype='f1')).transpose(Image.FLIP_TOP_BOTTOM)
         img.save(f"{args.outdir}/glslOutput/frame_{i:05d}.png")
         time += timeFactor
