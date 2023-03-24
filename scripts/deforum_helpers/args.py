@@ -933,6 +933,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                         show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
+    seed.change(fn=auto_hide_n_batch, inputs=seed, outputs=n_batch)
     fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
     r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
     ncnn_upscale_model.change(fn=update_r_upscale_factor, inputs=ncnn_upscale_model, outputs=ncnn_upscale_factor)

@@ -1,6 +1,9 @@
 import gradio as gr
 from .video_audio_utilities import extract_number, get_quick_vid_info
 
+def auto_hide_n_batch(choice):
+    return gr.update(visible=True) if choice == -1 else gr.update(value=1, visible=False)
+    
 def change_visibility_from_skip_video(choice):
     return gr.update(visible=False) if choice else gr.update(visible=True) 
 
