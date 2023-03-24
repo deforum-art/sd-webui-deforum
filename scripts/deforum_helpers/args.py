@@ -314,16 +314,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float noise_value = noise(gl_FragCoord.xy * 0.01 + iTime);
     // Time varying pixel color
     vec3 col = 0.5 + noise_value*cos(iTime+uv.xyx+vec3(0,2,4));
-    float transparentCircleSize = 0.5;
-
-    // Output to screen
-    if (length(uv) < transparentCircleSize) {
-        // create a transparent hole in the center of the shader
-        fragColor = vec4(0.0, 0.0, 0.0, 0.0);
-    }
-    else{
-        fragColor = vec4(col,0.5);
-    }
+    fragColor = vec4(col,1);
 }"""
 
 i1_store_backup = f"<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.3b | Git commit: {get_deforum_version()}</p>"
@@ -686,14 +677,22 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(min_width=250):
                             mask_brightness_adjust = gr.Number(label="Mask brightness adjust", value=d.mask_brightness_adjust, interactive=True)
                 with gr.Tab('GLSL settings'):
-                    with gr.Row(variant='compact'):# , 'Mask' we will add mask in after it works again
-                        use_shaders = gr.Radio(['No', 'Image'], label="Use shader image input", value='No', interactive=True)
-                    with gr.Row(variant='compact'):
-                        time_factor = gr.Textbox(label="fps", lines=1, interactive=True, value="0:(10)")
-                    with gr.Row(variant='compact'):
-                        alpha_schedule = gr.Textbox(label="shader alpha", lines=1, interactive=True, value="0:(.7)")
-                    with gr.Row(variant='compact'):
-                        glsl_shader = gr.Textbox(label="fragment shader", lines=15, interactive=True, value=fragment_shader())
+                    glsl_settings_notif = gr.HTML(value='Please, change animation mode to 2D or 3D to enable GLSL Mode', visible=False, elem_id='glsl_settings_notif')
+                    with gr.Column() as glsl_settings_tab:
+                        gr.HTML("""
+                        <p>You can use <a style='color:SteelBlue;' target='_blank' href='https://www.shadertoy.com/browse'>shadertoy.com</a> to get shaders</p>
+                        <p style="margin-top:1em; margin-bottom:1em;">
+                            
+                        </p>
+                        """)
+                        with gr.Row(variant='compact'):# , 'Mask' we will add mask in after it works again
+                            use_shaders = gr.Radio(['No', 'Image'], label="Use shader image input", value='No', interactive=True)
+                        with gr.Row(variant='compact'):
+                            time_factor = gr.Textbox(label="fps", lines=1, interactive=True, value="0:(10)")
+                        with gr.Row(variant='compact'):
+                            alpha_schedule = gr.Textbox(label="shader alpha", lines=1, interactive=True, value="0:(.7)")
+                        with gr.Row(variant='compact'):
+                            glsl_shader = gr.Textbox(label="fragment shader", lines=15, interactive=True, value=fragment_shader())
                 # PARSEQ ACCORD
                 with gr.Accordion('Parseq', open=False):
                     gr.HTML("""
@@ -987,7 +986,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     three_d_related_outputs = [depth_3d_warping_accord,fov_accord,optical_flow_cadence,only_3d_motion_column]
     for output in three_d_related_outputs:
         animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=output)
-    animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
+    animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column)
+    animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=glsl_settings_tab) 
+    animation_mode.change(fn=show_hybrid_html_msg, inputs=animation_mode, outputs=glsl_settings_notif) 
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=color_force_grayscale)
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=noise_tab_column)
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
@@ -1085,7 +1086,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         use_mask, use_alpha_as_mask, invert_mask, overlay_mask,
                         mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
                         fill, full_res_mask, full_res_mask_padding,
-                        reroll_blank_frames, use_shaders, time_factor, alpha_schedule, glsl_shader'''
+                        reroll_blank_frames'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_creation,
                             fps, make_gif, delete_imgs, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
@@ -1101,9 +1102,11 @@ parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
 loop_args_names = str(r'''use_looper, init_images, image_strength_schedule, blendFactorMax, blendFactorSlope, 
                           tweening_frames_schedule, color_correction_factor'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
+glsl_args_names = str(r'''use_shaders, time_factor, alpha_schedule, glsl_shader'''
+                    ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 
 def get_component_names():
-    return ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names + controlnet_component_names()
+    return ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + hybrid_args_names + loop_args_names + glsl_args_names + controlnet_component_names()
 
 def get_settings_component_names():
     return [name for name in get_component_names()] #if name not in video_args_names]
@@ -1140,6 +1143,9 @@ def pack_parseq_args(args_dict):
 def pack_loop_args(args_dict):
     return {name: args_dict[name] for name in loop_args_names}
 
+def pack_glsl_args(args_dict):
+    return {name: args_dict[name] for name in glsl_args_names}
+
 def pack_controlnet_args(args_dict):
     return {name: args_dict[name] for name in controlnet_component_names()}
 
@@ -1151,6 +1157,7 @@ def process_args(args_dict_main):
     video_args_dict = pack_video_args(args_dict_main)
     parseq_args_dict = pack_parseq_args(args_dict_main)
     loop_args_dict = pack_loop_args(args_dict_main)
+    glsl_args_dict = pack_glsl_args(args_dict_main)
     controlnet_args_dict = pack_controlnet_args(args_dict_main)
     
     root = SimpleNamespace(**Root())
@@ -1168,7 +1175,7 @@ def process_args(args_dict_main):
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root)
+        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, glsl_args_dict, custom_settings_file, root)
     
     if not os.path.exists(root.models_path):
         os.mkdir(root.models_path)
@@ -1178,6 +1185,7 @@ def process_args(args_dict_main):
     video_args = SimpleNamespace(**video_args_dict)
     parseq_args = SimpleNamespace(**parseq_args_dict)
     loop_args = SimpleNamespace(**loop_args_dict)
+    glsl_args = SimpleNamespace(**glsl_args_dict)
     controlnet_args = SimpleNamespace(**controlnet_args_dict)
 
     p.width, p.height = map(lambda x: x - x % 64, (args.W, args.H))
@@ -1223,7 +1231,7 @@ def process_args(args_dict_main):
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
     
-    return root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
+    return root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args, glsl_args
     
 # Local gradio-to-frame-interoplation function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
