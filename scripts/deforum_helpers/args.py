@@ -348,7 +348,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.TabItem('Run'):
                 from modules.sd_samplers import samplers_for_img2img
                 with gr.Row(variant='compact'):
-                    n_batch = gr.Number(label="# of vids", value=d.n_batch, interactive=True, precision=0)
+                    
                     sampler = gr.Dropdown(label="Sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
                     steps = gr.Slider(label="Steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                 with gr.Row(variant='compact'):
@@ -356,6 +356,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True) 
                 with gr.Row(variant='compact'):
                     seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
+                    n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True)
                     batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
                 with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
                     with gr.Row(variant='compact'):

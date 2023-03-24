@@ -43,9 +43,8 @@ def run_deforum(*args, **kwargs):
     p = StableDiffusionProcessingImg2Img(
         sd_model=shared.sd_model,
         outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
-        outpath_grids = opts.outdir_grids or opts.outdir_img2img_grids,
-        #we'll setup the rest later
-    )
+        outpath_grids = opts.outdir_grids or opts.outdir_img2img_grids
+    ) #we'll setup the rest later
 
     for i in range(args_dict['n_batch']):
         print(f"\033[4;33mDeforum extension for auto1111 webui, v2.3b\033[0m")
@@ -69,7 +68,6 @@ def run_deforum(*args, **kwargs):
                 basedir + '/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
             ])
         
-        print(f"Executing iteration {i+1} of {batch_number}")
         # clean up unused memory
         reset_frames_cache(root)
         gc.collect()
