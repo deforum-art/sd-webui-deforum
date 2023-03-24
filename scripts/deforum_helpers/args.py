@@ -348,6 +348,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.TabItem('Run'):
                 from modules.sd_samplers import samplers_for_img2img
                 with gr.Row(variant='compact'):
+                    n_batch = gr.Number(label="# of vids", value=d.n_batch, interactive=True, precision=0)
                     sampler = gr.Dropdown(label="Sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
                     steps = gr.Slider(label="Steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                 with gr.Row(variant='compact'):
@@ -928,7 +929,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
                         display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
                         seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
-                        n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
                         save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                         show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
