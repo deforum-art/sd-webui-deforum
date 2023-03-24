@@ -6,11 +6,11 @@ from .seed import next_seed
 from .video_audio_utilities import vid2frames
 from .prompt import interpolate_prompts
 from .generate import generate
-from .animation_key_frames import DeformAnimKeys
+from .animation_key_frames import DeformAnimKeys, GLSLKeys
 from .parseq_adapter import ParseqAnimKeys
 from .save_images import save_image
 from .settings import save_settings_from_animation_run
-
+from .render import run_glsl
 # Webui
 from modules.shared import opts, cmd_opts, state
 
@@ -47,10 +47,10 @@ def render_input_video(args, anim_args, video_args, parseq_args, loop_args, cont
         args.use_mask = True
         args.overlay_mask = True
 
-    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
+    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, glsl_args, animation_prompts, root)
 
 # Modified a copy of the above to allow using masking video with out a init video.
-def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, glsl_args, animation_prompts, root):
     # create a folder for the video input frames to live in
     mask_in_frame_path = os.path.join(args.outdir, 'maskframes') 
     os.makedirs(mask_in_frame_path, exist_ok=True)
@@ -66,7 +66,7 @@ def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, l
     #args.use_init = True
     print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
 
-    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
+    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, glsl_args, animation_prompts, root)
 
 def get_parsed_value(value, frame_idx, max_f):
     pattern = r'`.*?`'
@@ -79,17 +79,17 @@ def get_parsed_value(value, frame_idx, max_f):
         parsed_value = parsed_value.replace(matched_string, str(value))
     return parsed_value
 
-def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, glsl_args, controlnet_args, animation_prompts, root):
+def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, glsl_args, animation_prompts, root):
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
 
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
+    glslSchedulesAndData = GLSLKeys(glsl_args, anim_args, args.seed)
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
-    print(f"Saving interpolation animation frames to {args.outdir}")
 
     # save settings.txt file for the current run
     save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root)
@@ -102,6 +102,9 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, gl
         print("Generating interpolated prompts for all frames")
         prompt_series = interpolate_prompts(animation_prompts, anim_args.max_frames)
     
+    if glslSchedulesAndData.use_shaders != 'No':
+        run_glsl(args, anim_args.max_frames, glslSchedulesAndData)
+
     state.job_count = anim_args.max_frames
     frame_idx = 0
     # INTERPOLATION MODE
@@ -142,7 +145,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, gl
         args.seed = int(keys.seed_schedule_series[frame_idx]) if args.seed_behavior == 'schedule' or use_parseq else args.seed
         opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip if scheduled_clipskip is not None else opts.data["CLIP_stop_at_last_layers"]
 
-        image = generate(args, keys, anim_args, loop_args, controlnet_args, args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, keys, anim_args, loop_args, controlnet_args, glslSchedulesAndData, root, frame_idx, sampler_name=scheduled_sampler_name)
         filename = f"{args.timestring}_{frame_idx:09}.png"
 
         save_image(image, 'PIL', filename, args, video_args, root)

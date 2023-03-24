@@ -63,12 +63,12 @@ class LooperAnimKeys():
         self.color_correction_factor_series = self.fi.get_inbetweens(self.fi.parse_key_frames(loop_args.color_correction_factor))
 
 class GLSLKeys():
-    def __init__(self, args, anim_args):
-        self.fi = FrameInterpolater(anim_args.max_frames, args.seed)
-        self.use_shaders = args.use_shaders
-        self.time_factor = self.fi.get_inbetweens(self.fi.parse_key_frames(args.time_factor))
-        self.alpha = self.fi.get_inbetweens(self.fi.parse_key_frames(args.alpha_schedule))
-        self.glsl_shader = args.glsl_shader
+    def __init__(self, glsl_args, anim_args, seed):
+        self.fi = FrameInterpolater(anim_args.max_frames, seed)
+        self.use_shaders = glsl_args.use_shaders
+        self.time_factor = self.fi.get_inbetweens(self.fi.parse_key_frames(glsl_args.time_factor))
+        self.alpha = self.fi.get_inbetweens(self.fi.parse_key_frames(glsl_args.alpha_schedule))
+        self.glsl_shader = glsl_args.glsl_shader
 
 class FrameInterpolater():
     def __init__(self, max_frames=0, seed=-1) -> None:
