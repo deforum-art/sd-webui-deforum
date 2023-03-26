@@ -31,7 +31,7 @@ def load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, contr
                     print(f"Key {k} doesn't exist in the custom settings data! Using default value of {v}")
         print(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict)
 
-def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, full_out_file_path = None):
+def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, glsl_args, root, full_out_file_path = None):
     if full_out_file_path:
         args.__dict__["seed"] = root.raw_seed
         args.__dict__["batch_name"] = root.raw_batch_name
@@ -42,7 +42,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
     settings_filename = full_out_file_path if full_out_file_path else os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         s = {}
-        for d in (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, video_args.__dict__):
+        for d in (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, video_args.__dict__, glsl_args.__dict__):
             s.update({k: v for k, v in d.items() if k not in exclude_keys})
         s["deforum_git_commit_id"] = get_deforum_version()
         json.dump(s, f, ensure_ascii=False, indent=4)
