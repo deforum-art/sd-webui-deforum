@@ -92,7 +92,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
     os.makedirs(args.outdir, exist_ok=True)
 
     # save settings.txt file for the current run
-    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root)
+    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, glsl_args, root)
         
     # Compute interpolated prompts
     if use_parseq and keys.manages_prompts():

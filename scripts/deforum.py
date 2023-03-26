@@ -187,7 +187,7 @@ def run_deforum(*args, **kwargs):
             
         if opts.data.get("deforum_enable_persistent_settings"):
             persistent_sett_path = opts.data.get("deforum_persistent_settings_path")
-            deforum_settings.save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
+            deforum_settings.save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, glsl_args, root, persistent_sett_path)
 
     return processed.images, generation_info_js, plaintext_to_html(processed.info), plaintext_to_html('')
 
