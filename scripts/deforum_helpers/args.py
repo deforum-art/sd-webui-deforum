@@ -684,7 +684,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         gr.HTML("""
                         <p>You can use <a style='color:SteelBlue;' target='_blank' href='https://www.shadertoy.com/browse'>shadertoy.com</a> to get shaders</p>
                         <p style="margin-top:1em; margin-bottom:1em;">
-                            
+                            Supported shaders are the ones with no channel input data. Here is a <a style='color:SteelBlue;' target='_blank' href='https://www.shadertoy.com/view/WsycRh'>working example</a>
+                        <br />
+                            One that is not supported <a style='color:SteelBlue;' target='_blank' href='https://www.shadertoy.com/view/tdjcWz'>example</a> which has channel0 data
+                        </p><p style="margin-top:1em; margin-bottom:1em;">    
+                            Note: If they take in channel data you can try to modify them to, however it requires knowledge of GLSL.
                         </p>
                         """)
                         with gr.Row(variant='compact'):# , 'Mask' we will add mask in after it works again
