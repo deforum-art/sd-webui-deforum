@@ -49,7 +49,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
 
 # In gradio gui settings save/ load funs:
 def save_settings(*args, **kwargs):
-    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args, pack_video_args
+    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args, pack_video_args, pack_glsl_args
     settings_path = args[0].strip()
     settings_component_names = deforum_args.get_settings_component_names()
     data = {settings_component_names[i]: args[i+1] for i in range(0, len(settings_component_names))}
@@ -62,7 +62,8 @@ def save_settings(*args, **kwargs):
     loop_dict = pack_loop_args(data)
     controlnet_dict = pack_controlnet_args(data)
     video_args_dict = pack_video_args(data)
-    combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict, **video_args_dict}
+    glsl_args_dict = pack_glsl_args(data)
+    combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict, **video_args_dict, **glsl_args_dict}
     exclude_keys = get_keys_to_exclude() + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
     filtered_combined["deforum_git_commit_id"] = get_deforum_version()
