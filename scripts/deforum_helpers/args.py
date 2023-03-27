@@ -4,7 +4,7 @@ from modules.ui_components import FormRow
 import modules.shared as sh
 import modules.paths as ph
 import os
-from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_interp_vid_upload_logic, process_interp_pics_upload_logic
+from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_interp_vid_upload_logic, process_interp_pics_upload_logic, process_interp_pics_path_upload_logic
 from .upscaling import process_ncnn_upscale_vid_upload_logic
 from .vid2depth import process_depth_vid_upload_logic
 from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
@@ -819,6 +819,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     vid_to_interpolate_chosen_file = gr.File(label="Video to Interpolate", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_interpolate_chosen_file")
                                     # A drag-n-drop UI box to which the user uploads a pictures to interpolate
                                     pics_to_interpolate_chosen_file = gr.File(label="Pics to Interpolate", interactive=True, file_count="multiple", file_types=["image"], elem_id="pics_to_interpolate_chosen_file")
+                                    # Textbox to chose a path where images will reside in the server to interpolate
+                                    pics_to_interpolate_chosen_path = gr.Textbox(label="Pics Path to Interpolate", value = "", placeholder="Server path where images reside", elem_id="pics_to_interpolate_chosen_path")                                    
                                 with gr.Row(variant='compact', visible=False) as interp_live_stats_row:
                                     # Non interactive textbox showing uploaded input vid total Frame Count
                                     in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
@@ -830,11 +832,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     # This is the actual button that's pressed to initiate the interpolation:
                                     interpolate_button = gr.Button(value="*Interpolate Video*")
                                     interpolate_pics_button = gr.Button(value="*Interpolate Pics*")
+                                    interpolate_path_button = gr.Button(value="*Interpolate Directory Pics")
                                 # Show a text about CLI outputs:
                                 gr.HTML("* check your CLI for outputs *", elem_id="below_interpolate_butts_msg") # TODO: CSS THIS TO CENTER OF ROW!
                                 # make the functin call when the interpolation button is clicked
                                 interpolate_button.click(upload_vid_to_interpolate,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, in_vid_fps_ui_window])
                                 interpolate_pics_button.click(upload_pics_to_interpolate,inputs=[pics_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, fps, add_soundtrack, soundtrack_path])
+                                interpolate_path_button.click(server_path_to_interpolate,inputs=[pics_to_interpolate_chosen_path, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, fps, add_soundtrack, soundtrack_path])
                 # VIDEO UPSCALE TAB
                 with gr.TabItem('Video Upscaling'):
                     vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
@@ -1216,6 +1220,31 @@ def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_i
     f_models_path = root_params['models_path']
     
     process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_audio, audio_track)
+
+def server_path_to_interpolate(path, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, add_audio, audio_track):
+    from PIL import Image
+    
+    if path is None:
+        return print("Please choose a server path")
+    pic_list = []
+    # generate list of pics from server path provided
+    for(dirpath, dirnames, filenames) in os.walk(path):
+        pic_list.extend(os.path.join(dirpath, x) for x in filenames)
+        break
+    if len(pic_list) is 0:
+        return print("The path provided contains 0 files...")
+        
+    # make sure all uploaded pics have the same resolution
+    pic_sizes = [Image.open(picture_path).size for picture_path in pic_list]
+    if len(set(pic_sizes)) != 1:
+        return print("All uploaded pics need to be of the same Width and Height / resolution.")
+        
+    resolution = pic_sizes[0]
+     
+    root_params = Root()
+    f_models_path = root_params['models_path']
+    
+    process_interp_pics_path_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_audio, audio_track)
 
 def upload_vid_to_depth(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
     # print msg and do nothing if vid not uploaded
