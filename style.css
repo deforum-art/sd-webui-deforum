@@ -2,12 +2,12 @@
 	display: flex !important;
 	align-items: flex-start !important;
 	justify-content: center !important;
-	height: 85px !important;
+	height: 60px !important;
 }
 
-#vid_to_interpolate_chosen_file, #pics_to_interpolate_chosen_file, #vid_to_upscale_chosen_file,  #controlnet_input_video_chosen_file, #controlnet_input_video_mask_chosen_file, #vid_to_depth_chosen_file {
-	height: 85px !important;
-}
+/* #vid_to_interpolate_chosen_file, #pics_to_interpolate_chosen_file, #vid_to_upscale_chosen_file,  #controlnet_input_video_chosen_file, #controlnet_input_video_mask_chosen_file, #vid_to_depth_chosen_file { */
+	/* height: 85px !important; */
+/* } */
 
 #extra_schedules::before {
   content: "Schedules:";
