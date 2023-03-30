@@ -472,7 +472,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         loop_args.use_looper = loopSchedulesAndData.use_looper
         loop_args.imagesToKeyframe = loopSchedulesAndData.imagesToKeyframe
 
-        if opts.data["img2img_fix_steps"] == True: # disable "with img2img do exactly x steps" from general setting, as it *ruins* deforum animations
+        if 'img2img_fix_steps' in opts.data and opts.data["img2img_fix_steps"]: # disable "with img2img do exactly x steps" from general setting, as it *ruins* deforum animations
             opts.data["img2img_fix_steps"] = False
         if scheduled_clipskip is not None:
             opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip

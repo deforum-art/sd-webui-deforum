@@ -20,6 +20,8 @@ def Root():
     mask_preset_names = ['everywhere','video_mask']
     p = None
     frames_cache = []
+    raw_batch_name = None
+    raw_seed = None
     initial_seed = None
     initial_info = None
     first_frame = None
@@ -346,6 +348,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.TabItem('Run'):
                 from modules.sd_samplers import samplers_for_img2img
                 with gr.Row(variant='compact'):
+                    
                     sampler = gr.Dropdown(label="Sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
                     steps = gr.Slider(label="Steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
                 with gr.Row(variant='compact'):
@@ -353,6 +356,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True) 
                 with gr.Row(variant='compact'):
                     seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
+                    n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True)
                     batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
                 with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
                     with gr.Row(variant='compact'):
@@ -654,24 +658,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 # PARSEQ ACCORD
                 with gr.Accordion('Parseq', open=False):
                     gr.HTML("""
-                    Use an <a style='color:SteelBlue;' target='_blank' href='https://sd-parseq.web.app/deforum'>sd-parseq manifest</a> for your animation (leave blank to ignore).</p>
-                    <p style="margin-top:1em">
-                        Note that parseq overrides:
-                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                            <li>Run: seed, subseed, subseed strength.</li>
-                            <li>Keyframes: generation settings (noise, strength, contrast, scale).</li>
-                            <li>Keyframes: motion parameters for 2D and 3D (angle, zoom, translation, rotation, perspective flip).</li>
-                        </ul>
-                    </p>
-                    <p">
-                        Parseq does <strong><em>not</em></strong> override:
-                        <ul style="list-style-type:circle; margin-left:2em; margin-bottom:1em">
-                            <li>Run: Sampler, Width, Height, tiling, resize seed.</li>
-                            <li>Keyframes: animation settings (animation mode, max frames, border) </li>
-                            <li>Keyframes: coherence (color coherence & cadence) </li>
-                            <li>Keyframes: depth warping</li>
-                            <li>Output settings: all settings (including fps and max frames)</li>
-                        </ul>
+                    <p>Use a <a style='color:SteelBlue;' target='_blank' href='https://sd-parseq.web.app/deforum'>Parseq</a> manifest for your animation (leave blank to ignore).</p>
+                    <p style="margin-top:1em; margin-bottom:1em;">
+                        Fields managed in your Parseq manifest override the values and schedules set in other parts of this UI. You can select which values to override by using the "Managed Fields" section in Parseq.
                     </p>
                     """)
                     with gr.Row(variant='compact'):
@@ -922,7 +911,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                      <p style="margin-top:0em">
                         Important Notes:
                         <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
-                            <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%09d.png', just replace 20230124234916 with your batch ID. The %05d is important, don't forget it!</li>
+                            <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%09d.png', just replace 20230124234916 with your batch ID. The %09d is important, don't forget it!</li>
                         </ul>
                         """)
                     with gr.Row(variant='compact'):
@@ -941,10 +930,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
                         display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
                         seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
-                        n_batch = gr.Number(label="N Batch", value=d.n_batch, interactive=True, precision=0, visible=False)
                         save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                         show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
+    seed.change(fn=auto_hide_n_batch, inputs=seed, outputs=n_batch)
     fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
     r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
     ncnn_upscale_model.change(fn=update_r_upscale_factor, inputs=ncnn_upscale_model, outputs=ncnn_upscale_factor)
@@ -1168,7 +1157,11 @@ def process_args(args_dict_main):
     p.seed_resize_from_h = args.seed_resize_from_h
     p.fill = args.fill
     p.ddim_eta = args.ddim_eta
+    if args.seed == -1:
+        root.raw_seed = -1
     args.seed = get_fixed_seed(args.seed)
+    if root.raw_seed != -1:
+        root.raw_seed = args.seed
     args.timestring = time.strftime('%Y%m%d%H%M%S')
     args.strength = max(0.0, min(1.0, args.strength))
     args.prompts = json.loads(args_dict_main['animation_prompts'])
@@ -1182,9 +1175,10 @@ def process_args(args_dict_main):
         anim_args.max_frames = 1
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
-
+    
     current_arg_list = [args, anim_args, video_args, parseq_args]
     full_base_folder_path = os.path.join(os.getcwd(), p.outpath_samples)
+    root.raw_batch_name = args.batch_name
     args.batch_name = substitute_placeholders(args.batch_name, current_arg_list, full_base_folder_path)
     args.outdir = os.path.join(p.outpath_samples, str(args.batch_name))
     root.outpath_samples = args.outdir
@@ -1212,7 +1206,7 @@ def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_i
         return print("Please upload at least 2 pics for interpolation.")
         
     # make sure all uploaded pics have the same resolution
-    pic_sizes = [Image.open(picture_path).size for picture_path in pic_list]
+    pic_sizes = [Image.open(picture_path.name).size for picture_path in pic_list]
     if len(set(pic_sizes)) != 1:
         return print("All uploaded pics need to be of the same Width and Height / resolution.")
         

@@ -2,16 +2,11 @@
 	display: flex !important;
 	align-items: flex-start !important;
 	justify-content: center !important;
-	height: 85px !important;
 }
 
-#vid_to_interpolate_chosen_file, #pics_to_interpolate_chosen_file, #vid_to_upscale_chosen_file,  #controlnet_input_video_chosen_file, #controlnet_input_video_mask_chosen_file, #vid_to_depth_chosen_file {
-	height: 85px !important;
-}
-
-#save_zip_deforum, #save_deforum  {
-	display: none;
-}
+/* #vid_to_interpolate_chosen_file, #pics_to_interpolate_chosen_file, #vid_to_upscale_chosen_file,  #controlnet_input_video_chosen_file, #controlnet_input_video_mask_chosen_file, #vid_to_depth_chosen_file { */
+	/* height: 85px !important; */
+/* } */
 
 #extra_schedules::before {
   content: "Schedules:";
@@ -26,12 +21,17 @@
 	font-weight: bold !important;
 }
 
-#deforum_results .flex #image_buttons_deforum #img2img_tab,
-#deforum_results .flex #image_buttons_deforum #inpaint_tab,
-#deforum_results .flex #image_buttons_deforum #extras_tab {
+#image_buttons_deforum #img2img_tab,
+#image_buttons_deforum #inpaint_tab,
+#image_buttons_deforum #extras_tab,
+#save_zip_deforum, #save_deforum {
 	display: none !important;
 }
 
+#main_top_info_accord .label-wrap {
+	gap:2px;
+	padding: 0.5rem; 
+}
 #controlnet_not_found_html_msg {
 	color: Tomato;
 }
@@ -40,9 +40,9 @@
 	text-align: center !important;
 }
 
-#tab_deforum_interface .p-3 {
-  padding: 0.5rem;
-}
+/* #tab_deforum_interface .p-3 { */
+  /* padding: 0.5rem; */
+/* } */
 
 #settings_path_msg {
 	margin: 0.6em;
@@ -51,11 +51,11 @@
 	justify-content: center;
 }
 
-#deforum_results .flex {
-	gap:0px;
-}
+/* #deforum_results .flex { */
+	/* gap:0px; */
+/* } */
 
-#tab_deforum_interface #motion_noise_etc .flex, #tab_deforum_interface #extra_schedules .flex {
-	grid-gap:2px;
-	gap:2px; 
-}
+/* #tab_deforum_interface #motion_noise_etc .flex, #tab_deforum_interface #extra_schedules .flex { */
+	/* grid-gap:2px; */
+	/* gap:2px;  */
+/* } */
