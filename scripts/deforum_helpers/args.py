@@ -1210,7 +1210,7 @@ def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_i
         return print("Please upload at least 2 pics for interpolation.")
         
     # make sure all uploaded pics have the same resolution
-    pic_sizes = [Image.open(picture_path).size for picture_path in pic_list]
+    pic_sizes = [Image.open(picture_path.name).size for picture_path in pic_list]
     if len(set(pic_sizes)) != 1:
         return print("All uploaded pics need to be of the same Width and Height / resolution.")
         
