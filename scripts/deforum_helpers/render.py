@@ -216,7 +216,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             "mask_contrast": keys.hybrid_comp_mask_contrast_schedule_series[frame_idx],
             "mask_auto_contrast_cutoff_low": int(keys.hybrid_comp_mask_auto_contrast_cutoff_low_schedule_series[frame_idx]),
             "mask_auto_contrast_cutoff_high": int(keys.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx]),
-            "flow_factor": int(keys.hybrid_flow_factor_schedule_series[frame_idx])
+            "flow_factor": keys.hybrid_flow_factor_schedule_series[frame_idx]
         }        
         scheduled_sampler_name = None
         scheduled_clipskip = None
