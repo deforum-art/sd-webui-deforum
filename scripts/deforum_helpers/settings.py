@@ -31,12 +31,15 @@ def load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, contr
                     print(f"Key {k} doesn't exist in the custom settings data! Using default value of {v}")
         print(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict)
 
-def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root):
+def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, full_out_file_path = None):
+    if full_out_file_path:
+        args.__dict__["seed"] = root.raw_seed
+        args.__dict__["batch_name"] = root.raw_batch_name
     args.__dict__["prompts"] = root.animation_prompts
     args.__dict__["positive_prompts"] = root.positive_prompts
     args.__dict__["negative_prompts"] = root.negative_prompts
     exclude_keys = get_keys_to_exclude() + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
-    settings_filename = os.path.join(args.outdir, f"{args.timestring}_settings.txt")
+    settings_filename = full_out_file_path if full_out_file_path else os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         s = {}
         for d in (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, video_args.__dict__):
@@ -69,7 +72,8 @@ def save_settings(*args, **kwargs):
     
     return [""]
 
-def load_settings(*args, **kwargs):
+def load_all_settings(*args, ui_launch=False, **kwargs):
+    import gradio as gr
     settings_path = args[0].strip()
     settings_component_names = deforum_args.get_settings_component_names()
     data = {settings_component_names[i]: args[i+1] for i in range(len(settings_component_names))}
@@ -77,15 +81,18 @@ def load_settings(*args, **kwargs):
 
     if not os.path.isfile(settings_path):
         print('The custom settings file does not exist. The values will be unchanged.')
-        return list(data.values()) + [""]
-    
+        if ui_launch:
+            return ({key: gr.update(value=value) for key, value in data.items()},)
+        else:
+            return list(data.values()) + [""]
+
     with open(settings_path, "r", encoding='utf-8') as f:
         jdata = json.load(f)
         handle_deprecated_settings(jdata)
         if 'animation_prompts' in jdata:
             jdata['prompts'] = jdata['animation_prompts']
 
-    ret = []
+    result = {}
     for key, default_val in data.items():
         val = jdata.get(key, default_val)
         if key == 'sampler' and isinstance(val, int):
@@ -101,11 +108,13 @@ def load_settings(*args, **kwargs):
             val = jdata.get(key, default_val)
         elif key == 'animation_prompts':
             val = json.dumps(jdata['prompts'], ensure_ascii=False, indent=4)
-        
-        ret.append(val)
 
-    ret.append("")
-    return ret
+        result[key] = val
+
+    if ui_launch:
+        return ({key: gr.update(value=value) for key, value in result.items()},)
+    else:
+        return list(result.values()) + [""]
 
 def load_video_settings(*args, **kwargs):
     video_settings_path = args[0].strip()

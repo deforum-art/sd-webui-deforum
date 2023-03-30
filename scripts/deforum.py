@@ -43,146 +43,151 @@ def run_deforum(*args, **kwargs):
     p = StableDiffusionProcessingImg2Img(
         sd_model=shared.sd_model,
         outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
-        outpath_grids = opts.outdir_grids or opts.outdir_img2img_grids,
-        #we'll setup the rest later
-    )
-    
-    print(f"\033[4;33mDeforum extension for auto1111 webui, v2.3b\033[0m")
-    print(f"Git commit: {get_deforum_version()}")
-    args_dict['self'] = None
-    args_dict['p'] = p
-    
-    root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict)
-    root.clipseg_model = None
-    try:
-        root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
-    except:
-        root.initial_clipskip = 1
-    root.basedirs = basedirs
+        outpath_grids = opts.outdir_grids or opts.outdir_img2img_grids
+    ) #we'll setup the rest later
 
-    for basedir in basedirs:
-        sys.path.extend([
-            basedir + '/scripts/deforum_helpers/src',
-            basedir + '/extensions/deforum/scripts/deforum_helpers/src',
-            basedir + '/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
-        ])
-    
-    # clean up unused memory
-    reset_frames_cache(root)
-    gc.collect()
-    torch.cuda.empty_cache()
-    
-    from deforum_helpers.render import render_animation
-    from deforum_helpers.render_modes import render_input_video, render_animation_with_video_mask, render_interpolation
-
-    tqdm_backup = shared.total_tqdm
-    shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args, video_args)
-    try: # dispatch to appropriate renderer
-        if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
-            if anim_args.use_mask_video: 
-                render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root) # allow mask video without an input video
-            else:    
-                render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)
-        elif anim_args.animation_mode == 'Video Input':
-            render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)#TODO: prettify code
-        elif anim_args.animation_mode == 'Interpolation':
-            render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)
-        else:
-            print('Other modes are not available yet!')
-    finally:
-        shared.total_tqdm = tqdm_backup
-        opts.data["CLIP_stop_at_last_layers"] = root.initial_clipskip
-    
-    if video_args.store_frames_in_ram:
-        dump_frames_cache(root)
-    
-    from base64 import b64encode
-    
-    real_audio_track = None
-    if video_args.add_soundtrack != 'None':
-        real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
-    
-    # Delete folder with duplicated imgs from OS temp folder
-    shutil.rmtree(root.tmp_deforum_run_duplicated_folder, ignore_errors=True)
-
-    # Decide whether or not we need to try and frame interpolate laters
-    need_to_frame_interpolate = False
-    if video_args.frame_interpolation_engine != "None" and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
-        need_to_frame_interpolate = True
+    for i in range(args_dict['n_batch']):
+        print(f"\033[4;33mDeforum extension for auto1111 webui, v2.3b\033[0m")
+        print(f"Git commit: {get_deforum_version()}")
+        args_dict['self'] = None
+        args_dict['p'] = p
         
-    if video_args.skip_video_creation:
-        print("\nSkipping video creation, uncheck 'Skip video for run all' in 'Output' tab if you want to get a video too :)")
-    else:
-        import subprocess
+        root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict)
 
-        path_name_modifier = video_args.path_name_modifier
-        if video_args.render_steps: # render steps from a single image
-            fname = f"{path_name_modifier}_%09d.png"
-            all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
-            newest_dir = max(all_step_dirs, key=os.path.getmtime)
-            image_path = os.path.join(newest_dir, fname)
-            print(f"Reading images from {image_path}")
-            mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
-            max_video_frames = args.steps
-        else: # render images for a video
-            image_path = os.path.join(args.outdir, f"{args.timestring}_%09d.png")
-            mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
-            max_video_frames = anim_args.max_frames
-
-        # Stitch video using ffmpeg!
+        root.clipseg_model = None
         try:
-            ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
-            mp4 = open(mp4_path,'rb').read()
-            data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-            deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.2b </p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
-        except Exception as e:
-            if need_to_frame_interpolate:
-                print(f"FFMPEG DID NOT STITCH ANY VIDEO. However, you requested to frame interpolate  - so we will continue to frame interpolation, but you'll be left only with the interpolated frames and not a video, since ffmpeg couldn't run. Original ffmpeg error: {e}")
+            root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
+        except:
+            root.initial_clipskip = 1
+        root.basedirs = basedirs
+
+        for basedir in basedirs:
+            sys.path.extend([
+                basedir + '/scripts/deforum_helpers/src',
+                basedir + '/extensions/deforum/scripts/deforum_helpers/src',
+                basedir + '/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
+            ])
+        
+        # clean up unused memory
+        reset_frames_cache(root)
+        gc.collect()
+        torch.cuda.empty_cache()
+
+        from deforum_helpers.render import render_animation
+        from deforum_helpers.render_modes import render_input_video, render_animation_with_video_mask, render_interpolation
+
+        tqdm_backup = shared.total_tqdm
+        shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args, video_args)
+        try: # dispatch to appropriate renderer
+            if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
+                if anim_args.use_mask_video: 
+                    render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root) # allow mask video without an input video
+                else:    
+                    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)
+            elif anim_args.animation_mode == 'Video Input':
+                render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)#TODO: prettify code
+            elif anim_args.animation_mode == 'Interpolation':
+                render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)
             else:
-                print(f"** FFMPEG DID NOT STITCH ANY VIDEO ** Error: {e}")
-            pass
+                print('Other modes are not available yet!')
+        finally:
+            shared.total_tqdm = tqdm_backup
+            opts.data["CLIP_stop_at_last_layers"] = root.initial_clipskip
+        
+        if video_args.store_frames_in_ram:
+            dump_frames_cache(root)
+        
+        from base64 import b64encode
+        
+        real_audio_track = None
+        if video_args.add_soundtrack != 'None':
+            real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
+        
+        # Delete folder with duplicated imgs from OS temp folder
+        shutil.rmtree(root.tmp_deforum_run_duplicated_folder, ignore_errors=True)
+
+        # Decide whether or not we need to try and frame interpolate laters
+        need_to_frame_interpolate = False
+        if video_args.frame_interpolation_engine != "None" and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
+            need_to_frame_interpolate = True
             
-    if root.initial_info is None:
-        root.initial_info = "An error has occured and nothing has been generated!"
-        root.initial_info += "\nPlease, report the bug to https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"
-        import numpy as np
-        a = np.random.rand(args.W, args.H, 3)*255
-        root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
-        root.initial_seed = 6934
-    # FRAME INTERPOLATION TIME
-    if need_to_frame_interpolate: 
-        print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
-        process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount,frame_interpolation_slow_mo_enabled=video_args.frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
-    
-    if video_args.make_gif and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
-        make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
-    
-    # Upscale video once generation is done:
-    if video_args.r_upscale_video and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
-        
-        # out mp4 path is defined in make_upscale func
-        make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=video_args.ffmpeg_location, stitch_from_frame=0, stitch_to_frame=max_video_frames, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track)
-        
-    if video_args.delete_imgs and not video_args.skip_video_creation:
-        handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=args.timestring)
-        
-    root.initial_info += "\n The animation is stored in " + args.outdir
-    root.initial_info += "\n Timestring = " + args.timestring + '\n'
-    root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
-    reset_frames_cache(root) # cleanup the RAM in any case
-    processed = Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
-    
-    if processed is None:
-        processed = process_images(p)
+        if video_args.skip_video_creation:
+            print("\nSkipping video creation, uncheck 'Skip video for run all' in 'Output' tab if you want to get a video too :)")
+        else:
+            import subprocess
 
-    shared.total_tqdm.clear()
+            path_name_modifier = video_args.path_name_modifier
+            if video_args.render_steps: # render steps from a single image
+                fname = f"{path_name_modifier}_%09d.png"
+                all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
+                newest_dir = max(all_step_dirs, key=os.path.getmtime)
+                image_path = os.path.join(newest_dir, fname)
+                print(f"Reading images from {image_path}")
+                mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
+                max_video_frames = args.steps
+            else: # render images for a video
+                image_path = os.path.join(args.outdir, f"{args.timestring}_%09d.png")
+                mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
+                max_video_frames = anim_args.max_frames
 
-    generation_info_js = processed.js()
-    if opts.samples_log_stdout:
-        print(generation_info_js)
+            # Stitch video using ffmpeg!
+            try:
+                ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
+                mp4 = open(mp4_path,'rb').read()
+                data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
+                deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.2b </p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
+            except Exception as e:
+                if need_to_frame_interpolate:
+                    print(f"FFMPEG DID NOT STITCH ANY VIDEO. However, you requested to frame interpolate  - so we will continue to frame interpolation, but you'll be left only with the interpolated frames and not a video, since ffmpeg couldn't run. Original ffmpeg error: {e}")
+                else:
+                    print(f"** FFMPEG DID NOT STITCH ANY VIDEO ** Error: {e}")
+                pass
+                
+        if root.initial_info is None:
+            root.initial_info = "An error has occured and nothing has been generated!"
+            root.initial_info += "\nPlease, report the bug to https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"
+            import numpy as np
+            a = np.random.rand(args.W, args.H, 3)*255
+            root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
+            root.initial_seed = 6934
+        # FRAME INTERPOLATION TIME
+        if need_to_frame_interpolate: 
+            print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
+            process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount,frame_interpolation_slow_mo_enabled=video_args.frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=video_args.ffmpeg_location, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None)
+        
+        if video_args.make_gif and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
+            make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
+        
+        # Upscale video once generation is done:
+        if video_args.r_upscale_video and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
+            
+            # out mp4 path is defined in make_upscale func
+            make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=video_args.ffmpeg_location, stitch_from_frame=0, stitch_to_frame=max_video_frames, ffmpeg_crf=video_args.ffmpeg_crf, ffmpeg_preset=video_args.ffmpeg_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track)
+            
+        if video_args.delete_imgs and not video_args.skip_video_creation:
+            handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=args.timestring)
+            
+        root.initial_info += "\n The animation is stored in " + args.outdir
+        root.initial_info += "\n Timestring = " + args.timestring + '\n'
+        root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
+        reset_frames_cache(root) # cleanup the RAM in any case
+        processed = Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
+        
+        if processed is None:
+            processed = process_images(p)
 
-    if opts.do_not_show_images:
-        processed.images = []
+        shared.total_tqdm.clear()
+
+        generation_info_js = processed.js()
+        if opts.samples_log_stdout:
+            print(generation_info_js)
+
+        if opts.do_not_show_images:
+            processed.images = []
+            
+        if opts.data.get("deforum_enable_persistent_settings"):
+            persistent_sett_path = opts.data.get("deforum_persistent_settings_path")
+            deforum_settings.save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
 
     return processed.images, generation_info_js, plaintext_to_html(processed.info), plaintext_to_html('')
 
@@ -275,31 +280,50 @@ def on_ui_tabs():
         video_settings_component_list = [components[name] for name in deforum_args.video_args_names]
         stuff = gr.HTML("") # wrap gradio call garbage
         stuff.visible = False
-        
+
         save_settings_btn.click(
-                    fn=wrap_gradio_call(deforum_settings.save_settings),
-                    inputs=[settings_path] + settings_component_list + video_settings_component_list,
-                    outputs=[stuff],
-                )
+            fn=wrap_gradio_call(deforum_settings.save_settings),
+            inputs=[settings_path] + settings_component_list + video_settings_component_list,
+            outputs=[stuff],
+        )
         
         load_settings_btn.click(
-                    fn=wrap_gradio_call(deforum_settings.load_settings),
-                    inputs=[settings_path]+ settings_component_list,
-                    outputs=settings_component_list + [stuff],
-                )
-        
-        load_video_settings_btn.click(
-                    fn=wrap_gradio_call(deforum_settings.load_video_settings),
-                    inputs=[settings_path] + video_settings_component_list,
-                    outputs=video_settings_component_list + [stuff],
-                )
+        fn=wrap_gradio_call(lambda *args, **kwargs: deforum_settings.load_all_settings(*args, ui_launch=False, **kwargs)),
+        inputs=[settings_path] + settings_component_list,
+        outputs=settings_component_list + [stuff],
+        )
 
+        load_video_settings_btn.click(
+            fn=wrap_gradio_call(deforum_settings.load_video_settings),
+            inputs=[settings_path] + video_settings_component_list,
+            outputs=video_settings_component_list + [stuff],
+        )
+        
+    def trigger_load_general_settings():
+        print("Loading general settings...")
+        wrapped_fn = wrap_gradio_call(lambda *args, **kwargs: deforum_settings.load_all_settings(*args, ui_launch=True, **kwargs))
+        inputs = [settings_path.value] + [component.value for component in settings_component_list]
+        outputs = settings_component_list + [stuff]
+        updated_values = wrapped_fn(*inputs, *outputs)[0]
+
+        settings_component_name_to_obj = {name: component for name, component in zip(deforum_args.get_settings_component_names(), settings_component_list)}
+        for key, value in updated_values.items():
+            settings_component_name_to_obj[key].value = value['value']
+
+            
+    if opts.data.get("deforum_enable_persistent_settings"):
+        trigger_load_general_settings()
+        
     return [(deforum_interface, "Deforum", "deforum_interface")]
 
 def on_ui_settings():
     section = ('deforum', "Deforum")
     shared.opts.add_option("deforum_keep_3d_models_in_vram", shared.OptionInfo(
         False, "Keep 3D models in VRAM between runs", gr.Checkbox, {"interactive": True, "visible": True if not (cmd_opts.lowvram or cmd_opts.medvram) else False}, section=section))
+    shared.opts.add_option("deforum_enable_persistent_settings", shared.OptionInfo(
+        False, "Keep settings persistent upon relaunch of webui", gr.Checkbox, {"interactive": True}, section=section))
+    shared.opts.add_option("deforum_persistent_settings_path", shared.OptionInfo(
+        "models/Deforum/deforum_persistent_settings.txt", "Path for saving your persistent settings file:", section=section))
         
 script_callbacks.on_ui_tabs(on_ui_tabs)
 script_callbacks.on_ui_settings(on_ui_settings)
