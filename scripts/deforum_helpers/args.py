@@ -346,22 +346,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             [],
             [i1]
             )
-    
-    
-    def change_css(checkbox_status):
-        if checkbox_status:
-            display = "block"
-        else:
-            display = "none"
-        
-        html_template = f'''
-        <style>
-            #tab_deforum_interface .svelte-e8n7p6, #f_interp_accord {{
-                display: {display} !important;
-            }}
-        </style>
-        '''
-        return html_template
 
     with gr.Blocks():
         with gr.Tabs():
