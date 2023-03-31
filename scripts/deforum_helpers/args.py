@@ -160,7 +160,7 @@ def DeforumArgs():
     H = 512 #
     W, H = map(lambda x: x - x % 64, (W, H))  # resize to integer multiple of 64
     
-    show_info_on_ui = True
+    show_info_on_ui = sh.opts.data.get("deforum_start_with_more_info_enabled") if sh.opts.data is not None and sh.opts.data.get("deforum_start_with_more_info_enabled") is not None else True
 
     #**Webui stuff**
     tiling = False
@@ -316,7 +316,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             i1 = gr.HTML(i1_store, elem_id='deforum_header')
     else:
         btn = i1 = gr.HTML("")
-       
     # MAIN (TOP) EXTENSION INFO ACCORD
     with gr.Accordion("Info, Links and Help", open=False, elem_id='main_top_info_accord'):
             gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
@@ -779,10 +778,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True, info="don't delete upscaled imgs")
                     with gr.Accordion('FFmpeg settings', visible=True, open=False) as ffmpeg_quality_accordion:
                         with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
-                            ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True)
-                            ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
+                            ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True, info="enables to specify a target value that maps to a specific quality by adjusting the bitrates automatically based on the input video. Rec values 17-28")
+                            ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value", info="ffmpeg's preset is a collection of options that will provide a certain encoding speed to compression ratio. A slower preset will provide better compression (compression is quality per filesize)")
                         with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_location_row:
-                            ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location)
+                            ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location, info="the path in which ffmpeg binary is installed. if you have ffmpeg added to OS's PATH you can use just 'ffmpeg' as the value")
                 # FRAME INTERPOLATION TAB
                 with gr.Tab('Frame Interpolation') as frame_interp_tab:
                     with gr.Accordion('Important notes and Help', open=False, elem_id="f_interp_accord"):
