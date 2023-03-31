@@ -4,15 +4,6 @@
 	justify-content: center !important;
 }
 
-/* #vid_to_interpolate_chosen_file, #pics_to_interpolate_chosen_file, #vid_to_upscale_chosen_file,  #controlnet_input_video_chosen_file, #controlnet_input_video_mask_chosen_file, #vid_to_depth_chosen_file { */
-	/* height: 85px !important; */
-/* } */
-
-#extra_schedules::before {
-  content: "Schedules:";
-  font-size: 10px !important;
-}
-
 #hybrid_msg_html {
 	color: Tomato !important;
 	margin-top: 5px !important;
@@ -40,16 +31,49 @@
 	text-align: center !important;
 }
 
-/* #tab_deforum_interface .p-3 { */
-  /* padding: 0.5rem; */
-/* } */
-
-#settings_path_msg {
+#tab_deforum_interface #settings_path_msg {
 	margin: 0.6em;
 	display: flex;
 	align-items: flex-start;
 	justify-content: center;
 }
+
+#tab_deforum_interface .tabs.gradio-tabs.svelte-1g805jl .svelte-vt1mxs.gap {
+	gap:4px !important;
+}
+
+#tab_deforum_interface #main_top_info_accord {
+	padding: 1px; 
+}
+
+#tab_deforum_interface .gradio-column.svelte-vt1mxs.panel{
+	gap: 1px !important;
+}
+
+#tab_deforum_interface .svelte-e8n7p6 { /* hide at default gradio's info section from params at ui*/
+	display: none;
+}
+
+#add_soundtrack .svelte-1p9xokt {
+	padding: 2.25px;
+}
+
+
+/* OLD rules THAT MIGHT NEED TO BE REVIVED AT SOME POINT: */
+
+/* #extra_schedules::before { */
+  /* content: "Schedules:"; */
+  /* font-size: 10px !important; */
+/* } */
+/* #tab_deforum_interface .scroll-hide.svelte-4xt1ch { */
+	/* min-height: 36px; */
+	/* height: 36px !important; */
+	/* padding: 8px !important; */
+/* } */
+
+/* #vid_to_interpolate_chosen_file, #pics_to_interpolate_chosen_file, #vid_to_upscale_chosen_file,  #controlnet_input_video_chosen_file, #controlnet_input_video_mask_chosen_file, #vid_to_depth_chosen_file { */
+	/* height: 85px !important; */
+/* } */
 
 /* #deforum_results .flex { */
 	/* gap:0px; */
@@ -58,4 +82,8 @@
 /* #tab_deforum_interface #motion_noise_etc .flex, #tab_deforum_interface #extra_schedules .flex { */
 	/* grid-gap:2px; */
 	/* gap:2px;  */
+/* } */
+
+/* #tab_deforum_interface .p-3 { */
+  /* padding: 0.5rem; */
 /* } */
