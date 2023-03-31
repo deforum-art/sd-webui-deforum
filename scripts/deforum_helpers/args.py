@@ -159,6 +159,8 @@ def DeforumArgs():
     W = 512 #
     H = 512 #
     W, H = map(lambda x: x - x % 64, (W, H))  # resize to integer multiple of 64
+    
+    show_info_on_ui = False
 
     #**Webui stuff**
     tiling = False
@@ -331,6 +333,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             <li>If you want to use Width/Height which are not multiples of 64, please change noise_type to 'Uniform', in Keyframes --> Noise.</li>
             </ul>
             <italic>If you liked this extension, please <a style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">give it a star on GitHub</a>!</italic> 😊""")
+    with gr.Row(variant='compact'):
+        show_info_on_ui = gr.Checkbox(label="Show more info", value=d.show_info_on_ui, interactive=True)
     if not is_extension:
         def show_vid():
             return {
@@ -342,7 +346,23 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             [],
             [i1]
             )
-            
+    
+    
+    def change_css(checkbox_status):
+        if checkbox_status:
+            display = "block"
+        else:
+            display = "none"
+        
+        html_template = f'''
+        <style>
+            #tab_deforum_interface .svelte-e8n7p6, #f_interp_accord {{
+                display: {display} !important;
+            }}
+        </style>
+        '''
+        return html_template
+
     with gr.Blocks():
         with gr.Tabs():
             # RUN TAB
@@ -381,12 +401,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             with gr.TabItem('Keyframes'): #TODO make a some sort of the original dictionary parsing
                 with gr.Row(variant='compact'):
                     with gr.Column(scale=2):
-                        animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="Animation mode", value=da.animation_mode, elem_id="animation_mode")
+                        animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="Animation mode", value=da.animation_mode, elem_id="animation_mode", info="control animation mode, will hide non relevant params upon change")
                     with gr.Column(scale=1, min_width=180):
-                        border = gr.Radio(['replicate', 'wrap'], label="Border", value=da.border, elem_id="border")
+                        border = gr.Radio(['replicate', 'wrap'], label="Border", value=da.border, elem_id="border", info="controls pixel generation method for images smaller than the frame. hover on the options to see more info")
                 with gr.Row(variant='compact'):
-                    diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True)
-                    max_frames = gr.Number(label="Max frames", lines=1, value = da.max_frames, interactive=True, precision=0)
+                    diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True, info="# of in-between frames that will not be directly diffused")
+                    max_frames = gr.Number(label="Max frames", lines=1, value = da.max_frames, interactive=True, precision=0, info="end the animation at this frame number")
                 # GUIDED IMAGES ACCORD
                 with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
                     # GUIDED IMAGES INFO ACCORD
@@ -432,19 +452,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Tabs(elem_id='extra_schedules'):
                     with gr.TabItem('Strength'):
                         with gr.Row(variant='compact'):
-                            strength_schedule = gr.Textbox(label="Strength schedule", lines=1, value = da.strength_schedule, interactive=True)
+                            strength_schedule = gr.Textbox(label="Strength schedule", lines=1, value = da.strength_schedule, interactive=True, info="amount of presence of previous frame to influence next frame, also controls steps in the following formula [steps - (strength_schedule * steps)]")
                     with gr.TabItem('CFG'):
                         with gr.Row(variant='compact'):
-                            cfg_scale_schedule = gr.Textbox(label="CFG scale schedule", lines=1, value = da.cfg_scale_schedule, interactive=True)
+                            cfg_scale_schedule = gr.Textbox(label="CFG scale schedule", lines=1, value = da.cfg_scale_schedule, interactive=True, info="how closely the image should conform to the prompt. Lower values produce more creative results. (recommended range 5-15)")
                         with gr.Row(variant='compact'):
                             enable_clipskip_scheduling = gr.Checkbox(label="Enable CLIP skip scheduling", value=da.enable_clipskip_scheduling, interactive=True)
                         with gr.Row(variant='compact'):
                             clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value = da.clipskip_schedule, interactive=True)
                     with gr.TabItem('Seed') as a3:
                         with gr.Row(variant='compact'):
-                            seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="Seed behavior", value=d.seed_behavior, elem_id="seed_behavior")
+                            seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="Seed behavior", value=d.seed_behavior, elem_id="seed_behavior", info="controls the seed behavior that is used for animation. hover on the options to see more info")
                         with gr.Row(variant='compact') as seed_iter_N_row:
-                            seed_iter_N = gr.Number(label="Seed iter N", value=d.seed_iter_N, interactive=True, precision=0)
+                            seed_iter_N = gr.Number(label="Seed iter N", value=d.seed_iter_N, interactive=True, precision=0, info="for how many frames the same seed should stick before iterating to the next one")
                         with gr.Row(visible=False) as seed_schedule_row:
                             seed_schedule = gr.Textbox(label="Seed schedule", lines=1, value = da.seed_schedule, interactive=True)
                     with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
@@ -478,27 +498,27 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.TabItem('Motion') as motion_tab:
                         with gr.Column(visible=True) as only_2d_motion_column:
                             with gr.Row(variant='compact'):
-                                zoom = gr.Textbox(label="Zoom", lines=1, value = da.zoom, interactive=True)
+                                zoom = gr.Textbox(label="Zoom", lines=1, value = da.zoom, interactive=True, info="scale the canvas size, multiplicatively. [static = 1.0]")
                             with gr.Row(variant='compact'):
-                                angle = gr.Textbox(label="Angle", lines=1, value = da.angle, interactive=True)
+                                angle = gr.Textbox(label="Angle", lines=1, value = da.angle, interactive=True, info="rotate canvas clockwise/anticlockwise in degrees per frame")
                             with gr.Row(variant='compact'):
-                                transform_center_x = gr.Textbox(label="Transform Center X", lines=1, value = da.transform_center_x, interactive=True)
+                                transform_center_x = gr.Textbox(label="Transform Center X", lines=1, value = da.transform_center_x, interactive=True, info="x center axis for 2D angle/zoom")
                             with gr.Row(variant='compact'):
-                                transform_center_y = gr.Textbox(label="Transform Center Y", lines=1, value = da.transform_center_y, interactive=True)
+                                transform_center_y = gr.Textbox(label="Transform Center Y", lines=1, value = da.transform_center_y, interactive=True, info="y center axis for 2D angle/zoom")
                         with gr.Column(visible=True) as both_anim_mode_motion_params_column:
                             with gr.Row(variant='compact'):
-                                translation_x = gr.Textbox(label="Translation X", lines=1, value = da.translation_x, interactive=True)
+                                translation_x = gr.Textbox(label="Translation X", lines=1, value = da.translation_x, interactive=True, info="move canvas left/right in pixels per frame")
                             with gr.Row(variant='compact'):
-                                translation_y = gr.Textbox(label="Translation Y", lines=1, value = da.translation_y, interactive=True)
+                                translation_y = gr.Textbox(label="Translation Y", lines=1, value = da.translation_y, interactive=True, info="move canvas up/down in pixels per frame")
                         with gr.Column(visible=False) as only_3d_motion_column:
                             with gr.Row(variant='compact'):
-                                translation_z = gr.Textbox(label="Translation Z", lines=1, value = da.translation_z, interactive=True)
+                                translation_z = gr.Textbox(label="Translation Z", lines=1, value = da.translation_z, interactive=True, info="move canvas towards/away from view [speed set by FOV]")
                             with gr.Row(variant='compact'):
-                                rotation_3d_x = gr.Textbox(label="Rotation 3D X", lines=1, value = da.rotation_3d_x, interactive=True)
+                                rotation_3d_x = gr.Textbox(label="Rotation 3D X", lines=1, value = da.rotation_3d_x, interactive=True, info="tilt canvas up/down in degrees per frame")
                             with gr.Row(variant='compact'):
-                                rotation_3d_y = gr.Textbox(label="Rotation 3D Y", lines=1, value = da.rotation_3d_y, interactive=True)
+                                rotation_3d_y = gr.Textbox(label="Rotation 3D Y", lines=1, value = da.rotation_3d_y, interactive=True, info="pan canvas left/right in degrees per frame")
                             with gr.Row(variant='compact'):
-                                rotation_3d_z = gr.Textbox(label="Rotation 3D Z", lines=1, value = da.rotation_3d_z, interactive=True)
+                                rotation_3d_z = gr.Textbox(label="Rotation 3D Z", lines=1, value = da.rotation_3d_z, interactive=True, info="roll canvas clockwise/anticlockwise")
                         # 3D DEPTH & FOV ACCORD
                         with gr.Accordion('Depth Warping & FOV', visible=False, open=False) as depth_3d_warping_accord:
                             with gr.TabItem('Depth Warping'): 
@@ -528,7 +548,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.Row(variant='compact'):
                                 perspective_flip_gamma = gr.Textbox(label="Perspective flip gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
                             with gr.Row(variant='compact'):
-                                perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value = da.perspective_flip_fv, interactive=True)
+                                perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value = da.perspective_flip_fv, interactive=True, info="the 2D vanishing point of perspective (rec. range 30-160)")
                     # NOISE INNER TAB
                     with gr.TabItem('Noise'):
                         with gr.Column() as noise_tab_column:
@@ -588,11 +608,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         </ul>
                         """)
                 with gr.Row(variant='compact'):
-                    animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts())
+                    animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts(), info="full prompts list in a JSON format.  value on left side is the frame number")
                 with gr.Row(variant='compact'):
-                    animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, value = "")
+                    animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, info="words to add to the start of all positive prompts")
                 with gr.Row(variant='compact'):
-                    animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, value = "")
+                    animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, info="words to add to the end of all negative prompts")
                 # COMPOSABLE MASK SCHEDULING ACCORD
                 with gr.Accordion('Composable Mask scheduling', open=False):
                     gr.HTML("""
@@ -758,20 +778,21 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         output_format = gr.Dropdown(visible=False, label="Output format", choices=['FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
                     with gr.Column(variant='compact'):
                         with gr.Row(variant='compact') as soundtrack_row:
-                            add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="Add soundtrack", value=dv.add_soundtrack)
-                            soundtrack_path = gr.Textbox(label="Soundtrack path", lines=1, interactive=True, value = dv.soundtrack_path)
+                            add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="Add soundtrack", value=dv.add_soundtrack, info="add audio to video from file/url or init video", elem_id="add_soundtrack")
+                            soundtrack_path = gr.Textbox(label="Soundtrack path", lines=1, interactive=True, value = dv.soundtrack_path, info="abs. path or url to audio file")
+                            # TODO: auto-hide if video input is selected?!
                         with gr.Row(variant='compact'):
-                            skip_video_creation = gr.Checkbox(label="Skip video creation", value=dv.skip_video_creation, interactive=True)
-                            delete_imgs = gr.Checkbox(label="Delete Imgs", value=dv.delete_imgs, interactive=True)
-                            store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True)
-                            save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True)
+                            skip_video_creation = gr.Checkbox(label="Skip video creation", value=dv.skip_video_creation, interactive=True, info="If enabled, only images will be saved")
+                            delete_imgs = gr.Checkbox(label="Delete Imgs", value=dv.delete_imgs, interactive=True, info="auto-delete imgs when video is ready")
+                            store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True, visible=False)
+                            save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True, info="save animation's depth maps as extra files")
                             # the following param only shows for windows and linux users!
-                            make_gif = gr.Checkbox(label="Make GIF", value=dv.make_gif, interactive=True)
+                            make_gif = gr.Checkbox(label="Make GIF", value=dv.make_gif, interactive=True, info="make gif in addition to the video/s")
                     with gr.Row(equal_height=True, variant='compact', visible=True) as r_upscale_row:
-                        r_upscale_video = gr.Checkbox(label="Upscale", value=dv.r_upscale_video, interactive=True)
+                        r_upscale_video = gr.Checkbox(label="Upscale", value=dv.r_upscale_video, interactive=True, info="upscale output imgs when run is finished")
                         r_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
                         r_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
-                        r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True)
+                        r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True, info="don't delete upscaled imgs")
                     with gr.Accordion('FFmpeg settings', visible=True, open=False) as ffmpeg_quality_accordion:
                         with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
                             ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True)
@@ -780,7 +801,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location)
                 # FRAME INTERPOLATION TAB
                 with gr.Tab('Frame Interpolation') as frame_interp_tab:
-                    with gr.Accordion('Important notes and Help', open=False):
+                    with gr.Accordion('Important notes and Help', open=False, elem_id="f_interp_accord", visible=False):
                         gr.HTML("""
                         Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> / <a href="https://film-net.github.io/">FILM</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
                          <p style="margin-top:1em">
@@ -935,6 +956,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
                         show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
+    show_info_on_ui.change(fn=change_css, inputs=show_info_on_ui, outputs = gr.outputs.HTML())
     seed.change(fn=auto_hide_n_batch, inputs=seed, outputs=n_batch)
     fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
     r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
