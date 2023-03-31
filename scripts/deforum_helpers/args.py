@@ -160,7 +160,7 @@ def DeforumArgs():
     H = 512 #
     W, H = map(lambda x: x - x % 64, (W, H))  # resize to integer multiple of 64
     
-    show_info_on_ui = sh.opts.data.get("deforum_start_with_more_info_enabled") if sh.opts.data is not None and sh.opts.data.get("deforum_start_with_more_info_enabled") is not None else True
+    show_info_on_ui = True
 
     #**Webui stuff**
     tiling = False
