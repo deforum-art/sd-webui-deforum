@@ -105,3 +105,18 @@ def change_interp_x_max_limit(engine_name, current_value):
     
 def hide_interp_stats(choice):
     return gr.update(visible=True) if choice is not None else gr.update(visible=False)
+
+def change_css(checkbox_status):
+        if checkbox_status:
+            display = "block"
+        else:
+            display = "none"
+        
+        html_template = f'''
+        <style>
+            #tab_deforum_interface .svelte-e8n7p6, #f_interp_accord {{
+                display: {display} !important;
+            }}
+        </style>
+        '''
+        return html_template
