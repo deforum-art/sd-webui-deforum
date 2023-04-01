@@ -10,7 +10,7 @@ from .rich import console
 import cv2
 from .animation import sample_from_cv2, sample_to_cv2
 from modules import processing, sd_models
-from modules.shared import opts, sd_model
+from modules.shared import opts, sd_model, state, cmd_opts
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 from .deforum_controlnet import is_controlnet_enabled, process_with_controlnet
 
@@ -54,6 +54,47 @@ def pairwise_repl(iterable):
     return zip(a, b)
 
 def generate(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root, frame = 0, return_sample=False, sampler_name=None):
+    if args.reroll_blank_frames == 'ignore':
+        return generate_inner(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root, frame, return_sample, sampler_name)
+    
+    image, caught_vae_exception = generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root, frame, return_sample, sampler_name)
+
+    if caught_vae_exception or not image.getbbox():
+        patience = args.reroll_patience
+        print("Blank frame detected! If you don't have the NSFW filter enabled, this may be due to a glitch!")
+        if args.reroll_blank_frames == 'reroll':
+            while caught_vae_exception or not image.getbbox():
+                print("Rerolling with +1 seed...")
+                args.seed += 1
+                image, caught_vae_exception = generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root, frame, return_sample, sampler_name)
+                patience -= 1
+                if patience == 0:
+                    print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
+                    state.interrupted = True
+                    state.current_image = image
+                    return None
+        elif args.reroll_blank_frames == 'interrupt':
+            print("Interrupting to save your eyes...")
+            state.interrupted = True
+            state.current_image = image
+            return None
+    return image
+
+def generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root, frame = 0, return_sample=False, sampler_name=None):
+    if cmd_opts.disable_nan_check:
+        image = generate_inner(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root, frame, return_sample, sampler_name)
+    else:
+        try:
+            image = generate_inner(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root, frame, return_sample, sampler_name)
+        except Exception as e:
+            if "A tensor with all NaNs was produced in VAE." in repr(e):
+                print(e)
+                return None, True
+            else:
+                raise e
+    return image, False
+
+def generate_inner(args, keys, anim_args, loop_args, controlnet_args, glsl_args, root, frame = 0, return_sample=False, sampler_name=None):
     assert args.prompt is not None
 
     # Setup the pipeline
