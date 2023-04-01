@@ -781,7 +781,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Row(variant='compact'):
                             time_factor = gr.Textbox(label="fps", lines=1, interactive=True, value="0:(10)")
                         with gr.Row(variant='compact'):
-                            alpha_schedule = gr.Textbox(label="shader alpha", lines=1, interactive=True, value="0:(.7)")
+                            alpha_schedule = gr.Textbox(label="shader alpha", lines=1, interactive=True, value="0:(.3)")
                         with gr.Row(variant='compact'):
                             glsl_shader = gr.Textbox(label="fragment shader", lines=15, interactive=True, value=fragment_shader())
                 # PARSEQ ACCORD
