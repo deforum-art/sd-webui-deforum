@@ -316,7 +316,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             i1 = gr.HTML(i1_store, elem_id='deforum_header')
     else:
         btn = i1 = gr.HTML("")
-       
     # MAIN (TOP) EXTENSION INFO ACCORD
     with gr.Accordion("Info, Links and Help", open=False, elem_id='main_top_info_accord'):
             gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
@@ -779,13 +778,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True, info="don't delete upscaled imgs")
                     with gr.Accordion('FFmpeg settings', visible=True, open=False) as ffmpeg_quality_accordion:
                         with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
-                            ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True)
-                            ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value")
+                            ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True, info="enables to specify a target value that maps to a specific quality by adjusting the bitrates automatically based on the input video. Rec values 17-28")
+                            ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value", info="ffmpeg's preset is a collection of options that will provide a certain encoding speed to compression ratio. A slower preset will provide better compression (compression is quality per filesize)")
                         with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_location_row:
-                            ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location)
+                            ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location, info="the path in which ffmpeg binary is installed. if you have ffmpeg added to OS's PATH you can use just 'ffmpeg' as the value")
                 # FRAME INTERPOLATION TAB
                 with gr.Tab('Frame Interpolation') as frame_interp_tab:
-                    with gr.Accordion('Important notes and Help', open=False, elem_id="f_interp_accord", visible=False):
+                    with gr.Accordion('Important notes and Help', open=False, elem_id="f_interp_accord"):
                         gr.HTML("""
                         Use <a href="https://github.com/megvii-research/ECCV2022-RIFE">RIFE</a> / <a href="https://film-net.github.io/">FILM</a> Frame Interpolation to smooth out, slow-mo (or both) any video.</p>
                          <p style="margin-top:1em">
@@ -807,7 +806,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Column(variant='compact'):
                         with gr.Row(variant='compact'):
                             # Interpolation Engine
-                            frame_interpolation_engine = gr.Dropdown(label="Engine", choices=['None','RIFE v4.6','FILM'], value=dv.frame_interpolation_engine, type="value", elem_id="frame_interpolation_engine", interactive=True)
+                            frame_interpolation_engine = gr.Radio(['None','RIFE v4.6','FILM'], label="Engine", value=dv.frame_interpolation_engine, info="select the frame interpolation engine. hover on the options for more info")
                             frame_interpolation_slow_mo_enabled = gr.Checkbox(label="Slow Mo", elem_id="frame_interpolation_slow_mo_enabled", value=dv.frame_interpolation_slow_mo_enabled, interactive=True, visible=False)
                             # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
                             frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True, visible=False)

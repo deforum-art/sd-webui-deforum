@@ -318,6 +318,8 @@ def on_ui_tabs():
 
 def on_ui_settings():
     section = ('deforum', "Deforum")
+    # shared.opts.add_option("deforum_start_with_more_info_enabled", shared.OptionInfo(
+        # True, "Start deforum with 'info mode' enabled", gr.Checkbox, {"interactive": True}, section=section))   
     shared.opts.add_option("deforum_keep_3d_models_in_vram", shared.OptionInfo(
         False, "Keep 3D models in VRAM between runs", gr.Checkbox, {"interactive": True, "visible": True if not (cmd_opts.lowvram or cmd_opts.medvram) else False}, section=section))
     shared.opts.add_option("deforum_enable_persistent_settings", shared.OptionInfo(
