@@ -772,6 +772,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             One that is not supported <a style='color:SteelBlue;' target='_blank' href='https://www.shadertoy.com/view/tdjcWz'>example</a> which has channel0 data
                         </p><p style="margin-top:1em; margin-bottom:1em;">    
                             Note: If they take in channel data you can try to modify them to, however it requires knowledge of GLSL.
+                            <br />
+                            You will likely want to change the init image tab to have strength 0 no init set to false, and setting the strength around your scheduled value. 
                         </p>
                         """)
                         with gr.Row(variant='compact'):# , 'Mask' we will add mask in after it works again
