@@ -13,7 +13,7 @@ from modules import processing, sd_models
 from modules.shared import opts, sd_model, state, cmd_opts
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 from .deforum_controlnet import is_controlnet_enabled, process_with_controlnet
-
+from modules.shared import state
 import math, json, itertools
 import requests
 
@@ -54,6 +54,9 @@ def pairwise_repl(iterable):
     return zip(a, b)
 
 def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
+    if state.interrupted:
+        return None
+        
     if args.reroll_blank_frames == 'ignore':
         return generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame, return_sample, sampler_name)
     

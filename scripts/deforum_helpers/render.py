@@ -198,8 +198,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         #Webui
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
         state.job_no = frame_idx + 1
-        if state.interrupted:
-            break
+        # if state.interrupted:
+            # break
         if state.skipped:
             print("\n** PAUSED **")
             state.skipped = False
@@ -523,6 +523,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         # generation
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        
+        if image is None:
+            break
 
         # color matching on first frame is after generation, color match was collected earlier
         if frame_idx == 0:
