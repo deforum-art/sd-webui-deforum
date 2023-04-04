@@ -9,6 +9,7 @@ import numexpr
 import gc
 import random
 import PIL
+import time
 from PIL import Image, ImageOps
 from .rich import console
 from .generate import generate, isJson
@@ -197,8 +198,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         #Webui
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
         state.job_no = frame_idx + 1
-        if state.interrupted:
-            break
+        
+        if state.skipped:
+            print("\n** PAUSED **")
+            state.skipped = False
+            while not state.skipped:
+                time.sleep(0.1)
+            print("** RESUMING **")
 
         print(f"\033[36mAnimation frame: \033[0m{frame_idx}/{anim_args.max_frames}  ")
 
@@ -516,6 +522,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         # generation
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        
+        if image is None:
+            break
 
         # color matching on first frame is after generation, color match was collected earlier
         if frame_idx == 0:
