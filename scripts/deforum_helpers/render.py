@@ -9,6 +9,7 @@ import numexpr
 import gc
 import random
 import PIL
+import time
 from PIL import Image, ImageOps
 from .rich import console
 from .generate import generate, isJson
@@ -199,6 +200,12 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         state.job_no = frame_idx + 1
         if state.interrupted:
             break
+        if state.skipped:
+            print("\n** PAUSED **")
+            state.skipped = False
+            while not state.skipped:
+                time.sleep(0.1)
+            print("** RESUMING **")
 
         print(f"\033[36mAnimation frame: \033[0m{frame_idx}/{anim_args.max_frames}  ")
 
