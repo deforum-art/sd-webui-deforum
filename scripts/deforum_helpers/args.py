@@ -359,9 +359,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                     H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True) 
                 with gr.Row(variant='compact'):
-                    seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0)
-                    n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True)
-                    batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name)
+                    seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0, info="Starting seed for the animation. -1 for random")
+                    n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True, info="if seed is set to random (-1), generate a few vids in one run")
+                    batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name, info="output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}")
                 with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
                     with gr.Row(variant='compact'):
                         restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
@@ -463,19 +463,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Row(variant='compact'):
                             enable_steps_scheduling = gr.Checkbox(label="Enable steps scheduling", value=da.enable_steps_scheduling, interactive=True)
                         with gr.Row(variant='compact'):
-                            steps_schedule = gr.Textbox(label="Steps schedule", lines=1, value = da.steps_schedule, interactive=True)
+                            steps_schedule = gr.Textbox(label="Steps schedule", lines=1, value = da.steps_schedule, interactive=True, info="mainly allows using more than 200 steps. otherwise, it's a mirror-like param of 'strength schedule'")
                     # Sampler Scheduling
                     with gr.TabItem('Sampler') as a14:
                         with gr.Row(variant='compact'):
                             enable_sampler_scheduling = gr.Checkbox(label="Enable sampler scheduling", value=da.enable_sampler_scheduling, interactive=True)
                         with gr.Row(variant='compact'):
-                            sampler_schedule = gr.Textbox(label="Sampler schedule", lines=1, value = da.sampler_schedule, interactive=True)
+                            sampler_schedule = gr.Textbox(label="Sampler schedule", lines=1, value = da.sampler_schedule, interactive=True, info="allows keyframing different samplers. Use names as they appear in ui dropdown in 'run' tab")
                     # Checkpoint Scheduling
                     with gr.TabItem('Checkpoint') as a15:
                         with gr.Row(variant='compact'):
                             enable_checkpoint_scheduling = gr.Checkbox(label="Enable checkpoint scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
                         with gr.Row(variant='compact'):
-                            checkpoint_schedule = gr.Textbox(label="Checkpoint schedule", lines=1, value = da.checkpoint_schedule, interactive=True)
+                            checkpoint_schedule = gr.Textbox(label="Checkpoint schedule", lines=1, value = da.checkpoint_schedule, interactive=True, info="allows keyframing different sd models. use *full* name as appears in ui dropdown")
                 # MOTION INNER TAB
                 with gr.Tabs(elem_id='motion_noise_etc'):
                     with gr.TabItem('Motion') as motion_tab:
@@ -507,15 +507,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.TabItem('Depth Warping'): 
                                 with gr.Row(variant='compact'):
                                     use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
-                                    midas_weight = gr.Number(label="MiDaS weight", value=da.midas_weight, interactive=True)
+                                    midas_weight = gr.Number(label="MiDaS weight", value=da.midas_weight, interactive=True, info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
                                 with gr.Row(variant='compact'):
-                                    padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode")
+                                    padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode", info="controls the handling of pixels outside the field of view as they come into the scene. hover on the options for more info")
                                     sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="Sampling mode", value=da.sampling_mode, elem_id="sampling_mode")
                             with gr.TabItem('Field Of View', visible=False, open=False) as fov_accord:
                                 with gr.Row(variant='compact'):
-                                    fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True)
+                                    fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True, info="adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]")
                                 with gr.Row(variant='compact'):
-                                    aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value = da.aspect_ratio_schedule, interactive=True)
+                                    aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value = da.aspect_ratio_schedule, interactive=True, info="adjusts the aspect ratio for the depth calculation")
                                 with gr.Row(variant='compact'):
                                     near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
                                 with gr.Row(variant='compact'):
@@ -899,7 +899,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         invert = gr.Checkbox(label='Closer is brighter', value=True, elem_id="invert")
                     with gr.Row(variant='compact'):
                         end_blur = gr.Slider(label="End blur width", value=0, minimum=0, maximum=255, step=1)
-                        midas_weight_vid2depth = gr.Slider(label="MiDaS weight (vid2depth)", value=da.midas_weight, minimum=0, maximum=1, step=0.05, interactive=True)
+                        midas_weight_vid2depth = gr.Slider(label="MiDaS weight (vid2depth)", value=da.midas_weight, minimum=0, maximum=1, step=0.05, interactive=True, info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
                         depth_keep_imgs = gr.Checkbox(label='Keep Imgs', value=True, elem_id="depth_keep_imgs")
                     with gr.Row(variant='compact'):
                         # This is the actual button that's pressed to initiate the Upscaling:

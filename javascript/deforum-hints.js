@@ -86,7 +86,7 @@ deforum_titles = {
 	    //"border": "Border will attempt to use the edges of the canvas as the pixels to be drawn", //duplicate name as another property
 	    "reflection": "reflection will attempt to approximate the image and tile/repeat pixels",
 	    "zeros": "zeros will not add any new pixel information",
-	"sampling_mode": "choose from Bicubic, Bilinear or Nearest modes. (Recommended: Bicubic)",
+	"Sampling Mode": "choose from Bicubic, Bilinear or Nearest modes. (Recommended: Bicubic)",
     "Save depth maps": "will output a greyscale depth map image alongside the output images.",
     
 	// Prompts
