@@ -26,7 +26,7 @@ import json
 
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
-from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion
+from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, find_ffmpeg_binary, get_ffmpeg_params
 from deforum_helpers.general_utils import get_deforum_version
 from deforum_helpers.upscaling import make_upscale_v2
 import gc
@@ -38,6 +38,7 @@ from modules.ui import create_output_panel, plaintext_to_html, wrap_gradio_call
 from types import SimpleNamespace
 
 def run_deforum(*args, **kwargs):
+    f_location, f_crf, f_preset = get_ffmpeg_params() # get params for ffmpeg exec
     component_names = deforum_args.get_component_names()
     args_dict = {component_names[i]: args[i+2] for i in range(0, len(component_names))}
     p = StableDiffusionProcessingImg2Img(
@@ -132,7 +133,8 @@ def run_deforum(*args, **kwargs):
 
             # Stitch video using ffmpeg!
             try:
-                ffmpeg_stitch_video(ffmpeg_location=video_args.ffmpeg_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=video_args.ffmpeg_crf, preset=video_args.ffmpeg_preset)
+                f_location, f_crf, f_preset = get_ffmpeg_params() # get params for ffmpeg exec
+                ffmpeg_stitch_video(ffmpeg_location=f_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=f_crf, preset=f_preset)
                 mp4 = open(mp4_path,'rb').read()
                 data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
                 deforum_args.i1_store = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.2b </p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
@@ -320,12 +322,12 @@ def on_ui_settings():
     section = ('deforum', "Deforum")
     # shared.opts.add_option("deforum_start_with_more_info_enabled", shared.OptionInfo(
         # True, "Start deforum with 'info mode' enabled", gr.Checkbox, {"interactive": True}, section=section))   
-    shared.opts.add_option("deforum_keep_3d_models_in_vram", shared.OptionInfo(
-        False, "Keep 3D models in VRAM between runs", gr.Checkbox, {"interactive": True, "visible": True if not (cmd_opts.lowvram or cmd_opts.medvram) else False}, section=section))
-    shared.opts.add_option("deforum_enable_persistent_settings", shared.OptionInfo(
-        False, "Keep settings persistent upon relaunch of webui", gr.Checkbox, {"interactive": True}, section=section))
-    shared.opts.add_option("deforum_persistent_settings_path", shared.OptionInfo(
-        "models/Deforum/deforum_persistent_settings.txt", "Path for saving your persistent settings file:", section=section))
+    shared.opts.add_option("deforum_keep_3d_models_in_vram", shared.OptionInfo(False, "Keep 3D models in VRAM between runs", gr.Checkbox, {"interactive": True, "visible": True if not (cmd_opts.lowvram or cmd_opts.medvram) else False}, section=section))
+    shared.opts.add_option("deforum_enable_persistent_settings", shared.OptionInfo(False, "Keep settings persistent upon relaunch of webui", gr.Checkbox, {"interactive": True}, section=section))
+    shared.opts.add_option("deforum_persistent_settings_path", shared.OptionInfo("models/Deforum/deforum_persistent_settings.txt", "Path for saving your persistent settings file:", section=section))
+    shared.opts.add_option("deforum_ffmpeg_location", shared.OptionInfo(find_ffmpeg_binary(), "FFmpeg path/ location", section=section))
+    shared.opts.add_option("deforum_ffmpeg_crf", shared.OptionInfo(17, "FFmpeg CRF value", gr.Slider, {"interactive": True, "minimum": 0, "maximum": 51}, section=section))
+    shared.opts.add_option("deforum_ffmpeg_preset", shared.OptionInfo('slow', "FFmpeg Preset", gr.Dropdown, {"interactive": True, "choices": ['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast']}, section=section))
         
 script_callbacks.on_ui_tabs(on_ui_tabs)
 script_callbacks.on_ui_settings(on_ui_settings)
