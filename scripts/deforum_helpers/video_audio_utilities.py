@@ -13,8 +13,7 @@ from .general_utils import checksum, duplicate_pngs_from_folder
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
  
-def get_ffmpeg_params():
-
+def get_ffmpeg_params(): # get ffmpeg params from webui's settings -> deforum tab. actual opts are set in deforum.py
     f_location = opts.data.get("deforum_ffmpeg_location", find_ffmpeg_binary())
     f_crf = opts.data.get("deforum_ffmpeg_crf", 17)
     f_preset = opts.data.get("deforum_ffmpeg_preset", 'slow')
