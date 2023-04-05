@@ -46,7 +46,7 @@ def disable_by_interpolation(choice):
 def disable_by_video_input(choice):
     return gr.update(visible=False) if choice in ['Video Input'] else gr.update(visible=True)
     
-def change_comp_mask_x_visibility(choice):
+def hide_if_none(choice):
     return gr.update(visible=choice != "None")
     
 def change_gif_button_visibility(choice):
