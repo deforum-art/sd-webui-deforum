@@ -77,7 +77,7 @@ def DeforumAnimArgs():
     noise_mask_schedule = '0: ("{video_mask}")'
     # Checkpoint Scheduling
     enable_checkpoint_scheduling = False
-    checkpoint_schedule = '0: ("model1.ckpt"), 100: ("model2.ckpt")'
+    checkpoint_schedule = '0: ("model1.ckpt"), 100: ("model2.safetensors")'
     # CLIP skip Scheduling
     enable_clipskip_scheduling = False 
     clipskip_schedule = '0: (2)'
