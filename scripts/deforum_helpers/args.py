@@ -1,4 +1,4 @@
-from modules.shared import cmd_opts
+from modules.shared import cmd_opts, opts
 from modules.processing import get_fixed_seed
 from modules.ui_components import FormRow
 import modules.shared as sh
@@ -7,7 +7,7 @@ import os
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount, process_interp_vid_upload_logic, process_interp_pics_upload_logic
 from .upscaling import process_ncnn_upscale_vid_upload_logic
 from .vid2depth import process_depth_vid_upload_logic
-from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number
+from .video_audio_utilities import find_ffmpeg_binary, ffmpeg_stitch_video, direct_stitch_vid_from_frames, get_quick_vid_info, extract_number, get_ffmpeg_params
 from .gradio_funcs import *
 from .general_utils import get_os, get_deforum_version, custom_placeholder_format, test_long_path_support, get_max_path_length, substitute_placeholders
 from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names, controlnet_infotext
@@ -271,9 +271,6 @@ def DeforumOutputArgs():
     delete_imgs = False # True will delete all imgs after a successful mp4 creation
     image_path = "C:/SD/20230124234916_%09d.png" 
     mp4_path = "testvidmanualsettings.mp4" 
-    ffmpeg_location = find_ffmpeg_binary()
-    ffmpeg_crf = '17'
-    ffmpeg_preset = 'slow'
     add_soundtrack = 'None' # ["File","Init Video"]
     soundtrack_path = "https://deforum.github.io/a1/A1.mp3"
     # End-Run upscaling
@@ -776,12 +773,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         r_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True, value = dv.r_upscale_model, type="value")
                         r_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
                         r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True, info="don't delete upscaled imgs")
-                    with gr.Accordion('FFmpeg settings', visible=True, open=False) as ffmpeg_quality_accordion:
-                        with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_set_row:
-                            ffmpeg_crf = gr.Slider(minimum=0, maximum=51, step=1, label="CRF", value=dv.ffmpeg_crf, interactive=True, info="enables to specify a target value that maps to a specific quality by adjusting the bitrates automatically based on the input video. Rec values 17-28")
-                            ffmpeg_preset = gr.Dropdown(label="Preset", choices=['veryslow', 'slower', 'slow', 'medium', 'fast', 'faster', 'veryfast', 'superfast', 'ultrafast'], interactive=True, value = dv.ffmpeg_preset, type="value", info="ffmpeg's preset is a collection of options that will provide a certain encoding speed to compression ratio. A slower preset will provide better compression (compression is quality per filesize)")
-                        with gr.Row(equal_height=True, variant='compact', visible=True) as ffmpeg_location_row:
-                            ffmpeg_location = gr.Textbox(label="Location", lines=1, interactive=True, value = dv.ffmpeg_location, info="the path in which ffmpeg binary is installed. if you have ffmpeg added to OS's PATH you can use just 'ffmpeg' as the value")
                 # FRAME INTERPOLATION TAB
                 with gr.Tab('Frame Interpolation') as frame_interp_tab:
                     with gr.Accordion('Important notes and Help', open=False, elem_id="f_interp_accord"):
@@ -839,8 +830,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 # Show a text about CLI outputs:
                                 gr.HTML("* check your CLI for outputs *", elem_id="below_interpolate_butts_msg") # TODO: CSS THIS TO CENTER OF ROW!
                                 # make the functin call when the interpolation button is clicked
-                                interpolate_button.click(upload_vid_to_interpolate,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, in_vid_fps_ui_window])
-                                interpolate_pics_button.click(upload_pics_to_interpolate,inputs=[pics_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, fps, add_soundtrack, soundtrack_path])
+                                interpolate_button.click(upload_vid_to_interpolate,inputs=[vid_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, in_vid_fps_ui_window])
+                                interpolate_pics_button.click(upload_pics_to_interpolate,inputs=[pics_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, fps, add_soundtrack, soundtrack_path])
                 # VIDEO UPSCALE TAB
                 with gr.TabItem('Video Upscaling'):
                     vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
@@ -857,7 +848,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 ncnn_upscale_factor =  gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value="x2", type="value")
                                 ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=True, interactive=True) # fix value
                         ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
-                        ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model, ncnn_upscale_factor, ncnn_upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                        ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model, ncnn_upscale_factor, ncnn_upscale_keep_imgs])
                         with gr.Column(visible=False): # Upscale V1. Disabled 06-03-23
                             selected_tab = gr.State(value=0)
                             with gr.Tabs(elem_id="extras_resize_mode"):
@@ -908,7 +899,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         # Show a text about CLI outputs:
                         gr.HTML("* check your CLI for outputs")
                         # make the function call when the UPSCALE button is clicked
-                    depth_btn.click(upload_vid_to_depth,inputs=[vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
+                    depth_btn.click(upload_vid_to_depth,inputs=[vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs])
                 # STITCH FRAMES TO VID TAB
                 with gr.TabItem('Frames to Video') as stitch_imgs_to_vid_row:
                     with gr.Row(visible=False):
@@ -923,7 +914,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact'):
                           image_path = gr.Textbox(label="Image path", lines=1, interactive=True, value = dv.image_path)
                     ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
-                    ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, add_soundtrack, soundtrack_path])
+                    ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, add_soundtrack, soundtrack_path])
                 # **OLD + NON ACTIVES AREA**
                 with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
                         mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
@@ -981,7 +972,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     color_coherence.change(fn=change_color_coherence_video_every_N_frames_visibility, inputs=color_coherence, outputs=color_coherence_video_every_N_frames_row)
     color_coherence.change(fn=change_color_coherence_image_path_visibility, inputs=color_coherence, outputs=color_coherence_image_path_row)
     noise_type.change(fn=change_perlin_visibility, inputs=noise_type, outputs=perlin_row)
-    skip_video_creation_outputs = [fps_out_format_row, soundtrack_row, ffmpeg_quality_accordion, store_frames_in_ram, make_gif, r_upscale_row, delete_imgs]
+    skip_video_creation_outputs = [fps_out_format_row, soundtrack_row, store_frames_in_ram, make_gif, r_upscale_row, delete_imgs]
     for output in skip_video_creation_outputs:
         skip_video_creation.change(fn=change_visibility_from_skip_video, inputs=skip_video_creation, outputs=output)  
     frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
@@ -1056,7 +1047,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         reroll_blank_frames,reroll_patience'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_creation,
-                            fps, make_gif, delete_imgs, output_format, ffmpeg_location, ffmpeg_crf, ffmpeg_preset,
+                            fps, make_gif, delete_imgs, output_format,
                             add_soundtrack, soundtrack_path,
                             r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
                             render_steps,
@@ -1196,22 +1187,23 @@ def process_args(args_dict_main):
     return root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
     
 # Local gradio-to-frame-interoplation function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
-def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps):
+def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, in_vid_fps):
     # print msg and do nothing if vid not uploaded or interp_x not provided
     if not file or engine == 'None':
         return print("Please upload a video and set a proper value for 'Interp X'. Can't interpolate x0 times :)")
+    f_location, f_crf, f_preset = get_ffmpeg_params()
 
     root_params = Root()
     f_models_path = root_params['models_path']
 
     process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
 
-def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, add_audio, audio_track):
+def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, fps, add_audio, audio_track):
     from PIL import Image
     
     if pic_list is None or len(pic_list) < 2:
         return print("Please upload at least 2 pics for interpolation.")
-        
+    f_location, f_crf, f_preset = get_ffmpeg_params()
     # make sure all uploaded pics have the same resolution
     pic_sizes = [Image.open(picture_path.name).size for picture_path in pic_list]
     if len(set(pic_sizes)) != 1:
@@ -1224,20 +1216,21 @@ def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_i
     
     process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_audio, audio_track)
 
-def upload_vid_to_depth(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset):
+def upload_vid_to_depth(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs):
     # print msg and do nothing if vid not uploaded
     if not vid_to_depth_chosen_file:
         return print("Please upload a video :()")
-    
+    f_location, f_crf, f_preset = get_ffmpeg_params()
     root_params = Root()
     f_models_path = root_params['models_path']
     
     process_depth_vid_upload_logic(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, vid_to_depth_chosen_file.orig_name, depth_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, f_models_path)
 
-def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset):
+def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs):
     if vid_path is None:
         print("Please upload a video :)")
         return
+    f_location, f_crf, f_preset = get_ffmpeg_params()
     root_params = Root()
     f_models_path = root_params['models_path']
     current_user = root_params['current_user_os']
