@@ -75,6 +75,7 @@ def process_ncnn_video_upscaling(vid_path, outdir, in_vid_fps, in_vid_res, out_v
     upscaled_folder_path = os.path.join(os.path.dirname(outdir), 'Upscaled_frames')
     # create folder for upscaled imgs to live in. this folder will stay alive if keep_imgs=True, otherwise get deleted at the end
     os.makedirs(upscaled_folder_path, exist_ok=True)
+    # originally we used vid_path.orig_name but gradio broke it in v 3.23 so we use a hack on vid_path.name, which might not hold forever. 2023-04-05
     out_upscaled_mp4_path = os.path.join(os.path.dirname(outdir), f"{os.path.basename(vid_path.name)}_Upscaled_{upscale_factor}.mp4")
     # download upscaling model if needed
     check_and_download_realesrgan_ncnn(models_path, current_user_os)
