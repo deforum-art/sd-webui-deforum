@@ -18,11 +18,13 @@ def hybrid_generation(args, anim_args, root):
     hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
     human_masks_path = os.path.join(args.outdir, 'human_masks')
 
+    # create hybridframes folder whether using init_image or inputframes
+    os.makedirs(hybrid_frame_path, exist_ok=True)
+
     if anim_args.hybrid_generate_inputframes:
         # create folders for the video input frames and optional hybrid frames to live in
         os.makedirs(video_in_frame_path, exist_ok=True)
-        os.makedirs(hybrid_frame_path, exist_ok=True)
-        
+                
         # delete frames if overwrite = true
         if anim_args.overwrite_extracted_frames:
             delete_all_imgs_in_folder(hybrid_frame_path)
@@ -53,12 +55,13 @@ def hybrid_generation(args, anim_args, root):
         print(f"Extracting alpha humans masks from the input frames")
         video2humanmasks(video_in_frame_path, human_masks_path, anim_args.hybrid_generate_human_masks, output_fps)
         
-    # determine max frames from length of input frames
-    anim_args.max_frames = len([f for f in pathlib.Path(video_in_frame_path).glob('*.jpg')])
-    print(f"Using {anim_args.max_frames} input frames from {video_in_frame_path}...")
-
     # get sorted list of inputfiles
     inputfiles = sorted(pathlib.Path(video_in_frame_path).glob('*.jpg'))
+
+    if not anim_args.hybrid_use_init_image:
+        # determine max frames from length of input frames
+        anim_args.max_frames = len(inputfiles)
+        print(f"Using {anim_args.max_frames} input frames from {video_in_frame_path}...")
 
     # use first frame as init
     if anim_args.hybrid_use_first_frame_as_init_image:
@@ -71,7 +74,10 @@ def hybrid_generation(args, anim_args, root):
     return args, anim_args, inputfiles
 
 def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_comp_schedules, root):
-    video_frame = os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg")
+    if anim_args.hybrid_use_init_image:
+        video_frame = args.init_image
+    else:
+        video_frame = os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg")
     video_depth_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_vid_depth{frame_idx:09}.jpg")
     depth_frame = os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx-1:09}.png")
     mask_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_mask{frame_idx:09}.jpg")

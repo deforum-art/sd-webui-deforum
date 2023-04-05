@@ -53,17 +53,17 @@ def change_gif_button_visibility(choice):
     return gr.update(visible=False, value=False) if int(choice) > 30 else gr.update(visible=True)
     
 def disable_by_hybrid_composite(choice):
-    return gr.update(visible=True) if choice else gr.update(visible=False)
+    return gr.update(visible=True) if choice in ['Normal', 'Before Motion', 'After Generation'] else gr.update(visible=False)
         
 def disable_by_hybrid_composite_dynamic(choice, comp_mask_type):
-    if choice == True:
+    if choice in ['Normal', 'Before Motion', 'After Generation']:
         if comp_mask_type != 'None':
             return gr.update(visible=True)
     return gr.update(visible=False)
     
-def disable_by_comp_mask(choice):
+def disable_by_none(choice):
     return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
-        
+
 def disable_by_non_optical_flow(choice):
     return gr.update(visible=False) if choice != 'Optical Flow' else gr.update(visible=True)
     
