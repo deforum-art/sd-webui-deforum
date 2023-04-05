@@ -37,7 +37,7 @@ from modules import lowvram, devices, sd_hijack
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     if anim_args.animation_mode in ['2D','3D']:
         # handle hybrid video generation
-        if anim_args.hybrid_composite is not 'None' or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
+        if anim_args.hybrid_composite != 'None' or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
             args, anim_args, inputfiles = hybrid_generation(args, anim_args, root)
             # path required by hybrid functions, even if hybrid_comp_save_extra_frames is False
             hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
@@ -121,7 +121,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             adabins_model = AdaBinsModel(root.models_path, keep_in_vram=keep_in_vram)
             
         # depth-based hybrid composite mask requires saved depth maps
-        if anim_args.hybrid_composite is not 'None' and anim_args.hybrid_comp_mask_type =='Depth':
+        if anim_args.hybrid_composite != 'None' and anim_args.hybrid_comp_mask_type =='Depth':
             anim_args.save_depth_maps = True
     else:
         depth_model = None
@@ -346,7 +346,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 prev_img = turbo_next_image
 
         # get color match for video outside of prev_img conditional
-        hybrid_available = anim_args.hybrid_composite is not 'None' or anim_args.hybrid_motion in ['Optical Flow', 'Affine', 'Perspective']
+        hybrid_available = anim_args.hybrid_composite != 'None' or anim_args.hybrid_motion in ['Optical Flow', 'Affine', 'Perspective']
         if anim_args.color_coherence == 'Video Input' and hybrid_available:
             if int(frame_idx) % int(anim_args.color_coherence_video_every_N_frames) == 0:
                 prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx+1:09}.jpg"))
