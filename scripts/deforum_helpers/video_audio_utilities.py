@@ -8,10 +8,17 @@ import time
 import re 
 import glob
 from pkg_resources import resource_filename
-from modules.shared import state
+from modules.shared import state, opts
 from .general_utils import checksum, duplicate_pngs_from_folder
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
+ 
+def get_ffmpeg_params(): # get ffmpeg params from webui's settings -> deforum tab. actual opts are set in deforum.py
+    f_location = opts.data.get("deforum_ffmpeg_location", find_ffmpeg_binary())
+    f_crf = opts.data.get("deforum_ffmpeg_crf", 17)
+    f_preset = opts.data.get("deforum_ffmpeg_preset", 'slow')
+
+    return [f_location, f_crf, f_preset]
 
 # e.g gets 'x2' returns just 2 as int
 def extract_number(string):
@@ -225,7 +232,8 @@ def get_manual_frame_to_vid_output_path(input_path):
         i += 1
     return output_path
 
-def direct_stitch_vid_from_frames(image_path, fps, f_location, f_crf, f_preset, add_soundtrack, audio_path):
+def direct_stitch_vid_from_frames(image_path, fps, add_soundtrack, audio_path):
+    f_location, f_crf, f_preset = get_ffmpeg_params()
     matching_files = glob.glob(re.sub(r'%\d*d', '*', image_path))
     min_id = None
     for file in matching_files:
