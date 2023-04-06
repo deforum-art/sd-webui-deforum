@@ -973,14 +973,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_method)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_factor_schedule)
-    hybrid_motion.change(fn=disable_by_none, inputs=hybrid_motion, outputs=hybrid_motion_use_prev_img)
+    hybrid_motion.change(fn=hide_if_none, inputs=hybrid_motion, outputs=hybrid_motion_use_prev_img)
     hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)
     hybrid_composite_outputs = [humans_masking_accord, hybrid_sch_accord, hybrid_comp_mask_type, hybrid_use_first_frame_as_init_image, hybrid_use_init_image]
     for output in hybrid_composite_outputs:
         hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=output)  
     hybrid_comp_mask_type_outputs = [hybrid_comp_mask_blend_alpha_schedule_row, hybrid_comp_mask_contrast_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row]
     for output in hybrid_comp_mask_type_outputs:
-        hybrid_comp_mask_type.change(fn=disable_by_none, inputs=hybrid_comp_mask_type, outputs=output)
+        hybrid_comp_mask_type.change(fn=hide_if_none, inputs=hybrid_comp_mask_type, outputs=output)
     # End of hybrid related
     seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row) 
     seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)

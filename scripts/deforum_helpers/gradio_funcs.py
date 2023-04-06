@@ -60,9 +60,6 @@ def disable_by_hybrid_composite_dynamic(choice, comp_mask_type):
         if comp_mask_type != 'None':
             return gr.update(visible=True)
     return gr.update(visible=False)
-    
-def disable_by_none(choice):
-    return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
 
 def disable_by_non_optical_flow(choice):
     return gr.update(visible=False) if choice != 'Optical Flow' else gr.update(visible=True)
