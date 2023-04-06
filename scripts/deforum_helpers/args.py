@@ -1179,7 +1179,7 @@ def process_args(args_dict_main):
     args.positive_prompts = args_dict_main['animation_prompts_positive']
     args.negative_prompts = args_dict_main['animation_prompts_negative']
 
-    if not args.use_init:
+    if not args.use_init and not anim_args.hybrid_use_init_image:
         args.init_image = None
         
     if anim_args.animation_mode == 'None':
