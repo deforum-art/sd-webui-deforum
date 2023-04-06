@@ -966,11 +966,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_sch_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_settings_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=humans_masking_accord)
-    
     optical_flow_redo_generation.change(fn=hide_if_none, inputs=optical_flow_redo_generation, outputs=redo_flow_factor_schedule_column)
     hybrid_comp_mask_type.change(fn=hide_if_none, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
-    
-    
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_method)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_factor_schedule)
     hybrid_motion.change(fn=hide_if_none, inputs=hybrid_motion, outputs=hybrid_motion_use_prev_img)
