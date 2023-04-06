@@ -499,7 +499,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         
         # optical flow redo before generation
         if anim_args.optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
-            print("Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before final diffusion.")
+            print(f"Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before final diffusion.")
             stored_seed = args.seed
             args.seed = random.randint(0, 2**32 - 1)
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)

@@ -359,7 +359,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                     H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True) 
                 with gr.Row(variant='compact'):
-                    seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0, info="Starting seed for the animation. -1 for random")
+                    seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0, info="starting seed for the animation. -1 for random")
                     n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True, info="if seed is set to random (-1), generate a few vids in one run")
                     batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name, info="output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}")
                 with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
@@ -551,25 +551,25 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     # COHERENCE INNER TAB
                     with gr.TabItem('Coherence', open=False) as coherence_accord:
                         with gr.Row(variant='compact'):
-                            color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True)
-                            color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True)
+                            color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True, info="choose an algorithm/ method for keeping color coherence across the animation")
+                            color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True, info="forcing all frames to be in grayscale")
                         with gr.Row(visible=False) as color_coherence_image_path_row:
                             color_coherence_image_path = gr.Textbox(label="Color coherence image path", lines=1, value=da.color_coherence_image_path, interactive=True)
                         with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
                             color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
-                        with gr.Row(variant='compact'):
+                        with gr.Row(variant='compact', visible=False) as optical_flow_cadence_row:
                             with gr.Column(min_width=220):
-                                optical_flow_cadence = gr.Radio(['None', 'DIS Fine', 'DIS Medium', 'Farneback'], label="Optical flow cadence", value=da.optical_flow_cadence, elem_id="optical_flow_cadence", visible=True)
+                                optical_flow_cadence = gr.Dropdown(choices=['None', 'DIS Fine', 'DIS Medium', 'Farneback'], label="Optical flow cadence", value=da.optical_flow_cadence, elem_id="optical_flow_cadence", interactive=True)
                             with gr.Column(min_width=220):
                                 cadence_flow_factor_schedule = gr.Textbox(label="Cadence flow factor schedule", lines=1, value = da.cadence_flow_factor_schedule, interactive=True)
                         with gr.Row(variant='compact'):
                             with gr.Column(min_width=220):
-                                optical_flow_redo_generation = gr.Radio(['None', 'DIS Fine', 'DIS Medium', 'Farneback'], label="Optical flow redo", value=da.optical_flow_redo_generation, elem_id="optical_flow_redo_generation", visible=True)
-                            with gr.Column(min_width=220):
-                                redo_flow_factor_schedule = gr.Textbox(label="Redo flow factor schedule", lines=1, value = da.redo_flow_factor_schedule, interactive=True)
+                                optical_flow_redo_generation = gr.Dropdown(choices=['None', 'DIS Fine', 'DIS Medium', 'Farneback'], label="Optical flow generation", value=da.optical_flow_redo_generation, elem_id="optical_flow_redo_generation", visible=True, interactive=True, info="this option takes twice as long because it generates twice in order to capture the optical flow from the previous image to the first generation, then warps the previous image and redoes the generation")
+                            with gr.Column(min_width=220, visible=False) as redo_flow_factor_schedule_column:
+                                redo_flow_factor_schedule = gr.Textbox(label="Generation flow factor schedule", lines=1, value = da.redo_flow_factor_schedule, interactive=True)
                         with gr.Row(variant='compact'):
-                            contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value = da.contrast_schedule, interactive=True)
-                            diffusion_redo = gr.Slider(label="Redo", minimum=0, maximum=50, step=1, value=da.diffusion_redo, interactive=True)
+                            contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value = da.contrast_schedule, interactive=True, info="adjusts the overall contrast per frame [neutral at 1.0, recommended to *not* play with this param]")
+                            diffusion_redo = gr.Slider(label="Redo generation", minimum=0, maximum=50, step=1, value=da.diffusion_redo, interactive=True, info="this option renders N times before the final render. it is suggested to lower your steps if you up your redo. seed is randomized during redo generations and restored afterwards")
                         with gr.Row(variant='compact'):
                             # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                             reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
@@ -885,7 +885,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             # Show a text about CLI outputs:
                             gr.HTML("* check your CLI for outputs")
                             # make the function call when the UPSCALE button is clicked
-                            #upscale_btn.click(upload_vid_to_upscale,inputs=[vid_to_upscale_chosen_file, selected_tab, upscaling_resize, upscaling_resize_w, upscaling_resize_h, upscaling_crop, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, upscale_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset])
                         # Vid2Depth TAB
                 with gr.TabItem('Vid2depth'):
                     vid_to_depth_chosen_file = gr.File(label="Video to get Depth from", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_depth_chosen_file")
@@ -950,11 +949,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     ncnn_upscale_factor.change(update_upscale_out_res, inputs=[ncnn_upscale_in_vid_res, ncnn_upscale_factor], outputs=ncnn_upscale_out_vid_res)
     vid_to_upscale_chosen_file.change(vid_upscale_gradio_update_stats,inputs=[vid_to_upscale_chosen_file, ncnn_upscale_factor],outputs=[ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_frame_count_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res])
     animation_mode.change(fn=change_max_frames_visibility, inputs=animation_mode, outputs=max_frames)
-    diffusion_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence,cadence_flow_factor_schedule,
+    diffusion_cadence_outputs = [diffusion_cadence,guided_images_accord,optical_flow_cadence_row,cadence_flow_factor_schedule,
     optical_flow_redo_generation,redo_flow_factor_schedule,diffusion_redo]
     for output in diffusion_cadence_outputs:
         animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=output)
-    three_d_related_outputs = [depth_3d_warping_accord,fov_accord,optical_flow_cadence,cadence_flow_factor_schedule,only_3d_motion_column]
+    three_d_related_outputs = [depth_3d_warping_accord,fov_accord,optical_flow_cadence_row,cadence_flow_factor_schedule,only_3d_motion_column]
     for output in three_d_related_outputs:
         animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=output)
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
@@ -967,17 +966,18 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_sch_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_settings_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=humans_masking_accord)
-    hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
+    optical_flow_redo_generation.change(fn=hide_if_none, inputs=optical_flow_redo_generation, outputs=redo_flow_factor_schedule_column)
+    hybrid_comp_mask_type.change(fn=hide_if_none, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_method)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_factor_schedule)
-    hybrid_motion.change(fn=disable_by_none, inputs=hybrid_motion, outputs=hybrid_motion_use_prev_img)
+    hybrid_motion.change(fn=hide_if_none, inputs=hybrid_motion, outputs=hybrid_motion_use_prev_img)
     hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)
     hybrid_composite_outputs = [humans_masking_accord, hybrid_sch_accord, hybrid_comp_mask_type, hybrid_use_first_frame_as_init_image, hybrid_use_init_image]
     for output in hybrid_composite_outputs:
         hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=output)  
     hybrid_comp_mask_type_outputs = [hybrid_comp_mask_blend_alpha_schedule_row, hybrid_comp_mask_contrast_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row]
     for output in hybrid_comp_mask_type_outputs:
-        hybrid_comp_mask_type.change(fn=disable_by_none, inputs=hybrid_comp_mask_type, outputs=output)
+        hybrid_comp_mask_type.change(fn=hide_if_none, inputs=hybrid_comp_mask_type, outputs=output)
     # End of hybrid related
     seed_behavior.change(fn=change_seed_iter_visibility, inputs=seed_behavior, outputs=seed_iter_N_row) 
     seed_behavior.change(fn=change_seed_schedule_visibility, inputs=seed_behavior, outputs=seed_schedule_row)
