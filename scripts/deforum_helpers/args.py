@@ -808,10 +808,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Column(variant='compact'):
                         with gr.Row(variant='compact'):
                             # Interpolation Engine
-                            frame_interpolation_engine = gr.Radio(['None','RIFE v4.6','FILM'], label="Engine", value=dv.frame_interpolation_engine, info="select the frame interpolation engine. hover on the options for more info")
-                            frame_interpolation_slow_mo_enabled = gr.Checkbox(label="Slow Mo", elem_id="frame_interpolation_slow_mo_enabled", value=dv.frame_interpolation_slow_mo_enabled, interactive=True, visible=False)
-                            # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
-                            frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True, visible=False)
+                            with gr.Column(min_width=110, scale = 3):
+                                frame_interpolation_engine = gr.Radio(['None','RIFE v4.6','FILM'], label="Engine", value=dv.frame_interpolation_engine, info="select the frame interpolation engine. hover on the options for more info")
+                            with gr.Column(min_width=30, scale = 1):
+                                frame_interpolation_slow_mo_enabled = gr.Checkbox(label="Slow Mo", elem_id="frame_interpolation_slow_mo_enabled", value=dv.frame_interpolation_slow_mo_enabled, interactive=True, visible=False)
+                            with gr.Column(min_width=30, scale = 1):
+                                # If this is set to True, we keep all of the interpolated frames in a folder. Default is False - means we delete them at the end of the run
+                                frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True, visible=False)
                         with gr.Row(variant='compact', visible=False) as frame_interp_amounts_row:
                             with gr.Column(min_width=180) as frame_interp_x_amount_column:
                                 # How many times to interpolate (interp X)
