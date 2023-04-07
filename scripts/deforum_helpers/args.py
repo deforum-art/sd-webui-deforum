@@ -1131,7 +1131,7 @@ def process_args(args_dict_main, run_id):
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root, run_id)
+        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id)
     
     if not os.path.exists(root.models_path):
         os.mkdir(root.models_path)
