@@ -7,6 +7,7 @@ import PIL
 from PIL import Image, ImageChops, ImageOps, ImageEnhance
 from .video_audio_utilities import vid2frames, get_quick_vid_info, get_frame_name, get_next_frame
 from .human_masking import video2humanmasks
+from .load_images import load_image
 
 def delete_all_imgs_in_folder(folder_path):
         files = list(pathlib.Path(folder_path).glob('*.jpg'))
@@ -18,11 +19,13 @@ def hybrid_generation(args, anim_args, root):
     hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
     human_masks_path = os.path.join(args.outdir, 'human_masks')
 
+    # create hybridframes folder whether using init_image or inputframes
+    os.makedirs(hybrid_frame_path, exist_ok=True)
+
     if anim_args.hybrid_generate_inputframes:
         # create folders for the video input frames and optional hybrid frames to live in
         os.makedirs(video_in_frame_path, exist_ok=True)
-        os.makedirs(hybrid_frame_path, exist_ok=True)
-        
+                
         # delete frames if overwrite = true
         if anim_args.overwrite_extracted_frames:
             delete_all_imgs_in_folder(hybrid_frame_path)
@@ -53,12 +56,13 @@ def hybrid_generation(args, anim_args, root):
         print(f"Extracting alpha humans masks from the input frames")
         video2humanmasks(video_in_frame_path, human_masks_path, anim_args.hybrid_generate_human_masks, output_fps)
         
-    # determine max frames from length of input frames
-    anim_args.max_frames = len([f for f in pathlib.Path(video_in_frame_path).glob('*.jpg')])
-    print(f"Using {anim_args.max_frames} input frames from {video_in_frame_path}...")
-
     # get sorted list of inputfiles
     inputfiles = sorted(pathlib.Path(video_in_frame_path).glob('*.jpg'))
+
+    if not anim_args.hybrid_use_init_image:
+        # determine max frames from length of input frames
+        anim_args.max_frames = len(inputfiles)
+        print(f"Using {anim_args.max_frames} input frames from {video_in_frame_path}...")
 
     # use first frame as init
     if anim_args.hybrid_use_first_frame_as_init_image:
@@ -79,7 +83,10 @@ def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_c
     prev_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_prev{frame_idx:09}.jpg")
     prev_img = cv2.cvtColor(prev_img, cv2.COLOR_BGR2RGB)
     prev_img_hybrid = Image.fromarray(prev_img)
-    video_image = Image.open(video_frame)
+    if anim_args.hybrid_use_init_image:
+        video_image = load_image(args.init_image)
+    else:
+        video_image = Image.open(video_frame)
     video_image = video_image.resize((args.W, args.H), PIL.Image.LANCZOS)
     hybrid_mask = None
 

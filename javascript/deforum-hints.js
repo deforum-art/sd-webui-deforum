@@ -167,9 +167,10 @@ deforum_titles = {
     // Hybrid Video
     "Generate inputframes": "Initiates extraction of video frames from your video_init_path to the inputframes folder. You only need to do this once and then you can change it to False and re-render",
     "Hybrid composite": "Engages hybrid compositing of video into animation in various ways with comp alpha as a master mix control.",
+	"Use init image as video": "Use init image instead of video. Doesn't require generation of inputframes.",
     "First Frame as init image": "If True, uses the first frame of the video as the init_image. False can create interesting transition effects into the video, depending on settings.",
     "Motion use prev img": "If enabled, changes the behavior or hybrid_motion to captures motion by comparing the current video frame to the previous rendered image, instead of the previous video frame.",
-    "Hybrid motion": "Analyzes video frames for camera motion during generation that are used in rendering to match movement.",
+    "Hybrid motion": "Analyzes video frames for camera motion and applies movement to render.",
     "Flow method": "Selects the type of Optical Flow to use if Optical Flow is selected in Hybrid motion.",
     "Comp mask type": "You don't need a mask to composite video. But, Mask types can control the way that video is composited with the previous image each frame.",
     "Comp mask equalize": "Equalizes the mask for the composite before or after autocontrast operation (or both)",
