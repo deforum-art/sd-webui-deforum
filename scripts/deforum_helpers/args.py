@@ -60,6 +60,7 @@ def DeforumAnimArgs():
     steps_schedule = "0: (25)"
     fov_schedule = "0: (70)"
     aspect_ratio_schedule = "0: (1)"
+    aspect_ratio_use_old_formula = False
     near_schedule = "0: (200)"
     far_schedule = "0: (10000)"
     seed_schedule = '0:(s), 1:(-1), "max_f-2":(-1), "max_f-1":(s)'
@@ -515,6 +516,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 with gr.Row(variant='compact'):
                                     fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True, info="adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]")
                                 with gr.Row(variant='compact'):
+                                    aspect_ratio_use_old_formula = gr.Checkbox(label="Use old aspect ratio formula", value=da.aspect_ratio_use_old_formula, interactive=True, info="for backward compatibility. uses the formula width/height")
                                     aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value = da.aspect_ratio_schedule, interactive=True, info="adjusts the aspect ratio for the depth calculation")
                                 with gr.Row(variant='compact'):
                                     near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
@@ -964,6 +966,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=noise_tab_column)
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=both_anim_mode_motion_params_column)
+    aspect_ratio_use_old_formula.change(fn=hide_if_true, inputs=aspect_ratio_use_old_formula, outputs=aspect_ratio_schedule)
     #Hybrid related:
     animation_mode.change(fn=show_hybrid_html_msg, inputs=animation_mode, outputs=hybrid_msg_html)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_sch_accord)
@@ -1026,7 +1029,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
                         enable_subseed_scheduling, subseed_schedule, subseed_strength_schedule,
                         enable_steps_scheduling, steps_schedule,
-                        fov_schedule, aspect_ratio_schedule, near_schedule, far_schedule,
+                        fov_schedule, aspect_ratio_schedule, aspect_ratio_use_old_formula, near_schedule, far_schedule,
                         seed_schedule,
                         enable_sampler_scheduling, sampler_schedule,
                         mask_schedule, use_noise_mask, noise_mask_schedule,
