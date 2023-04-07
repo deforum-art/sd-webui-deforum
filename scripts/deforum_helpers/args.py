@@ -370,7 +370,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Accordion('Batch Mode & Resume', open=False):
                     with gr.Tab('Batch Mode/ run from setting files'):
                         with gr.Row(variant='compact'):
-                            override_settings_with_file = gr.Checkbox(label="Enable batch mode", value=False, interactive=True, elem_id='override_settings')
+                            override_settings_with_file = gr.Checkbox(label="Enable batch mode", value=False, interactive=True, elem_id='override_settings', info="run from a list of setting .txt files. Upload them to the box on the right (visible when enabled)")
                             custom_settings_file = gr.File(label="Setting files", interactive=True, file_count="multiple", file_types=[".txt"], elem_id="custom_setting_file", visible=False)
                     # RESUME ANIMATION ACCORD
                     with gr.Tab('Resume Animation'):
