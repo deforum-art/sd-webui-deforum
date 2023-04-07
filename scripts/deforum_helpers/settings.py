@@ -21,10 +21,8 @@ def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_
         handle_deprecated_settings(jdata)
         root.animation_prompts = jdata.get("prompts", root.animation_prompts)
         if "animation_prompts_positive" in jdata:
-            root.animation_prompts_positive = jdata["animation_prompts_positive"]
             args_dict_main['animation_prompts_positive'] = jdata["animation_prompts_positive"] # Update the args_dict_main
         if "animation_prompts_negative" in jdata:
-            root.animation_prompts_negative = jdata["animation_prompts_negative"]
             args_dict_main['animation_prompts_negative'] = jdata["animation_prompts_negative"] # Update the args_dict_main
         keys_to_exclude = get_keys_to_exclude()
         for dicts in [args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, video_args_dict]:
