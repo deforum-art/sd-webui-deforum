@@ -54,6 +54,11 @@
 	padding: 2.25px;
 }
 
+#tab_deforum_interface .wrap.svelte-xwlu1w, #custom_setting_file {
+	height: 85px !important;
+	min-height: 85px !important;
+}
+
 /* OLD rules THAT MIGHT NEED TO BE REVIVED AT SOME POINT: */
 
 /* #tab_deforum_interface .svelte-e8n7p6 { /* hide at default gradio's info section from params at ui*/ */

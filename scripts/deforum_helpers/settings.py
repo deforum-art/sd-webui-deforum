@@ -12,10 +12,10 @@ def get_keys_to_exclude():
 
 def load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root):
     print(f"reading custom settings from {custom_settings_file}")
-    if not os.path.isfile(custom_settings_file):
+    if not os.path.isfile(custom_settings_file.name):
         print('Custom settings file does not exist. Using in-notebook settings.')
         return
-    with open(custom_settings_file, "r") as f:
+    with open(custom_settings_file.name, "r") as f:
         jdata = json.loads(f.read())
         handle_deprecated_settings(jdata)
         root.animation_prompts = jdata.get("prompts", root.animation_prompts)
