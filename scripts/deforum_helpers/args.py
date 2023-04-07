@@ -367,7 +367,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
                         pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
                 # RUN FROM SETTING FILE ACCORD
-                with gr.Accordion('Resume & Batch Mode', open=False):
+                with gr.Accordion('Batch Mode & Resume', open=False):
                     with gr.Tab('Batch Mode/ run from setting files'):
                         with gr.Row(variant='compact'):
                             override_settings_with_file = gr.Checkbox(label="Enable batch mode", value=False, interactive=True, elem_id='override_settings')
