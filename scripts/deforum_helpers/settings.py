@@ -40,8 +40,6 @@ def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_
         print(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict)
 
 def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, full_out_file_path = None):
-    sd_model_name = sh.sd_model.sd_checkpoint_info.name
-    sd_model_hash = sh.sd_model.sd_checkpoint_info.hash
     if full_out_file_path:
         args.__dict__["seed"] = root.raw_seed
         args.__dict__["batch_name"] = root.raw_batch_name
@@ -54,15 +52,13 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
         s = {}
         for d in (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, video_args.__dict__):
             s.update({k: v for k, v in d.items() if k not in exclude_keys})
-        s["sd_model_name"] = sd_model_name
-        s["sd_model_hash"] = sd_model_hash
+        s["sd_model_name"] = sh.sd_model.sd_checkpoint_info.name
+        s["sd_model_hash"] = sh.sd_model.sd_checkpoint_info.hash
         s["deforum_git_commit_id"] = get_deforum_version()
         json.dump(s, f, ensure_ascii=False, indent=4)
 
 # In gradio gui settings save/ load funcs:
 def save_settings(*args, **kwargs):
-    sd_model_name = sh.sd_model.sd_checkpoint_info.name
-    sd_model_hash = sh.sd_model.sd_checkpoint_info.hash
     from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args, pack_video_args
     settings_path = args[0].strip()
     settings_component_names = deforum_args.get_settings_component_names()
@@ -79,8 +75,8 @@ def save_settings(*args, **kwargs):
     combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict, **video_args_dict}
     exclude_keys = get_keys_to_exclude() + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
-    filtered_combined["sd_model_name"] = sd_model_name
-    filtered_combined["sd_model_hash"] = sd_model_hash
+    filtered_combined["sd_model_name"] = sh.sd_model.sd_checkpoint_info.name
+    filtered_combined["sd_model_hash"] = sh.sd_model.sd_checkpoint_info.hash
     filtered_combined["deforum_git_commit_id"] = get_deforum_version()
     print(f"saving custom settings to {settings_path}")
     with open(settings_path, "w", encoding='utf-8') as f:
