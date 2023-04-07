@@ -552,7 +552,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.TabItem('Coherence', open=False) as coherence_accord:
                         with gr.Row(variant='compact'):
                             color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True, info="choose an algorithm/ method for keeping color coherence across the animation")
-                            color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True, info="forcing all frames to be in grayscale")
+                            color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True, info="force all frames to be in grayscale")
                         with gr.Row(visible=False) as color_coherence_image_path_row:
                             color_coherence_image_path = gr.Textbox(label="Color coherence image path", lines=1, value=da.color_coherence_image_path, interactive=True)
                         with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
