@@ -1118,6 +1118,7 @@ def pack_controlnet_args(args_dict):
     return {name: args_dict[name] for name in controlnet_component_names()}
 
 def process_args(args_dict_main, run_id):
+    from deforum_helpers.settings import load_args
     override_settings_with_file = args_dict_main['override_settings_with_file']
     custom_settings_file = args_dict_main['custom_settings_file']
     args_dict = pack_args(args_dict_main)
@@ -1133,6 +1134,10 @@ def process_args(args_dict_main, run_id):
     root.p = args_dict_main['p']
     p = root.p
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
+    
+    if override_settings_with_file:
+        load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id)
+        
     positive_prompts = args_dict_main['animation_prompts_positive']
     negative_prompts = args_dict_main['animation_prompts_negative']
     negative_prompts = negative_prompts.replace('--neg', '') # remove --neg from negative_prompts if recieved by mistake
@@ -1141,10 +1146,6 @@ def process_args(args_dict_main, run_id):
         root.animation_prompts[key] = f"{positive_prompts} {animationPromptCurr} {'' if '--neg' in animationPromptCurr else '--neg'} {negative_prompts}"
     root.positive_prompts = positive_prompts
     root.negative_prompts = negative_prompts
-    from deforum_helpers.settings import load_args
-    
-    if override_settings_with_file:
-        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id)
     
     if not os.path.exists(root.models_path):
         os.mkdir(root.models_path)
