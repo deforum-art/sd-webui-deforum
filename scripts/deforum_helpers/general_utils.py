@@ -1,5 +1,8 @@
 import os, shutil
 import hashlib
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def checksum(filename, hash_factory=hashlib.blake2b, chunk_num_blocks=128):
     h = hash_factory()

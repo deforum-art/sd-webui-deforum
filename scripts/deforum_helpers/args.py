@@ -12,6 +12,8 @@ from .gradio_funcs import *
 from .general_utils import get_os, get_deforum_version, custom_placeholder_format, test_long_path_support, get_max_path_length, substitute_placeholders
 from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names, controlnet_infotext
 import tempfile
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
         
 def Root():
     device = sh.device

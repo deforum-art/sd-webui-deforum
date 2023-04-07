@@ -13,6 +13,9 @@ from .rich import console
 from rich.table import Table
 from rich import box
 from modules import scripts
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 cnet = None
 

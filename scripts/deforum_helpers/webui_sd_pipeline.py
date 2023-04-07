@@ -2,6 +2,8 @@ from modules.processing import StableDiffusionProcessingImg2Img
 from modules.shared import opts, sd_model
 import os
 
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+
 def get_webui_sd_pipeline(args, root, frame):
     import re
     assert args.prompt is not None
