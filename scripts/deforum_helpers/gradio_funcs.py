@@ -52,9 +52,9 @@ def hide_if_none(choice):
 def change_gif_button_visibility(choice):
     return gr.update(visible=False, value=False) if int(choice) > 30 else gr.update(visible=True)
     
-def disable_by_hybrid_composite(choice):
-    return gr.update(visible=True) if choice in ['Normal', 'Before Motion', 'After Generation'] else gr.update(visible=False)
-        
+def hide_if_false(choice):
+    return gr.update(visible=True) if choice else gr.update(visible=False)
+
 def disable_by_hybrid_composite_dynamic(choice, comp_mask_type):
     if choice in ['Normal', 'Before Motion', 'After Generation']:
         if comp_mask_type != 'None':
@@ -87,8 +87,7 @@ def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
     factor = 2 if upscale_model_name == 'realesr-animevideov3' else 4
     return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
 
-def hide_slow_mo(choice):
-    return gr.update(visible=True) if choice else gr.update(visible=False)
+
     
 def hide_interp_by_interp_status(choice):
     return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)

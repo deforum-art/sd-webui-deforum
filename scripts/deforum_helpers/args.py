@@ -359,8 +359,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
                     H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True) 
                 with gr.Row(variant='compact'):
-                    seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0, info="starting seed for the animation. -1 for random")
-                    n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True, info="if seed is set to random (-1), generate a few vids in one run")
+                    seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0, info="Starting seed for the animation. -1 for random")
+                    n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True, info="if seed is set to random (-1), generate a few vids in one run", visible=False)
                     batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name, info="output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}")
                 with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
                     with gr.Row(variant='compact'):
@@ -370,16 +370,16 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
                         pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
                 # RUN FROM SETTING FILE ACCORD
-                with gr.Accordion('Resume & Run from file', open=False):
-                    with gr.Tab('Run from Settings file'):
+                with gr.Accordion('Batch Mode & Resume', open=False):
+                    with gr.Tab('Batch Mode/ run from setting files'):
                         with gr.Row(variant='compact'):
-                            override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True, elem_id='override_settings')
-                            custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True, elem_id='custom_settings_file')
+                            override_settings_with_file = gr.Checkbox(label="Enable batch mode", value=False, interactive=True, elem_id='override_settings', info="run from a list of setting .txt files. Upload them to the box on the right (visible when enabled)")
+                            custom_settings_file = gr.File(label="Setting files", interactive=True, file_count="multiple", file_types=[".txt"], elem_id="custom_setting_file", visible=False)
                     # RESUME ANIMATION ACCORD
                     with gr.Tab('Resume Animation'):
                         with gr.Row(variant='compact'):
                             resume_from_timestring = gr.Checkbox(label="Resume from timestring", value=da.resume_from_timestring, interactive=True)
-                            resume_timestring = gr.Textbox(label="Resume timestring", lines=1, value = da.resume_timestring, interactive=True)
+                            resume_timestring = gr.Textbox(label="Resume timestring", lines=1, value = da.resume_timestring, interactive=True, visible=False)
             # KEYFRAMES TAB
             with gr.TabItem('Keyframes'): #TODO make a some sort of the original dictionary parsing
                 with gr.Row(variant='compact'):
@@ -941,7 +941,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
     show_info_on_ui.change(fn=change_css, inputs=show_info_on_ui, outputs = gr.outputs.HTML())
-    seed.change(fn=auto_hide_n_batch, inputs=seed, outputs=n_batch)
+    # seed.change(fn=auto_hide_n_batch, inputs=seed, outputs=n_batch)
     fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
     r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
     ncnn_upscale_model.change(fn=update_r_upscale_factor, inputs=ncnn_upscale_model, outputs=ncnn_upscale_factor)
@@ -967,6 +967,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_settings_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=humans_masking_accord)
     optical_flow_redo_generation.change(fn=hide_if_none, inputs=optical_flow_redo_generation, outputs=redo_flow_factor_schedule_column)
+    override_settings_with_file.change(fn=hide_if_false, inputs=override_settings_with_file,outputs=custom_settings_file)
+    resume_from_timestring.change(fn=hide_if_false, inputs=resume_from_timestring,outputs=resume_timestring)
     hybrid_comp_mask_type.change(fn=hide_if_none, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_method)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_factor_schedule)
@@ -974,7 +976,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)
     hybrid_composite_outputs = [humans_masking_accord, hybrid_sch_accord, hybrid_comp_mask_type, hybrid_use_first_frame_as_init_image, hybrid_use_init_image]
     for output in hybrid_composite_outputs:
-        hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=output)  
+        hybrid_composite.change(fn=hide_if_false, inputs=hybrid_composite, outputs=output)  
     hybrid_comp_mask_type_outputs = [hybrid_comp_mask_blend_alpha_schedule_row, hybrid_comp_mask_contrast_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row]
     for output in hybrid_comp_mask_type_outputs:
         hybrid_comp_mask_type.change(fn=hide_if_none, inputs=hybrid_comp_mask_type, outputs=output)
@@ -987,7 +989,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     skip_video_creation_outputs = [fps_out_format_row, soundtrack_row, store_frames_in_ram, make_gif, r_upscale_row, delete_imgs]
     for output in skip_video_creation_outputs:
         skip_video_creation.change(fn=change_visibility_from_skip_video, inputs=skip_video_creation, outputs=output)  
-    frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
+    frame_interpolation_slow_mo_enabled.change(fn=hide_if_false,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
     frame_interpolation_engine.change(fn=change_interp_x_max_limit,inputs=[frame_interpolation_engine,frame_interpolation_x_amount],outputs=frame_interpolation_x_amount)
     [change_fn.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps) for change_fn in [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_slow_mo_enabled]]
     # Populate the FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_interpolate_chosen_file)
@@ -1115,7 +1117,7 @@ def pack_loop_args(args_dict):
 def pack_controlnet_args(args_dict):
     return {name: args_dict[name] for name in controlnet_component_names()}
 
-def process_args(args_dict_main):
+def process_args(args_dict_main, run_id):
     override_settings_with_file = args_dict_main['override_settings_with_file']
     custom_settings_file = args_dict_main['custom_settings_file']
     args_dict = pack_args(args_dict_main)
@@ -1142,7 +1144,7 @@ def process_args(args_dict_main):
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root)
+        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id)
     
     if not os.path.exists(root.models_path):
         os.mkdir(root.models_path)
