@@ -13,6 +13,9 @@ from midas.transforms import Resize, NormalizeImage, PrepareForNet
 import torchvision.transforms.functional as TF
 from .general_utils import checksum
 from modules import lowvram, devices
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 class MidasModel:
     _instance = None

@@ -3,6 +3,9 @@ import torch
 from PIL import Image
 from torchvision import transforms
 from clipseg.models.clipseg import CLIPDensePredT
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 preclipseg_transform = transforms.Compose([
       transforms.ToTensor(),

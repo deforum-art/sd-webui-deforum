@@ -4,6 +4,9 @@ import numpy as np, os, torch
 from PIL import Image
 from torchvision.utils import make_grid
 import time
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 
 def get_output_folder(output_path, batch_folder):

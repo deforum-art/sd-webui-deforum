@@ -1,4 +1,7 @@
 import random
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def next_seed(args):
     if args.seed_behavior == 'iter':

@@ -5,6 +5,9 @@ from PIL import ImageOps
 import math
 from .animation import sample_to_cv2
 import cv2
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 deforum_noise_gen = torch.Generator(device='cpu')
 

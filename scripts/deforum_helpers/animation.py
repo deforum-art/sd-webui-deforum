@@ -8,7 +8,9 @@ from einops import rearrange
 from .prompt import check_is_number
 
 # Webui
-from modules.shared import state
+from modules.shared import state, opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def sample_from_cv2(sample: np.ndarray) -> torch.Tensor:
     sample = ((sample.astype(float) / 255.0) * 2) - 1

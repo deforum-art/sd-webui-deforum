@@ -6,6 +6,8 @@ from film_interpolation.film_inference import run_film_interp_infer
 from .general_utils import duplicate_pngs_from_folder, checksum, convert_images_from_list
 from modules.shared import opts
 
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+
 # gets 'RIFE v4.3', returns: 'RIFE43'   
 def extract_rife_name(string):
     parts = string.split()
