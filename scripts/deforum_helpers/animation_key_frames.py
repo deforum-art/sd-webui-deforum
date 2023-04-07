@@ -43,6 +43,8 @@ class DeformAnimKeys():
         self.aspect_ratio_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.aspect_ratio_schedule))
         self.fov_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.fov_schedule))
         self.near_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.near_schedule))
+        self.cadence_flow_factor_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.cadence_flow_factor_schedule))
+        self.redo_flow_factor_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.redo_flow_factor_schedule))
         self.far_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.far_schedule))
         self.hybrid_comp_alpha_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.hybrid_comp_alpha_schedule))
         self.hybrid_comp_mask_blend_alpha_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.hybrid_comp_mask_blend_alpha_schedule))

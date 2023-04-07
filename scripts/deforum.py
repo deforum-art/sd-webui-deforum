@@ -174,8 +174,7 @@ def run_deforum(*args, **kwargs):
             handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=args.timestring)
             
         root.initial_info += "\n The animation is stored in " + args.outdir
-        root.initial_info += "\n Timestring = " + args.timestring + '\n'
-        root.initial_info += "Only the first frame is shown in webui not to clutter the memory"
+        root.initial_info += "\n Timestring: " + args.timestring + '\n'
         reset_frames_cache(root) # cleanup the RAM in any case
         processed = Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
         
