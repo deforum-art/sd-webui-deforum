@@ -1,4 +1,5 @@
 import os
+import time
 import pathlib
 import json
 from .render import render_animation
@@ -123,6 +124,12 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         
         if state.interrupted:
             break
+        if state.skipped:
+            print("\n** PAUSED **")
+            state.skipped = False
+            while not state.skipped:
+                time.sleep(0.1)
+            print("** RESUMING **")
         
         # grab inputs for current frame generation
         args.n_samples = 1

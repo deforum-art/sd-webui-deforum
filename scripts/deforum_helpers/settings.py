@@ -10,12 +10,13 @@ import logging
 def get_keys_to_exclude():
     return ["n_batch", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal", "perlin_w", "perlin_h", "mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
 
-def load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, glsl_args_dict, custom_settings_file, root):
-    print(f"reading custom settings from {custom_settings_file}")
-    if not os.path.isfile(custom_settings_file):
+def load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, glsl_args_dict, video_args_dict, custom_settings_file, root, run_id):
+    custom_settings_file = custom_settings_file[run_id]
+    print(f"reading custom settings from {custom_settings_file.name}")
+    if not os.path.isfile(custom_settings_file.name):
         print('Custom settings file does not exist. Using in-notebook settings.')
         return
-    with open(custom_settings_file, "r") as f:
+    with open(custom_settings_file.name, "r") as f:
         jdata = json.loads(f.read())
         handle_deprecated_settings(jdata)
         root.animation_prompts = jdata.get("prompts", root.animation_prompts)
@@ -23,12 +24,15 @@ def load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, contr
             root.animation_prompts_positive = jdata["animation_prompts_positive"]
         if "animation_prompts_negative" in jdata:
             root.animation_prompts_negative = jdata["animation_prompts_negative"]
-        for dicts in [args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, glsl_args_dict]:
+        keys_to_exclude = get_keys_to_exclude()
+        for dicts in [args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, glsl_args_dict, video_args_dict]:
             for k, v in dicts.items():
-                if k in jdata:
-                    dicts[k] = jdata[k]
-                else:
-                    print(f"Key {k} doesn't exist in the custom settings data! Using default value of {v}")
+                # Check if the key is not in the keys_to_exclude list before processing
+                if k not in keys_to_exclude:
+                    if k in jdata:
+                        dicts[k] = jdata[k]
+                    else:
+                        print(f"Key {k} doesn't exist in the custom settings data! Using default value of {v}")
         print(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict)
 
 def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, glsl_args, root, full_out_file_path = None):
