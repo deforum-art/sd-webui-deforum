@@ -357,7 +357,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True) 
                 with gr.Row(variant='compact'):
                     seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0, info="Starting seed for the animation. -1 for random")
-                    n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True, info="if seed is set to random (-1), generate a few vids in one run")
+                    n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True, info="if seed is set to random (-1), generate a few vids in one run", visible=False)
                     batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name, info="output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}")
                 with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
                     with gr.Row(variant='compact'):
@@ -367,11 +367,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
                         pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
                 # RUN FROM SETTING FILE ACCORD
-                with gr.Accordion('Resume & Run from file', open=False):
-                    with gr.Tab('Run from Settings file'):
+                with gr.Accordion('Resume & Batch Mode', open=False):
+                    with gr.Tab('Batch Mode/ run from setting files'):
                         with gr.Row(variant='compact'):
-                            override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True, elem_id='override_settings')
-                            custom_settings_file = gr.File(label="Custom settings file", interactive=True, file_count="single", file_types=[".txt"], elem_id="custom_setting_file", visible=False)
+                            override_settings_with_file = gr.Checkbox(label="Enable batch mode", value=False, interactive=True, elem_id='override_settings')
+                            custom_settings_file = gr.File(label="Setting files", interactive=True, file_count="multiple", file_types=[".txt"], elem_id="custom_setting_file", visible=False)
                     # RESUME ANIMATION ACCORD
                     with gr.Tab('Resume Animation'):
                         with gr.Row(variant='compact'):
@@ -931,7 +931,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
     show_info_on_ui.change(fn=change_css, inputs=show_info_on_ui, outputs = gr.outputs.HTML())
-    seed.change(fn=auto_hide_n_batch, inputs=seed, outputs=n_batch)
+    # seed.change(fn=auto_hide_n_batch, inputs=seed, outputs=n_batch)
     fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
     r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
     ncnn_upscale_model.change(fn=update_r_upscale_factor, inputs=ncnn_upscale_model, outputs=ncnn_upscale_factor)
@@ -1104,7 +1104,7 @@ def pack_loop_args(args_dict):
 def pack_controlnet_args(args_dict):
     return {name: args_dict[name] for name in controlnet_component_names()}
 
-def process_args(args_dict_main):
+def process_args(args_dict_main, run_id):
     override_settings_with_file = args_dict_main['override_settings_with_file']
     custom_settings_file = args_dict_main['custom_settings_file']
     args_dict = pack_args(args_dict_main)
@@ -1131,7 +1131,7 @@ def process_args(args_dict_main):
     from deforum_helpers.settings import load_args
     
     if override_settings_with_file:
-        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root)
+        load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, custom_settings_file, root, run_id)
     
     if not os.path.exists(root.models_path):
         os.mkdir(root.models_path)

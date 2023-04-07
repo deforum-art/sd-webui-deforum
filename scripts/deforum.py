@@ -47,13 +47,17 @@ def run_deforum(*args, **kwargs):
         outpath_grids = opts.outdir_grids or opts.outdir_img2img_grids
     ) #we'll setup the rest later
 
-    for i in range(args_dict['n_batch']):
+    times_to_run = 1
+    if args_dict['custom_settings_file'] is not None and len(args_dict['custom_settings_file']) > 1:
+        times_to_run = len(args_dict['custom_settings_file'])
+        
+    for i in range(times_to_run):
         print(f"\033[4;33mDeforum extension for auto1111 webui, v2.3b\033[0m")
         print(f"Git commit: {get_deforum_version()}")
         args_dict['self'] = None
         args_dict['p'] = p
         
-        root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict)
+        root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict, i)
 
         root.clipseg_model = None
         try:
