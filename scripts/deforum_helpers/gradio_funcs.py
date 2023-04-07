@@ -54,6 +54,9 @@ def change_gif_button_visibility(choice):
     
 def hide_if_false(choice):
     return gr.update(visible=True) if choice else gr.update(visible=False)
+    
+def hide_if_true(choice):
+    return gr.update(visible=False) if choice else gr.update(visible=True)
 
 def disable_by_hybrid_composite_dynamic(choice, comp_mask_type):
     if choice in ['Normal', 'Before Motion', 'After Generation']:
