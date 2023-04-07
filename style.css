@@ -59,6 +59,11 @@
 	min-height: 85px !important;
 }
 
+#tab_deforum_interface .file-preview-holder {
+  overflow-y: auto;
+  max-height: 60px;
+}
+
 /* OLD rules THAT MIGHT NEED TO BE REVIVED AT SOME POINT: */
 
 /* #tab_deforum_interface .svelte-e8n7p6 { /* hide at default gradio's info section from params at ui*/ */
