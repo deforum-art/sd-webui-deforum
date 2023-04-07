@@ -18,6 +18,9 @@ from .word_masking import get_word_mask
 from torch import Tensor
 import PIL
 from PIL import Image, ImageChops
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 # val_masks: name, PIL Image mask
 # Returns an image in mode '1' (needed for bool ops), convert to 'L' in the sender function

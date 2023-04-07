@@ -16,6 +16,9 @@ from .depth import MidasModel, AdaBinsModel
 from .frame_interpolation import clean_folder_name
 from rife.inference_video import duplicate_pngs_from_folder
 from .video_audio_utilities import get_quick_vid_info, vid2frames, ffmpeg_stitch_video
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def process_depth_vid_upload_logic(file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, vid_file_name, keep_imgs, f_location, f_crf, f_preset, f_models_path):
     print("got a request to *vid2depth* an existing video.")

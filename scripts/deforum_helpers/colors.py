@@ -1,5 +1,8 @@
 from skimage.exposure import match_histograms
 import cv2
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def maintain_colors(prev_img, color_match_sample, mode):
     if mode == 'RGB':
