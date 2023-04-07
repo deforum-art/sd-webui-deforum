@@ -9,8 +9,8 @@ import logging
 
 def get_keys_to_exclude():
     return ["n_batch", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal", "perlin_w", "perlin_h", "mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
-
-def load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id):
+       
+def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id):
     custom_settings_file = custom_settings_file[run_id]
     print(f"reading custom settings from {custom_settings_file.name}")
     if not os.path.isfile(custom_settings_file.name):
@@ -22,8 +22,10 @@ def load_args(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, contr
         root.animation_prompts = jdata.get("prompts", root.animation_prompts)
         if "animation_prompts_positive" in jdata:
             root.animation_prompts_positive = jdata["animation_prompts_positive"]
+            args_dict_main['animation_prompts_positive'] = jdata["animation_prompts_positive"] # Update the args_dict_main
         if "animation_prompts_negative" in jdata:
             root.animation_prompts_negative = jdata["animation_prompts_negative"]
+            args_dict_main['animation_prompts_negative'] = jdata["animation_prompts_negative"] # Update the args_dict_main
         keys_to_exclude = get_keys_to_exclude()
         for dicts in [args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, video_args_dict]:
             for k, v in dicts.items():
