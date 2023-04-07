@@ -964,7 +964,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)
     hybrid_composite_outputs = [humans_masking_accord, hybrid_sch_accord, hybrid_comp_mask_type, hybrid_use_first_frame_as_init_image]
     for output in hybrid_composite_outputs:
-        hybrid_composite.change(fn=disable_by_hybrid_composite, inputs=hybrid_composite, outputs=output)  
+        hybrid_composite.change(fn=hide_if_false, inputs=hybrid_composite, outputs=output)  
     hybrid_comp_mask_type_outputs = [hybrid_comp_mask_blend_alpha_schedule_row, hybrid_comp_mask_contrast_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row, hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row]
     for output in hybrid_comp_mask_type_outputs:
         hybrid_comp_mask_type.change(fn=disable_by_comp_mask, inputs=hybrid_comp_mask_type, outputs=output)
@@ -977,7 +977,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     skip_video_creation_outputs = [fps_out_format_row, soundtrack_row, store_frames_in_ram, make_gif, r_upscale_row, delete_imgs]
     for output in skip_video_creation_outputs:
         skip_video_creation.change(fn=change_visibility_from_skip_video, inputs=skip_video_creation, outputs=output)  
-    frame_interpolation_slow_mo_enabled.change(fn=hide_slow_mo,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
+    frame_interpolation_slow_mo_enabled.change(fn=hide_if_false,inputs=frame_interpolation_slow_mo_enabled,outputs=frame_interp_slow_mo_amount_column)
     frame_interpolation_engine.change(fn=change_interp_x_max_limit,inputs=[frame_interpolation_engine,frame_interpolation_x_amount],outputs=frame_interpolation_x_amount)
     [change_fn.change(set_interp_out_fps, inputs=[frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, in_vid_fps_ui_window], outputs=out_interp_vid_estimated_fps) for change_fn in [frame_interpolation_x_amount, frame_interpolation_slow_mo_amount, frame_interpolation_slow_mo_enabled]]
     # Populate the FPS and FCount values as soon as a video is uploaded to the FileUploadBox (vid_to_interpolate_chosen_file)
