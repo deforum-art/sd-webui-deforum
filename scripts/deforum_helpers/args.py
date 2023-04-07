@@ -371,7 +371,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Tab('Run from Settings file'):
                         with gr.Row(variant='compact'):
                             override_settings_with_file = gr.Checkbox(label="Override settings", value=False, interactive=True, elem_id='override_settings')
-                            custom_settings_file = gr.Textbox(label="Custom settings file", lines=1, interactive=True, elem_id='custom_settings_file')
+                            custom_settings_file = gr.File(label="Custom settings file", interactive=True, file_count="single", file_types=[".txt"], elem_id="custom_setting_file", visible=False)
                     # RESUME ANIMATION ACCORD
                     with gr.Tab('Resume Animation'):
                         with gr.Row(variant='compact'):
@@ -956,7 +956,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_sch_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=hybrid_settings_accord)
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=humans_masking_accord)
-    hybrid_comp_mask_type.change(fn=change_comp_mask_x_visibility, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
+    override_settings_with_file.change(fn=hide_if_false, inputs=override_settings_with_file,outputs=custom_settings_file)
+    hybrid_comp_mask_type.change(fn=hide_if_none, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_method)
     hybrid_motion.change(fn=disable_by_comp_mask, inputs=hybrid_motion, outputs=hybrid_motion_use_prev_img)
     hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)

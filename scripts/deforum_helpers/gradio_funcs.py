@@ -46,7 +46,7 @@ def disable_by_interpolation(choice):
 def disable_by_video_input(choice):
     return gr.update(visible=False) if choice in ['Video Input'] else gr.update(visible=True)
     
-def change_comp_mask_x_visibility(choice):
+def hide_if_none(choice):
     return gr.update(visible=choice != "None")
     
 def change_gif_button_visibility(choice):
@@ -63,6 +63,9 @@ def disable_by_hybrid_composite_dynamic(choice, comp_mask_type):
     
 def disable_by_comp_mask(choice):
     return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
+    
+def hide_if_false(choice):
+    return gr.update(visible=True) if choice else gr.update(visible=False)
         
 def disable_by_non_optical_flow(choice):
     return gr.update(visible=False) if choice != 'Optical Flow' else gr.update(visible=True)
