@@ -196,7 +196,7 @@ def run_deforum(*args, **kwargs):
             persistent_sett_path = opts.data.get("deforum_persistent_settings_path")
             deforum_settings.save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
 
-    return processed.images, generation_info_js, plaintext_to_html(processed.info), plaintext_to_html('')
+    return processed.images, args.timestring, generation_info_js, plaintext_to_html(processed.info), plaintext_to_html('')
 
 def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
@@ -277,6 +277,7 @@ def on_ui_tabs():
                     inputs=[dummy_component, dummy_component] + component_list,
                     outputs=[
                          deforum_gallery,
+                         components["resume_timestring"],
                          generation_info,
                          html_info,
                          html_log,
