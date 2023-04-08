@@ -30,6 +30,7 @@ from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import save_settings_from_animation_run
 from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
+from .resume import get_resume_vars
 # Webui
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
@@ -65,18 +66,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args, args.seed) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
     loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
-    # resume animation
-    start_frame = 0
-    if anim_args.resume_from_timestring:
-        for tmp in os.listdir(args.outdir):
-            if ".txt" in tmp : 
-                pass
-            else:
-                filename = tmp.split("_")
-                # don't use saved depth maps to count number of frames
-                if anim_args.resume_timestring in filename and "depth" not in filename:
-                    start_frame += 1
-        #start_frame = start_frame - 1
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
@@ -134,22 +123,32 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     turbo_prev_image, turbo_prev_frame_idx = None, 0
     turbo_next_image, turbo_next_frame_idx = None, 0
 
-    # resume animation
+    # initialize vars
     prev_img = None
     color_match_sample = None
+    start_frame = 0
+
+    # resume animation (requires at least two frames - see function)
     if anim_args.resume_from_timestring:
-        last_frame = start_frame-1
+        # determine last frame and frame to start on
+        prev_frame, next_frame, prev_img, next_img = get_resume_vars(
+            folder=args.outdir,
+            timestring=anim_args.resume_timestring,
+            cadence=turbo_steps
+        )
+
+        # restore color match from first frame if necessary (0th frame on disk)
+        if anim_args.color_coherence not in ['None','Image','Video Input']:
+            path = os.path.join(args.outdir,f"{args.timestring}_{0:09}.png")
+            color_match_sample = cv2.imread(path)
+
+        # set up turbo step vars
         if turbo_steps > 1:
-            last_frame -= last_frame%turbo_steps
-        path = os.path.join(args.outdir,f"{args.timestring}_{last_frame:09}.png")
-        img = cv2.imread(path)
-        prev_img = img
-        if anim_args.color_coherence != 'None':
-            color_match_sample = img
-        if turbo_steps > 1:
-            turbo_next_image, turbo_next_frame_idx = prev_img, last_frame
-            turbo_prev_image, turbo_prev_frame_idx = turbo_next_image, turbo_next_frame_idx
-            start_frame = last_frame+turbo_steps
+            turbo_prev_image, turbo_prev_frame_idx = prev_img, prev_frame
+            turbo_next_image, turbo_next_frame_idx = next_img, next_frame
+        
+        # advance start_frame to next frame
+        start_frame = next_frame + 1
 
     args.n_samples = 1
     frame_idx = start_frame
@@ -260,7 +259,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         
         # emit in-between frames
         if turbo_steps > 1:
-            tween_frame_start_idx = max(0, frame_idx-turbo_steps)
+            tween_frame_start_idx = max(start_frame, frame_idx-turbo_steps)
             cadence_flow = None
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
                 tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
