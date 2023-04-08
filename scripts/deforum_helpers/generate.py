@@ -19,6 +19,8 @@ import requests
 import numexpr
 from .prompt import check_is_number
 
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+
 def load_mask_latent(mask_input, shape):
     # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
     # shape (list-like len(4)): shape of the image to match, usually latent_image.shape

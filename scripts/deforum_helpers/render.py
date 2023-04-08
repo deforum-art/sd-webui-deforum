@@ -35,6 +35,8 @@ from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, glsl_args, animation_prompts, root):
     if anim_args.animation_mode in ['2D','3D']:
         # handle hybrid video generation

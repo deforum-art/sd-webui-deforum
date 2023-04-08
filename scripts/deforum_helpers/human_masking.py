@@ -2,6 +2,9 @@ import os, cv2
 import torch
 from pathlib import Path
 from multiprocessing import freeze_support
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def extract_frames(input_video_path, output_imgs_path):
     # Open the video file
