@@ -6,7 +6,7 @@ import tempfile
 import gradio as gr
 from types import SimpleNamespace
 from PIL import Image
-from modules.shared import cmd_opts
+from modules.shared import cmd_opts, opts
 from modules.processing import get_fixed_seed
 from modules.ui_components import FormRow
 import modules.shared as sh
