@@ -20,7 +20,7 @@ Therefore, it is best recommended to keep two folders:
 
 ## Getting Started
 
-1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/). <br>If the repo link doesn't work, please use the alternate official download source: [https://gitgud.io/AUTOMATIC1111/stable-diffusion-webui](https://gitgud.io/AUTOMATIC1111/stable-diffusion-webui). To change your existing webui's installation origin, execute `git remote set-url origin https://gitgud.io/AUTOMATIC1111/stable-diffusion-webui` in the webui starting folder.
+1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/).
 
 2. Now two ways: either clone the repo into the `extensions` directory via git commandline launched within in the `stable-diffusion-webui` folder
 
