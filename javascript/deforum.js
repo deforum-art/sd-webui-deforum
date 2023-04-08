@@ -15,7 +15,3 @@ function submit_deforum(){
 
     return res
 }
-
-onUiUpdate(function(){
-    check_gallery('deforum_gallery')
-})

@@ -1,4 +1,5 @@
 import os
+import time
 import pathlib
 import json
 from .render import render_animation
@@ -13,6 +14,10 @@ from .settings import save_settings_from_animation_run
 
 # Webui
 from modules.shared import opts, cmd_opts, state
+
+import re, numexpr
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     # create a folder for the video input frames to live in
@@ -66,6 +71,16 @@ def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, l
 
     render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
 
+def get_parsed_value(value, frame_idx, max_f):
+    pattern = r'`.*?`'
+    regex = re.compile(pattern)
+    parsed_value = value
+    for match in regex.finditer(parsed_value):
+        matched_string = match.group(0)
+        parsed_string = matched_string.replace('t', f'{frame_idx}').replace("max_f" , f"{max_f}").replace('`','')
+        value = numexpr.evaluate(parsed_string)
+        parsed_value = parsed_value.replace(matched_string, str(value))
+    return parsed_value
 
 def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
 
@@ -94,9 +109,9 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
     frame_idx = 0
     # INTERPOLATION MODE
     while frame_idx < anim_args.max_frames:
-    
         # print data to cli
-        prompt_to_print = prompt_series[frame_idx].strip()
+        prompt_to_print = get_parsed_value(prompt_series[frame_idx].strip(), frame_idx, anim_args.max_frames)
+        
         if prompt_to_print.endswith("--neg"):
             prompt_to_print = prompt_to_print[:-5]
         print(f"\033[36mInterpolation frame: \033[0m{frame_idx}/{anim_args.max_frames}  ")
@@ -107,11 +122,17 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         state.job_no = frame_idx + 1
         
         if state.interrupted:
-                break
+            break
+        if state.skipped:
+            print("\n** PAUSED **")
+            state.skipped = False
+            while not state.skipped:
+                time.sleep(0.1)
+            print("** RESUMING **")
         
         # grab inputs for current frame generation
         args.n_samples = 1
-        args.prompt = prompt_series[frame_idx]
+        args.prompt = prompt_to_print
         args.scale = keys.cfg_scale_schedule_series[frame_idx]
         args.pix2pix_img_cfg_scale = keys.pix2pix_img_cfg_scale_series[frame_idx]
 

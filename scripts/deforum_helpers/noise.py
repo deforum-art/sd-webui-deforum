@@ -1,9 +1,13 @@
 import torch
+from torch.nn.functional import interpolate
 import numpy as np
 from PIL import ImageOps
 import math
 from .animation import sample_to_cv2
 import cv2
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 deforum_noise_gen = torch.Generator(device='cpu')
 
@@ -48,12 +52,16 @@ def condition_noise_mask(noise_mask, invert_mask = False):
 
 def add_noise(sample, noise_amt: float, seed: int, noise_type: str, noise_args, noise_mask = None, invert_mask = False):
     deforum_noise_gen.manual_seed(seed) # Reproducibility
-    sample2dshape = (sample.shape[0], sample.shape[1]) #sample is cv2, so height - width
-    noise = torch.randn((sample.shape[2], sample.shape[0], sample.shape[1]), generator=deforum_noise_gen) # White noise
+    perlin_w = sample.shape[0]
+    perlin_h = sample.shape[1]
+    perlin_w, perlin_h = map(lambda x: x - x % 64, (perlin_w, perlin_h)) # rescale perlin to multiplies of 64
+    sample2dshape = (perlin_w, perlin_h)
+    noise = torch.randn((sample.shape[2], perlin_w, perlin_h), generator=deforum_noise_gen) # White noise
     if noise_type == 'perlin':
         # rand_perlin_2d_octaves is between -1 and 1, so we need to shift it to be between 0 and 1
         # print(sample.shape)
         noise = noise * ((rand_perlin_2d_octaves(sample2dshape, (int(noise_args[0]), int(noise_args[1])), octaves=noise_args[2], persistence=noise_args[3]) + torch.ones(sample2dshape)) / 2)
+        noise = interpolate(noise.unsqueeze(1), size=(sample.shape[0], sample.shape[1])).squeeze(1) # rescale perlin back to the target resolution
     if noise_mask is not None:
         noise_mask = condition_noise_mask(noise_mask, invert_mask)
         noise_to_add = sample_to_cv2(noise * noise_mask)

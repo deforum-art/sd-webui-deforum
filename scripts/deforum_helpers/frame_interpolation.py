@@ -6,6 +6,8 @@ from film_interpolation.film_inference import run_film_interp_infer
 from .general_utils import duplicate_pngs_from_folder, checksum, convert_images_from_list
 from modules.shared import opts
 
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+
 # gets 'RIFE v4.3', returns: 'RIFE43'   
 def extract_rife_name(string):
     parts = string.split()
@@ -15,10 +17,9 @@ def extract_rife_name(string):
 
 # This function usually gets a filename, and converts it to a legal linux/windows *folder* name
 def clean_folder_name(string):
-    illegal_chars = ["/", "\\", "<", ">", ":", "\"", "|", "?", "*", "."]
-    for char in illegal_chars:
-        string = string.replace(char, "_")
-    return string
+    illegal_chars = "/\\<>:\"|?*.,\" "
+    translation_table = str.maketrans(illegal_chars, "_"*len(illegal_chars))
+    return string.translate(translation_table)
 
 def set_interp_out_fps(interp_x, slow_x_enabled, slom_x, in_vid_fps):
     if interp_x == 'Disabled' or in_vid_fps in ('---', None, '', 'None'):

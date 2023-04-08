@@ -20,7 +20,7 @@ Therefore, it is best recommended to keep two folders:
 
 ## Getting Started
 
-1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/). <br>If the repo link doesn't work, please use the alternate official download source: [https://gitgud.io/AUTOMATIC1111/stable-diffusion-webui](https://gitgud.io/AUTOMATIC1111/stable-diffusion-webui). To change your existing webui's installation origin, execute `git remote set-url origin https://gitgud.io/AUTOMATIC1111/stable-diffusion-webui` in the webui starting folder.
+1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/).
 
 2. Now two ways: either clone the repo into the `extensions` directory via git commandline launched within in the `stable-diffusion-webui` folder
 
@@ -34,7 +34,7 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 4. Enter the animation settings. Refer to [this general guide](https://docs.google.com/document/d/1pEobUknMFMkn8F5TMsv8qRzamXX_75BShMMXV8IFslI/edit) and [this guide to math keyframing functions in Deforum](https://docs.google.com/document/d/1pfW1PwbDIuW0cv-dnuyYj1UzPqe23BlSLTJsqazffXM/edit?usp=sharing). However, **in this version prompt weights less than zero don't just like in original Deforum!** Split the positive and the negative prompt in the json section using --neg argument like this "apple:\`where(cos(t)>=0, cos(t), 0)\`, snow --neg strawberry:\`where(cos(t)<0, -cos(t), 0)\`"
 
-5. To view animation frames as they're being made, without waiting for the completion of an animation, go to the 'Settings' tab and set the value of this toolbar **above zero**. Warning: it may slow down the generation process. If you have 'Do exactly the amount of steps the slider specifies' checkbox selected in the tab, unselect it as it won't allow you to use Deforum schedules and you will get adrupt frame changes without transitions. Then click 'Apply settings' at the top of the page. Now return to the 'Deforum' tab.
+5. To view animation frames as they're being made, without waiting for the completion of an animation, go to the 'Settings' tab and set the value of this toolbar **above zero**. Warning: it may slow down the generation process.
 
 ![adsdasunknown](https://user-images.githubusercontent.com/14872007/196064311-1b79866a-e55b-438a-84a7-004ff30829ad.png)
 
@@ -54,20 +54,22 @@ Or download this repository, locate the `extensions` folder within your WebUI in
 
 ## Screenshots
 
-https://user-images.githubusercontent.com/121192995/215522284-d6fbedd5-09e2-4d2c-bd10-f9bbb4a20f82.mp4
+Amazing raw Deforum animation by [Pxl.Pshr](https://www.instagram.com/pxl.pshr):
+* Turn Audio ON!
+
+(Audio credits: SKRILLEX, FRED AGAIN & FLOWDAN - RUMBLE (PHACE'S DNB FLIP))
+
+https://user-images.githubusercontent.com/121192995/224450647-39529b28-be04-4871-bb7a-faf7afda2ef2.mp4
+
+<br>
 
 Main extension tab:
 
-![maintab](https://user-images.githubusercontent.com/121192995/215362176-4e5599c1-9cb6-4bf9-964d-0ff882661993.png)
+![image](https://user-images.githubusercontent.com/121192995/226101131-43bf594a-3152-45dd-a5d1-2538d0bc221d.png)
 
 Keyframes tab:
 
-![keyframes](https://user-images.githubusercontent.com/121192995/215362228-c239c43a-d565-4862-b490-d18b19eaaaa5.png)
-
-Math evaluation:
-
-![math-eval](https://user-images.githubusercontent.com/121192995/215362467-481127a4-247a-4b0d-924a-d10719aa4c01.png)
-
+![image](https://user-images.githubusercontent.com/121192995/226101140-bfe6cce7-9b78-4a1d-be9a-43e1fc78239e.png)
 
 ## Benchmarks
 

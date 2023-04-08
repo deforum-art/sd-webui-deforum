@@ -1,6 +1,9 @@
 import gradio as gr
 from .video_audio_utilities import extract_number, get_quick_vid_info
 
+def auto_hide_n_batch(choice):
+    return gr.update(visible=True) if choice == -1 else gr.update(value=1, visible=False)
+    
 def change_visibility_from_skip_video(choice):
     return gr.update(visible=False) if choice else gr.update(visible=True) 
 
@@ -9,6 +12,9 @@ def update_r_upscale_factor(choice):
 
 def change_perlin_visibility(choice):
     return gr.update(visible=choice=="perlin")
+
+def change_color_coherence_image_path_visibility(choice):
+    return gr.update(visible=choice=="Image")
 
 def change_color_coherence_video_every_N_frames_visibility(choice):
     return gr.update(visible=choice=="Video Input")
@@ -40,24 +46,24 @@ def disable_by_interpolation(choice):
 def disable_by_video_input(choice):
     return gr.update(visible=False) if choice in ['Video Input'] else gr.update(visible=True)
     
-def change_comp_mask_x_visibility(choice):
+def hide_if_none(choice):
     return gr.update(visible=choice != "None")
     
 def change_gif_button_visibility(choice):
     return gr.update(visible=False, value=False) if int(choice) > 30 else gr.update(visible=True)
     
-def disable_by_hybrid_composite(choice):
+def hide_if_false(choice):
     return gr.update(visible=True) if choice else gr.update(visible=False)
-        
+    
+def hide_if_true(choice):
+    return gr.update(visible=False) if choice else gr.update(visible=True)
+
 def disable_by_hybrid_composite_dynamic(choice, comp_mask_type):
-    if choice == True:
+    if choice in ['Normal', 'Before Motion', 'After Generation']:
         if comp_mask_type != 'None':
             return gr.update(visible=True)
     return gr.update(visible=False)
-    
-def disable_by_comp_mask(choice):
-    return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
-        
+
 def disable_by_non_optical_flow(choice):
     return gr.update(visible=False) if choice != 'Optical Flow' else gr.update(visible=True)
     
@@ -84,8 +90,7 @@ def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
     factor = 2 if upscale_model_name == 'realesr-animevideov3' else 4
     return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
 
-def hide_slow_mo(choice):
-    return gr.update(visible=True) if choice else gr.update(visible=False)
+
     
 def hide_interp_by_interp_status(choice):
     return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
@@ -99,3 +104,18 @@ def change_interp_x_max_limit(engine_name, current_value):
     
 def hide_interp_stats(choice):
     return gr.update(visible=True) if choice is not None else gr.update(visible=False)
+
+def change_css(checkbox_status):
+        if checkbox_status:
+            display = "block"
+        else:
+            display = "none"
+        
+        html_template = f'''
+        <style>
+            #tab_deforum_interface .svelte-e8n7p6, #f_interp_accord {{
+                display: {display} !important;
+            }}
+        </style>
+        '''
+        return html_template

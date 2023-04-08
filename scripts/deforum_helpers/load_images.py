@@ -5,6 +5,9 @@ import cv2
 import numpy as np
 import socket
 import torchvision.transforms.functional as TF
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def load_img(path : str, shape=None, use_alpha_as_mask=False):
     # use_alpha_as_mask: Read the alpha channel of the image as the mask image

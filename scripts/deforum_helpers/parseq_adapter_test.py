@@ -10,6 +10,10 @@ from unittest.mock import MagicMock, PropertyMock
 
 from types import SimpleNamespace
 
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+
 class TestParseqAnimKeys(unittest.TestCase):
 
     @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')

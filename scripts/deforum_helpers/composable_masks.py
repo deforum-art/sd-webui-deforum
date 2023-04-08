@@ -1,6 +1,5 @@
 # At the moment there are three types of masks: mask from variable, file mask and word mask
-# Variable masks include init_mask for the predefined whole-video mask, frame_mask from video-masking system
-# and human_mask for a model which better segments people in the background video
+# Variable masks include video_mask (which can be set to auto-generated human masks) and everywhere
 # They are put in {}-brackets
 # Word masks are framed with <>-bracets, like: <cat>, <anime girl>
 # File masks are put in []-brackes
@@ -19,6 +18,9 @@ from .word_masking import get_word_mask
 from torch import Tensor
 import PIL
 from PIL import Image, ImageChops
+from modules.shared import opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 # val_masks: name, PIL Image mask
 # Returns an image in mode '1' (needed for bool ops), convert to 'L' in the sender function

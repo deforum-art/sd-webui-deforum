@@ -8,7 +8,9 @@ from einops import rearrange
 from .prompt import check_is_number
 
 # Webui
-from modules.shared import state
+from modules.shared import state, opts
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def sample_from_cv2(sample: np.ndarray) -> torch.Tensor:
     sample = ((sample.astype(float) / 255.0) * 2) - 1
@@ -217,7 +219,11 @@ def transform_image_3d(device, prev_img_cv2, depth_tensor, rot_mat, translate, a
     # adapted and optimized version of transform_image_3d from Disco Diffusion https://github.com/alembics/disco-diffusion 
     w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
 
-    aspect_ratio = keys.aspect_ratio_series[frame_idx]
+    if anim_args.aspect_ratio_use_old_formula:
+        aspect_ratio = float(w)/float(h)
+    else:
+        aspect_ratio = keys.aspect_ratio_series[frame_idx]
+    
     near = keys.near_series[frame_idx]
     far = keys.far_series[frame_idx]
     fov_deg = keys.fov_series[frame_idx]

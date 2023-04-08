@@ -5,11 +5,22 @@ import math
 import requests
 import subprocess
 import time
+import re 
+import glob
 from pkg_resources import resource_filename
-from modules.shared import state
+from modules.shared import state, opts
 from .general_utils import checksum, duplicate_pngs_from_folder
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
+
+DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+ 
+def get_ffmpeg_params(): # get ffmpeg params from webui's settings -> deforum tab. actual opts are set in deforum.py
+    f_location = opts.data.get("deforum_ffmpeg_location", find_ffmpeg_binary())
+    f_crf = opts.data.get("deforum_ffmpeg_crf", 17)
+    f_preset = opts.data.get("deforum_ffmpeg_preset", 'slow')
+
+    return [f_location, f_crf, f_preset]
 
 # e.g gets 'x2' returns just 2 as int
 def extract_number(string):
@@ -211,29 +222,33 @@ def find_ffmpeg_binary():
             return files[0] if files else 'ffmpeg'
         except:
             return 'ffmpeg'
-            
+          
 # These 2 functions belong to "stitch frames to video" in Output tab
 def get_manual_frame_to_vid_output_path(input_path):
-    root, ext = os.path.splitext(input_path)
-    base, _ = root.rsplit("_", 1)
-    output_path = f"{base}.mp4"
+    dir_name = os.path.dirname(input_path)
+    folder_name = os.path.basename(dir_name)
+    output_path = os.path.join(dir_name, f"{folder_name}.mp4")
     i = 1
     while os.path.exists(output_path):
-        output_path = f"{base}_{i}.mp4"
+        output_path = os.path.join(dir_name, f"{folder_name}_{i}.mp4")
         i += 1
     return output_path
-    
-def direct_stitch_vid_from_frames(image_path, fps, f_location, f_crf, f_preset, add_soundtrack, audio_path):
-    import re
-    # checking - do we actually have at least 4 matched files for the provided pattern
-    file_list = [image_path % i for i in range(4)]
-    exists_list = [os.path.isfile(file) for file in file_list]
-    # we got 4 files, moving on
-    if all(exists_list):
-        out_mp4_path = get_manual_frame_to_vid_output_path(image_path)
-        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=out_mp4_path, stitch_from_frame=0, stitch_to_frame=-1, imgs_path=image_path, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
-    else:
+
+def direct_stitch_vid_from_frames(image_path, fps, add_soundtrack, audio_path):
+    f_location, f_crf, f_preset = get_ffmpeg_params()
+    matching_files = glob.glob(re.sub(r'%\d*d', '*', image_path))
+    min_id = None
+    for file in matching_files:
+        try:
+            id = int(re.search(r'(\d+)(?=\.\w+$)', file).group(1))
+            min_id = min(min_id, id) if min_id is not None else id
+        except (AttributeError, ValueError):
+            pass
+    if min_id is None or not all(os.path.isfile(image_path % (min_id + i)) for i in range(2)):
         print("Couldn't find images that match the provided path/ pattern. At least 2 matched images are required.")
+        return
+    out_mp4_path = get_manual_frame_to_vid_output_path(image_path)
+    ffmpeg_stitch_video(ffmpeg_location=f_location, fps=fps, outmp4_path=out_mp4_path, stitch_from_frame=min_id, stitch_to_frame=-1, imgs_path=image_path, add_soundtrack=add_soundtrack, audio_path=audio_path, crf=f_crf, preset=f_preset)
 # end of 2 stitch frame to video funcs
 
 # returns True if filename (could be also media URL) contains an audio stream, othehrwise False
@@ -273,7 +288,6 @@ def check_and_download_gifski(models_folder, current_user_os):
            
 # create a gif using gifski - limited to up to 30 fps (from the ui; if users wanna try to hack it, results are not good, but possible up to 100 fps theoretically)   
 def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
-    import glob
     msg_to_print = f"Stitching *gif* from frames using Gifski..."
     # blink the msg in the cli until action is done
     console.print(msg_to_print, style="blink yellow", end="") 
