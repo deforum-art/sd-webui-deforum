@@ -137,11 +137,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             cadence=turbo_steps
         )
 
-        # restore color match from first frame if necessary (0th frame on disk)
-        if anim_args.color_coherence not in ['None','Image','Video Input']:
-            path = os.path.join(args.outdir,f"{args.timestring}_{0:09}.png")
-            color_match_sample = cv2.imread(path)
-
         # set up turbo step vars
         if turbo_steps > 1:
             turbo_prev_image, turbo_prev_frame_idx = prev_img, prev_frame
