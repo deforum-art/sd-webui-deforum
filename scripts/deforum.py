@@ -65,8 +65,8 @@ def run_deforum(*args, **kwargs):
                 print(f"\033[31mWARNING:\033[0m skipped running from the following setting file, as it contains an invalid JSON: {os.path.basename(args_dict['custom_settings_file'][i].name)}")
                 continue
             else:
-                print("\033[31mERROR!\033[0m Couldn't load data from your .txt file, make sure it's a valid JSON using a JSON validator (google it)")
-                return None, None, None, "FAILED TO RUN", "FAILED TO RUN", plaintext_to_html('')
+                print(f"\033[31mERROR!\033[0m Couldn't load data from '{os.path.basename(args_dict['custom_settings_file'][i].name)}'. Make sure it's a valid JSON using a JSON validator")
+                return None, None, None, None, f"Couldn't load data from '{os.path.basename(args_dict['custom_settings_file'][i].name)}'. Make sure it's a valid JSON using a JSON validator", plaintext_to_html('')
 
         root.clipseg_model = None
         try:
