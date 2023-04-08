@@ -260,7 +260,7 @@ def on_ui_tabs():
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
 
                 with gr.Row(variant='compact'):
-                    settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="Settings File", info="settings file Path can be relative to webui folder OR full - absolute")
+                    settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="Settings File", info="settings file path can be relative to webui folder OR full - absolute")
                     #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
                 with gr.Row(variant='compact'):
                     save_settings_btn = gr.Button('Save Settings', elem_id='deforum_save_settings_btn')
