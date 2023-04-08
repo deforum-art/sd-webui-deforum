@@ -176,7 +176,6 @@ def run_deforum(*args, **kwargs):
             handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=args.timestring)
             
         root.initial_info += "\n The animation is stored in " + args.outdir
-        root.initial_info += "\n Timestring: " + args.timestring + '\n'
         reset_frames_cache(root) # cleanup the RAM in any case
         processed = Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
         
@@ -196,7 +195,7 @@ def run_deforum(*args, **kwargs):
             persistent_sett_path = opts.data.get("deforum_persistent_settings_path")
             deforum_settings.save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
 
-    return processed.images, generation_info_js, plaintext_to_html(processed.info), plaintext_to_html('')
+    return processed.images, args.timestring, generation_info_js, plaintext_to_html(processed.info), plaintext_to_html('')
 
 def on_ui_tabs():
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
@@ -277,6 +276,7 @@ def on_ui_tabs():
                     inputs=[dummy_component, dummy_component] + component_list,
                     outputs=[
                          deforum_gallery,
+                         components["resume_timestring"],
                          generation_info,
                          html_info,
                          html_log,
