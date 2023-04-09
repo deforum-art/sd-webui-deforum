@@ -24,6 +24,9 @@ def do_overlay_mask(args, anim_args, img, frame_idx, is_bgr_array=False):
     current_mask = current_mask.resize((args.W, args.H), Image.LANCZOS)
     current_frame = current_frame.resize((args.W, args.H), Image.LANCZOS)
     current_mask = ImageOps.grayscale(current_mask)
+    
+    if args.invert_mask:
+        current_mask = ImageOps.invert(current_mask)
 
     img = Image.composite(img, current_frame, current_mask)
 
