@@ -32,6 +32,7 @@ from .composable_masks import compose_mask_with_check
 from .settings import save_settings_from_animation_run
 from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 from .resume import get_resume_vars
+from .masks import do_overlay_mask
 # Webui
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
@@ -227,7 +228,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             "mask_auto_contrast_cutoff_low": int(keys.hybrid_comp_mask_auto_contrast_cutoff_low_schedule_series[frame_idx]),
             "mask_auto_contrast_cutoff_high": int(keys.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx]),
             "flow_factor": keys.hybrid_flow_factor_schedule_series[frame_idx]
-        }        
+        }
         scheduled_sampler_name = None
         scheduled_clipskip = None
         scheduled_noise_multiplier = None
@@ -340,6 +341,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2GRAY)
                     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
+                # overlay mask
+                if args.overlay_mask and (anim_args.use_mask_video or args.use_mask):
+                    img = do_overlay_mask(args, anim_args, img, tween_frame_idx, True)
+
                 filename = f"{args.timestring}_{tween_frame_idx:09}.png"
                 cv2.imwrite(os.path.join(args.outdir, filename), img)
                 if anim_args.save_depth_maps:
@@ -356,8 +361,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 color_match_sample = np.asarray(prev_vid_img)
                 color_match_sample = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2BGR)
 
-        # apply transforms to previous frame
+        # after 1st frame, prev_img exists
         if prev_img is not None:
+            # apply transforms to previous frame
             prev_img, depth = anim_frame_warp(prev_img, args, anim_args, keys, frame_idx, depth_model, depth=None, device=root.device, half_precision=root.half_precision)
 
             # do hybrid compositing before motion
@@ -498,7 +504,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             devices.torch_gc()
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
             sd_hijack.model_hijack.hijack(sd_model)
-        
+
         # optical flow redo before generation
         if anim_args.optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
             print(f"Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before final diffusion.")
@@ -554,6 +560,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if anim_args.color_force_grayscale:
             image = ImageOps.grayscale(image)
             image = ImageOps.colorize(image, black ="black", white ="white")
+
+        # overlay mask
+        if args.overlay_mask and (anim_args.use_mask_video or args.use_mask):
+            image = do_overlay_mask(args, anim_args, image, frame_idx)
 
         # on strength 0, set color match to generation
         if strength == 0 and not anim_args.color_coherence in ['Image', 'Video Input']:
