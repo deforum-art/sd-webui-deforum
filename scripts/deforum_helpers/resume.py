@@ -1,5 +1,6 @@
 import os
 import cv2
+from modules.shared import opts
 
 # Resume requires at least two actual frames in order to work
 # 'Actual' frames are defined as frames that go through generation
@@ -9,6 +10,7 @@ import cv2
 #   in order to work with cadence properly and feed it the prev_img/next_img
 
 def get_resume_vars(folder, timestring, cadence):
+    DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
     # count previous frames
     frame_count = 0
     for item in os.listdir(folder):
@@ -23,7 +25,8 @@ def get_resume_vars(folder, timestring, cadence):
             if timestring in filename and "depth" not in filename:
                 frame_count += 1
                 # add this to debugging var
-                print(f"\033[36mResuming:\033[0m File: {filename}")
+                if DEBUG_MODE:
+                    print(f"\033[36mResuming:\033[0m File: {filename}")
 
     print(f"\033[36mResuming:\033[0m Current frame count: {frame_count}")
 

@@ -382,7 +382,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Tab('Resume Animation'):
                         with gr.Row(variant='compact'):
                             resume_from_timestring = gr.Checkbox(label="Resume from timestring", value=da.resume_from_timestring, interactive=True)
-                            resume_timestring = gr.Textbox(label="Resume timestring", lines=1, value = da.resume_timestring, interactive=True, visible=False)
+                            resume_timestring = gr.Textbox(label="Resume timestring", lines=1, value = da.resume_timestring, interactive=True)
             # KEYFRAMES TAB
             with gr.TabItem('Keyframes'): #TODO make a some sort of the original dictionary parsing
                 with gr.Row(variant='compact'):
@@ -976,7 +976,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=change_hybrid_tab_status, inputs=animation_mode, outputs=humans_masking_accord)
     optical_flow_redo_generation.change(fn=hide_if_none, inputs=optical_flow_redo_generation, outputs=redo_flow_factor_schedule_column)
     override_settings_with_file.change(fn=hide_if_false, inputs=override_settings_with_file,outputs=custom_settings_file)
-    resume_from_timestring.change(fn=hide_if_false, inputs=resume_from_timestring,outputs=resume_timestring)
     hybrid_comp_mask_type.change(fn=hide_if_none, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_method)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_factor_schedule)
@@ -1144,8 +1143,9 @@ def process_args(args_dict_main, run_id):
     p = root.p
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
     
+    args_loaded_ok = True # can use this later to error cleanly upon wrong gen param in ui
     if override_settings_with_file:
-        load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id)
+        args_loaded_ok = load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id)
         
     positive_prompts = args_dict_main['animation_prompts_positive']
     negative_prompts = args_dict_main['animation_prompts_negative']
@@ -1209,7 +1209,7 @@ def process_args(args_dict_main, run_id):
     if not os.path.exists(args.outdir):
         os.makedirs(args.outdir)
     
-    return root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
+    return args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
     
 # Local gradio-to-frame-interoplation function. *Needs* to stay here since we do Root() and use gradio elements directly, to be changed in the future
 def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, in_vid_fps):
