@@ -21,7 +21,10 @@ def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_
         print('Custom settings file does not exist. Using in-notebook settings.')
         return
     with open(custom_settings_file.name, "r") as f:
-        jdata = json.loads(f.read())
+        try:
+            jdata = json.loads(f.read())
+        except:
+            return False
         handle_deprecated_settings(jdata)
         root.animation_prompts = jdata.get("prompts", root.animation_prompts)
         if "animation_prompts_positive" in jdata:
@@ -38,6 +41,7 @@ def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_
                     else:
                         print(f"Key {k} doesn't exist in the custom settings data! Using default value of {v}")
         print(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict)
+        return True
 
 def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, glsl_args, root, full_out_file_path = None):
     if full_out_file_path:
