@@ -418,6 +418,15 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                         <li>Prompts are stored in JSON format. If you've got an error, check it in validator, <a style="color:SteelBlue" href="https://odu.github.io/slingjsonlint/">like here</a></li>
                                     </ul>
                                 """)
+                        gr.HTML("""The Guided images mode exposes the following variables for the prompts and the schedules:
+                                    <ul style="list-style-type:circle; margin-left:2em; margin-bottom:0em">
+                                        <li><b>s</b> is the <i>initial</i> seed for the whole video generation.</li>
+                                        <li><b>max_f</b> is the length of the video, in frames.<br />
+                                            Example: seed_schedule could use 0:(s), 1:(-1), "max_f-2":(-1), "max_f-1":(s)</li>
+                                        <li><b>t</b> is the current frame number.<br />
+                                            Example: strength_schedule could use 0:(0.25 * cos((72 / 60 * 3.141 * (t + 0) / 30))**13 + 0.7) to make alternating changes each 30 frames</li>
+                                    </ul>
+                                """)
                     with gr.Row(variant='compact'):
                         use_looper = gr.Checkbox(label="Enable guided images mode", value=dloopArgs.use_looper, interactive=True)
                     with gr.Row(variant='compact'):
