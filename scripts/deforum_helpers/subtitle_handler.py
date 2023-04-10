@@ -73,16 +73,22 @@ def write_frame_subtitle(filename, frame_number, frame_duration, text):
 
 def format_animation_params(keys, frame_idx):
     params_to_print = opts.data.get("deforum_save_gen_info_as_srt_params", ['Seed'])
-
     params_string = ""
     for key, value in param_dict.items():
         if value['user'] in params_to_print:
             backend_key = value['backend']
             print_key = value['print']
-            params_string += f"{print_key}: {keys.__dict__[backend_key][frame_idx]}; "
+            param_value = keys.__dict__[backend_key][frame_idx]
+            if isinstance(param_value, float) and param_value == int(param_value):
+                formatted_value = str(int(param_value))
+            elif isinstance(param_value, float) and not param_value.is_integer():
+                formatted_value = f"{param_value:.3f}"
+            else:
+                formatted_value = f"{param_value}"
+            params_string += f"{print_key}: {formatted_value}; "
 
     params_string = params_string.rstrip("; ")  # Remove trailing semicolon and whitespace
     return params_string
-
+    
 def get_user_values():
     return [v["user"] for v in param_dict.values()]
