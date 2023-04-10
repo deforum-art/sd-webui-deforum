@@ -84,9 +84,18 @@ def get_max_path_length(base_folder_path):
     if get_os() == 'Windows':
         return (32767 if test_long_path_support(base_folder_path) else 260) - len(base_folder_path) - 1
     return 4096 - len(base_folder_path) - 1
-
+   
 def substitute_placeholders(template, arg_list, base_folder_path):
     import re
+    # Find and update timestring values if resume_from_timestring is True
+    resume_from_timestring = next((arg_obj.resume_from_timestring for arg_obj in arg_list if hasattr(arg_obj, 'resume_from_timestring')), False)
+    resume_timestring = next((arg_obj.resume_timestring for arg_obj in arg_list if hasattr(arg_obj, 'resume_timestring')), None)
+
+    if resume_from_timestring and resume_timestring:
+        for arg_obj in arg_list:
+            if hasattr(arg_obj, 'timestring'):
+                arg_obj.timestring = resume_timestring
+
     max_length = get_max_path_length(base_folder_path)
     values = {attr.lower(): getattr(arg_obj, attr)
               for arg_obj in arg_list
