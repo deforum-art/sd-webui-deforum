@@ -616,19 +616,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         args.seed = next_seed(args)
         
     if predict_depths and not keep_in_vram:
-        if DEBUG_MODE:
-            print(f"Removing MiDaS from memory... {get_used_vram_in_mb()}")
         depth_model.delete_model()
-        if DEBUG_MODE:
-            print(f"Done. {get_used_vram_in_mb()}")
         if anim_args.midas_weight < 1.0:
-            if DEBUG_MODE:
-                print(f"Removing AdaBins from memory... {get_used_vram_in_mb()}")
             adabins_model.delete_model()
-            if DEBUG_MODE:
-                print(f"Done. {get_used_vram_in_mb()}")
-            
-# Print the total used VRAM in MB
-def get_used_vram_in_mb():
-    max_memory_bytes = torch.cuda.max_memory_allocated()
-    return(f"VRAM in use: {max_memory_bytes/1024**2:.2f} MB")
