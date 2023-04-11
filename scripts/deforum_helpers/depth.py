@@ -23,14 +23,17 @@ class MidasModel:
 
     def __new__(cls, *args, **kwargs):
         keep_in_vram = kwargs.get('keep_in_vram', False)
-        if cls._instance is None or (not keep_in_vram and not hasattr(cls._instance, 'midas_model')):
+        use_zoe_depth = kwargs.get('use_zoe_depth', False)
+        model_switched = cls._instance and cls._instance.use_zoe_depth != use_zoe_depth
+
+        if cls._instance is None or (not keep_in_vram and not hasattr(cls._instance, 'midas_model')) or model_switched:
             cls._instance = super().__new__(cls)
             cls._instance._initialize(*args, **kwargs)
         elif cls._instance.should_delete and keep_in_vram:
             cls._instance._initialize(*args, **kwargs)
         cls._instance.should_delete = not keep_in_vram
         return cls._instance
-        
+
     def _initialize(self, models_path, device, half_precision=True, keep_in_vram=False, use_zoe_depth=False):
         self.keep_in_vram = keep_in_vram
         self.adabins_helper = None
@@ -38,9 +41,10 @@ class MidasModel:
         self.depth_max = -1000
         self.device = device
         self.use_zoe_depth = use_zoe_depth
+
         if self.use_zoe_depth:
             self.zoe_depth = ZoeDepth()
-        
+
         if not self.use_zoe_depth:
             model_file = os.path.join(models_path, 'dpt_large-midas-2f21e586.pt')
             if not os.path.exists(model_file):
@@ -169,7 +173,7 @@ class AdaBinsModel:
     _instance = None
     
     def __new__(cls, *args, **kwargs):
-        keep_in_vram = kwargs.get('keep_in_vram', True)
+        keep_in_vram = kwargs.get('keep_in_vram', False)
         if cls._instance is None or not keep_in_vram:
             cls._instance = super().__new__(cls)
             cls._instance._initialize(*args, **kwargs)
