@@ -35,10 +35,11 @@ from .resume import get_resume_vars
 from .masks import do_overlay_mask
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
-
-# DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+from .ZoeDepth import ZoeDepth
+import torch
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+    DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
     if opts.data.get("deforum_save_gen_info_as_srt"): # create .srt file and set timeframe mechanism using FPS
         srt_filename = os.path.join(args.outdir, f"{args.timestring}.srt")
@@ -112,9 +113,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
         
         device = ('cpu' if cmd_opts.lowvram or cmd_opts.medvram else root.device)
-        depth_model = MidasModel(root.models_path, device, root.half_precision, keep_in_vram=keep_in_vram)
+        depth_model = MidasModel(root.models_path, device, root.half_precision, keep_in_vram=keep_in_vram, use_zoe_depth=anim_args.use_zoe_depth)
         
         if anim_args.midas_weight < 1.0:
+            if DEBUG_MODE:
+                print("Engaging AdaBins, as MiDaS < 1")
             adabins_model = AdaBinsModel(root.models_path, keep_in_vram=keep_in_vram)
             
         # depth-based hybrid composite mask requires saved depth maps
@@ -360,6 +363,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 cv2.imwrite(os.path.join(args.outdir, filename), img)
                 if anim_args.save_depth_maps:
                     depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:09}.png"), depth)
+                    # depth_model.save_colored_depth(depth, os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:09}.png"))
+                    
             if turbo_next_image is not None:
                 prev_img = turbo_next_image
 
@@ -612,6 +617,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         args.seed = next_seed(args)
         
     if predict_depths and not keep_in_vram:
-        depth_model.delete_model
+        depth_model.delete_model()
         if anim_args.midas_weight < 1.0:
             adabins_model.delete_model()
