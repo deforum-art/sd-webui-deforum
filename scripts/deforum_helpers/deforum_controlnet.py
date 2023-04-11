@@ -290,7 +290,8 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         cnu["guidance_end"],
         cnu["guess_mode"],
     )
-
+    
+    #TODO: add multi CN support!
     cn_units = [
         cnet.ControlNetUnit(**cnu),
     ]
