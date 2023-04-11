@@ -124,8 +124,7 @@ class UnetAdaptiveBins(nn.Module):
         DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
         basemodel_name = 'tf_efficientnet_b5_ap'
         
-        if DEBUG_MODE:
-            print('Loading AdaBins model... '.format(basemodel_name), end='')
+        print('Loading AdaBins model...')
         predicted_torch_model_cache_path = str(Path.home()) + '\\.cache\\torch\\hub\\rwightman_gen-efficientnet-pytorch_master' 
         predicted_gep_cache_testilfe = Path(predicted_torch_model_cache_path + '\\hubconf.py')
         #print(f"predicted_gep_cache_testilfe:  {predicted_gep_cache_testilfe}")

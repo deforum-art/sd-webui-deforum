@@ -50,6 +50,7 @@ class MidasModel:
                     raise Exception(r"Error while downloading dpt_large-midas-2f21e586.pt. Please download from here: https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt and place in: " + models_path)
 
             if not self.keep_in_vram or not hasattr(self, 'midas_model'):
+                print("Loading MiDaS model...")
                 self.midas_model = DPTDepthModel(
                     path=model_file,
                     backbone="vitl16_384",
