@@ -3,9 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import os
 from pathlib import Path
-
 from .miniViT import mViT
-
+from modules.shared import opts
 
 class UpSampleBN(nn.Module):
     def __init__(self, skip_input, output_features):
@@ -122,9 +121,10 @@ class UnetAdaptiveBins(nn.Module):
 
     @classmethod
     def build(cls, n_bins, **kwargs):
+        DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
         basemodel_name = 'tf_efficientnet_b5_ap'
-
-        print('Loading base model ()...'.format(basemodel_name), end='')
+        
+        print('Loading AdaBins model...')
         predicted_torch_model_cache_path = str(Path.home()) + '\\.cache\\torch\\hub\\rwightman_gen-efficientnet-pytorch_master' 
         predicted_gep_cache_testilfe = Path(predicted_torch_model_cache_path + '\\hubconf.py')
         #print(f"predicted_gep_cache_testilfe:  {predicted_gep_cache_testilfe}")
@@ -133,17 +133,21 @@ class UnetAdaptiveBins(nn.Module):
             basemodel = torch.hub.load(predicted_torch_model_cache_path, basemodel_name, pretrained=True, source = 'local')        
         else:
             basemodel = torch.hub.load('rwightman/gen-efficientnet-pytorch', basemodel_name, pretrained=True)
-        print('Done.')
+        if DEBUG_MODE:
+            print('Done.')
 
         # Remove last layer
-        print('Removing last two layers (global_pool & classifier).')
+        if DEBUG_MODE:
+            print('Removing last two layers (global_pool & classifier).')
         basemodel.global_pool = nn.Identity()
         basemodel.classifier = nn.Identity()
 
         # Building Encoder-Decoder model
-        print('Building Encoder-Decoder model..', end='')
+        if DEBUG_MODE:
+            print('Building Encoder-Decoder model..', end='')
         m = cls(basemodel, n_bins=n_bins, **kwargs)
-        print('Done.')
+        if DEBUG_MODE:
+            print('Done.')
         return m
 
 

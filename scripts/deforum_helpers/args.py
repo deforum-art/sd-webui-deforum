@@ -119,6 +119,7 @@ def DeforumAnimArgs():
     perlin_persistence = 0.5 
     #**3D Depth Warping:**
     use_depth_warping = True 
+    use_zoe_depth = False
     midas_weight = 0.2 
     padding_mode = 'border' # ['border', 'reflection', 'zeros'] 
     sampling_mode = 'bicubic' # ['bicubic', 'bilinear', 'nearest']
@@ -519,6 +520,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.TabItem('Depth Warping'): 
                                 with gr.Row(variant='compact'):
                                     use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
+                                    use_zoe_depth = gr.Checkbox(label="Use ZoeDepth", value=da.use_zoe_depth, interactive=True, info="a new depth estimation model. provides *much* better results at the cost of more gpu vram")
                                     midas_weight = gr.Number(label="MiDaS weight", value=da.midas_weight, interactive=True, info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
                                 with gr.Row(variant='compact'):
                                     padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode", info="controls the handling of pixels outside the field of view as they come into the scene. hover on the options for more info")
@@ -1050,7 +1052,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         diffusion_cadence, optical_flow_cadence, cadence_flow_factor_schedule,
                         optical_flow_redo_generation, redo_flow_factor_schedule, diffusion_redo,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
-                        use_depth_warping, midas_weight,
+                        use_depth_warping, use_zoe_depth ,midas_weight,
                         padding_mode, sampling_mode, save_depth_maps,
                         video_init_path, extract_nth_frame, extract_from_frame, extract_to_frame, overwrite_extracted_frames,
                         use_mask_video, video_mask_path,
