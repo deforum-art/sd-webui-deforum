@@ -16,35 +16,37 @@ from modules import lowvram, devices
 from modules.shared import opts
 from .ZoeDepth import ZoeDepth
 
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-
 class MidasModel:
     _instance = None
 
     def __new__(cls, *args, **kwargs):
         keep_in_vram = kwargs.get('keep_in_vram', False)
         use_zoe_depth = kwargs.get('use_zoe_depth', False)
+        Width = kwargs.get('Width', 512)
+        Height = kwargs.get('Height', 512)
         model_switched = cls._instance and cls._instance.use_zoe_depth != use_zoe_depth
+        resolution_changed = cls._instance and (cls._instance.Width != Width or cls._instance.Height != Height)
 
-        if cls._instance is None or (not keep_in_vram and not hasattr(cls._instance, 'midas_model')) or model_switched:
+        if cls._instance is None or (not keep_in_vram and not hasattr(cls._instance, 'midas_model')) or model_switched or resolution_changed:
             cls._instance = super().__new__(cls)
-            cls._instance._initialize(*args, **kwargs)
+            cls._instance._initialize(models_path=args[0], device=args[1], half_precision=True, keep_in_vram=keep_in_vram, use_zoe_depth=use_zoe_depth, Width=Width, Height=Height)
         elif cls._instance.should_delete and keep_in_vram:
-            cls._instance._initialize(*args, **kwargs)
+            cls._instance._initialize(models_path=args[0], device=args[1], half_precision=True, keep_in_vram=keep_in_vram, use_zoe_depth=use_zoe_depth, Width=Width, Height=Height)
         cls._instance.should_delete = not keep_in_vram
         return cls._instance
 
-    def _initialize(self, models_path, device, half_precision=True, keep_in_vram=False, use_zoe_depth=False):
+    def _initialize(self, models_path, device, half_precision=True, keep_in_vram=False, use_zoe_depth=False, Width=512, Height=512):
         self.keep_in_vram = keep_in_vram
+        self.Width = Width
+        self.Height = Height
         self.adabins_helper = None
         self.depth_min = 1000
         self.depth_max = -1000
         self.device = device
         self.use_zoe_depth = use_zoe_depth
-
+        
         if self.use_zoe_depth:
-            self.zoe_depth = ZoeDepth()
-
+            self.zoe_depth = ZoeDepth(self.Width, self.Height)
         if not self.use_zoe_depth:
             model_file = os.path.join(models_path, 'dpt_large-midas-2f21e586.pt')
             if not os.path.exists(model_file):
@@ -75,10 +77,14 @@ class MidasModel:
                 self.midas_model = self.midas_model.half()
 
     def predict(self, prev_img_cv2, midas_weight, half_precision) -> torch.Tensor:
+        DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+        
         img_pil = Image.fromarray(cv2.cvtColor(prev_img_cv2.astype(np.uint8), cv2.COLOR_RGB2BGR))
 
+        
         if self.use_zoe_depth:
             depth_tensor = self.zoe_depth.predict(img_pil).to(self.device)
+            # depth_tensor = torch.subtract(50.0, depth_tensor) / 19
         else:
             w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
 
@@ -99,10 +105,20 @@ class MidasModel:
                 mode="bicubic",
                 align_corners=False,
             ).squeeze().cpu().numpy()
+            
+            if DEBUG_MODE:
+                print("Midas depth tensor before 50/19 calculation:")
+                midas_depth_tensor = print(torch.from_numpy(np.expand_dims(midas_depth, axis=0)).squeeze())
+
 
             torch.cuda.empty_cache()
             midas_depth = np.subtract(50.0, midas_depth) / 19.0
             depth_tensor = torch.from_numpy(np.expand_dims(midas_depth, axis=0)).squeeze().to(self.device)
+        
+        if DEBUG_MODE:
+            print("Shape of depth_tensor:", depth_tensor.shape)
+            print("Tensor data:")
+            print(depth_tensor)
 
         w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
         use_adabins = midas_weight < 1.0 and self.adabins_helper is not None
@@ -146,10 +162,7 @@ class MidasModel:
         return Image.fromarray(temp.astype(np.uint8))
 
     def save(self, filename: str, depth: torch.Tensor):
-        if self.use_zoe_depth:
-            self.zoe_depth.save_colored_depth(depth, filename)
-        else:
-            self.to_image(depth).save(filename)
+        self.to_image(depth).save(filename)
 
     def to(self, device):
         self.device = device

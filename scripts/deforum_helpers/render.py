@@ -113,7 +113,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
         
         device = ('cpu' if cmd_opts.lowvram or cmd_opts.medvram else root.device)
-        depth_model = MidasModel(root.models_path, device, root.half_precision, keep_in_vram=keep_in_vram, use_zoe_depth=anim_args.use_zoe_depth)
+        depth_model = MidasModel(root.models_path, device, root.half_precision, keep_in_vram=keep_in_vram, use_zoe_depth=anim_args.use_zoe_depth, Width=args.W, Height=args.H)
         
         if anim_args.midas_weight < 1.0:
             if DEBUG_MODE:
