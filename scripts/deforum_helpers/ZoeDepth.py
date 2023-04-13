@@ -3,15 +3,22 @@ import gc
 from PIL import Image
 from modules import devices
 from zoedepth.utils.misc import colorize 
+from zoedepth.models.builder import build_model
+from zoedepth.utils.config import get_config
 
 class ZoeDepth:
-    def __init__(self):
-        repo = "isl-org/ZoeDepth"
-        self.model_zoe = torch.hub.load(repo, "ZoeD_NK", pretrained=True)
+    def __init__(self, width=512, height=512):
+        conf = get_config("zoedepth_nk", "infer")
+        conf.img_size = [width, height]
+        self.model_zoe = build_model(conf)
         self.DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
         self.zoe = self.model_zoe.to(self.DEVICE)
+        self.width = width
+        self.height = height
         
     def predict(self, image):
+        self.zoe.core.prep.resizer._Resize__width = self.width
+        self.zoe.core.prep.resizer._Resize__height = self.height
         depth_tensor = self.zoe.infer_pil(image, output_type="tensor")
         return depth_tensor
 
