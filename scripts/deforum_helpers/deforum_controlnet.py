@@ -15,6 +15,7 @@ from rich import box
 from modules import scripts
 from modules.shared import opts
 from .deforum_controlnet_gradio import *
+from .video_audio_utilities import vid2frames
 
 DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
@@ -348,9 +349,6 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
 
     p.script_args = {"enabled": True}
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
-
-# import pathlib
-from .video_audio_utilities import vid2frames
 
 def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
     if (video_path or mask_path) and getattr(controlnet_args, f'cn_{id}_enabled'):
