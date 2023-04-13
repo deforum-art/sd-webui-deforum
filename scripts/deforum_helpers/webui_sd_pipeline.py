@@ -16,7 +16,7 @@ def get_webui_sd_pipeline(args, root, frame):
     )
     
     os.makedirs(args.outdir, exist_ok=True)
-    p.width, p.height = map(lambda x: x - x % 64, (args.W, args.H))
+    p.width, p.height = map(lambda x: x - x % 8, (args.W, args.H))
     p.steps = args.steps
     p.seed = args.seed
     p.sampler_name = args.sampler
@@ -30,8 +30,6 @@ def get_webui_sd_pipeline(args, root, frame):
     p.fill = args.fill
     p.ddim_eta = args.ddim_eta
     p.batch_size = args.n_samples
-    p.width = args.W
-    p.height = args.H
     p.seed = args.seed
     p.do_not_save_samples = not args.save_sample_per_step
     p.sampler_name = args.sampler

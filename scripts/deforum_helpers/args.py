@@ -1177,7 +1177,7 @@ def process_args(args_dict_main, run_id):
     loop_args = SimpleNamespace(**loop_args_dict)
     controlnet_args = SimpleNamespace(**controlnet_args_dict)
 
-    p.width, p.height = map(lambda x: x - x % 64, (args.W, args.H))
+    p.width, p.height = map(lambda x: x - x % 8, (args.W, args.H))
     p.steps = args.steps
     p.seed = args.seed
     p.sampler_name = args.sampler
