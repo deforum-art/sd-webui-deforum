@@ -80,19 +80,22 @@ def setup_controlnet_ui_raw():
                 invert_image = gr.Checkbox(label="Invert colors", value=False, visible=False, interactive=True)
                 rgbbgr_mode = gr.Checkbox(label="RGB to BGR", value=False, visible=False, interactive=True)
                 low_vram = gr.Checkbox(label="Low VRAM", value=False, visible=False, interactive=True)
-            # with gr.Row(visible=False) as cn_1_mod_row:
-                # cn_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
-                # cn_model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
-                # refresh_models = ToolButton(value=refresh_symbol)
-                # refresh_models.click(refresh_all_models, cn_1_model, cn_1_model)
+            with gr.Row(visible=False) as cn_1_mod_row:
+                module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
+                model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
+                refresh_models = ToolButton(value=refresh_symbol)
+                refresh_models.click(refresh_all_models, model, model)
                 return {
                     "enabled": enabled,
                     "guess_mode": guess_mode,
                     "invert_image": invert_image,
                     "rgbbgr_mode": rgbbgr_mode,
                     "low_vram": low_vram,
+                    "module": module, 
+                    "model": model,
+                    "cn_1_mod_row": cn_1_mod_row,
                 }
-    def refresh_all_models(*inputs):
+    def refresh_all_models(*inputs): # TODO FIX NULL WHEN PRESSING BUTTON! should say None in UI
         cn_models = cnet.get_models(update=True)
         dd = inputs[0]
         selected = dd if dd in cn_models else "None"
@@ -109,18 +112,10 @@ def setup_controlnet_ui_raw():
             cn_1_invert_image = model_params[1]["invert_image"]
             cn_1_rgbbgr_mode = model_params[1]["rgbbgr_mode"]
             cn_1_low_vram = model_params[1]["low_vram"]
-            # with gr.Row():
-                # cn_1_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
-                # cn_1_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
-                # cn_1_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
-                # cn_1_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
-                # cn_1_low_vram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
+            cn_1_module = model_params[1]["module"]
+            cn_1_model = model_params[1]["model"]
+            cn_1_mod_row = model_params[1]["cn_1_mod_row"]
 
-            with gr.Row(visible=False) as cn_1_mod_row:
-                cn_1_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
-                cn_1_model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
-                refresh_models = ToolButton(value=refresh_symbol)
-                refresh_models.click(refresh_all_models, cn_1_model, cn_1_model)
             with gr.Row(visible=False) as cn_1_weight_row:
                 cn_1_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05, interactive=True)
                 cn_1_guidance_start =  gr.Slider(label="Guidance start", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
@@ -150,7 +145,9 @@ def setup_controlnet_ui_raw():
             cn_1_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
             cn_1_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
            
-            cn_1_hide_output_list = [cn_1_guess_mode,cn_1_invert_image,cn_1_rgbbgr_mode,cn_1_low_vram,cn_1_mod_row,cn_1_weight_row,cn_1_env_row,cn_1_vid_settings_row,cn_1_input_video_chosen_file,cn_1_input_video_mask_chosen_file, cn_1_advanced] 
+           
+            # cn_1_module           cn_1_mod_row
+            cn_1_hide_output_list = [cn_1_guess_mode,cn_1_invert_image,cn_1_rgbbgr_mode,cn_1_low_vram,cn_1_mod_row,cn_1_module,cn_1_weight_row,cn_1_env_row,cn_1_vid_settings_row,cn_1_input_video_chosen_file,cn_1_input_video_mask_chosen_file, cn_1_advanced] 
             for cn_output in cn_1_hide_output_list:
                 cn_1_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_1_enabled,outputs=cn_output)
         with gr.Tab(f"ControlNet 2"):
