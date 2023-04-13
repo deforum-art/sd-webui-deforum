@@ -17,7 +17,7 @@ from modules.shared import opts
 from .deforum_controlnet_gradio import *
 from .video_audio_utilities import vid2frames
 
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+# DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 cnet = None
 
@@ -30,20 +30,9 @@ def find_controlnet():
         cnet = importlib.import_module('extensions.sd-webui-controlnet.scripts.external_code', 'external_code')
         print(f"\033[0;32m*Deforum ControlNet support: enabled*\033[0m")
         return True
-    except Exception as e:
-        # the tab will be disactivated anyway, so we don't need the error message
+    except Exception as e: # the tab will be disactivated anyway, so we don't need the error message
         return None
 
-gradio_compat = True
-try:
-    from distutils.version import LooseVersion
-    from importlib_metadata import version
-    if LooseVersion(version("gradio")) < LooseVersion("3.10"):
-        gradio_compat = False
-except ImportError:
-    pass
-
-# svgsupports
 svgsupport = False
 try:
     import io
@@ -54,28 +43,11 @@ try:
 except ImportError:
     pass
 
-# NOT IN USE?!
-def ControlnetArgs():
-    cn_1_enabled = False
-    cn_1_guess_mode = False
-    cn_1_rgbbgr_mode = False
-    cn_1_low_vram = False
-    cn_1_module = "none"
-    cn_1_model = "None"
-    cn_1_weight = 1.0
-    cn_1_guidance_strength = 1.0
-    cn_1_blendFactorMax = "0:(0.35)"
-    cn_1_blendFactorSlope = "0:(0.25)"
-    cn_1_tweening_frames_schedule = "0:(20)"
-    cn_1_color_correction_factor = "0:(0.075)"
-    return locals()
-
 def setup_controlnet_ui_raw():
     cnet = find_controlnet()
     cn_models = cnet.get_models()
     max_models = opts.data.get("control_net_max_models_num", 1)
-    # since cn preprocessors don't seem to be provided in the API rn, hardcode the names list
-    cn_preprocessors = [
+    cn_preprocessors = [ # since cn preprocessors don't seem to be provided in the API rn, hardcode the names list
         "none",
         "canny",
         "depth",
@@ -94,28 +66,16 @@ def setup_controlnet_ui_raw():
         "binary",
     ]
 
-    # Already under an accordion
     refresh_symbol = '\U0001f504'  # 🔄
     switch_values_symbol = '\U000021C5' # ⇅
     model_dropdowns = []
     infotext_fields = []
-    # Main part
-    class ToolButton(gr.Button, gr.components.FormComponent):
-        """Small button with single emoji as text, fits inside gradio forms"""
 
-        def __init__(self, **kwargs):
-            super().__init__(variant="tool", **kwargs)
-
-        def get_block_name(self):
-            return "button"
     def refresh_all_models(*inputs):
         cn_models = cnet.get_models(update=True)
         dd = inputs[0]
         selected = dd if dd in cn_models else "None"
-        # return gr.Dropdown.update(value=selected, choices=cn_models)
-    # if max_models > 1:
     with gr.Tabs():
-            # for i in range(max_models):
         with gr.Tab(f"Control Model 1"):
             with gr.Row():
                 cn_1_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
@@ -129,23 +89,17 @@ def setup_controlnet_ui_raw():
                 cn_1_model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
                 refresh_models = ToolButton(value=refresh_symbol)
                 refresh_models.click(refresh_all_models, cn_1_model, cn_1_model)
-                #ctrls += (refresh_models, )
             with gr.Row(visible=False) as cn_1_weight_row:
                 cn_1_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05, interactive=True)
                 cn_1_guidance_start =  gr.Slider(label="Guidance start", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
                 cn_1_guidance_end =  gr.Slider(label="Guidance end", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
-                #ctrls += (controlnet_module, controlnet_model, controlnet_weight,)
                 model_dropdowns.append(cn_1_model)
-          
-            # advanced options    
-            # controlnet_advanced = 
             with gr.Column(visible=False) as cn_1_advanced:
                 cn_1_processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
                 cn_1_threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
                 cn_1_threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
             
-            if gradio_compat:    
-                cn_1_module.change(build_sliders, inputs=[cn_1_module], outputs=[cn_1_processor_res, cn_1_threshold_a, cn_1_threshold_b, cn_1_advanced])
+            cn_1_module.change(build_sliders, inputs=[cn_1_module], outputs=[cn_1_processor_res, cn_1_threshold_a, cn_1_threshold_b, cn_1_advanced])
                 
             infotext_fields.extend([
                 (cn_1_module, f"ControlNet Preprocessor"),
@@ -161,8 +115,6 @@ def setup_controlnet_ui_raw():
                 cn_1_vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=True)
                 cn_1_mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
 
-            # Video input to be fed into ControlNet
-            #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
             cn_1_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
             cn_1_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
            
@@ -176,28 +128,22 @@ def setup_controlnet_ui_raw():
                 cn_2_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
                 cn_2_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
                 cn_2_low_vram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
-
             with gr.Row(visible=False) as cn_2_mod_row:
                 cn_2_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
                 cn_2_model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
                 refresh_models = ToolButton(value=refresh_symbol)
                 refresh_models.click(refresh_all_models, cn_2_model, cn_2_model)
-                #ctrls += (refresh_models, )
             with gr.Row(visible=False) as cn_2_weight_row:
                 cn_2_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05, interactive=True)
                 cn_2_guidance_start =  gr.Slider(label="Guidance start", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
                 cn_2_guidance_end =  gr.Slider(label="Guidance end", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
-                #ctrls += (controlnet_module, controlnet_model, controlnet_weight,)
                 model_dropdowns.append(cn_2_model)
-          
-            # advanced options    
             with gr.Column(visible=False) as cn_2_advanced:
                 cn_2_processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
                 cn_2_threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
                 cn_2_threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
             
-            if gradio_compat:    
-                cn_2_module.change(build_sliders, inputs=[cn_2_module], outputs=[cn_2_processor_res, cn_2_threshold_a, cn_2_threshold_b, cn_2_advanced])
+            cn_2_module.change(build_sliders, inputs=[cn_2_module], outputs=[cn_2_processor_res, cn_2_threshold_a, cn_2_threshold_b, cn_2_advanced])
                 
             infotext_fields.extend([
                 (cn_2_module, f"ControlNet Preprocessor"),
@@ -213,8 +159,6 @@ def setup_controlnet_ui_raw():
                 cn_2_vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=True)
                 cn_2_mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
 
-            # Video input to be fed into ControlNet
-            #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
             cn_2_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
             cn_2_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
            
@@ -223,13 +167,10 @@ def setup_controlnet_ui_raw():
                 cn_2_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_2_enabled,outputs=cn_output)
             
     return locals()
-
             
 def setup_controlnet_ui():
     if not find_controlnet():
-        gr.HTML("""
-                <a style='target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet not found. Please install it :)</a>
-                """, elem_id='controlnet_not_found_html_msg')
+        gr.HTML("""<a style='target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet not found. Please install it :)</a>""", elem_id='controlnet_not_found_html_msg')
         return {}
 
     try:
@@ -241,26 +182,24 @@ def setup_controlnet_ui():
                 """, elem_id='controlnet_not_found_html_msg')
         return {}
 
-
 def controlnet_component_names():
     if not find_controlnet():
         return []
 
-
     controlnet_args_names = str(r'''cn_1_input_video_chosen_file, cn_1_input_video_mask_chosen_file,
-cn_1_overwrite_frames,cn_1_vid_path,cn_1_mask_vid_path,
-cn_1_enabled, cn_1_guess_mode, cn_1_invert_image, cn_1_rgbbgr_mode, cn_1_low_vram,
-cn_1_module, cn_1_model,
-cn_1_weight, cn_1_guidance_start, cn_1_guidance_end,
-cn_1_processor_res, 
-cn_1_threshold_a, cn_1_threshold_b, cn_1_resize_mode,
-cn_2_input_video_chosen_file, cn_2_input_video_mask_chosen_file,
-cn_2_overwrite_frames,cn_2_vid_path,cn_2_mask_vid_path,
-cn_2_enabled, cn_2_guess_mode, cn_2_invert_image, cn_2_rgbbgr_mode, cn_2_low_vram,
-cn_2_module, cn_2_model,
-cn_2_weight, cn_2_guidance_start, cn_2_guidance_end,
-cn_2_processor_res, 
-cn_2_threshold_a, cn_2_threshold_b, cn_2_resize_mode'''
+        cn_1_overwrite_frames,cn_1_vid_path,cn_1_mask_vid_path,
+        cn_1_enabled, cn_1_guess_mode, cn_1_invert_image, cn_1_rgbbgr_mode, cn_1_low_vram,
+        cn_1_module, cn_1_model,
+        cn_1_weight, cn_1_guidance_start, cn_1_guidance_end,
+        cn_1_processor_res, 
+        cn_1_threshold_a, cn_1_threshold_b, cn_1_resize_mode,
+        cn_2_input_video_chosen_file, cn_2_input_video_mask_chosen_file,
+        cn_2_overwrite_frames,cn_2_vid_path,cn_2_mask_vid_path,
+        cn_2_enabled, cn_2_guess_mode, cn_2_invert_image, cn_2_rgbbgr_mode, cn_2_low_vram,
+        cn_2_module, cn_2_model,
+        cn_2_weight, cn_2_guidance_start, cn_2_guidance_end,
+        cn_2_processor_res, 
+        cn_2_threshold_a, cn_2_threshold_b, cn_2_resize_mode'''
     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
     
     return controlnet_args_names
@@ -307,25 +246,6 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
     if not os.path.exists(cn_1_inputframes) and not os.path.exists(cn_2_inputframes):
         print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
 
-        
-    # *** TODO: re-enable table printing! disabled only temp! 13-04-23 ***
-    # table = Table(title="ControlNet params",padding=0, box=box.ROUNDED)
-
-    # TODO: auto infer the names and the values for the table
-    # field_names = []
-    # field_names += ["module", "model", "weight", "inv", "guide_start", "guide_end", "guess", "resize", "rgb_bgr", "proc res", "thr a", "thr b"]
-    # for field_name in field_names:
-        # table.add_column(field_name, justify="center")
-    
-    # cn_model_name = str(controlnet_args.cn_1_model)
-
-    # rows = []
-    # rows += [controlnet_args.cn_1_module, cn_model_name[len('control_'):] if 'control_' in cn_model_name else cn_model_name, controlnet_args.cn_1_weight, controlnet_args.cn_1_invert_image, controlnet_args.cn_1_guidance_start, controlnet_args.cn_1_guidance_end, controlnet_args.cn_1_guess_mode, controlnet_args.cn_1_resize_mode, controlnet_args.cn_1_rgbbgr_mode, controlnet_args.cn_1_processor_res, controlnet_args.cn_1_threshold_a, controlnet_args.cn_1_threshold_b]
-    # rows = [str(x) for x in rows]
-
-    # table.add_row(*rows)
-    # console.print(table)
-
     p.scripts = scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img
 
     def create_cnu_dict(cn_args, prefix, img_np, mask_np):
@@ -366,10 +286,8 @@ def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_
             extract_to_frame=anim_args.extract_to_frame,
             numeric_files_output=True
         )
-
         print(f"Loading {anim_args.max_frames} input frames from {frame_path} and saving video frames to {args.outdir}")
         print(f'ControlNet {id} {"video mask" if mask_path else "base video"} unpacked!')
-
 
 def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     for i in range(1, 3):
