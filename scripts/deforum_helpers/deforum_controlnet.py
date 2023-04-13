@@ -58,7 +58,7 @@ def ControlnetArgs():
     cn_1_enabled = False
     cn_1_guess_mode = False
     cn_1_rgbbgr_mode = False
-    cn_1_lowvram = False
+    cn_1_low_vram = False
     cn_1_module = "none"
     cn_1_model = "None"
     cn_1_weight = 1.0
@@ -121,7 +121,7 @@ def setup_controlnet_ui_raw():
                 cn_1_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
                 cn_1_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
                 cn_1_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
-                cn_1_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
+                cn_1_low_vram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
 
             with gr.Row(visible=False) as cn_1_mod_row:
                 cn_1_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
@@ -165,7 +165,7 @@ def setup_controlnet_ui_raw():
             cn_1_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
             cn_1_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
            
-            cn_1_hide_output_list = [cn_1_guess_mode,cn_1_invert_image,cn_1_rgbbgr_mode,cn_1_lowvram,cn_1_mod_row,cn_1_weight_row,cn_1_env_row,cn_1_vid_settings_row,cn_1_input_video_chosen_file,cn_1_input_video_mask_chosen_file] 
+            cn_1_hide_output_list = [cn_1_guess_mode,cn_1_invert_image,cn_1_rgbbgr_mode,cn_1_low_vram,cn_1_mod_row,cn_1_weight_row,cn_1_env_row,cn_1_vid_settings_row,cn_1_input_video_chosen_file,cn_1_input_video_mask_chosen_file] 
             for cn_output in cn_1_hide_output_list:
                 cn_1_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_1_enabled,outputs=cn_output)
         with gr.Tab(f"Control Model 2"):
@@ -174,7 +174,7 @@ def setup_controlnet_ui_raw():
                 cn_2_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
                 cn_2_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
                 cn_2_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
-                cn_2_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
+                cn_2_low_vram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
 
             with gr.Row(visible=False) as cn_2_mod_row:
                 cn_2_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
@@ -217,7 +217,7 @@ def setup_controlnet_ui_raw():
             cn_2_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
             cn_2_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
            
-            cn_2_hide_output_list = [cn_2_guess_mode,cn_2_invert_image,cn_2_rgbbgr_mode,cn_2_lowvram,cn_2_mod_row,cn_2_weight_row,cn_2_env_row,cn_2_vid_settings_row,cn_2_input_video_chosen_file,cn_2_input_video_mask_chosen_file] 
+            cn_2_hide_output_list = [cn_2_guess_mode,cn_2_invert_image,cn_2_rgbbgr_mode,cn_2_low_vram,cn_2_mod_row,cn_2_weight_row,cn_2_env_row,cn_2_vid_settings_row,cn_2_input_video_chosen_file,cn_2_input_video_mask_chosen_file] 
             for cn_output in cn_2_hide_output_list:
                 cn_2_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_2_enabled,outputs=cn_output)
             
@@ -248,14 +248,14 @@ def controlnet_component_names():
 
     controlnet_args_names = str(r'''cn_1_input_video_chosen_file, cn_1_input_video_mask_chosen_file,
 cn_1_overwrite_frames,cn_1_vid_path,cn_1_mask_vid_path,
-cn_1_enabled, cn_1_guess_mode, cn_1_invert_image, cn_1_rgbbgr_mode, cn_1_lowvram,
+cn_1_enabled, cn_1_guess_mode, cn_1_invert_image, cn_1_rgbbgr_mode, cn_1_low_vram,
 cn_1_module, cn_1_model,
 cn_1_weight, cn_1_guidance_start, cn_1_guidance_end,
 cn_1_processor_res, 
 cn_1_threshold_a, cn_1_threshold_b, cn_1_resize_mode,
 cn_2_input_video_chosen_file, cn_2_input_video_mask_chosen_file,
 cn_2_overwrite_frames,cn_2_vid_path,cn_2_mask_vid_path,
-cn_2_enabled, cn_2_guess_mode, cn_2_invert_image, cn_2_rgbbgr_mode, cn_2_lowvram,
+cn_2_enabled, cn_2_guess_mode, cn_2_invert_image, cn_2_rgbbgr_mode, cn_2_low_vram,
 cn_2_module, cn_2_model,
 cn_2_weight, cn_2_guidance_start, cn_2_guidance_end,
 cn_2_processor_res, 
@@ -327,52 +327,29 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
 
     p.scripts = scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img
 
-    cnu1 = {
-        "enabled":controlnet_args.cn_1_enabled,
-        "module":controlnet_args.cn_1_module,
-        "model":controlnet_args.cn_1_model,
-        "weight":controlnet_args.cn_1_weight,
-        "image":{'image': cn_1_image_np, 'mask': cn_1_mask_np} if cn_1_mask_np is not None else cn_1_image_np,
-        "invert_image":controlnet_args.cn_1_invert_image,
-        "guess_mode":controlnet_args.cn_1_guess_mode,
-        "resize_mode":controlnet_args.cn_1_resize_mode,
-        "rgbbgr_mode":controlnet_args.cn_1_rgbbgr_mode,
-        "low_vram":controlnet_args.cn_1_lowvram,
-        "processor_res":controlnet_args.cn_1_processor_res,
-        "threshold_a":controlnet_args.cn_1_threshold_a,
-        "threshold_b":controlnet_args.cn_1_threshold_b,
-        "guidance_start":controlnet_args.cn_1_guidance_start,
-        "guidance_end":controlnet_args.cn_1_guidance_end,
-    }
+    def create_cnu_dict(cn_args, prefix, img_np, mask_np):
+        keys = [
+            "enabled", "module", "model", "weight", "invert_image",
+            "guess_mode", "resize_mode", "rgbbgr_mode", "low_vram",
+            "processor_res", "threshold_a", "threshold_b", "guidance_start", "guidance_end"
+        ]
+        cnu = {k: getattr(cn_args, f"{prefix}_{k}") for k in keys}
+        cnu['image'] = {'image': img_np, 'mask': mask_np} if mask_np is not None else img_np
+        return cnu
 
-    cnu2 = {
-            "enabled":controlnet_args.cn_2_enabled,
-            "module":controlnet_args.cn_2_module,
-            "model":controlnet_args.cn_2_model,
-            "weight":controlnet_args.cn_2_weight,
-            "image":{'image': cn_2_image_np, 'mask': cn_2_mask_np} if cn_2_mask_np is not None else cn_2_image_np,
-            "invert_image":controlnet_args.cn_2_invert_image,
-            "guess_mode":controlnet_args.cn_2_guess_mode,
-            "resize_mode":controlnet_args.cn_2_resize_mode,
-            "rgbbgr_mode":controlnet_args.cn_2_rgbbgr_mode,
-            "low_vram":controlnet_args.cn_2_lowvram,
-            "processor_res":controlnet_args.cn_2_processor_res,
-            "threshold_a":controlnet_args.cn_2_threshold_a,
-            "threshold_b":controlnet_args.cn_2_threshold_b,
-            "guidance_start":controlnet_args.cn_2_guidance_start,
-            "guidance_end":controlnet_args.cn_2_guidance_end,
-        }
-
-    p.script_args = ({"enabled":True})
+    images_np = [cn_1_image_np, cn_2_image_np]
+    masks_np = [cn_1_mask_np, cn_2_mask_np]
+    prefixes = ["cn_1", "cn_2"]
 
     cn_units = [
-    cnet.ControlNetUnit(**cnu1),
-    cnet.ControlNetUnit(**cnu2),
+        cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, prefix, img_np, mask_np))
+        for prefix, img_np, mask_np in zip(prefixes, images_np, masks_np)
     ]
 
+    p.script_args = {"enabled": True}
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
 
-import pathlib
+# import pathlib
 from .video_audio_utilities import vid2frames
 
 def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
