@@ -118,7 +118,7 @@ def setup_controlnet_ui_raw():
             cn_1_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
             cn_1_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
            
-            cn_1_hide_output_list = [cn_1_guess_mode,cn_1_invert_image,cn_1_rgbbgr_mode,cn_1_low_vram,cn_1_mod_row,cn_1_weight_row,cn_1_env_row,cn_1_vid_settings_row,cn_1_input_video_chosen_file,cn_1_input_video_mask_chosen_file] 
+            cn_1_hide_output_list = [cn_1_guess_mode,cn_1_invert_image,cn_1_rgbbgr_mode,cn_1_low_vram,cn_1_mod_row,cn_1_weight_row,cn_1_env_row,cn_1_vid_settings_row,cn_1_input_video_chosen_file,cn_1_input_video_mask_chosen_file, cn_1_advanced] 
             for cn_output in cn_1_hide_output_list:
                 cn_1_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_1_enabled,outputs=cn_output)
         with gr.Tab(f"ControlNet 2"):
@@ -162,7 +162,7 @@ def setup_controlnet_ui_raw():
             cn_2_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
             cn_2_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
            
-            cn_2_hide_output_list = [cn_2_guess_mode,cn_2_invert_image,cn_2_rgbbgr_mode,cn_2_low_vram,cn_2_mod_row,cn_2_weight_row,cn_2_env_row,cn_2_vid_settings_row,cn_2_input_video_chosen_file,cn_2_input_video_mask_chosen_file] 
+            cn_2_hide_output_list = [cn_2_guess_mode,cn_2_invert_image,cn_2_rgbbgr_mode,cn_2_low_vram,cn_2_mod_row,cn_2_weight_row,cn_2_env_row,cn_2_vid_settings_row,cn_2_input_video_chosen_file,cn_2_input_video_mask_chosen_file, cn_2_advanced] 
             for cn_output in cn_2_hide_output_list:
                 cn_2_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_2_enabled,outputs=cn_output)
             
