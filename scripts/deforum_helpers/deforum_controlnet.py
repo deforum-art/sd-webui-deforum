@@ -70,6 +70,7 @@ def ControlnetArgs():
 def setup_controlnet_ui_raw():
     cnet = find_controlnet()
     cn_models = cnet.get_models()
+    max_models = opts.data.get("control_net_max_models_num", 1)
     # since cn preprocessors don't seem to be provided in the API rn, hardcode the names list
     cn_preprocessors = [
         "none",
@@ -104,67 +105,68 @@ def setup_controlnet_ui_raw():
 
         def get_block_name(self):
             return "button"
-
-    # # Copying the main ControlNet widgets while getting rid of static elements such as the scribble pad
-    with gr.Row():
-        controlnet_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
-        controlnet_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
-        controlnet_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
-        controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
-        controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
-
     def refresh_all_models(*inputs):
         cn_models = cnet.get_models(update=True)
         dd = inputs[0]
         selected = dd if dd in cn_models else "None"
-        return gr.Dropdown.update(value=selected, choices=cn_models)
+        # return gr.Dropdown.update(value=selected, choices=cn_models)
+    # if max_models > 1:
+    with gr.Tabs():
+            # for i in range(max_models):
+        with gr.Tab(f"Control Model 1"):
+            with gr.Row():
+                controlnet_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
+                controlnet_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
+                controlnet_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
+                controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
+                controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
 
-    with gr.Row(visible=False) as cn_mod_row:
-        controlnet_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
-        controlnet_model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
-        refresh_models = ToolButton(value=refresh_symbol)
-        refresh_models.click(refresh_all_models, controlnet_model, controlnet_model)
-        #ctrls += (refresh_models, )
-    with gr.Row(visible=False) as cn_weight_row:
-        controlnet_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05, interactive=True)
-        controlnet_guidance_start =  gr.Slider(label="Guidance start", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
-        controlnet_guidance_end =  gr.Slider(label="Guidance end", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
-        #ctrls += (controlnet_module, controlnet_model, controlnet_weight,)
-        model_dropdowns.append(controlnet_model)
-  
-    # advanced options    
-    controlnet_advanced = gr.Column(visible=False)
-    with controlnet_advanced:
-        controlnet_processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
-        controlnet_threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
-        controlnet_threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
-    
-    if gradio_compat:    
-        controlnet_module.change(build_sliders, inputs=[controlnet_module], outputs=[controlnet_processor_res, controlnet_threshold_a, controlnet_threshold_b, controlnet_advanced])
-        
-    infotext_fields.extend([
-        (controlnet_module, f"ControlNet Preprocessor"),
-        (controlnet_model, f"ControlNet Model"),
-        (controlnet_weight, f"ControlNet Weight"),
-    ])
+            with gr.Row(visible=False) as cn_mod_row:
+                controlnet_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
+                controlnet_model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
+                refresh_models = ToolButton(value=refresh_symbol)
+                refresh_models.click(refresh_all_models, controlnet_model, controlnet_model)
+                #ctrls += (refresh_models, )
+            with gr.Row(visible=False) as cn_weight_row:
+                controlnet_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05, interactive=True)
+                controlnet_guidance_start =  gr.Slider(label="Guidance start", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
+                controlnet_guidance_end =  gr.Slider(label="Guidance end", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
+                #ctrls += (controlnet_module, controlnet_model, controlnet_weight,)
+                model_dropdowns.append(controlnet_model)
+          
+            # advanced options    
+            controlnet_advanced = gr.Column(visible=False)
+            with controlnet_advanced:
+                controlnet_processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
+                controlnet_threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
+                controlnet_threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
+            
+            if gradio_compat:    
+                controlnet_module.change(build_sliders, inputs=[controlnet_module], outputs=[controlnet_processor_res, controlnet_threshold_a, controlnet_threshold_b, controlnet_advanced])
+                
+            infotext_fields.extend([
+                (controlnet_module, f"ControlNet Preprocessor"),
+                (controlnet_model, f"ControlNet Model"),
+                (controlnet_weight, f"ControlNet Weight"),
+            ])
 
-    with gr.Row(visible=False) as cn_env_row:
-        controlnet_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode", interactive=True)
-    
-    with gr.Row(visible=False) as cn_vid_settings_row:
-        controlnet_overwrite_frames = gr.Checkbox(label='Overwrite input frames', value=True, interactive=True)
-        controlnet_vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=True)
-        controlnet_mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
+            with gr.Row(visible=False) as cn_env_row:
+                controlnet_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode", interactive=True)
+            
+            with gr.Row(visible=False) as cn_vid_settings_row:
+                controlnet_overwrite_frames = gr.Checkbox(label='Overwrite input frames', value=True, interactive=True)
+                controlnet_vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=True)
+                controlnet_mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
 
-    # Video input to be fed into ControlNet
-    #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
-    controlnet_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
-    controlnet_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
-   
-    cn_hide_output_list = [controlnet_guess_mode,controlnet_invert_image,controlnet_rgbbgr_mode,controlnet_lowvram,cn_mod_row,cn_weight_row,cn_env_row,cn_vid_settings_row,controlnet_input_video_chosen_file,controlnet_input_video_mask_chosen_file] 
-    for cn_output in cn_hide_output_list:
-        controlnet_enabled.change(fn=hide_ui_by_cn_status, inputs=controlnet_enabled,outputs=cn_output)
-        
+            # Video input to be fed into ControlNet
+            #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
+            controlnet_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
+            controlnet_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
+           
+            cn_hide_output_list = [controlnet_guess_mode,controlnet_invert_image,controlnet_rgbbgr_mode,controlnet_lowvram,cn_mod_row,cn_weight_row,cn_env_row,cn_vid_settings_row,controlnet_input_video_chosen_file,controlnet_input_video_mask_chosen_file] 
+            for cn_output in cn_hide_output_list:
+                controlnet_enabled.change(fn=hide_ui_by_cn_status, inputs=controlnet_enabled,outputs=cn_output)
+            
     return locals()
 
             
@@ -290,11 +292,21 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         cnu["guidance_end"],
         cnu["guess_mode"],
     )
-    
+    # print(cnu)
     #TODO: add multi CN support!
+    cnu_second = cnu.copy() # make a copy of the first ControlNetUnit
+    cnu_second["module"] = "depth" # override the "module" value
+    cnu_second["model"] = "control_depth-fp16 [400750f6]" # override the "model" value
+
     cn_units = [
         cnet.ControlNetUnit(**cnu),
+        # cnet.ControlNetUnit(**cnu_second),
     ]
+    # ]
+    # cn_units = [
+        # cnet.ControlNetUnit(**cnu),
+        # # cnet.ControlNetUnit(**cnu),
+    # ]
 
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
 
