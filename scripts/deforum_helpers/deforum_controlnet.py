@@ -71,18 +71,50 @@ def setup_controlnet_ui_raw():
     model_dropdowns = []
     infotext_fields = []
 
+
+
+    def create_model_checkboxes(model_name, gr):
+            with gr.Row():
+                enabled = gr.Checkbox(label="Enable", value=False, interactive=True)
+                guess_mode = gr.Checkbox(label="Guess Mode", value=False, visible=False, interactive=True)
+                invert_image = gr.Checkbox(label="Invert colors", value=False, visible=False, interactive=True)
+                rgbbgr_mode = gr.Checkbox(label="RGB to BGR", value=False, visible=False, interactive=True)
+                low_vram = gr.Checkbox(label="Low VRAM", value=False, visible=False, interactive=True)
+            # with gr.Row(visible=False) as cn_1_mod_row:
+                # cn_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
+                # cn_model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
+                # refresh_models = ToolButton(value=refresh_symbol)
+                # refresh_models.click(refresh_all_models, cn_1_model, cn_1_model)
+                return {
+                    "enabled": enabled,
+                    "guess_mode": guess_mode,
+                    "invert_image": invert_image,
+                    "rgbbgr_mode": rgbbgr_mode,
+                    "low_vram": low_vram,
+                }
     def refresh_all_models(*inputs):
         cn_models = cnet.get_models(update=True)
         dd = inputs[0]
         selected = dd if dd in cn_models else "None"
     with gr.Tabs():
         with gr.Tab(f"ControlNet 1"):
-            with gr.Row():
-                cn_1_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
-                cn_1_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
-                cn_1_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
-                cn_1_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
-                cn_1_low_vram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
+            # with gr.Row():
+            model_ids = [1]
+            model_params = {}
+            for model_id in model_ids:
+                model_params[model_id] = create_model_checkboxes(model_id, gr)
+
+            cn_1_enabled = model_params[1]["enabled"]
+            cn_1_guess_mode = model_params[1]["guess_mode"]
+            cn_1_invert_image = model_params[1]["invert_image"]
+            cn_1_rgbbgr_mode = model_params[1]["rgbbgr_mode"]
+            cn_1_low_vram = model_params[1]["low_vram"]
+            # with gr.Row():
+                # cn_1_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
+                # cn_1_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
+                # cn_1_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
+                # cn_1_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
+                # cn_1_low_vram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
 
             with gr.Row(visible=False) as cn_1_mod_row:
                 cn_1_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
