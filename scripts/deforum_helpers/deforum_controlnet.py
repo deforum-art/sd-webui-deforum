@@ -417,60 +417,36 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
 import pathlib
 from .video_audio_utilities import vid2frames
 
+def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
+    if video_path or mask_path:
+        print(f'Unpacking ControlNet {id} {"video mask" if mask_path else "base video"}')
+        frame_path = os.path.join(args.outdir, f'controlnet_{id}_{outdir_suffix}')
+        os.makedirs(frame_path, exist_ok=True)
+
+        print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {frame_path}...")
+        vid2frames(
+            video_path=video_path or mask_path,
+            video_in_frame_path=frame_path,
+            n=anim_args.extract_nth_frame,
+            overwrite=getattr(controlnet_args, f'cn_{id}_overwrite_frames'),
+            extract_from_frame=anim_args.extract_from_frame,
+            extract_to_frame=anim_args.extract_to_frame,
+            numeric_files_output=True
+        )
+
+        print(f"Loading {anim_args.max_frames} input frames from {frame_path} and saving video frames to {args.outdir}")
+        print(f'ControlNet {id} {"video mask" if mask_path else "base video"} unpacked!')
+
+
 def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    if controlnet_args.cn_1_input_video_chosen_file is not None and len(controlnet_args.cn_1_input_video_chosen_file.name) > 0 or len(controlnet_args.cn_1_vid_path) > 0:
-        print(f'Unpacking ControlNet 1 base video')
-        # create a folder for the video input frames to live in
-        mask_in_frame_path = os.path.join(args.outdir, 'controlnet_1_inputframes') 
-        os.makedirs(mask_in_frame_path, exist_ok=True)
-
-        # save the video frames from mask video
-        print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
-        vid2frames(video_path=controlnet_args.cn_1_vid_path if len(controlnet_args.cn_1_vid_path) > 0 else controlnet_args.cn_1_input_video_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=controlnet_args.cn_1_overwrite_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
-
-        print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
-        print(f'ControlNet 1 base video unpacked!')
-    
-    if controlnet_args.cn_1_input_video_mask_chosen_file is not None and len(controlnet_args.cn_1_input_video_mask_chosen_file.name) > 0 or len(controlnet_args.cn_1_mask_vid_path) > 0:
-        print(f'Unpacking ControlNet 1 video mask')
-        # create a folder for the video input frames to live in
-        mask_in_frame_path = os.path.join(args.outdir, 'controlnet_1_maskframes') 
-        os.makedirs(mask_in_frame_path, exist_ok=True)
-
-        # save the video frames from mask video
-        print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
-        vid2frames(video_path=controlnet_args.cn_1_mask_vid_path if len(controlnet_args.cn_1_mask_vid_path) > 0 else controlnet_args.cn_1_input_video_mask_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=controlnet_args.cn_1_overwrite_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
-
-        print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
-        print(f'ControlNet 1 video mask unpacked!')
-
-    if controlnet_args.cn_2_input_video_chosen_file is not None and len(controlnet_args.cn_2_input_video_chosen_file.name) > 0 or len(controlnet_args.cn_2_vid_path) > 0:
-        print(f'Unpacking ControlNet 2 base video')
-        # create a folder for the video input frames to live in
-        mask_in_frame_path = os.path.join(args.outdir, 'controlnet_2_inputframes') 
-        os.makedirs(mask_in_frame_path, exist_ok=True)
-
-        # save the video frames from mask video
-        print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
-        vid2frames(video_path=controlnet_args.cn_2_vid_path if len(controlnet_args.cn_2_vid_path) > 0 else controlnet_args.cn_2_input_video_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=controlnet_args.cn_2_overwrite_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
-
-        print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
-        print(f'ControlNet 2 base video unpacked!')
-    
-    if controlnet_args.cn_2_input_video_mask_chosen_file is not None and len(controlnet_args.cn_2_input_video_mask_chosen_file.name) > 0 or len(controlnet_args.cn_2_mask_vid_path) > 0:
-        print(f'Unpacking ControlNet 2 video mask')
-        # create a folder for the video input frames to live in
-        mask_in_frame_path = os.path.join(args.outdir, 'controlnet_2_maskframes') 
-        os.makedirs(mask_in_frame_path, exist_ok=True)
-
-        # save the video frames from mask video
-        print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
-        vid2frames(video_path=controlnet_args.cn_2_mask_vid_path if len(controlnet_args.cn_2_mask_vid_path) > 0 else controlnet_args.cn_2_input_video_mask_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=controlnet_args.cn_2_overwrite_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
-
-        print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
-        print(f'ControlNet 2 video mask unpacked!')
-
-
+    for i in range(1, 3):
+        process_controlnet_video(
+            args, anim_args, controlnet_args,
+            getattr(controlnet_args, f'cn_{i}_vid_path') or getattr(controlnet_args, f'cn_{i}_input_video_chosen_file', None) and controlnet_args[f'cn_{i}_input_video_chosen_file'].name,
+            getattr(controlnet_args, f'cn_{i}_mask_vid_path') or getattr(controlnet_args, f'cn_{i}_input_video_mask_chosen_file', None) and controlnet_args[f'cn_{i}_input_video_mask_chosen_file'].name,
+            'inputframes' if not getattr(controlnet_args, f'cn_{i}_mask_vid_path') else 'maskframes',
+            i
+        )
 
 def hide_ui_by_cn_status(choice):
     return gr.update(visible=True) if choice else gr.update(visible=False)
