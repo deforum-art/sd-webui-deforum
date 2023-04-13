@@ -279,42 +279,31 @@ def is_controlnet_enabled(controlnet_args):
         return False
 
 def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=True, frame_idx=1):
+    def read_cn_data(cn_idx):
+        cn_mask_np, cn_image_np = None, None
+        cn_inputframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_inputframes')
+        if os.path.exists(cn_inputframes):
+            cn_frame_path = os.path.join(cn_inputframes, f"{frame_idx:09}.jpg")
+            cn_mask_frame_path = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes', f"{frame_idx:09}.jpg")
+
+            print(f'Reading ControlNet {cn_idx} base frame {frame_idx} at {cn_frame_path}')
+            print(f'Reading ControlNet {cn_idx} mask frame {frame_idx} at {cn_mask_frame_path}')
+
+            if os.path.exists(cn_frame_path):
+                cn_image_np = np.array(Image.open(cn_frame_path).convert("RGB")).astype('uint8')
+
+            if os.path.exists(cn_mask_frame_path):
+                cn_mask_np = np.array(Image.open(cn_mask_frame_path).convert("RGB")).astype('uint8')
+        return cn_mask_np, cn_image_np
+
     cnet = find_controlnet()
+    cn_1_mask_np, cn_1_image_np = read_cn_data(1)
+    cn_2_mask_np, cn_2_image_np = read_cn_data(2)
 
-    # Check for ControlNet 1
-    cn_1_mask_np = None
-    cn_1_image_np = None
-    controlnet_1_inputframes = os.path.join(args.outdir, 'controlnet_1_inputframes')
-    if os.path.exists(controlnet_1_inputframes):
-        cn_1_frame_path = os.path.join(controlnet_1_inputframes, f"{frame_idx:09}.jpg")
-        cn_1_mask_frame_path = os.path.join(args.outdir, 'controlnet_1_maskframes', f"{frame_idx:09}.jpg")
+    cn_1_inputframes = os.path.join(args.outdir, 'controlnet_1_inputframes')
+    cn_2_inputframes = os.path.join(args.outdir, 'controlnet_2_inputframes')
 
-        print(f'Reading ControlNet 1 base frame {frame_idx} at {cn_1_frame_path}')
-        print(f'Reading ControlNet 1 mask frame {frame_idx} at {cn_1_mask_frame_path}')
-
-        if os.path.exists(cn_1_frame_path):
-            cn_1_image_np = np.array(Image.open(cn_1_frame_path).convert("RGB")).astype('uint8')
-
-        if os.path.exists(cn_1_mask_frame_path):
-            cn_1_mask_np = np.array(Image.open(cn_1_mask_frame_path).convert("RGB")).astype('uint8')
-
-    # Check for ControlNet 2
-    cn_2_mask_np = None
-    cn_2_image_np = None
-    controlnet_2_inputframes = os.path.join(args.outdir, 'controlnet_2_inputframes')
-    if os.path.exists(controlnet_2_inputframes):
-        cn_2_frame_path = os.path.join(controlnet_2_inputframes, f"{frame_idx:09}.jpg")
-        cn_2_mask_frame_path = os.path.join(args.outdir, 'controlnet_2_maskframes', f"{frame_idx:09}.jpg")
-
-        print(f'Reading ControlNet 2 base frame {frame_idx} at {cn_2_frame_path}')
-        print(f'Reading ControlNet 2 mask frame {frame_idx} at {cn_2_mask_frame_path}')
-
-        if os.path.exists(cn_2_frame_path):
-            cn_2_image_np = np.array(Image.open(cn_2_frame_path).convert("RGB")).astype('uint8')
-
-        if os.path.exists(cn_2_mask_frame_path):
-            cn_2_mask_np = np.array(Image.open(cn_2_mask_frame_path).convert("RGB")).astype('uint8')
-    else:
+    if not os.path.exists(cn_1_inputframes) and not os.path.exists(cn_2_inputframes):
         print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
 
         
