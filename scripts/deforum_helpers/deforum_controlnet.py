@@ -76,7 +76,7 @@ def setup_controlnet_ui_raw():
         dd = inputs[0]
         selected = dd if dd in cn_models else "None"
     with gr.Tabs():
-        with gr.Tab(f"Control Model 1"):
+        with gr.Tab(f"ControlNet 1"):
             with gr.Row():
                 cn_1_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
                 cn_1_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
@@ -121,7 +121,7 @@ def setup_controlnet_ui_raw():
             cn_1_hide_output_list = [cn_1_guess_mode,cn_1_invert_image,cn_1_rgbbgr_mode,cn_1_low_vram,cn_1_mod_row,cn_1_weight_row,cn_1_env_row,cn_1_vid_settings_row,cn_1_input_video_chosen_file,cn_1_input_video_mask_chosen_file] 
             for cn_output in cn_1_hide_output_list:
                 cn_1_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_1_enabled,outputs=cn_output)
-        with gr.Tab(f"Control Model 2"):
+        with gr.Tab(f"ControlNet 2"):
             with gr.Row():
                 cn_2_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
                 cn_2_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
@@ -208,7 +208,7 @@ def controlnet_infotext():
     return """Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
             <p">If Deforum crashes due to CN updates, go <a style='color:Orange;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet/issues'>here</a> and report your problem.</p>
            """
-
+           
 def is_controlnet_enabled(controlnet_args):
     # return 'cn_1_enabled' in vars(controlnet_args) and controlnet_args.cn_1_enabled
     if 'cn_1_enabled' in vars(controlnet_args) and controlnet_args.cn_1_enabled:
