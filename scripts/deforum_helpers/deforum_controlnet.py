@@ -418,7 +418,7 @@ import pathlib
 from .video_audio_utilities import vid2frames
 
 def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
-    if video_path or mask_path:
+    if (video_path or mask_path) and getattr(controlnet_args, f'cn_{id}_enabled'):
         print(f'Unpacking ControlNet {id} {"video mask" if mask_path else "base video"}')
         frame_path = os.path.join(args.outdir, f'controlnet_{id}_{outdir_suffix}')
         os.makedirs(frame_path, exist_ok=True)
