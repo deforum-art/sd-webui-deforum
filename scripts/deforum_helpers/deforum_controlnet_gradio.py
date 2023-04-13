@@ -1,7 +1,5 @@
 import gradio as gr
 
-
-
     # *** TODO: re-enable table printing! disabled only temp! 13-04-23 ***
     # table = Table(title="ControlNet params",padding=0, box=box.ROUNDED)
 
@@ -19,8 +17,7 @@ import gradio as gr
 
     # table.add_row(*rows)
     # console.print(table)
-    
-    
+       
 class ToolButton(gr.Button, gr.components.FormComponent):
         """Small button with single emoji as text, fits inside gradio forms"""
         def __init__(self, **kwargs):
