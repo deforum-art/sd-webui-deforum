@@ -113,10 +113,11 @@ def setup_controlnet_ui_raw():
                     "advanced_column": advanced_column, # EDIT TO BE DYNAMIC
                     
                 }
-    def refresh_all_models(*inputs): # TODO FIX NULL WHEN PRESSING BUTTON! should say None in UI
+    def refresh_all_models(*inputs):
         cn_models = cnet.get_models(update=True)
         dd = inputs[0]
         selected = dd if dd in cn_models else "None"
+        return gr.Dropdown.update(value=selected, choices=cn_models)
     with gr.Tabs():
         with gr.Tab(f"ControlNet 1"):
             model_ids = [1]
