@@ -73,7 +73,7 @@ def setup_controlnet_ui_raw():
 
 
 
-    def create_model_checkboxes(model_name, gr):
+    def create_model_checkboxes():
             with gr.Row():
                 enabled = gr.Checkbox(label="Enable", value=False, interactive=True)
                 guess_mode = gr.Checkbox(label="Guess Mode", value=False, visible=False, interactive=True)
@@ -94,6 +94,12 @@ def setup_controlnet_ui_raw():
                 processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
                 threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
                 threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
+            with gr.Row(visible=False) as env_row:
+                resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode", interactive=True)
+            with gr.Row(visible=False) as vid_settings_row:
+                overwrite_frames = gr.Checkbox(label='Overwrite input frames', value=True, interactive=True)
+                vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=True)
+                mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
                 return {
                     "enabled": enabled,
                     "guess_mode": guess_mode,
@@ -111,6 +117,12 @@ def setup_controlnet_ui_raw():
                     "threshold_a": threshold_a, 
                     "threshold_b": threshold_b, 
                     "advanced_column": advanced_column, # EDIT TO BE DYNAMIC
+                    "resize_mode": resize_mode,
+                    "env_row": env_row, # EDIT TO BE DYNAMIC
+                    "overwrite_frames": overwrite_frames,
+                    "vid_path": vid_path,
+                    "mask_vid_path": mask_vid_path,
+                    "vid_settings_row": vid_settings_row, # EDIT TO BE DYNAMIC
                     
                 }
     def refresh_all_models(*inputs):
@@ -123,7 +135,7 @@ def setup_controlnet_ui_raw():
             model_ids = [1]
             model_params = {}
             for model_id in model_ids:
-                model_params[model_id] = create_model_checkboxes(model_id, gr)
+                model_params[model_id] = create_model_checkboxes()
 
             cn_1_enabled = model_params[1]["enabled"]
             cn_1_guess_mode = model_params[1]["guess_mode"]
@@ -141,27 +153,12 @@ def setup_controlnet_ui_raw():
             cn_1_threshold_a = model_params[1]["threshold_a"]
             cn_1_threshold_b = model_params[1]["threshold_b"]
             cn_1_advanced = model_params[1]["advanced_column"]
-
-            # with gr.Column(visible=False) as cn_1_advanced:
-                # cn_1_processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
-                # cn_1_threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
-                # cn_1_threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
-            
-            cn_1_module.change(build_sliders, inputs=[cn_1_module], outputs=[cn_1_processor_res, cn_1_threshold_a, cn_1_threshold_b, cn_1_advanced])
-                
-            infotext_fields.extend([
-                (cn_1_module, f"ControlNet Preprocessor"),
-                (cn_1_model, f"ControlNet Model"),
-                (cn_1_weight, f"ControlNet Weight"),
-            ])
-
-            with gr.Row(visible=False) as cn_1_env_row:
-                cn_1_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode", interactive=True)
-            
-            with gr.Row(visible=False) as cn_1_vid_settings_row:
-                cn_1_overwrite_frames = gr.Checkbox(label='Overwrite input frames', value=True, interactive=True)
-                cn_1_vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=True)
-                cn_1_mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
+            cn_1_resize_mode = model_params[1]["resize_mode"]
+            cn_1_env_row = model_params[1]["env_row"]
+            cn_1_overwrite_frames = model_params[1]["overwrite_frames"]
+            cn_1_vid_path = model_params[1]["vid_path"]
+            cn_1_mask_vid_path = model_params[1]["mask_vid_path"]
+            cn_1_vid_settings_row =model_params[1]["vid_settings_row"]
 
             cn_1_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
             cn_1_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
@@ -169,6 +166,13 @@ def setup_controlnet_ui_raw():
             cn_1_hide_output_list = [cn_1_guess_mode,cn_1_invert_image,cn_1_rgbbgr_mode,cn_1_low_vram,cn_1_mod_row,cn_1_module,cn_1_weight_row,cn_1_env_row,cn_1_vid_settings_row,cn_1_input_video_chosen_file,cn_1_input_video_mask_chosen_file, cn_1_advanced] 
             for cn_output in cn_1_hide_output_list:
                 cn_1_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_1_enabled,outputs=cn_output)
+            cn_1_module.change(build_sliders, inputs=[cn_1_module], outputs=[cn_1_processor_res, cn_1_threshold_a, cn_1_threshold_b, cn_1_advanced])
+                
+            infotext_fields.extend([
+                (cn_1_module, f"ControlNet Preprocessor"),
+                (cn_1_model, f"ControlNet Model"),
+                (cn_1_weight, f"ControlNet Weight"),
+            ])
         with gr.Tab(f"ControlNet 2"):
             with gr.Row():
                 cn_2_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
