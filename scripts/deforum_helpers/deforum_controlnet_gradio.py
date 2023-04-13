@@ -1,3 +1,5 @@
+import gradio as gr
+
 def build_sliders(module):
     if module == "canny":
         return [

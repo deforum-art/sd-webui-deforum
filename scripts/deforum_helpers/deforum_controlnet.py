@@ -266,12 +266,7 @@ cn_2_threshold_a, cn_2_threshold_b, cn_2_resize_mode'''
 
 def controlnet_infotext():
     return """Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
-            <p style="margin-top:0.2em">
-                *Work In Progress*. All params below are going to be keyframable at some point. If you want to speedup the integration, *especially* if you want to bring new features sooner, <a style='color:Violet;' target='_blank' href='https://github.com/deforum-art/deforum-for-automatic1111-webui/'>join Deforum's development</a>. &#128521;
-            </p>
-            <p">
-                If you previously downgraded the CN extension to use it in Deforum, upgrade it to the latest version for the API communication to work; also, you don't need to store your CN models in deforum/models anymore. We got complaints that fp16 models sometimes don't work for an unknown reason, so use <a style='color:DarkGreen;' target='_blank' href='https://huggingface.co/lllyasviel/ControlNet/tree/main/models'>the full precision ones</a> until it's fixed. If Deforum crashes due to CN updates, go <a style='color:Orange;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet/issues'>here</a> and report your problem.
-            </p>
+            <p">If Deforum crashes due to CN updates, go <a style='color:Orange;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet/issues'>here</a> and report your problem.</p>
            """
 
 def is_controlnet_enabled(controlnet_args):
@@ -282,30 +277,6 @@ def is_controlnet_enabled(controlnet_args):
         return True
     else:
         return False
-
-# def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img = True, frame_idx = 1):
-    # cnet = find_controlnet()
-
-    # controlnet_frame_path = os.path.join(args.outdir, 'controlnet_2_inputframes', f"{frame_idx:09}.jpg")
-    # controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_2_maskframes', f"{frame_idx:09}.jpg")
-
-    # print(f'Reading ControlNet base frame {frame_idx} at {controlnet_frame_path}')
-    # print(f'Reading ControlNet mask frame {frame_idx} at {controlnet_mask_frame_path}')
-
-    # cn_mask_np = None
-    # cn_image_np = None
-
-    # if not os.path.exists(controlnet_frame_path) and not os.path.exists(controlnet_mask_frame_path):
-        # print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
-        # return
-    
-    # if os.path.exists(controlnet_frame_path):
-        # cn_image_np = np.array(Image.open(controlnet_frame_path).convert("RGB")).astype('uint8')
-    
-    # if os.path.exists(controlnet_mask_frame_path):
-        # cn_mask_np = np.array(Image.open(controlnet_mask_frame_path).convert("RGB")).astype('uint8')
-        
-        
 
 def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=True, frame_idx=1):
     cnet = find_controlnet()
@@ -345,11 +316,8 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
             cn_2_mask_np = np.array(Image.open(cn_2_mask_frame_path).convert("RGB")).astype('uint8')
     else:
         print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
-      
+
         
-        
-        
-    
     # *** TODO: re-enable table printing! disabled only temp! 13-04-23 ***
     # table = Table(title="ControlNet params",padding=0, box=box.ROUNDED)
 
