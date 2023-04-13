@@ -276,7 +276,6 @@ def on_ui_tabs():
                     load_video_settings_btn = gr.Button('Load Video Settings', elem_id='deforum_load_video_settings_btn')
 
         component_list = [components[name] for name in deforum_args.get_component_names()]
-        print(component_list)
 
         submit.click(
                     fn=wrap_gradio_gpu_call(run_deforum, extra_outputs=[None, '', '']),
