@@ -52,19 +52,20 @@ try:
 except ImportError:
     pass
 
+# NOT IN USE?!
 def ControlnetArgs():
-    controlnet_enabled = False
-    controlnet_guess_mode = False
-    controlnet_rgbbgr_mode = False
-    controlnet_lowvram = False
-    controlnet_module = "none"
-    controlnet_model = "None"
-    controlnet_weight = 1.0
-    controlnet_guidance_strength = 1.0
-    blendFactorMax = "0:(0.35)"
-    blendFactorSlope = "0:(0.25)"
-    tweening_frames_schedule = "0:(20)"
-    color_correction_factor = "0:(0.075)"
+    cn_1_enabled = False
+    cn_1_guess_mode = False
+    cn_1_rgbbgr_mode = False
+    cn_1_lowvram = False
+    cn_1_module = "none"
+    cn_1_model = "None"
+    cn_1_weight = 1.0
+    cn_1_guidance_strength = 1.0
+    cn_1_blendFactorMax = "0:(0.35)"
+    cn_1_blendFactorSlope = "0:(0.25)"
+    cn_1_tweening_frames_schedule = "0:(20)"
+    cn_1_color_correction_factor = "0:(0.075)"
     return locals()
 
 def setup_controlnet_ui_raw():
@@ -115,57 +116,57 @@ def setup_controlnet_ui_raw():
             # for i in range(max_models):
         with gr.Tab(f"Control Model 1"):
             with gr.Row():
-                controlnet_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
-                controlnet_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
-                controlnet_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
-                controlnet_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
-                controlnet_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
+                cn_1_enabled = gr.Checkbox(label='Enable', value=False, interactive=True)
+                cn_1_guess_mode = gr.Checkbox(label='Guess Mode', value=False, visible=False, interactive=True)
+                cn_1_invert_image = gr.Checkbox(label='Invert colors', value=False, visible=False, interactive=True)
+                cn_1_rgbbgr_mode = gr.Checkbox(label='RGB to BGR', value=False, visible=False, interactive=True)
+                cn_1_lowvram = gr.Checkbox(label='Low VRAM', value=False, visible=False, interactive=True)
 
             with gr.Row(visible=False) as cn_mod_row:
-                controlnet_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
-                controlnet_model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
+                cn_1_module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
+                cn_1_model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
                 refresh_models = ToolButton(value=refresh_symbol)
-                refresh_models.click(refresh_all_models, controlnet_model, controlnet_model)
+                refresh_models.click(refresh_all_models, cn_1_model, cn_1_model)
                 #ctrls += (refresh_models, )
             with gr.Row(visible=False) as cn_weight_row:
-                controlnet_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05, interactive=True)
-                controlnet_guidance_start =  gr.Slider(label="Guidance start", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
-                controlnet_guidance_end =  gr.Slider(label="Guidance end", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
+                cn_1_weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05, interactive=True)
+                cn_1_guidance_start =  gr.Slider(label="Guidance start", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
+                cn_1_guidance_end =  gr.Slider(label="Guidance end", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
                 #ctrls += (controlnet_module, controlnet_model, controlnet_weight,)
-                model_dropdowns.append(controlnet_model)
+                model_dropdowns.append(cn_1_model)
           
             # advanced options    
             controlnet_advanced = gr.Column(visible=False)
             with controlnet_advanced:
-                controlnet_processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
-                controlnet_threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
-                controlnet_threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
+                cn_1_processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
+                cn_1_threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
+                cn_1_threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
             
             if gradio_compat:    
-                controlnet_module.change(build_sliders, inputs=[controlnet_module], outputs=[controlnet_processor_res, controlnet_threshold_a, controlnet_threshold_b, controlnet_advanced])
+                cn_1_module.change(build_sliders, inputs=[cn_1_module], outputs=[cn_1_processor_res, cn_1_threshold_a, cn_1_threshold_b, controlnet_advanced])
                 
             infotext_fields.extend([
-                (controlnet_module, f"ControlNet Preprocessor"),
-                (controlnet_model, f"ControlNet Model"),
-                (controlnet_weight, f"ControlNet Weight"),
+                (cn_1_module, f"ControlNet Preprocessor"),
+                (cn_1_model, f"ControlNet Model"),
+                (cn_1_weight, f"ControlNet Weight"),
             ])
 
             with gr.Row(visible=False) as cn_env_row:
-                controlnet_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode", interactive=True)
+                cn_1_resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode", interactive=True)
             
             with gr.Row(visible=False) as cn_vid_settings_row:
-                controlnet_overwrite_frames = gr.Checkbox(label='Overwrite input frames', value=True, interactive=True)
-                controlnet_vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=True)
-                controlnet_mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
+                cn_1_overwrite_frames = gr.Checkbox(label='Overwrite input frames', value=True, interactive=True)
+                cn_1_vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=True)
+                cn_1_mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
 
             # Video input to be fed into ControlNet
             #input_video_url = gr.Textbox(source='upload', type='numpy', tool='sketch') # TODO
-            controlnet_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
-            controlnet_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
+            cn_1_input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
+            cn_1_input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
            
-            cn_hide_output_list = [controlnet_guess_mode,controlnet_invert_image,controlnet_rgbbgr_mode,controlnet_lowvram,cn_mod_row,cn_weight_row,cn_env_row,cn_vid_settings_row,controlnet_input_video_chosen_file,controlnet_input_video_mask_chosen_file] 
+            cn_hide_output_list = [cn_1_guess_mode,cn_1_invert_image,cn_1_rgbbgr_mode,cn_1_lowvram,cn_mod_row,cn_weight_row,cn_env_row,cn_vid_settings_row,cn_1_input_video_chosen_file,cn_1_input_video_mask_chosen_file] 
             for cn_output in cn_hide_output_list:
-                controlnet_enabled.change(fn=hide_ui_by_cn_status, inputs=controlnet_enabled,outputs=cn_output)
+                cn_1_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_1_enabled,outputs=cn_output)
             
     return locals()
 
@@ -191,13 +192,13 @@ def controlnet_component_names():
     if not find_controlnet():
         return []
 
-    controlnet_args_names = str(r'''controlnet_input_video_chosen_file, controlnet_input_video_mask_chosen_file,
-controlnet_overwrite_frames,controlnet_vid_path,controlnet_mask_vid_path,
-controlnet_enabled, controlnet_guess_mode, controlnet_invert_image, controlnet_rgbbgr_mode, controlnet_lowvram,
-controlnet_module, controlnet_model,
-controlnet_weight, controlnet_guidance_start, controlnet_guidance_end,
-controlnet_processor_res, 
-controlnet_threshold_a, controlnet_threshold_b, controlnet_resize_mode'''
+    controlnet_args_names = str(r'''cn_1_input_video_chosen_file, cn_1_input_video_mask_chosen_file,
+cn_1_overwrite_frames,cn_1_vid_path,cn_1_mask_vid_path,
+cn_1_enabled, cn_1_guess_mode, cn_1_invert_image, cn_1_rgbbgr_mode, cn_1_lowvram,
+cn_1_module, cn_1_model,
+cn_1_weight, cn_1_guidance_start, cn_1_guidance_end,
+cn_1_processor_res, 
+cn_1_threshold_a, cn_1_threshold_b, cn_1_resize_mode'''
     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
     
     return controlnet_args_names
@@ -213,11 +214,12 @@ def controlnet_infotext():
            """
 
 def is_controlnet_enabled(controlnet_args):
-    return 'controlnet_enabled' in vars(controlnet_args) and controlnet_args.controlnet_enabled
+    return 'cn_1_enabled' in vars(controlnet_args) and controlnet_args.cn_1_enabled
 
 def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img = True, frame_idx = 1):
     cnet = find_controlnet()
 
+    # cn_1_
     controlnet_frame_path = os.path.join(args.outdir, 'controlnet_inputframes', f"{frame_idx:09}.jpg")
     controlnet_mask_frame_path = os.path.join(args.outdir, 'controlnet_maskframes', f"{frame_idx:09}.jpg")
 
@@ -245,10 +247,10 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
     for field_name in field_names:
         table.add_column(field_name, justify="center")
     
-    cn_model_name = str(controlnet_args.controlnet_model)
+    cn_model_name = str(controlnet_args.cn_1_model)
 
     rows = []
-    rows += [controlnet_args.controlnet_module, cn_model_name[len('control_'):] if 'control_' in cn_model_name else cn_model_name, controlnet_args.controlnet_weight, controlnet_args.controlnet_invert_image, controlnet_args.controlnet_guidance_start, controlnet_args.controlnet_guidance_end, controlnet_args.controlnet_guess_mode, controlnet_args.controlnet_resize_mode, controlnet_args.controlnet_rgbbgr_mode, controlnet_args.controlnet_processor_res, controlnet_args.controlnet_threshold_a, controlnet_args.controlnet_threshold_b]
+    rows += [controlnet_args.cn_1_module, cn_model_name[len('control_'):] if 'control_' in cn_model_name else cn_model_name, controlnet_args.cn_1_weight, controlnet_args.cn_1_invert_image, controlnet_args.cn_1_guidance_start, controlnet_args.cn_1_guidance_end, controlnet_args.cn_1_guess_mode, controlnet_args.cn_1_resize_mode, controlnet_args.cn_1_rgbbgr_mode, controlnet_args.cn_1_processor_res, controlnet_args.cn_1_threshold_a, controlnet_args.cn_1_threshold_b]
     rows = [str(x) for x in rows]
 
     table.add_row(*rows)
@@ -259,20 +261,20 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
 
     cnu = {
         "enabled":True,
-        "module":controlnet_args.controlnet_module,
-        "model":controlnet_args.controlnet_model,
-        "weight":controlnet_args.controlnet_weight,
+        "module":controlnet_args.cn_1_module,
+        "model":controlnet_args.cn_1_model,
+        "weight":controlnet_args.cn_1_weight,
         "image":{'image': cn_image_np, 'mask': cn_mask_np} if cn_mask_np is not None else cn_image_np,
-        "invert_image":controlnet_args.controlnet_invert_image,
-        "guess_mode":controlnet_args.controlnet_guess_mode,
-        "resize_mode":controlnet_args.controlnet_resize_mode,
-        "rgbbgr_mode":controlnet_args.controlnet_rgbbgr_mode,
-        "low_vram":controlnet_args.controlnet_lowvram,
-        "processor_res":controlnet_args.controlnet_processor_res,
-        "threshold_a":controlnet_args.controlnet_threshold_a,
-        "threshold_b":controlnet_args.controlnet_threshold_b,
-        "guidance_start":controlnet_args.controlnet_guidance_start,
-        "guidance_end":controlnet_args.controlnet_guidance_end,
+        "invert_image":controlnet_args.cn_1_invert_image,
+        "guess_mode":controlnet_args.cn_1_guess_mode,
+        "resize_mode":controlnet_args.cn_1_resize_mode,
+        "rgbbgr_mode":controlnet_args.cn_1_rgbbgr_mode,
+        "low_vram":controlnet_args.cn_1_lowvram,
+        "processor_res":controlnet_args.cn_1_processor_res,
+        "threshold_a":controlnet_args.cn_1_threshold_a,
+        "threshold_b":controlnet_args.cn_1_threshold_b,
+        "guidance_start":controlnet_args.cn_1_guidance_start,
+        "guidance_end":controlnet_args.cn_1_guidance_end,
     }
 
     p.script_args = (
@@ -314,7 +316,7 @@ import pathlib
 from .video_audio_utilities import vid2frames
 
 def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    if controlnet_args.controlnet_input_video_chosen_file is not None and len(controlnet_args.controlnet_input_video_chosen_file.name) > 0 or len(controlnet_args.controlnet_vid_path) > 0:
+    if controlnet_args.cn_1_input_video_chosen_file is not None and len(controlnet_args.cn_1_input_video_chosen_file.name) > 0 or len(controlnet_args.cn_1_vid_path) > 0:
         print(f'Unpacking ControlNet base video')
         # create a folder for the video input frames to live in
         mask_in_frame_path = os.path.join(args.outdir, 'controlnet_inputframes') 
@@ -322,12 +324,12 @@ def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, 
 
         # save the video frames from mask video
         print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
-        vid2frames(video_path=controlnet_args.controlnet_vid_path if len(controlnet_args.controlnet_vid_path) > 0 else controlnet_args.controlnet_input_video_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=controlnet_args.controlnet_overwrite_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
+        vid2frames(video_path=controlnet_args.cn_1_vid_path if len(controlnet_args.cn_1_vid_path) > 0 else controlnet_args.cn_1_input_video_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=controlnet_args.cn_1_overwrite_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
 
         print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
         print(f'ControlNet base video unpacked!')
     
-    if controlnet_args.controlnet_input_video_mask_chosen_file is not None and len(controlnet_args.controlnet_input_video_mask_chosen_file.name) > 0 or len(controlnet_args.controlnet_mask_vid_path) > 0:
+    if controlnet_args.cn_1_input_video_mask_chosen_file is not None and len(controlnet_args.cn_1_input_video_mask_chosen_file.name) > 0 or len(controlnet_args.cn_1_mask_vid_path) > 0:
         print(f'Unpacking ControlNet video mask')
         # create a folder for the video input frames to live in
         mask_in_frame_path = os.path.join(args.outdir, 'controlnet_maskframes') 
@@ -335,7 +337,7 @@ def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, 
 
         # save the video frames from mask video
         print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {mask_in_frame_path}...")
-        vid2frames(video_path=controlnet_args.controlnet_mask_vid_path if len(controlnet_args.controlnet_mask_vid_path) > 0 else controlnet_args.controlnet_input_video_mask_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=controlnet_args.controlnet_overwrite_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
+        vid2frames(video_path=controlnet_args.cn_1_mask_vid_path if len(controlnet_args.cn_1_mask_vid_path) > 0 else controlnet_args.cn_1_input_video_mask_chosen_file.name, video_in_frame_path=mask_in_frame_path, n=anim_args.extract_nth_frame, overwrite=controlnet_args.cn_1_overwrite_frames, extract_from_frame=anim_args.extract_from_frame, extract_to_frame=anim_args.extract_to_frame, numeric_files_output=True)
 
         print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
         print(f'ControlNet video mask unpacked!')
