@@ -112,7 +112,7 @@ def setup_controlnet_ui_raw():
         selected = dd if dd in cn_models else "None"
         return gr.Dropdown.update(value=selected, choices=cn_models)
     with gr.Tabs():
-        with gr.Tab(f"ControlNet 1"):
+        with gr.Tab(f"CN Model 1"):
             model_params = {}
             model_params[1] = create_model_in_tab_ui(1)
 
@@ -136,9 +136,9 @@ def setup_controlnet_ui_raw():
             cn_1_input_video_chosen_file = model_params[1]["input_video_chosen_file"]
             cn_1_input_video_mask_chosen_file = model_params[1]["input_video_mask_chosen_file"]
                 
-        with gr.Tab(f"ControlNet 2"):
+        with gr.Tab(f"CN Model 2"):
             model_params = {}
-            model_params[2] = create_model_in_tab_ui(1)
+            model_params[2] = create_model_in_tab_ui(2)
 
             cn_2_enabled = model_params[2]["enabled"]
             cn_2_guess_mode = model_params[2]["guess_mode"]
@@ -159,7 +159,30 @@ def setup_controlnet_ui_raw():
             cn_2_mask_vid_path = model_params[2]["mask_vid_path"]
             cn_2_input_video_chosen_file = model_params[2]["input_video_chosen_file"]
             cn_2_input_video_mask_chosen_file = model_params[2]["input_video_mask_chosen_file"]
-           
+
+        with gr.Tab(f"CN Model 3"):
+            model_params = {}
+            model_params[3] = create_model_in_tab_ui(3)
+
+            cn_3_enabled = model_params[3]["enabled"]
+            cn_3_guess_mode = model_params[3]["guess_mode"]
+            cn_3_invert_image = model_params[3]["invert_image"]
+            cn_3_rgbbgr_mode = model_params[3]["rgbbgr_mode"]
+            cn_3_low_vram = model_params[3]["low_vram"]
+            cn_3_module = model_params[3]["module"]
+            cn_3_model = model_params[3]["model"]
+            cn_3_weight = model_params[3]["weight"]
+            cn_3_guidance_start = model_params[3]["guidance_start"]
+            cn_3_guidance_end = model_params[3]["guidance_end"]
+            cn_3_processor_res = model_params[3]["processor_res"]
+            cn_3_threshold_a = model_params[3]["threshold_a"]
+            cn_3_threshold_b = model_params[3]["threshold_b"]
+            cn_3_resize_mode = model_params[3]["resize_mode"]
+            cn_3_overwrite_frames = model_params[3]["overwrite_frames"]
+            cn_3_vid_path = model_params[3]["vid_path"]
+            cn_3_mask_vid_path = model_params[3]["mask_vid_path"]
+            cn_3_input_video_chosen_file = model_params[3]["input_video_chosen_file"]
+            cn_3_input_video_mask_chosen_file = model_params[3]["input_video_mask_chosen_file"]
     return locals()
             
 def setup_controlnet_ui():
@@ -180,7 +203,7 @@ def controlnet_component_names():
     if not find_controlnet():
         return []
 
-    prefix_list = ['cn_1_', 'cn_2_']
+    prefix_list = ['cn_1_', 'cn_2_', 'cn_3_']
     arg_names = []
     for prefix in prefix_list:
         arg_names.extend([f'{prefix}input_video_chosen_file',
@@ -210,13 +233,10 @@ def controlnet_infotext():
            """
            
 def is_controlnet_enabled(controlnet_args):
-    # return 'cn_1_enabled' in vars(controlnet_args) and controlnet_args.cn_1_enabled
-    if 'cn_1_enabled' in vars(controlnet_args) and controlnet_args.cn_1_enabled:
-        return True
-    elif 'cn_2_enabled' in vars(controlnet_args) and controlnet_args.cn_2_enabled:
-        return True
-    else:
-        return False
+    for i in range(1, 4):
+        if getattr(controlnet_args, f'cn_{i}_enabled', False):
+            return True
+    return False
 
 def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=True, frame_idx=1):
     def read_cn_data(cn_idx):
