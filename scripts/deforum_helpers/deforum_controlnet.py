@@ -117,21 +117,16 @@ def setup_controlnet_ui_raw():
             "low_vram": low_vram,
             "module": module, 
             "model": model,
-            "mod_row": mod_row, # EDIT TO BE DYNAMIC
             "weight": weight, 
             "guidance_start": guidance_start, 
             "guidance_end": guidance_end, 
-            "weight_row": weight_row, # EDIT TO BE DYNAMIC
             "processor_res": processor_res, 
             "threshold_a": threshold_a, 
             "threshold_b": threshold_b, 
-            "advanced_column": advanced_column, # EDIT TO BE DYNAMIC
             "resize_mode": resize_mode,
-            "env_row": env_row, # EDIT TO BE DYNAMIC
             "overwrite_frames": overwrite_frames,
             "vid_path": vid_path,
             "mask_vid_path": mask_vid_path,
-            "vid_settings_row": vid_settings_row, # EDIT TO BE DYNAMIC
             "input_video_chosen_file": input_video_chosen_file,
             "input_video_mask_chosen_file": input_video_mask_chosen_file,
             
@@ -153,21 +148,16 @@ def setup_controlnet_ui_raw():
             cn_1_low_vram = model_params[1]["low_vram"]
             cn_1_module = model_params[1]["module"]
             cn_1_model = model_params[1]["model"]
-            cn_1_mod_row = model_params[1]["mod_row"]
             cn_1_weight = model_params[1]["weight"]
             cn_1_guidance_start = model_params[1]["guidance_start"]
             cn_1_guidance_end = model_params[1]["guidance_end"]
-            cn_1_weight_row = model_params[1]["weight_row"]
             cn_1_processor_res = model_params[1]["processor_res"]
             cn_1_threshold_a = model_params[1]["threshold_a"]
             cn_1_threshold_b = model_params[1]["threshold_b"]
-            cn_1_advanced = model_params[1]["advanced_column"]
             cn_1_resize_mode = model_params[1]["resize_mode"]
-            cn_1_env_row = model_params[1]["env_row"]
             cn_1_overwrite_frames = model_params[1]["overwrite_frames"]
             cn_1_vid_path = model_params[1]["vid_path"]
             cn_1_mask_vid_path = model_params[1]["mask_vid_path"]
-            cn_1_vid_settings_row = model_params[1]["vid_settings_row"]
             cn_1_input_video_chosen_file = model_params[1]["input_video_chosen_file"]
             cn_1_input_video_mask_chosen_file = model_params[1]["input_video_mask_chosen_file"]
                 
@@ -182,21 +172,16 @@ def setup_controlnet_ui_raw():
             cn_2_low_vram = model_params[2]["low_vram"]
             cn_2_module = model_params[2]["module"]
             cn_2_model = model_params[2]["model"]
-            cn_2_mod_row = model_params[2]["mod_row"]
             cn_2_weight = model_params[2]["weight"]
             cn_2_guidance_start = model_params[2]["guidance_start"]
             cn_2_guidance_end = model_params[2]["guidance_end"]
-            cn_2_weight_row = model_params[2]["weight_row"]
             cn_2_processor_res = model_params[2]["processor_res"]
             cn_2_threshold_a = model_params[2]["threshold_a"]
             cn_2_threshold_b = model_params[2]["threshold_b"]
-            cn_2_advanced = model_params[2]["advanced_column"]
             cn_2_resize_mode = model_params[2]["resize_mode"]
-            cn_2_env_row = model_params[2]["env_row"]
             cn_2_overwrite_frames = model_params[2]["overwrite_frames"]
             cn_2_vid_path = model_params[2]["vid_path"]
             cn_2_mask_vid_path = model_params[2]["mask_vid_path"]
-            cn_2_vid_settings_row = model_params[2]["vid_settings_row"]
             cn_2_input_video_chosen_file = model_params[2]["input_video_chosen_file"]
             cn_2_input_video_mask_chosen_file = model_params[2]["input_video_mask_chosen_file"]
            
