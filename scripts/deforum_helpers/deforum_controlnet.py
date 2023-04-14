@@ -129,7 +129,6 @@ def setup_controlnet_ui_raw():
             "mask_vid_path": mask_vid_path,
             "input_video_chosen_file": input_video_chosen_file,
             "input_video_mask_chosen_file": input_video_mask_chosen_file,
-            
         }
     def refresh_all_models(*inputs):
         cn_models = cnet.get_models(update=True)
@@ -285,7 +284,6 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, prefix, img_np, mask_np))
         for prefix, img_np, mask_np in zip(prefixes, images_np, masks_np)
     ]
-
     p.script_args = {"enabled": True}
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
 
@@ -309,7 +307,7 @@ def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_
         print(f'ControlNet {id} {"video mask" if mask_path else "base video"} unpacked!')
 
 def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    for i in range(1, 3):
+    for i in range(0, 2):
         process_controlnet_video(
             args, anim_args, controlnet_args,
             getattr(controlnet_args, f'cn_{i}_vid_path') or getattr(controlnet_args, f'cn_{i}_input_video_chosen_file', None) and controlnet_args[f'cn_{i}_input_video_chosen_file'].name,
