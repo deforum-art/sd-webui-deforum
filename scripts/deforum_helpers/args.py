@@ -1260,7 +1260,7 @@ def upload_vid_to_depth(vid_to_depth_chosen_file, mode, thresholding, threshold_
     root_params = Root()
     f_models_path = root_params['models_path']
     
-    process_depth_vid_upload_logic(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, vid_to_depth_chosen_file.orig_name, depth_keep_imgs, ffmpeg_location, ffmpeg_crf, ffmpeg_preset, f_models_path)
+    process_depth_vid_upload_logic(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, vid_to_depth_chosen_file.orig_name, depth_keep_imgs, f_location, f_crf, f_preset, f_models_path)
 
 def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs):
     if vid_path is None:

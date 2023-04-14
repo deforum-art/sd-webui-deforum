@@ -79,7 +79,7 @@ def process_video_depth(mode, thresholding, threshold_value, threshold_value_max
         lastframe = videogen[i]
         img_path = os.path.join(temp_convert_raw_png_path, lastframe)
         image = process_frame(model, Image.open(img_path).convert("RGB"), mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth)
-        filename = '{}/{:0>7d}.png'.format(custom_upscale_path, i)
+        filename = '{}/{:0>9d}.png'.format(custom_upscale_path, i)
         image.save(filename)
     
     # Cleaning up and freeing the memory before stitching
