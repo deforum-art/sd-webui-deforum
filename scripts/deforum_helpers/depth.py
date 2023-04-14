@@ -166,7 +166,10 @@ class MidasModel:
 
     def to(self, device):
         self.device = device
-        self.midas_model.to(device)
+        if self.use_zoe_depth:
+            self.zoe_depth.zoe.to(device)
+        else:
+            self.midas_model.to(device)
         if self.adabins_helper is not None:
             self.adabins_helper.to(device)
         gc.collect()
