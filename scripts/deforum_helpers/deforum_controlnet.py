@@ -99,27 +99,12 @@ def setup_controlnet_ui_raw():
                 (model, f"ControlNet Model"),
                 (weight, f"ControlNet Weight"),
         ])
-        return {
-            "enabled": enabled,
-            "guess_mode": guess_mode,
-            "invert_image": invert_image,
-            "rgbbgr_mode": rgbbgr_mode,
-            "low_vram": low_vram,
-            "module": module, 
-            "model": model,
-            "weight": weight, 
-            "guidance_start": guidance_start, 
-            "guidance_end": guidance_end, 
-            "processor_res": processor_res, 
-            "threshold_a": threshold_a, 
-            "threshold_b": threshold_b, 
-            "resize_mode": resize_mode,
-            "overwrite_frames": overwrite_frames,
-            "vid_path": vid_path,
-            "mask_vid_path": mask_vid_path,
-            "input_video_chosen_file": input_video_chosen_file,
-            "input_video_mask_chosen_file": input_video_mask_chosen_file,
-        }
+        
+        return {key: value for key, value in locals().items() if key in [
+            "enabled", "guess_mode", "invert_image", "rgbbgr_mode", "low_vram", "module", "model", "weight",
+            "guidance_start", "guidance_end", "processor_res", "threshold_a", "threshold_b", "resize_mode",
+            "overwrite_frames", "vid_path", "mask_vid_path", "input_video_chosen_file", "input_video_mask_chosen_file"
+        ]}
     def refresh_all_models(*inputs):
         cn_models = cnet.get_models(update=True)
         dd = inputs[0]
