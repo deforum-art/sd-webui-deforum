@@ -105,6 +105,7 @@ def setup_controlnet_ui_raw():
             "guidance_start", "guidance_end", "processor_res", "threshold_a", "threshold_b", "resize_mode",
             "overwrite_frames", "vid_path", "mask_vid_path", "input_video_chosen_file", "input_video_mask_chosen_file"
         ]}
+        
     def refresh_all_models(*inputs):
         cn_models = cnet.get_models(update=True)
         dd = inputs[0]
@@ -179,23 +180,29 @@ def controlnet_component_names():
     if not find_controlnet():
         return []
 
-    controlnet_args_names = str(r'''cn_1_input_video_chosen_file, cn_1_input_video_mask_chosen_file,
-        cn_1_overwrite_frames,cn_1_vid_path,cn_1_mask_vid_path,
-        cn_1_enabled, cn_1_guess_mode, cn_1_invert_image, cn_1_rgbbgr_mode, cn_1_low_vram,
-        cn_1_module, cn_1_model,
-        cn_1_weight, cn_1_guidance_start, cn_1_guidance_end,
-        cn_1_processor_res, 
-        cn_1_threshold_a, cn_1_threshold_b, cn_1_resize_mode,
-        cn_2_input_video_chosen_file, cn_2_input_video_mask_chosen_file,
-        cn_2_overwrite_frames,cn_2_vid_path,cn_2_mask_vid_path,
-        cn_2_enabled, cn_2_guess_mode, cn_2_invert_image, cn_2_rgbbgr_mode, cn_2_low_vram,
-        cn_2_module, cn_2_model,
-        cn_2_weight, cn_2_guidance_start, cn_2_guidance_end,
-        cn_2_processor_res, 
-        cn_2_threshold_a, cn_2_threshold_b, cn_2_resize_mode'''
-    ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
-    
-    return controlnet_args_names
+    prefix_list = ['cn_1_', 'cn_2_']
+    arg_names = []
+    for prefix in prefix_list:
+        arg_names.extend([f'{prefix}input_video_chosen_file',
+                          f'{prefix}input_video_mask_chosen_file',
+                          f'{prefix}overwrite_frames',
+                          f'{prefix}vid_path',
+                          f'{prefix}mask_vid_path',
+                          f'{prefix}enabled',
+                          f'{prefix}guess_mode',
+                          f'{prefix}invert_image',
+                          f'{prefix}rgbbgr_mode',
+                          f'{prefix}low_vram',
+                          f'{prefix}module',
+                          f'{prefix}model',
+                          f'{prefix}weight',
+                          f'{prefix}guidance_start',
+                          f'{prefix}guidance_end',
+                          f'{prefix}processor_res',
+                          f'{prefix}threshold_a',
+                          f'{prefix}threshold_b',
+                          f'{prefix}resize_mode'])
+    return arg_names
 
 def controlnet_infotext():
     return """Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
