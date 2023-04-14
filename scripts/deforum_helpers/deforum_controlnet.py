@@ -309,7 +309,7 @@ def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_
         print(f'ControlNet {id} {"video mask" if mask_path else "base video"} unpacked!')
 
 def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    for i in range(1, 3):
+    for i in range(1, 4):
         process_controlnet_video(
             args, anim_args, controlnet_args,
             getattr(controlnet_args, f'cn_{i}_vid_path') or getattr(controlnet_args, f'cn_{i}_input_video_chosen_file', None) and controlnet_args[f'cn_{i}_input_video_chosen_file'].name,
