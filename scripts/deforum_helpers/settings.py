@@ -50,7 +50,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
     args.__dict__["prompts"] = root.animation_prompts
     args.__dict__["positive_prompts"] = root.positive_prompts
     args.__dict__["negative_prompts"] = root.negative_prompts
-    exclude_keys = get_keys_to_exclude() + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
+    exclude_keys = get_keys_to_exclude() + ['cn_1_input_video_chosen_file', 'cn_1_input_video_mask_chosen_file', 'cn_2_input_video_chosen_file', 'cn_2_input_video_mask_chosen_file']
     settings_filename = full_out_file_path if full_out_file_path else os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         s = {}
@@ -77,7 +77,7 @@ def save_settings(*args, **kwargs):
     controlnet_dict = pack_controlnet_args(data)
     video_args_dict = pack_video_args(data)
     combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict, **video_args_dict}
-    exclude_keys = get_keys_to_exclude() + ['controlnet_input_video_chosen_file', 'controlnet_input_video_mask_chosen_file']
+    exclude_keys = get_keys_to_exclude() + ['cn_1_input_video_chosen_file', 'cn_1_input_video_mask_chosen_file', 'cn_2_input_video_chosen_file', 'cn_2_input_video_mask_chosen_file']
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
     filtered_combined["sd_model_name"] = sh.sd_model.sd_checkpoint_info.name
     filtered_combined["sd_model_hash"] = sh.sd_model.sd_checkpoint_info.hash
@@ -131,6 +131,7 @@ def load_all_settings(*args, ui_launch=False, **kwargs):
         return ({key: gr.update(value=value) for key, value in result.items()},)
     else:
         return list(result.values()) + [""]
+
 
 def load_video_settings(*args, **kwargs):
     video_settings_path = args[0].strip()
