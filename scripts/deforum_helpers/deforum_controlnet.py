@@ -33,16 +33,6 @@ def find_controlnet():
     except Exception as e: # the tab will be disactivated anyway, so we don't need the error message
         return None
 
-# svgsupport = False
-# try:
-    # import io
-    # import base64
-    # from svglib.svglib import svg2rlg
-    # from reportlab.graphics import renderPM
-    # svgsupport = True
-# except ImportError:
-    # pass
-
 def setup_controlnet_ui_raw():
     cnet = find_controlnet()
     cn_models = cnet.get_models()
