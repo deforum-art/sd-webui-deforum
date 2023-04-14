@@ -312,11 +312,23 @@ def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_
 
 def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     for i in range(1, 4):
+        vid_path = getattr(controlnet_args, f'cn_{i}_vid_path', None)
+        vid_chosen_file = getattr(controlnet_args, f'cn_{i}_input_video_chosen_file', None)
+        vid_name = None
+        if vid_chosen_file is not None:
+            vid_name = getattr(getattr(controlnet_args, f'cn_{i}_input_video_chosen_file'), 'name', None)
+        
+        mask_path = getattr(controlnet_args, f'cn_{i}_mask_vid_path', None)
+        mask_chosen_file = getattr(controlnet_args, f'cn_{i}_input_video_mask_chosen_file', None)
+        mask_name = None
+        if mask_chosen_file is not None:
+            mask_name = getattr(getattr(controlnet_args, f'cn_{i}_input_video_mask_chosen_file'), 'name', None)
+
         process_controlnet_video(
             args, anim_args, controlnet_args,
-            getattr(controlnet_args, f'cn_{i}_vid_path') or getattr(controlnet_args, f'cn_{i}_input_video_chosen_file', None) and controlnet_args[f'cn_{i}_input_video_chosen_file'].name,
-            getattr(controlnet_args, f'cn_{i}_mask_vid_path') or getattr(controlnet_args, f'cn_{i}_input_video_mask_chosen_file', None) and controlnet_args[f'cn_{i}_input_video_mask_chosen_file'].name,
-            'inputframes' if not getattr(controlnet_args, f'cn_{i}_mask_vid_path') else 'maskframes',
+            vid_path or vid_name,
+            mask_path or mask_name,
+            'inputframes' if not mask_path else 'maskframes',
             i
         )
 
