@@ -71,9 +71,7 @@ def setup_controlnet_ui_raw():
     model_dropdowns = []
     infotext_fields = []
 
-
-
-    def create_model_checkboxes(cn_id):
+    def create_model_in_tab_ui(cn_id):
         with gr.Row():
             enabled = gr.Checkbox(label="Enable", value=False, interactive=True)
             guess_mode = gr.Checkbox(label="Guess Mode", value=False, visible=False, interactive=True)
@@ -102,6 +100,15 @@ def setup_controlnet_ui_raw():
             mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
         input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
         input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
+        hide_output_list = [guess_mode,invert_image,rgbbgr_mode,low_vram,mod_row,module,weight_row,env_row,vid_settings_row,input_video_chosen_file,input_video_mask_chosen_file, advanced_column] 
+        for cn_output in hide_output_list:
+            enabled.change(fn=hide_ui_by_cn_status, inputs=enabled,outputs=cn_output)
+        module.change(build_sliders, inputs=[module], outputs=[processor_res, threshold_a, threshold_b, advanced_column])
+        infotext_fields.extend([
+                (module, f"ControlNet Preprocessor"),
+                (model, f"ControlNet Model"),
+                (weight, f"ControlNet Weight"),
+        ])
         return {
             "enabled": enabled,
             "guess_mode": guess_mode,
@@ -137,7 +144,7 @@ def setup_controlnet_ui_raw():
     with gr.Tabs():
         with gr.Tab(f"ControlNet 1"):
             model_params = {}
-            model_params[1] = create_model_checkboxes(1)
+            model_params[1] = create_model_in_tab_ui(1)
 
             cn_1_enabled = model_params[1]["enabled"]
             cn_1_guess_mode = model_params[1]["guess_mode"]
@@ -163,20 +170,10 @@ def setup_controlnet_ui_raw():
             cn_1_vid_settings_row = model_params[1]["vid_settings_row"]
             cn_1_input_video_chosen_file = model_params[1]["input_video_chosen_file"]
             cn_1_input_video_mask_chosen_file = model_params[1]["input_video_mask_chosen_file"]
-
-            cn_1_hide_output_list = [cn_1_guess_mode,cn_1_invert_image,cn_1_rgbbgr_mode,cn_1_low_vram,cn_1_mod_row,cn_1_module,cn_1_weight_row,cn_1_env_row,cn_1_vid_settings_row,cn_1_input_video_chosen_file,cn_1_input_video_mask_chosen_file, cn_1_advanced] 
-            for cn_output in cn_1_hide_output_list:
-                cn_1_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_1_enabled,outputs=cn_output)
-            cn_1_module.change(build_sliders, inputs=[cn_1_module], outputs=[cn_1_processor_res, cn_1_threshold_a, cn_1_threshold_b, cn_1_advanced])
                 
-            infotext_fields.extend([
-                (cn_1_module, f"ControlNet Preprocessor"),
-                (cn_1_model, f"ControlNet Model"),
-                (cn_1_weight, f"ControlNet Weight"),
-            ])
         with gr.Tab(f"ControlNet 2"):
             model_params = {}
-            model_params[2] = create_model_checkboxes(1)
+            model_params[2] = create_model_in_tab_ui(1)
 
             cn_2_enabled = model_params[2]["enabled"]
             cn_2_guess_mode = model_params[2]["guess_mode"]
@@ -203,15 +200,6 @@ def setup_controlnet_ui_raw():
             cn_2_input_video_chosen_file = model_params[2]["input_video_chosen_file"]
             cn_2_input_video_mask_chosen_file = model_params[2]["input_video_mask_chosen_file"]
            
-            cn_2_hide_output_list = [cn_2_guess_mode,cn_2_invert_image,cn_2_rgbbgr_mode,cn_2_low_vram,cn_2_mod_row,cn_2_weight_row,cn_2_env_row,cn_2_vid_settings_row,cn_2_input_video_chosen_file,cn_2_input_video_mask_chosen_file, cn_2_advanced] 
-            for cn_output in cn_2_hide_output_list:
-                cn_2_enabled.change(fn=hide_ui_by_cn_status, inputs=cn_2_enabled,outputs=cn_output)
-            infotext_fields.extend([
-                (cn_2_module, f"ControlNet Preprocessor"),
-                (cn_2_model, f"ControlNet Model"),
-                (cn_2_weight, f"ControlNet Weight"),
-            ])
-            
     return locals()
             
 def setup_controlnet_ui():
@@ -222,7 +210,7 @@ def setup_controlnet_ui():
     try:
         return setup_controlnet_ui_raw()
     except Exception as e:
-        print(f"'ControlNet UI setup failed due to '{e}'!")
+        print(f"'ControlNet UI setup failed with error: '{e}'!")
         gr.HTML(f"""
                 Failed to setup ControlNet UI, check the reason in your commandline log. Please, downgrade your CN extension to <a style='color:Orange;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet/archive/c9340671d6d59e5a79fc404f78f747f969f87374.zip'>c9340671d6d59e5a79fc404f78f747f969f87374</a> or report the problem <a style='color:Orange;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet/issues'>here</a>.
                 """, elem_id='controlnet_not_found_html_msg')
