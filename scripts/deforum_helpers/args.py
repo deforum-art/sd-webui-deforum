@@ -707,7 +707,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # CONTROLNET TAB
             with gr.TabItem('ControlNet'):
                     gr.HTML(controlnet_infotext())
-                    controlnet_dict = setup_controlnet_ui()
+                    try:
+                        controlnet_dict = setup_controlnet_ui()
+                    except Exception as e:
+                        raise Exception(e)
             # HYBRID VIDEO TAB
             with gr.TabItem('Hybrid Video'):
                 # this html only shows when not in 2d/3d mode
