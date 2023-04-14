@@ -260,7 +260,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             lowvram.send_everything_to_cpu()
             sd_hijack.model_hijack.undo_hijack(sd_model)
             devices.torch_gc()
-            depth_model.to(root.device)
+            if predict_depths: depth_model.to(root.device)
         
         if turbo_steps == 1 and opts.data.get("deforum_save_gen_info_as_srt"):
             params_string = format_animation_params(keys, frame_idx)
@@ -516,7 +516,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             opts.data["initial_noise_multiplier"] = scheduled_noise_multiplier
         
         if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
-            depth_model.to('cpu')
+            if predict_depths: depth_model.to('cpu')
             devices.torch_gc()
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
             sd_hijack.model_hijack.hijack(sd_model)
