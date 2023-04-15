@@ -12,7 +12,7 @@ import logging
 DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def get_keys_to_exclude():
-    return ["n_batch", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal", "perlin_w", "perlin_h", "mp4_path", "image_path", "output_format","render_steps","path_name_modifier"]
+    return ["n_batch", "seed_enable_extras", "save_samples", "display_samples", "show_sample_per_step", "filename_format", "from_img2img_instead_of_link", "scale", "subseed", "subseed_strength", "C", "f", "init_latent", "init_sample", "init_c", "noise_mask", "seed_internal", "perlin_w", "perlin_h", "mp4_path", "image_path", "output_format","render_steps","path_name_modifier", 'cn_1_input_video_chosen_file', 'cn_1_input_video_mask_chosen_file', 'cn_2_input_video_chosen_file', 'cn_2_input_video_mask_chosen_file', 'cn_3_input_video_chosen_file', 'cn_3_input_video_mask_chosen_file','cn_4_input_video_chosen_file', 'cn_4_input_video_mask_chosen_file']
        
 def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id):
     custom_settings_file = custom_settings_file[run_id]
@@ -50,7 +50,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
     args.__dict__["prompts"] = root.animation_prompts
     args.__dict__["positive_prompts"] = root.positive_prompts
     args.__dict__["negative_prompts"] = root.negative_prompts
-    exclude_keys = get_keys_to_exclude() + ['cn_1_input_video_chosen_file', 'cn_1_input_video_mask_chosen_file', 'cn_2_input_video_chosen_file', 'cn_2_input_video_mask_chosen_file', 'cn_3_input_video_chosen_file', 'cn_3_input_video_mask_chosen_file','cn_4_input_video_chosen_file', 'cn_4_input_video_mask_chosen_file']
+    exclude_keys = get_keys_to_exclude()
     settings_filename = full_out_file_path if full_out_file_path else os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         s = {}
@@ -77,7 +77,7 @@ def save_settings(*args, **kwargs):
     controlnet_dict = pack_controlnet_args(data)
     video_args_dict = pack_video_args(data)
     combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict, **video_args_dict}
-    exclude_keys = get_keys_to_exclude() + ['cn_1_input_video_chosen_file', 'cn_1_input_video_mask_chosen_file', 'cn_2_input_video_chosen_file', 'cn_2_input_video_mask_chosen_file', 'cn_3_input_video_chosen_file', 'cn_3_input_video_mask_chosen_file','cn_4_input_video_chosen_file', 'cn_4_input_video_mask_chosen_file']
+    exclude_keys = get_keys_to_exclude()
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}
     filtered_combined["sd_model_name"] = sh.sd_model.sd_checkpoint_info.name
     filtered_combined["sd_model_hash"] = sh.sd_model.sd_checkpoint_info.hash

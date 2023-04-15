@@ -140,16 +140,13 @@ def controlnet_component_names():
     if not find_controlnet():
         return []
 
-    prefix_list = ['cn_1', 'cn_2', 'cn_3', 'cn_4']
-    component_names = [
+    return [f'cn_{i}_{component}' for i in range(1, 5) for component in [
         'input_video_chosen_file', 'input_video_mask_chosen_file',
         'overwrite_frames', 'vid_path', 'mask_vid_path', 'enabled',
         'guess_mode', 'invert_image', 'rgbbgr_mode', 'low_vram',
         'module', 'model', 'weight', 'guidance_start', 'guidance_end',
         'processor_res', 'threshold_a', 'threshold_b', 'resize_mode'
-    ]
-    arg_names = [f'{prefix}_{component}' for prefix in prefix_list for component in component_names]
-    return arg_names
+    ]]
 
 def controlnet_infotext():
     return """Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
