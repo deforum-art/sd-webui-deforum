@@ -278,7 +278,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 advance_next = tween_frame_idx > turbo_next_frame_idx
 
                 # optical flow cadence setup before animation warping
-                if anim_args.animation_mode == '3D' and anim_args.optical_flow_cadence != 'None':
+                if anim_args.animation_mode in ['2D', '3D'] and anim_args.optical_flow_cadence != 'None':
                     if keys.strength_schedule_series[tween_frame_start_idx] > 0:
                         if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
                             cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, anim_args.optical_flow_cadence) / 2
@@ -302,9 +302,16 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
                 # do optical flow cadence after animation warping
                 if cadence_flow is not None:
-                    cadence_flow = abs_flow_to_rel_flow(cadence_flow)
+                    # scale down relative flow for 2D to avoid warping function's effect on relative flow
+                    scale_factor = 1000 if anim_args.animation_mode == '2D' else 1
+                    cadence_flow = abs_flow_to_rel_flow(cadence_flow, scale_factor)
+                    # store sampling mode and restore after (for 3D cadence, does nothing in 2D)
+                    current_sampling_mode = anim_args.sampling_mode
+                    anim_args.sampling_mode = "nearest"
                     cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
-                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow) * tween
+                    anim_args.sampling_mode = current_sampling_mode
+                    # determing flow increment and apply
+                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow, scale_factor) * tween
                     if advance_prev:
                         turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc, cadence_flow_factor)
                     if advance_next:
