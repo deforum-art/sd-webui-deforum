@@ -83,7 +83,7 @@ def setup_controlnet_ui_raw():
             threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
             threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
         with gr.Row(visible=False) as env_row:
-            resize_mode = gr.Radio(choices=["Envelope (Outer Fit)", "Scale to Fit (Inner Fit)", "Just Resize"], value="Scale to Fit (Inner Fit)", label="Resize Mode", interactive=True)
+            resize_mode = gr.Radio(choices=["Outer Fit (Shrink to Fit)", "Inner Fit (Scale to Fit)", "Just Resize"], value="Inner Fit (Scale to Fit)", label="Resize Mode", interactive=True)
         with gr.Row(visible=False) as vid_settings_row:
             overwrite_frames = gr.Checkbox(label='Overwrite input frames', value=True, interactive=True)
             vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=True)

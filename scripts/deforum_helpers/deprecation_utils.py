@@ -22,6 +22,18 @@ deprecation_map = {
     "optical_flow_cadence": [
         (False, "None", False),
         (True, "DIS Fine", False),
+    ],
+    "cn_1_resize_mode": [
+        ("Envelope (Outer Fit)", "Outer Fit (Shrink to Fit)", False),
+        ("Scale to Fit (Inner Fit)", "Inner Fit (Scale to Fit)", False),
+    ],
+    "cn_2_resize_mode": [
+        ("Envelope (Outer Fit)", "Outer Fit (Shrink to Fit)", False),
+        ("Scale to Fit (Inner Fit)", "Inner Fit (Scale to Fit)", False),
+    ],
+    "cn_3_resize_mode": [
+        ("Envelope (Outer Fit)", "Outer Fit (Shrink to Fit)", False),
+        ("Scale to Fit (Inner Fit)", "Inner Fit (Scale to Fit)", False),
     ]
 }
 

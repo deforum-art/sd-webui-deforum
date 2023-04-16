@@ -70,14 +70,3 @@ Main extension tab:
 Keyframes tab:
 
 ![image](https://user-images.githubusercontent.com/121192995/226101140-bfe6cce7-9b78-4a1d-be9a-43e1fc78239e.png)
-
-## Benchmarks
-
-3D mode without additional WebUI flags
-
-![image](https://user-images.githubusercontent.com/14872007/196294447-7817f138-ec4b-4001-885f-454f8667100d.png)
-
-3D mode when WebUI is launched with '--lowvram'
-
-![image](https://user-images.githubusercontent.com/14872007/196294517-125fbb27-c06d-4c4b-bcbc-7c743103eff6.png)
-
