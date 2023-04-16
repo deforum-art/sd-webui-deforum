@@ -45,7 +45,7 @@ def render_input_video(args, anim_args, video_args, parseq_args, loop_args, cont
 
         # limit max frames if there are less frames in the video mask compared to input video
         if max_mask_frames < anim_args.max_frames :
-            anim_args.max_mask_frames
+            anim_args.max_frames = max_mask_frames
             print ("Video mask contains less frames than init video, max frames limited to number of mask frames.")
         args.use_mask = True
         args.overlay_mask = True
