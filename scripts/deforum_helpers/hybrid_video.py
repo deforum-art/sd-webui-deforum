@@ -471,24 +471,24 @@ def extend_flow(flow, w, h):
     # Return the extended image
     return new_flow
 
-def abs_flow_to_rel_flow(flow):
-    h, w = flow.shape[:2]
+# in order to use the 2d warp function, we scale the relative flow down with the scale factor
+def abs_flow_to_rel_flow(flow, scale_factor = 1):
     fx, fy = flow[:,:,0], flow[:,:,1]
     flow_magnitude = np.sqrt(fx*fx + fy*fy)
     flow_angle = np.arctan2(fy, fx)
-
+    flow_magnitude /= scale_factor
+    flow_angle /= scale_factor
     rel_fx = flow_magnitude * np.cos(flow_angle - np.pi/2)
     rel_fy = flow_magnitude * np.sin(flow_angle - np.pi/2)
-
     return np.dstack((rel_fx, rel_fy))
 
-def rel_flow_to_abs_flow(rel_flow):
-    h, w = rel_flow.shape[:2]
+# in order to use the 2d warp function, we restore the relative flow down with the scale factor 
+def rel_flow_to_abs_flow(rel_flow, scale_factor = 1):
     rel_fx, rel_fy = rel_flow[:,:,0], rel_flow[:,:,1]
     flow_magnitude = np.sqrt(rel_fx*rel_fx + rel_fy*rel_fy)
     flow_angle = np.arctan2(rel_fy, rel_fx)
-
+    flow_magnitude *= scale_factor
+    flow_angle *= scale_factor
     abs_fx = flow_magnitude * np.cos(flow_angle + np.pi/2)
     abs_fy = flow_magnitude * np.sin(flow_angle + np.pi/2)
-
     return np.dstack((abs_fx, abs_fy))

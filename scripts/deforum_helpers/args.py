@@ -572,7 +572,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             color_coherence_image_path = gr.Textbox(label="Color coherence image path", lines=1, value=da.color_coherence_image_path, interactive=True)
                         with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
                             color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
-                        with gr.Row(variant='compact', visible=False) as optical_flow_cadence_row:
+                        with gr.Row(variant='compact', visible=True) as optical_flow_cadence_row:
                             with gr.Column(min_width=220):
                                 optical_flow_cadence = gr.Dropdown(choices=['None', 'DIS Fine', 'DIS Medium', 'Farneback'], label="Optical flow cadence", value=da.optical_flow_cadence, elem_id="optical_flow_cadence", interactive=True, info="use optical flow estimation for your in-between (cadence) frames")
                             with gr.Column(min_width=220, visible=False) as cadence_flow_factor_schedule_column:
@@ -974,7 +974,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     optical_flow_redo_generation,redo_flow_factor_schedule,diffusion_redo]
     for output in diffusion_cadence_outputs:
         animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=output)
-    three_d_related_outputs = [depth_3d_warping_accord,fov_accord,optical_flow_cadence_row,cadence_flow_factor_schedule,only_3d_motion_column]
+    three_d_related_outputs = [depth_3d_warping_accord,fov_accord,only_3d_motion_column]
     for output in three_d_related_outputs:
         animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=output)
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
