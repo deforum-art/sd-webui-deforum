@@ -41,14 +41,14 @@ def build_sliders(module):
             gr.update(label="Hough distance threshold (MLSD)", minimum=0.01, maximum=20.0, value=0.1, step=0.01, interactive=True),
             gr.update(visible=True)
         ]
-    elif module in ["hed", "fake_scribble"]:
+    elif module in ["hed", "scribble_hed", "hed_safe"]:
         return [
             gr.update(label="HED Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
             gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
             gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
             gr.update(visible=True)
         ]
-    elif module in ["openpose", "openpose_hand", "segmentation"]:
+    elif module in ["openpose", "openpose_full", "segmentation"]:
         return [
             gr.update(label="Annotator Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
             gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
@@ -57,7 +57,7 @@ def build_sliders(module):
         ]
     elif module == "depth":
         return [
-            gr.update(label="Midas Resolution", minimum=64, maximum=2048, value=384, step=1, interactive=True),
+            gr.update(label="Midas Resolution", minimum=64, maximum=2048, value=512, step=1, interactive=True),
             gr.update(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False),
             gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
             gr.update(visible=True)
@@ -76,10 +76,24 @@ def build_sliders(module):
             gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
             gr.update(visible=True)
         ]
-    elif module == "binary":
+    elif module == "threshold":
         return [
             gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
-            gr.update(label="Binary threshold", minimum=0, maximum=255, value=0, step=1, interactive=True),
+            gr.update(label="Binarization Threshold", minimum=0, maximum=255, value=127, step=1, interactive=True),
+            gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+            gr.update(visible=True)
+        ]
+    elif module == "scribble_xdog":
+        return [
+            gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
+            gr.update(label="XDoG Threshold", minimum=1, maximum=64, value=32, step=1, interactive=True),
+            gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
+            gr.update(visible=True)
+        ]
+    elif module == "tile_gaussian":
+        return [
+            gr.update(label="Annotator resolution", value=512, minimum=64, maximum=2048, step=1, interactive=True),
+            gr.update(label="Noise", value=16.0, minimum=0.1, maximum=48.0, step=0.01, interactive=True),
             gr.update(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False),
             gr.update(visible=True)
         ]
