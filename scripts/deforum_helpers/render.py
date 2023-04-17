@@ -35,6 +35,7 @@ from .resume import get_resume_vars
 from .masks import do_overlay_mask
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
+from .RAFT import RAFT
 from .ZoeDepth import ZoeDepth
 import torch
 
@@ -126,6 +127,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     else:
         depth_model = None
         anim_args.save_depth_maps = False
+        
+    load_raft = (anim_args.optical_flow_cadence == 'RAFT' and anim_args.diffusion_cadence > 1) or (anim_args.hybrid_motion == "Optical Flow" and anim_args.hybrid_flow_method == "RAFT")
+    if load_raft:
+        print("Loading RAFT model...")
+        raft_model = RAFT()
 
     # state for interpolating between diffusion steps
     turbo_steps = 1 if using_vid_init else int(anim_args.diffusion_cadence)
@@ -281,7 +287,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 if anim_args.animation_mode in ['2D', '3D'] and anim_args.optical_flow_cadence != 'None':
                     if keys.strength_schedule_series[tween_frame_start_idx] > 0:
                         if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
-                            cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, anim_args.optical_flow_cadence) / 2
+                            cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, raft_model, anim_args.optical_flow_cadence) / 2
                             turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow, 1)
 
                 if opts.data.get("deforum_save_gen_info_as_srt"):
@@ -336,14 +342,14 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     if anim_args.hybrid_motion in ['Optical Flow']:
                         if anim_args.hybrid_motion_use_prev_img:
                             if advance_prev:
-                                flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, turbo_prev_image, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)                            
+                                flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, turbo_prev_image, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_comp_save_extra_frames)                            
                                 turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, hybrid_comp_schedules['flow_factor'], cv2_border_mode)
                             if advance_next:
-                                flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, turbo_next_image, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                                flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, turbo_next_image, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_comp_save_extra_frames)
                                 turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, hybrid_comp_schedules['flow_factor'], cv2_border_mode)
                             prev_flow = flow
                         else:
-                            flow = get_flow_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                            flow = get_flow_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_comp_save_extra_frames)
                             if advance_prev:
                                 turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, hybrid_comp_schedules['flow_factor'], cv2_border_mode)
                             if advance_next:
@@ -403,9 +409,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     prev_img = image_transform_ransac(prev_img, matrix, anim_args.hybrid_motion, cv2_border_mode)    
                 if anim_args.hybrid_motion in ['Optical Flow']:
                     if anim_args.hybrid_motion_use_prev_img:
-                        flow = get_flow_for_hybrid_motion_prev(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, prev_img, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                        flow = get_flow_for_hybrid_motion_prev(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, prev_img, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_comp_save_extra_frames)
                     else:
-                        flow = get_flow_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, anim_args.hybrid_comp_save_extra_frames)
+                        flow = get_flow_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, raft_model,anim_args.hybrid_comp_save_extra_frames)
                     prev_img = image_transform_optical_flow(prev_img, flow, hybrid_comp_schedules['flow_factor'], cv2_border_mode)
                     prev_flow = flow
 
@@ -535,7 +541,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.seed = random.randint(0, 2**32 - 1)
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
             disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
-            disposable_flow = get_flow_from_images(prev_img, disposable_image, anim_args.optical_flow_redo_generation)
+            disposable_flow = get_flow_from_images(prev_img, disposable_image, raft_model, anim_args.optical_flow_redo_generation)
             disposable_image = cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB)
             disposable_image = image_transform_optical_flow(disposable_image, disposable_flow, redo_flow_factor)
             args.init_sample = Image.fromarray(disposable_image)
@@ -627,3 +633,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         depth_model.delete_model()
         if anim_args.midas_weight < 1.0:
             adabins_model.delete_model()
+            
+    if load_raft: # TODO: add to keep_in_vram? only 22MB...
+        raft_model.delete_model()
