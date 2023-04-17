@@ -7,13 +7,14 @@ import subprocess
 import time
 import re 
 import glob
+import concurrent.futures
 from pkg_resources import resource_filename
 from modules.shared import state, opts
 from .general_utils import checksum, duplicate_pngs_from_folder
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
 
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+# DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
  
 def get_ffmpeg_params(): # get ffmpeg params from webui's settings -> deforum tab. actual opts are set in deforum.py
     f_location = opts.data.get("deforum_ffmpeg_location", find_ffmpeg_binary())
@@ -26,17 +27,21 @@ def get_ffmpeg_params(): # get ffmpeg params from webui's settings -> deforum ta
 def extract_number(string):
     return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
     
-def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
+def save_frame(image, file_path):
+    cv2.imwrite(file_path, image)
+
+def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False):
+    start_time = time.time()
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
         raise RuntimeError('Error: extract_to_frame can not be higher than extract_from_frame')
-    
+
     if n < 1: n = 1 #HACK Gradio interface does not currently allow min/max in gr.Number(...) 
 
     # check vid path using a function and only enter if we get True
     if is_vid_path_valid(video_path):
-        
+
         name = get_frame_name(video_path)
-        
+
         vidcap = cv2.VideoCapture(video_path)
         video_fps = vidcap.get(cv2.CAP_PROP_FPS)
 
@@ -53,18 +58,18 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
 
         # grab the frame count to check against existing directory len 
         frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
-        
+
         # raise error if the user wants to skip more frames than exist
         if n >= frame_count : 
             raise RuntimeError('Skipping more frames than input video contains. extract_nth_frames larger than input frames')
-        
+
         expected_frame_count = math.ceil(frame_count / n) 
         # Check to see if the frame count is matches the number of files in path
         if overwrite or expected_frame_count != len(input_content):
             shutil.rmtree(video_in_frame_path)
             os.makedirs(video_in_frame_path, exist_ok=True) # just deleted the folder so we need to make it again
             input_content = os.listdir(video_in_frame_path)
-        
+
         print(f"Trying to extract frames from video with input FPS of {video_fps}. Please wait patiently.")
         if len(input_content) == 0:
             vidcap.set(cv2.CAP_PROP_POS_FRAMES, extract_from_frame) # Set the starting frame
@@ -72,18 +77,23 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
             count = extract_from_frame
             t=1
             success = True
-            while success:
-                if state.interrupted:
-                    return
-                if (count <= extract_to_frame or extract_to_frame == -1) and count % n == 0:
-                    if numeric_files_output == True:
-                        cv2.imwrite(video_in_frame_path + os.path.sep + f"{t:09}.{out_img_format}" , image) # save frame as file
-                    else:
-                        cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:09}.{out_img_format}" , image) # save frame as file
-                    t += 1
-                success,image = vidcap.read()
-                count += 1
-            print(f"Successfully extracted {count} frames from video.")
+            cpu_count = os.cpu_count()
+            max_workers = max(1, cpu_count - 2)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor: # adjust max_workers to your needs
+                while success:
+                    if state.interrupted:
+                        return
+                    if (count <= extract_to_frame or extract_to_frame == -1) and count % n == 0:
+                        if numeric_files_output == True:
+                            file_name = f"{t:09}.{out_img_format}"
+                        else:
+                            file_name = f"{name}{t:09}.{out_img_format}"
+                        file_path = os.path.join(video_in_frame_path, file_name)
+                        executor.submit(save_frame, image, file_path)
+                        t += 1
+                    success,image = vidcap.read()
+                    count += 1
+            print(f"Extracted {count} frames from video in {time.time() - start_time:.2f} seconds!")
         else:
             print("Frames already unpacked")
         vidcap.release()
