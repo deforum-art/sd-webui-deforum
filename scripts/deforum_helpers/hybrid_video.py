@@ -16,7 +16,7 @@ def delete_all_imgs_in_folder(folder_path):
         files = list(pathlib.Path(folder_path).glob('*.jpg'))
         files.extend(list(pathlib.Path(folder_path).glob('*.png')))
         for f in files: os.remove(f)
-
+    
 def hybrid_generation(args, anim_args, root):
     video_in_frame_path = os.path.join(args.outdir, 'inputframes')
     hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
@@ -164,16 +164,16 @@ def get_matrix_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, prev_im
         print(f"Calculating {hybrid_motion} RANSAC matrix for frames {frame_idx} to {frame_idx+1}")
         return matrix
 
-def get_flow_for_hybrid_motion(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, method, do_flow_visualization=False):
+def get_flow_for_hybrid_motion(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, method, raft_model, do_flow_visualization=False):
     print(f"Calculating {method} optical flow for frames {frame_idx} to {frame_idx+1}")
     i1 = get_resized_image_from_filename(str(inputfiles[frame_idx]), dimensions)
     i2 = get_resized_image_from_filename(str(inputfiles[frame_idx+1]), dimensions)
-    flow = get_flow_from_images(i1, i2, method, prev_flow)
+    flow = get_flow_from_images(i1, i2, method, raft_model, prev_flow)
     if do_flow_visualization:
         save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_frame_path)
     return flow
 
-def get_flow_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, prev_img, method, do_flow_visualization=False):
+def get_flow_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, prev_img, method, raft_model, do_flow_visualization=False):
     print(f"Calculating {method} optical flow for frames {frame_idx} to {frame_idx+1}")
     # first handle invalid images from cadence by returning default matrix
     height, width = prev_img.shape[:2]   
@@ -182,7 +182,7 @@ def get_flow_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, hybrid_fr
     else:
         i1 = prev_img.astype(np.uint8)
         i2 = get_resized_image_from_filename(str(inputfiles[frame_idx]), dimensions)
-        flow = get_flow_from_images(i1, i2, method, prev_flow)
+        flow = get_flow_from_images(i1, i2, method, raft_model, prev_flow)
     if do_flow_visualization:
         save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_frame_path)
     return flow
@@ -261,8 +261,11 @@ def get_transformation_matrix_from_images(img1, img2, hybrid_motion, max_corners
         transformation_rigid_matrix, rigid_mask = cv2.estimateAffinePartial2D(prev_pts, curr_pts)
         return transformation_rigid_matrix
 
-def get_flow_from_images(i1, i2, method, prev_flow=None):
-    # Unused presets are included for this function's use in other applications (or real-time applications).
+def get_flow_from_images(i1, i2, method, raft_model, prev_flow=None): # Unused presets are included for this function's use in other applications (or real-time applications).
+    if method =="RAFT":
+        if raft_model is None:
+            raise Exception("RAFT Model not provided to get_flow_from_images function, cannot continue.")
+        r = get_flow_from_images_RAFT(i1, i2, raft_model)       
     if method =="DIS Medium":
         r = get_flow_from_images_DIS(i1, i2, 'medium', prev_flow)
     elif method =="DIS Fast": # Unused
@@ -283,6 +286,10 @@ def get_flow_from_images(i1, i2, method, prev_flow=None):
         r = get_flow_from_images_Farneback(i1, i2, prev_flow)
     return r
     # return detect_scene_change_abs(r)
+
+def get_flow_from_images_RAFT(i1, i2, raft_model):
+    flow = raft_model.predict(i1, i2)
+    return flow
 
 def get_flow_from_images_DIS(i1, i2, preset, prev_flow):
     # DIS PRESETS CHART KEY: finest scale, grad desc its, patch size
