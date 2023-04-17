@@ -20,6 +20,8 @@ from .video_audio_utilities import vid2frames
 # DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 cnet = None
+# number of CN model tabs to show in the deforum gui. *if adding more, make sure to update cn_models param in get_keys_to_exclude in settings.py*
+num_of_models = 5
 
 def find_controlnet():
     global cnet
@@ -127,7 +129,7 @@ def setup_controlnet_ui_raw():
         return gr.Dropdown.update(value=selected, choices=cn_models)
     with gr.Tabs():
         model_params = {}
-        for i in range(1, 5):
+        for i in range(1, num_of_models+1):
             with gr.Tab(f"CN Model {i}"):
                 model_params[i] = create_model_in_tab_ui(i)
 
@@ -154,7 +156,7 @@ def controlnet_component_names():
     if not find_controlnet():
         return []
 
-    return [f'cn_{i}_{component}' for i in range(1, 5) for component in [
+    return [f'cn_{i}_{component}' for i in range(1, num_of_models+1) for component in [
         'input_video_chosen_file', 'input_video_mask_chosen_file',
         'overwrite_frames', 'vid_path', 'mask_vid_path', 'enabled',
         'guess_mode', 'invert_image', 'rgbbgr_mode', 'low_vram',
@@ -168,7 +170,7 @@ def controlnet_infotext():
            """
            
 def is_controlnet_enabled(controlnet_args):
-    for i in range(1, 5):
+    for i in range(1, num_of_models+1):
         if getattr(controlnet_args, f'cn_{i}_enabled', False):
             return True
     return False
@@ -192,8 +194,8 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         return cn_mask_np, cn_image_np
 
     cnet = find_controlnet()
-    cn_data = [read_cn_data(i) for i in range(1, 5)]
-    cn_inputframes_list = [os.path.join(args.outdir, f'controlnet_{i}_inputframes') for i in range(1, 5)]
+    cn_data = [read_cn_data(i) for i in range(1, num_of_models+1)]
+    cn_inputframes_list = [os.path.join(args.outdir, f'controlnet_{i}_inputframes') for i in range(1, num_of_models+1)]
 
     if not any(os.path.exists(cn_inputframes) for cn_inputframes in cn_inputframes_list):
         print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
@@ -238,7 +240,7 @@ def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_
         print(f'ControlNet {id} {"video mask" if mask_path else "base video"} unpacked!')
 
 def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    for i in range(1, 5):
+    for i in range(1, num_of_models+1):
         vid_path = getattr(controlnet_args, f'cn_{i}_vid_path', None)
         vid_chosen_file = getattr(controlnet_args, f'cn_{i}_input_video_chosen_file', None)
         vid_name = None
