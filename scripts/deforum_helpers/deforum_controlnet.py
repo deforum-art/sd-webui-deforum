@@ -37,24 +37,38 @@ def setup_controlnet_ui_raw():
     cnet = find_controlnet()
     cn_models = cnet.get_models()
     max_models = opts.data.get("control_net_max_models_num", 1)
-    cn_preprocessors = [ # since cn preprocessors don't seem to be provided in the API rn, hardcode the names list
-        "none",
-        "canny",
-        "depth",
-        "depth_leres",
-        "hed",
-        "mlsd",
-        "normal_map",
-        "openpose",
-        "openpose_hand",
-        "clip_vision",
-        "color",
-        "pidinet",
-        "scribble",
-        "fake_scribble",
-        "segmentation",
-        "binary",
-    ]
+    cn_preprocessors = [
+            "none",
+            "canny",
+            "depth_midas",                  
+            "depth_leres",                  
+            "depth_zoe",                    
+            "lineart",                      
+            "lineart_coarse",               
+            "lineart_anime",                
+            "mlsd",                         
+            "normal_midas",                 
+            "normal_bae",                   
+            "openpose",                     
+            "openpose_face",                
+            "openpose_faceonly",            
+            "openpose_hand",             
+            "openpose_full",                
+            "scribble_hed",
+            "scribble_pidinet",
+            "scribble_xdog",
+            "seg_ofcoco",        
+            "seg_ofade20k",          
+            "seg_ufade20k",
+            "shuffle",
+            "softedge_hed",                
+            "softedge_hedsafe",             
+            "softedge_pidinet",             
+            "softedge_pidisafe",            
+            "t2ia_color_grid",
+            "t2ia_sketch_pidi",
+            "threshold"
+        ]
 
     refresh_symbol = '\U0001f504'  # 🔄
     switch_values_symbol = '\U000021C5' # ⇅
