@@ -129,7 +129,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         anim_args.save_depth_maps = False
         
     raft_model = None
-    load_raft = (anim_args.optical_flow_cadence == 'RAFT' and int(anim_args.diffusion_cadence) > 1) or \
+    load_raft = (anim_args.optical_flow_cadence == "RAFT" and int(anim_args.diffusion_cadence) > 1) or \
             (anim_args.hybrid_motion == "Optical Flow" and anim_args.hybrid_flow_method == "RAFT") or \
             (anim_args.optical_flow_redo_generation == "RAFT")
     if load_raft:
