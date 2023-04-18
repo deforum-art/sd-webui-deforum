@@ -9,15 +9,6 @@
     </a>
 </p>
 
-## Before Starting
-
-**Important note about versions updating:** <br>
-As auto's webui is getting updated multiple times a day, every day, things tend to break with regards to extensions compatability.
-Therefore, it is best recommended to keep two folders:
-1. "Stable" folder that you don't regularly update, with versions that you know *work* together (we will provide info on this soon). 
-2. "Experimental" folder in which you can add 'git pull' to your webui-user.bat, update deforum every day, etc. Keep it wild - but be prepared for bugs. 
-
-
 ## Getting Started
 
 1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/).

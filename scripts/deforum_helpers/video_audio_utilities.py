@@ -50,7 +50,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
             input_content = os.listdir(video_in_frame_path)
 
         # check if existing frame is the same video, if not we need to erase it and repopulate
-        if len(input_content) > 0:
+        if len(input_content) > 0 and numeric_files_output is False:
             #get the name of the existing frame
             content_name = get_frame_name(input_content[0])
             if not content_name.startswith(name):
@@ -77,9 +77,8 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
             count = extract_from_frame
             t=1
             success = True
-            cpu_count = os.cpu_count()
-            max_workers = int(max(1, cpu_count / 2))
-            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor: # adjust max_workers to your needs
+            max_workers = int(max(1, (os.cpu_count() / 2) - 1)) # set max threads to cpu cores halved, minus 1. minimum is 1
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                 while success:
                     if state.interrupted:
                         return
