@@ -138,7 +138,7 @@ def DeforumAnimArgs():
     hybrid_use_first_frame_as_init_image = True 
     hybrid_motion = "None" #['None','Optical Flow','Perspective','Affine']
     hybrid_motion_use_prev_img = False 
-    hybrid_flow_method = "DIS Fine" #['RAFT', 'DIS Fine', 'DIS Medium', 'Farneback']
+    hybrid_flow_method = "RAFT" #['RAFT', 'DIS Fine', 'DIS Medium', 'Farneback']
     hybrid_composite = 'None' #['None', 'Normal', 'Before Motion', 'After Generation'] 
     hybrid_use_init_image = False 
     hybrid_comp_mask_type = "None" #['None', 'Depth', 'Video Depth', 'Blend', 'Difference']
