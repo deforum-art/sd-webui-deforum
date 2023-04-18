@@ -79,7 +79,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
             success = True
             cpu_count = os.cpu_count()
             max_workers = int(max(1, (cpu_count / 2) - 1))
-            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor: # adjust max_workers to your needs
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
                 while success:
                     if state.interrupted:
                         return
