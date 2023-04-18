@@ -471,8 +471,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         if use_parseq:
             args.seed_enable_extras = True
-            args.subseed = int(keys.subseed_series[frame_idx])
-            args.subseed_strength = keys.subseed_strength_series[frame_idx]
+            anim_args.enable_subseed_scheduling = True
+            args.subseed = int(keys.subseed_schedule_series[frame_idx])
+            args.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
         
         max_f = anim_args.max_frames - 1
         pattern = r'`.*?`'

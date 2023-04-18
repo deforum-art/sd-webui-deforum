@@ -95,8 +95,8 @@ class ParseqAnimKeys():
         self.near_series = self.parseq_to_anim_series('near')
         self.far_series = self.parseq_to_anim_series('far')
         self.prompts = self.parseq_to_anim_series('deforum_prompt') # formatted as "{positive} --neg {negative}"
-        self.subseed_series = self.parseq_to_anim_series('subseed')
-        self.subseed_strength_series = self.parseq_to_anim_series('subseed_strength')
+        self.subseed_schedule_series = self.parseq_to_anim_series('subseed')
+        self.subseed_strength_schedule_series = self.parseq_to_anim_series('subseed_strength')
         self.kernel_schedule_series = self.parseq_to_anim_series('antiblur_kernel')
         self.sigma_schedule_series = self.parseq_to_anim_series('antiblur_sigma')
         self.amount_schedule_series = self.parseq_to_anim_series('antiblur_amount')
