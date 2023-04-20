@@ -25,15 +25,18 @@ num_of_models = 5
 
 def find_controlnet():
     global cnet
-    global cnet_import_failure_count
-    if cnet is not None:
-        return cnet
+    if cnet: return cnet
     try:
         cnet = importlib.import_module('extensions.sd-webui-controlnet.scripts.external_code', 'external_code')
+    except:
+        try:
+            cnet = importlib.import_module('extensions-builtin.sd-webui-controlnet.scripts.external_code', 'external_code')
+        except: 
+            pass
+    if cnet:
         print(f"\033[0;32m*Deforum ControlNet support: enabled*\033[0m")
         return True
-    except Exception as e: # the tab will be disactivated anyway, so we don't need the error message
-        return None
+    return None
 
 def setup_controlnet_ui_raw():
     cnet = find_controlnet()
