@@ -132,7 +132,7 @@ class MidasModel:
             if image_pil_area not in range(MIN_ADABINS_AREA, MAX_ADABINS_AREA + 1):
                 scale = ((MAX_ADABINS_AREA if image_pil_area > MAX_ADABINS_AREA else MIN_ADABINS_AREA) / image_pil_area) ** 0.5
                 depth_input = img_pil.resize((int(w * scale), int(h * scale)), Image.LANCZOS if image_pil_area > MAX_ADABINS_AREA else Image.BICUBIC)
-                print(f"  resized to {depth_input.width}x{depth_input.height}")
+                print(f"AdaBins depth resized to {depth_input.width}x{depth_input.height}")
                 resized = True
             else:
                 depth_input = img_pil
@@ -144,7 +144,7 @@ class MidasModel:
                     adabins_depth = TF.resize(torch.from_numpy(adabins_depth), torch.Size([h, w]), interpolation=TF.InterpolationMode.BICUBIC).cpu().numpy()
                 adabins_depth = adabins_depth.squeeze()
             except:
-                print("  exception encountered, falling back to pure MiDaS")
+                print("AdaBins exception encountered, falling back to pure MiDaS")
                 use_adabins = False
             torch.cuda.empty_cache()
 
