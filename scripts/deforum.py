@@ -193,7 +193,7 @@ def run_deforum(*args, **kwargs):
         shared.total_tqdm.clear()
 
         generation_info_js = processed.js()
-        if opts.samples_log_stdout:
+        if getattr(opts, 'samples_log_stdout', False):
             print(generation_info_js)
 
         if opts.do_not_show_images:
