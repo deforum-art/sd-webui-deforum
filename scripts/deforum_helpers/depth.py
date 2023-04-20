@@ -148,7 +148,6 @@ class MidasModel:
                 use_adabins = False
             torch.cuda.empty_cache()
 
-
             if not self.use_zoe_depth:
                 midas_depth = (midas_depth * midas_weight + adabins_depth * (1.0 - midas_weight))
                 depth_tensor = torch.from_numpy(np.expand_dims(midas_depth, axis=0)).squeeze().to(self.device)
