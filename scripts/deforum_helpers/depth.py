@@ -124,23 +124,30 @@ class MidasModel:
         use_adabins = midas_weight < 1.0 and self.adabins_helper is not None
 
         if use_adabins:
-            MAX_ADABINS_AREA = 500000
-            MIN_ADABINS_AREA = 448 * 448
-            image_pil_area = w * h
-            scale = math.sqrt(MIN_ADABINS_AREA) / math.sqrt(image_pil_area)
-            depth_input = img_pil.resize((int(w * scale), int(h * scale)), Image.LANCZOS if image_pil_area > MAX_ADABINS_AREA else Image.BICUBIC)
+            MAX_ADABINS_AREA, MIN_ADABINS_AREA = 500000, 448 * 448
+
+            img_pil = Image.fromarray(cv2.cvtColor(prev_img_cv2.astype(np.uint8), cv2.COLOR_RGB2BGR))
+            image_pil_area, resized = w * h, False
+
+            if image_pil_area not in range(MIN_ADABINS_AREA, MAX_ADABINS_AREA + 1):
+                scale = ((MAX_ADABINS_AREA if image_pil_area > MAX_ADABINS_AREA else MIN_ADABINS_AREA) / image_pil_area) ** 0.5
+                depth_input = img_pil.resize((int(w * scale), int(h * scale)), Image.LANCZOS if image_pil_area > MAX_ADABINS_AREA else Image.BICUBIC)
+                print(f"  resized to {depth_input.width}x{depth_input.height}")
+                resized = True
+            else:
+                depth_input = img_pil
+
             try:
                 with torch.no_grad():
                     _, adabins_depth = self.adabins_helper.predict_pil(depth_input)
-                adabins_depth = adabins_depth.squeeze().cpu().numpy()
-                if image_pil_area != MAX_ADABINS_AREA:
-                    adabins_depth = TF.resize(torch.from_numpy(adabins_depth),
-                                    torch.Size([h, w]),
-                                    interpolation=TF.InterpolationMode.BICUBIC).numpy()
+                if resized:
+                    adabins_depth = TF.resize(torch.from_numpy(adabins_depth), torch.Size([h, w]), interpolation=TF.InterpolationMode.BICUBIC).cpu().numpy()
+                adabins_depth = adabins_depth.squeeze()
             except:
-                print("exception encountered, falling back to pure MiDaS")
+                print("  exception encountered, falling back to pure MiDaS")
                 use_adabins = False
             torch.cuda.empty_cache()
+
 
             if not self.use_zoe_depth:
                 midas_depth = (midas_depth * midas_weight + adabins_depth * (1.0 - midas_weight))
@@ -198,6 +205,7 @@ class AdaBinsModel:
     def _initialize(self, models_path, keep_in_vram=False):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.keep_in_vram = keep_in_vram
+        self.adabins_helper = None
 
         if self.keep_in_vram or not hasattr(self, 'adabins_helper'):
             if not os.path.exists(os.path.join(models_path, 'AdaBins_nyu.pt')):
