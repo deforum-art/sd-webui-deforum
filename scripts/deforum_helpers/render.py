@@ -120,6 +120,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             if DEBUG_MODE:
                 print("Engaging AdaBins, as MiDaS < 1")
             adabins_model = AdaBinsModel(root.models_path, keep_in_vram=keep_in_vram)
+            depth_model.adabins_helper = adabins_model.adabins_helper
             
         # depth-based hybrid composite mask requires saved depth maps
         if anim_args.hybrid_composite != 'None' and anim_args.hybrid_comp_mask_type =='Depth':
