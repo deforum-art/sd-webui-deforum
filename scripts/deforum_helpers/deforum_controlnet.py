@@ -186,7 +186,6 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
     cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i+1}", img_np, mask_np))
             for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
 
-    #todo: "image":{'image': cn_image_np, 'mask': cn_mask_np} if cn_mask_np is not None else cn_image_np,
     p.script_args = {"enabled": True} 
     
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
