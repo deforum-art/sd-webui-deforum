@@ -187,7 +187,6 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
             for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
 
     p.script_args = {"enabled": True} 
-    
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
 
 def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
