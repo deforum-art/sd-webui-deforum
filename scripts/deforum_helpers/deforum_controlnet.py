@@ -186,7 +186,7 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
     cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i+1}", img_np, mask_np))
             for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
 
-    p.script_args = {"enabled": True}
+    p.script_args = {"enabled": True} 
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
 
 def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
@@ -222,13 +222,22 @@ def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, 
         if mask_chosen_file is not None:
             mask_name = getattr(getattr(controlnet_args, f'cn_{i}_input_video_mask_chosen_file'), 'name', None)
 
-        process_controlnet_video(
+        process_controlnet_video( # Process base video
             args, anim_args, controlnet_args,
             vid_path or vid_name,
-            mask_path or mask_name,
-            'inputframes' if not mask_path else 'maskframes',
+            None,
+            'inputframes',
             i
         )
+
+        if mask_name: # Process mask video, if available
+            process_controlnet_video(
+                args, anim_args, controlnet_args,
+                None,
+                mask_path or mask_name,
+                'maskframes',
+                i
+            )
 
 def hide_ui_by_cn_status(choice):
     return gr.update(visible=True) if choice else gr.update(visible=False)
