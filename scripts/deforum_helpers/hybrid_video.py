@@ -287,6 +287,7 @@ def get_flow_from_images(i1, i2, method, raft_model, prev_flow=None):
         return get_flow_from_images_PCAFlow(i1, i2, prev_flow)
     elif method == "Farneback": # Farneback Normal:
         return get_flow_from_images_Farneback(i1, i2, prev_flow)
+    # if we reached this point, something went wrong. raise an error:
     raise RuntimeError(f"Invald flow method name: '{method}'")
 
 def get_flow_from_images_RAFT(i1, i2, raft_model):
