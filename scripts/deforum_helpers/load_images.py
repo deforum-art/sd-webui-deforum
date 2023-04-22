@@ -76,6 +76,10 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
     mask = mask.convert('L')
     return mask
 
+# "check_mask_for_errors" may have prevented errors in composable masks,
+# but it CAUSES errors on any frame where it's all black.
+# Bypassing the check below until we can fix it even better.
+# This may break composable masks, but it makes ACTUAL masks usable.
 def check_mask_for_errors(mask_input, invert_mask=False):
     extrema = mask_input.getextrema()
     if (invert_mask):
@@ -87,16 +91,18 @@ def check_mask_for_errors(mask_input, invert_mask=False):
         return None
     else:
         return mask_input    
-
+ 
 def get_mask(args):
-    return check_mask_for_errors(
-         prepare_mask(args.mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
-    )
+    # return check_mask_for_errors(
+    #     prepare_mask(args.mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
+    # )
+    return prepare_mask(args.mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
 
 def get_mask_from_file(mask_file, args):
-    return check_mask_for_errors(
-         prepare_mask(mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
-    )
+    # return check_mask_for_errors(
+    #     prepare_mask(mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
+    # )
+    return prepare_mask(mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
 
 def blank_if_none(mask, w, h, mode):
     return Image.new(mode, (w, h), (0)) if mask is None else mask

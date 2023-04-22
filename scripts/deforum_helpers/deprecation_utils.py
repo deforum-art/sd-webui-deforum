@@ -23,6 +23,10 @@ deprecation_map = {
         (False, "None", False),
         (True, "DIS Fine", False),
     ],
+    # When RIFE is fixed, this needs to be removed
+    "hybrid_flow_method": [
+        ("RAFT", "Farneback", False),
+    ],
     "cn_1_resize_mode": [
         ("Envelope (Outer Fit)", "Outer Fit (Shrink to Fit)", False),
         ("Scale to Fit (Inner Fit)", "Inner Fit (Scale to Fit)", False),
