@@ -146,22 +146,22 @@ def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_c
     return args, prev_img
 
 def get_matrix_for_hybrid_motion(frame_idx, dimensions, inputfiles, hybrid_motion):
-    img1 = cv2.cvtColor(get_resized_image_from_filename(str(inputfiles[frame_idx-1]), dimensions), cv2.COLOR_BGR2GRAY)
-    img2 = cv2.cvtColor(get_resized_image_from_filename(str(inputfiles[frame_idx]), dimensions), cv2.COLOR_BGR2GRAY)
-    matrix = get_transformation_matrix_from_images(img1, img2, hybrid_motion)
     print(f"Calculating {hybrid_motion} RANSAC matrix for frames {frame_idx} to {frame_idx+1}")
+    img1 = cv2.cvtColor(get_resized_image_from_filename(str(inputfiles[frame_idx]), dimensions), cv2.COLOR_BGR2GRAY)
+    img2 = cv2.cvtColor(get_resized_image_from_filename(str(inputfiles[frame_idx+1]), dimensions), cv2.COLOR_BGR2GRAY)
+    matrix = get_transformation_matrix_from_images(img1, img2, hybrid_motion)
     return matrix
 
 def get_matrix_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, prev_img, hybrid_motion):
-    # first handle invalid images from cadence by returning default matrix
+    print(f"Calculating {hybrid_motion} RANSAC matrix for frames {frame_idx} to {frame_idx+1}")
+    # first handle invalid images by returning default matrix
     height, width = prev_img.shape[:2]
     if height == 0 or width == 0 or prev_img != np.uint8:
         return get_hybrid_motion_default_matrix(hybrid_motion)
     else:
         prev_img_gray = cv2.cvtColor(prev_img, cv2.COLOR_BGR2GRAY)
-        img = cv2.cvtColor(get_resized_image_from_filename(str(inputfiles[frame_idx]), dimensions), cv2.COLOR_BGR2GRAY)
+        img = cv2.cvtColor(get_resized_image_from_filename(str(inputfiles[frame_idx+1]), dimensions), cv2.COLOR_BGR2GRAY)
         matrix = get_transformation_matrix_from_images(prev_img_gray, img, hybrid_motion)
-        print(f"Calculating {hybrid_motion} RANSAC matrix for frames {frame_idx} to {frame_idx+1}")
         return matrix
 
 def get_flow_for_hybrid_motion(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, method, raft_model, do_flow_visualization=False):
@@ -175,25 +175,25 @@ def get_flow_for_hybrid_motion(frame_idx, dimensions, inputfiles, hybrid_frame_p
 
 def get_flow_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, prev_img, method, raft_model, do_flow_visualization=False):
     print(f"Calculating {method} optical flow for frames {frame_idx} to {frame_idx+1}")
-    # first handle invalid images from cadence by returning default matrix
+    # first handle invalid images by returning default flow
     height, width = prev_img.shape[:2]   
     if height == 0 or width == 0:
         flow = get_hybrid_motion_default_flow(dimensions)
     else:
         i1 = prev_img.astype(np.uint8)
-        i2 = get_resized_image_from_filename(str(inputfiles[frame_idx]), dimensions)
+        i2 = get_resized_image_from_filename(str(inputfiles[frame_idx+1]), dimensions)
         flow = get_flow_from_images(i1, i2, method, raft_model, prev_flow)
     if do_flow_visualization:
         save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_frame_path)
     return flow
 
-def image_transform_ransac(image_cv2, xform, hybrid_motion, border_mode=cv2.BORDER_REPLICATE):
+def image_transform_ransac(image_cv2, xform, hybrid_motion):
     if hybrid_motion == "Perspective":
-        return image_transform_perspective(image_cv2, xform, border_mode=border_mode)
+        return image_transform_perspective(image_cv2, xform)
     else: # Affine
-        return image_transform_affine(image_cv2, xform, border_mode=border_mode)
+        return image_transform_affine(image_cv2, xform)
 
-def image_transform_optical_flow(img, flow, flow_factor, border_mode=cv2.BORDER_REPLICATE):
+def image_transform_optical_flow(img, flow, flow_factor):
     # if flow factor not normal, calculate flow factor
     if flow_factor != 1:
         flow = flow * flow_factor
@@ -202,22 +202,22 @@ def image_transform_optical_flow(img, flow, flow_factor, border_mode=cv2.BORDER_
     h, w = img.shape[:2]
     flow[:, :, 0] += np.arange(w)
     flow[:, :, 1] += np.arange(h)[:,np.newaxis]
-    return remap(img, flow, border_mode)
+    return remap(img, flow)
 
-def image_transform_affine(image_cv2, xform, border_mode=cv2.BORDER_REPLICATE):
+def image_transform_affine(image_cv2, xform):
     return cv2.warpAffine(
         image_cv2,
         xform,
         (image_cv2.shape[1],image_cv2.shape[0]),
-        borderMode=border_mode
+        borderMode=cv2.BORDER_REFLECT_101
     )
 
-def image_transform_perspective(image_cv2, xform, border_mode=cv2.BORDER_REPLICATE):
+def image_transform_perspective(image_cv2, xform):
     return cv2.warpPerspective(
         image_cv2,
         xform,
         (image_cv2.shape[1], image_cv2.shape[0]),
-        borderMode=border_mode
+        borderMode=cv2.BORDER_REFLECT_101
     )
 
 def get_hybrid_motion_default_matrix(hybrid_motion):
@@ -232,60 +232,63 @@ def get_hybrid_motion_default_flow(dimensions):
     flow = np.zeros((rows, cols, 2), np.float32)
     return flow
 
-def get_transformation_matrix_from_images(img1, img2, hybrid_motion, max_corners=200, quality_level=0.01, min_distance=30, block_size=3):
-    # Detect feature points in previous frame
-    prev_pts = cv2.goodFeaturesToTrack(img1,
-                                        maxCorners=max_corners,
-                                        qualityLevel=quality_level,
-                                        minDistance=min_distance,
-                                        blockSize=block_size)
+def get_transformation_matrix_from_images(img1, img2, hybrid_motion, confidence=0.75):
+    # Create SIFT detector and feature extractor
+    sift = cv2.SIFT_create()
 
-    if prev_pts is None or len(prev_pts) < 8 or img1 is None or img2 is None:
+    # Detect keypoints and compute descriptors
+    kp1, des1 = sift.detectAndCompute(img1, None)
+    kp2, des2 = sift.detectAndCompute(img2, None)
+
+    # Create BFMatcher object and match descriptors
+    bf = cv2.BFMatcher()
+    matches = bf.knnMatch(des1, des2, k=2)
+
+    # Apply ratio test to filter good matches
+    good_matches = []
+    for m, n in matches:
+        if m.distance < confidence * n.distance:
+            good_matches.append(m)
+
+    if len(good_matches) <= 8:
+        get_hybrid_motion_default_matrix(hybrid_motion)
+
+    # Convert keypoints to numpy arrays
+    src_pts = np.float32([kp1[m.queryIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+    dst_pts = np.float32([kp2[m.trainIdx].pt for m in good_matches]).reshape(-1, 1, 2)
+
+    if len(src_pts) <= 8 or len(dst_pts) <= 8:
         return get_hybrid_motion_default_matrix(hybrid_motion)
-
-    # Get optical flow
-    curr_pts, status, err = cv2.calcOpticalFlowPyrLK(img1, img2, prev_pts, None) 
-   
-    # Filter only valid points
-    idx = np.where(status==1)[0]
-    prev_pts = prev_pts[idx]
-    curr_pts = curr_pts[idx]
-
-    if len(prev_pts) < 8 or len(curr_pts) < 8:
-        return get_hybrid_motion_default_matrix(hybrid_motion)
-    
-    if hybrid_motion == "Perspective":  # Perspective - Find the transformation between points
-        transformation_matrix, mask = cv2.findHomography(prev_pts, curr_pts, cv2.RANSAC, 5.0)
+    elif hybrid_motion == "Perspective": # Perspective transformation (3x3)
+        transformation_matrix, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
         return transformation_matrix
-    else: # Affine - Compute a rigid transformation (without depth, only scale + rotation + translation)
-        transformation_rigid_matrix, rigid_mask = cv2.estimateAffinePartial2D(prev_pts, curr_pts)
+    else: # Affine - rigid transformation (no skew 3x2)
+        transformation_rigid_matrix, rigid_mask = cv2.estimateAffinePartial2D(src_pts, dst_pts)
         return transformation_rigid_matrix
 
-def get_flow_from_images(i1, i2, method, raft_model, prev_flow=None): # Unused presets are included for this function's use in other applications (or real-time applications).
-    if method =="RAFT":
+def get_flow_from_images(i1, i2, method, raft_model, prev_flow=None):
+    if method == "RAFT":
         if raft_model is None:
             raise Exception("RAFT Model not provided to get_flow_from_images function, cannot continue.")
-        r = get_flow_from_images_RAFT(i1, i2, raft_model)       
-    elif method =="DIS Medium":
-        r = get_flow_from_images_DIS(i1, i2, 'medium', prev_flow)
-    elif method =="DIS Fast": # Unused
-        r = get_flow_from_images_DIS(i1, i2, 'fast', prev_flow)
-    elif method =="DIS UltraFast": # Unused
-        r = get_flow_from_images_DIS(i1, i2, 'ultrafast', prev_flow)
-    elif method =="DIS Slow": # Unused
-        r = get_flow_from_images_DIS(i1, i2, 'slow', prev_flow)
-    elif method =="DIS Fine":
-        r = get_flow_from_images_DIS(i1, i2, 'fine', prev_flow)
+        return get_flow_from_images_RAFT(i1, i2, raft_model)
+    elif method == "DIS Medium":
+        return get_flow_from_images_DIS(i1, i2, 'medium', prev_flow)
+    elif method == "DIS Fine":
+        return get_flow_from_images_DIS(i1, i2, 'fine', prev_flow)
     elif method == "DenseRLOF": # Unused - requires running opencv-contrib-python (full opencv) INSTEAD of opencv-python
-        r = get_flow_from_images_Dense_RLOF(i1, i2, prev_flow)
+        return get_flow_from_images_Dense_RLOF(i1, i2, prev_flow)
     elif method == "SF": # Unused - requires running opencv-contrib-python (full opencv) INSTEAD of opencv-python
-        r = get_flow_from_images_SF(i1, i2, prev_flow)
-    elif method =="Farneback Fine": # Unused
-        r = get_flow_from_images_Farneback(i1, i2, 'fine', prev_flow)
-    else: # Farneback Normal:
-        r = get_flow_from_images_Farneback(i1, i2, prev_flow)
-    return r
-    # return detect_scene_change_abs(r)
+        return get_flow_from_images_SF(i1, i2, prev_flow)
+    elif method == "DualTVL1": # Unused - requires running opencv-contrib-python (full opencv) INSTEAD of opencv-python
+        return get_flow_from_images_DualTVL1(i1, i2, prev_flow)
+    elif method == "DeepFlow": # Unused - requires running opencv-contrib-python (full opencv) INSTEAD of opencv-python
+        return get_flow_from_images_DeepFlow(i1, i2, prev_flow)
+    elif method == "PCAFlow": # Unused - requires running opencv-contrib-python (full opencv) INSTEAD of opencv-python
+        return get_flow_from_images_PCAFlow(i1, i2, prev_flow)
+    elif method == "Farneback": # Farneback Normal:
+        return get_flow_from_images_Farneback(i1, i2, prev_flow)
+    # if we reached this point, something went wrong. raise an error:
+    raise RuntimeError(f"Invald flow method name: '{method}'")
 
 def get_flow_from_images_RAFT(i1, i2, raft_model):
     flow = raft_model.predict(i1, i2)
@@ -319,6 +322,24 @@ def get_flow_from_images_Dense_RLOF(i1, i2, last_flow=None):
 
 def get_flow_from_images_SF(i1, i2, last_flow=None, layers = 3, averaging_block_size = 2, max_flow = 4):
     return cv2.optflow.calcOpticalFlowSF(i1, i2, layers, averaging_block_size, max_flow)
+
+def get_flow_from_images_DualTVL1(i1, i2, prev_flow):
+    i1 = cv2.cvtColor(i1, cv2.COLOR_BGR2GRAY)
+    i2 = cv2.cvtColor(i2, cv2.COLOR_BGR2GRAY)
+    f = cv2.optflow.DualTVL1OpticalFlow_create()
+    return f.calc(i1, i2, prev_flow)
+
+def get_flow_from_images_DeepFlow(i1, i2, prev_flow):
+    i1 = cv2.cvtColor(i1, cv2.COLOR_BGR2GRAY)
+    i2 = cv2.cvtColor(i2, cv2.COLOR_BGR2GRAY)
+    f = cv2.optflow.createOptFlow_DeepFlow()
+    return f.calc(i1, i2, prev_flow)
+
+def get_flow_from_images_PCAFlow(i1, i2, prev_flow):
+    i1 = cv2.cvtColor(i1, cv2.COLOR_BGR2GRAY)
+    i2 = cv2.cvtColor(i2, cv2.COLOR_BGR2GRAY)
+    f = cv2.optflow.createOptFlow_PCAFlow()
+    return f.calc(i1, i2, prev_flow)
 
 def get_flow_from_images_Farneback(i1, i2, preset="normal", last_flow=None, pyr_scale = 0.5, levels = 3, winsize = 15, iterations = 3, poly_n = 5, poly_sigma = 1.2, flags = 0):
     flags = cv2.OPTFLOW_FARNEBACK_GAUSSIAN         # Specify the operation flags
@@ -440,10 +461,8 @@ def get_resized_image_from_filename(im, dimensions):
     img = cv2.imread(im)
     return cv2.resize(img, (dimensions[0], dimensions[1]), cv2.INTER_AREA)
 
-def remap(img, flow, border_mode = cv2.BORDER_REFLECT_101):
-    # copyMakeBorder doesn't support wrap, but supports replicate. Replaces wrap with reflect101.
-    if border_mode == cv2.BORDER_WRAP:
-        border_mode = cv2.BORDER_REFLECT_101
+def remap(img, flow):
+    border_mode = cv2.BORDER_REFLECT_101
     h, w = img.shape[:2]
     displacement = int(h * 0.25), int(w * 0.25)
     larger_img = cv2.copyMakeBorder(img, displacement[0], displacement[0], displacement[1], displacement[1], border_mode)
