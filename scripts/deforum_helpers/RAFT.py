@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 import torchvision.transforms.functional as F
 from torchvision.models.optical_flow import Raft_Large_Weights, raft_large
 
@@ -16,7 +17,10 @@ class RAFT:
         img1_batch, img2_batch = self.transforms(img1_batch, img2_batch)
 
         with torch.no_grad():
-            flow = self.model(image1 = img1_batch.to(self.device), image2 = img2_batch.to(self.device), num_flow_updates = num_flow_updates)[-1].cpu().numpy()[0]
+            flow = self.model(image1=img1_batch.to(self.device), image2=img2_batch.to(self.device), num_flow_updates=num_flow_updates)[-1].cpu().numpy()[0]
+
+        # align the flow array to have the shape (w, h, 2) so it's compatible with the rest of CV2's flow methods
+        flow = np.transpose(flow, (1, 2, 0))
 
         return flow
 

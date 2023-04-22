@@ -266,7 +266,7 @@ def get_flow_from_images(i1, i2, method, raft_model, prev_flow=None): # Unused p
         if raft_model is None:
             raise Exception("RAFT Model not provided to get_flow_from_images function, cannot continue.")
         r = get_flow_from_images_RAFT(i1, i2, raft_model)       
-    if method =="DIS Medium":
+    elif method =="DIS Medium":
         r = get_flow_from_images_DIS(i1, i2, 'medium', prev_flow)
     elif method =="DIS Fast": # Unused
         r = get_flow_from_images_DIS(i1, i2, 'fast', prev_flow)
