@@ -92,7 +92,7 @@ for issue in repo.get_issues():
 
             # Add the comment to the issue
             issue.create_comment(comment)
-        elif issue.state is 'closed':
+        elif repo.get_label("invalid") in issue.labels:
             print('Issue is fine')
             issue.edit(state='open')
             issue.delete_labels()
