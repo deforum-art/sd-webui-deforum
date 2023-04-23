@@ -81,8 +81,8 @@ for issue in repo.get_issues():
         if not check_title_concise(issue.title, 13):
             error_messages.append("The issue title should be concise and contain no more than 13 words.")
 
-        if not check_commit_id_format(issue.body):
-            error_messages.append("Provide a valid commit ID in the format 'commit id - [commit_hash]' **both** for the WebUI and the Extension.")
+        # if not check_commit_id_format(issue.body):
+            # error_messages.append("Provide a valid commit ID in the format 'commit id - [commit_hash]' **both** for the WebUI and the Extension.")
             
         # If there are any error messages, close the issue and send a comment with the error messages
         if error_messages:
