@@ -88,7 +88,7 @@ for issue in repo.get_issues():
         if error_messages:
             print('Invalid issue, closing')
             # Add the "not planned" label to the issue
-            not_planned_label = repo.get_label("invalid")
+            not_planned_label = repo.get_label("wrong format")
             issue.add_to_labels(not_planned_label)
             
             # Close the issue
@@ -100,7 +100,7 @@ for issue in repo.get_issues():
 
             # Add the comment to the issue
             issue.create_comment(comment)
-        elif repo.get_label("invalid") in issue.labels:
+        elif repo.get_label("wrong format") in issue.labels:
             print('Issue is fine')
             issue.edit(state='open')
             issue.delete_labels()
