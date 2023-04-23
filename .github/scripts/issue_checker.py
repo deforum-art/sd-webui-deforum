@@ -45,17 +45,23 @@ for issue in repo.get_issues():
     def check_commit_id_format(issue_body):
         match = re.search(r'webui commit id - ([a-fA-F0-9]+|\[[a-fA-F0-9]+\])', issue_body)
         if not match:
+            print('webui_commit_id not found')
             return False
         webui_commit_id = match.group(1)
+        print(f'webui_commit_id {webui_commit_id}')
         webui_commit_id = webui_commit_id.replace("[", "").replace("]", "")
         if not (7 <= len(webui_commit_id) <= 40):
+            print(f'invalid length!')
             return False
         match = re.search(r'deforum exten commit id - ([a-fA-F0-9]+|\[[a-fA-F0-9]+\])', issue_body)
         if match:
+            print('deforum commit id not found')
             return False
         t2v_commit_id = match.group(1)
+        print(f'deforum_commit_id {t2v_commit_id}')
         t2v_commit_id = t2v_commit_id.replace("[", "").replace("]", "")
         if not (7 <= len(t2v_commit_id) <= 40):
+            print(f'invalid length!')
             return False
         return True
 
