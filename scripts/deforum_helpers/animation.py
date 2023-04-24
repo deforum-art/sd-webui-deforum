@@ -1,3 +1,4 @@
+from time import sleep
 import numpy as np
 import cv2
 from functools import reduce
@@ -6,7 +7,7 @@ import py3d_tools as p3d
 import torch
 from einops import rearrange
 from .prompt import check_is_number
-from .live_editing import live_edit_get_rotation_speed
+from .live_editing import live_edit_get_rotation_speed,live_edit_request_received, first_live_edit_request_received
 
 # Webui
 from modules.shared import state
@@ -202,8 +203,10 @@ def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
         -keys.translation_z_series[frame_idx] * TRANSLATION_SCALE
     ]
 
-    live_editing_look_at = live_edit_get_rotation_speed(prev_img_cv2, anim_args, keys, frame_idx)
-
+    live_editing_look_at = live_edit_get_rotation_speed(prev_img_cv2, anim_args, keys, frame_idx) 
+    while(live_editing_look_at[0] == 0 and live_editing_look_at[1] == 0 and live_editing_look_at[2] == 0):
+        live_editing_look_at = live_edit_get_rotation_speed(prev_img_cv2, anim_args, keys, frame_idx)
+        sleep(1)
     rotate_xyz = [
         math.radians(keys.rotation_3d_x_series[frame_idx]) - live_editing_look_at[1], 
         math.radians(keys.rotation_3d_y_series[frame_idx]) + live_editing_look_at[0], 

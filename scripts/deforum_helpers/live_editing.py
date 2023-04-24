@@ -1,9 +1,14 @@
 from glob import glob
+from time import sleep
 from tkinter import N
+import numpy as np
+
 from pydantic import BaseModel, Field
 import math
 from modules.script_callbacks import on_app_started
 
+first_live_edit_request_received = False
+live_edit_request_received = False
 def live_edit_on_app_start(demo, app):
     app.add_api_route("/deforum/live-edit/look-at", live_edit_look_at, methods=["POST"])
 
@@ -17,6 +22,12 @@ class LiveEditRequest(BaseModel):
 
 #Called when the user clicks on the image to move the camera to that point
 def live_edit_look_at(req: LiveEditRequest):
+    global live_edit_request_received
+    live_edit_request_received = True
+    global first_live_edit_request_received
+    first_live_edit_request_received = True
+
+
     print("Received lookat request, settign target point", req)
     global alignment_target_point_01
     alignment_target_point_01 = (req.x, req.y)
@@ -99,7 +110,26 @@ def finish_rotation_change():
     alignment_target_point_01 = None
     rad_distance_to_target = (0,0)
     resume_scaling_factor = 1
+    global live_edit_request_received
+    live_edit_request_received = False
 
+def get_speed(frame_idx):
+    global look_at_duration
+    global start_frame
+    if start_frame is None:
+        return 0
+    startedNFramesAgo = frame_idx - start_frame
+    global easingFunction
+    interpolationProgress = easingFunction(startedNFramesAgo / look_at_duration)
+    interpolationProgressSpeed = (easingFunction(startedNFramesAgo / look_at_duration) - easingFunction((startedNFramesAgo - 1) / look_at_duration))
+    if interpolationProgressSpeed is None:
+        # Lazy fix. Sometimes interpolationProgressSpeed is none, which breaks things
+        return 0
+    return interpolationProgressSpeed
+def get_max_speed():
+    global look_at_duration
+    global start_frame
+    return get_speed(start_frame+look_at_duration/2)
 def live_edit_get_rotation_speed(prev_img_cv2, anim_args, keys, frame_idx):
     global rad_distance_to_target
     global start_frame
@@ -114,15 +144,17 @@ def live_edit_get_rotation_speed(prev_img_cv2, anim_args, keys, frame_idx):
         start_rotation_change(frame_idx, prev_img_cv2, keys)
 
     startedNFramesAgo = frame_idx - start_frame
+    global easingFunction
     interpolationProgress = easingFunction(startedNFramesAgo / look_at_duration)
-    global resume_scaling_factor
-    interpolationProgressSpeed = resume_scaling_factor * (easingFunction(startedNFramesAgo / look_at_duration) - easingFunction((startedNFramesAgo - 1) / look_at_duration))
+    interpolationProgressSpeed = (easingFunction(startedNFramesAgo / look_at_duration) - easingFunction((startedNFramesAgo - 1) / look_at_duration))
     rotation_speed_cur_frame = (rad_distance_to_target[0] * interpolationProgressSpeed, rad_distance_to_target[1] * interpolationProgressSpeed, 0)
     print(f"Rotating to align to {alignment_target_point_01} ({startedNFramesAgo}/{look_at_duration}) - total rotation: {rad_distance_to_target}")
     #print(f"--Rotation speed this frame: {rotation_speed_cur_frame}")
     #print(f"--Rotation progress: {interpolationProgress}")
     #print(f"--Rotation progress speed: {interpolationProgressSpeed}")
     #print(f"--Nearplane: {keys.near_series[frame_idx]}")
+    global resume_scaling_factor
+
     global was_interupted
     if was_interupted:
         global interruped_rotation_last_velocity01
@@ -138,6 +170,11 @@ def live_edit_get_rotation_speed(prev_img_cv2, anim_args, keys, frame_idx):
     
     return rotation_speed_cur_frame
     
+def live_edit_get_strength_adjustment(frame_idx, keys):
+    velocity01 = get_speed(frame_idx)/get_max_speed()
+    strengthMult = 0.1
+    global rad_distance_to_target
+    return velocity01 * strengthMult * np.linalg.norm([ x / math.radians(keys.fov_series[frame_idx]) / 2 for x in rad_distance_to_target])
 
 def get_translation_until(frame_idx, current_frame_idx, anim_args, keys):
     return (0,0,0.5)

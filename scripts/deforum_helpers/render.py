@@ -1,6 +1,7 @@
 from glob import glob
 import os
 import json
+from time import sleep
 import pandas as pd
 import cv2
 import numpy as np
@@ -28,8 +29,10 @@ from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 # Webui
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
+from .live_editing import live_edit_request_received, first_live_edit_request_received, live_edit_get_strength_adjustment        
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+   
     # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         if anim_args.hybrid_composite or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
@@ -176,7 +179,16 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             break
 
         print(f"\033[36mAnimation frame: \033[0m{frame_idx}/{anim_args.max_frames}  ")
+        global first_live_edit_request_received, live_edit_request_received
+        print(first_live_edit_request_received, live_edit_request_received)
+        if first_live_edit_request_received and not live_edit_request_received:
+            print("")
+            print("Waiting for next live edit request")
 
+            #wating for next live edit request 
+            while(not live_edit_request_received):
+                sleep(1)
+        print("Live edit request received")
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
         scale = keys.cfg_scale_schedule_series[frame_idx]
@@ -346,6 +358,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             # use transformed previous frame as init for current
             args.use_init = True
             args.init_sample = Image.fromarray(cv2.cvtColor(noised_image, cv2.COLOR_BGR2RGB))
+            args.strength += live_edit_get_strength_adjustment(frame_idx, keys)
             args.strength = max(0.0, min(1.0, strength))
         
         args.scale = scale
@@ -415,7 +428,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             devices.torch_gc()
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
             sd_hijack.model_hijack.hijack(sd_model)
-        
         # sample the diffusion model
         image = generate(args, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
         patience = 10
