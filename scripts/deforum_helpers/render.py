@@ -33,6 +33,7 @@ from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 from .subtitle_handler import init_srt_file, write_frame_subtitle, format_animation_params
 from .resume import get_resume_vars
 from .masks import do_overlay_mask
+from .prompt import prepare_prompt
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 from .RAFT import RAFT
@@ -453,7 +454,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         # grab prompt for current frame
         args.prompt = prompt_series[frame_idx]
-        
+      
         if args.seed_behavior == 'schedule' or use_parseq:
             args.seed = int(keys.seed_schedule_series[frame_idx])
 
@@ -472,29 +473,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             anim_args.enable_subseed_scheduling = True
             args.subseed = int(keys.subseed_schedule_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
-        
-        max_f = anim_args.max_frames - 1
-        pattern = r'`.*?`'
-        regex = re.compile(pattern)
-        prompt_parsed = args.prompt
-        for match in regex.finditer(prompt_parsed):
-            matched_string = match.group(0)
-            parsed_string = matched_string.replace('t', f'{frame_idx}').replace("max_f" , f"{max_f}").replace('`','')
-            parsed_value = numexpr.evaluate(parsed_string)
-            prompt_parsed = prompt_parsed.replace(matched_string, str(parsed_value))
 
-        prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
-        prompt_to_print = prompt_to_print.strip()
-        after_neg = "".join(after_neg).strip()
-
-        print(f"\033[32mSeed: \033[0m{args.seed}")
-        print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
-        if after_neg and after_neg.strip():
-            print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
-            prompt_to_print += f"--neg {after_neg}"
-
-        # set value back into the prompt
-        args.prompt = prompt_to_print
+        # set value back into the prompt - prepare and report prompt and seed
+        args.prompt = prepare_prompt(args.prompt, anim_args.max_frames, args.seed)
 
         # grab init image for current frame
         if using_vid_init:
