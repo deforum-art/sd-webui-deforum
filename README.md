@@ -9,6 +9,15 @@
     </a>
 </p>
 
+# Live Editing Fork
+
+This is a WIP modifcation of deforum. It currently allows you to click on the preview image to smoothly rotate the camera to look at the point you clicked, thus allowing you to make dynamic camera moves towards interesting points that emerge during generation 
+Limitations:
+* Only works in 3D mode
+* There is no UI for it yet. Just click the preview window, and if you're in 3d mode it will start rotating the camera
+* After each camera movement is done, the generation will pause (without any indication) until you click again. 
+
+
 ## Before Starting
 
 **Important note about versions updating:** <br>
