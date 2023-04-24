@@ -516,7 +516,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         # optical flow redo before generation
         if anim_args.optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
-            print(f"Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before final diffusion.")
+            print(f"Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before generation.")
             stored_seed = args.seed
             args.seed = random.randint(0, 2**32 - 1)
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
@@ -524,8 +524,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             disposable_flow = get_flow_from_images(prev_img, disposable_image, anim_args.optical_flow_redo_generation, raft_model)
             disposable_image = cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB)
             disposable_image = image_transform_optical_flow(disposable_image, disposable_flow, redo_flow_factor)
-            args.init_sample = Image.fromarray(disposable_image)
             args.seed = stored_seed
+            args.init_sample = Image.fromarray(disposable_image)
             del(disposable_image,disposable_flow,stored_seed)
             gc.collect()
 
@@ -533,16 +533,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0:
             stored_seed = args.seed
             for n in range(0,int(anim_args.diffusion_redo)):
+                print(f"Redo generation {n+1} of {int(anim_args.diffusion_redo)} before final generation")
                 args.seed = random.randint(0, 2**32 - 1)
                 disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                 disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
                 # color match on last one only
                 if (n == int(anim_args.diffusion_redo)):
                     disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)                
+                args.seed = stored_seed
                 args.init_sample = Image.fromarray(cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB))
-                del(disposable_image)
-                gc.collect()
-            args.seed = stored_seed
+            del(disposable_image, stored_seed)
+            gc.collect()
 
         # generation
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
@@ -552,23 +553,14 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         # do hybrid video after generation
         if frame_idx > 0 and anim_args.hybrid_composite == 'After Generation':
-            image = np.array(image)
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
             args, image = hybrid_composite(args, anim_args, frame_idx, image, depth_model, hybrid_comp_schedules, root)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            image = Image.fromarray(image)
+            image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
         # color matching on first frame is after generation, color match was collected earlier, so we do an extra generation to avoid the corruption introduced by the color match of first output
         if frame_idx == 0 and (anim_args.color_coherence == 'Image' or (anim_args.color_coherence == 'Video Input' and hybrid_available)):
-            image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-            image = maintain_colors(image, color_match_sample, anim_args.color_coherence)
-            # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            # image = Image.fromarray(image)
-            stored_seed = args.seed
-            args.seed = random.randint(0, 2**32 - 1)
-            args.init_sample = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-            image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
-            args.seed = stored_seed
+            image = maintain_colors(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR), color_match_sample, anim_args.color_coherence)
+            image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
         # intercept and override to grayscale
         if anim_args.color_force_grayscale:
