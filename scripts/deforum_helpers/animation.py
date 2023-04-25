@@ -5,6 +5,7 @@ import math
 import py3d_tools as p3d
 import torch
 from einops import rearrange
+from time import sleep
 from .prompt import check_is_number
 from .live_editing import live_edit_get_rotation_speed
 
