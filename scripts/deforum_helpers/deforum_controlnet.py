@@ -51,7 +51,6 @@ def setup_controlnet_ui_raw():
     def create_model_in_tab_ui(cn_id):
         with gr.Row():
             enabled = gr.Checkbox(label="Enable", value=False, interactive=True)
-            guess_mode = gr.Checkbox(label="Guess Mode", value=False, visible=False, interactive=True)
             pixel_perfect = gr.Checkbox(label="Pixel Perfect", value=False, visible=False, interactive=True)
             low_vram = gr.Checkbox(label="Low VRAM", value=False, visible=False, interactive=True)
         with gr.Row(visible=False) as mod_row:
@@ -68,6 +67,8 @@ def setup_controlnet_ui_raw():
             processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
             threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
             threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
+        with gr.Row(visible=False) as control_mode_row:
+            control_mode = gr.Radio(choices=["Balanced", "My prompt is more important", "ControlNet is more important"], value="Balanced", label="Control Mode", interactive=True)            
         with gr.Row(visible=False) as env_row:
             resize_mode = gr.Radio(choices=["Outer Fit (Shrink to Fit)", "Inner Fit (Scale to Fit)", "Just Resize"], value="Inner Fit (Scale to Fit)", label="Resize Mode", interactive=True)
         with gr.Row(visible=False) as vid_settings_row:
@@ -76,10 +77,11 @@ def setup_controlnet_ui_raw():
             mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
         input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
         input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
-        hide_output_list = [guess_mode,pixel_perfect,low_vram,mod_row,module,weight_row,env_row,vid_settings_row,input_video_chosen_file,input_video_mask_chosen_file, advanced_column] 
+        hide_output_list = [pixel_perfect,low_vram,mod_row,module,weight_row,env_row,vid_settings_row,input_video_chosen_file,input_video_mask_chosen_file, advanced_column, control_mode_row] 
         for cn_output in hide_output_list:
             enabled.change(fn=hide_ui_by_cn_status, inputs=enabled,outputs=cn_output)
-        module.change(build_sliders, inputs=[module], outputs=[processor_res, threshold_a, threshold_b, advanced_column])
+        module.change(build_sliders, inputs=[module, pixel_perfect], outputs=[processor_res, threshold_a, threshold_b, advanced_column])
+        pixel_perfect.change(build_sliders, inputs=[module, pixel_perfect], outputs=[processor_res, threshold_a, threshold_b, advanced_column])
         infotext_fields.extend([
                 (module, f"ControlNet Preprocessor"),
                 (model, f"ControlNet Model"),
@@ -87,8 +89,8 @@ def setup_controlnet_ui_raw():
         ])
         
         return {key: value for key, value in locals().items() if key in [
-            "enabled", "guess_mode", "pixel_perfect","low_vram", "module", "model", "weight",
-            "guidance_start", "guidance_end", "processor_res", "threshold_a", "threshold_b", "resize_mode",
+            "enabled", "pixel_perfect","low_vram", "module", "model", "weight",
+            "guidance_start", "guidance_end", "processor_res", "threshold_a", "threshold_b", "resize_mode", "control_mode",
             "overwrite_frames", "vid_path", "mask_vid_path", "input_video_chosen_file", "input_video_mask_chosen_file"
         ]}
         
@@ -129,9 +131,9 @@ def controlnet_component_names():
     return [f'cn_{i}_{component}' for i in range(1, num_of_models+1) for component in [
         'input_video_chosen_file', 'input_video_mask_chosen_file',
         'overwrite_frames', 'vid_path', 'mask_vid_path', 'enabled',
-        'guess_mode', 'low_vram', 'pixel_perfect',
+        'low_vram', 'pixel_perfect',
         'module', 'model', 'weight', 'guidance_start', 'guidance_end',
-        'processor_res', 'threshold_a', 'threshold_b', 'resize_mode'
+        'processor_res', 'threshold_a', 'threshold_b', 'resize_mode', 'control_mode'
     ]]
 
 def controlnet_infotext():
@@ -174,7 +176,7 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
 
     def create_cnu_dict(cn_args, prefix, img_np, mask_np):
         keys = [
-            "enabled", "module", "model", "weight", "guess_mode", "resize_mode", "low_vram","pixel_perfect",
+            "enabled", "module", "model", "weight", "resize_mode", "control_mode", "low_vram","pixel_perfect",
             "processor_res", "threshold_a", "threshold_b", "guidance_start", "guidance_end"
         ]
         cnu = {k: getattr(cn_args, f"{prefix}_{k}") for k in keys}
