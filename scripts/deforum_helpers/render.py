@@ -1,5 +1,7 @@
+from glob import glob
 import os
 import json
+from time import sleep
 import pandas as pd
 import cv2
 import re
@@ -36,17 +38,13 @@ from .masks import do_overlay_mask
 from .prompt import prepare_prompt
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
+from .live_editing import live_edit_request_received, first_live_edit_request_received, live_edit_get_strength_adjustment        
 from .RAFT import RAFT
 from .ZoeDepth import ZoeDepth
 import torch
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-
-    if opts.data.get("deforum_save_gen_info_as_srt"): # create .srt file and set timeframe mechanism using FPS
-        srt_filename = os.path.join(args.outdir, f"{args.timestring}.srt")
-        srt_frame_duration = init_srt_file(srt_filename, video_args.fps)
-
+    # handle hybrid video generation
     if anim_args.animation_mode in ['2D','3D']:
         # handle hybrid video generation
         if anim_args.hybrid_composite != 'None' or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
@@ -221,7 +219,16 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             print("** RESUMING **")
 
         print(f"\033[36mAnimation frame: \033[0m{frame_idx}/{anim_args.max_frames}  ")
+        global first_live_edit_request_received, live_edit_request_received
+        print(first_live_edit_request_received, live_edit_request_received)
+        if first_live_edit_request_received and not live_edit_request_received:
+            print("")
+            print("Waiting for next live edit request")
 
+            #wating for next live edit request 
+            while(not live_edit_request_received):
+                sleep(1)
+        print("Live edit request received")
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
         scale = keys.cfg_scale_schedule_series[frame_idx]
@@ -445,6 +452,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             # use transformed previous frame as init for current
             args.use_init = True
             args.init_sample = Image.fromarray(cv2.cvtColor(noised_image, cv2.COLOR_BGR2RGB))
+            #Disabled because currently broken
+            #args.strength += live_edit_get_strength_adjustment(frame_idx, keys)
             args.strength = max(0.0, min(1.0, strength))
         
         args.scale = scale

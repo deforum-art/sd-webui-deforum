@@ -36,6 +36,7 @@ import modules.shared as shared
 from modules.shared import opts, cmd_opts, state
 from modules.ui import create_output_panel, plaintext_to_html, wrap_gradio_call
 from types import SimpleNamespace
+import deforum_helpers.live_editing
 from deforum_helpers.subtitle_handler import get_user_values
 
 DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
@@ -266,7 +267,9 @@ def on_ui_tabs():
                     )
                 
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
-
+                with gr.Row():
+                    toggle_live_edit_look_at_selection = gr.Button('Select look at point', elem_id='deforum_bump_strength_btn')
+                    bump_strength_slider = gr.Slider(-0.1, -0.3, -0.2, 0.01, elem_id='deforum_bump_strength_slider', label="Bump Strength")
                 with gr.Row(variant='compact'):
                     settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="Settings File", info="settings file path can be relative to webui folder OR full - absolute")
                     #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
