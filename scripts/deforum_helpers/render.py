@@ -358,7 +358,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             # use transformed previous frame as init for current
             args.use_init = True
             args.init_sample = Image.fromarray(cv2.cvtColor(noised_image, cv2.COLOR_BGR2RGB))
-            args.strength += live_edit_get_strength_adjustment(frame_idx, keys)
+            #Disabled because currently broken
+            #args.strength += live_edit_get_strength_adjustment(frame_idx, keys)
             args.strength = max(0.0, min(1.0, strength))
         
         args.scale = scale

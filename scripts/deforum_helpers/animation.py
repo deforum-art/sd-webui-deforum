@@ -1,4 +1,3 @@
-from time import sleep
 import numpy as np
 import cv2
 from functools import reduce
@@ -7,7 +6,7 @@ import py3d_tools as p3d
 import torch
 from einops import rearrange
 from .prompt import check_is_number
-from .live_editing import live_edit_get_rotation_speed,live_edit_request_received, first_live_edit_request_received
+from .live_editing import live_edit_get_rotation_speed
 
 # Webui
 from modules.shared import state

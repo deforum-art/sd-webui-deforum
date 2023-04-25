@@ -251,9 +251,9 @@ def on_ui_tabs():
                     )
                 
                 deforum_gallery, generation_info, html_info, html_log = create_output_panel("deforum", opts.outdir_img2img_samples)
-               # with gr.Row():
-               #     bump_strength_btn = gr.Button('💥', elem_id='deforum_bump_strength_btn')
-                #    bump_strength_slider = gr.Slider(-0.1, -0.3, -0.2, 0.01, elem_id='deforum_bump_strength_slider', label="Bump Strength")
+                with gr.Row():
+                    toggle_live_edit_look_at_selection = gr.Button('Select look at point', elem_id='deforum_bump_strength_btn')
+                    bump_strength_slider = gr.Slider(-0.1, -0.3, -0.2, 0.01, elem_id='deforum_bump_strength_slider', label="Bump Strength")
                 gr.HTML("<p>* Paths can be relative to webui folder OR full - absolute </p>")
                 with gr.Row():
                     settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="General Settings File")
