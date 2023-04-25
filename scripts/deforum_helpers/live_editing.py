@@ -148,7 +148,7 @@ def live_edit_get_rotation_speed(prev_img_cv2, anim_args, keys, frame_idx):
     interpolationProgress = easingFunction(startedNFramesAgo / look_at_duration)
     interpolationProgressSpeed = (easingFunction(startedNFramesAgo / look_at_duration) - easingFunction((startedNFramesAgo - 1) / look_at_duration))
     rotation_speed_cur_frame = (rad_distance_to_target[0] * interpolationProgressSpeed, rad_distance_to_target[1] * interpolationProgressSpeed, 0)
-    print(f"Rotating to align to {alignment_target_point_01} ({startedNFramesAgo}/{look_at_duration}) - total rotation: {rad_distance_to_target}")
+    #print(f"Rotating to align to {alignment_target_point_01} ({startedNFramesAgo}/{look_at_duration}) - total rotation: {rad_distance_to_target}")
     #print(f"--Rotation speed this frame: {rotation_speed_cur_frame}")
     #print(f"--Rotation progress: {interpolationProgress}")
     #print(f"--Rotation progress speed: {interpolationProgressSpeed}")
