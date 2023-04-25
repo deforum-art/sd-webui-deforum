@@ -122,15 +122,14 @@ def get_speed(frame_idx):
     global easingFunction
     interpolationProgress = easingFunction(startedNFramesAgo / look_at_duration)
     interpolationProgressSpeed = (easingFunction(startedNFramesAgo / look_at_duration) - easingFunction((startedNFramesAgo - 1) / look_at_duration))
-    if interpolationProgressSpeed is None:
-        # Lazy fix. Sometimes interpolationProgressSpeed is none, which breaks things
-        return 0
     return interpolationProgressSpeed
 def get_max_speed():
     global look_at_duration
     global start_frame
     return get_speed(start_frame+look_at_duration/2)
 def live_edit_get_rotation_speed(prev_img_cv2, anim_args, keys, frame_idx):
+    print(f"Lookat enabled: {anim_args.live_edit_look_at_enabled}")
+    print("Lookat speed: {anim_args.live_edit_look_at_transition_millis")
     global rad_distance_to_target
     global start_frame
     global look_at_duration

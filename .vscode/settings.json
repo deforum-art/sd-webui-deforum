@@ -1,0 +1,4 @@
+{
+    "python.analysis.autoImportCompletions": true,
+    "editor.tabSize": 2
+}

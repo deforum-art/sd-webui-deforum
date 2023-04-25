@@ -38,13 +38,18 @@ from .masks import do_overlay_mask
 from .prompt import prepare_prompt
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
-from .live_editing import live_edit_request_received, first_live_edit_request_received, live_edit_get_strength_adjustment        
+from .live_editing import live_edit_request_received, first_live_edit_request_received        
 from .RAFT import RAFT
 from .ZoeDepth import ZoeDepth
 import torch
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    # handle hybrid video generation
+    DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+
+    if opts.data.get("deforum_save_gen_info_as_srt"): # create .srt file and set timeframe mechanism using FPS
+        srt_filename = os.path.join(args.outdir, f"{args.timestring}.srt")
+        srt_frame_duration = init_srt_file(srt_filename, video_args.fps)
+
     if anim_args.animation_mode in ['2D','3D']:
         # handle hybrid video generation
         if anim_args.hybrid_composite != 'None' or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:

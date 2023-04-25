@@ -36,6 +36,12 @@ def Root():
     return locals()
 
 def DeforumAnimArgs():
+    #live edit settings
+    live_edit_look_at_enabled = False
+    live_edit_look_at_transition_millis =  250
+    live_edit_look_at_pause_after_move = False
+
+
     animation_mode = '2D' # ['None', '2D', '3D', 'Video Input', 'Interpolation']
     max_frames = 120 
     border = 'replicate' # ['wrap', 'replicate']
@@ -320,6 +326,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             i1 = gr.HTML(i1_store, elem_id='deforum_header')
     else:
         btn = i1 = gr.HTML("")
+    with gr.Row(variant='compact'):
+        live_edit_look_at_enabled = gr.Checkbox(label="Enable interactive generation preview moves", value=da.live_edit_look_at_enabled, elem_id='live_edit_look_at_enabled', interactive=True)
+        live_edit_look_at_transition_millis = gr.Textbox(label="Camera Movement duration (millis)", value=da.live_edit_look_at_transition_millis, elem_id='live_edit_look_at_transition_millis', interactive=True)
+        live_edit_look_at_pause_after_move = gr.Checkbox(label="Pause on movement completion", value=da.live_edit_look_at_pause_after_move, elem_id='live_edit_look_at_pause_after_move', interactive=True)
     # MAIN (TOP) EXTENSION INFO ACCORD
     with gr.Accordion("Info, Links and Help", open=False, elem_id='main_top_info_accord'):
             gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
@@ -1037,7 +1047,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 ### If you're adding a new setting, add it to one of the lists
 ### besides writing it in the setup functions above
 
-anim_args_names =   str(r'''animation_mode, max_frames, border,
+anim_args_names =   str(r'''live_edit_look_at_enabled, live_edit_look_at_transition_millis, live_edit_look_at_pause_after_move,
+                        animation_mode, max_frames, border,
                         angle, zoom, translation_x, translation_y, translation_z, transform_center_x, transform_center_y,
                         rotation_3d_x, rotation_3d_y, rotation_3d_z,
                         enable_perspective_flip,
