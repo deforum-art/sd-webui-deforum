@@ -33,6 +33,7 @@ from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
 from .subtitle_handler import init_srt_file, write_frame_subtitle, format_animation_params
 from .resume import get_resume_vars
 from .masks import do_overlay_mask
+from .prompt import prepare_prompt
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 from .RAFT import RAFT
@@ -453,7 +454,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         # grab prompt for current frame
         args.prompt = prompt_series[frame_idx]
-        
+      
         if args.seed_behavior == 'schedule' or use_parseq:
             args.seed = int(keys.seed_schedule_series[frame_idx])
 
@@ -472,29 +473,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             anim_args.enable_subseed_scheduling = True
             args.subseed = int(keys.subseed_schedule_series[frame_idx])
             args.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
-        
-        max_f = anim_args.max_frames - 1
-        pattern = r'`.*?`'
-        regex = re.compile(pattern)
-        prompt_parsed = args.prompt
-        for match in regex.finditer(prompt_parsed):
-            matched_string = match.group(0)
-            parsed_string = matched_string.replace('t', f'{frame_idx}').replace("max_f" , f"{max_f}").replace('`','')
-            parsed_value = numexpr.evaluate(parsed_string)
-            prompt_parsed = prompt_parsed.replace(matched_string, str(parsed_value))
 
-        prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
-        prompt_to_print = prompt_to_print.strip()
-        after_neg = "".join(after_neg).strip()
-
-        print(f"\033[32mSeed: \033[0m{args.seed}")
-        print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
-        if after_neg and after_neg.strip():
-            print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
-            prompt_to_print += f"--neg {after_neg}"
-
-        # set value back into the prompt
-        args.prompt = prompt_to_print
+        # set value back into the prompt - prepare and report prompt and seed
+        args.prompt = prepare_prompt(args.prompt, anim_args.max_frames, args.seed)
 
         # grab init image for current frame
         if using_vid_init:
@@ -535,7 +516,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         # optical flow redo before generation
         if anim_args.optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
-            print(f"Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before final diffusion.")
+            print(f"Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before generation.")
             stored_seed = args.seed
             args.seed = random.randint(0, 2**32 - 1)
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
@@ -543,8 +524,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             disposable_flow = get_flow_from_images(prev_img, disposable_image, anim_args.optical_flow_redo_generation, raft_model)
             disposable_image = cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB)
             disposable_image = image_transform_optical_flow(disposable_image, disposable_flow, redo_flow_factor)
-            args.init_sample = Image.fromarray(disposable_image)
             args.seed = stored_seed
+            args.init_sample = Image.fromarray(disposable_image)
             del(disposable_image,disposable_flow,stored_seed)
             gc.collect()
 
@@ -552,16 +533,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0:
             stored_seed = args.seed
             for n in range(0,int(anim_args.diffusion_redo)):
+                print(f"Redo generation {n+1} of {int(anim_args.diffusion_redo)} before final generation")
                 args.seed = random.randint(0, 2**32 - 1)
                 disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                 disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
                 # color match on last one only
                 if (n == int(anim_args.diffusion_redo)):
                     disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)                
+                args.seed = stored_seed
                 args.init_sample = Image.fromarray(cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB))
-                del(disposable_image)
-                gc.collect()
-            args.seed = stored_seed
+            del(disposable_image, stored_seed)
+            gc.collect()
 
         # generation
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
@@ -571,23 +553,14 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         # do hybrid video after generation
         if frame_idx > 0 and anim_args.hybrid_composite == 'After Generation':
-            image = np.array(image)
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
             args, image = hybrid_composite(args, anim_args, frame_idx, image, depth_model, hybrid_comp_schedules, root)
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            image = Image.fromarray(image)
+            image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
         # color matching on first frame is after generation, color match was collected earlier, so we do an extra generation to avoid the corruption introduced by the color match of first output
         if frame_idx == 0 and (anim_args.color_coherence == 'Image' or (anim_args.color_coherence == 'Video Input' and hybrid_available)):
-            image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-            image = maintain_colors(image, color_match_sample, anim_args.color_coherence)
-            # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            # image = Image.fromarray(image)
-            stored_seed = args.seed
-            args.seed = random.randint(0, 2**32 - 1)
-            args.init_sample = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-            image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
-            args.seed = stored_seed
+            image = maintain_colors(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR), color_match_sample, anim_args.color_coherence)
+            image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
         # intercept and override to grayscale
         if anim_args.color_force_grayscale:
