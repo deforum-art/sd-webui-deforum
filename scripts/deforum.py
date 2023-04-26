@@ -109,8 +109,8 @@ def run_deforum(*args, **kwargs):
             else:
                 print('Other modes are not available yet!')
         except Exception as e:
-            print(f"Error: {e}. Check your schedules/ init values please.")
-            return None, None, None, None, f"Error: '{e}'. Check your schedules/ init values please.", plaintext_to_html('') 
+            print(f"Error: {e}. Check your schedules/ init values please. Also make sure you don't have a forward slash in any of your PATHs - use / instead of \\.")
+            return None, None, None, None, f"Error: '{e}'. Check your schedules/ init values please. Also make sure you don't have a forward slash in any of your PATHs - use / instead of \\.", plaintext_to_html('') 
         finally:
             shared.total_tqdm = tqdm_backup
             opts.data["CLIP_stop_at_last_layers"] = root.initial_clipskip
