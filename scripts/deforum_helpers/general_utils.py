@@ -103,3 +103,9 @@ def substitute_placeholders(template, arg_list, base_folder_path):
     formatted_string = re.sub(r"{(\w+)}", lambda m: custom_placeholder_format(values, m), template)
     formatted_string = re.sub(r'[<>:"/\\|?*\s,]', '_', formatted_string)
     return formatted_string[:max_length]
+
+def count_files_in_folder(folder_path):
+    import glob
+    file_pattern = folder_path + "/*"
+    file_count = len(glob.glob(file_pattern))
+    return file_count

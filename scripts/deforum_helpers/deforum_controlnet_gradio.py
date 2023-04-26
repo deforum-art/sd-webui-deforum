@@ -23,6 +23,9 @@ import gradio as gr
     # table.add_row(*rows)
     # console.print(table)
 
+def hide_ui_by_cn_status(choice):
+    return gr.update(visible=True) if choice else gr.update(visible=False)
+    
 class ToolButton(gr.Button, gr.components.FormComponent):
         """Small button with single emoji as text, fits inside gradio forms"""
         def __init__(self, **kwargs):
