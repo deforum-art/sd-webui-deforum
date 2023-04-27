@@ -1,0 +1,23 @@
+name: Issue Checker
+
+on:
+  issues:
+    types: [opened, reopened, edited]
+
+jobs:
+  check_issue:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: pip install PyGithub
+    - name: Check issue
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ISSUE_NUMBER: ${{ github.event.number }}
+      run: python .github/scripts/issue_checker.py

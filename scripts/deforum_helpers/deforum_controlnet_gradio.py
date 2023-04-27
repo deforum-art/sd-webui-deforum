@@ -23,6 +23,9 @@ import gradio as gr
     # table.add_row(*rows)
     # console.print(table)
 
+def hide_ui_by_cn_status(choice):
+    return gr.update(visible=True) if choice else gr.update(visible=False)
+    
 class ToolButton(gr.Button, gr.components.FormComponent):
         """Small button with single emoji as text, fits inside gradio forms"""
         def __init__(self, **kwargs):
@@ -31,102 +34,102 @@ class ToolButton(gr.Button, gr.components.FormComponent):
         def get_block_name(self):
             return "button"
              
-def build_sliders(module):
-    # module = cnet_1.get_module_basename(module)
+def build_sliders(module, pp):
+    # module = self.get_module_basename(module)
     if module == "canny":
         return [
-            gr.update(label="Preprocessor resolution", value=512, minimum=64, maximum=2048, step=1, visible=True, interactive=True),
+            gr.update(label="Preprocessor resolution", value=512, minimum=64, maximum=2048, step=1, visible=not pp, interactive=not pp),
             gr.update(label="Canny low threshold", minimum=1, maximum=255, value=100, step=1, visible=True, interactive=True),
             gr.update(label="Canny high threshold", minimum=1, maximum=255, value=200, step=1, visible=True, interactive=True),
             gr.update(visible=True)
         ]
     elif module == "mlsd": #Hough
         return [
-            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=True, interactive=True),
+            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=not pp, interactive=not pp),
             gr.update(label="Hough value threshold (MLSD)", minimum=0.01, maximum=2.0, value=0.1, step=0.01, visible=True, interactive=True),
             gr.update(label="Hough distance threshold (MLSD)", minimum=0.01, maximum=20.0, value=0.1, step=0.01, visible=True, interactive=True),
             gr.update(visible=True)
         ]
     elif module in ["hed", "scribble_hed", "hed_safe"]:
         return [
-            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=True, interactive=True),
+            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=not pp, interactive=not pp),
             gr.update(visible=False, interactive=False),
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
         ]
     elif module in ["openpose", "openpose_full", "segmentation"]:
         return [
-            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=True, interactive=True),
+            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=not pp, interactive=not pp),
             gr.update(visible=False, interactive=False),
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
         ]
     elif module == "depth":
         return [
-            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=True, interactive=True),
+            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=not pp, interactive=not pp),
             gr.update(visible=False, interactive=False),
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
         ]
     elif module in ["depth_leres", "depth_leres_boost"]:
         return [
-            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=True, interactive=True),
+            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=not pp, interactive=not pp),
             gr.update(label="Remove Near %", value=0, minimum=0, maximum=100, step=0.1, visible=True, interactive=True),
             gr.update(label="Remove Background %", value=0, minimum=0, maximum=100, step=0.1, visible=True, interactive=True),
             gr.update(visible=True)
         ]
     elif module == "normal_map":
         return [
-            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=True, interactive=True),
+            gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=not pp, interactive=not pp),
             gr.update(label="Normal background threshold", minimum=0.0, maximum=1.0, value=0.4, step=0.01, visible=True, interactive=True),
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
         ]
     elif module == "threshold":
         return [
-            gr.update(label="Preprocessor resolution", value=512, minimum=64, maximum=2048, step=1, visible=True, interactive=True),
+            gr.update(label="Preprocessor resolution", value=512, minimum=64, maximum=2048, step=1, visible=not pp, interactive=not pp),
             gr.update(label="Binarization Threshold", minimum=0, maximum=255, value=127, step=1, visible=True, interactive=True),
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
         ]
     elif module == "scribble_xdog":
         return [
-            gr.update(label="Preprocessor resolution", value=512, minimum=64, maximum=2048, step=1, visible=True, interactive=True),
+            gr.update(label="Preprocessor resolution", value=512, minimum=64, maximum=2048, step=1, visible=not pp, interactive=not pp),
             gr.update(label="XDoG Threshold", minimum=1, maximum=64, value=32, step=1, visible=True, interactive=True),
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
         ]
     elif module == "tile_gaussian":
         return [
-            gr.update(label="Preprocessor resolution", value=512, minimum=64, maximum=2048, step=1, visible=True, interactive=True),
-            gr.update(label="Noise", value=16.0, minimum=0.1, maximum=48.0, step=0.01, visible=True, interactive=True),
+            gr.update(visible=False, interactive=False),
+            gr.update(label="Down Sampling Rate", value=1.0, minimum=1.0, maximum=8.0, step=0.01, visible=True, interactive=True),
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
         ]
     elif module == "color":
         return [
-            gr.update(label="Preprocessor Resolution", value=512, minimum=64, maximum=2048, step=8, visible=True, interactive=True),
+            gr.update(label="Preprocessor Resolution", value=512, minimum=64, maximum=2048, step=8, visible=not pp, interactive=not pp),
             gr.update(visible=False, interactive=False),
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
         ]
     elif module == "mediapipe_face":
         return [
-            gr.update(label="Preprocessor Resolution", value=512, minimum=64, maximum=2048, step=8, visible=True, interactive=True),
+            gr.update(label="Preprocessor Resolution", value=512, minimum=64, maximum=2048, step=8, visible=not pp, interactive=not pp),
             gr.update(label="Max Faces", value=1, minimum=1, maximum=10, step=1, visible=True, interactive=True),
             gr.update(label="Min Face Confidence", value=0.5, minimum=0.01, maximum=1.0, step=0.01, visible=True, interactive=True),
             gr.update(visible=True)
         ]
-    elif module == "none":
+    elif module == "none" or "inpaint" in module:
         return [
-            gr.update(label="Preprocessor Resolution", value=64, minimum=64, maximum=2048, visible=False, interactive=False),
+            gr.update(visible=False, interactive=False),
             gr.update(visible=False, interactive=False),
             gr.update(visible=False, interactive=False),
             gr.update(visible=False)
         ]
     else:
         return [
-            gr.update(label="Preprocessor resolution", value=512, minimum=64, maximum=2048, step=1, visible=True, interactive=True),
+            gr.update(label="Preprocessor resolution", value=512, minimum=64, maximum=2048, step=1, visible=not pp, interactive=not pp),
             gr.update(visible=False, interactive=False),
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
