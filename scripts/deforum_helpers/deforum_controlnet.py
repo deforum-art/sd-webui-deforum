@@ -82,12 +82,12 @@ def setup_controlnet_ui_raw():
         with gr.Row(visible=False) as vid_path_row:
             vid_path = gr.Textbox(value='', label="ControlNet Input Video/ Image Path", interactive=True)
         with gr.Row(visible=False) as mask_vid_path_row: # invisible temporarily since 26-04-23 until masks are fixed
-            mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video/ Image Path", interactive=True)
+            mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video/ Image Path (*NOT WORKING, kept in UI for CN's devs testing!*)", interactive=True)
         with gr.Row(visible=False) as control_mode_row:
             control_mode = gr.Radio(choices=["Balanced", "My prompt is more important", "ControlNet is more important"], value="Balanced", label="Control Mode", interactive=True)            
         with gr.Row(visible=False) as env_row:
             resize_mode = gr.Radio(choices=["Outer Fit (Shrink to Fit)", "Inner Fit (Scale to Fit)", "Just Resize"], value="Inner Fit (Scale to Fit)", label="Resize Mode", interactive=True)
-        hide_output_list = [pixel_perfect,low_vram,mod_row,module,weight_row,env_row,overwrite_frames,vid_path_row,control_mode_row] # add mask_vid_path_row when masks are working again
+        hide_output_list = [pixel_perfect,low_vram,mod_row,module,weight_row,env_row,overwrite_frames,vid_path_row,control_mode_row, mask_vid_path_row] # add mask_vid_path_row when masks are working again
         for cn_output in hide_output_list:
             enabled.change(fn=hide_ui_by_cn_status, inputs=enabled,outputs=cn_output)
         module.change(build_sliders, inputs=[module, pixel_perfect], outputs=[processor_res, threshold_a, threshold_b, advanced_column])
@@ -160,9 +160,15 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
                 cn_image_np = np.array(Image.open(cn_frame_path).convert("RGB")).astype('uint8')
         cn_maskframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes') # set mask frames folder path        
         if os.path.exists(cn_maskframes):
-            cn_mask_frame_path = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes', f"{frame_idx:09}.jpg")
+            if count_files_in_folder(cn_maskframes) == 1:
+                cn_mask_frame_path = os.path.join(cn_inputframes, "000000001.jpg")
+                print(f'Reading ControlNet *static* mask frame at {cn_mask_frame_path}')
+            else:
+                cn_mask_frame_path = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes', f"{frame_idx:09}.jpg")
+                print(f'Reading ControlNet {cn_idx} mask frame #{frame_idx} at {cn_mask_frame_path}')
             if os.path.exists(cn_mask_frame_path):
                 cn_mask_np = np.array(Image.open(cn_mask_frame_path).convert("RGB")).astype('uint8')
+
         return cn_mask_np, cn_image_np
 
     cnet = find_controlnet()
@@ -196,11 +202,13 @@ def process_controlnet_input_frames(args, anim_args, controlnet_args, video_path
         frame_path = os.path.join(args.outdir, f'controlnet_{id}_{outdir_suffix}')
         os.makedirs(frame_path, exist_ok=True)
         
-        # TODO: handle masks too
         accepted_image_extensions = ('.jpg', '.jpeg', '.png', '.bmp')
-        if video_path.lower().endswith(accepted_image_extensions):
+        if video_path and video_path.lower().endswith(accepted_image_extensions):
             convert_image(video_path, os.path.join(frame_path, '000000001.jpg'))
             print(f"Copied CN Model {id}'s single input image to inputframes folder!")
+        elif mask_path and mask_path.lower().endswith(accepted_image_extensions):
+            convert_image(mask_path, os.path.join(frame_path, '000000001.jpg'))
+            print(f"Copied CN Model {id}'s single input image to inputframes *mask* folder!")
         else:
             print(f'Unpacking ControlNet {id} {"video mask" if mask_path else "base video"}')
             print(f"Exporting Video Frames to {frame_path}...") # future todo, add an if for vid input mode to show actual extract nth param
