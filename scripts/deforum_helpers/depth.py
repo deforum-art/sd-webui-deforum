@@ -207,13 +207,12 @@ class AdaBinsModel:
         self.adabins_helper = None
 
         if not os.path.exists(os.path.join(models_path, 'AdaBins_nyu.pt')):
-            from basicsr.utils.download_util import load_file_from_url
-            load_file_from_url(
-                r"https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt",
-                models_path)
+            import gdown
+            url = 'https://drive.google.com/uc?id=1lvyZZbC9NLcS8a__YPcUP7rDiIpbRpoF'
+            output = os.path.join(models_path, 'AdaBins_nyu.pt')
+            gdown.download(url, output, quiet=False)
             if checksum(os.path.join(models_path, 'AdaBins_nyu.pt')) != "643db9785c663aca72f66739427642726b03acc6c4c1d3755a4587aa2239962746410d63722d87b49fc73581dbc98ed8e3f7e996ff7b9c0d56d0fbc98e23e41a":
-                raise Exception(
-                    r"Error while downloading AdaBins_nyu.pt. Please download from here: https://drive.google.com/file/d/1lvyZZbC9NLcS8a__YPcUP7rDiIpbRpoF and place in: " + models_path)
+                raise Exception(f"Error while downloading AdaBins_nyu.pt. Please download from here: https://drive.google.com/uc?id=1lvyZZbC9NLcS8a__YPcUP7rDiIpbRpoF and place in: {models_path})
         self.adabins_helper = InferenceHelper(models_path=models_path, dataset='nyu', device=self.device)
 
     def delete_model(self):
