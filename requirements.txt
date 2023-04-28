@@ -5,3 +5,4 @@ av
 pims
 imageio_ffmpeg
 rich
+gdown
