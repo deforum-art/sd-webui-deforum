@@ -23,6 +23,7 @@ import modules.scripts as wscripts
 from modules import script_callbacks
 import gradio as gr
 import json
+import traceback
 
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
@@ -62,8 +63,12 @@ def run_deforum(*args, **kwargs):
         try:
             args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict, i)
         except Exception as e:
+            print("\n*START OF TRACEBACK*")
+            traceback.print_exc()
+            print("*END OF TRACEBACK*\n")
+            print("User friendly error message:")
             print(f"Error: {e}. Check your prompts with a JSON validator please.")
-            return None, None, None, None, f"Error: '{e}'. Check your prompts with a JSON validator please.", plaintext_to_html('') 
+            return None, None, None, None, f"Error: '{e}'. Check your prompts with a JSON validator please. Full error message is in your terminal/ cli.", plaintext_to_html('') 
         if args_loaded_ok is False:
             if times_to_run > 1:
                 print(f"\033[31mWARNING:\033[0m skipped running from the following setting file, as it contains an invalid JSON: {os.path.basename(args_dict['custom_settings_file'][i].name)}")
@@ -109,8 +114,12 @@ def run_deforum(*args, **kwargs):
             else:
                 print('Other modes are not available yet!')
         except Exception as e:
+            print("\n*START OF TRACEBACK*")
+            traceback.print_exc()
+            print("*END OF TRACEBACK*\n")
+            print("User friendly error message:")
             print(f"Error: {e}. Check your schedules/ init values please. Also make sure you don't have a forward slash in any of your PATHs - use / instead of \\.")
-            return None, None, None, None, f"Error: '{e}'. Check your schedules/ init values please. Also make sure you don't have a forward slash in any of your PATHs - use / instead of \\.", plaintext_to_html('') 
+            return None, None, None, None, f"Error: '{e}'. Check your schedules/ init values please. Also make sure you don't have a forward slash in any of your PATHs - use / instead of \\. Full error message is in your terminal/ cli.", plaintext_to_html('') 
         finally:
             shared.total_tqdm = tqdm_backup
             opts.data["CLIP_stop_at_last_layers"] = root.initial_clipskip
