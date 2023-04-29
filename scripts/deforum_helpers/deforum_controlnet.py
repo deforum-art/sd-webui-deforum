@@ -179,23 +179,30 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
 
     p.scripts = scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img
+    scripts_store = [s for s in p.scripts.alwayson_scripts]
+    p.scripts.alwayson_scripts.clear()
 
-    def create_cnu_dict(cn_args, prefix, img_np, mask_np):
-        keys = [
-            "enabled", "module", "model", "weight", "resize_mode", "control_mode", "low_vram","pixel_perfect",
-            "processor_res", "threshold_a", "threshold_b", "guidance_start", "guidance_end"
-        ]
-        cnu = {k: getattr(cn_args, f"{prefix}_{k}") for k in keys}
-        cnu['image'] = {'image': img_np, 'mask': mask_np} if mask_np is not None else img_np
-        return cnu
+    try:
+        def create_cnu_dict(cn_args, prefix, img_np, mask_np):
+            keys = [
+                "enabled", "module", "model", "weight", "resize_mode", "control_mode", "low_vram","pixel_perfect",
+                "processor_res", "threshold_a", "threshold_b", "guidance_start", "guidance_end"
+            ]
+            cnu = {k: getattr(cn_args, f"{prefix}_{k}") for k in keys}
+            cnu['image'] = {'image': img_np, 'mask': mask_np} if mask_np is not None else img_np
+            return cnu
 
-    masks_np, images_np = zip(*cn_data)
+        masks_np, images_np = zip(*cn_data)
 
-    cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i+1}", img_np, mask_np))
-            for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
+        cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i+1}", img_np, mask_np))
+                for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
 
-    p.script_args = {"enabled": True} 
-    cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
+        p.script_args = {"enabled": True} 
+        cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
+    except Exception as e:
+        raise e
+    finally:
+        p.scripts.alwayson_scripts = scripts_store
 
 def process_controlnet_input_frames(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
     if (video_path or mask_path) and getattr(controlnet_args, f'cn_{id}_enabled'):
