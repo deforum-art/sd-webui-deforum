@@ -7,6 +7,7 @@ import gc
 import torchvision.transforms as T
 from einops import rearrange, repeat
 from PIL import Image
+from basicsr.utils.download_util import load_file_from_url
 from infer import InferenceHelper
 from midas.dpt_depth import DPTDepthModel
 from midas.transforms import Resize, NormalizeImage, PrepareForNet
@@ -50,7 +51,6 @@ class MidasModel:
         if not self.use_zoe_depth:
             model_file = os.path.join(models_path, 'dpt_large-midas-2f21e586.pt')
             if not os.path.exists(model_file):
-                from basicsr.utils.download_util import load_file_from_url
                 load_file_from_url(r"https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", models_path)
                 if checksum(model_file) != "fcc4829e65d00eeed0a38e9001770676535d2e95c8a16965223aba094936e1316d569563552a852d471f310f83f597e8a238987a26a950d667815e08adaebc06":
                     raise Exception(r"Error while downloading dpt_large-midas-2f21e586.pt. Please download from here: https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt and place in: " + models_path)
@@ -207,10 +207,7 @@ class AdaBinsModel:
         self.adabins_helper = None
 
         if not os.path.exists(os.path.join(models_path, 'AdaBins_nyu.pt')):
-            import gdown
-            url = 'https://drive.google.com/uc?id=1lvyZZbC9NLcS8a__YPcUP7rDiIpbRpoF'
-            output = os.path.join(models_path, 'AdaBins_nyu.pt')
-            gdown.download(url, output, quiet=False)
+            load_file_from_url(r"https://github.com/hithereai/deforum-for-automatic1111-webui/releases/download/AdaBins/AdaBins_nyu.pt", models_path)
             if checksum(os.path.join(models_path, 'AdaBins_nyu.pt')) != "643db9785c663aca72f66739427642726b03acc6c4c1d3755a4587aa2239962746410d63722d87b49fc73581dbc98ed8e3f7e996ff7b9c0d56d0fbc98e23e41a":
                 raise Exception(f"Error while downloading AdaBins_nyu.pt. Please download from here: https://drive.google.com/uc?id=1lvyZZbC9NLcS8a__YPcUP7rDiIpbRpoF and place in: {models_path}")
         self.adabins_helper = InferenceHelper(models_path=models_path, dataset='nyu', device=self.device)
