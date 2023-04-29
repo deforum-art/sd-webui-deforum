@@ -15,7 +15,7 @@ from rich import box
 from modules import scripts
 from modules.shared import opts
 from .deforum_controlnet_gradio import *
-from .general_utils import count_files_in_folder # TODO: do it another way
+from .general_utils import count_files_in_folder, clean_gradio_path_strings # TODO: do it another way
 from .video_audio_utilities import vid2frames, convert_image
 
 # DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
@@ -244,9 +244,9 @@ def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, 
     # this func gets called from render.py once for an entire animation run -->
     # tries to trigger an extraction of CN input frames (regular + masks) from video or image
     for i in range(1, num_of_models+1):
-        vid_path = getattr(controlnet_args, f'cn_{i}_vid_path', None)
-        mask_path = getattr(controlnet_args, f'cn_{i}_mask_vid_path', None)
-        
+        vid_path = clean_gradio_path_strings(getattr(controlnet_args, f'cn_{i}_vid_path', None))
+        mask_path = clean_gradio_path_strings(getattr(controlnet_args, f'cn_{i}_mask_vid_path', None))
+
         if vid_path: # Process base video, if available
             process_controlnet_input_frames(args, anim_args, controlnet_args, vid_path, None, 'inputframes', i)
         

@@ -6,6 +6,7 @@ import numpy as np
 import socket
 import torchvision.transforms.functional as TF
 from modules.shared import opts
+from .general_utils import clean_gradio_path_strings
 
 DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
@@ -37,6 +38,7 @@ def load_img(path : str, shape=None, use_alpha_as_mask=False):
     return image, mask_image
 
 def load_image(image_path :str):
+    image_path = clean_gradio_path_strings(image_path)
     image = None
     if image_path.startswith('http://') or image_path.startswith('https://'):
         try:
