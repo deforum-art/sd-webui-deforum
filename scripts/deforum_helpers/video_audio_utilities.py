@@ -105,9 +105,8 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
                         file_path = os.path.join(video_in_frame_path, file_name)
                         executor.submit(save_frame, image, file_path)
                         t += 1
-                        count += 1
-                    success,image = vidcap.read()
-                        
+                    count += 1
+                    success, image = vidcap.read()
             print(f"Extracted {count} frames from video in {time.time() - start_time:.2f} seconds!")
         else:
             print("Frames already unpacked")
