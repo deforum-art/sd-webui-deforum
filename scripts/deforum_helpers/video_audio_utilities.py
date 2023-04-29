@@ -10,7 +10,7 @@ import glob
 import concurrent.futures
 from pkg_resources import resource_filename
 from modules.shared import state, opts
-from .general_utils import checksum, duplicate_pngs_from_folder
+from .general_utils import checksum, duplicate_pngs_from_folder, clean_gradio_path_strings
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
 
@@ -52,6 +52,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
 
     if n < 1: n = 1 #HACK Gradio interface does not currently allow min/max in gr.Number(...) 
 
+    video_path = clean_gradio_path_strings(video_path)
     # check vid path using a function and only enter if we get True
     if is_vid_path_valid(video_path):
 
@@ -188,6 +189,7 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         raise Exception(f'Error stitching frames to video. Actual runtime error:{e}')
     
     if add_soundtrack != 'None':
+        audio_path = clean_gradio_path_strings(audio_path)
         audio_add_start_time = time.time()
         try:
             cmd = [
