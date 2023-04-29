@@ -179,8 +179,17 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
 
     p.scripts = scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img
-    scripts_store = [s for s in p.scripts.alwayson_scripts]
-    p.scripts.alwayson_scripts.clear()
+
+    # disabling the alwayson scripts
+    # preserve the scripts before cleaning
+    scripts_store = []
+    control_net_store = None
+    for s in p.scripts.alwayson_scripts:
+        if cnet.is_cn_script(s):
+            control_net_store = s
+        scripts_store.append(s)
+    # drop all except CN
+    p.scripts.alwayson_scripts = [control_net_store] if control_net_store is not None else [] # for future, if they fix the external scripts handling
 
     try:
         def create_cnu_dict(cn_args, prefix, img_np, mask_np):
