@@ -280,6 +280,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             tween_frame_start_idx = max(start_frame, frame_idx-turbo_steps)
             cadence_flow = None
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
+                # update progress during cadence
+                state.job = f"frame {tween_frame_idx + 1}/{anim_args.max_frames}"
+                state.job_no = tween_frame_idx + 1
+                # cadence vars
                 tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
                 advance_prev = turbo_prev_image is not None and tween_frame_idx > turbo_prev_frame_idx
                 advance_next = tween_frame_idx > turbo_next_frame_idx
@@ -373,6 +377,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
                 # get prev_img during cadence
                 prev_img = img
+
+                # current image update for cadence frames (left commented because it doesn't currently update the preview)
+                # state.current_image = Image.fromarray(cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB))
 
                 # saving cadence frames
                 filename = f"{args.timestring}_{tween_frame_idx:09}.png"
