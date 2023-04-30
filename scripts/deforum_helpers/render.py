@@ -1,20 +1,16 @@
 import os
-# import json
 import pandas as pd
 import cv2
-# import re
 import numpy as np
-# import itertools
 import numexpr
 import gc
 import random
 import PIL
 import time
 from PIL import Image, ImageOps
-# from .rich import console
 from .generate import generate, isJson
 from .noise import add_noise
-from .animation import anim_frame_warp #,sample_from_cv2, sample_to_cv2,
+from .animation import anim_frame_warp
 from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
 from .video_audio_utilities import get_frame_name, get_next_frame
 from .depth import MidasModel, AdaBinsModel
@@ -37,8 +33,6 @@ from .prompt import prepare_prompt
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 from .RAFT import RAFT
-# from .ZoeDepth import ZoeDepth
-# import torch
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
