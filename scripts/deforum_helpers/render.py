@@ -1,20 +1,20 @@
 import os
-import json
+# import json
 import pandas as pd
 import cv2
-import re
+# import re
 import numpy as np
-import itertools
+# import itertools
 import numexpr
 import gc
 import random
 import PIL
 import time
 from PIL import Image, ImageOps
-from .rich import console
+# from .rich import console
 from .generate import generate, isJson
 from .noise import add_noise
-from .animation import sample_from_cv2, sample_to_cv2, anim_frame_warp
+from .animation import anim_frame_warp #,sample_from_cv2, sample_to_cv2,
 from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
 from .video_audio_utilities import get_frame_name, get_next_frame
 from .depth import MidasModel, AdaBinsModel
@@ -37,8 +37,8 @@ from .prompt import prepare_prompt
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 from .RAFT import RAFT
-from .ZoeDepth import ZoeDepth
-import torch
+# from .ZoeDepth import ZoeDepth
+# import torch
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
@@ -341,14 +341,14 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                                 turbo_next_image = image_transform_ransac(turbo_next_image, matrix, anim_args.hybrid_motion)
                     if anim_args.hybrid_motion in ['Optical Flow']:
                         if anim_args.hybrid_motion_use_prev_img:
-                            flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, prev_img, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_comp_save_extra_frames)                            
+                            flow = get_flow_for_hybrid_motion_prev(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, prev_img, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_flow_consistency, anim_args.hybrid_consistency_blur, anim_args.hybrid_comp_save_extra_frames)                            
                             if advance_prev:
                                 turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, hybrid_comp_schedules['flow_factor'])
                             if advance_next:
                                 turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, hybrid_comp_schedules['flow_factor'])
                             prev_flow = flow
                         else:
-                            flow = get_flow_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_comp_save_extra_frames)
+                            flow = get_flow_for_hybrid_motion(tween_frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_flow_consistency, anim_args.hybrid_consistency_blur, anim_args.hybrid_comp_save_extra_frames)
                             if advance_prev:
                                 turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, hybrid_comp_schedules['flow_factor'])
                             if advance_next:
@@ -408,9 +408,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 prev_img = image_transform_ransac(prev_img, matrix, anim_args.hybrid_motion)    
             if anim_args.hybrid_motion in ['Optical Flow']:
                 if anim_args.hybrid_motion_use_prev_img:
-                    flow = get_flow_for_hybrid_motion_prev(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, prev_img, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_comp_save_extra_frames)
+                    flow = get_flow_for_hybrid_motion_prev(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, prev_img, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_flow_consistency, anim_args.hybrid_consistency_blur, anim_args.hybrid_comp_save_extra_frames)
                 else:
-                    flow = get_flow_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, raft_model,anim_args.hybrid_comp_save_extra_frames)
+                    flow = get_flow_for_hybrid_motion(frame_idx-1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, raft_model, anim_args.hybrid_flow_consistency, anim_args.hybrid_consistency_blur, anim_args.hybrid_comp_save_extra_frames)
                 prev_img = image_transform_optical_flow(prev_img, flow, hybrid_comp_schedules['flow_factor'])
                 prev_flow = flow
 

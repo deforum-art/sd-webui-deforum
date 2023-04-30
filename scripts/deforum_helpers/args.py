@@ -138,6 +138,8 @@ def DeforumAnimArgs():
     hybrid_use_first_frame_as_init_image = True 
     hybrid_motion = "None" #['None','Optical Flow','Perspective','Affine']
     hybrid_motion_use_prev_img = False 
+    hybrid_flow_consistency = False
+    hybrid_consistency_blur = 2
     hybrid_flow_method = "RAFT" #['RAFT', 'DIS Medium', 'DIS Fine', 'Farneback']
     hybrid_composite = 'None' #['None', 'Normal', 'Before Motion', 'After Generation'] 
     hybrid_use_init_image = False 
@@ -739,10 +741,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Column(min_width=340):
                             with gr.Row(variant='compact'):
                                 hybrid_generate_inputframes = gr.Checkbox(label="Generate inputframes", value=False, interactive=True)
-                                hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=False, interactive=True, visible=False)
                                 hybrid_use_first_frame_as_init_image = gr.Checkbox(label="First frame as init image", value=da.hybrid_use_first_frame_as_init_image, interactive=True, visible=False)
                                 hybrid_use_init_image = gr.Checkbox(label="Use init image as video", value=da.hybrid_use_init_image, interactive=True, visible=True)
-                    with gr.Row(variant='compact') as hybrid_flow_row:
+                    with gr.Row(variant='compact'):
                         with gr.Column(variant='compact'):
                             with gr.Row(variant='compact'):
                                 hybrid_motion = gr.Radio(['None', 'Optical Flow', 'Perspective', 'Affine'], label="Hybrid motion", value=da.hybrid_motion, elem_id="hybrid_motion")
@@ -750,7 +751,13 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.Row(variant='compact'):
                                 with gr.Column(scale=1):
                                     hybrid_flow_method = gr.Radio(['RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method", visible=False)
-                    with gr.Row(variant='compact') as hybrid_flow_row:
+                            with gr.Row(variant='compact'):
+                                with gr.Column(variant='compact'):
+                                    hybrid_flow_consistency = gr.Checkbox(label="Flow consistency mask", value=False, interactive=True, visible=False)
+                                    hybrid_consistency_blur = gr.Slider(label="Consistency mask blur", minimum=0, maximum=16, step=1, value=da.hybrid_consistency_blur, interactive=True, visible=False)
+                                with gr.Column(variant='compact'):
+                                    hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=False, interactive=True, visible=False)
+                    with gr.Row(variant='compact'):
                         hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type", visible=False)
                     with gr.Row(visible=False, variant='compact') as hybrid_comp_mask_row:
                         hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="Comp mask equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
@@ -940,6 +947,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         Important Notes:
                         <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
                             <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%09d.png', just replace 20230124234916 with your batch ID. The %09d is important, don't forget it!</li>
+                            <li>In the filename, '%09d' represents the 9 counting numbers, For '20230124234916_000000001.png', use '20230124234916_%09d.png'</li>
+                            <li>If non-deforum frames, use the correct number of counting digits. For files like 'bunnies-0000.jpg', you'd use 'bunnies-%04d.jpg'</li>
                         </ul>
                         """)
                     with gr.Row(variant='compact'):
@@ -993,7 +1002,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     hybrid_comp_mask_type.change(fn=hide_if_none, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_method)
     hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_factor_schedule)
+    hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_consistency)
+    hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_consistency_blur)
     hybrid_motion.change(fn=hide_if_none, inputs=hybrid_motion, outputs=hybrid_motion_use_prev_img)
+    hybrid_flow_consistency.change(fn=hide_if_false, inputs=hybrid_flow_consistency, outputs=hybrid_consistency_blur)
     optical_flow_cadence.change(fn=hide_if_none, inputs=optical_flow_cadence, outputs=cadence_flow_factor_schedule_column)
     hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)
     hybrid_composite_outputs = [humans_masking_accord, hybrid_sch_accord, hybrid_comp_mask_type, hybrid_use_first_frame_as_init_image, hybrid_use_init_image]
@@ -1063,7 +1075,8 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         resume_from_timestring, resume_timestring'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
-                        hybrid_motion, hybrid_motion_use_prev_img, hybrid_flow_method, hybrid_composite, hybrid_use_init_image, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
+                        hybrid_motion, hybrid_motion_use_prev_img, hybrid_flow_consistency, hybrid_consistency_blur, hybrid_flow_method, hybrid_composite,
+                        hybrid_use_init_image, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
                         hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames,
                         hybrid_comp_alpha_schedule, hybrid_flow_factor_schedule,
                         hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,

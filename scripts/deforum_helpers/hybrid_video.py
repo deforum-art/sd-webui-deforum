@@ -1,14 +1,17 @@
-import cv2
 import os
+import cv2
 import pathlib
 import numpy as np
 import random
 import PIL
+import torch
 from PIL import Image, ImageChops, ImageOps, ImageEnhance
 from .video_audio_utilities import vid2frames, get_quick_vid_info, get_frame_name, get_next_frame
 from .human_masking import video2humanmasks
 from .load_images import load_image
+from .consistency_check import make_consistency
 from modules.shared import opts
+from scipy.ndimage.filters import gaussian_filter
 
 DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
@@ -149,8 +152,8 @@ def get_matrix_for_hybrid_motion(frame_idx, dimensions, inputfiles, hybrid_motio
     print(f"Calculating {hybrid_motion} RANSAC matrix for frames {frame_idx} to {frame_idx+1}")
     img1 = cv2.cvtColor(get_resized_image_from_filename(str(inputfiles[frame_idx]), dimensions), cv2.COLOR_BGR2GRAY)
     img2 = cv2.cvtColor(get_resized_image_from_filename(str(inputfiles[frame_idx+1]), dimensions), cv2.COLOR_BGR2GRAY)
-    matrix = get_transformation_matrix_from_images(img1, img2, hybrid_motion)
-    return matrix
+    M = get_transformation_matrix_from_images(img1, img2, hybrid_motion)
+    return M
 
 def get_matrix_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, prev_img, hybrid_motion):
     print(f"Calculating {hybrid_motion} RANSAC matrix for frames {frame_idx} to {frame_idx+1}")
@@ -161,20 +164,24 @@ def get_matrix_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, prev_im
     else:
         prev_img_gray = cv2.cvtColor(prev_img, cv2.COLOR_BGR2GRAY)
         img = cv2.cvtColor(get_resized_image_from_filename(str(inputfiles[frame_idx+1]), dimensions), cv2.COLOR_BGR2GRAY)
-        matrix = get_transformation_matrix_from_images(prev_img_gray, img, hybrid_motion)
-        return matrix
+        M = get_transformation_matrix_from_images(prev_img_gray, img, hybrid_motion)
+        return M
 
-def get_flow_for_hybrid_motion(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, method, raft_model, do_flow_visualization=False):
-    print(f"Calculating {method} optical flow for frames {frame_idx} to {frame_idx+1}")
+def get_flow_for_hybrid_motion(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, method, raft_model, consistency_check=True, consistency_blur=0, do_flow_visualization=False):
+    print(f"Calculating {method} optical flow {'w/consistency mask' if consistency_check else ''} for frames {frame_idx} to {frame_idx+1}")
     i1 = get_resized_image_from_filename(str(inputfiles[frame_idx]), dimensions)
     i2 = get_resized_image_from_filename(str(inputfiles[frame_idx+1]), dimensions)
-    flow = get_flow_from_images(i1, i2, method, raft_model, prev_flow)
-    if do_flow_visualization:
-        save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_frame_path)
+    if consistency_check:
+        flow, reliable_flow = get_reliable_flow_from_images(i1, i2, method, raft_model, prev_flow, consistency_blur) # forward flow w/backward consistency check
+        if do_flow_visualization: save_flow_mask_visualization(frame_idx, reliable_flow, hybrid_frame_path)
+    else:
+        flow = get_flow_from_images(i1, i2, method, raft_model, prev_flow) # old single flow forward
+    if do_flow_visualization: save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_frame_path)
     return flow
 
-def get_flow_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, prev_img, method, raft_model, do_flow_visualization=False):
-    print(f"Calculating {method} optical flow for frames {frame_idx} to {frame_idx+1}")
+def get_flow_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, hybrid_frame_path, prev_flow, prev_img, method, raft_model, consistency_check=True, consistency_blur=0, do_flow_visualization=False):
+    print(f"Calculating {method} optical flow {'w/consistency mask' if consistency_check else ''} for frames {frame_idx} to {frame_idx+1}")
+    reliable_flow = None
     # first handle invalid images by returning default flow
     height, width = prev_img.shape[:2]   
     if height == 0 or width == 0:
@@ -182,16 +189,44 @@ def get_flow_for_hybrid_motion_prev(frame_idx, dimensions, inputfiles, hybrid_fr
     else:
         i1 = prev_img.astype(np.uint8)
         i2 = get_resized_image_from_filename(str(inputfiles[frame_idx+1]), dimensions)
-        flow = get_flow_from_images(i1, i2, method, raft_model, prev_flow)
-    if do_flow_visualization:
-        save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_frame_path)
+        if consistency_check:
+            flow, reliable_flow = get_reliable_flow_from_images(i1, i2, method, raft_model, prev_flow, consistency_blur) # forward flow w/backward consistency check
+            if do_flow_visualization: save_flow_mask_visualization(frame_idx, reliable_flow, hybrid_frame_path)
+        else:
+            flow = get_flow_from_images(i1, i2, method, raft_model, prev_flow)
+    if do_flow_visualization: save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_frame_path)
     return flow
 
-def image_transform_ransac(image_cv2, xform, hybrid_motion):
+def get_reliable_flow_from_images(i1, i2, method, raft_model, prev_flow, consistency_blur, reliability=0):
+    flow_forward = get_flow_from_images(i1, i2, method, raft_model, prev_flow)
+    flow_backward = get_flow_from_images(i2, i1, method, raft_model, None)
+    reliable_flow = make_consistency(flow_forward, flow_backward, edges_unreliable=False)
+    if consistency_blur > 0:
+        reliable_flow = custom_gaussian_blur(reliable_flow.astype(np.float32), 1, consistency_blur)
+    return filter_flow(flow_forward, reliable_flow, consistency_blur, reliability), reliable_flow
+
+def custom_gaussian_blur(input_array, blur_size, sigma):
+    return gaussian_filter(input_array, sigma=(sigma, sigma, 0), order=0, mode='constant', cval=0.0, truncate=blur_size)
+
+def filter_flow(flow, reliable_flow, reliability=0.5, consistency_blur=0):
+    # reliability from reliabile flow: -0.75 is bad, 0 is meh/outside, 1 is great
+    # Create a mask from the first channel of the reliable_flow array
+    mask = reliable_flow[..., 0]
+
+    # to set everything to 1 or 0 based on reliability
+    # mask = np.where(mask >= reliability, 1, 0)
+
+    # Expand the mask to match the shape of the forward_flow array
+    mask = np.repeat(mask[..., np.newaxis], flow.shape[2], axis=2)
+
+    # Apply the mask to the flow
+    return flow * mask
+
+def image_transform_ransac(image_cv2, M, hybrid_motion, depth=None):
     if hybrid_motion == "Perspective":
-        return image_transform_perspective(image_cv2, xform)
+        return image_transform_perspective(image_cv2, M, depth)
     else: # Affine
-        return image_transform_affine(image_cv2, xform)
+        return image_transform_affine(image_cv2, M, depth)
 
 def image_transform_optical_flow(img, flow, flow_factor):
     # if flow factor not normal, calculate flow factor
@@ -204,21 +239,35 @@ def image_transform_optical_flow(img, flow, flow_factor):
     flow[:, :, 1] += np.arange(h)[:,np.newaxis]
     return remap(img, flow)
 
-def image_transform_affine(image_cv2, xform):
-    return cv2.warpAffine(
-        image_cv2,
-        xform,
-        (image_cv2.shape[1],image_cv2.shape[0]),
-        borderMode=cv2.BORDER_REFLECT_101
-    )
+def image_transform_affine(image_cv2, M, depth=None):
+    if depth is None:
+        return cv2.warpAffine(
+            image_cv2,
+            M,
+            (image_cv2.shape[1],image_cv2.shape[0]),
+            borderMode=cv2.BORDER_REFLECT_101
+        )
+    else:
+        return depth_based_affine_warp(
+            image_cv2,
+            depth,
+            M            
+        )
 
-def image_transform_perspective(image_cv2, xform):
-    return cv2.warpPerspective(
-        image_cv2,
-        xform,
-        (image_cv2.shape[1], image_cv2.shape[0]),
-        borderMode=cv2.BORDER_REFLECT_101
-    )
+def image_transform_perspective(image_cv2, M, depth=None):
+    if depth is None:
+        return cv2.warpPerspective(
+            image_cv2,
+            M,
+            (image_cv2.shape[1], image_cv2.shape[0]),
+            borderMode=cv2.BORDER_REFLECT_101
+        )
+    else:
+        return render_3d_perspective(
+            image_cv2,
+            depth,
+            M            
+        )
 
 def get_hybrid_motion_default_matrix(hybrid_motion):
     if hybrid_motion == "Perspective":
@@ -373,7 +422,37 @@ def save_flow_visualization(frame_idx, dimensions, flow, inputfiles, hybrid_fram
     cv2.imwrite(flow_img_file, flow_img)
     print(f"Saved optical flow visualization: {flow_img_file}")
 
-def draw_flow_lines_in_grid_in_color(img, flow, step=8, magnitude_multiplier=1, min_magnitude = 1, max_magnitude = 10000):
+def save_flow_mask_visualization(frame_idx, reliable_flow, hybrid_frame_path, color=True):
+    flow_mask_img_file = os.path.join(hybrid_frame_path, f"flow_mask{frame_idx:09}.jpg")
+    if color:
+        # Normalize the reliable_flow array to the range [0, 255]
+        normalized_reliable_flow = (reliable_flow - reliable_flow.min()) / (reliable_flow.max() - reliable_flow.min()) * 255
+        # Change the data type to np.uint8
+        mask_image = normalized_reliable_flow.astype(np.uint8)
+    else:
+        # Extract the first channel of the reliable_flow array
+        first_channel = reliable_flow[..., 0]
+        # Normalize the first channel to the range [0, 255]
+        normalized_first_channel = (first_channel - first_channel.min()) / (first_channel.max() - first_channel.min()) * 255
+        # Change the data type to np.uint8
+        grayscale_image = normalized_first_channel.astype(np.uint8)
+        # Replicate the grayscale channel three times to form a BGR image
+        mask_image = np.stack((grayscale_image, grayscale_image, grayscale_image), axis=2)
+    cv2.imwrite(flow_mask_img_file, mask_image)
+    print(f"Saved mask flow visualization: {flow_mask_img_file}")
+
+def reliable_flow_to_image(reliable_flow):
+    # Extract the first channel of the reliable_flow array
+    first_channel = reliable_flow[..., 0]
+    # Normalize the first channel to the range [0, 255]
+    normalized_first_channel = (first_channel - first_channel.min()) / (first_channel.max() - first_channel.min()) * 255
+    # Change the data type to np.uint8
+    grayscale_image = normalized_first_channel.astype(np.uint8)
+    # Replicate the grayscale channel three times to form a BGR image
+    bgr_image = np.stack((grayscale_image, grayscale_image, grayscale_image), axis=2)
+    return bgr_image
+
+def draw_flow_lines_in_grid_in_color(img, flow, step=8, magnitude_multiplier=1, min_magnitude = 0, max_magnitude = 10000):
     flow = flow * magnitude_multiplier
     h, w = img.shape[:2]
     y, x = np.mgrid[step/2:h:step, step/2:w:step].reshape(2,-1).astype(int)
