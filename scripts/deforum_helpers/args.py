@@ -619,7 +619,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row(variant='compact'):
                     animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, placeholder="words in here will be added to the start of all positive prompts")
                 with gr.Row(variant='compact'):
-                    animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, placeholder="words in here will be added to the end of all negative prompts")
+                    animation_prompts_negative = gr.Textbox(label="Prompts negative", value="nsfw, nude", lines=1, interactive=True, placeholder="words in here will be added to the end of all negative prompts")
                 # COMPOSABLE MASK SCHEDULING ACCORD
                 with gr.Accordion('Composable Mask scheduling', open=False):
                     gr.HTML("""
