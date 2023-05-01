@@ -1,5 +1,6 @@
 '''
 Taken from https://github.com/Sxela/flow_tools/blob/main
+Minimal changes have been made, some code removed, some commented. Check the link for the original code(s).
 '''
 import numpy as np
 
