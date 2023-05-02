@@ -105,9 +105,9 @@ def DeforumAnimArgs():
     color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
     diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
-    optical_flow_cadence = 'None' #['None', 'DIS Fine', 'DIS Medium', 'Farneback']
+    optical_flow_cadence = 'None' #['None', 'RAFT','DIS Medium', 'DIS Fine', 'Farneback']
     cadence_flow_factor_schedule = "0: (1)"
-    optical_flow_redo_generation = 'None' #['None', 'DIS Fine', 'DIS Medium', 'Farneback']
+    optical_flow_redo_generation = 'None' #['None', 'RAFT', 'DIS Medium', 'DIS Fine', 'Farneback']
     redo_flow_factor_schedule = "0: (1)"
     diffusion_redo = '0'
     #**Noise settings:**
@@ -138,7 +138,9 @@ def DeforumAnimArgs():
     hybrid_use_first_frame_as_init_image = True 
     hybrid_motion = "None" #['None','Optical Flow','Perspective','Affine']
     hybrid_motion_use_prev_img = False 
-    hybrid_flow_method = "DIS Fine" #['DIS Fine', 'DIS Medium', 'Farneback']
+    hybrid_flow_consistency = False
+    hybrid_consistency_blur = 2
+    hybrid_flow_method = "RAFT" #['RAFT', 'DIS Medium', 'DIS Fine', 'Farneback']
     hybrid_composite = 'None' #['None', 'Normal', 'Before Motion', 'After Generation'] 
     hybrid_use_init_image = False 
     hybrid_comp_mask_type = "None" #['None', 'Depth', 'Video Depth', 'Blend', 'Difference']
@@ -520,7 +522,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.TabItem('Depth Warping'): 
                                 with gr.Row(variant='compact'):
                                     use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
-                                    use_zoe_depth = gr.Checkbox(label="Use ZoeDepth", value=da.use_zoe_depth, interactive=True, info="a new depth estimation model. provides *much* better results at the cost of more gpu vram")
+                                    use_zoe_depth = gr.Checkbox(label="Use ZoeDepth", value=da.use_zoe_depth, interactive=True, info="*experimental*. a new 3d-depth model. provides better results at the cost of more gpu vram and inference speed")
                                     midas_weight = gr.Number(label="MiDaS weight", value=da.midas_weight, interactive=True, info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
                                 with gr.Row(variant='compact'):
                                     padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode", info="controls the handling of pixels outside the field of view as they come into the scene. hover on the options for more info")
@@ -572,14 +574,14 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             color_coherence_image_path = gr.Textbox(label="Color coherence image path", lines=1, value=da.color_coherence_image_path, interactive=True)
                         with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
                             color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
-                        with gr.Row(variant='compact', visible=False) as optical_flow_cadence_row:
-                            with gr.Column(min_width=220):
-                                optical_flow_cadence = gr.Dropdown(choices=['None', 'DIS Fine', 'DIS Medium', 'Farneback'], label="Optical flow cadence", value=da.optical_flow_cadence, elem_id="optical_flow_cadence", interactive=True, info="use optical flow estimation for your in-between (cadence) frames")
+                        with gr.Row(variant='compact') as optical_flow_cadence_row:
+                            with gr.Column(min_width=220) as optical_flow_cadence_column:
+                                optical_flow_cadence = gr.Dropdown(choices=['None', 'RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'], label="Optical flow cadence", value=da.optical_flow_cadence, elem_id="optical_flow_cadence", interactive=True, info="use optical flow estimation for your in-between (cadence) frames")
                             with gr.Column(min_width=220, visible=False) as cadence_flow_factor_schedule_column:
                                 cadence_flow_factor_schedule = gr.Textbox(label="Cadence flow factor schedule", lines=1, value = da.cadence_flow_factor_schedule, interactive=True)
                         with gr.Row(variant='compact'):
                             with gr.Column(min_width=220):
-                                optical_flow_redo_generation = gr.Dropdown(choices=['None', 'DIS Fine', 'DIS Medium', 'Farneback'], label="Optical flow generation", value=da.optical_flow_redo_generation, elem_id="optical_flow_redo_generation", visible=True, interactive=True, info="this option takes twice as long because it generates twice in order to capture the optical flow from the previous image to the first generation, then warps the previous image and redoes the generation")
+                                optical_flow_redo_generation = gr.Dropdown(choices=['None', 'RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'], label="Optical flow generation", value=da.optical_flow_redo_generation, elem_id="optical_flow_redo_generation", visible=True, interactive=True, info="this option takes twice as long because it generates twice in order to capture the optical flow from the previous image to the first generation, then warps the previous image and redoes the generation")
                             with gr.Column(min_width=220, visible=False) as redo_flow_factor_schedule_column:
                                 redo_flow_factor_schedule = gr.Textbox(label="Generation flow factor schedule", lines=1, value = da.redo_flow_factor_schedule, interactive=True)
                         with gr.Row(variant='compact'):
@@ -617,7 +619,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Row(variant='compact'):
                     animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, placeholder="words in here will be added to the start of all positive prompts")
                 with gr.Row(variant='compact'):
-                    animation_prompts_negative = gr.Textbox(label="Prompts negative", lines=1, interactive=True, placeholder="words in here will be added to the end of all negative prompts")
+                    animation_prompts_negative = gr.Textbox(label="Prompts negative", value="nsfw, nude", lines=1, interactive=True, placeholder="words in here will be added to the end of all negative prompts")
                 # COMPOSABLE MASK SCHEDULING ACCORD
                 with gr.Accordion('Composable Mask scheduling', open=False):
                     gr.HTML("""
@@ -707,7 +709,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
             # CONTROLNET TAB
             with gr.TabItem('ControlNet'):
                     gr.HTML(controlnet_infotext())
-                    controlnet_dict = setup_controlnet_ui()
+                    try:
+                        controlnet_dict = setup_controlnet_ui()
+                    except Exception as e:
+                        raise Exception(e)
             # HYBRID VIDEO TAB
             with gr.TabItem('Hybrid Video'):
                 # this html only shows when not in 2d/3d mode
@@ -735,25 +740,30 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact'):
                         with gr.Column(min_width=340):
                             with gr.Row(variant='compact'):
-                                hybrid_generate_inputframes = gr.Checkbox(label="Generate inputframes", value=False, interactive=True)
-                                hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=False, interactive=True, visible=False)
+                                hybrid_generate_inputframes = gr.Checkbox(label="Generate inputframes", value=da.hybrid_generate_inputframes, interactive=True)
                                 hybrid_use_first_frame_as_init_image = gr.Checkbox(label="First frame as init image", value=da.hybrid_use_first_frame_as_init_image, interactive=True, visible=False)
                                 hybrid_use_init_image = gr.Checkbox(label="Use init image as video", value=da.hybrid_use_init_image, interactive=True, visible=True)
-                    with gr.Row(variant='compact') as hybrid_flow_row:
+                    with gr.Row(variant='compact'):
                         with gr.Column(variant='compact'):
                             with gr.Row(variant='compact'):
                                 hybrid_motion = gr.Radio(['None', 'Optical Flow', 'Perspective', 'Affine'], label="Hybrid motion", value=da.hybrid_motion, elem_id="hybrid_motion")
                         with gr.Column(variant='compact'):
                             with gr.Row(variant='compact'):
                                 with gr.Column(scale=1):
-                                    hybrid_flow_method = gr.Radio(['DIS Fine', 'DIS Medium', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method", visible=False)
-                    with gr.Row(variant='compact') as hybrid_flow_row:
+                                    hybrid_flow_method = gr.Radio(['RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method", visible=False)
+                            with gr.Row(variant='compact'):
+                                with gr.Column(variant='compact'):
+                                    hybrid_flow_consistency = gr.Checkbox(label="Flow consistency mask", value=da.hybrid_flow_consistency, interactive=True, visible=False)
+                                    hybrid_consistency_blur = gr.Slider(label="Consistency mask blur", minimum=0, maximum=16, step=1, value=da.hybrid_consistency_blur, interactive=True, visible=False)
+                                with gr.Column(variant='compact'):
+                                    hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=da.hybrid_motion_use_prev_img, interactive=True, visible=False)
+                    with gr.Row(variant='compact'):
                         hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type, elem_id="hybrid_comp_mask_type", visible=False)
                     with gr.Row(visible=False, variant='compact') as hybrid_comp_mask_row:
                         hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="Comp mask equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
                         with gr.Column(variant='compact'):
                             hybrid_comp_mask_auto_contrast = gr.Checkbox(label="Comp mask auto contrast", value=False, interactive=True)
-                            hybrid_comp_mask_inverse = gr.Checkbox(label="Comp mask inverse", value=False, interactive=True)
+                            hybrid_comp_mask_inverse = gr.Checkbox(label="Comp mask inverse", value=da.hybrid_comp_mask_inverse, interactive=True)
                     with gr.Row(variant='compact'):
                             hybrid_comp_save_extra_frames = gr.Checkbox(label="Comp save extra frames", value=False, interactive=True)
                 # HYBRID SCHEDULES ACCORD
@@ -937,6 +947,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         Important Notes:
                         <ul style="list-style-type:circle; margin-left:1em; margin-bottom:0.25em">
                             <li>Enter relative to webui folder or Full-Absolute path, and make sure it ends with something like this: '20230124234916_%09d.png', just replace 20230124234916 with your batch ID. The %09d is important, don't forget it!</li>
+                            <li>In the filename, '%09d' represents the 9 counting numbers, For '20230124234916_000000001.png', use '20230124234916_%09d.png'</li>
+                            <li>If non-deforum frames, use the correct number of counting digits. For files like 'bunnies-0000.jpg', you'd use 'bunnies-%04d.jpg'</li>
                         </ul>
                         """)
                     with gr.Row(variant='compact'):
@@ -971,7 +983,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     optical_flow_redo_generation,redo_flow_factor_schedule,diffusion_redo]
     for output in diffusion_cadence_outputs:
         animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=output)
-    three_d_related_outputs = [depth_3d_warping_accord,fov_accord,optical_flow_cadence_row,cadence_flow_factor_schedule,only_3d_motion_column]
+    three_d_related_outputs = [depth_3d_warping_accord,fov_accord,only_3d_motion_column]
     for output in three_d_related_outputs:
         animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=output)
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
@@ -988,9 +1000,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     optical_flow_redo_generation.change(fn=hide_if_none, inputs=optical_flow_redo_generation, outputs=redo_flow_factor_schedule_column)
     override_settings_with_file.change(fn=hide_if_false, inputs=override_settings_with_file,outputs=custom_settings_file)
     hybrid_comp_mask_type.change(fn=hide_if_none, inputs=hybrid_comp_mask_type, outputs=hybrid_comp_mask_row)
-    hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_method)
-    hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=hybrid_flow_factor_schedule)
-    hybrid_motion.change(fn=hide_if_none, inputs=hybrid_motion, outputs=hybrid_motion_use_prev_img)
+    hybrid_motion_outputs = [hybrid_flow_method, hybrid_flow_factor_schedule, hybrid_flow_consistency, hybrid_consistency_blur, hybrid_motion_use_prev_img]
+    for output in hybrid_motion_outputs:
+        hybrid_motion.change(fn=disable_by_non_optical_flow, inputs=hybrid_motion, outputs=output)
+    hybrid_flow_consistency.change(fn=hide_if_false, inputs=hybrid_flow_consistency, outputs=hybrid_consistency_blur)
     optical_flow_cadence.change(fn=hide_if_none, inputs=optical_flow_cadence, outputs=cadence_flow_factor_schedule_column)
     hybrid_composite.change(fn=disable_by_hybrid_composite_dynamic, inputs=[hybrid_composite, hybrid_comp_mask_type], outputs=hybrid_comp_mask_row)
     hybrid_composite_outputs = [humans_masking_accord, hybrid_sch_accord, hybrid_comp_mask_type, hybrid_use_first_frame_as_init_image, hybrid_use_init_image]
@@ -1017,6 +1030,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     interp_hide_list = [frame_interpolation_slow_mo_enabled,frame_interpolation_keep_imgs,frame_interp_amounts_row,interp_existing_video_row]
     for output in interp_hide_list:
         frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
+    diffusion_cadence.change(fn=hide_optical_flow_cadence, inputs=diffusion_cadence,outputs=optical_flow_cadence_row)
     # END OF UI TABS
     stuff = locals()
     stuff = {**stuff, **controlnet_dict}
@@ -1059,7 +1073,8 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         resume_from_timestring, resume_timestring'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human_masks, hybrid_use_first_frame_as_init_image,
-                        hybrid_motion, hybrid_motion_use_prev_img, hybrid_flow_method, hybrid_composite, hybrid_use_init_image, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
+                        hybrid_motion, hybrid_motion_use_prev_img, hybrid_flow_consistency, hybrid_consistency_blur, hybrid_flow_method, hybrid_composite,
+                        hybrid_use_init_image, hybrid_comp_mask_type, hybrid_comp_mask_inverse,
                         hybrid_comp_mask_equalize, hybrid_comp_mask_auto_contrast, hybrid_comp_save_extra_frames,
                         hybrid_comp_alpha_schedule, hybrid_flow_factor_schedule,
                         hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,

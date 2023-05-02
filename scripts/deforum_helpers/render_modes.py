@@ -147,7 +147,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
             args.subseed, args.subseed_strength = keys.subseed_schedule_series[frame_idx], keys.subseed_strength_schedule_series[frame_idx]
         if use_parseq:
             anim_args.enable_subseed_scheduling = True
-            args.subseed, args.subseed_strength = int(keys.subseed_series[frame_idx]), keys.subseed_strength_series[frame_idx]
+            args.subseed, args.subseed_strength = int(keys.subseed_schedule_series[frame_idx]), keys.subseed_strength_schedule_series[frame_idx]
         args.seed = int(keys.seed_schedule_series[frame_idx]) if args.seed_behavior == 'schedule' or use_parseq else args.seed
         opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip if scheduled_clipskip is not None else opts.data["CLIP_stop_at_last_layers"]
 

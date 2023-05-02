@@ -7,14 +7,30 @@ import subprocess
 import time
 import re 
 import glob
+import concurrent.futures
 from pkg_resources import resource_filename
 from modules.shared import state, opts
-from .general_utils import checksum, duplicate_pngs_from_folder
+from .general_utils import checksum, duplicate_pngs_from_folder, clean_gradio_path_strings
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
 
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
- 
+# DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+
+def convert_image(input_path, output_path):
+    # Read the input image
+    img = cv2.imread(input_path)
+    # Get the file extension of the output path
+    out_ext = os.path.splitext(output_path)[1].lower()
+    # Convert the image to the specified output format
+    if out_ext == ".png":
+        cv2.imwrite(output_path, img, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+    elif out_ext == ".jpg" or out_ext == ".jpeg":
+        cv2.imwrite(output_path, img, [cv2.IMWRITE_JPEG_QUALITY, 99])
+    elif out_ext == ".bmp":
+        cv2.imwrite(output_path, img)
+    else:
+        print(f"Unsupported output format: {out_ext}")
+
 def get_ffmpeg_params(): # get ffmpeg params from webui's settings -> deforum tab. actual opts are set in deforum.py
     f_location = opts.data.get("deforum_ffmpeg_location", find_ffmpeg_binary())
     f_crf = opts.data.get("deforum_ffmpeg_crf", 17)
@@ -26,17 +42,22 @@ def get_ffmpeg_params(): # get ffmpeg params from webui's settings -> deforum ta
 def extract_number(string):
     return int(string[1:]) if len(string) > 1 and string[1:].isdigit() else -1
     
-def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False): 
+def save_frame(image, file_path):
+    cv2.imwrite(file_path, image)
+
+def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_from_frame=0, extract_to_frame=-1, out_img_format='jpg', numeric_files_output = False):
+    start_time = time.time()
     if (extract_to_frame <= extract_from_frame) and extract_to_frame != -1:
         raise RuntimeError('Error: extract_to_frame can not be higher than extract_from_frame')
-    
+
     if n < 1: n = 1 #HACK Gradio interface does not currently allow min/max in gr.Number(...) 
 
+    video_path = clean_gradio_path_strings(video_path)
     # check vid path using a function and only enter if we get True
     if is_vid_path_valid(video_path):
-        
+
         name = get_frame_name(video_path)
-        
+
         vidcap = cv2.VideoCapture(video_path)
         video_fps = vidcap.get(cv2.CAP_PROP_FPS)
 
@@ -45,7 +66,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
             input_content = os.listdir(video_in_frame_path)
 
         # check if existing frame is the same video, if not we need to erase it and repopulate
-        if len(input_content) > 0:
+        if len(input_content) > 0 and numeric_files_output is False:
             #get the name of the existing frame
             content_name = get_frame_name(input_content[0])
             if not content_name.startswith(name):
@@ -53,18 +74,18 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
 
         # grab the frame count to check against existing directory len 
         frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT)) 
-        
+
         # raise error if the user wants to skip more frames than exist
         if n >= frame_count : 
             raise RuntimeError('Skipping more frames than input video contains. extract_nth_frames larger than input frames')
-        
+
         expected_frame_count = math.ceil(frame_count / n) 
         # Check to see if the frame count is matches the number of files in path
         if overwrite or expected_frame_count != len(input_content):
             shutil.rmtree(video_in_frame_path)
             os.makedirs(video_in_frame_path, exist_ok=True) # just deleted the folder so we need to make it again
             input_content = os.listdir(video_in_frame_path)
-        
+
         print(f"Trying to extract frames from video with input FPS of {video_fps}. Please wait patiently.")
         if len(input_content) == 0:
             vidcap.set(cv2.CAP_PROP_POS_FRAMES, extract_from_frame) # Set the starting frame
@@ -72,18 +93,22 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
             count = extract_from_frame
             t=1
             success = True
-            while success:
-                if state.interrupted:
-                    return
-                if (count <= extract_to_frame or extract_to_frame == -1) and count % n == 0:
-                    if numeric_files_output == True:
-                        cv2.imwrite(video_in_frame_path + os.path.sep + f"{t:09}.{out_img_format}" , image) # save frame as file
-                    else:
-                        cv2.imwrite(video_in_frame_path + os.path.sep + name + f"{t:09}.{out_img_format}" , image) # save frame as file
-                    t += 1
-                success,image = vidcap.read()
-                count += 1
-            print(f"Successfully extracted {count} frames from video.")
+            max_workers = int(max(1, (os.cpu_count() / 2) - 1)) # set max threads to cpu cores halved, minus 1. minimum is 1
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                while success:
+                    if state.interrupted:
+                        return
+                    if (count <= extract_to_frame or extract_to_frame == -1) and count % n == 0:
+                        if numeric_files_output == True:
+                            file_name = f"{t:09}.{out_img_format}"
+                        else:
+                            file_name = f"{name}{t:09}.{out_img_format}"
+                        file_path = os.path.join(video_in_frame_path, file_name)
+                        executor.submit(save_frame, image, file_path)
+                        t += 1
+                    count += 1
+                    success, image = vidcap.read()
+            print(f"Extracted {count} frames from video in {time.time() - start_time:.2f} seconds!")
         else:
             print("Frames already unpacked")
         vidcap.release()
@@ -138,7 +163,6 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         cmd = [
             ffmpeg_location,
             '-y',
-            '-vcodec', 'png',
             '-r', str(float(fps)),
             '-start_number', str(stitch_from_frame),
             '-i', imgs_path,
@@ -149,9 +173,12 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
             '-pix_fmt', 'yuv420p',
             '-crf', str(crf),
             '-preset', preset,
-            '-pattern_type', 'sequence',
-            outmp4_path
+            '-pattern_type', 'sequence'
         ]
+        cmd.append('-vcodec')
+        cmd.append('png' if imgs_path[0].find('.png') != -1 else 'libx264')
+        cmd.append(outmp4_path)
+
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
     except FileNotFoundError:
@@ -164,6 +191,7 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         raise Exception(f'Error stitching frames to video. Actual runtime error:{e}')
     
     if add_soundtrack != 'None':
+        audio_path = clean_gradio_path_strings(audio_path)
         audio_add_start_time = time.time()
         try:
             cmd = [

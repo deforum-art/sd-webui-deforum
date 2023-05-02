@@ -121,3 +121,27 @@ def interpolate_prompts(animation_prompts, max_frames):
     
     # Return the filled series, in case max_frames is greater than the last keyframe or any ranges were skipped.
     return prompt_series.ffill().bfill()
+
+def prepare_prompt(prompt_series, max_frames, seed):
+    max_f = max_frames - 1
+    pattern = r'`.*?`'
+    regex = re.compile(pattern)
+    prompt_parsed = prompt_series
+    for match in regex.finditer(prompt_parsed):
+        matched_string = match.group(0)
+        parsed_string = matched_string.replace('t', f'{frame_idx}').replace("max_f" , f"{max_f}").replace('`','')
+        parsed_value = numexpr.evaluate(parsed_string)
+        prompt_parsed = prompt_parsed.replace(matched_string, str(parsed_value))
+
+    prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
+    prompt_to_print = prompt_to_print.strip()
+    after_neg = "".join(after_neg).strip()
+
+    print(f"\033[32mSeed: \033[0m{seed}")
+    print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
+    if after_neg and after_neg.strip():
+        print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
+        prompt_to_print += f"--neg {after_neg}"
+
+    # set value back into the prompt
+    return prompt_to_print

@@ -48,8 +48,10 @@ def disable_by_video_input(choice):
     
 def hide_if_none(choice):
     return gr.update(visible=choice != "None")
-    
+
 def change_gif_button_visibility(choice):
+    if choice is None or choice == "":
+        return gr.update(visible=True)
     return gr.update(visible=False, value=False) if int(choice) > 30 else gr.update(visible=True)
     
 def hide_if_false(choice):
@@ -90,7 +92,8 @@ def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
     factor = 2 if upscale_model_name == 'realesr-animevideov3' else 4
     return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
 
-
+def hide_optical_flow_cadence(cadence_value):
+    return gr.update(visible=True) if cadence_value > 1 else gr.update(visible=False)
     
 def hide_interp_by_interp_status(choice):
     return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)

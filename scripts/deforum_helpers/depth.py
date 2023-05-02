@@ -7,6 +7,7 @@ import gc
 import torchvision.transforms as T
 from einops import rearrange, repeat
 from PIL import Image
+from basicsr.utils.download_util import load_file_from_url
 from infer import InferenceHelper
 from midas.dpt_depth import DPTDepthModel
 from midas.transforms import Resize, NormalizeImage, PrepareForNet
@@ -50,7 +51,6 @@ class MidasModel:
         if not self.use_zoe_depth:
             model_file = os.path.join(models_path, 'dpt_large-midas-2f21e586.pt')
             if not os.path.exists(model_file):
-                from basicsr.utils.download_util import load_file_from_url
                 load_file_from_url(r"https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", models_path)
                 if checksum(model_file) != "fcc4829e65d00eeed0a38e9001770676535d2e95c8a16965223aba094936e1316d569563552a852d471f310f83f597e8a238987a26a950d667815e08adaebc06":
                     raise Exception(r"Error while downloading dpt_large-midas-2f21e586.pt. Please download from here: https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt and place in: " + models_path)
@@ -79,12 +79,14 @@ class MidasModel:
     def predict(self, prev_img_cv2, midas_weight, half_precision) -> torch.Tensor:
         DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
         
+        use_adabins = midas_weight < 1.0 and self.adabins_helper is not None
+        
         img_pil = Image.fromarray(cv2.cvtColor(prev_img_cv2.astype(np.uint8), cv2.COLOR_RGB2BGR))
-
         
         if self.use_zoe_depth:
             depth_tensor = self.zoe_depth.predict(img_pil).to(self.device)
-            # depth_tensor = torch.subtract(50.0, depth_tensor) / 19
+            if use_adabins:
+                depth_tensor = torch.subtract(50.0, depth_tensor) / 19
         else:
             w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
 
@@ -108,8 +110,7 @@ class MidasModel:
             
             if DEBUG_MODE:
                 print("Midas depth tensor before 50/19 calculation:")
-                midas_depth_tensor = print(torch.from_numpy(np.expand_dims(midas_depth, axis=0)).squeeze())
-
+                print(torch.from_numpy(np.expand_dims(midas_depth, axis=0)).squeeze())
 
             torch.cuda.empty_cache()
             midas_depth = np.subtract(50.0, midas_depth) / 19.0
@@ -121,24 +122,29 @@ class MidasModel:
             print(depth_tensor)
 
         w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
-        use_adabins = midas_weight < 1.0 and self.adabins_helper is not None
 
         if use_adabins:
-            MAX_ADABINS_AREA = 500000
-            MIN_ADABINS_AREA = 448 * 448
-            image_pil_area = w * h
-            scale = math.sqrt(MIN_ADABINS_AREA) / math.sqrt(image_pil_area)
-            depth_input = img_pil.resize((int(w * scale), int(h * scale)), Image.LANCZOS if image_pil_area > MAX_ADABINS_AREA else Image.BICUBIC)
+            MAX_ADABINS_AREA, MIN_ADABINS_AREA = 500000, 448 * 448
+
+            img_pil = Image.fromarray(cv2.cvtColor(prev_img_cv2.astype(np.uint8), cv2.COLOR_RGB2BGR))
+            image_pil_area, resized = w * h, False
+
+            if image_pil_area not in range(MIN_ADABINS_AREA, MAX_ADABINS_AREA + 1):
+                scale = ((MAX_ADABINS_AREA if image_pil_area > MAX_ADABINS_AREA else MIN_ADABINS_AREA) / image_pil_area) ** 0.5
+                depth_input = img_pil.resize((int(w * scale), int(h * scale)), Image.LANCZOS if image_pil_area > MAX_ADABINS_AREA else Image.BICUBIC)
+                print(f"AdaBins depth resized to {depth_input.width}x{depth_input.height}")
+                resized = True
+            else:
+                depth_input = img_pil
+
             try:
                 with torch.no_grad():
                     _, adabins_depth = self.adabins_helper.predict_pil(depth_input)
-                adabins_depth = adabins_depth.squeeze().cpu().numpy()
-                if image_pil_area != MAX_ADABINS_AREA:
-                    adabins_depth = TF.resize(torch.from_numpy(adabins_depth),
-                                    torch.Size([h, w]),
-                                    interpolation=TF.InterpolationMode.BICUBIC).numpy()
+                if resized:
+                    adabins_depth = TF.resize(torch.from_numpy(adabins_depth), torch.Size([h, w]), interpolation=TF.InterpolationMode.BICUBIC).cpu().numpy()
+                adabins_depth = adabins_depth.squeeze()
             except:
-                print("exception encountered, falling back to pure MiDaS")
+                print("AdaBins exception encountered, falling back to pure MiDaS")
                 use_adabins = False
             torch.cuda.empty_cache()
 
@@ -166,7 +172,10 @@ class MidasModel:
 
     def to(self, device):
         self.device = device
-        self.midas_model.to(device)
+        if self.use_zoe_depth:
+            self.zoe_depth.zoe.to(device)
+        else:
+            self.midas_model.to(device)
         if self.adabins_helper is not None:
             self.adabins_helper.to(device)
         gc.collect()
@@ -181,32 +190,28 @@ class MidasModel:
         gc.collect()
         torch.cuda.empty_cache()
         devices.torch_gc()
-        
+
 class AdaBinsModel:
     _instance = None
     
     def __new__(cls, *args, **kwargs):
         keep_in_vram = kwargs.get('keep_in_vram', False)
-        if cls._instance is None or not keep_in_vram:
+        if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance._initialize(*args, **kwargs)
+        cls._instance._initialize(*args, keep_in_vram=keep_in_vram)
         return cls._instance
 
     def _initialize(self, models_path, keep_in_vram=False):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.keep_in_vram = keep_in_vram
+        self.adabins_helper = None
 
-        if self.keep_in_vram or not hasattr(self, 'adabins_helper'):
-            if not os.path.exists(os.path.join(models_path, 'AdaBins_nyu.pt')):
-                from basicsr.utils.download_util import load_file_from_url
-                load_file_from_url(
-                    r"https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt",
-                    models_path)
-                if checksum(os.path.join(models_path, 'AdaBins_nyu.pt')) != "643db9785c663aca72f66739427642726b03acc6c4c1d3755a4587aa2239962746410d63722d87b49fc73581dbc98ed8e3f7e996ff7b9c0d56d0fbc98e23e41a":
-                    raise Exception(
-                        r"Error while downloading AdaBins_nyu.pt. Please download from here: https://drive.google.com/file/d/1lvyZZbC9NLcS8a__YPcUP7rDiIpbRpoF and place in: " + models_path)
-            self.adabins_helper = InferenceHelper(models_path=models_path, dataset='nyu', device=self.device)
-            
+        if not os.path.exists(os.path.join(models_path, 'AdaBins_nyu.pt')):
+            load_file_from_url(r"https://github.com/hithereai/deforum-for-automatic1111-webui/releases/download/AdaBins/AdaBins_nyu.pt", models_path)
+            if checksum(os.path.join(models_path, 'AdaBins_nyu.pt')) != "643db9785c663aca72f66739427642726b03acc6c4c1d3755a4587aa2239962746410d63722d87b49fc73581dbc98ed8e3f7e996ff7b9c0d56d0fbc98e23e41a":
+                raise Exception(f"Error while downloading AdaBins_nyu.pt. Please download from here: https://drive.google.com/uc?id=1lvyZZbC9NLcS8a__YPcUP7rDiIpbRpoF and place in: {models_path}")
+        self.adabins_helper = InferenceHelper(models_path=models_path, dataset='nyu', device=self.device)
+
     def delete_model(self):
         del self.adabins_helper
         torch.cuda.empty_cache()
