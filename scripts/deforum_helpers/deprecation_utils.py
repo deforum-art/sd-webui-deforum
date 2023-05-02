@@ -34,14 +34,23 @@ deprecation_map = {
     "cn_3_resize_mode": [
         ("Envelope (Outer Fit)", "Outer Fit (Shrink to Fit)", False),
         ("Scale to Fit (Inner Fit)", "Inner Fit (Scale to Fit)", False),
-    ]
+    ],
+    "use_zoe_depth": ("depth_algorithm", [("True", "Zoe"), ("False", "Midas")]),
 }
 
 def handle_deprecated_settings(settings_json):
     for setting_name, deprecation_info in deprecation_map.items():
         if setting_name in settings_json:
+            if isinstance(deprecation_info, tuple):  # Add this block
+                new_setting_name, value_map = deprecation_info
+                old_value = str(settings_json.pop(setting_name))  # Convert the boolean value to a string for comparison
+                new_value = next((v for k, v in value_map if k == old_value), None)
+                if new_value is not None:
+                    print(f"WARNING: Setting '{setting_name}' has been renamed to '{new_setting_name}' with value '{new_value}'. The saved settings file will reflect the change")
+                    settings_json[new_setting_name] = new_value
+                continue
             if deprecation_info is None:
-                print(f"WARNING: Setting '{setting_name}' has been removed. It will be discarded and the default value used instead!")
+                    print(f"WARNING: Setting '{setting_name}' has been removed. It will be discarded and the default value used instead!")
             elif isinstance(deprecation_info, str):
                 print(f"WARNING: Setting '{setting_name}' has been renamed to '{deprecation_info}'. The saved settings file will reflect the change")
                 settings_json[deprecation_info] = settings_json.pop(setting_name)
