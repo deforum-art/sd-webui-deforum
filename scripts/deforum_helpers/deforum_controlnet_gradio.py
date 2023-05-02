@@ -33,7 +33,7 @@ class ToolButton(gr.Button, gr.components.FormComponent):
 
         def get_block_name(self):
             return "button"
-             
+
 def build_sliders(module, pp):
     # module = self.get_module_basename(module)
     if module == "canny":
@@ -71,7 +71,7 @@ def build_sliders(module, pp):
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
         ]
-    elif module in ["depth_leres", "depth_leres_boost"]:
+    elif module in ["depth_leres", "depth_leres++"]:
         return [
             gr.update(label="Preprocessor Resolution", minimum=64, maximum=2048, value=512, step=1, visible=not pp, interactive=not pp),
             gr.update(label="Remove Near %", value=0, minimum=0, maximum=100, step=0.1, visible=True, interactive=True),
@@ -99,7 +99,7 @@ def build_sliders(module, pp):
             gr.update(visible=False, interactive=False),
             gr.update(visible=True)
         ]
-    elif module == "tile_gaussian":
+    elif module == "tile_resample":
         return [
             gr.update(visible=False, interactive=False),
             gr.update(label="Down Sampling Rate", value=1.0, minimum=1.0, maximum=8.0, step=0.01, visible=True, interactive=True),
