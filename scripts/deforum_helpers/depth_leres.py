@@ -3,8 +3,7 @@ import cv2
 import os
 import numpy as np
 import torchvision.transforms as transforms
-from basicsr.utils.download_util import load_file_from_url
-from .general_utils import checksum
+from .general_utils import download_file_with_checksum
 from PIL import Image
 from leres.lib.multi_depth_model_woauxi import RelDepthModel
 from leres.lib.net_tools import load_ckpt
@@ -16,21 +15,14 @@ class LeReSDepth:
         self.models_path = models_path
         self.checkpoint_name = checkpoint_name
         self.backbone = backbone
-        
-        self.check_and_download_leres_model(models_path=models_path, leres_model_filename=checkpoint_name)
-        
+
+        download_file_with_checksum(url='https://cloudstor.aarnet.edu.au/plus/s/lTIJF4vrvHCAI31/download', expected_checksum='7fdc870ae6568cb28d56700d0be8fc45541e09cea7c4f84f01ab47de434cfb7463cacae699ad19fe40ee921849f9760dedf5e0dec04a62db94e169cf203f55b1', dest_folder=models_path, dest_filename=self.checkpoint_name)
+
         self.depth_model = RelDepthModel(backbone=self.backbone)
         self.depth_model.eval()
         self.DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
         self.depth_model.to(self.DEVICE)
         load_ckpt(os.path.join(self.models_path, self.checkpoint_name), self.depth_model, None, None)
-    
-    def check_and_download_leres_model(self, models_path, leres_model_filename):
-        model_file = os.path.join(models_path, leres_model_filename)
-        if not os.path.exists(model_file):
-            load_file_from_url(url="https://cloudstor.aarnet.edu.au/plus/s/lTIJF4vrvHCAI31/download", model_dir=models_path, file_name=leres_model_filename)
-            if checksum(model_file) != "7fdc870ae6568cb28d56700d0be8fc45541e09cea7c4f84f01ab47de434cfb7463cacae699ad19fe40ee921849f9760dedf5e0dec04a62db94e169cf203f55b1":
-                raise Exception(f"Error while downloading {leres_model_filename}\nPlease download from here: https://cloudstor.aarnet.edu.au/plus/s/lTIJF4vrvHCAI31/download and place in: {models_path}")
 
     @staticmethod
     def scale_torch(img):

@@ -1,9 +1,8 @@
 import os
 import torch
 from infer import InferenceHelper
-from basicsr.utils.download_util import load_file_from_url
 import numpy as np
-from .general_utils import checksum
+from .general_utils import download_file_with_checksum
 
 class AdaBinsModel:
     _instance = None
@@ -19,11 +18,9 @@ class AdaBinsModel:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.keep_in_vram = keep_in_vram
         self.adabins_helper = None
+        
+        download_file_with_checksum(url='https://github.com/hithereai/deforum-for-automatic1111-webui/releases/download/AdaBins/AdaBins_nyu.pt', expected_checksum='643db9785c663aca72f66739427642726b03acc6c4c1d3755a4587aa2239962746410d63722d87b49fc73581dbc98ed8e3f7e996ff7b9c0d56d0fbc98e23e41a', dest_folder=models_path, dest_filename='AdaBins_nyu.pt')
 
-        if not os.path.exists(os.path.join(models_path, 'AdaBins_nyu.pt')):
-            load_file_from_url(r"https://github.com/hithereai/deforum-for-automatic1111-webui/releases/download/AdaBins/AdaBins_nyu.pt", models_path)
-            if checksum(os.path.join(models_path, 'AdaBins_nyu.pt')) != "643db9785c663aca72f66739427642726b03acc6c4c1d3755a4587aa2239962746410d63722d87b49fc73581dbc98ed8e3f7e996ff7b9c0d56d0fbc98e23e41a":
-                raise Exception(f"Error while downloading AdaBins_nyu.pt. Please download from here: https://drive.google.com/uc?id=1lvyZZbC9NLcS8a__YPcUP7rDiIpbRpoF and place in: {models_path}")
         self.adabins_helper = InferenceHelper(models_path=models_path, dataset='nyu', device=self.device)
         
     def predict(self, img_pil, prev_img_cv2):

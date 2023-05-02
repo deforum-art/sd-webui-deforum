@@ -64,7 +64,7 @@ class DepthModel:
         elif self.depth_algorithm == 'Leres':
             depth_tensor = self.leres_depth.predict(prev_img_cv2.astype(np.float32) / 255.0)
         else: # Midas
-            depth_tensor = self.midas_depth.predict_depth(prev_img_cv2, half_precision)
+            depth_tensor = self.midas_depth.predict(prev_img_cv2, half_precision)
 
         self.debug_print(f"Shape of {self.depth_algorithm} depth_tensor: {depth_tensor.shape}")
         self.debug_print(f"Tensor data: {depth_tensor}")
