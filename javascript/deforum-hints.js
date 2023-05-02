@@ -17,10 +17,6 @@ deforum_titles = {
     "Resize seed from width": "Normally, changing the resolution will completely change an image, even when using the same seed. If you generated an image with a particular seed and then changed the resolution, put the original resolution here to get an image that more closely resemles the original",
     "Resize seed from height": "Normally, changing the resolution will completely change an image, even when using the same seed. If you generated an image with a particular seed and then changed the resolution, put the original resolution here to get an image that more closely resemles the original",
     "Steps": "How many times to improve the generated image iteratively; higher values take longer; very low values can produce bad results",
-    //"ddim_eta": "";
-    //"n_batch": "",
-    //"save_settings": "",
-    //"save_samples": "",
     "Batch name": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports placeholders like {seed}, {w}, {h}, {prompts} and more",
 	"Pix2Pix img CFG schedule": "*Only in use with pix2pix checkpoints!*",
     "Filename format": "specify the format of the filename for output images",
@@ -30,6 +26,7 @@ deforum_titles = {
         "random": "a random seed will be used on each frame of the animation",
 		"schedule": "specify your own seed schedule",
 	"Seed iter N":"controls for how many frames the same seed should stick before iterating to the next one",
+
     //Keyframes
     "Animation mode": "selects the type of animation",
         "2D": "only 2D motion parameters will be used, but this mode uses the least amount of VRAM. You can optionally enable flip_2d_perspective to enable some psuedo-3d animation parameters while in 2D mode.",
@@ -61,9 +58,9 @@ deforum_titles = {
     "CFG scale schedule": "how closely the image should conform to the prompt. Lower values produce more creative results. (recommended range 5-15)",
     "FOV schedule": "adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]",
     "Aspect Ratio schedule": "adjusts the aspect ratio for the depth calculation (normally 1)",
-    //"near_schedule": "",
-    //"far_schedule":  "",
     "Seed schedule": "allows you to specify seeds at a specific schedule, if seed_behavior is set to schedule.",
+
+    // Coherence
     "Color coherence": "The color coherence will attempt to sample the overall pixel color information, and trend those values analyzed in the first frame to be applied to future frames.",
         // "None": "Disable color coherence",
         "HSV": "HSV is a good method for balancing presence of vibrant colors, but may produce unrealistic results - (ie.blue apples)",
