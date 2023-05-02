@@ -212,11 +212,17 @@ def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
     if anim_args.enable_perspective_flip:
         prev_img_cv2 = flip_3d_perspective(anim_args, prev_img_cv2, keys, frame_idx)
     rot_mat = p3d.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
-    result = transform_image_3d(device if not device.type.startswith('mps') else torch.device('cpu'), prev_img_cv2, depth, rot_mat, translate_xyz, anim_args, keys, frame_idx)
+    result = transform_image_3d_switcher(device if not device.type.startswith('mps') else torch.device('cpu'), prev_img_cv2, depth, rot_mat, translate_xyz, anim_args, keys, frame_idx)
     torch.cuda.empty_cache()
     return result
 
-def transform_image_3d(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx):
+def transform_image_3d_switcher(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx, depth_min_0=False, equalize=True, autocontrast=False, autocontrast_cutoff_low=0, autocontrast_cutoff_high=1):
+    if anim_args.depth_algorithm.lower() == 'midas+adabins':
+        return transform_image_3d_legacy(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx)
+    else:
+        return transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx, depth_min_0, equalize, autocontrast, autocontrast_cutoff_low, autocontrast_cutoff_high)
+        
+def transform_image_3d_legacy(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx):
     # adapted and optimized version of transform_image_3d from Disco Diffusion https://github.com/alembics/disco-diffusion 
     w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
 
@@ -264,3 +270,198 @@ def transform_image_3d(device, prev_img_cv2, depth_tensor, rot_mat, translate, a
         'c h w -> h w c'
     ).cpu().numpy().astype(prev_img_cv2.dtype)
     return result
+
+def transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx, depth_min_0=False, equalize=True, autocontrast=False, autocontrast_cutoff_low=0, autocontrast_cutoff_high=1):
+    '''
+    originally an adapted and optimized version of transform_image_3d from Disco Diffusion https://github.com/alembics/disco-diffusion
+    modified by reallybigname to control various incoming tensors
+    '''
+    if anim_args.depth_algorithm.lower() == "midas":
+        depth = 1
+        depth_factor = -1
+        depth_offset = -2
+    elif anim_args.depth_algorithm.lower() == "adabins":
+        depth = 1
+        depth_factor = 1
+        depth_offset = 1
+    elif anim_args.depth_algorithm.lower() == "leres":
+        depth = 1
+        depth_factor = 1
+        depth_offset = 1
+    elif anim_args.depth_algorithm.lower() == "zoe":
+        depth = 1
+        depth_factor = 1
+        depth_offset = 1
+    else:
+        raise Exception(f"Unknown depth_algorithm passed to transform_image_3d function: {depth_algorithm}")
+
+    w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
+
+    # depth stretching aspect ratio (has nothing to do with image dimensions - which is why the old formula was flawed)
+    aspect_ratio = float(w)/float(h) if anim_args.aspect_ratio_use_old_formula else keys.aspect_ratio_series[frame_idx]
+    
+    # get projection keys
+    near = keys.near_series[frame_idx]
+    far = keys.far_series[frame_idx]
+    fov_deg = keys.fov_series[frame_idx]
+
+    # get perspective cams old (still) and new (transformed)
+    persp_cam_old = p3d.FoVPerspectiveCameras(near, far, aspect_ratio, fov=fov_deg, degrees=True, device=device)
+    persp_cam_new = p3d.FoVPerspectiveCameras(near, far, aspect_ratio, fov=fov_deg, degrees=True, R=rot_mat, T=torch.tensor([translate]), device=device)
+
+    # make xy meshgrid - range of [-1,1] is important to torch grid_sample's padding handling
+    y,x = torch.meshgrid(torch.linspace(-1.,1.,h,dtype=torch.float32,device=device),torch.linspace(-1.,1.,w,dtype=torch.float32,device=device))
+
+    # test tensor for validity (some are corrupted for some reason)
+    depth_tensor_invalid = depth_tensor is None or torch.isnan(depth_tensor).any() or torch.isinf(depth_tensor).any() or depth_tensor.min() == depth_tensor.max()
+
+    # if invalid, create flat matrix for this frame
+    if depth_tensor_invalid:
+        print("Depth tensor invalid. Flat depth for this frame.")
+        z = torch.ones_like(x)
+    else:
+        # console output vars
+        con_txt = "\033[36mDepth"
+        txt_depth_min = '{:.2f}'.format(float(depth_tensor.min()))
+        txt_depth_max = '{:.2f}'.format(float(depth_tensor.max()))
+        diff = '{:.2f}'.format(float(depth_tensor.max())-float(depth_tensor.min()))
+
+        # prepare tensor between 0 and 1 with optional equalization and autocontrast
+        depth_normalized = prepare_depth_tensor(depth_tensor, depth_min_0, equalize, autocontrast, autocontrast_cutoff_low, autocontrast_cutoff_high)
+
+        # Rescale the depth values to depth with offset (depth 2 and offset -1 would be -1 to +11)
+        depth_final = depth_normalized * depth + depth_offset
+
+        # depth factor (1 is normal. -1 is inverted)
+        if depth_factor != 1:
+            depth_final *= depth_factor
+
+        # console reporting of normalization
+        con_txt += f" normalized to {depth_final.min()}/{depth_final.max()} from"
+
+        # console reporting of depth normalization, min, max, diff
+        print(con_txt + f" {txt_depth_min}/{txt_depth_max} diff {diff}\033[0m")
+
+        # add z from depth
+        z = torch.as_tensor(depth_final, dtype=torch.float32, device=device)
+
+    # calculate offset_xy
+    xyz_old_world = torch.stack((x.flatten(), y.flatten(), z.flatten()), dim=1)
+    xyz_old_cam_xy = persp_cam_old.get_full_projection_transform().transform_points(xyz_old_world)[:,0:2]
+    xyz_new_cam_xy = persp_cam_new.get_full_projection_transform().transform_points(xyz_old_world)[:,0:2]
+    offset_xy = xyz_new_cam_xy - xyz_old_cam_xy
+
+    # affine_grid theta param expects a batch of 2D mats. Each is 2x3 to do rotation+translation.
+    identity_2d_batch = torch.tensor([[1.,0.,0.],[0.,1.,0.]], device=device).unsqueeze(0)
+
+    # coords_2d will have shape (N,H,W,2).. which is also what grid_sample needs.
+    coords_2d = torch.nn.functional.affine_grid(identity_2d_batch, [1,1,h,w], align_corners=False)
+    offset_coords_2d = coords_2d - torch.reshape(offset_xy, (h,w,2)).unsqueeze(0)
+
+    # do the hyperdimensional remap
+    image_tensor = rearrange(torch.from_numpy(prev_img_cv2.astype(np.float32)), 'h w c -> c h w').to(device)
+    new_image = torch.nn.functional.grid_sample(
+        image_tensor.unsqueeze(0),  # image_tensor.add(1/512 - 0.0001).unsqueeze(0), 
+        offset_coords_2d, 
+        mode=anim_args.sampling_mode, 
+        padding_mode=anim_args.padding_mode, 
+        align_corners=False
+    )
+
+    # convert back to cv2 style numpy array
+    result = rearrange(
+        new_image.squeeze().clamp(0,255), 
+        'c h w -> h w c'
+    ).cpu().numpy().astype(prev_img_cv2.dtype)
+    return result
+     
+def prepare_depth_tensor(depth_tensor=None, depth_min_0=False, equalize=False, autocontrast=False, autocontrast_cutoff_low=0, autocontrast_cutoff_high=1):
+    """
+    Prepares a depth tensor with optional equalization and autocontrast.
+    Normalizes the depth tensor values between 0 and 1.
+
+    Args:
+    depth_tensor (torch.Tensor): A 2D depth tensor (H, W)
+    depth_min_0 (bool): If True, normalize using tensor floor of 0; otherwise, use tensor minimum.
+    equalize (bool): If True, perform equalization on the depth tensor.
+    autocontrast (bool): If True, apply autocontrast to the depth tensor.
+    autocontrast_cutoff_low (float): The lower cutoff value for autocontrast (between 0.0 and 1.0).
+    autocontrast_cutoff_high (float): The upper cutoff value for autocontrast (between 0.0 and 1.0).
+
+    Returns:
+    torch.Tensor: Prepared depth tensor (2D) with values between 0 and 1.
+    """
+
+    # normalization, zero based or min based
+    if depth_min_0: # tensor floor = 0
+        depth_tensor = 1 - (1 / depth_tensor.max())
+        # Clip the equalized depth tensor values between 0 and 1
+        equalized_depth_tensor = torch.clamp(equalized_depth_tensor, 0, 1)
+    else: # tensor floor = tensor minimum
+        depth_range = depth_tensor.max() - depth_tensor.min()
+        depth_tensor = (depth_tensor - depth_tensor.min()) / depth_range
+
+    # equalization of depth tensor (must be 0 to 1 at this stage)
+    if equalize:
+        depth_tensor = depth_equalization(depth_tensor=depth_tensor)
+    
+    # auto-contrast of depth tensor (must be 0 to 1 at this stage)
+    if autocontrast:
+        depth_tensor = depth_auto_contrast(depth_tensor=depth_tensor, low_cutoff=autocontrast_cutoff_low, high_cutoff=autocontrast_cutoff_high)
+    
+    return depth_tensor
+
+def depth_equalization(depth_tensor):
+    """
+    Perform histogram equalization on a single-channel depth tensor.
+
+    Args:
+    depth_tensor (torch.Tensor): A 2D depth tensor (H, W).
+
+    Returns:
+    torch.Tensor: Equalized depth tensor (2D).
+    """
+
+    # Convert the depth tensor to a NumPy array for processing
+    depth_array = depth_tensor.cpu().numpy()
+
+    # Calculate the histogram of the depth values using a specified number of bins
+    # Increase the number of bins for higher precision depth tensors
+    hist, bin_edges = np.histogram(depth_array, bins=1024, range=(0, 1))
+
+    # Calculate the cumulative distribution function (CDF) of the histogram
+    cdf = hist.cumsum()
+
+    # Normalize the CDF so that the maximum value is 1
+    cdf = cdf / float(cdf[-1])
+
+    # Perform histogram equalization by mapping the original depth values to the CDF values
+    equalized_depth_array = np.interp(depth_array, bin_edges[:-1], cdf)
+
+    # Convert the equalized depth array back to a PyTorch tensor and return it
+    equalized_depth_tensor = torch.from_numpy(equalized_depth_array).to(depth_tensor.device)
+
+    return equalized_depth_tensor
+
+def depth_auto_contrast(depth_tensor=None, low_cutoff=0.0, high_cutoff=1.0):
+    """
+    Apply auto-contrast to a depth tensor by adjusting the range of depth values.
+
+    Args:
+    depth_tensor (torch.Tensor): A 2D depth tensor (H, W)
+    low_cutoff (float): The lower cutoff value as a percentage (between 0.0 and 1.0) for clipping depth values.
+    high_cutoff (float): The upper cutoff value as a percentage (between 0.0 and 1.0) for clipping depth values.
+
+    Returns:
+    torch.Tensor: Auto-contrasted depth tensor (2D)
+    """
+
+    # Calculate the lower and upper bounds based on the cutoff values
+    depth_min = torch.quantile(depth_tensor, low_cutoff)
+    depth_max = torch.quantile(depth_tensor, high_cutoff)
+
+    # Apply auto-contrast by clipping and scaling the depth values
+    depth_clipped = torch.clamp(depth_tensor, depth_min, depth_max)
+    depth_auto_contrasted = (depth_clipped - depth_min) / (depth_max - depth_min)
+
+    return depth_auto_contrasted

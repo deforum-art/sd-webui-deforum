@@ -41,54 +41,59 @@ class DepthModel:
         self.depth_max = -1000
         self.device = device
         self.depth_algorithm = depth_algorithm
+        self.adabins_helper = None
 
-        if self.depth_algorithm == 'Zoe':
+        if self.depth_algorithm.lower() == 'zoe':
             self.zoe_depth = ZoeDepth(self.Width, self.Height)
-        elif self.depth_algorithm == 'Leres':
+        elif self.depth_algorithm.lower() == 'leres':
             self.leres_depth = LeReSDepth(width=448, height=448, models_path=models_path, checkpoint_name='res101.pth', backbone='resnext101')
-        else: # Midas
-            self.midas_depth = MidasDepth(models_path, device, half_precision=half_precision)
-        if midas_weight < 1.0:
+        elif self.depth_algorithm.lower() == 'adabins':
             self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
             self.adabins_helper = self.adabins_model.adabins_helper
-        else:
-            self.adabins_helper = None
+        elif self.depth_algorithm.lower().startswith('midas'): # Midas or Midas+AdaBins
+            self.midas_depth = MidasDepth(models_path, device, half_precision=half_precision)
+            if self.depth_algorithm.lower() == 'midas+adabins' and midas_weight < 1.0:
+                self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
+                self.adabins_helper = self.adabins_model.adabins_helper
             
     def predict(self, prev_img_cv2, midas_weight, half_precision) -> torch.Tensor:
-        use_adabins = midas_weight < 1.0 and self.adabins_helper is not None
 
         img_pil = Image.fromarray(cv2.cvtColor(prev_img_cv2.astype(np.uint8), cv2.COLOR_RGB2BGR))
 
-        if self.depth_algorithm == 'Zoe':
+        if self.depth_algorithm.lower() == 'zoe':
             depth_tensor = self.zoe_depth.predict(img_pil).to(self.device)
-        elif self.depth_algorithm == 'Leres':
+        elif self.depth_algorithm.lower() == 'leres':
             depth_tensor = self.leres_depth.predict(prev_img_cv2.astype(np.float32) / 255.0)
-        else: # Midas
-            depth_tensor = self.midas_depth.predict(prev_img_cv2, half_precision)
-
-        self.debug_print(f"Shape of {self.depth_algorithm} depth_tensor: {depth_tensor.shape}")
-        self.debug_print(f"Tensor data: {depth_tensor}")
-        
-        if use_adabins: # need to use AdaBins. first, try to get adabins depth estimation from our image
+        elif self.depth_algorithm.lower() == 'adabins':
             use_adabins, adabins_depth = AdaBinsModel._instance.predict(img_pil, prev_img_cv2)
-            if use_adabins: # if there was no error in getting the depth, align other depths (midas/zoe/leres) with adabins' depth
-                depth_tensor = self.blend_and_align_with_adabins(depth_tensor, adabins_depth, midas_weight)
+            depth_tensor = torch.tensor(adabins_depth)
+            if use_adabins is False:
+                raise Exception("Error getting depth from AdaBins") # TODO: fallback to something else maybe?
+        elif self.depth_algorithm.lower().startswith('midas'):
+            depth_tensor = self.midas_depth.predict(prev_img_cv2, half_precision)
+            if self.depth_algorithm.lower() == 'midas+adabins' and midas_weight < 1.0:
+                use_adabins, adabins_depth = AdaBinsModel._instance.predict(img_pil, prev_img_cv2)
+                if use_adabins: # if there was no error in getting the adabins depth, align midas with adabins
+                    depth_tensor = self.blend_and_align_with_adabins(depth_tensor, adabins_depth, midas_weight)
+        else: # Unknown!
+            raise Exception(f"Unknown depth_algorithm passed to depth.predict function: {self.depth_algorithm}")
 
         return depth_tensor
 
     def blend_and_align_with_adabins(self, depth_tensor, adabins_depth, midas_weight):
-        depth_tensor = torch.subtract(50.0, depth_tensor) / 19.0 # this alignment was originally meant for midas, but it kinda works with Zoe and Leres too
+        depth_tensor = torch.subtract(50.0, depth_tensor) / 19.0 # align midas depth with adabins depth. Original alignment code from Disco Diffusion
         blended_depth_map = (depth_tensor.cpu().numpy() * midas_weight + adabins_depth * (1.0 - midas_weight))
         depth_tensor = torch.from_numpy(np.expand_dims(blended_depth_map, axis=0)).squeeze().to(self.device)
+        self.debug_print(f"Blended Midas Depth with AdaBins Depth")
         return depth_tensor
         
     def to(self, device):
         self.device = device
-        if self.depth_algorithm == 'Zoe':
+        if self.depth_algorithm.lower() == 'zoe':
             self.zoe_depth.zoe.to(device)
-        elif self.depth_algorithm == 'Leres':
+        elif self.depth_algorithm.lower() == 'leres':
             self.leres_depth.to(device)
-        else: # midas
+        elif self.depth_algorithm.lower().startswith('midas'):
             self.midas_depth.to(device)
         if hasattr(self, 'adabins_model'):
             self.adabins_model.to(device)
@@ -107,20 +112,21 @@ class DepthModel:
         self.to_image(depth).save(filename)
 
     def delete_model(self):
-        if self.depth_algorithm == 'Zoe':
-            self.zoe_depth.delete()
-            del self.zoe_depth
-        elif self.depth_algorithm == 'Leres':
-            self.leres_depth.delete()
-            del self.leres_depth
-        else: # Midas
+        for attr in ['zoe_depth', 'leres_depth']:
+            if hasattr(self, attr):
+                getattr(self, attr).delete()
+                delattr(self, attr)
+
+        if hasattr(self, 'midas_depth'):
             del self.midas_depth
+
         if hasattr(self, 'adabins_model'):
             self.adabins_model.delete_model()
+
         gc.collect()
         torch.cuda.empty_cache()
         devices.torch_gc()
-    
+ 
     def debug_print(self, message):
         DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
         if DEBUG_MODE:
