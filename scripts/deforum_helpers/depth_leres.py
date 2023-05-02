@@ -44,6 +44,10 @@ class LeReSDepth:
     def save_raw_depth(self, depth, filepath):
         depth_normalized = (depth / depth.max() * 60000).astype(np.uint16)
         cv2.imwrite(filepath, depth_normalized)
+        
+    def to(self, device):
+        self.DEVICE = device
+        self.depth_model = self.depth_model.to(device)
 
     def delete(self):
         del self.depth_model

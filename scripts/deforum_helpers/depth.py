@@ -86,7 +86,9 @@ class DepthModel:
         self.device = device
         if self.depth_algorithm == 'Zoe':
             self.zoe_depth.zoe.to(device)
-        else:
+        elif self.depth_algorithm == 'Leres':
+            self.leres_depth.to(device)
+        else: # midas
             self.midas_depth.to(device)
         if hasattr(self, 'adabins_model'):
             self.adabins_model.to(device)
