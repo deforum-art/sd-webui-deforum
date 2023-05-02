@@ -1,6 +1,5 @@
 # This file is used to map deprecated setting names in a dictionary
 # and print a message containing the old and the new names
-# if the latter is removed completely, put a warning
 deprecation_map = {
     "histogram_matching": None,
     "flip_2d_perspective": "enable_perspective_flip",
@@ -41,7 +40,7 @@ deprecation_map = {
 def handle_deprecated_settings(settings_json):
     for setting_name, deprecation_info in deprecation_map.items():
         if setting_name in settings_json:
-            if isinstance(deprecation_info, tuple):  # Add this block
+            if isinstance(deprecation_info, tuple):
                 new_setting_name, value_map = deprecation_info
                 old_value = str(settings_json.pop(setting_name))  # Convert the boolean value to a string for comparison
                 new_value = next((v for k, v in value_map if k == old_value), None)
