@@ -70,7 +70,7 @@ class DepthModel:
         self.debug_print(f"Tensor data: {depth_tensor}")
         
         if use_adabins: # need to use AdaBins. first, try to get adabins depth estimation from our image
-            use_adabins, adabins_depth = AdaBinsModel._instance.predict(img_pil, prev_img_cv2, use_adabins)
+            use_adabins, adabins_depth = AdaBinsModel._instance.predict(img_pil, prev_img_cv2)
             if use_adabins: # if there was no error in getting the depth, align other depths (midas/zoe/leres) with adabins' depth
                 depth_tensor = self.blend_and_align_with_adabins(depth_tensor, adabins_depth, midas_weight)
 

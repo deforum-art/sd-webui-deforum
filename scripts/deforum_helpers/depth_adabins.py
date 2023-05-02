@@ -26,33 +26,32 @@ class AdaBinsModel:
                 raise Exception(f"Error while downloading AdaBins_nyu.pt. Please download from here: https://drive.google.com/uc?id=1lvyZZbC9NLcS8a__YPcUP7rDiIpbRpoF and place in: {models_path}")
         self.adabins_helper = InferenceHelper(models_path=models_path, dataset='nyu', device=self.device)
         
-    def predict(self, img_pil, prev_img_cv2, use_adabins):
+    def predict(self, img_pil, prev_img_cv2):
         w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
         adabins_depth = np.array([])
+        use_adabins = True
+        MAX_ADABINS_AREA, MIN_ADABINS_AREA = 500000, 448 * 448
 
-        if use_adabins:
-            MAX_ADABINS_AREA, MIN_ADABINS_AREA = 500000, 448 * 448
+        image_pil_area, resized = w * h, False
 
-            image_pil_area, resized = w * h, False
+        if image_pil_area not in range(MIN_ADABINS_AREA, MAX_ADABINS_AREA + 1):
+            scale = ((MAX_ADABINS_AREA if image_pil_area > MAX_ADABINS_AREA else MIN_ADABINS_AREA) / image_pil_area) ** 0.5
+            depth_input = img_pil.resize((int(w * scale), int(h * scale)), Image.LANCZOS if image_pil_area > MAX_ADABINS_AREA else Image.BICUBIC)
+            print(f"AdaBins depth resized to {depth_input.width}x{depth_input.height}")
+            resized = True
+        else:
+            depth_input = img_pil
 
-            if image_pil_area not in range(MIN_ADABINS_AREA, MAX_ADABINS_AREA + 1):
-                scale = ((MAX_ADABINS_AREA if image_pil_area > MAX_ADABINS_AREA else MIN_ADABINS_AREA) / image_pil_area) ** 0.5
-                depth_input = img_pil.resize((int(w * scale), int(h * scale)), Image.LANCZOS if image_pil_area > MAX_ADABINS_AREA else Image.BICUBIC)
-                print(f"AdaBins depth resized to {depth_input.width}x{depth_input.height}")
-                resized = True
-            else:
-                depth_input = img_pil
-
-            try:
-                with torch.no_grad():
-                    _, adabins_depth = self.adabins_helper.predict_pil(depth_input)
-                if resized:
-                    adabins_depth = TF.resize(torch.from_numpy(adabins_depth), torch.Size([h, w]), interpolation=TF.InterpolationMode.BICUBIC).cpu().numpy()
-                adabins_depth = adabins_depth.squeeze()
-            except Exception as e:
-                print("AdaBins exception encountered, falling back to pure MiDaS")
-                use_adabins = False
-            torch.cuda.empty_cache()
+        try:
+            with torch.no_grad():
+                _, adabins_depth = self.adabins_helper.predict_pil(depth_input)
+            if resized:
+                adabins_depth = TF.resize(torch.from_numpy(adabins_depth), torch.Size([h, w]), interpolation=TF.InterpolationMode.BICUBIC).cpu().numpy()
+            adabins_depth = adabins_depth.squeeze()
+        except Exception as e:
+            print("AdaBins exception encountered, falling back to pure MiDaS")
+            use_adabins = False
+        torch.cuda.empty_cache()
 
         return use_adabins, adabins_depth
         
