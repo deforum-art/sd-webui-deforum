@@ -107,16 +107,17 @@ class DepthModel:
         self.to_image(depth).save(filename)
 
     def delete_model(self):
-        if self.depth_algorithm == 'Zoe':
-            self.zoe_depth.delete()
-            del self.zoe_depth
-        elif self.depth_algorithm == 'Leres':
-            self.leres_depth.delete()
-            del self.leres_depth
-        else: # Midas
+        for attr in ['zoe_depth', 'leres_depth']:
+            if hasattr(self, attr):
+                getattr(self, attr).delete()
+                delattr(self, attr)
+
+        if hasattr(self, 'midas_depth'):
             del self.midas_depth
+
         if hasattr(self, 'adabins_model'):
             self.adabins_model.delete_model()
+
         gc.collect()
         torch.cuda.empty_cache()
         devices.torch_gc()
