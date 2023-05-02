@@ -1,6 +1,5 @@
 import torch
 from PIL import Image
-from zoedepth.utils.misc import colorize 
 from zoedepth.models.builder import build_model
 from zoedepth.utils.config import get_config
 
@@ -26,14 +25,6 @@ class ZoeDepth:
         
     def save_raw_depth(self, depth, filepath):
         depth.save(filepath, format='PNG', mode='I;16')
-
-    def colorize_depth(self, depth):
-        colored = colorize(depth)
-        return colored
-
-    def save_colored_depth(self, depth, filepath):
-        colored = colorize(depth)
-        Image.fromarray(colored).save(filepath)
     
     def delete(self):
         del self.model_zoe

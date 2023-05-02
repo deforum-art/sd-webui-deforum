@@ -45,8 +45,5 @@ class LeReSDepth:
         depth_normalized = (depth / depth.max() * 60000).astype(np.uint16)
         cv2.imwrite(filepath, depth_normalized)
 
-    def save_colored_depth(self, depth, filepath):
-        plt.imsave(filepath, depth, cmap='rainbow')
-
     def delete(self):
         del self.depth_model
