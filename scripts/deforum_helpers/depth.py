@@ -42,9 +42,9 @@ class DepthModel:
         self.device = device
         self.depth_algorithm = depth_algorithm
 
-        if self.depth_algorithm == 'Zoe':
+        if self.depth_algorithm.lower() == 'zoe':
             self.zoe_depth = ZoeDepth(self.Width, self.Height)
-        elif self.depth_algorithm == 'Leres':
+        elif self.depth_algorithm.lower() == 'leres':
             self.leres_depth = LeReSDepth(width=448, height=448, models_path=models_path, checkpoint_name='res101.pth', backbone='resnext101')
         else: # Midas
             self.midas_depth = MidasDepth(models_path, device, half_precision=half_precision)
@@ -59,9 +59,9 @@ class DepthModel:
 
         img_pil = Image.fromarray(cv2.cvtColor(prev_img_cv2.astype(np.uint8), cv2.COLOR_RGB2BGR))
 
-        if self.depth_algorithm == 'Zoe':
+        if self.depth_algorithm.lower() == 'zoe':
             depth_tensor = self.zoe_depth.predict(img_pil).to(self.device)
-        elif self.depth_algorithm == 'Leres':
+        elif self.depth_algorithm.lower() == 'leres':
             depth_tensor = self.leres_depth.predict(prev_img_cv2.astype(np.float32) / 255.0)
         else: # Midas
             depth_tensor = self.midas_depth.predict(prev_img_cv2, half_precision)
@@ -84,9 +84,9 @@ class DepthModel:
         
     def to(self, device):
         self.device = device
-        if self.depth_algorithm == 'Zoe':
+        if self.depth_algorithm.lower() == 'zoe':
             self.zoe_depth.zoe.to(device)
-        elif self.depth_algorithm == 'Leres':
+        elif self.depth_algorithm.lower() == 'leres':
             self.leres_depth.to(device)
         else: # midas
             self.midas_depth.to(device)
