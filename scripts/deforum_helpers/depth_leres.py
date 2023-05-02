@@ -50,4 +50,3 @@ class LeReSDepth:
 
     def delete(self):
         del self.depth_model
-        torch.cuda.empty_cache()

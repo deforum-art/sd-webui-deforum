@@ -1,9 +1,7 @@
 import os
 import torch
-import gc
 from infer import InferenceHelper
 from basicsr.utils.download_util import load_file_from_url
-from modules import devices
 import numpy as np
 from .general_utils import checksum
 
@@ -65,5 +63,3 @@ class AdaBinsModel:
 
     def delete_model(self):
         del self.adabins_helper
-        torch.cuda.empty_cache()
-        devices.torch_gc()

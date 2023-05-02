@@ -1,7 +1,5 @@
 import torch
-import gc
 from PIL import Image
-from modules import devices
 from zoedepth.utils.misc import colorize 
 from zoedepth.models.builder import build_model
 from zoedepth.utils.config import get_config
@@ -40,6 +38,3 @@ class ZoeDepth:
     def delete(self):
         del self.model_zoe
         del self.zoe
-        gc.collect()
-        torch.cuda.empty_cache()
-        devices.torch_gc()
