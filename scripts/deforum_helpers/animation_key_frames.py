@@ -66,7 +66,7 @@ class ControlNetKeys():
         self.cn_2_guidance_start_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_2_guidance_start))
         self.cn_2_guidance_end_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_2_guidance_end))
         self.cn_3_guidance_start_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_3_guidance_start))
-        self.cn_3_guidance_end_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args._guidance_end))
+        self.cn_3_guidance_end_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_3_guidance_end))
         self.cn_4_guidance_start_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_4_guidance_start))
         self.cn_4_guidance_end_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_4_guidance_end))
         self.cn_5_guidance_start_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_5_guidance_start))
