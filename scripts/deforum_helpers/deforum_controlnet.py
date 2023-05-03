@@ -17,6 +17,7 @@ from modules.shared import opts
 from .deforum_controlnet_gradio import *
 from .general_utils import count_files_in_folder, clean_gradio_path_strings # TODO: do it another way
 from .video_audio_utilities import vid2frames, convert_image
+from .animation_key_frames import ControlNetKeys
 
 # DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 cnet = None
@@ -71,7 +72,7 @@ def setup_controlnet_ui_raw():
             refresh_models = ToolButton(value=refresh_symbol)
             refresh_models.click(refresh_all_models, model, model)
         with gr.Row(visible=False) as weight_row:
-            weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05, interactive=True)
+            weight = gr.Textbox(label="Weight", lines=1, value = '0:(1)', interactive=True)
             guidance_start =  gr.Slider(label="Starting Control Step", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
             guidance_end =  gr.Slider(label="Ending Control Step", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
             model_dropdowns.append(model)
@@ -146,6 +147,7 @@ def controlnet_component_names():
     ]]
     
 def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=True, frame_idx=1):
+    CnSchKeys = ControlNetKeys(anim_args, controlnet_args)
     def read_cn_data(cn_idx):
         cn_mask_np, cn_image_np = None, None
         cn_inputframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_inputframes') # set input frames folder path
@@ -180,18 +182,23 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
 
     p.scripts = scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img
 
-    def create_cnu_dict(cn_args, prefix, img_np, mask_np):
+    def create_cnu_dict(cn_args, prefix, img_np, mask_np, frame_idx, CnSchKeys):
+        
         keys = [
             "enabled", "module", "model", "weight", "resize_mode", "control_mode", "low_vram","pixel_perfect",
             "processor_res", "threshold_a", "threshold_b", "guidance_start", "guidance_end"
         ]
         cnu = {k: getattr(cn_args, f"{prefix}_{k}") for k in keys}
+        # Dynamic weight assignment for models 1 to 5
+        model_num = int(prefix.split('_')[-1])  # Extract model number from prefix (e.g., "cn_1" -> 1)
+        if 1 <= model_num <= 5:
+            cnu['weight'] = getattr(CnSchKeys, f"cn_{model_num}_weight_schedule_series")[frame_idx-1]
         cnu['image'] = {'image': img_np, 'mask': mask_np} if mask_np is not None else img_np
         return cnu
 
     masks_np, images_np = zip(*cn_data)
 
-    cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i+1}", img_np, mask_np))
+    cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i+1}", img_np, mask_np, frame_idx, CnSchKeys))
             for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
 
     p.script_args = {"enabled": True} 
@@ -211,7 +218,7 @@ def process_controlnet_input_frames(args, anim_args, controlnet_args, video_path
             print(f"Copied CN Model {id}'s single input image to inputframes *mask* folder!")
         else:
             print(f'Unpacking ControlNet {id} {"video mask" if mask_path else "base video"}')
-            print(f"Exporting Video Frames to {frame_path}...") # future todo, add an if for vid input mode to show actual extract nth param
+            print(f"Exporting Video Frames to {frame_path}...")
             vid2frames(
                 video_path=video_path or mask_path,
                 video_in_frame_path=frame_path,
