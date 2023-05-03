@@ -50,11 +50,11 @@ def video2humanmasks(input_frames_path, output_folder_path, output_type, fps):
     try:
         # Try to fetch the models from cache
         convert_video = torch.hub.load(predicted_torch_model_cache_path, "converter", source='local')
-        model = torch.hub.load(predicted_torch_model_cache_path, "mobilenetv3", source='local').cuda()
+        model = torch.hub.load(predicted_torch_model_cache_path, "resnet50", source='local').cuda()
     except:
         # Download from the internet if not found in cache
         convert_video = torch.hub.load("hithereai/RobustVideoMatting", "converter")
-        model = torch.hub.load("hithereai/RobustVideoMatting", "mobilenetv3").cuda()
+        model = torch.hub.load("hithereai/RobustVideoMatting", "resnet50").cuda()
         
     output_alpha_vid_path = os.path.join(output_folder_path, "human_masked_video.mp4")
     # extract humans masks from the input folder' imgs.

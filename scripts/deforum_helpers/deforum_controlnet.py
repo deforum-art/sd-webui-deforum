@@ -15,12 +15,13 @@ from rich import box
 from modules import scripts
 from modules.shared import opts
 from .deforum_controlnet_gradio import *
-from .video_audio_utilities import vid2frames
+from .general_utils import count_files_in_folder, clean_gradio_path_strings # TODO: do it another way
+from .video_audio_utilities import vid2frames, convert_image
+from .animation_key_frames import ControlNetKeys
 
 # DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-
 cnet = None
-# number of CN model tabs to show in the deforum gui. *if adding more, make sure to update cn_models param in get_keys_to_exclude in settings.py*
+# number of CN model tabs to show in the deforum gui
 num_of_models = 5
 
 def find_controlnet():
@@ -37,6 +38,17 @@ def find_controlnet():
         print(f"\033[0;32m*Deforum ControlNet support: enabled*\033[0m")
         return True
     return None
+    
+def controlnet_infotext():
+    return """Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
+            <p">If Deforum crashes due to CN updates, go <a style='color:Orange;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet/issues'>here</a> and report your problem.</p>
+           """
+   
+def is_controlnet_enabled(controlnet_args):
+    for i in range(1, num_of_models+1):
+        if getattr(controlnet_args, f'cn_{i}_enabled', False):
+            return True
+    return False
 
 def setup_controlnet_ui_raw():
     cnet = find_controlnet()
@@ -53,31 +65,30 @@ def setup_controlnet_ui_raw():
             enabled = gr.Checkbox(label="Enable", value=False, interactive=True)
             pixel_perfect = gr.Checkbox(label="Pixel Perfect", value=False, visible=False, interactive=True)
             low_vram = gr.Checkbox(label="Low VRAM", value=False, visible=False, interactive=True)
+            overwrite_frames = gr.Checkbox(label='Overwrite input frames', value=True, visible=False, interactive=True)
         with gr.Row(visible=False) as mod_row:
             module = gr.Dropdown(cn_preprocessors, label=f"Preprocessor", value="none", interactive=True)
             model = gr.Dropdown(cn_models, label=f"Model", value="None", interactive=True)
             refresh_models = ToolButton(value=refresh_symbol)
             refresh_models.click(refresh_all_models, model, model)
         with gr.Row(visible=False) as weight_row:
-            weight = gr.Slider(label=f"Weight", value=1.0, minimum=0.0, maximum=2.0, step=.05, interactive=True)
-            guidance_start =  gr.Slider(label="Guidance start", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
-            guidance_end =  gr.Slider(label="Guidance end", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
+            weight = gr.Textbox(label="Weight", lines=1, value = '0:(1)', interactive=True)
+            guidance_start =  gr.Slider(label="Starting Control Step", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
+            guidance_end =  gr.Slider(label="Ending Control Step", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
             model_dropdowns.append(model)
         with gr.Column(visible=False) as advanced_column:
             processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
             threshold_a =  gr.Slider(label="Threshold A", value=64, minimum=64, maximum=1024, interactive=False)
             threshold_b =  gr.Slider(label="Threshold B", value=64, minimum=64, maximum=1024, interactive=False)
+        with gr.Row(visible=False) as vid_path_row:
+            vid_path = gr.Textbox(value='', label="ControlNet Input Video/ Image Path", interactive=True)
+        with gr.Row(visible=False) as mask_vid_path_row: # invisible temporarily since 26-04-23 until masks are fixed
+            mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video/ Image Path (*NOT WORKING, kept in UI for CN's devs testing!*)", interactive=True)
         with gr.Row(visible=False) as control_mode_row:
             control_mode = gr.Radio(choices=["Balanced", "My prompt is more important", "ControlNet is more important"], value="Balanced", label="Control Mode", interactive=True)            
         with gr.Row(visible=False) as env_row:
             resize_mode = gr.Radio(choices=["Outer Fit (Shrink to Fit)", "Inner Fit (Scale to Fit)", "Just Resize"], value="Inner Fit (Scale to Fit)", label="Resize Mode", interactive=True)
-        with gr.Row(visible=False) as vid_settings_row:
-            overwrite_frames = gr.Checkbox(label='Overwrite input frames', value=True, interactive=True)
-            vid_path = gr.Textbox(value='', label="ControlNet Input Video Path", interactive=True)
-            mask_vid_path = gr.Textbox(value='', label="ControlNet Mask Video Path", interactive=True)
-        input_video_chosen_file = gr.File(label="ControlNet Video Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_chosen_file", visible=False)
-        input_video_mask_chosen_file = gr.File(label="ControlNet Video Mask Input", interactive=True, file_count="single", file_types=["video"], elem_id="controlnet_input_video_mask_chosen_file", visible=False)
-        hide_output_list = [pixel_perfect,low_vram,mod_row,module,weight_row,env_row,vid_settings_row,input_video_chosen_file,input_video_mask_chosen_file, advanced_column, control_mode_row] 
+        hide_output_list = [pixel_perfect,low_vram,mod_row,module,weight_row,env_row,overwrite_frames,vid_path_row,control_mode_row, mask_vid_path_row] # add mask_vid_path_row when masks are working again
         for cn_output in hide_output_list:
             enabled.change(fn=hide_ui_by_cn_status, inputs=enabled,outputs=cn_output)
         module.change(build_sliders, inputs=[module, pixel_perfect], outputs=[processor_res, threshold_a, threshold_b, advanced_column])
@@ -91,7 +102,7 @@ def setup_controlnet_ui_raw():
         return {key: value for key, value in locals().items() if key in [
             "enabled", "pixel_perfect","low_vram", "module", "model", "weight",
             "guidance_start", "guidance_end", "processor_res", "threshold_a", "threshold_b", "resize_mode", "control_mode",
-            "overwrite_frames", "vid_path", "mask_vid_path", "input_video_chosen_file", "input_video_mask_chosen_file"
+            "overwrite_frames", "vid_path", "mask_vid_path"
         ]}
         
     def refresh_all_models(*inputs):
@@ -129,40 +140,37 @@ def controlnet_component_names():
         return []
 
     return [f'cn_{i}_{component}' for i in range(1, num_of_models+1) for component in [
-        'input_video_chosen_file', 'input_video_mask_chosen_file',
         'overwrite_frames', 'vid_path', 'mask_vid_path', 'enabled',
         'low_vram', 'pixel_perfect',
         'module', 'model', 'weight', 'guidance_start', 'guidance_end',
         'processor_res', 'threshold_a', 'threshold_b', 'resize_mode', 'control_mode'
     ]]
-
-def controlnet_infotext():
-    return """Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet'>ControlNet</a> extension to be installed.</p>
-            <p">If Deforum crashes due to CN updates, go <a style='color:Orange;' target='_blank' href='https://github.com/Mikubill/sd-webui-controlnet/issues'>here</a> and report your problem.</p>
-           """
-           
-def is_controlnet_enabled(controlnet_args):
-    for i in range(1, num_of_models+1):
-        if getattr(controlnet_args, f'cn_{i}_enabled', False):
-            return True
-    return False
     
 def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=True, frame_idx=1):
+    CnSchKeys = ControlNetKeys(anim_args, controlnet_args)
     def read_cn_data(cn_idx):
         cn_mask_np, cn_image_np = None, None
-        cn_inputframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_inputframes')
+        cn_inputframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_inputframes') # set input frames folder path
         if os.path.exists(cn_inputframes):
-            cn_frame_path = os.path.join(cn_inputframes, f"{frame_idx:09}.jpg")
-            cn_mask_frame_path = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes', f"{frame_idx:09}.jpg")
-
-            print(f'Reading ControlNet {cn_idx} base frame {frame_idx} at {cn_frame_path}')
-            print(f'Reading ControlNet {cn_idx} mask frame {frame_idx} at {cn_mask_frame_path}')
-
+            if count_files_in_folder(cn_inputframes) == 1:
+                cn_frame_path = os.path.join(cn_inputframes, "000000001.jpg")
+                print(f'Reading ControlNet *static* base frame at {cn_frame_path}')
+            else:
+                cn_frame_path = os.path.join(cn_inputframes, f"{frame_idx:09}.jpg")
+                print(f'Reading ControlNet {cn_idx} base frame #{frame_idx} at {cn_frame_path}')
             if os.path.exists(cn_frame_path):
                 cn_image_np = np.array(Image.open(cn_frame_path).convert("RGB")).astype('uint8')
-
+        cn_maskframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes') # set mask frames folder path        
+        if os.path.exists(cn_maskframes):
+            if count_files_in_folder(cn_maskframes) == 1:
+                cn_mask_frame_path = os.path.join(cn_inputframes, "000000001.jpg")
+                print(f'Reading ControlNet *static* mask frame at {cn_mask_frame_path}')
+            else:
+                cn_mask_frame_path = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes', f"{frame_idx:09}.jpg")
+                print(f'Reading ControlNet {cn_idx} mask frame #{frame_idx} at {cn_mask_frame_path}')
             if os.path.exists(cn_mask_frame_path):
                 cn_mask_np = np.array(Image.open(cn_mask_frame_path).convert("RGB")).astype('uint8')
+
         return cn_mask_np, cn_image_np
 
     cnet = find_controlnet()
@@ -174,72 +182,64 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
 
     p.scripts = scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img
 
-    def create_cnu_dict(cn_args, prefix, img_np, mask_np):
+    def create_cnu_dict(cn_args, prefix, img_np, mask_np, frame_idx, CnSchKeys):
+        
         keys = [
             "enabled", "module", "model", "weight", "resize_mode", "control_mode", "low_vram","pixel_perfect",
             "processor_res", "threshold_a", "threshold_b", "guidance_start", "guidance_end"
         ]
         cnu = {k: getattr(cn_args, f"{prefix}_{k}") for k in keys}
+        # Dynamic weight assignment for models 1 to 5
+        model_num = int(prefix.split('_')[-1])  # Extract model number from prefix (e.g., "cn_1" -> 1)
+        if 1 <= model_num <= 5:
+            cnu['weight'] = getattr(CnSchKeys, f"cn_{model_num}_weight_schedule_series")[frame_idx-1]
         cnu['image'] = {'image': img_np, 'mask': mask_np} if mask_np is not None else img_np
         return cnu
 
     masks_np, images_np = zip(*cn_data)
 
-    cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i+1}", img_np, mask_np))
+    cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i+1}", img_np, mask_np, frame_idx, CnSchKeys))
             for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
 
     p.script_args = {"enabled": True} 
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
 
-def process_controlnet_video(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
+def process_controlnet_input_frames(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
     if (video_path or mask_path) and getattr(controlnet_args, f'cn_{id}_enabled'):
-        print(f'Unpacking ControlNet {id} {"video mask" if mask_path else "base video"}')
         frame_path = os.path.join(args.outdir, f'controlnet_{id}_{outdir_suffix}')
         os.makedirs(frame_path, exist_ok=True)
-
-        print(f"Exporting Video Frames (1 every {anim_args.extract_nth_frame}) frames to {frame_path}...")
-        vid2frames(
-            video_path=video_path or mask_path,
-            video_in_frame_path=frame_path,
-            n=anim_args.extract_nth_frame,
-            overwrite=getattr(controlnet_args, f'cn_{id}_overwrite_frames'),
-            extract_from_frame=anim_args.extract_from_frame,
-            extract_to_frame=anim_args.extract_to_frame,
-            numeric_files_output=True
-        )
-        print(f"Loading {anim_args.max_frames} input frames from {frame_path} and saving video frames to {args.outdir}")
-        print(f'ControlNet {id} {"video mask" if mask_path else "base video"} unpacked!')
+        
+        accepted_image_extensions = ('.jpg', '.jpeg', '.png', '.bmp')
+        if video_path and video_path.lower().endswith(accepted_image_extensions):
+            convert_image(video_path, os.path.join(frame_path, '000000001.jpg'))
+            print(f"Copied CN Model {id}'s single input image to inputframes folder!")
+        elif mask_path and mask_path.lower().endswith(accepted_image_extensions):
+            convert_image(mask_path, os.path.join(frame_path, '000000001.jpg'))
+            print(f"Copied CN Model {id}'s single input image to inputframes *mask* folder!")
+        else:
+            print(f'Unpacking ControlNet {id} {"video mask" if mask_path else "base video"}')
+            print(f"Exporting Video Frames to {frame_path}...")
+            vid2frames(
+                video_path=video_path or mask_path,
+                video_in_frame_path=frame_path,
+                n=1 if anim_args.animation_mode != 'Video Input' else anim_args.extract_nth_frame,
+                overwrite=getattr(controlnet_args, f'cn_{id}_overwrite_frames'),
+                extract_from_frame=0 if anim_args.animation_mode != 'Video Input' else anim_args.extract_from_frame,
+                extract_to_frame=(anim_args.max_frames-1) if anim_args.animation_mode != 'Video Input' else anim_args.extract_to_frame,
+                numeric_files_output=True
+            )
+            print(f"Loading {anim_args.max_frames} input frames from {frame_path} and saving video frames to {args.outdir}")
+            print(f'ControlNet {id} {"video mask" if mask_path else "base video"} unpacked!')
 
 def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+    # this func gets called from render.py once for an entire animation run -->
+    # tries to trigger an extraction of CN input frames (regular + masks) from video or image
     for i in range(1, num_of_models+1):
-        vid_path = getattr(controlnet_args, f'cn_{i}_vid_path', None)
-        vid_chosen_file = getattr(controlnet_args, f'cn_{i}_input_video_chosen_file', None)
-        vid_name = None
-        if vid_chosen_file is not None:
-            vid_name = getattr(getattr(controlnet_args, f'cn_{i}_input_video_chosen_file'), 'name', None)
+        vid_path = clean_gradio_path_strings(getattr(controlnet_args, f'cn_{i}_vid_path', None))
+        mask_path = clean_gradio_path_strings(getattr(controlnet_args, f'cn_{i}_mask_vid_path', None))
+
+        if vid_path: # Process base video, if available
+            process_controlnet_input_frames(args, anim_args, controlnet_args, vid_path, None, 'inputframes', i)
         
-        mask_path = getattr(controlnet_args, f'cn_{i}_mask_vid_path', None)
-        mask_chosen_file = getattr(controlnet_args, f'cn_{i}_input_video_mask_chosen_file', None)
-        mask_name = None
-        if mask_chosen_file is not None:
-            mask_name = getattr(getattr(controlnet_args, f'cn_{i}_input_video_mask_chosen_file'), 'name', None)
-
-        process_controlnet_video( # Process base video
-            args, anim_args, controlnet_args,
-            vid_path or vid_name,
-            None,
-            'inputframes',
-            i
-        )
-
-        if mask_name: # Process mask video, if available
-            process_controlnet_video(
-                args, anim_args, controlnet_args,
-                None,
-                mask_path or mask_name,
-                'maskframes',
-                i
-            )
-
-def hide_ui_by_cn_status(choice):
-    return gr.update(visible=True) if choice else gr.update(visible=False)
+        if mask_path: # Process mask video, if available
+            process_controlnet_input_frames(args, anim_args, controlnet_args, None, mask_path, 'maskframes', i)

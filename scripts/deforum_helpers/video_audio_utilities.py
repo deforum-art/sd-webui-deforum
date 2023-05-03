@@ -10,12 +10,27 @@ import glob
 import concurrent.futures
 from pkg_resources import resource_filename
 from modules.shared import state, opts
-from .general_utils import checksum, duplicate_pngs_from_folder
+from .general_utils import checksum, duplicate_pngs_from_folder, clean_gradio_path_strings
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
 
 # DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
- 
+
+def convert_image(input_path, output_path):
+    # Read the input image
+    img = cv2.imread(input_path)
+    # Get the file extension of the output path
+    out_ext = os.path.splitext(output_path)[1].lower()
+    # Convert the image to the specified output format
+    if out_ext == ".png":
+        cv2.imwrite(output_path, img, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+    elif out_ext == ".jpg" or out_ext == ".jpeg":
+        cv2.imwrite(output_path, img, [cv2.IMWRITE_JPEG_QUALITY, 99])
+    elif out_ext == ".bmp":
+        cv2.imwrite(output_path, img)
+    else:
+        print(f"Unsupported output format: {out_ext}")
+
 def get_ffmpeg_params(): # get ffmpeg params from webui's settings -> deforum tab. actual opts are set in deforum.py
     f_location = opts.data.get("deforum_ffmpeg_location", find_ffmpeg_binary())
     f_crf = opts.data.get("deforum_ffmpeg_crf", 17)
@@ -37,6 +52,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
 
     if n < 1: n = 1 #HACK Gradio interface does not currently allow min/max in gr.Number(...) 
 
+    video_path = clean_gradio_path_strings(video_path)
     # check vid path using a function and only enter if we get True
     if is_vid_path_valid(video_path):
 
@@ -90,8 +106,8 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
                         file_path = os.path.join(video_in_frame_path, file_name)
                         executor.submit(save_frame, image, file_path)
                         t += 1
-                    success,image = vidcap.read()
                     count += 1
+                    success, image = vidcap.read()
             print(f"Extracted {count} frames from video in {time.time() - start_time:.2f} seconds!")
         else:
             print("Frames already unpacked")
@@ -147,7 +163,6 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         cmd = [
             ffmpeg_location,
             '-y',
-            '-vcodec', 'png',
             '-r', str(float(fps)),
             '-start_number', str(stitch_from_frame),
             '-i', imgs_path,
@@ -158,9 +173,12 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
             '-pix_fmt', 'yuv420p',
             '-crf', str(crf),
             '-preset', preset,
-            '-pattern_type', 'sequence',
-            outmp4_path
+            '-pattern_type', 'sequence'
         ]
+        cmd.append('-vcodec')
+        cmd.append('png' if imgs_path[0].find('.png') != -1 else 'libx264')
+        cmd.append(outmp4_path)
+
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
     except FileNotFoundError:
@@ -173,6 +191,7 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         raise Exception(f'Error stitching frames to video. Actual runtime error:{e}')
     
     if add_soundtrack != 'None':
+        audio_path = clean_gradio_path_strings(audio_path)
         audio_add_start_time = time.time()
         try:
             cmd = [

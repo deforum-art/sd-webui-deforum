@@ -95,7 +95,7 @@ for issue in repo.get_issues():
             issue.edit(state='closed')
             
             # Generate the comment by concatenating the error messages
-            comment = "This issue has been closed due to incorrect formatting. Please address the following mistakes and reopen the issue:\n\n"
+            comment = "This issue has been closed due to incorrect formatting. Please address the following mistakes and reopen the issue (click on the 'Reopen' button below):\n\n"
             comment += "\n".join(f"- {error_message}" for error_message in error_messages)
 
             # Add the comment to the issue
