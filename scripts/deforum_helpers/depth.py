@@ -9,6 +9,7 @@ from einops import rearrange, repeat
 from PIL import Image
 from modules import lowvram, devices
 from modules.shared import opts, cmd_opts
+from .general_utils import debug_print
 from .depth_midas import MidasDepth
 from .depth_zoe import ZoeDepth
 from .depth_leres import LeReSDepth
@@ -98,7 +99,7 @@ class DepthModel:
         depth_tensor = torch.subtract(50.0, depth_tensor) / 19.0 # align midas depth with adabins depth. Original alignment code from Disco Diffusion
         blended_depth_map = (depth_tensor.cpu().numpy() * midas_weight + adabins_depth * (1.0 - midas_weight))
         depth_tensor = torch.from_numpy(np.expand_dims(blended_depth_map, axis=0)).squeeze().to(self.device)
-        self.debug_print(f"Blended Midas Depth with AdaBins Depth")
+        debug_print(f"Blended Midas Depth with AdaBins Depth")
         return depth_tensor
         
     def to(self, device):
@@ -140,8 +141,3 @@ class DepthModel:
         gc.collect()
         torch.cuda.empty_cache()
         devices.torch_gc()
- 
-    def debug_print(self, message):
-        DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-        if DEBUG_MODE:
-            print(message)

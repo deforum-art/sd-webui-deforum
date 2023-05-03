@@ -6,6 +6,7 @@ import py3d_tools as p3d
 import torch
 from einops import rearrange
 from .prompt import check_is_number
+from .general_utils import debug_print
 
 # Webui
 from modules.shared import state, opts
@@ -319,17 +320,11 @@ def transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translat
     if depth_tensor_invalid:
         # if none, then 3D depth is turned off, so no warning is needed.
         if depth_tensor is not None:
-            print("Depth tensor invalid. Flat depth for this frame.")
+            print("Depth tensor invalid. Generating a Flat depth for this frame.")
         # create flat depth
         z = torch.ones_like(x)
     # create z from depth tensor
     else:
-        # console output vars
-        con_txt = "\033[36mDepth"
-        txt_depth_min = '{:.2f}'.format(float(depth_tensor.min()))
-        txt_depth_max = '{:.2f}'.format(float(depth_tensor.max()))
-        diff = '{:.2f}'.format(float(depth_tensor.max())-float(depth_tensor.min()))
-
         # prepare tensor between 0 and 1 with optional equalization and autocontrast
         depth_normalized = prepare_depth_tensor(depth_tensor)
 
@@ -339,12 +334,13 @@ def transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translat
         # depth factor (1 is normal. -1 is inverted)
         if depth_factor != 1:
             depth_final *= depth_factor
-
-        # console reporting of normalization
-        con_txt += f" normalized to {depth_final.min()}/{depth_final.max()} from"
-
+        
         # console reporting of depth normalization, min, max, diff
-        print(con_txt + f" {txt_depth_min}/{txt_depth_max} diff {diff}\033[0m")
+        # will *only* print to console if Dev mode is enabled in general settings of Deforum
+        txt_depth_min, txt_depth_max = '{:.2f}'.format(float(depth_tensor.min())), '{:.2f}'.format(float(depth_tensor.max()))
+        diff = '{:.2f}'.format(float(depth_tensor.max()) - float(depth_tensor.min()))
+        console_txt = f"\033[36mDepth normalized to {depth_final.min()}/{depth_final.max()} from"
+        debug_print(f"{console_txt} {txt_depth_min}/{txt_depth_max} diff {diff}\033[0m") 
 
         # add z from depth
         z = torch.as_tensor(depth_final, dtype=torch.float32, device=device)

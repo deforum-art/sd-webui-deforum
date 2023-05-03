@@ -3,8 +3,11 @@ import hashlib
 from modules.shared import opts
 from basicsr.utils.download_util import load_file_from_url
 
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-
+def debug_print(message):
+    DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+    if DEBUG_MODE:
+        print(message)
+            
 def checksum(filename, hash_factory=hashlib.blake2b, chunk_num_blocks=128):
     h = hash_factory()
     with open(filename,'rb') as f: 
