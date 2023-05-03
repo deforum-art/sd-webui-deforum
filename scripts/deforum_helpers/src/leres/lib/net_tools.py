@@ -29,7 +29,7 @@ def load_ckpt(args, depth_model, shift_model, focal_model):
     Load checkpoint.
     """
     if os.path.isfile(args):
-        print("loading checkpoint %s" % args)
+        print("loading LeReS checkpoint from %s" % args)
         checkpoint = torch.load(args)
         if shift_model is not None:
             shift_model.load_state_dict(strip_prefix_if_present(checkpoint['shift_model'], 'module.'),

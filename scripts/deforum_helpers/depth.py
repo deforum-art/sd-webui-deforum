@@ -35,6 +35,8 @@ class DepthModel:
 
     def _initialize(self, models_path, device, half_precision=not cmd_opts.no_half, keep_in_vram=False, depth_algorithm='midas', Width=512, Height=512, midas_weight=1.0):
         self.keep_in_vram = keep_in_vram
+        self.half_precision = half_precision
+        self.models_path = models_path
         self.Width = Width
         self.Height = Height
         self.depth_min = 1000
@@ -42,23 +44,28 @@ class DepthModel:
         self.device = device
         self.depth_algorithm = depth_algorithm
         self.adabins_helper = None
+        self._initialize_model()
 
-        if self.depth_algorithm.lower().startswith('zoe'): # Zoe or Zoe+Adabins for legacy mode
+    def _initialize_model(self):
+        depth_algo = self.depth_algorithm.lower()
+        if depth_algo.startswith('zoe'):
             self.zoe_depth = ZoeDepth(self.Width, self.Height)
-            if self.depth_algorithm.lower() == 'zoe+adabins (old)' and midas_weight < 1.0:
-                self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
+            if depth_algo == 'zoe+adabins (old)':
+                self.adabins_model = AdaBinsModel(self.models_path, keep_in_vram=self.keep_in_vram)
                 self.adabins_helper = self.adabins_model.adabins_helper
-        elif self.depth_algorithm.lower() == 'leres':
-            self.leres_depth = LeReSDepth(width=448, height=448, models_path=models_path, checkpoint_name='res101.pth', backbone='resnext101')
-        elif self.depth_algorithm.lower() == 'adabins':
-            self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
+        elif depth_algo == 'leres':
+            self.leres_depth = LeReSDepth(width=448, height=448, models_path=self.models_path, checkpoint_name='res101.pth', backbone='resnext101')
+        elif depth_algo == 'adabins':
+            self.adabins_model = AdaBinsModel(self.models_path, keep_in_vram=self.keep_in_vram)
             self.adabins_helper = self.adabins_model.adabins_helper
-        elif self.depth_algorithm.lower().startswith('midas'): # Midas or Midas+AdaBins for legacy mode
-            self.midas_depth = MidasDepth(models_path, device, half_precision=half_precision, midas_model_type=self.depth_algorithm)
-            if self.depth_algorithm.lower() == 'midas+adabins (old)' and midas_weight < 1.0:
-                self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
+        elif depth_algo.startswith('midas'):
+            self.midas_depth = MidasDepth(self.models_path, self.device, half_precision=self.half_precision, midas_model_type=self.depth_algorithm)
+            if depth_algo == 'midas+adabins (old)':
+                self.adabins_model = AdaBinsModel(self.models_path, keep_in_vram=self.keep_in_vram)
                 self.adabins_helper = self.adabins_model.adabins_helper
-            
+        else:
+            raise Exception(f"Unknown depth_algorithm: {self.depth_algorithm}")
+
     def predict(self, prev_img_cv2, midas_weight, half_precision) -> torch.Tensor:
 
         img_pil = Image.fromarray(cv2.cvtColor(prev_img_cv2.astype(np.uint8), cv2.COLOR_RGB2BGR))
