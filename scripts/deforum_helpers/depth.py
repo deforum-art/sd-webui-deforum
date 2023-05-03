@@ -51,7 +51,7 @@ class DepthModel:
             self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
             self.adabins_helper = self.adabins_model.adabins_helper
         elif self.depth_algorithm.lower().startswith('midas'): # Midas or Midas+AdaBins
-            self.midas_depth = MidasDepth(models_path, device, half_precision=half_precision)
+            self.midas_depth = MidasDepth(models_path, device, half_precision=half_precision, midas_model_type=self.depth_algorithm)
             if self.depth_algorithm.lower() == 'midas+adabins' and midas_weight < 1.0:
                 self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
                 self.adabins_helper = self.adabins_model.adabins_helper

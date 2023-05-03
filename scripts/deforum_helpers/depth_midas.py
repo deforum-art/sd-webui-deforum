@@ -9,18 +9,29 @@ from midas.transforms import Resize, NormalizeImage, PrepareForNet
 import torchvision.transforms as T
 
 class MidasDepth:
-    def __init__(self, models_path, device, half_precision=True):
+    def __init__(self, models_path, device, half_precision=True, midas_model_type='Midas-3-Hybrid'):
+        if midas_model_type.lower() == 'midas-3.1-beitlarge':
+            self.midas_model_filename = 'dpt_beit_large_512.pt'
+            self.midas_model_checksum='66cbb00ea7bccd6e43d3fd277bd21002d8d8c2c5c487e5fcd1e1d70c691688a19122418b3ddfa94e62ab9f086957aa67bbec39afe2b41c742aaaf0699ee50b33'
+            self.midas_model_url = 'https://github.com/isl-org/MiDaS/releases/download/v3_1/dpt_beit_large_512.pt'
+            self.resize_px = 512
+            self.backbone = 'beitl16_512'
+        else:
+            self.midas_model_filename = 'dpt_large-midas-2f21e586.pt'
+            self.midas_model_checksum = 'fcc4829e65d00eeed0a38e9001770676535d2e95c8a16965223aba094936e1316d569563552a852d471f310f83f597e8a238987a26a950d667815e08adaebc06'
+            self.midas_model_url = 'https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt'
+            self.resize_px = 384
+            self.backbone = 'vitl16_384'
         self.device = device
         self.normalization = NormalizeImage(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
         self.midas_transform = T.Compose([
-            Resize(384, 384, resize_target=None, keep_aspect_ratio=True, ensure_multiple_of=32,
+            Resize(self.resize_px, self.resize_px, resize_target=None, keep_aspect_ratio=True, ensure_multiple_of=32,
                    resize_method="minimal", image_interpolation_method=cv2.INTER_CUBIC),
             self.normalization,
             PrepareForNet()
         ])
         
-        self.midas_model_filename = 'dpt_large-midas-2f21e586.pt'
-        download_file_with_checksum(url='https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt', expected_checksum='fcc4829e65d00eeed0a38e9001770676535d2e95c8a16965223aba094936e1316d569563552a852d471f310f83f597e8a238987a26a950d667815e08adaebc06', dest_folder=models_path, dest_filename=self.midas_model_filename)
+        download_file_with_checksum(url=self.midas_model_url, expected_checksum=self.midas_model_checksum, dest_folder=models_path, dest_filename=self.midas_model_filename)
         
         self.load_midas_model(models_path, self.midas_model_filename)
         if half_precision:
@@ -31,7 +42,7 @@ class MidasDepth:
         print("Loading MiDaS model...")
         self.midas_model = DPTDepthModel(
             path=model_file,
-            backbone="vitl16_384",
+            backbone=self.backbone,
             non_negative=True,
         )
         self.midas_model.eval().to(self.device, memory_format=torch.channels_last if self.device == torch.device("cuda") else None)
