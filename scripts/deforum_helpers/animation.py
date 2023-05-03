@@ -276,7 +276,7 @@ def transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translat
     originally an adapted and optimized version of transform_image_3d from Disco Diffusion https://github.com/alembics/disco-diffusion
     modified by reallybigname to control various incoming tensors
     '''
-    if anim_args.depth_algorithm.lower().startswith('midas'):
+    if anim_args.depth_algorithm.lower().startswith('midas'): # 'Midas-3-Hybrid' or 'Midas-3.1-BeitLarge'
         depth = 1
         depth_factor = -1
         depth_offset = -2
