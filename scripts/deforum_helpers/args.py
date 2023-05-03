@@ -1031,6 +1031,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     for output in interp_hide_list:
         frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
     diffusion_cadence.change(fn=hide_optical_flow_cadence, inputs=diffusion_cadence,outputs=optical_flow_cadence_row)
+    depth_algorithm.change(fn=legacy_3d_mode, inputs=depth_algorithm, outputs=midas_weight)
     # END OF UI TABS
     stuff = locals()
     stuff = {**stuff, **controlnet_dict}
