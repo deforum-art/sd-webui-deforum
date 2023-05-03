@@ -119,8 +119,8 @@ def DeforumAnimArgs():
     perlin_persistence = 0.5 
     #**3D Depth Warping:**
     use_depth_warping = True 
-    depth_algorithm = 'Midas+AdaBins (old)' # ['Midas+AdaBins (old)','Zoe+AdaBins (old)','Midas-3-Hybrid','Midas-3.1-BeitLarge','AdaBins','Zoe', 'Leres']
-    midas_weight = 0.2 
+    depth_algorithm = 'Midas-3-Hybrid' # ['Midas+AdaBins (old)','Zoe+AdaBins (old)', 'Midas-3-Hybrid','Midas-3.1-BeitLarge', 'AdaBins', 'Zoe', 'Leres']
+    midas_weight = 0.2 # midas/ zoe weight - only relevant in old/ legacy depth_algorithm modes. see above ^
     padding_mode = 'border' # ['border', 'reflection', 'zeros'] 
     sampling_mode = 'bicubic' # ['bicubic', 'bilinear', 'nearest']
     save_depth_maps = False 
