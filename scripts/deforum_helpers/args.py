@@ -303,7 +303,7 @@ import gradio as gr
 import time
 from types import SimpleNamespace
 
-i1_store_backup = f"<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.3b | Git commit: {get_deforum_version()}</p>"
+i1_store_backup = f"<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.4b | Git commit: {get_deforum_version()}</p>"
 i1_store = i1_store_backup
 
 mask_fill_choices=['fill', 'original', 'latent noise', 'latent nothing']
@@ -324,7 +324,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         btn = i1 = gr.HTML("")
     # MAIN (TOP) EXTENSION INFO ACCORD
     with gr.Accordion("Info, Links and Help", open=False, elem_id='main_top_info_accord'):
-            gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong>""")
+            gr.HTML("""<strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong> & <a href="https://github.com/hithereai">hithereai</a></strong> """)
             gr.HTML("""<a  style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/FAQ-&-Troubleshooting">FOR HELP CLICK HERE</a""", elem_id="for_help_click_here")
             gr.HTML("""<ul style="list-style-type:circle; margin-left:1em">
             <li>The code for this extension: <a  style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">here</a>.</li>

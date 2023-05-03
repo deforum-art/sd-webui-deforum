@@ -56,7 +56,7 @@ def run_deforum(*args, **kwargs):
         times_to_run = len(args_dict['custom_settings_file'])
         
     for i in range(times_to_run):
-        print(f"\033[4;33mDeforum extension for auto1111 webui, v2.3b\033[0m")
+        print(f"\033[4;33mDeforum extension for auto1111 webui, v2.4b\033[0m")
         print(f"Git commit: {get_deforum_version()}")
         args_dict['self'] = None
         args_dict['p'] = p
