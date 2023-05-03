@@ -522,6 +522,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.TabItem('Depth Warping'): 
                                 with gr.Row(variant='compact'):
                                     use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
+                                    # this following html only shows when using LeReS depth
+                                    leres_license_msg = gr.HTML(value='Note that LeReS has a Non-Commercial <a href="https://github.com/aim-uofa/AdelaiDepth/blob/main/LeReS/LICENSE" target="_blank">license</a>. Use it only for fun/personal use.', visible=False, elem_id='leres_license_msg')
+
+                                    # leres_license_msg = gr.HTML(value='Note that LeReS has a Non-Commercial license. Use it only for fun/ personal use.',visible=False, elem_id='leres_license_msg')
                                     depth_algorithm = gr.Dropdown(label="Depth Algorithm", choices=['Midas+AdaBins (old)','Zoe+AdaBins (old)','Midas-3-Hybrid','Midas-3.1-BeitLarge', 'AdaBins','Zoe', 'Leres'], value=da.depth_algorithm, type="value", elem_id="df_depth_algorithm", interactive=True)
                                     midas_weight = gr.Number(label="MiDaS/Zoe weight", value=da.midas_weight, interactive=True, info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
                                 with gr.Row(variant='compact'):
@@ -696,16 +700,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         parseq_manifest = gr.Textbox(label="Parseq Manifest (JSON or URL)", lines=4, value = dp.parseq_manifest, interactive=True)
                     with gr.Row(variant='compact'):
                         parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)            
-            def show_hybrid_html_msg(choice):
-                if choice not in ['2D','3D']:
-                    return gr.update(visible=True) 
-                else:
-                    return gr.update(visible=False)
-            def change_hybrid_tab_status(choice):
-                if choice in ['2D','3D']:
-                    return gr.update(visible=True) 
-                else:
-                    return gr.update(visible=False)
             # CONTROLNET TAB
             with gr.TabItem('ControlNet'):
                     gr.HTML(controlnet_infotext())
@@ -1032,6 +1026,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
         frame_interpolation_engine.change(fn=hide_interp_by_interp_status,inputs=frame_interpolation_engine,outputs=output)
     diffusion_cadence.change(fn=hide_optical_flow_cadence, inputs=diffusion_cadence,outputs=optical_flow_cadence_row)
     depth_algorithm.change(fn=legacy_3d_mode, inputs=depth_algorithm, outputs=midas_weight)
+    depth_algorithm.change(fn=show_leres_html_msg, inputs=depth_algorithm, outputs=leres_license_msg)
     # END OF UI TABS
     stuff = locals()
     stuff = {**stuff, **controlnet_dict}
