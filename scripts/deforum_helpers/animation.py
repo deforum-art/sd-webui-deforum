@@ -216,12 +216,12 @@ def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
     torch.cuda.empty_cache()
     return result
 
-def transform_image_3d_switcher(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx, depth_min_0=False, equalize=True, autocontrast=False, autocontrast_cutoff_low=0, autocontrast_cutoff_high=1):
+def transform_image_3d_switcher(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx):
     if anim_args.depth_algorithm.lower() in ['midas+adabins', 'zoe+adabins']:
         return transform_image_3d_legacy(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx)
     else:
-        return transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx, depth_min_0, equalize, autocontrast, autocontrast_cutoff_low, autocontrast_cutoff_high)
-        
+        return transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx)
+
 def transform_image_3d_legacy(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx):
     # adapted and optimized version of transform_image_3d from Disco Diffusion https://github.com/alembics/disco-diffusion 
     w, h = prev_img_cv2.shape[1], prev_img_cv2.shape[0]
@@ -271,7 +271,7 @@ def transform_image_3d_legacy(device, prev_img_cv2, depth_tensor, rot_mat, trans
     ).cpu().numpy().astype(prev_img_cv2.dtype)
     return result
 
-def transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx, depth_min_0=False, equalize=True, autocontrast=False, autocontrast_cutoff_low=0, autocontrast_cutoff_high=1):
+def transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx):
     '''
     originally an adapted and optimized version of transform_image_3d from Disco Diffusion https://github.com/alembics/disco-diffusion
     modified by reallybigname to control various incoming tensors
@@ -315,10 +315,14 @@ def transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translat
     # test tensor for validity (some are corrupted for some reason)
     depth_tensor_invalid = depth_tensor is None or torch.isnan(depth_tensor).any() or torch.isinf(depth_tensor).any() or depth_tensor.min() == depth_tensor.max()
 
-    # if invalid, create flat matrix for this frame
+    # if invalid, create flat z for this frame
     if depth_tensor_invalid:
-        print("Depth tensor invalid. Flat depth for this frame.")
+        # if none, then 3D depth is turned off, so no warning is needed.
+        if depth_tensor is not None:
+            print("Depth tensor invalid. Flat depth for this frame.")
+        # create flat depth
         z = torch.ones_like(x)
+    # create z from depth tensor
     else:
         # console output vars
         con_txt = "\033[36mDepth"
@@ -327,7 +331,7 @@ def transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translat
         diff = '{:.2f}'.format(float(depth_tensor.max())-float(depth_tensor.min()))
 
         # prepare tensor between 0 and 1 with optional equalization and autocontrast
-        depth_normalized = prepare_depth_tensor(depth_tensor, depth_min_0, equalize, autocontrast, autocontrast_cutoff_low, autocontrast_cutoff_high)
+        depth_normalized = prepare_depth_tensor(depth_tensor)
 
         # Rescale the depth values to depth with offset (depth 2 and offset -1 would be -1 to +11)
         depth_final = depth_normalized * depth + depth_offset
@@ -374,41 +378,12 @@ def transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translat
         'c h w -> h w c'
     ).cpu().numpy().astype(prev_img_cv2.dtype)
     return result
-     
-def prepare_depth_tensor(depth_tensor=None, depth_min_0=False, equalize=False, autocontrast=False, autocontrast_cutoff_low=0, autocontrast_cutoff_high=1):
-    """
-    Prepares a depth tensor with optional equalization and autocontrast.
-    Normalizes the depth tensor values between 0 and 1.
 
-    Args:
-    depth_tensor (torch.Tensor): A 2D depth tensor (H, W)
-    depth_min_0 (bool): If True, normalize using tensor floor of 0; otherwise, use tensor minimum.
-    equalize (bool): If True, perform equalization on the depth tensor.
-    autocontrast (bool): If True, apply autocontrast to the depth tensor.
-    autocontrast_cutoff_low (float): The lower cutoff value for autocontrast (between 0.0 and 1.0).
-    autocontrast_cutoff_high (float): The upper cutoff value for autocontrast (between 0.0 and 1.0).
-
-    Returns:
-    torch.Tensor: Prepared depth tensor (2D) with values between 0 and 1.
-    """
-
-    # normalization, zero based or min based
-    if depth_min_0: # tensor floor = 0
-        depth_tensor = 1 - (1 / depth_tensor.max())
-        # Clip the equalized depth tensor values between 0 and 1
-        equalized_depth_tensor = torch.clamp(equalized_depth_tensor, 0, 1)
-    else: # tensor floor = tensor minimum
-        depth_range = depth_tensor.max() - depth_tensor.min()
-        depth_tensor = (depth_tensor - depth_tensor.min()) / depth_range
-
-    # equalization of depth tensor (must be 0 to 1 at this stage)
-    if equalize:
-        depth_tensor = depth_equalization(depth_tensor=depth_tensor)
-    
-    # auto-contrast of depth tensor (must be 0 to 1 at this stage)
-    if autocontrast:
-        depth_tensor = depth_auto_contrast(depth_tensor=depth_tensor, low_cutoff=autocontrast_cutoff_low, high_cutoff=autocontrast_cutoff_high)
-    
+def prepare_depth_tensor(depth_tensor=None):
+    # Prepares a depth tensor with normalization & equalization between 0 and 1
+    depth_range = depth_tensor.max() - depth_tensor.min()
+    depth_tensor = (depth_tensor - depth_tensor.min()) / depth_range
+    depth_tensor = depth_equalization(depth_tensor=depth_tensor)    
     return depth_tensor
 
 def depth_equalization(depth_tensor):
@@ -442,26 +417,3 @@ def depth_equalization(depth_tensor):
     equalized_depth_tensor = torch.from_numpy(equalized_depth_array).to(depth_tensor.device)
 
     return equalized_depth_tensor
-
-def depth_auto_contrast(depth_tensor=None, low_cutoff=0.0, high_cutoff=1.0):
-    """
-    Apply auto-contrast to a depth tensor by adjusting the range of depth values.
-
-    Args:
-    depth_tensor (torch.Tensor): A 2D depth tensor (H, W)
-    low_cutoff (float): The lower cutoff value as a percentage (between 0.0 and 1.0) for clipping depth values.
-    high_cutoff (float): The upper cutoff value as a percentage (between 0.0 and 1.0) for clipping depth values.
-
-    Returns:
-    torch.Tensor: Auto-contrasted depth tensor (2D)
-    """
-
-    # Calculate the lower and upper bounds based on the cutoff values
-    depth_min = torch.quantile(depth_tensor, low_cutoff)
-    depth_max = torch.quantile(depth_tensor, high_cutoff)
-
-    # Apply auto-contrast by clipping and scaling the depth values
-    depth_clipped = torch.clamp(depth_tensor, depth_min, depth_max)
-    depth_auto_contrasted = (depth_clipped - depth_min) / (depth_max - depth_min)
-
-    return depth_auto_contrasted
