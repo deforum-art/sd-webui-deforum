@@ -39,7 +39,7 @@ class MidasDepth:
             
     def load_midas_model(self, models_path, midas_model_filename):
         model_file = os.path.join(models_path, midas_model_filename)
-        print("Loading MiDaS model...")
+        print(f"Loading MiDaS model from {midas_model_filename}...")
         self.midas_model = DPTDepthModel(
             path=model_file,
             backbone=self.backbone,
