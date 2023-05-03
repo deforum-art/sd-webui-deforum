@@ -53,6 +53,15 @@ class DeformAnimKeys():
         self.hybrid_comp_mask_auto_contrast_cutoff_low_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.hybrid_comp_mask_auto_contrast_cutoff_low_schedule))
         self.hybrid_flow_factor_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.hybrid_flow_factor_schedule))
 
+class ControlNetKeys():
+    def __init__(self, anim_args, controlnet_args):
+        self.fi = FrameInterpolater(max_frames = anim_args.max_frames)
+        self.cn_1_weight_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_1_weight))
+        self.cn_2_weight_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_2_weight))
+        self.cn_3_weight_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_3_weight))
+        self.cn_4_weight_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_4_weight))
+        self.cn_5_weight_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_5_weight))
+
 class LooperAnimKeys():
     def __init__(self, loop_args, anim_args, seed):
         self.fi = FrameInterpolater(anim_args.max_frames, seed)
