@@ -43,14 +43,17 @@ class DepthModel:
         self.depth_algorithm = depth_algorithm
         self.adabins_helper = None
 
-        if self.depth_algorithm.lower() == 'zoe':
+        if self.depth_algorithm.lower().startswith('zoe'): # Zoe or Zoe+Adabins for legacy mode
             self.zoe_depth = ZoeDepth(self.Width, self.Height)
+            if self.depth_algorithm.lower() == 'zoe+adabins' and midas_weight < 1.0:
+                self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
+                self.adabins_helper = self.adabins_model.adabins_helper
         elif self.depth_algorithm.lower() == 'leres':
             self.leres_depth = LeReSDepth(width=448, height=448, models_path=models_path, checkpoint_name='res101.pth', backbone='resnext101')
         elif self.depth_algorithm.lower() == 'adabins':
             self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
             self.adabins_helper = self.adabins_model.adabins_helper
-        elif self.depth_algorithm.lower().startswith('midas'): # Midas or Midas+AdaBins
+        elif self.depth_algorithm.lower().startswith('midas'): # Midas or Midas+AdaBins for legacy mode
             self.midas_depth = MidasDepth(models_path, device, half_precision=half_precision, midas_model_type=self.depth_algorithm)
             if self.depth_algorithm.lower() == 'midas+adabins' and midas_weight < 1.0:
                 self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
@@ -60,8 +63,12 @@ class DepthModel:
 
         img_pil = Image.fromarray(cv2.cvtColor(prev_img_cv2.astype(np.uint8), cv2.COLOR_RGB2BGR))
 
-        if self.depth_algorithm.lower() == 'zoe':
+        if self.depth_algorithm.lower().startswith('zoe'):
             depth_tensor = self.zoe_depth.predict(img_pil).to(self.device)
+            if self.depth_algorithm.lower() == 'zoe+adabins' and midas_weight < 1.0:
+                use_adabins, adabins_depth = AdaBinsModel._instance.predict(img_pil, prev_img_cv2)
+                if use_adabins: # if there was no error in getting the adabins depth, align midas with adabins
+                    depth_tensor = self.blend_and_align_with_adabins(depth_tensor, adabins_depth, midas_weight)
         elif self.depth_algorithm.lower() == 'leres':
             depth_tensor = self.leres_depth.predict(prev_img_cv2.astype(np.float32) / 255.0)
         elif self.depth_algorithm.lower() == 'adabins':
@@ -89,7 +96,7 @@ class DepthModel:
         
     def to(self, device):
         self.device = device
-        if self.depth_algorithm.lower() == 'zoe':
+        if self.depth_algorithm.lower().startswith('zoe'):
             self.zoe_depth.zoe.to(device)
         elif self.depth_algorithm.lower() == 'leres':
             self.leres_depth.to(device)

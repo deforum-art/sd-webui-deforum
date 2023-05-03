@@ -217,7 +217,7 @@ def anim_frame_warp_3d(device, prev_img_cv2, depth, anim_args, keys, frame_idx):
     return result
 
 def transform_image_3d_switcher(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx, depth_min_0=False, equalize=True, autocontrast=False, autocontrast_cutoff_low=0, autocontrast_cutoff_high=1):
-    if anim_args.depth_algorithm.lower() == 'midas+adabins':
+    if anim_args.depth_algorithm.lower() in ['midas+adabins', 'zoe+adabins']:
         return transform_image_3d_legacy(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx)
     else:
         return transform_image_3d_new(device, prev_img_cv2, depth_tensor, rot_mat, translate, anim_args, keys, frame_idx, depth_min_0, equalize, autocontrast, autocontrast_cutoff_low, autocontrast_cutoff_high)

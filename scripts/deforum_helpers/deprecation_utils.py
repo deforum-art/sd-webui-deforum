@@ -34,7 +34,7 @@ deprecation_map = {
         ("Envelope (Outer Fit)", "Outer Fit (Shrink to Fit)", False),
         ("Scale to Fit (Inner Fit)", "Inner Fit (Scale to Fit)", False),
     ],
-    "use_zoe_depth": ("depth_algorithm", [("True", "Zoe"), ("False", "Midas")]),
+    "use_zoe_depth": ("depth_algorithm", [("True", "Zoe+AdaBins"), ("False", "Midas+AdaBins")]),
 }
 
 def handle_deprecated_settings(settings_json):
