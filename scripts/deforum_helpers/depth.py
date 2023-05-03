@@ -19,20 +19,24 @@ class DepthModel:
     _instance = None
 
     def __new__(cls, *args, **kwargs):
-            keep_in_vram = kwargs.get('keep_in_vram', False)
-            depth_algorithm = kwargs.get('depth_algorithm', 'Midas-3-Hybrid')
-            Width, Height = kwargs.get('Width', 512), kwargs.get('Height', 512)
-            midas_weight = kwargs.get('midas_weight', 0.2)
-            model_switched = cls._instance and cls._instance.depth_algorithm != depth_algorithm
-            resolution_changed = cls._instance and (cls._instance.Width != Width or cls._instance.Height != Height)
+        keep_in_vram = kwargs.get('keep_in_vram', False)
+        depth_algorithm = kwargs.get('depth_algorithm', 'Midas-3-Hybrid')
+        Width, Height = kwargs.get('Width', 512), kwargs.get('Height', 512)
+        midas_weight = kwargs.get('midas_weight', 0.2)
+        model_switched = cls._instance and cls._instance.depth_algorithm != depth_algorithm
+        resolution_changed = cls._instance and (cls._instance.Width != Width or cls._instance.Height != Height)
+        zoe_algorithm = 'zoe' in depth_algorithm.lower()
+        model_deleted = cls._instance and cls._instance.should_delete
 
-            if cls._instance is None or (not keep_in_vram and not hasattr(cls._instance, 'midas_model')) or model_switched or resolution_changed:
-                cls._instance = super().__new__(cls)
-                cls._instance._initialize(models_path=args[0], device=args[1], half_precision=not cmd_opts.no_half, keep_in_vram=keep_in_vram, depth_algorithm=depth_algorithm, Width=Width, Height=Height, midas_weight=midas_weight)
-            elif cls._instance.should_delete and keep_in_vram:
-                cls._instance._initialize(models_path=args[0], device=args[1], half_precision=not cmd_opts.no_half, keep_in_vram=keep_in_vram, depth_algorithm=depth_algorithm, Width=Width, Height=Height, midas_weight=midas_weight)
-            cls._instance.should_delete = not keep_in_vram
-            return cls._instance
+        should_reload = (cls._instance is None or model_deleted or model_switched or (zoe_algorithm and resolution_changed))
+
+        if should_reload:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialize(models_path=args[0], device=args[1], half_precision=not cmd_opts.no_half, keep_in_vram=keep_in_vram, depth_algorithm=depth_algorithm, Width=Width, Height=Height, midas_weight=midas_weight)
+        elif cls._instance.should_delete and keep_in_vram:
+            cls._instance._initialize(models_path=args[0], device=args[1], half_precision=not cmd_opts.no_half, keep_in_vram=keep_in_vram, depth_algorithm=depth_algorithm, Width=Width, Height=Height, midas_weight=midas_weight)
+        cls._instance.should_delete = not keep_in_vram
+        return cls._instance
 
     def _initialize(self, models_path, device, half_precision=not cmd_opts.no_half, keep_in_vram=False, depth_algorithm='Midas-3-Hybrid', Width=512, Height=512, midas_weight=1.0):
         self.models_path = models_path
