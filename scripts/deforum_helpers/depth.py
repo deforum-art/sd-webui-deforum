@@ -20,7 +20,7 @@ class DepthModel:
 
     def __new__(cls, *args, **kwargs):
             keep_in_vram = kwargs.get('keep_in_vram', False)
-            depth_algorithm = kwargs.get('depth_algorithm', 'Midas')
+            depth_algorithm = kwargs.get('depth_algorithm', 'Midas-3-Hybrid')
             Width, Height = kwargs.get('Width', 512), kwargs.get('Height', 512)
             midas_weight = kwargs.get('midas_weight', 0.2)
             model_switched = cls._instance and cls._instance.depth_algorithm != depth_algorithm
