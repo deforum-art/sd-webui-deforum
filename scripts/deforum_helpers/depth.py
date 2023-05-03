@@ -45,7 +45,7 @@ class DepthModel:
 
         if self.depth_algorithm.lower().startswith('zoe'): # Zoe or Zoe+Adabins for legacy mode
             self.zoe_depth = ZoeDepth(self.Width, self.Height)
-            if self.depth_algorithm.lower() == 'zoe+adabins' and midas_weight < 1.0:
+            if self.depth_algorithm.lower() == 'zoe+adabins (old)' and midas_weight < 1.0:
                 self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
                 self.adabins_helper = self.adabins_model.adabins_helper
         elif self.depth_algorithm.lower() == 'leres':
@@ -55,7 +55,7 @@ class DepthModel:
             self.adabins_helper = self.adabins_model.adabins_helper
         elif self.depth_algorithm.lower().startswith('midas'): # Midas or Midas+AdaBins for legacy mode
             self.midas_depth = MidasDepth(models_path, device, half_precision=half_precision, midas_model_type=self.depth_algorithm)
-            if self.depth_algorithm.lower() == 'midas+adabins' and midas_weight < 1.0:
+            if self.depth_algorithm.lower() == 'midas+adabins (old)' and midas_weight < 1.0:
                 self.adabins_model = AdaBinsModel(models_path, keep_in_vram=keep_in_vram)
                 self.adabins_helper = self.adabins_model.adabins_helper
             
@@ -65,7 +65,7 @@ class DepthModel:
 
         if self.depth_algorithm.lower().startswith('zoe'):
             depth_tensor = self.zoe_depth.predict(img_pil).to(self.device)
-            if self.depth_algorithm.lower() == 'zoe+adabins' and midas_weight < 1.0:
+            if self.depth_algorithm.lower() == 'zoe+adabins (old)' and midas_weight < 1.0:
                 use_adabins, adabins_depth = AdaBinsModel._instance.predict(img_pil, prev_img_cv2)
                 if use_adabins: # if there was no error in getting the adabins depth, align midas with adabins
                     depth_tensor = self.blend_and_align_with_adabins(depth_tensor, adabins_depth, midas_weight)
@@ -78,7 +78,7 @@ class DepthModel:
                 raise Exception("Error getting depth from AdaBins") # TODO: fallback to something else maybe?
         elif self.depth_algorithm.lower().startswith('midas'):
             depth_tensor = self.midas_depth.predict(prev_img_cv2, half_precision)
-            if self.depth_algorithm.lower() == 'midas+adabins' and midas_weight < 1.0:
+            if self.depth_algorithm.lower() == 'midas+adabins (old)' and midas_weight < 1.0:
                 use_adabins, adabins_depth = AdaBinsModel._instance.predict(img_pil, prev_img_cv2)
                 if use_adabins: # if there was no error in getting the adabins depth, align midas with adabins
                     depth_tensor = self.blend_and_align_with_adabins(depth_tensor, adabins_depth, midas_weight)

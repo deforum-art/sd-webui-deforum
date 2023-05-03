@@ -37,7 +37,7 @@ deprecation_map = {
         ("Envelope (Outer Fit)", "Outer Fit (Shrink to Fit)", False),
         ("Scale to Fit (Inner Fit)", "Inner Fit (Scale to Fit)", False),
     ],
-    "use_zoe_depth": ("depth_algorithm", [("True", "Zoe+AdaBins"), ("False", "Midas+AdaBins")]),
+    "use_zoe_depth": ("depth_algorithm", [("True", "Zoe+AdaBins (old)"), ("False", "Midas+AdaBins (old)")]),
 }
 
 def dynamic_num_to_schedule_formatter(old_value):

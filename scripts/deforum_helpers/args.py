@@ -119,7 +119,7 @@ def DeforumAnimArgs():
     perlin_persistence = 0.5 
     #**3D Depth Warping:**
     use_depth_warping = True 
-    depth_algorithm = 'Midas+AdaBins' # ['Midas+AdaBins','Zoe+AdaBins','Midas-3-Hybrid','Midas-3.1-BeitLarge','AdaBins','Zoe', 'Leres']
+    depth_algorithm = 'Midas+AdaBins (old)' # ['Midas+AdaBins (old)','Zoe+AdaBins (old)','Midas-3-Hybrid','Midas-3.1-BeitLarge','AdaBins','Zoe', 'Leres']
     midas_weight = 0.2 
     padding_mode = 'border' # ['border', 'reflection', 'zeros'] 
     sampling_mode = 'bicubic' # ['bicubic', 'bilinear', 'nearest']
@@ -522,7 +522,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             with gr.TabItem('Depth Warping'): 
                                 with gr.Row(variant='compact'):
                                     use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
-                                    depth_algorithm = gr.Dropdown(label="Depth Algorithm", choices=['Midas+AdaBins','Zoe+AdaBins','Midas-3-Hybrid','Midas-3.1-BeitLarge', 'AdaBins','Zoe', 'Leres'], value=da.depth_algorithm, type="value", elem_id="df_depth_algorithm", interactive=True)
+                                    depth_algorithm = gr.Dropdown(label="Depth Algorithm", choices=['Midas+AdaBins (old)','Zoe+AdaBins (old)','Midas-3-Hybrid','Midas-3.1-BeitLarge', 'AdaBins','Zoe', 'Leres'], value=da.depth_algorithm, type="value", elem_id="df_depth_algorithm", interactive=True)
                                     midas_weight = gr.Number(label="MiDaS/Zoe weight", value=da.midas_weight, interactive=True, info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
                                 with gr.Row(variant='compact'):
                                     padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode", info="controls the handling of pixels outside the field of view as they come into the scene. hover on the options for more info")
