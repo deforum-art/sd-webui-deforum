@@ -47,7 +47,7 @@ class AdaBinsModel:
                 adabins_depth = TF.resize(torch.from_numpy(adabins_depth), torch.Size([h, w]), interpolation=TF.InterpolationMode.BICUBIC).cpu().numpy()
             adabins_depth = adabins_depth.squeeze()
         except Exception as e:
-            print("AdaBins exception encountered. Falling back to pure MiDaS (only if running in Legacy Midas+AdaBins mode)")
+            print("AdaBins exception encountered. Falling back to pure MiDaS/Zoe (only if running in Legacy Midas/Zoe+AdaBins mode)")
             use_adabins = False
         torch.cuda.empty_cache()
 
