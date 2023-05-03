@@ -34,16 +34,15 @@ class DepthModel:
             cls._instance.should_delete = not keep_in_vram
             return cls._instance
 
-    def _initialize(self, models_path, device, half_precision=not cmd_opts.no_half, keep_in_vram=False, depth_algorithm='midas', Width=512, Height=512, midas_weight=1.0):
-        self.keep_in_vram = keep_in_vram
-        self.half_precision = half_precision
+    def _initialize(self, models_path, device, half_precision=not cmd_opts.no_half, keep_in_vram=False, depth_algorithm='Midas-3-Hybrid', Width=512, Height=512, midas_weight=1.0):
         self.models_path = models_path
-        self.Width = Width
-        self.Height = Height
-        self.depth_min = 1000
-        self.depth_max = -1000
         self.device = device
+        self.half_precision = half_precision
+        self.keep_in_vram = keep_in_vram
         self.depth_algorithm = depth_algorithm
+        self.Width, self.Height = Width, Height
+        self.midas_weight = midas_weight
+        self.depth_min, self.depth_max = 1000, -1000
         self.adabins_helper = None
         self._initialize_model()
 
