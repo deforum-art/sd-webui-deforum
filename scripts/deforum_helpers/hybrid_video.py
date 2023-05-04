@@ -578,24 +578,23 @@ def extend_flow(flow, w, h):
     # Return the extended image
     return new_flow
 
-# in order to use the 2d warp function, we scale the relative flow down with the scale factor
-def abs_flow_to_rel_flow(flow, scale_factor = 1):
+def abs_flow_to_rel_flow(flow, width, height):
     fx, fy = flow[:,:,0], flow[:,:,1]
-    flow_magnitude = np.sqrt(fx*fx + fy*fy)
-    flow_angle = np.arctan2(fy, fx)
-    flow_magnitude /= scale_factor
-    flow_angle /= scale_factor
-    rel_fx = flow_magnitude * np.cos(flow_angle - np.pi/2)
-    rel_fy = flow_magnitude * np.sin(flow_angle - np.pi/2)
+    max_flow_x = np.max(np.abs(fx))
+    max_flow_y = np.max(np.abs(fy))
+    max_flow = max(max_flow_x, max_flow_y)
+
+    rel_fx = fx / (max_flow * width)
+    rel_fy = fy / (max_flow * height)
     return np.dstack((rel_fx, rel_fy))
 
-# in order to use the 2d warp function, we restore the relative flow down with the scale factor 
-def rel_flow_to_abs_flow(rel_flow, scale_factor = 1):
+def rel_flow_to_abs_flow(rel_flow, width, height):
     rel_fx, rel_fy = rel_flow[:,:,0], rel_flow[:,:,1]
-    flow_magnitude = np.sqrt(rel_fx*rel_fx + rel_fy*rel_fy)
-    flow_angle = np.arctan2(rel_fy, rel_fx)
-    flow_magnitude *= scale_factor
-    flow_angle *= scale_factor
-    abs_fx = flow_magnitude * np.cos(flow_angle + np.pi/2)
-    abs_fy = flow_magnitude * np.sin(flow_angle + np.pi/2)
-    return np.dstack((abs_fx, abs_fy))
+    
+    max_flow_x = np.max(np.abs(rel_fx * width))
+    max_flow_y = np.max(np.abs(rel_fy * height))
+    max_flow = max(max_flow_x, max_flow_y)
+
+    fx = rel_fx * (max_flow * width)
+    fy = rel_fy * (max_flow * height)
+    return np.dstack((fx, fy))
