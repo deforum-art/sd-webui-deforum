@@ -301,16 +301,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
                 # do optical flow cadence after animation warping
                 if cadence_flow is not None:
-                    # scale down relative flow for 2D to avoid warping function's effect on relative flow
-                    scale_factor = 1000 if anim_args.animation_mode == '2D' else 1
-                    cadence_flow = abs_flow_to_rel_flow(cadence_flow, scale_factor)
-                    # store sampling mode and restore after (for 3D cadence, does nothing in 2D)
-                    current_sampling_mode = anim_args.sampling_mode
-                    anim_args.sampling_mode = "nearest"
+                    cadence_flow = abs_flow_to_rel_flow(cadence_flow, args.W, args.H)
                     cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
-                    anim_args.sampling_mode = current_sampling_mode
-                    # determing flow increment and apply
-                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow, scale_factor) * tween
+                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow, args.W, args.H) * tween
                     if advance_prev:
                         turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc, cadence_flow_factor)
                     if advance_next:
