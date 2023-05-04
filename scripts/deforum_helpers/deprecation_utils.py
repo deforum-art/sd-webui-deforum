@@ -1,6 +1,5 @@
 # This file is used to map deprecated setting names in a dictionary
 # and print a message containing the old and the new names
-cn_models = 5
 
 deprecation_map = {
     "histogram_matching": None,
@@ -41,8 +40,10 @@ deprecation_map = {
 def dynamic_num_to_schedule_formatter(old_value):
     return f"0:({old_value})"
     
-for i in range(1, cn_models + 1):
+for i in range(1, 6): # 5 CN models in total
     deprecation_map[f"cn_{i}_weight"] = dynamic_num_to_schedule_formatter
+    deprecation_map[f"cn_{i}_guidance_start"] = dynamic_num_to_schedule_formatter
+    deprecation_map[f"cn_{i}_guidance_end"] = dynamic_num_to_schedule_formatter
     
 def handle_deprecated_settings(settings_json):
     for setting_name, deprecation_info in deprecation_map.items():

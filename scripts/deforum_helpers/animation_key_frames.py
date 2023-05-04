@@ -55,12 +55,14 @@ class DeformAnimKeys():
 
 class ControlNetKeys():
     def __init__(self, anim_args, controlnet_args):
-        self.fi = FrameInterpolater(max_frames = anim_args.max_frames)
-        self.cn_1_weight_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_1_weight))
-        self.cn_2_weight_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_2_weight))
-        self.cn_3_weight_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_3_weight))
-        self.cn_4_weight_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_4_weight))
-        self.cn_5_weight_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(controlnet_args.cn_5_weight))
+        self.fi = FrameInterpolater(max_frames=anim_args.max_frames)
+        self.schedules = {}
+        for i in range(1, 6): # 5 CN models in total
+            for suffix in ['weight', 'guidance_start', 'guidance_end']:
+                prefix = f"cn_{i}"
+                key = f"{prefix}_{suffix}_schedule_series"
+                self.schedules[key] = self.fi.get_inbetweens(self.fi.parse_key_frames(getattr(controlnet_args, f"{prefix}_{suffix}")))
+                setattr(self, key, self.schedules[key])
 
 class LooperAnimKeys():
     def __init__(self, loop_args, anim_args, seed):
