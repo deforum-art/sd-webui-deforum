@@ -19,7 +19,6 @@ from .general_utils import count_files_in_folder, clean_gradio_path_strings # TO
 from .video_audio_utilities import vid2frames, convert_image
 from .animation_key_frames import ControlNetKeys
 
-# DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 cnet = None
 # number of CN model tabs to show in the deforum gui
 num_of_models = 5
@@ -73,8 +72,8 @@ def setup_controlnet_ui_raw():
             refresh_models.click(refresh_all_models, model, model)
         with gr.Row(visible=False) as weight_row:
             weight = gr.Textbox(label="Weight", lines=1, value = '0:(1)', interactive=True)
-            guidance_start =  gr.Slider(label="Starting Control Step", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
-            guidance_end =  gr.Slider(label="Ending Control Step", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
+            guidance_start = gr.Textbox(label="Starting Control Step", lines=1, value = '0:(0.0)', interactive=True)
+            guidance_end = gr.Textbox(label="Ending Control Step", lines=1, value = '0:(1.0)', interactive=True)
             model_dropdowns.append(model)
         with gr.Column(visible=False) as advanced_column:
             processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
@@ -193,6 +192,8 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         model_num = int(prefix.split('_')[-1])  # Extract model number from prefix (e.g., "cn_1" -> 1)
         if 1 <= model_num <= 5:
             cnu['weight'] = getattr(CnSchKeys, f"cn_{model_num}_weight_schedule_series")[frame_idx-1]
+            cnu['guidance_start'] = getattr(CnSchKeys, f"cn_{model_num}_guidance_start_schedule_series")[frame_idx-1]
+            cnu['guidance_end'] = getattr(CnSchKeys, f"cn_{model_num}_guidance_end_schedule_series")[frame_idx-1]
         cnu['image'] = {'image': img_np, 'mask': mask_np} if mask_np is not None else img_np
         return cnu
 
