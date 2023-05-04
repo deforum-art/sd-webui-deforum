@@ -13,7 +13,7 @@ from .noise import add_noise
 from .animation import anim_frame_warp
 from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
 from .video_audio_utilities import get_frame_name, get_next_frame
-from .depth import MidasModel, AdaBinsModel
+from .depth import DepthModel
 from .colors import maintain_colors
 from .parseq_adapter import ParseqAnimKeys
 from .seed import next_seed
@@ -109,13 +109,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
         
         device = ('cpu' if cmd_opts.lowvram or cmd_opts.medvram else root.device)
-        depth_model = MidasModel(root.models_path, device, root.half_precision, keep_in_vram=keep_in_vram, use_zoe_depth=anim_args.use_zoe_depth, Width=args.W, Height=args.H)
-        
-        if anim_args.midas_weight < 1.0:
-            if DEBUG_MODE:
-                print("Engaging AdaBins, as MiDaS < 1")
-            adabins_model = AdaBinsModel(root.models_path, keep_in_vram=keep_in_vram)
-            depth_model.adabins_helper = adabins_model.adabins_helper
+        depth_model = DepthModel(root.models_path, device, root.half_precision, keep_in_vram=keep_in_vram, depth_algorithm=anim_args.depth_algorithm, Width=args.W, Height=args.H, midas_weight=anim_args.midas_weight)
             
         # depth-based hybrid composite mask requires saved depth maps
         if anim_args.hybrid_composite != 'None' and anim_args.hybrid_comp_mask_type =='Depth':
@@ -380,7 +374,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 cv2.imwrite(os.path.join(args.outdir, filename), img)
                 if anim_args.save_depth_maps:
                     depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:09}.png"), depth)
-                    # depth_model.save_colored_depth(depth, os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:09}.png"))
 
         # get color match for video outside of prev_img conditional
         hybrid_available = anim_args.hybrid_composite != 'None' or anim_args.hybrid_motion in ['Optical Flow', 'Affine', 'Perspective']
@@ -608,9 +601,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         args.seed = next_seed(args)
         
     if predict_depths and not keep_in_vram:
-        depth_model.delete_model()
-        if anim_args.midas_weight < 1.0:
-            adabins_model.delete_model()
+        depth_model.delete_model() # handles adabins too
             
-    if load_raft: # TODO: add to keep_in_vram? only 22MB...
+    if load_raft:
         raft_model.delete_model()

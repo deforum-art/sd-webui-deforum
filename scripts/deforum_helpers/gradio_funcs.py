@@ -12,6 +12,9 @@ def update_r_upscale_factor(choice):
 
 def change_perlin_visibility(choice):
     return gr.update(visible=choice=="perlin")
+    
+def legacy_3d_mode(choice):
+    return gr.update(visible=choice.lower() in["midas+adabins (old)",'zoe+adabins (old)'])
 
 def change_color_coherence_image_path_visibility(choice):
     return gr.update(visible=choice=="Image")
@@ -107,6 +110,15 @@ def change_interp_x_max_limit(engine_name, current_value):
     
 def hide_interp_stats(choice):
     return gr.update(visible=True) if choice is not None else gr.update(visible=False)
+
+def show_hybrid_html_msg(choice):
+    return gr.update(visible=True) if choice not in ['2D','3D'] else gr.update(visible=False)
+
+def change_hybrid_tab_status(choice):
+    return gr.update(visible=True) if choice in ['2D','3D'] else gr.update(visible=False)
+
+def show_leres_html_msg(choice):
+    return gr.update(visible=True) if choice.lower() == 'leres' else gr.update(visible=False)
 
 def change_css(checkbox_status):
         if checkbox_status:

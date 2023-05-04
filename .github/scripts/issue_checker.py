@@ -22,7 +22,7 @@ for issue in repo.get_issues():
     #issue = repo.get_issue(issue_number)
 
     # Define the keywords to search for in the issue
-    keywords = ['Python', 'Installing requirements for Web UI', 'Commit hash', 'Launching Web UI with arguments', 'Model loaded', 'deforum']
+    keywords = ['Python', 'Commit hash', 'Launching Web UI with arguments', 'Model loaded', 'deforum']
 
     # Check if ALL of the keywords are present in the issue
     def check_keywords(issue_body, keywords):
