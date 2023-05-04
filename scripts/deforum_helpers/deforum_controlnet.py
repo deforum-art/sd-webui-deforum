@@ -74,8 +74,6 @@ def setup_controlnet_ui_raw():
             weight = gr.Textbox(label="Weight", lines=1, value = '0:(1)', interactive=True)
             guidance_start = gr.Textbox(label="Starting Control Step", lines=1, value = '0:(0.0)', interactive=True)
             guidance_end = gr.Textbox(label="Ending Control Step", lines=1, value = '0:(1.0)', interactive=True)
-            # guidance_start =  gr.Slider(label="Starting Control Step", value=0.0, minimum=0.0, maximum=1.0, interactive=True)
-            # guidance_end =  gr.Slider(label="Ending Control Step", value=1.0, minimum=0.0, maximum=1.0, interactive=True)
             model_dropdowns.append(model)
         with gr.Column(visible=False) as advanced_column:
             processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
