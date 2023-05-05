@@ -5,8 +5,6 @@ from torchvision import transforms
 from clipseg.models.clipseg import CLIPDensePredT
 from modules.shared import opts
 
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-
 preclipseg_transform = transforms.Compose([
       transforms.ToTensor(),
       transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
@@ -16,9 +14,7 @@ preclipseg_transform = transforms.Compose([
 def find_clipseg(root):
     src_basedirs = []
     for basedir in root.basedirs:
-        src_basedirs.append(basedir + '/scripts/deforum_helpers/src')
-        src_basedirs.append(basedir + '/extensions/deforum/scripts/deforum_helpers/src')
-        src_basedirs.append(basedir + '/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src')
+        src_basedirs.append(os.path.join(os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-2]), 'deforum_helpers', 'src'))
 
     for basedir in src_basedirs:
         pth = os.path.join(basedir, './clipseg/weights/rd64-uni.pth')
