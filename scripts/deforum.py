@@ -89,6 +89,7 @@ def run_deforum(*args, **kwargs):
                 basedir + '/scripts/deforum_helpers/src',
                 basedir + '/extensions/deforum/scripts/deforum_helpers/src',
                 basedir + '/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
+                basedir + '/extensions/sd-webui-deforum/scripts/deforum_helpers/src'
             ])
         
         # clean up unused memory
