@@ -31,6 +31,7 @@ from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifs
 from deforum_helpers.general_utils import get_deforum_version
 from deforum_helpers.upscaling import make_upscale_v2
 import gc
+import numpy as np
 import torch
 from webui import wrap_gradio_gpu_call
 import modules.shared as shared
@@ -178,7 +179,6 @@ def run_deforum(*args, **kwargs):
         if root.initial_info is None:
             root.initial_info = "An error has occured and nothing has been generated!"
             root.initial_info += "\nPlease, report the bug to https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"
-            import numpy as np
             a = np.random.rand(args.W, args.H, 3)*255
             root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
             root.initial_seed = 6934
