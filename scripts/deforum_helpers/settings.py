@@ -4,7 +4,7 @@ import json
 import deforum_helpers.args as deforum_args
 from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
 from .deprecation_utils import handle_deprecated_settings
-from .general_utils import get_deforum_version
+from .general_utils import get_deforum_version, clean_gradio_path_strings
 from modules.shared import opts
 import modules.shared as sh
 import logging
@@ -97,6 +97,7 @@ def save_settings(*args, **kwargs):
 def load_all_settings(*args, ui_launch=False, **kwargs):
     import gradio as gr
     settings_path = args[0].strip()
+    settings_path = clean_gradio_path_strings(settings_path)
     settings_component_names = deforum_args.get_settings_component_names()
     data = {settings_component_names[i]: args[i+1] for i in range(len(settings_component_names))}
     print(f"reading custom settings from {settings_path}")
