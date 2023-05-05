@@ -91,9 +91,7 @@ def run_deforum(*args, **kwargs):
 
         for basedir in basedirs:
             sys.path.extend([
-                basedir + '/scripts/deforum_helpers/src',
-                basedir + '/extensions/deforum/scripts/deforum_helpers/src',
-                basedir + '/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
+                os.path.join(deforum_folder_name, 'scripts', 'deforum_helpers', 'src')
             ])
         
         # clean up unused memory
