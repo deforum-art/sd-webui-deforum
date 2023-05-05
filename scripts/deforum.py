@@ -2,12 +2,17 @@
 # causing Deforum's tab not show up in some cases when you've might've broken the environment with webui packages updates
 import sys, os, shutil
 
+deforum_folder_name = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-2])
+
 basedirs = [os.getcwd()]
 if 'google.colab' in sys.modules:
     basedirs.append('/content/gdrive/MyDrive/sd/stable-diffusion-webui') #hardcode as TheLastBen's colab seems to be the primal source
 
 for basedir in basedirs:
-    deforum_paths_to_ensure = [basedir + '/extensions/sd-webui-deforum/scripts', basedir +'/extensions/sd-webui-deforum/scripts/deforum_helpers/src', basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/sd-webui-controlnet', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',basedir]
+    deforum_paths_to_ensure = [
+        os.path.join(deforum_folder_name, 'scripts'),
+        os.path.join(deforum_folder_name, 'scripts', 'deforum_helpers', 'src')
+        ]
 
     for deforum_scripts_path_fix in deforum_paths_to_ensure:
         if not deforum_scripts_path_fix in sys.path:
