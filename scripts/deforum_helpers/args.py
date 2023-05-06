@@ -235,8 +235,6 @@ def DeforumArgs():
 
     n_samples = 1 # doesnt do anything
     precision = 'autocast' 
-    C = 4
-    f = 8
 
     prompt = ""
     timestring = ""
