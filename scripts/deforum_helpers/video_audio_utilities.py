@@ -91,7 +91,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
             vidcap.set(cv2.CAP_PROP_POS_FRAMES, extract_from_frame) # Set the starting frame
             success,image = vidcap.read()
             count = extract_from_frame
-            t=1
+            t=0
             success = True
             max_workers = int(max(1, (os.cpu_count() / 2) - 1)) # set max threads to cpu cores halved, minus 1. minimum is 1
             with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
