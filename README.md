@@ -9,7 +9,7 @@
     </a>
 </p>
 
-## Need help? Visit the [FAQ](https://github.com/deforum-art/sd-webui-deforum/wiki/FAQ-&-Troubleshooting)
+## Need help? See our [FAQ](https://github.com/deforum-art/sd-webui-deforum/wiki/FAQ-&-Troubleshooting)
 
 ## Getting Started
 
