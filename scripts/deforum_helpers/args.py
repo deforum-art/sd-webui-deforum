@@ -201,7 +201,6 @@ def DeforumArgs():
     #**Batch Settings**
     n_batch = 1 #
     batch_name = "Deforum_{timestring}" 
-    filename_format = "{timestring}_{index}_{prompt}.png" # ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
     seed_behavior = "iter" # ["iter","fixed","random","ladder","alternate","schedule"]
     seed_iter_N = 1
     outdir = ""
@@ -943,7 +942,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
                         perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                         perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
-                        filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
                         save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
                         seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
                         save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
@@ -1062,8 +1060,7 @@ hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 args_names =    str(r'''W, H, tiling, restore_faces, seed, sampler, seed_enable_extras,
                         seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, save_settings,
-                        save_sample_per_step, batch_name, filename_format,
-                        seed_behavior, seed_iter_N, use_init, strength_0_no_init, strength, init_image,
+                        save_sample_per_step, batch_name, seed_behavior, seed_iter_N, use_init, strength_0_no_init, strength, init_image,
                         use_mask, use_alpha_as_mask, invert_mask, overlay_mask,
                         mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
                         fill, full_res_mask, full_res_mask_padding, reroll_blank_frames,reroll_patience'''
