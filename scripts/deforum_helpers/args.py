@@ -193,8 +193,7 @@ def DeforumArgs():
     save_samples = True 
     save_settings = True 
     display_samples = True 
-    save_sample_per_step = False 
-    show_sample_per_step = False 
+    save_sample_per_step = False
 
     #**Prompt Settings**
     prompt_weighting = False 
@@ -958,7 +957,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
                         seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
                         save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
-                        show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
     show_info_on_ui.change(fn=change_css, inputs=show_info_on_ui, outputs = gr.outputs.HTML())
     # seed.change(fn=auto_hide_n_batch, inputs=seed, outputs=n_batch)
@@ -1078,7 +1076,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         steps, ddim_eta,
                         n_batch,
                         save_settings, save_samples, display_samples,
-                        save_sample_per_step, show_sample_per_step, 
+                        save_sample_per_step, 
                         batch_name, filename_format,
                         seed_behavior, seed_iter_N,
                         use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image,
