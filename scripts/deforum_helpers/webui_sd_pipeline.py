@@ -31,7 +31,7 @@ def get_webui_sd_pipeline(args, root, frame):
     p.ddim_eta = args.ddim_eta
     p.batch_size = args.n_samples
     p.seed = args.seed
-    p.do_not_save_samples = True
+    p.do_not_save_samples = True # Setting this to False will trigger webui's saving mechanism - and we will end up with duplicated files, and another folder within our destination folder - big no no.
     p.sampler_name = args.sampler
     p.mask_blur = args.mask_overlay_blur
     p.extra_generation_params["Mask blur"] = args.mask_overlay_blur
