@@ -9,6 +9,8 @@
     </a>
 </p>
 
+## Need help? See our [FAQ](https://github.com/deforum-art/sd-webui-deforum/wiki/FAQ-&-Troubleshooting)
+
 ## Getting Started
 
 1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/).
@@ -52,7 +54,7 @@ Amazing raw Deforum animation by [Pxl.Pshr](https://www.instagram.com/pxl.pshr):
 
 https://user-images.githubusercontent.com/121192995/224450647-39529b28-be04-4871-bb7a-faf7afda2ef2.mp4
 
-Setting file of that video: [here](https://github.com/deforum-art/deforum-for-automatic1111-webui/files/11353167/PxlPshrWinningAnimationSettings.txt).
+Setting file of that video: [here](https://github.com/deforum-art/sd-webui-deforum/files/11353167/PxlPshrWinningAnimationSettings.txt).
 
 <br>
 
