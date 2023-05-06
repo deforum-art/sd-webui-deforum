@@ -9,6 +9,10 @@
     </a>
 </p>
 
+## Need help? Visit the FAQ:
+[Here](https://github.com/deforum-art/sd-webui-deforum/wiki/FAQ-&-Troubleshooting).
+
+
 ## Getting Started
 
 1. Install [AUTOMATIC1111's webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/).
