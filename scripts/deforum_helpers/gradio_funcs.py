@@ -12,6 +12,9 @@ def update_r_upscale_factor(choice):
 
 def change_perlin_visibility(choice):
     return gr.update(visible=choice=="perlin")
+    
+def legacy_3d_mode(choice):
+    return gr.update(visible=choice.lower() in["midas+adabins (old)",'zoe+adabins (old)'])
 
 def change_color_coherence_image_path_visibility(choice):
     return gr.update(visible=choice=="Image")
@@ -48,8 +51,10 @@ def disable_by_video_input(choice):
     
 def hide_if_none(choice):
     return gr.update(visible=choice != "None")
-    
+
 def change_gif_button_visibility(choice):
+    if choice is None or choice == "":
+        return gr.update(visible=True)
     return gr.update(visible=False, value=False) if int(choice) > 30 else gr.update(visible=True)
     
 def hide_if_false(choice):
@@ -90,7 +95,8 @@ def update_upscale_out_res_by_model_name(in_res, upscale_model_name):
     factor = 2 if upscale_model_name == 'realesr-animevideov3' else 4
     return f"{int(in_res.split('*')[0]) * factor}*{int(in_res.split('*')[1]) * factor}"
 
-
+def hide_optical_flow_cadence(cadence_value):
+    return gr.update(visible=True) if cadence_value > 1 else gr.update(visible=False)
     
 def hide_interp_by_interp_status(choice):
     return gr.update(visible=False) if choice == 'None' else gr.update(visible=True)
@@ -104,6 +110,15 @@ def change_interp_x_max_limit(engine_name, current_value):
     
 def hide_interp_stats(choice):
     return gr.update(visible=True) if choice is not None else gr.update(visible=False)
+
+def show_hybrid_html_msg(choice):
+    return gr.update(visible=True) if choice not in ['2D','3D'] else gr.update(visible=False)
+
+def change_hybrid_tab_status(choice):
+    return gr.update(visible=True) if choice in ['2D','3D'] else gr.update(visible=False)
+
+def show_leres_html_msg(choice):
+    return gr.update(visible=True) if choice.lower() == 'leres' else gr.update(visible=False)
 
 def change_css(checkbox_status):
         if checkbox_status:

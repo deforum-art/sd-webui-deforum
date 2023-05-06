@@ -1,9 +1,13 @@
 import os, shutil
 import hashlib
 from modules.shared import opts
+from basicsr.utils.download_util import load_file_from_url
 
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-
+def debug_print(message):
+    DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+    if DEBUG_MODE:
+        print(message)
+            
 def checksum(filename, hash_factory=hashlib.blake2b, chunk_num_blocks=128):
     h = hash_factory()
     with open(filename,'rb') as f: 
@@ -84,9 +88,18 @@ def get_max_path_length(base_folder_path):
     if get_os() == 'Windows':
         return (32767 if test_long_path_support(base_folder_path) else 260) - len(base_folder_path) - 1
     return 4096 - len(base_folder_path) - 1
-
+   
 def substitute_placeholders(template, arg_list, base_folder_path):
     import re
+    # Find and update timestring values if resume_from_timestring is True
+    resume_from_timestring = next((arg_obj.resume_from_timestring for arg_obj in arg_list if hasattr(arg_obj, 'resume_from_timestring')), False)
+    resume_timestring = next((arg_obj.resume_timestring for arg_obj in arg_list if hasattr(arg_obj, 'resume_timestring')), None)
+
+    if resume_from_timestring and resume_timestring:
+        for arg_obj in arg_list:
+            if hasattr(arg_obj, 'timestring'):
+                arg_obj.timestring = resume_timestring
+
     max_length = get_max_path_length(base_folder_path)
     values = {attr.lower(): getattr(arg_obj, attr)
               for arg_obj in arg_list
@@ -94,3 +107,22 @@ def substitute_placeholders(template, arg_list, base_folder_path):
     formatted_string = re.sub(r"{(\w+)}", lambda m: custom_placeholder_format(values, m), template)
     formatted_string = re.sub(r'[<>:"/\\|?*\s,]', '_', formatted_string)
     return formatted_string[:max_length]
+
+def count_files_in_folder(folder_path):
+    import glob
+    file_pattern = folder_path + "/*"
+    file_count = len(glob.glob(file_pattern))
+    return file_count
+    
+def clean_gradio_path_strings(input_str):
+    if isinstance(input_str, str) and input_str.startswith('"') and input_str.endswith('"'):
+        return input_str[1:-1]
+    else:
+        return input_str
+        
+def download_file_with_checksum(url, expected_checksum, dest_folder, dest_filename):
+    expected_full_path = os.path.join(dest_folder, dest_filename)
+    if not os.path.exists(expected_full_path) and not os.path.isdir(expected_full_path):
+        load_file_from_url(url=url, model_dir=dest_folder, file_name=dest_filename, progress=True)
+        if checksum(expected_full_path) != expected_checksum:
+            raise Exception(f"Error while downloading {dest_filename}.]nPlease manually download from: {url}\nAnd place it in: {dest_folder}")

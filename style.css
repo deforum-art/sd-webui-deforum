@@ -4,12 +4,16 @@
 	justify-content: center !important;
 }
 
-#hybrid_msg_html {
+#tab_deforum_interface #hybrid_msg_html {
 	color: Tomato !important;
 	margin-top: 5px !important;
 	text-align: center !important;
 	font-size: 20px !important;
 	font-weight: bold !important;
+}
+
+#tab_deforum_interface #leres_license_msg {
+	color: GoldenRod;
 }
 
 #image_buttons_deforum #img2img_tab,

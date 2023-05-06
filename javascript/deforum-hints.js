@@ -26,7 +26,7 @@ deforum_titles = {
     "Filename format": "specify the format of the filename for output images",
     "Seed behavior": "defines the seed behavior that is used for animations",
         "iter": "the seed value will increment by 1 for each subsequent frame of the animation",
-        "fixed": "the seed will remain fixed across all frames of animation",
+        "fixed": "the seed will remain fixed across all frames of animation. **NOT RECOMMENDED.** Unless you know what you are doing, it will *deep fry* the pictures over time",
         "random": "a random seed will be used on each frame of the animation",
 		"schedule": "specify your own seed schedule",
 	"Seed iter N":"controls for how many frames the same seed should stick before iterating to the next one",

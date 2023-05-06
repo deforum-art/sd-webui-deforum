@@ -50,10 +50,9 @@ def split_weighted_subprompts(text, frame = 0, max_frames = 0):
     return positive_prompts, negative_prompts
 
 def interpolate_prompts(animation_prompts, max_frames):
-# <<<<<<< HEAD
     # Get prompts sorted by keyframe 
     # sorted_prompts = sorted(animation_prompts.items(), key=lambda item: int(item[0]))
-# =======
+
     import numpy as np
     import pandas as pd
     # Get prompts sorted by keyframe
@@ -66,7 +65,6 @@ def interpolate_prompts(animation_prompts, max_frames):
             parsed_animation_prompts[int(numexpr.evaluate(key))] = value
     
     sorted_prompts = sorted(parsed_animation_prompts.items(), key=lambda item: int(item[0]))
-# >>>>>>> upstream/automatic1111-webui
 
     # Setup container for interpolated prompts
     prompt_series = pd.Series([np.nan for a in range(max_frames)])
@@ -168,3 +166,27 @@ def prompts_from_dataframe(prompts_df):
             prompt += f" --neg {row['Negative prompt']}"
         prompts[row['Start frame']] = prompt
     return json.dumps(prompts, indent=4, separators=(',', ': '))
+
+def prepare_prompt(prompt_series, max_frames, seed, frame_idx):
+    max_f = max_frames - 1
+    pattern = r'`.*?`'
+    regex = re.compile(pattern)
+    prompt_parsed = prompt_series
+    for match in regex.finditer(prompt_parsed):
+        matched_string = match.group(0)
+        parsed_string = matched_string.replace('t', f'{frame_idx}').replace("max_f" , f"{max_f}").replace('`','')
+        parsed_value = numexpr.evaluate(parsed_string)
+        prompt_parsed = prompt_parsed.replace(matched_string, str(parsed_value))
+
+    prompt_to_print, *after_neg = prompt_parsed.strip().split("--neg")
+    prompt_to_print = prompt_to_print.strip()
+    after_neg = "".join(after_neg).strip()
+
+    print(f"\033[32mSeed: \033[0m{seed}")
+    print(f"\033[35mPrompt: \033[0m{prompt_to_print}")
+    if after_neg and after_neg.strip():
+        print(f"\033[91mNeg Prompt: \033[0m{after_neg}")
+        prompt_to_print += f"--neg {after_neg}"
+
+    # set value back into the prompt
+    return prompt_to_print

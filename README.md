@@ -2,21 +2,14 @@
 # Deforum Stable Diffusion — official extension for AUTOMATIC1111's webui
 
 <p align="left">
-    <a href="https://github.com/deforum-art/deforum-for-automatic1111-webui/commits"><img alt="Last Commit" src="https://img.shields.io/github/last-commit/deforum-art/deforum-for-automatic1111-webui"></a>
-    <a href="https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/deforum-art/deforum-for-automatic1111-webui"></a>
-    <a href="https://github.com/deforum-art/deforum-for-automatic1111-webui/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/deforum-art/deforum-for-automatic1111-webui"></a>
-    <a href="https://github.com/deforum-art/deforum-for-automatic1111-webui/network"><img alt="GitHub forks" src="https://img.shields.io/github/forks/deforum-art/deforum-for-automatic1111-webui"></a>
+    <a href="https://github.com/deforum-art/sd-webui-deforum/commits"><img alt="Last Commit" src="https://img.shields.io/github/last-commit/deforum-art/deforum-for-automatic1111-webui"></a>
+    <a href="https://github.com/deforum-art/sd-webui-deforum/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/deforum-art/deforum-for-automatic1111-webui"></a>
+    <a href="https://github.com/deforum-art/sd-webui-deforum/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/deforum-art/deforum-for-automatic1111-webui"></a>
+    <a href="https://github.com/deforum-art/sd-webui-deforum/network"><img alt="GitHub forks" src="https://img.shields.io/github/forks/deforum-art/deforum-for-automatic1111-webui"></a>
     </a>
 </p>
 
-## Before Starting
-
-**Important note about versions updating:** <br>
-As auto's webui is getting updated multiple times a day, every day, things tend to break with regards to extensions compatability.
-Therefore, it is best recommended to keep two folders:
-1. "Stable" folder that you don't regularly update, with versions that you know *work* together (we will provide info on this soon). 
-2. "Experimental" folder in which you can add 'git pull' to your webui-user.bat, update deforum every day, etc. Keep it wild - but be prepared for bugs. 
-
+## Need help? See our [FAQ](https://github.com/deforum-art/sd-webui-deforum/wiki/FAQ-&-Troubleshooting)
 
 ## Getting Started
 
@@ -25,10 +18,10 @@ Therefore, it is best recommended to keep two folders:
 2. Now two ways: either clone the repo into the `extensions` directory via git commandline launched within in the `stable-diffusion-webui` folder
 
 ```sh
-git clone https://github.com/deforum-art/deforum-for-automatic1111-webui extensions/deforum
+git clone https://github.com/deforum-art/sd-webui-deforum extensions/deforum
 ```
 
-Or download this repository, locate the `extensions` folder within your WebUI installation, create a folder named `deforum` and put the contents of the downloaded directory inside of it. Then restart WebUI. **Warning: the extension folder has to be named 'deforum' or 'deforum-for-automatic1111-webui', otherwise it will fail to locate the 3D modules as the PATH addition is hardcoded**
+Or download this repository, locate the `extensions` folder within your WebUI installation, create a folder named `deforum` and put the contents of the downloaded directory inside of it. Then restart WebUI.
 
 3. Open the webui, find the Deforum tab at the top of the page.
 
@@ -61,6 +54,8 @@ Amazing raw Deforum animation by [Pxl.Pshr](https://www.instagram.com/pxl.pshr):
 
 https://user-images.githubusercontent.com/121192995/224450647-39529b28-be04-4871-bb7a-faf7afda2ef2.mp4
 
+Setting file of that video: [here](https://github.com/deforum-art/sd-webui-deforum/files/11353167/PxlPshrWinningAnimationSettings.txt).
+
 <br>
 
 Main extension tab:
@@ -70,14 +65,3 @@ Main extension tab:
 Keyframes tab:
 
 ![image](https://user-images.githubusercontent.com/121192995/226101140-bfe6cce7-9b78-4a1d-be9a-43e1fc78239e.png)
-
-## Benchmarks
-
-3D mode without additional WebUI flags
-
-![image](https://user-images.githubusercontent.com/14872007/196294447-7817f138-ec4b-4001-885f-454f8667100d.png)
-
-3D mode when WebUI is launched with '--lowvram'
-
-![image](https://user-images.githubusercontent.com/14872007/196294517-125fbb27-c06d-4c4b-bcbc-7c743103eff6.png)
-
