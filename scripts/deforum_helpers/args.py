@@ -12,9 +12,7 @@ from .gradio_funcs import *
 from .general_utils import get_os, get_deforum_version, custom_placeholder_format, test_long_path_support, get_max_path_length, substitute_placeholders
 from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names, controlnet_infotext
 import tempfile
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-        
+       
 def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
@@ -514,8 +512,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
                                     # this following html only shows when using LeReS depth
                                     leres_license_msg = gr.HTML(value='Note that LeReS has a Non-Commercial <a href="https://github.com/aim-uofa/AdelaiDepth/blob/main/LeReS/LICENSE" target="_blank">license</a>. Use it only for fun/personal use.', visible=False, elem_id='leres_license_msg')
-
-                                    # leres_license_msg = gr.HTML(value='Note that LeReS has a Non-Commercial license. Use it only for fun/ personal use.',visible=False, elem_id='leres_license_msg')
                                     depth_algorithm = gr.Dropdown(label="Depth Algorithm", choices=['Midas+AdaBins (old)','Zoe+AdaBins (old)','Midas-3-Hybrid','AdaBins','Zoe', 'Leres'], value=da.depth_algorithm, type="value", elem_id="df_depth_algorithm", interactive=True) # 'Midas-3.1-BeitLarge' is temporarily removed until fixed 04-05-23
                                     midas_weight = gr.Number(label="MiDaS/Zoe weight", value=da.midas_weight, interactive=True, info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
                                 with gr.Row(variant='compact'):
