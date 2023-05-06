@@ -40,6 +40,9 @@ def change_diffusion_cadence_visibility(choice):
 def disble_3d_related_stuff(choice):
     return gr.update(visible=False) if choice != '3D' else gr.update(visible=True)
     
+def only_show_in_non_3d_mode(choice):
+    return gr.update(visible=False) if choice == '3D' else gr.update(visible=True)
+    
 def enable_2d_related_stuff(choice):
     return gr.update(visible=True) if choice == '2D' else gr.update(visible=False)
     
