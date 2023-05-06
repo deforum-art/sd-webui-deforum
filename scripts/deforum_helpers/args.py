@@ -282,8 +282,6 @@ def DeforumOutputArgs():
     r_upscale_model = 'realesr-animevideov3' # 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest do only 4x: 'realesrgan-x4plus', 'realesrgan-x4plus-anime'
     r_upscale_keep_imgs = True
     
-    render_steps = False
-    path_name_modifier = "x0_pred" #["x0_pred","x"]
     store_frames_in_ram = False
     #**Interpolate Video Settings**
     frame_interpolation_engine = "None" # ["None", "RIFE v4.6", "FILM"]
@@ -928,8 +926,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     depth_btn.click(upload_vid_to_depth,inputs=[vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs])
                 # STITCH FRAMES TO VID TAB
                 with gr.TabItem('Frames to Video') as stitch_imgs_to_vid_row:
-                    with gr.Row(visible=False):
-                        path_name_modifier = gr.Dropdown(label="Path name modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
                     gr.HTML("""
                      <p style="margin-top:0em">
                         Important Notes:
@@ -946,7 +942,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 # **OLD + NON ACTIVES AREA**
                 with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
                         mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
-                        render_steps = gr.Checkbox(label="Render steps", value=dv.render_steps, interactive=True, visible=False)
                         perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                         perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
                         filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
@@ -1086,8 +1081,7 @@ video_args_names =  str(r'''skip_video_creation,
                             fps, make_gif, delete_imgs, output_format,
                             add_soundtrack, soundtrack_path,
                             r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
-                            render_steps,
-                            path_name_modifier, image_path, mp4_path, store_frames_in_ram,
+                            image_path, mp4_path, store_frames_in_ram,
                             frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount,
                             frame_interpolation_keep_imgs'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')

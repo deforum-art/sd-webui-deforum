@@ -146,21 +146,11 @@ def run_deforum(*args, **kwargs):
         if video_args.skip_video_creation:
             print("\nSkipping video creation, uncheck 'Skip video for run all' in 'Output' tab if you want to get a video too :)")
         else:
-            import subprocess
+            import subprocess # DO WE USE IT?
 
-            path_name_modifier = video_args.path_name_modifier
-            if video_args.render_steps: # render steps from a single image
-                fname = f"{path_name_modifier}_%09d.png"
-                all_step_dirs = [os.path.join(args.outdir, d) for d in os.listdir(args.outdir) if os.path.isdir(os.path.join(args.outdir,d))]
-                newest_dir = max(all_step_dirs, key=os.path.getmtime)
-                image_path = os.path.join(newest_dir, fname)
-                print(f"Reading images from {image_path}")
-                mp4_path = os.path.join(newest_dir, f"{args.timestring}_{path_name_modifier}.mp4")
-                max_video_frames = args.steps
-            else: # render images for a video
-                image_path = os.path.join(args.outdir, f"{args.timestring}_%09d.png")
-                mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
-                max_video_frames = anim_args.max_frames
+            image_path = os.path.join(args.outdir, f"{args.timestring}_%09d.png")
+            mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
+            max_video_frames = anim_args.max_frames
 
             # Stitch video using ffmpeg!
             try:

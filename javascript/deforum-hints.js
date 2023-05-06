@@ -136,7 +136,6 @@ deforum_titles = {
     "Use manual settings": "when this is unchecked, the video will automatically be created in the same output folder as the images. Check this box to specify different settings for the creation of the video, specified by the following options",
     "Render steps": "render each step of diffusion as a separate frame",
     "Max video frames": "the maximum number of frames to include in the video, when use_manual_settings is checked",
-    //"path_name_modifier": "",
     "Image path": "the location of images to create the video from, when use_manual_settings is checked",
     "MP4 path": "the output location of the mp4 file, when use_manual_settings is checked",
 	"Delete Imgs": "if enabled, raw imgs will be deleted after a successful video/ videos (upsacling, interpolation, gif) creation",
