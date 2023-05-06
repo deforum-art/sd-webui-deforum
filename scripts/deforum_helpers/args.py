@@ -505,40 +505,17 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                 rotation_3d_y = gr.Textbox(label="Rotation 3D Y", lines=1, value = da.rotation_3d_y, interactive=True, info="pan canvas left/right in degrees per frame")
                             with gr.Row(variant='compact'):
                                 rotation_3d_z = gr.Textbox(label="Rotation 3D Z", lines=1, value = da.rotation_3d_z, interactive=True, info="roll canvas clockwise/anticlockwise")
-                        # 3D DEPTH & FOV ACCORD
-                        with gr.Accordion('Depth Warping & FOV', visible=False, open=False) as depth_3d_warping_accord:
-                            with gr.TabItem('Depth Warping'): 
-                                with gr.Row(variant='compact'):
-                                    use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
-                                    # this following html only shows when using LeReS depth
-                                    leres_license_msg = gr.HTML(value='Note that LeReS has a Non-Commercial <a href="https://github.com/aim-uofa/AdelaiDepth/blob/main/LeReS/LICENSE" target="_blank">license</a>. Use it only for fun/personal use.', visible=False, elem_id='leres_license_msg')
-                                    depth_algorithm = gr.Dropdown(label="Depth Algorithm", choices=['Midas+AdaBins (old)','Zoe+AdaBins (old)','Midas-3-Hybrid','AdaBins','Zoe', 'Leres'], value=da.depth_algorithm, type="value", elem_id="df_depth_algorithm", interactive=True) # 'Midas-3.1-BeitLarge' is temporarily removed until fixed 04-05-23
-                                    midas_weight = gr.Number(label="MiDaS/Zoe weight", value=da.midas_weight, interactive=True, info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
-                                with gr.Row(variant='compact'):
-                                    padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode", info="controls the handling of pixels outside the field of view as they come into the scene. hover on the options for more info")
-                                    sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="Sampling mode", value=da.sampling_mode, elem_id="sampling_mode")
-                            with gr.TabItem('Field Of View', visible=False, open=False) as fov_accord:
-                                with gr.Row(variant='compact'):
-                                    fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True, info="adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]")
-                                with gr.Row(variant='compact'):
-                                    aspect_ratio_use_old_formula = gr.Checkbox(label="Use old aspect ratio formula", value=da.aspect_ratio_use_old_formula, interactive=True, info="for backward compatibility. uses the formula width/height")
-                                    aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value = da.aspect_ratio_schedule, interactive=True, info="adjusts the aspect ratio for the depth calculation")
-                                with gr.Row(variant='compact'):
-                                    near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
-                                with gr.Row(variant='compact'):
-                                    far_schedule = gr.Textbox(label="Far schedule", lines=1, value = da.far_schedule, interactive=True)
-                        # PERSPECTIVE FLIP ACCORD
-                        with gr.Accordion('Perspective Flip', open=False) as perspective_flip_accord:
-                            with gr.Row(variant='compact'):
-                                enable_perspective_flip = gr.Checkbox(label="Enable perspective flip", value=da.enable_perspective_flip, interactive=True)
-                            with gr.Row(variant='compact'):
-                                perspective_flip_theta = gr.Textbox(label="Perspective flip theta", lines=1, value = da.perspective_flip_theta, interactive=True)
-                            with gr.Row(variant='compact'):
-                                perspective_flip_phi = gr.Textbox(label="Perspective flip phi", lines=1, value = da.perspective_flip_phi, interactive=True)
-                            with gr.Row(variant='compact'):
-                                perspective_flip_gamma = gr.Textbox(label="Perspective flip gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
-                            with gr.Row(variant='compact'):
-                                perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value = da.perspective_flip_fv, interactive=True, info="the 2D vanishing point of perspective (rec. range 30-160)")
+                        # PERSPECTIVE FLIP - params are hidden if not enabled
+                        with gr.Row(variant='compact') as enable_per_f_row:
+                            enable_perspective_flip = gr.Checkbox(label="Enable perspective flip", value=da.enable_perspective_flip, interactive=True)
+                        with gr.Row(variant='compact', visible=False) as per_f_th_row:
+                            perspective_flip_theta = gr.Textbox(label="Perspective flip theta", lines=1, value = da.perspective_flip_theta, interactive=True)
+                        with gr.Row(variant='compact', visible=False) as per_f_ph_row:
+                            perspective_flip_phi = gr.Textbox(label="Perspective flip phi", lines=1, value = da.perspective_flip_phi, interactive=True)
+                        with gr.Row(variant='compact', visible=False) as per_f_ga_row:
+                            perspective_flip_gamma = gr.Textbox(label="Perspective flip gamma", lines=1, value = da.perspective_flip_gamma, interactive=True)
+                        with gr.Row(variant='compact', visible=False) as per_f_f_row:
+                            perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value = da.perspective_flip_fv, interactive=True, info="the 2D vanishing point of perspective (rec. range 30-160)")
                     # NOISE INNER TAB
                     with gr.TabItem('Noise'):
                         with gr.Column() as noise_tab_column:
@@ -582,7 +559,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
                             reroll_patience = gr.Number(value=d.reroll_patience, label="Reroll patience", interactive=True)
                     # ANTI BLUR INNER TAB  
-                    with gr.TabItem('Anti Blur', open=False, elem_id='anti_blur_accord') as anti_blur_tab:
+                    with gr.TabItem('Anti Blur', elem_id='anti_blur_accord') as anti_blur_tab:
                         with gr.Row(variant='compact'):
                             amount_schedule = gr.Textbox(label="Amount schedule", lines=1, value = da.amount_schedule, interactive=True)
                         with gr.Row(variant='compact'):
@@ -591,6 +568,28 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             sigma_schedule = gr.Textbox(label="Sigma schedule", lines=1, value = da.sigma_schedule, interactive=True)
                         with gr.Row(variant='compact'):
                             threshold_schedule = gr.Textbox(label="Threshold schedule", lines=1, value = da.threshold_schedule, interactive=True)
+                    with gr.TabItem('Depth Warping & FOV', elem_id='depth_warp_fov_tab') as depth_warp_fov_tab:
+                        # this html only shows when not in 2d/3d mode
+                        depth_warp_msg_html = gr.HTML(value='Please switch to 3D animation mode to view this section.', elem_id='depth_warp_msg_html')
+                        with gr.Row(variant='compact', visible=False) as depth_warp_row_1:
+                            use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
+                            # this following html only shows when using LeReS depth
+                            leres_license_msg = gr.HTML(value='Note that LeReS has a Non-Commercial <a href="https://github.com/aim-uofa/AdelaiDepth/blob/main/LeReS/LICENSE" target="_blank">license</a>. Use it only for fun/personal use.', visible=False, elem_id='leres_license_msg')
+                            depth_algorithm = gr.Dropdown(label="Depth Algorithm", choices=['Midas+AdaBins (old)','Zoe+AdaBins (old)','Midas-3-Hybrid','AdaBins','Zoe', 'Leres'], value=da.depth_algorithm, type="value", elem_id="df_depth_algorithm", interactive=True) # 'Midas-3.1-BeitLarge' is temporarily removed until fixed 04-05-23
+                            midas_weight = gr.Number(label="MiDaS/Zoe weight", value=da.midas_weight, interactive=True, visible=False, info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
+                        with gr.Row(variant='compact', visible=False) as depth_warp_row_2:
+                            padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode", info="controls the handling of pixels outside the field of view as they come into the scene. hover on the options for more info")
+                            sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="Sampling mode", value=da.sampling_mode, elem_id="sampling_mode")
+                        with gr.Row(variant='compact', visible=False) as depth_warp_row_3:
+                            aspect_ratio_use_old_formula = gr.Checkbox(label="Use old aspect ratio formula", value=da.aspect_ratio_use_old_formula, interactive=True, info="for backward compatibility. uses the formula width/height")
+                        with gr.Row(variant='compact', visible=False) as depth_warp_row_4:
+                            aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value = da.aspect_ratio_schedule, interactive=True, info="adjusts the aspect ratio for the depth calculation")
+                        with gr.Row(variant='compact', visible=False) as depth_warp_row_5:
+                            fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value = da.fov_schedule, interactive=True, info="adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]")
+                        with gr.Row(variant='compact', visible=False) as depth_warp_row_6:
+                            near_schedule = gr.Textbox(label="Near schedule", lines=1, value = da.near_schedule, interactive=True)
+                        with gr.Row(variant='compact', visible=False) as depth_warp_row_7:
+                            far_schedule = gr.Textbox(label="Far schedule", lines=1, value = da.far_schedule, interactive=True)
             # PROMPTS TAB    
             with gr.TabItem('Prompts'):
                 # PROMPTS INFO ACCORD  
@@ -953,13 +952,19 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     optical_flow_redo_generation,redo_flow_factor_schedule,diffusion_redo]
     for output in diffusion_cadence_outputs:
         animation_mode.change(fn=change_diffusion_cadence_visibility, inputs=animation_mode, outputs=output)
-    three_d_related_outputs = [depth_3d_warping_accord,fov_accord,only_3d_motion_column]
+    three_d_related_outputs = [only_3d_motion_column, depth_warp_row_1, depth_warp_row_2, depth_warp_row_3, depth_warp_row_4, depth_warp_row_5, depth_warp_row_6, depth_warp_row_7] # depth_3d_warping_accord, fov_accord
     for output in three_d_related_outputs:
         animation_mode.change(fn=disble_3d_related_stuff, inputs=animation_mode, outputs=output)
+    pers_flip_outputs = [per_f_th_row, per_f_ph_row, per_f_ga_row, per_f_f_row]
+    for output in pers_flip_outputs:
+        enable_perspective_flip.change(fn=hide_if_false,inputs=enable_perspective_flip,outputs=output)
+    animation_mode.change(fn=only_show_in_non_3d_mode, inputs=animation_mode, outputs=depth_warp_msg_html)
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=color_force_grayscale)
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=noise_tab_column)
-    animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=perspective_flip_accord)    
+    pers_flip_hide_all_param_names = [enable_per_f_row, per_f_th_row, per_f_ph_row, per_f_ga_row, per_f_f_row]
+    for output in pers_flip_hide_all_param_names:
+        animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=output)    
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=both_anim_mode_motion_params_column)
     aspect_ratio_use_old_formula.change(fn=hide_if_true, inputs=aspect_ratio_use_old_formula, outputs=aspect_ratio_schedule)
     #Hybrid related:

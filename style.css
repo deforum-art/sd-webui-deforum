@@ -27,7 +27,7 @@
 	gap:2px;
 	padding: 0.5rem; 
 }
-#controlnet_not_found_html_msg {
+#tab_deforum_interface #controlnet_not_found_html_msg, #tab_deforum_interface #depth_warp_msg_html {
 	color: Tomato;
 }
 
