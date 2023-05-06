@@ -13,7 +13,14 @@ DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def get_keys_to_exclude():
     return ["n_batch", "seed_enable_extras", "scale", "subseed", "subseed_strength", "init_sample",
-        "noise_mask", "seed_internal", "perlin_w", "perlin_h", "mp4_path", "image_path", "output_format","outdir"]
+        "noise_mask", "seed_internal", "perlin_w", "perlin_h", "mp4_path", "image_path", ,"outdir"]
+    ''' n_batch = used to control how many times we run with one click of the generate button, logic in args and deforum .py files
+        scale is used to set p.scale with our scale schedule
+        perlin params are used just not shown in ui for now, so not to be deleted
+        mp4_path, image_path and outdir are in use, not to be deleted
+        seed params are not to be touched, are used internally in various files
+        init_sample could probably be removed in the future but it requires some actual code changes as it's in use
+    '''
        
 def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id):
     custom_settings_file = custom_settings_file[run_id]

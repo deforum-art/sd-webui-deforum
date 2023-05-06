@@ -774,8 +774,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Accordion('Video Output Settings', open=True):
                     with gr.Row(variant='compact') as fps_out_format_row:
                         fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
-                        # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
-                        output_format = gr.Dropdown(visible=False, label="Output format", choices=['FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
                     with gr.Column(variant='compact'):
                         with gr.Row(variant='compact') as soundtrack_row:
                             add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="Add soundtrack", value=dv.add_soundtrack, info="add audio to video from file/url or init video", elem_id="add_soundtrack")
@@ -1066,12 +1064,8 @@ args_names =    str(r'''W, H, tiling, restore_faces, seed, sampler, seed_enable_
                         fill, full_res_mask, full_res_mask_padding, reroll_blank_frames,reroll_patience'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_creation,
-                            fps, make_gif, delete_imgs, output_format,
-                            add_soundtrack, soundtrack_path,
-                            r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
-                            image_path, mp4_path, store_frames_in_ram,
-                            frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount,
-                            frame_interpolation_keep_imgs'''
+                            fps, make_gif, delete_imgs, add_soundtrack, soundtrack_path, r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
+                            mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
