@@ -147,18 +147,18 @@ def controlnet_component_names():
         'processor_res', 'threshold_a', 'threshold_b', 'resize_mode', 'control_mode', 'loopback_mode'
     ]]
     
-def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=True, frame_idx=1):
+def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=True, frame_idx=0):
     CnSchKeys = ControlNetKeys(anim_args, controlnet_args)
     def read_cn_data(cn_idx):
         cn_mask_np, cn_image_np = None, None
-        if getattr(controlnet_args, f'cn_{cn_idx}_loopback_mode') and args.init_sample and frame_idx > 1:
+        if getattr(controlnet_args, f'cn_{cn_idx}_loopback_mode') and args.init_sample and frame_idx > 0:
             cn_mask_np = None
             cn_image_np = np.array(args.init_sample).astype('uint8')
         else:
             cn_inputframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_inputframes') # set input frames folder path
             if os.path.exists(cn_inputframes):
                 if count_files_in_folder(cn_inputframes) == 1:
-                    cn_frame_path = os.path.join(cn_inputframes, "000000001.jpg")
+                    cn_frame_path = os.path.join(cn_inputframes, "000000000.jpg")
                     print(f'Reading ControlNet *static* base frame at {cn_frame_path}')
                 else:
                     cn_frame_path = os.path.join(cn_inputframes, f"{frame_idx:09}.jpg")
@@ -168,7 +168,7 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
             cn_maskframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes') # set mask frames folder path        
             if os.path.exists(cn_maskframes):
                 if count_files_in_folder(cn_maskframes) == 1:
-                    cn_mask_frame_path = os.path.join(cn_inputframes, "000000001.jpg")
+                    cn_mask_frame_path = os.path.join(cn_inputframes, "000000000.jpg")
                     print(f'Reading ControlNet *static* mask frame at {cn_mask_frame_path}')
                 else:
                     cn_mask_frame_path = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes', f"{frame_idx:09}.jpg")
@@ -201,7 +201,7 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
         # Dynamic weight assignment for models 1 to 5
         model_num = int(prefix.split('_')[-1])  # Extract model number from prefix (e.g., "cn_1" -> 1)
         if 1 <= model_num <= 5:
-            if getattr(cn_args, f"cn_{model_num}_loopback_mode") and frame_idx == 1:
+            if getattr(cn_args, f"cn_{model_num}_loopback_mode") and frame_idx == 0:
                 cnu['enabled'] = False
             cnu['weight'] = getattr(CnSchKeys, f"cn_{model_num}_weight_schedule_series")[frame_idx]
             cnu['guidance_start'] = getattr(CnSchKeys, f"cn_{model_num}_guidance_start_schedule_series")[frame_idx]
