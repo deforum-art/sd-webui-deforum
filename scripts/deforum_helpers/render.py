@@ -462,7 +462,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
 
         # set value back into the prompt - prepare and report prompt and seed
-        args.prompt = prepare_prompt(args.prompt, anim_args.max_frames, args.seed)
+        args.prompt = prepare_prompt(args.prompt, anim_args.max_frames, args.seed, frame_idx)
 
         # grab init image for current frame
         if using_vid_init:
