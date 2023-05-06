@@ -238,9 +238,7 @@ def DeforumArgs():
 
     prompt = ""
     timestring = ""
-    init_latent = None
     init_sample = None
-    init_c = None
     mask_image = None
     noise_mask = None
     seed_internal = 0
@@ -1126,9 +1124,7 @@ def pack_args(args_dict):
     args_dict['C'] = 4
     args_dict['f'] = 8
     args_dict['timestring'] = ""
-    args_dict['init_latent'] = None
     args_dict['init_sample'] = None
-    args_dict['init_c'] = None
     args_dict['noise_mask'] = None
     args_dict['seed_internal'] = 0
     return args_dict
