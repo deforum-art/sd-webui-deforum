@@ -12,9 +12,7 @@ from .gradio_funcs import *
 from .general_utils import get_os, get_deforum_version, custom_placeholder_format, test_long_path_support, get_max_path_length, substitute_placeholders
 from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names, controlnet_infotext
 import tempfile
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-        
+       
 def Root():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
@@ -190,11 +188,8 @@ def DeforumArgs():
     static_threshold = None
 
     #**Save & Display Settings**
-    save_samples = True 
     save_settings = True 
-    display_samples = True 
-    save_sample_per_step = False 
-    show_sample_per_step = False 
+    save_sample_per_step = False
 
     #**Prompt Settings**
     prompt_weighting = False 
@@ -204,7 +199,6 @@ def DeforumArgs():
     #**Batch Settings**
     n_batch = 1 #
     batch_name = "Deforum_{timestring}" 
-    filename_format = "{timestring}_{index}_{prompt}.png" # ["{timestring}_{index}_{seed}.png","{timestring}_{index}_{prompt}.png"]
     seed_behavior = "iter" # ["iter","fixed","random","ladder","alternate","schedule"]
     seed_iter_N = 1
     outdir = ""
@@ -235,14 +229,10 @@ def DeforumArgs():
 
     n_samples = 1 # doesnt do anything
     precision = 'autocast' 
-    C = 4
-    f = 8
 
     prompt = ""
     timestring = ""
-    init_latent = None
     init_sample = None
-    init_c = None
     mask_image = None
     noise_mask = None
     seed_internal = 0
@@ -288,8 +278,6 @@ def DeforumOutputArgs():
     r_upscale_model = 'realesr-animevideov3' # 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest do only 4x: 'realesrgan-x4plus', 'realesrgan-x4plus-anime'
     r_upscale_keep_imgs = True
     
-    render_steps = False
-    path_name_modifier = "x0_pred" #["x0_pred","x"]
     store_frames_in_ram = False
     #**Interpolate Video Settings**
     frame_interpolation_engine = "None" # ["None", "RIFE v4.6", "FILM"]
@@ -524,8 +512,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                                     use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
                                     # this following html only shows when using LeReS depth
                                     leres_license_msg = gr.HTML(value='Note that LeReS has a Non-Commercial <a href="https://github.com/aim-uofa/AdelaiDepth/blob/main/LeReS/LICENSE" target="_blank">license</a>. Use it only for fun/personal use.', visible=False, elem_id='leres_license_msg')
-
-                                    # leres_license_msg = gr.HTML(value='Note that LeReS has a Non-Commercial license. Use it only for fun/ personal use.',visible=False, elem_id='leres_license_msg')
                                     depth_algorithm = gr.Dropdown(label="Depth Algorithm", choices=['Midas+AdaBins (old)','Zoe+AdaBins (old)','Midas-3-Hybrid','AdaBins','Zoe', 'Leres'], value=da.depth_algorithm, type="value", elem_id="df_depth_algorithm", interactive=True) # 'Midas-3.1-BeitLarge' is temporarily removed until fixed 04-05-23
                                     midas_weight = gr.Number(label="MiDaS/Zoe weight", value=da.midas_weight, interactive=True, info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
                                 with gr.Row(variant='compact'):
@@ -784,8 +770,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Accordion('Video Output Settings', open=True):
                     with gr.Row(variant='compact') as fps_out_format_row:
                         fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
-                        # NOT VISIBLE AS OF 11-02-23 moving to ffmpeg-only!
-                        output_format = gr.Dropdown(visible=False, label="Output format", choices=['FFMPEG mp4'], value='FFMPEG mp4', type="value", elem_id="output_format", interactive=True)
                     with gr.Column(variant='compact'):
                         with gr.Row(variant='compact') as soundtrack_row:
                             add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="Add soundtrack", value=dv.add_soundtrack, info="add audio to video from file/url or init video", elem_id="add_soundtrack")
@@ -934,8 +918,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     depth_btn.click(upload_vid_to_depth,inputs=[vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs])
                 # STITCH FRAMES TO VID TAB
                 with gr.TabItem('Frames to Video') as stitch_imgs_to_vid_row:
-                    with gr.Row(visible=False):
-                        path_name_modifier = gr.Dropdown(label="Path name modifier", choices=['x0_pred', 'x'], value=dv.path_name_modifier, type="value", elem_id="path_name_modifier", interactive=True, visible=False) 
                     gr.HTML("""
                      <p style="margin-top:0em">
                         Important Notes:
@@ -952,17 +934,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 # **OLD + NON ACTIVES AREA**
                 with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
                         mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
-                        render_steps = gr.Checkbox(label="Render steps", value=dv.render_steps, interactive=True, visible=False)
-                        from_img2img_instead_of_link = gr.Checkbox(label="from_img2img_instead_of_link", value=False, interactive=False, visible=False)
                         perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                         perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
-                        filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
                         save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
-                        save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
-                        display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
                         seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
                         save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
-                        show_sample_per_step = gr.Checkbox(label="Show sample per step", value=d.show_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
     show_info_on_ui.change(fn=change_css, inputs=show_info_on_ui, outputs = gr.outputs.HTML())
     # seed.change(fn=auto_hide_n_batch, inputs=seed, outputs=n_batch)
@@ -1076,29 +1052,16 @@ hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human
                         hybrid_comp_mask_blend_alpha_schedule, hybrid_comp_mask_contrast_schedule,
                         hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
-args_names =    str(r'''W, H, tiling, restore_faces,
-                        seed, sampler,
-                        seed_enable_extras, seed_resize_from_w, seed_resize_from_h,
-                        steps, ddim_eta,
-                        n_batch,
-                        save_settings, save_samples, display_samples,
-                        save_sample_per_step, show_sample_per_step, 
-                        batch_name, filename_format,
-                        seed_behavior, seed_iter_N,
-                        use_init, from_img2img_instead_of_link, strength_0_no_init, strength, init_image,
+args_names =    str(r'''W, H, tiling, restore_faces, seed, sampler, seed_enable_extras,
+                        seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, save_settings,
+                        save_sample_per_step, batch_name, seed_behavior, seed_iter_N, use_init, strength_0_no_init, strength, init_image,
                         use_mask, use_alpha_as_mask, invert_mask, overlay_mask,
                         mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
-                        fill, full_res_mask, full_res_mask_padding,
-                        reroll_blank_frames,reroll_patience'''
+                        fill, full_res_mask, full_res_mask_padding, reroll_blank_frames,reroll_patience'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_creation,
-                            fps, make_gif, delete_imgs, output_format,
-                            add_soundtrack, soundtrack_path,
-                            r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
-                            render_steps,
-                            path_name_modifier, image_path, mp4_path, store_frames_in_ram,
-                            frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount,
-                            frame_interpolation_keep_imgs'''
+                            fps, make_gif, delete_imgs, add_soundtrack, soundtrack_path, r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
+                            mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
@@ -1128,9 +1091,7 @@ def pack_args(args_dict):
     args_dict['C'] = 4
     args_dict['f'] = 8
     args_dict['timestring'] = ""
-    args_dict['init_latent'] = None
     args_dict['init_sample'] = None
-    args_dict['init_c'] = None
     args_dict['noise_mask'] = None
     args_dict['seed_internal'] = 0
     return args_dict
