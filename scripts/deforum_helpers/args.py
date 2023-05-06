@@ -190,7 +190,6 @@ def DeforumArgs():
     static_threshold = None
 
     #**Save & Display Settings**
-    save_samples = True 
     save_settings = True 
     display_samples = True 
     save_sample_per_step = False
@@ -952,7 +951,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
                         filename_format = gr.Textbox(label="Filename format", lines=1, interactive=True, value = d.filename_format, visible=False)
                         save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
-                        save_samples = gr.Checkbox(label="save_samples", value=d.save_samples, interactive=True)
                         display_samples = gr.Checkbox(label="display_samples", value=False, interactive=False)
                         seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
                         save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
@@ -1074,7 +1072,7 @@ args_names =    str(r'''W, H, tiling, restore_faces,
                         seed_enable_extras, seed_resize_from_w, seed_resize_from_h,
                         steps, ddim_eta,
                         n_batch,
-                        save_settings, save_samples, display_samples,
+                        save_settings, display_samples,
                         save_sample_per_step, 
                         batch_name, filename_format,
                         seed_behavior, seed_iter_N,

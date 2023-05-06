@@ -13,7 +13,7 @@ DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def get_keys_to_exclude():
     return [
-        "n_batch", "seed_enable_extras", "save_samples", "display_samples",
+        "n_batch", "seed_enable_extras", "display_samples",
         "filename_format", "scale", "subseed", "subseed_strength", "init_sample",
         "noise_mask", "seed_internal", "perlin_w", "perlin_h", "mp4_path",
         "image_path", "output_format","render_steps","path_name_modifier", "outdir"

@@ -20,7 +20,6 @@ deforum_titles = {
     //"ddim_eta": "";
     //"n_batch": "",
     //"save_settings": "",
-    //"save_samples": "",
     "Batch name": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports placeholders like {seed}, {w}, {h}, {prompts} and more",
 	"Pix2Pix img CFG schedule": "*Only in use with pix2pix checkpoints!*",
     "Filename format": "specify the format of the filename for output images",
