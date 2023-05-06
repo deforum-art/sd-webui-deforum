@@ -52,10 +52,6 @@ def split_weighted_subprompts(text, frame = 0, max_frames = 0):
 def interpolate_prompts(animation_prompts, max_frames):
     # Get prompts sorted by keyframe 
     # sorted_prompts = sorted(animation_prompts.items(), key=lambda item: int(item[0]))
-
-    import numpy as np
-    import pandas as pd
-    # Get prompts sorted by keyframe
     max_f = max_frames
     parsed_animation_prompts = {}
     for key, value in animation_prompts.items():
@@ -128,6 +124,28 @@ def interpolate_prompts(animation_prompts, max_frames):
     # Return the filled series, in case max_frames is greater than the last keyframe or any ranges were skipped.
     return prompt_series.ffill().bfill()
 
+# def prompts_to_dataframe(prompts_json_str):
+    # prompts_json = json.loads(prompts_json_str)
+    # df = pd.DataFrame(columns=['Start frame', 'Prompt', 'Negative prompt'])
+    # l = []
+    # for key, _ in prompts_json.items():
+        # l += [int(key)]
+    # l.sort()
+    # for key in l:
+        # row = {}
+        # row['Start frame'] = key
+        # prompt = prompts_json[str(key)]
+        # if '--neg' in prompt:
+            # prompt_parts = prompt.split('--neg')
+            # if len(prompt_parts) > 2:
+                # prompt_parts[1] = "".join(prompt_parts[2:])
+            # row['Prompt'] = prompt_parts[0]
+            # row['Negative prompt'] = prompt_parts[1]
+        # else:
+            # row['Prompt'] = prompt
+            # row['Negative prompt'] = ""
+        # df = df.append(row, ignore_index=True)
+    # return df
 def prompts_to_dataframe(prompts_json_str):
     prompts_json = json.loads(prompts_json_str)
     df = pd.DataFrame(columns=['Start frame', 'Prompt', 'Negative prompt'])
@@ -148,8 +166,10 @@ def prompts_to_dataframe(prompts_json_str):
         else:
             row['Prompt'] = prompt
             row['Negative prompt'] = ""
-        df = df.append(row, ignore_index=True)
+        df.loc[len(df)] = row
     return df
+
+
 
 def prompts_to_listlist(prompts_json_str):
     df = prompts_to_dataframe(prompts_json_str)

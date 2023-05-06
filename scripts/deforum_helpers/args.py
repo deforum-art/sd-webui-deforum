@@ -621,58 +621,60 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         </ul>
                         """)
                 with gr.Row():
-                animation_prompts_df = gr.Dataframe(
-                    headers=["Start frame", "Prompt", "Negative prompt"],
-                    datatype=["number", "str", "str"],
-                    label="Prompts",
-                    col_count=(3, 'fixed'),
-                    row_count=(1, 'dynamic'),
-                    max_rows=None, #infinite
-                    max_cols=3,
-                    interactive=True,
-                    wrap=True,
-                    type='pandas',
-                    value=prompts_to_listlist(DeforumAnimPrompts()),
-                    info="full prompts list in a JSON format.  value on left side is the frame number"
+                    animation_prompts_df = gr.Dataframe(
+                        headers=["Start frame", "Prompt", "Negative prompt"],
+                        datatype=["number", "str", "str"],
+                        label="Prompts",
+                        col_count=(3, 'fixed'),
+                        row_count=(1, 'dynamic'),
+                        max_rows=None, #infinite
+                        max_cols=3,
+                        interactive=True,
+                        wrap=True,
+                        type='pandas',
+                        value=prompts_to_listlist(DeforumAnimPrompts()),
+                        info="full prompts list in a JSON format.  value on left side is the frame number"
                 )
-            with gr.Row():
-                animation_prompts_positive = gr.Textbox(label="Common positive prompt", lines=1, interactive=True, placeholder="words in here will be added to the start of all positive prompts")
-            with gr.Row():
-                animation_prompts_negative = gr.Textbox(label="Common negative prompt", lines=1, interactive=True, placeholder="words in here will be added to the end of all negative prompts")
-            with gr.Row():
-                animation_prompts = gr.Textbox(label="Prompts JSON", lines=8, interactive=True, value = DeforumAnimPrompts())
+            # with gr.Row():
+                # animation_prompts_positive = gr.Textbox(label="Common positive prompt", lines=1, interactive=True, placeholder="words in here will be added to the start of all positive prompts")
+            # with gr.Row():
+                # animation_prompts_negative = gr.Textbox(label="Common negative prompt", lines=1, interactive=True, placeholder="words in here will be added to the end of all negative prompts")
+            # with gr.Row():
+                # animation_prompts = gr.Textbox(label="Prompts JSON", lines=8, interactive=True, value = DeforumAnimPrompts())
             # update button functions
             def update_prompts_json(prompts_df):
                 return prompts_from_dataframe(prompts_df)
-            animation_prompts_df.change(update_prompts_json, inputs=[animation_prompts_df], outputs=[animation_prompts])
+            
             def update_prompts_df(prompts_json):
                 return prompts_to_listlist(prompts_json)
             with gr.Row():
                 load_from_json = gr.Button(value="Load from JSON", elem_id="load_from_json")
+            
+            with gr.Row(variant='compact'):
+                animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts(), info="full prompts list in a JSON format.  value on left side is the frame number")
+            with gr.Row(variant='compact'):
+                animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, placeholder="words in here will be added to the start of all positive prompts")
+            with gr.Row(variant='compact'):
+                animation_prompts_negative = gr.Textbox(label="Prompts negative", value="nsfw, nude", lines=1, interactive=True, placeholder="words in here will be added to the end of all negative prompts")
+            # COMPOSABLE MASK SCHEDULING ACCORD
             load_from_json.click(update_prompts_df, inputs=[animation_prompts], outputs=[animation_prompts_df])
+            animation_prompts_df.change(update_prompts_json, inputs=[animation_prompts_df], outputs=[animation_prompts])
+            with gr.Accordion('Composable Mask scheduling', open=False):
+                gr.HTML("""
+                        <ul style="list-style-type:circle; margin-left:0.75em; margin-bottom:0.2em">
+                        <li>To enable, check use_mask in the Init tab</li>
+                        <li>Supports boolean operations: (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations)</li>
+                        <li>default variables: in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}</li>
+                        <li>masks from files: in [], like [mask1.png]</li>
+                        <li>description-based: <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt</li>
+                        </ul>
+                        """)
                 with gr.Row(variant='compact'):
-                    animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value = DeforumAnimPrompts(), info="full prompts list in a JSON format.  value on left side is the frame number")
+                    mask_schedule = gr.Textbox(label="Mask schedule", lines=1, value = da.mask_schedule, interactive=True)
                 with gr.Row(variant='compact'):
-                    animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, placeholder="words in here will be added to the start of all positive prompts")
+                    use_noise_mask = gr.Checkbox(label="Use noise mask", value=da.use_noise_mask, interactive=True)
                 with gr.Row(variant='compact'):
-                    animation_prompts_negative = gr.Textbox(label="Prompts negative", value="nsfw, nude", lines=1, interactive=True, placeholder="words in here will be added to the end of all negative prompts")
-                # COMPOSABLE MASK SCHEDULING ACCORD
-                with gr.Accordion('Composable Mask scheduling', open=False):
-                    gr.HTML("""
-                            <ul style="list-style-type:circle; margin-left:0.75em; margin-bottom:0.2em">
-                            <li>To enable, check use_mask in the Init tab</li>
-                            <li>Supports boolean operations: (! - negation, & - and, | - or, ^ - xor, \ - difference, () - nested operations)</li>
-                            <li>default variables: in \{\}, like \{init_mask\}, \{video_mask\}, \{everywhere\}</li>
-                            <li>masks from files: in [], like [mask1.png]</li>
-                            <li>description-based: <i>word masks</i> in &lt;&gt;, like &lt;apple&gt;, &lt;hair&gt</li>
-                            </ul>
-                            """)
-                    with gr.Row(variant='compact'):
-                        mask_schedule = gr.Textbox(label="Mask schedule", lines=1, value = da.mask_schedule, interactive=True)
-                    with gr.Row(variant='compact'):
-                        use_noise_mask = gr.Checkbox(label="Use noise mask", value=da.use_noise_mask, interactive=True)
-                    with gr.Row(variant='compact'):
-                        noise_mask_schedule = gr.Textbox(label="Noise mask schedule", lines=1, value = da.noise_mask_schedule, interactive=True)
+                    noise_mask_schedule = gr.Textbox(label="Noise mask schedule", lines=1, value = da.noise_mask_schedule, interactive=True)
             # INIT MAIN TAB
             with gr.TabItem('Init'):
                 # IMAGE INIT INNER-TAB
