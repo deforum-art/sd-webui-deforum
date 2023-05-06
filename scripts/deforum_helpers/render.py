@@ -13,7 +13,7 @@ from .noise import add_noise
 from .animation import anim_frame_warp
 from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
 from .video_audio_utilities import get_frame_name, get_next_frame
-from .depth import MidasModel, AdaBinsModel
+from .depth import DepthModel
 from .colors import maintain_colors
 from .parseq_adapter import ParseqAnimKeys
 from .seed import next_seed
@@ -109,13 +109,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
         
         device = ('cpu' if cmd_opts.lowvram or cmd_opts.medvram else root.device)
-        depth_model = MidasModel(root.models_path, device, root.half_precision, keep_in_vram=keep_in_vram, use_zoe_depth=anim_args.use_zoe_depth, Width=args.W, Height=args.H)
-        
-        if anim_args.midas_weight < 1.0:
-            if DEBUG_MODE:
-                print("Engaging AdaBins, as MiDaS < 1")
-            adabins_model = AdaBinsModel(root.models_path, keep_in_vram=keep_in_vram)
-            depth_model.adabins_helper = adabins_model.adabins_helper
+        depth_model = DepthModel(root.models_path, device, root.half_precision, keep_in_vram=keep_in_vram, depth_algorithm=anim_args.depth_algorithm, Width=args.W, Height=args.H, midas_weight=anim_args.midas_weight)
             
         # depth-based hybrid composite mask requires saved depth maps
         if anim_args.hybrid_composite != 'None' and anim_args.hybrid_comp_mask_type =='Depth':
@@ -307,16 +301,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
                 # do optical flow cadence after animation warping
                 if cadence_flow is not None:
-                    # scale down relative flow for 2D to avoid warping function's effect on relative flow
-                    scale_factor = 1000 if anim_args.animation_mode == '2D' else 1
-                    cadence_flow = abs_flow_to_rel_flow(cadence_flow, scale_factor)
-                    # store sampling mode and restore after (for 3D cadence, does nothing in 2D)
-                    current_sampling_mode = anim_args.sampling_mode
-                    anim_args.sampling_mode = "nearest"
+                    cadence_flow = abs_flow_to_rel_flow(cadence_flow, args.W, args.H)
                     cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
-                    anim_args.sampling_mode = current_sampling_mode
-                    # determing flow increment and apply
-                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow, scale_factor) * tween
+                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow, args.W, args.H) * tween
                     if advance_prev:
                         turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc, cadence_flow_factor)
                     if advance_next:
@@ -380,7 +367,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 cv2.imwrite(os.path.join(args.outdir, filename), img)
                 if anim_args.save_depth_maps:
                     depth_model.save(os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:09}.png"), depth)
-                    # depth_model.save_colored_depth(depth, os.path.join(args.outdir, f"{args.timestring}_depth_{tween_frame_idx:09}.png"))
 
         # get color match for video outside of prev_img conditional
         hybrid_available = anim_args.hybrid_composite != 'None' or anim_args.hybrid_motion in ['Optical Flow', 'Affine', 'Perspective']
@@ -476,7 +462,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
 
         # set value back into the prompt - prepare and report prompt and seed
-        args.prompt = prepare_prompt(args.prompt, anim_args.max_frames, args.seed)
+        args.prompt = prepare_prompt(args.prompt, anim_args.max_frames, args.seed, frame_idx)
 
         # grab init image for current frame
         if using_vid_init:
@@ -608,9 +594,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         args.seed = next_seed(args)
         
     if predict_depths and not keep_in_vram:
-        depth_model.delete_model()
-        if anim_args.midas_weight < 1.0:
-            adabins_model.delete_model()
+        depth_model.delete_model() # handles adabins too
             
-    if load_raft: # TODO: add to keep_in_vram? only 22MB...
+    if load_raft:
         raft_model.delete_model()

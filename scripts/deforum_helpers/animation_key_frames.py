@@ -53,6 +53,17 @@ class DeformAnimKeys():
         self.hybrid_comp_mask_auto_contrast_cutoff_low_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.hybrid_comp_mask_auto_contrast_cutoff_low_schedule))
         self.hybrid_flow_factor_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.hybrid_flow_factor_schedule))
 
+class ControlNetKeys():
+    def __init__(self, anim_args, controlnet_args):
+        self.fi = FrameInterpolater(max_frames=anim_args.max_frames)
+        self.schedules = {}
+        for i in range(1, 6): # 5 CN models in total
+            for suffix in ['weight', 'guidance_start', 'guidance_end']:
+                prefix = f"cn_{i}"
+                key = f"{prefix}_{suffix}_schedule_series"
+                self.schedules[key] = self.fi.get_inbetweens(self.fi.parse_key_frames(getattr(controlnet_args, f"{prefix}_{suffix}")))
+                setattr(self, key, self.schedules[key])
+
 class LooperAnimKeys():
     def __init__(self, loop_args, anim_args, seed):
         self.fi = FrameInterpolater(anim_args.max_frames, seed)

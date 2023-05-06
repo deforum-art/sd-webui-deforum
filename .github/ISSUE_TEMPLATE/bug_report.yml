@@ -62,6 +62,13 @@ body:
              deforum exten commit id - 
     validations:
       required: true
+  - type: textarea
+    id: what-torch
+    attributes:
+      label: Torch version
+      description: Which Torch version your WebUI is working with
+    validations:
+      required: true
   - type: dropdown
     id: where
     attributes:

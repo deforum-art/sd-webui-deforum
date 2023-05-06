@@ -2,12 +2,17 @@
 # causing Deforum's tab not show up in some cases when you've might've broken the environment with webui packages updates
 import sys, os, shutil
 
+deforum_folder_name = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-2])
+
 basedirs = [os.getcwd()]
 if 'google.colab' in sys.modules:
     basedirs.append('/content/gdrive/MyDrive/sd/stable-diffusion-webui') #hardcode as TheLastBen's colab seems to be the primal source
 
 for basedir in basedirs:
-    deforum_paths_to_ensure = [basedir + '/extensions/deforum-for-automatic1111-webui/scripts', basedir + '/extensions/sd-webui-controlnet', basedir + '/extensions/deforum/scripts', basedir + '/scripts/deforum_helpers/src', basedir + '/extensions/deforum/scripts/deforum_helpers/src', basedir +'/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',basedir]
+    deforum_paths_to_ensure = [
+        os.path.join(deforum_folder_name, 'scripts'),
+        os.path.join(deforum_folder_name, 'scripts', 'deforum_helpers', 'src')
+        ]
 
     for deforum_scripts_path_fix in deforum_paths_to_ensure:
         if not deforum_scripts_path_fix in sys.path:
@@ -31,6 +36,7 @@ from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifs
 from deforum_helpers.general_utils import get_deforum_version
 from deforum_helpers.upscaling import make_upscale_v2
 import gc
+import numpy as np
 import torch
 from webui import wrap_gradio_gpu_call
 import modules.shared as shared
@@ -56,7 +62,7 @@ def run_deforum(*args, **kwargs):
         times_to_run = len(args_dict['custom_settings_file'])
         
     for i in range(times_to_run):
-        print(f"\033[4;33mDeforum extension for auto1111 webui, v2.3b\033[0m")
+        print(f"\033[4;33mDeforum extension for auto1111 webui, v2.4b\033[0m")
         print(f"Git commit: {get_deforum_version()}")
         args_dict['self'] = None
         args_dict['p'] = p
@@ -85,11 +91,7 @@ def run_deforum(*args, **kwargs):
         root.basedirs = basedirs
 
         for basedir in basedirs:
-            sys.path.extend([
-                basedir + '/scripts/deforum_helpers/src',
-                basedir + '/extensions/deforum/scripts/deforum_helpers/src',
-                basedir + '/extensions/deforum-for-automatic1111-webui/scripts/deforum_helpers/src',
-            ])
+            sys.path.extend([os.path.join(deforum_folder_name, 'scripts', 'deforum_helpers', 'src')])
         
         # clean up unused memory
         reset_frames_cache(root)
@@ -177,7 +179,6 @@ def run_deforum(*args, **kwargs):
         if root.initial_info is None:
             root.initial_info = "An error has occured and nothing has been generated!"
             root.initial_info += "\nPlease, report the bug to https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"
-            import numpy as np
             a = np.random.rand(args.W, args.H, 3)*255
             root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
             root.initial_seed = 6934

@@ -122,7 +122,7 @@ def interpolate_prompts(animation_prompts, max_frames):
     # Return the filled series, in case max_frames is greater than the last keyframe or any ranges were skipped.
     return prompt_series.ffill().bfill()
 
-def prepare_prompt(prompt_series, max_frames, seed):
+def prepare_prompt(prompt_series, max_frames, seed, frame_idx):
     max_f = max_frames - 1
     pattern = r'`.*?`'
     regex = re.compile(pattern)
