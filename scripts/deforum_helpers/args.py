@@ -932,7 +932,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, add_soundtrack, soundtrack_path])
                 # **OLD + NON ACTIVES AREA**
                 with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
-                        mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
                         perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                         perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
                         save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
@@ -1068,7 +1067,7 @@ args_names =    str(r'''W, H, tiling, restore_faces, seed, sampler, seed_enable_
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_creation,
                             fps, make_gif, delete_imgs, add_soundtrack, soundtrack_path, r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
-                            mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs'''
+                            store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
