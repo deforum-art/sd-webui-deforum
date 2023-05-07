@@ -231,6 +231,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         scheduled_sampler_name = None
         scheduled_clipskip = None
         scheduled_noise_multiplier = None
+        scheduled_ddim_eta = None
         mask_seq = None
         noise_mask_seq = None
         if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
@@ -241,6 +242,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             scheduled_clipskip = int(keys.clipskip_schedule_series[frame_idx])
         if anim_args.enable_noise_multiplier_scheduling and keys.noise_multiplier_schedule_series[frame_idx] is not None:
             scheduled_noise_multiplier = float(keys.noise_multiplier_schedule_series[frame_idx])
+        if anim_args.enable_ddim_eta_scheduling and keys.ddim_eta_schedule_series[frame_idx] is not None:
+            scheduled_ddim_eta = float(keys.ddim_eta_schedule_series[frame_idx])
         if args.use_mask and keys.mask_schedule_series[frame_idx] is not None:
             mask_seq = keys.mask_schedule_series[frame_idx]
         if anim_args.use_noise_mask and keys.noise_mask_schedule_series[frame_idx] is not None:
@@ -490,10 +493,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         if 'img2img_fix_steps' in opts.data and opts.data["img2img_fix_steps"]: # disable "with img2img do exactly x steps" from general setting, as it *ruins* deforum animations
             opts.data["img2img_fix_steps"] = False
-        if scheduled_clipskip is not None:
+        if scheduled_clipskip:
             opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip
-        if scheduled_noise_multiplier is not None:
+        if scheduled_noise_multiplier:
             opts.data["initial_noise_multiplier"] = scheduled_noise_multiplier
+        if scheduled_ddim_eta:
+            opts.data["eta_ddim"] = scheduled_ddim_eta
+        # TODO: add non-ddim eta schedule (of ancestral samplers)
         
         if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
             if predict_depths: depth_model.to('cpu')

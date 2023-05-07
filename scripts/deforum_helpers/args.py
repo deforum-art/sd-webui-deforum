@@ -149,6 +149,8 @@ def DeforumAnimArgs():
     #**Resume Animation:**
     resume_from_timestring = False 
     resume_timestring = "20230129210106" 
+    enable_ddim_eta_scheduling = False
+    ddim_eta_schedule = "0:(0)"
 
     return locals()
     
@@ -183,7 +185,7 @@ def DeforumArgs():
     sampler = 'euler_ancestral' # ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
     steps = 25 #
     scale = 7 #
-    ddim_eta = 0.0 #
+    
     dynamic_threshold = None
     static_threshold = None
 
@@ -359,8 +361,9 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
                     with gr.Row(variant='compact'):
                         restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
-                        tiling = gr.Checkbox(label='Tiling', value=False)
-                        ddim_eta = gr.Number(label="DDIM Eta", value=d.ddim_eta, interactive=True)
+                        tiling = gr.Checkbox(label='Tiling', value=d.tiling)
+                        enable_ddim_eta_scheduling = gr.Checkbox(label='Enable DDIM ETA scheduling', value=da.enable_ddim_eta_scheduling)
+                        ddim_eta_schedule = gr.Textbox(label="DDIM ETA Schedule", lines=1, value=da.ddim_eta_schedule, interactive=True)
                     with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
                         pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
                 # RUN FROM SETTING FILE ACCORD
@@ -1028,7 +1031,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 anim_args_names =   str(r'''animation_mode, max_frames, border,
                         angle, zoom, translation_x, translation_y, translation_z, transform_center_x, transform_center_y,
                         rotation_3d_x, rotation_3d_y, rotation_3d_z,
-                        enable_perspective_flip,
+                        enable_perspective_flip, enable_ddim_eta_scheduling, ddim_eta_schedule, 
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
                         enable_subseed_scheduling, subseed_schedule, subseed_strength_schedule,
@@ -1059,7 +1062,7 @@ hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human
                         hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 args_names =    str(r'''W, H, tiling, restore_faces, seed, sampler, seed_enable_extras,
-                        seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, save_settings,
+                        seed_resize_from_w, seed_resize_from_h, steps, n_batch, save_settings,
                         save_sample_per_step, batch_name, seed_behavior, seed_iter_N, use_init, strength_0_no_init, strength, init_image,
                         use_mask, use_alpha_as_mask, invert_mask, overlay_mask,
                         mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
@@ -1168,7 +1171,6 @@ def process_args(args_dict_main, run_id):
     p.seed_resize_from_w = args.seed_resize_from_w
     p.seed_resize_from_h = args.seed_resize_from_h
     p.fill = args.fill
-    p.ddim_eta = args.ddim_eta
     if args.seed == -1:
         root.raw_seed = -1
     args.seed = get_fixed_seed(args.seed)
