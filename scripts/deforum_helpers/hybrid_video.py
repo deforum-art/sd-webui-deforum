@@ -12,7 +12,7 @@ from scipy.ndimage.filters import gaussian_filter
 from .consistency_check import make_consistency
 from .human_masking import video2humanmasks
 from .load_images import load_image
-from .video_audio_utilities import vid2frames, get_quick_vid_info, get_frame_name, get_next_frame
+from .video_audio_utilities import vid2frames, get_quick_vid_info, get_frame_name
 from modules.shared import opts
 
 # DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
