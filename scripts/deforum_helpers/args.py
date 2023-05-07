@@ -962,9 +962,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     animation_mode.change(fn=enable_2d_related_stuff, inputs=animation_mode, outputs=only_2d_motion_column) 
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=color_force_grayscale)
     animation_mode.change(fn=disable_by_interpolation, inputs=animation_mode, outputs=noise_tab_column)
-    pers_flip_hide_all_param_names = [enable_per_f_row, per_f_th_row, per_f_ph_row, per_f_ga_row, per_f_f_row]
+    pers_flip_hide_all_param_names = [per_f_th_row, per_f_ph_row, per_f_ga_row, per_f_f_row]
     for output in pers_flip_hide_all_param_names:
-        animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=output)    
+        animation_mode.change(fn=per_flip_handle, inputs=[animation_mode, enable_perspective_flip], outputs=output)
+    # show/hide enable persp flip mode button. Shown only in 2d/3d anim modes
+    animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=enable_per_f_row)
     animation_mode.change(fn=disable_pers_flip_accord, inputs=animation_mode, outputs=both_anim_mode_motion_params_column)
     aspect_ratio_use_old_formula.change(fn=hide_if_true, inputs=aspect_ratio_use_old_formula, outputs=aspect_ratio_schedule)
     #Hybrid related:
