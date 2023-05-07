@@ -18,6 +18,7 @@ from .deforum_controlnet_gradio import *
 from .general_utils import count_files_in_folder, clean_gradio_path_strings # TODO: do it another way
 from .video_audio_utilities import vid2frames, convert_image
 from .animation_key_frames import ControlNetKeys
+from .load_images import load_image
 
 cnet = None
 # number of CN model tabs to show in the deforum gui
@@ -156,10 +157,17 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
     CnSchKeys = ControlNetKeys(anim_args, controlnet_args)
     def read_cn_data(cn_idx):
         cn_mask_np, cn_image_np = None, None
-        if getattr(controlnet_args, f'cn_{cn_idx}_loopback_mode') and args.init_sample and frame_idx > 0:
-            cn_mask_np = None
-            cn_image_np = np.array(args.init_sample).astype('uint8')
-        else:
+        # Loopback mode ENABLED:
+        if getattr(controlnet_args, f'cn_{cn_idx}_loopback_mode'):
+            # On very first frame, check if use init enabled, and if init image is provided
+            if frame_idx == 0 and args.use_init and args.init_image is not None:
+                cn_image_np = load_image(args.init_image)
+                # convert to uint8 for compatability with CN
+                cn_image_np = np.array(cn_image_np).astype('uint8')
+            # Not first frame, use previous img (init_sample)
+            elif frame_idx > 0 and args.init_sample:
+                cn_image_np = np.array(args.init_sample).astype('uint8')
+        else: # loopback mode is DISABLED
             cn_inputframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_inputframes') # set input frames folder path
             if os.path.exists(cn_inputframes):
                 if count_files_in_folder(cn_inputframes) == 1:
@@ -203,10 +211,10 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
             "processor_res", "threshold_a", "threshold_b", "guidance_start", "guidance_end"
         ]
         cnu = {k: getattr(cn_args, f"{prefix}_{k}") for k in keys}
-        # Dynamic weight assignment for models 1 to 5
         model_num = int(prefix.split('_')[-1])  # Extract model number from prefix (e.g., "cn_1" -> 1)
         if 1 <= model_num <= 5:
-            if getattr(cn_args, f"cn_{model_num}_loopback_mode") and frame_idx == 0:
+            # if in loopmode and no init image (img_np, after processing in this case) provided, disable CN unit for the very first frame. Will be enabled in the next frame automatically
+            if getattr(cn_args, f"cn_{model_num}_loopback_mode") and frame_idx == 0 and img_np is None:
                 cnu['enabled'] = False
             cnu['weight'] = getattr(CnSchKeys, f"cn_{model_num}_weight_schedule_series")[frame_idx]
             cnu['guidance_start'] = getattr(CnSchKeys, f"cn_{model_num}_guidance_start_schedule_series")[frame_idx]
