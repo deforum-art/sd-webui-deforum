@@ -30,15 +30,11 @@ def change_seed_schedule_visibility(choice):
 
 def disable_pers_flip_accord(choice):
     return gr.update(visible=True) if choice in ['2D','3D'] else gr.update(visible=False)
-    
+
 def per_flip_handle(anim_mode, per_f_enabled):
-    if anim_mode in ['2D','3D']:
-        if per_f_enabled:
-            return gr.update(visible=True)
-        else:
-            return gr.update(visible=False)
-    else:
-        return gr.update(visible=False)
+    if anim_mode in ['2D','3D'] and per_f_enabled:
+        return gr.update(visible=True)
+    return gr.update(visible=False)
     
 def change_max_frames_visibility(choice):
     return gr.update(visible=choice != "Video Input")
