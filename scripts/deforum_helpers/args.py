@@ -149,6 +149,10 @@ def DeforumAnimArgs():
     #**Resume Animation:**
     resume_from_timestring = False 
     resume_timestring = "20230129210106" 
+    enable_ddim_eta_scheduling = False
+    ddim_eta_schedule = "0:(0)"
+    enable_ancestral_eta_scheduling = False
+    ancestral_eta_schedule = "0:(1)"
 
     return locals()
     
@@ -183,7 +187,7 @@ def DeforumArgs():
     sampler = 'euler_ancestral' # ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
     steps = 25 #
     scale = 7 #
-    ddim_eta = 0.0 #
+    
     dynamic_threshold = None
     static_threshold = None
 
@@ -359,8 +363,11 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                 with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
                     with gr.Row(variant='compact'):
                         restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
-                        tiling = gr.Checkbox(label='Tiling', value=False)
-                        ddim_eta = gr.Number(label="DDIM Eta", value=d.ddim_eta, interactive=True)
+                        tiling = gr.Checkbox(label='Tiling', value=d.tiling)
+                        enable_ddim_eta_scheduling = gr.Checkbox(label='Enable DDIM ETA scheduling', value=da.enable_ddim_eta_scheduling, visible=False)
+                        ddim_eta_schedule = gr.Textbox(label="DDIM ETA Schedule", lines=1, value=da.ddim_eta_schedule, interactive=True, visible=False)
+                        enable_ancestral_eta_scheduling = gr.Checkbox(label='Enable Ancestral ETA scheduling', value=da.enable_ancestral_eta_scheduling)
+                        ancestral_eta_schedule =  gr.Textbox(label="Ancestral ETA Schedule", lines=1, value=da.ancestral_eta_schedule, interactive=True)
                     with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
                         pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
                 # RUN FROM SETTING FILE ACCORD
@@ -932,7 +939,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames,inputs=[image_path, fps, add_soundtrack, soundtrack_path])
                 # **OLD + NON ACTIVES AREA**
                 with gr.Accordion(visible=False, label='INVISIBLE') as not_in_use_accordion:
-                        mp4_path = gr.Textbox(label="MP4 path", lines=1, interactive=True, value = dv.mp4_path)
                         perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                         perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
                         save_settings = gr.Checkbox(label="save_settings", value=d.save_settings, interactive=True)
@@ -1010,6 +1016,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     diffusion_cadence.change(fn=hide_optical_flow_cadence, inputs=diffusion_cadence,outputs=optical_flow_cadence_row)
     depth_algorithm.change(fn=legacy_3d_mode, inputs=depth_algorithm, outputs=midas_weight)
     depth_algorithm.change(fn=show_leres_html_msg, inputs=depth_algorithm, outputs=leres_license_msg)
+    ddim_outputs = [enable_ddim_eta_scheduling, ddim_eta_schedule]
+    for output in ddim_outputs:
+        sampler.change(fn=show_when_ddim,inputs=sampler,outputs=output)
+    ancestral_outputs = [enable_ancestral_eta_scheduling, ancestral_eta_schedule]
+    for output in ancestral_outputs:
+        sampler.change(fn=show_when_ancestral_samplers,inputs=sampler,outputs=output)
     # END OF UI TABS
     stuff = locals()
     stuff = {**stuff, **controlnet_dict}
@@ -1029,7 +1041,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 anim_args_names =   str(r'''animation_mode, max_frames, border,
                         angle, zoom, translation_x, translation_y, translation_z, transform_center_x, transform_center_y,
                         rotation_3d_x, rotation_3d_y, rotation_3d_z,
-                        enable_perspective_flip,
+                        enable_perspective_flip, enable_ddim_eta_scheduling, ddim_eta_schedule, enable_ancestral_eta_scheduling, ancestral_eta_schedule,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
                         enable_subseed_scheduling, subseed_schedule, subseed_strength_schedule,
@@ -1060,7 +1072,7 @@ hybrid_args_names =   str(r'''hybrid_generate_inputframes, hybrid_generate_human
                         hybrid_comp_mask_auto_contrast_cutoff_high_schedule, hybrid_comp_mask_auto_contrast_cutoff_low_schedule'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 args_names =    str(r'''W, H, tiling, restore_faces, seed, sampler, seed_enable_extras,
-                        seed_resize_from_w, seed_resize_from_h, steps, ddim_eta, n_batch, save_settings,
+                        seed_resize_from_w, seed_resize_from_h, steps, n_batch, save_settings,
                         save_sample_per_step, batch_name, seed_behavior, seed_iter_N, use_init, strength_0_no_init, strength, init_image,
                         use_mask, use_alpha_as_mask, invert_mask, overlay_mask,
                         mask_file, mask_contrast_adjust, mask_brightness_adjust, mask_overlay_blur,
@@ -1068,7 +1080,7 @@ args_names =    str(r'''W, H, tiling, restore_faces, seed, sampler, seed_enable_
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 video_args_names =  str(r'''skip_video_creation,
                             fps, make_gif, delete_imgs, add_soundtrack, soundtrack_path, r_upscale_video, r_upscale_model, r_upscale_factor, r_upscale_keep_imgs,
-                            mp4_path, store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs'''
+                            store_frames_in_ram, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
 parseq_args_names = str(r'''parseq_manifest, parseq_use_deltas'''
                     ).replace("\n", "").replace("\r", "").replace(" ", "").split(',')
@@ -1169,7 +1181,6 @@ def process_args(args_dict_main, run_id):
     p.seed_resize_from_w = args.seed_resize_from_w
     p.seed_resize_from_h = args.seed_resize_from_h
     p.fill = args.fill
-    p.ddim_eta = args.ddim_eta
     if args.seed == -1:
         root.raw_seed = -1
     args.seed = get_fixed_seed(args.seed)
