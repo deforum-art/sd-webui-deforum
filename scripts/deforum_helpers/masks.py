@@ -12,8 +12,8 @@ def do_overlay_mask(args, anim_args, img, frame_idx, is_bgr_array=False):
         img = Image.fromarray(img)
 
     if anim_args.use_mask_video:
-        current_mask = Image.open(os.path.join(args.outdir, 'maskframes', get_frame_name(anim_args.video_mask_path) + f"{frame_idx+1:09}.jpg"))
-        current_frame = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx+1:09}.jpg"))
+        current_mask = Image.open(os.path.join(args.outdir, 'maskframes', get_frame_name(anim_args.video_mask_path) + f"{frame_idx:09}.jpg"))
+        current_frame = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg"))
     elif args.use_mask:
         current_mask = load_image(args.mask_file)
         if args.init_image is None:
