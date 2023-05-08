@@ -127,6 +127,12 @@ def change_hybrid_tab_status(choice):
 
 def show_leres_html_msg(choice):
     return gr.update(visible=True) if choice.lower() == 'leres' else gr.update(visible=False)
+    
+def show_when_ddim(sampler_name):
+    return gr.update(visible=True) if sampler_name.lower() == 'ddim' else gr.update(visible=False)
+    
+def show_when_ancestral_samplers(sampler_name):
+    return gr.update(visible=True) if sampler_name.lower() in ['euler a', 'dpm++ 2s a', 'dpm2 a', 'dpm2 a karras', 'dpm++ 2s a karras'] else gr.update(visible=False)
 
 def change_css(checkbox_status):
         if checkbox_status:

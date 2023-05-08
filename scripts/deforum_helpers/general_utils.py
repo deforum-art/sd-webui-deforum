@@ -60,7 +60,7 @@ def get_deforum_version():
     from modules import extensions as mext
     try:
         for ext in mext.extensions:
-            if ext.name in ["deforum", "deforum-for-automatic1111-webui"] and ext.enabled:
+            if ext.name in ["deforum", "deforum-for-automatic1111-webui", "sd-webui-deforum"] and ext.enabled:
                 return ext.version
         return "Unknown"
     except:
