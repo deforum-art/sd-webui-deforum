@@ -174,7 +174,10 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
                     cn_frame_path = os.path.join(cn_inputframes, "000000000.jpg")
                     print(f'Reading ControlNet *static* base frame at {cn_frame_path}')
                 else:
-                    cn_frame_path = os.path.join(cn_inputframes, f"{frame_idx:09}.jpg")
+                    if os.path.isfile(os.path.join(cn_inputframes, f"{frame_idx+1:09}.jpg")):
+                        cn_frame_path = os.path.join(cn_inputframes, f"{frame_idx+1:09}.jpg")
+                    else:
+                        cn_frame_path = os.path.join(cn_inputframes, f"{frame_idx:09}.jpg")
                     print(f'Reading ControlNet {cn_idx} base frame #{frame_idx} at {cn_frame_path}')
                 if os.path.exists(cn_frame_path):
                     cn_image_np = np.array(Image.open(cn_frame_path).convert("RGB")).astype('uint8')
@@ -184,7 +187,10 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
                     cn_mask_frame_path = os.path.join(cn_inputframes, "000000000.jpg")
                     print(f'Reading ControlNet *static* mask frame at {cn_mask_frame_path}')
                 else:
-                    cn_mask_frame_path = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes', f"{frame_idx:09}.jpg")
+                    if os.path.isfile(os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes', f"{frame_idx+1:09}.jpg")):
+                        cn_mask_frame_path = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes', f"{frame_idx+1:09}.jpg")
+                    else:
+                        cn_mask_frame_path = os.path.join(args.outdir, f'controlnet_{cn_idx}_maskframes', f"{frame_idx:09}.jpg")
                     print(f'Reading ControlNet {cn_idx} mask frame #{frame_idx} at {cn_mask_frame_path}')
                 if os.path.exists(cn_mask_frame_path):
                     cn_mask_np = np.array(Image.open(cn_mask_frame_path).convert("RGB")).astype('uint8')
