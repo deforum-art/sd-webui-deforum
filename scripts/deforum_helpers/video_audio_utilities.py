@@ -234,7 +234,10 @@ def get_frame_name(path):
 def get_next_frame(outdir, video_path, frame_idx, mask=False):
     frame_path = 'inputframes'
     if (mask): frame_path = 'maskframes'
-    return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx:09}.jpg")
+    if os.path.isfile(os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:09}.jpg")):
+        return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx+1:09}.jpg")
+    else:
+        return os.path.join(outdir, frame_path, get_frame_name(video_path) + f"{frame_idx:09}.jpg")
      
 def find_ffmpeg_binary():
     try:
