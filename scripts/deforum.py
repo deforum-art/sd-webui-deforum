@@ -84,12 +84,15 @@ def run_deforum(*args, **kwargs):
                 return None, None, None, None, f"Couldn't load data from '{os.path.basename(args_dict['custom_settings_file'][i].name)}'. Make sure it's a valid JSON using a JSON validator", plaintext_to_html('')
 
         root.clipseg_model = None
-        try:
-            root.initial_clipskip = opts.data["CLIP_stop_at_last_layers"]
-        except:
-            root.initial_clipskip = 1
-        root.basedirs = basedirs
+        
+        root.initial_clipskip = opts.data.get("CLIP_stop_at_last_layers", 1)
+        root.initial_img2img_fix_steps = opts.data.get("img2img_fix_steps", False)
+        root.initial_noise_multiplier = opts.data.get("initial_noise_multiplier", 1.0)
+        root.initial_ddim_eta = opts.data.get("eta_ddim", 0.0)
+        root.initial_ancestral_eta = opts.data.get("eta_ancestral", 1.0)
 
+        root.basedirs = basedirs
+        print(f"root.initial_clipskip = {root.initial_clipskip}")
         for basedir in basedirs:
             sys.path.extend([os.path.join(deforum_folder_name, 'scripts', 'deforum_helpers', 'src')])
         
@@ -124,7 +127,14 @@ def run_deforum(*args, **kwargs):
             return None, None, None, None, f"Error: '{e}'. Check your schedules/ init values please. Also make sure you don't have a backwards slash in any of your PATHs - use / instead of \\. Full error message is in your terminal/ cli.", plaintext_to_html('') 
         finally:
             shared.total_tqdm = tqdm_backup
+            # reset opts.data vals to what they were before we started the animation. Else they will stick to the last value - it actually updates webui settings (config.json)
             opts.data["CLIP_stop_at_last_layers"] = root.initial_clipskip
+            opts.data["img2img_fix_steps"] = root.initial_img2img_fix_steps
+            opts.data["initial_noise_multiplier"] = root.initial_noise_multiplier
+            opts.data["eta_ddim"] = root.initial_ddim_eta
+            opts.data["eta_ancestral"] = root.initial_ancestral_eta
+            
+            
         
         if video_args.store_frames_in_ram:
             dump_frames_cache(root)
