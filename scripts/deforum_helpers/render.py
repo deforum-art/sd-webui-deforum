@@ -497,13 +497,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         if 'img2img_fix_steps' in opts.data and opts.data["img2img_fix_steps"]: # disable "with img2img do exactly x steps" from general setting, as it *ruins* deforum animations
             opts.data["img2img_fix_steps"] = False
-        if scheduled_clipskip:
+        if scheduled_clipskip is not None:
             opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip
-        if scheduled_noise_multiplier:
+        if scheduled_noise_multiplier is not None:
             opts.data["initial_noise_multiplier"] = scheduled_noise_multiplier
-        if scheduled_ddim_eta:
+        if scheduled_ddim_eta is not None:
             opts.data["eta_ddim"] = scheduled_ddim_eta
-        if scheduled_ancestral_eta:
+        if scheduled_ancestral_eta is not None:
             opts.data["eta_ancestral"] = scheduled_ancestral_eta
         
         if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
