@@ -91,7 +91,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
-        max_f = anim_args.max_frames - 1
         for i, prompt in animation_prompts.items():
             if str(i).isdigit():
                 prompt_series[int(i)] = prompt
@@ -195,7 +194,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     #Webui
     state.job_count = anim_args.max_frames
 
-    while frame_idx < (anim_args.max_frames if not anim_args.use_mask_video else anim_args.max_frames - 1):
+    while frame_idx < anim_args.max_frames:
         #Webui
         
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
@@ -379,7 +378,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         hybrid_available = anim_args.hybrid_composite != 'None' or anim_args.hybrid_motion in ['Optical Flow', 'Affine', 'Perspective']
         if anim_args.color_coherence == 'Video Input' and hybrid_available:
             if int(frame_idx) % int(anim_args.color_coherence_video_every_N_frames) == 0:
-                prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx+1:09}.jpg"))
+                prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg"))
                 prev_vid_img = prev_vid_img.resize((args.W, args.H), PIL.Image.LANCZOS)
                 color_match_sample = np.asarray(prev_vid_img)
                 color_match_sample = cv2.cvtColor(color_match_sample, cv2.COLOR_RGB2BGR)
