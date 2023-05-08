@@ -151,6 +151,8 @@ def DeforumAnimArgs():
     resume_timestring = "20230129210106" 
     enable_ddim_eta_scheduling = False
     ddim_eta_schedule = "0:(0)"
+    enable_ancestral_eta_scheduling = False
+    ancestral_eta_schedule = "0:(0)"
 
     return locals()
     
@@ -364,6 +366,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         tiling = gr.Checkbox(label='Tiling', value=d.tiling)
                         enable_ddim_eta_scheduling = gr.Checkbox(label='Enable DDIM ETA scheduling', value=da.enable_ddim_eta_scheduling)
                         ddim_eta_schedule = gr.Textbox(label="DDIM ETA Schedule", lines=1, value=da.ddim_eta_schedule, interactive=True)
+                        enable_ancestral_eta_scheduling = gr.Checkbox(label='Enable Ancestral (non-ddim) ETA scheduling', value=da.enable_ancestral_eta_scheduling)
+                        ancestral_eta_schedule =  gr.Textbox(label="Ancestral (non-ddim) ETA Schedule", lines=1, value=da.ancestral_eta_schedule, interactive=True)
                     with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
                         pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
                 # RUN FROM SETTING FILE ACCORD
@@ -1031,7 +1035,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
 anim_args_names =   str(r'''animation_mode, max_frames, border,
                         angle, zoom, translation_x, translation_y, translation_z, transform_center_x, transform_center_y,
                         rotation_3d_x, rotation_3d_y, rotation_3d_z,
-                        enable_perspective_flip, enable_ddim_eta_scheduling, ddim_eta_schedule, 
+                        enable_perspective_flip, enable_ddim_eta_scheduling, ddim_eta_schedule, enable_ancestral_eta_scheduling, ancestral_eta_schedule,
                         perspective_flip_theta, perspective_flip_phi, perspective_flip_gamma, perspective_flip_fv,
                         noise_schedule, strength_schedule, contrast_schedule, cfg_scale_schedule, pix2pix_img_cfg_scale_schedule,
                         enable_subseed_scheduling, subseed_schedule, subseed_strength_schedule,

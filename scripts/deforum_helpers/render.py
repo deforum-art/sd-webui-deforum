@@ -232,6 +232,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         scheduled_clipskip = None
         scheduled_noise_multiplier = None
         scheduled_ddim_eta = None
+        scheduled_ancestral_eta = None
+        
         mask_seq = None
         noise_mask_seq = None
         if anim_args.enable_steps_scheduling and keys.steps_schedule_series[frame_idx] is not None:
@@ -244,6 +246,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             scheduled_noise_multiplier = float(keys.noise_multiplier_schedule_series[frame_idx])
         if anim_args.enable_ddim_eta_scheduling and keys.ddim_eta_schedule_series[frame_idx] is not None:
             scheduled_ddim_eta = float(keys.ddim_eta_schedule_series[frame_idx])
+        if anim_args.enable_ancestral_eta_scheduling and keys.ancestral_eta_schedule_series[frame_idx] is not None:
+            scheduled_ancestral_eta = float(keys.ancestral_eta_schedule_series[frame_idx])
         if args.use_mask and keys.mask_schedule_series[frame_idx] is not None:
             mask_seq = keys.mask_schedule_series[frame_idx]
         if anim_args.use_noise_mask and keys.noise_mask_schedule_series[frame_idx] is not None:
@@ -499,7 +503,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             opts.data["initial_noise_multiplier"] = scheduled_noise_multiplier
         if scheduled_ddim_eta:
             opts.data["eta_ddim"] = scheduled_ddim_eta
-        # TODO: add non-ddim eta schedule (of ancestral samplers)
+        if scheduled_ancestral_eta:
+            opts.data["eta_ancestral"] = scheduled_ancestral_eta
         
         if anim_args.animation_mode == '3D' and (cmd_opts.lowvram or cmd_opts.medvram):
             if predict_depths: depth_model.to('cpu')

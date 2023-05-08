@@ -26,6 +26,7 @@ class DeformAnimKeys():
         self.contrast_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.contrast_schedule))
         self.cfg_scale_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.cfg_scale_schedule))
         self.ddim_eta_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.ddim_eta_schedule))
+        self.ancestral_eta_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.ancestral_eta_schedule))
         self.pix2pix_img_cfg_scale_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.pix2pix_img_cfg_scale_schedule))
         self.subseed_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.subseed_schedule))
         self.subseed_strength_schedule_series = self.fi.get_inbetweens(self.fi.parse_key_frames(anim_args.subseed_strength_schedule))
