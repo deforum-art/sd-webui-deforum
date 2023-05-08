@@ -152,7 +152,7 @@ def DeforumAnimArgs():
     enable_ddim_eta_scheduling = False
     ddim_eta_schedule = "0:(0)"
     enable_ancestral_eta_scheduling = False
-    ancestral_eta_schedule = "0:(0)"
+    ancestral_eta_schedule = "0:(1)"
 
     return locals()
     
@@ -364,10 +364,10 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     with gr.Row(variant='compact'):
                         restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
                         tiling = gr.Checkbox(label='Tiling', value=d.tiling)
-                        enable_ddim_eta_scheduling = gr.Checkbox(label='Enable DDIM ETA scheduling', value=da.enable_ddim_eta_scheduling)
-                        ddim_eta_schedule = gr.Textbox(label="DDIM ETA Schedule", lines=1, value=da.ddim_eta_schedule, interactive=True)
-                        enable_ancestral_eta_scheduling = gr.Checkbox(label='Enable Ancestral (non-ddim) ETA scheduling', value=da.enable_ancestral_eta_scheduling)
-                        ancestral_eta_schedule =  gr.Textbox(label="Ancestral (non-ddim) ETA Schedule", lines=1, value=da.ancestral_eta_schedule, interactive=True)
+                        enable_ddim_eta_scheduling = gr.Checkbox(label='Enable DDIM ETA scheduling', value=da.enable_ddim_eta_scheduling, visible=False)
+                        ddim_eta_schedule = gr.Textbox(label="DDIM ETA Schedule", lines=1, value=da.ddim_eta_schedule, interactive=True, visible=False)
+                        enable_ancestral_eta_scheduling = gr.Checkbox(label='Enable Ancestral ETA scheduling', value=da.enable_ancestral_eta_scheduling)
+                        ancestral_eta_schedule =  gr.Textbox(label="Ancestral ETA Schedule", lines=1, value=da.ancestral_eta_schedule, interactive=True)
                     with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
                         pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
                 # RUN FROM SETTING FILE ACCORD
@@ -1016,6 +1016,12 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
     diffusion_cadence.change(fn=hide_optical_flow_cadence, inputs=diffusion_cadence,outputs=optical_flow_cadence_row)
     depth_algorithm.change(fn=legacy_3d_mode, inputs=depth_algorithm, outputs=midas_weight)
     depth_algorithm.change(fn=show_leres_html_msg, inputs=depth_algorithm, outputs=leres_license_msg)
+    ddim_outputs = [enable_ddim_eta_scheduling, ddim_eta_schedule]
+    for output in ddim_outputs:
+        sampler.change(fn=show_when_ddim,inputs=sampler,outputs=output)
+    ancestral_outputs = [enable_ancestral_eta_scheduling, ancestral_eta_schedule]
+    for output in ancestral_outputs:
+        sampler.change(fn=show_when_ancestral_samplers,inputs=sampler,outputs=output)
     # END OF UI TABS
     stuff = locals()
     stuff = {**stuff, **controlnet_dict}
