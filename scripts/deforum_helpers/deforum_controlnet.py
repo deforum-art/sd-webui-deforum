@@ -72,9 +72,11 @@ def setup_controlnet_ui_raw():
             refresh_models = ToolButton(value=refresh_symbol)
             refresh_models.click(refresh_all_models, model, model)
         with gr.Row(visible=False) as weight_row:
-            weight = gr.Textbox(label="Weight", lines=1, value = '0:(1)', interactive=True)
-            guidance_start = gr.Textbox(label="Starting Control Step", lines=1, value = '0:(0.0)', interactive=True)
-            guidance_end = gr.Textbox(label="Ending Control Step", lines=1, value = '0:(1.0)', interactive=True)
+            weight = gr.Textbox(label="Weight schedule", lines=1, value = '0:(1)', interactive=True)
+        with gr.Row(visible=False) as start_cs_row:
+            guidance_start = gr.Textbox(label="Starting Control Step schedule", lines=1, value = '0:(0.0)', interactive=True)
+        with gr.Row(visible=False) as end_cs_row:
+            guidance_end = gr.Textbox(label="Ending Control Step schedule", lines=1, value = '0:(1.0)', interactive=True)
             model_dropdowns.append(model)
         with gr.Column(visible=False) as advanced_column:
             processor_res = gr.Slider(label="Annotator resolution", value=64, minimum=64, maximum=2048, interactive=False)
@@ -90,7 +92,7 @@ def setup_controlnet_ui_raw():
             resize_mode = gr.Radio(choices=["Outer Fit (Shrink to Fit)", "Inner Fit (Scale to Fit)", "Just Resize"], value="Inner Fit (Scale to Fit)", label="Resize Mode", interactive=True)
         with gr.Row(visible=False) as control_loopback_row:
             loopback_mode = gr.Checkbox(label="LoopBack mode", value=False, interactive=True)
-        hide_output_list = [pixel_perfect,low_vram,mod_row,module,weight_row,env_row,overwrite_frames,vid_path_row,control_mode_row, mask_vid_path_row, control_loopback_row] # add mask_vid_path_row when masks are working again
+        hide_output_list = [pixel_perfect,low_vram,mod_row,module,weight_row,start_cs_row, end_cs_row,env_row,overwrite_frames,vid_path_row,control_mode_row, mask_vid_path_row, control_loopback_row] # add mask_vid_path_row when masks are working again
         for cn_output in hide_output_list:
             enabled.change(fn=hide_ui_by_cn_status, inputs=enabled,outputs=cn_output)
         module.change(build_sliders, inputs=[module, pixel_perfect], outputs=[processor_res, threshold_a, threshold_b, advanced_column])
