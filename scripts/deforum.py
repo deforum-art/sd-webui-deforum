@@ -92,7 +92,6 @@ def run_deforum(*args, **kwargs):
         root.initial_ancestral_eta = opts.data.get("eta_ancestral", 1.0)
 
         root.basedirs = basedirs
-        print(f"root.initial_clipskip = {root.initial_clipskip}")
         for basedir in basedirs:
             sys.path.extend([os.path.join(deforum_folder_name, 'scripts', 'deforum_helpers', 'src')])
         
