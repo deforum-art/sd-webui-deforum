@@ -73,19 +73,48 @@ def attention_forward(self, x, resolution, shared_rel_pos_bias: Optional[torch.T
     qkv = qkv.reshape(B, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
     q, k, v = qkv.unbind(0)  # make torchscript happy (cannot use tensor as tuple)
 
-    q = q * self.scale
-    attn = (q @ k.transpose(-2, -1))
+    # from sd hijack
+    import modules.shared as shared
+    from modules.shared import cmd_opts
+    can_use_sdp = hasattr(torch.nn.functional, "scaled_dot_product_attention") and callable(getattr(torch.nn.functional, "scaled_dot_product_attention")) # not everyone has torch 2.x to use sdp
 
+    # get biases
+    bias = None
     if self.relative_position_bias_table is not None:
         window_size = tuple(np.array(resolution) // 16)
-        attn = attn + self._get_rel_pos_bias(window_size)
+        bias = self._get_rel_pos_bias(window_size)
     if shared_rel_pos_bias is not None:
-        attn = attn + shared_rel_pos_bias
+        if bias is None:
+            bias = shared_rel_pos_bias
+        else:
+            bias += shared_rel_pos_bias
 
-    attn = attn.softmax(dim=-1)
-    attn = self.attn_drop(attn)
+    if cmd_opts.force_enable_xformers or (cmd_opts.xformers and shared.xformers_available and torch.version.cuda and (6, 0) <= torch.cuda.get_device_capability(shared.device) <= (9, 0)):
+        # xform
+        from modules.sd_hijack_optimizations import get_xformers_flash_attention_op
+        import xformers
+        x = xformers.ops.memory_efficient_attention(q, k, v, attn_bias=bias, op=get_xformers_flash_attention_op(q, k, v))
+    elif cmd_opts.opt_sdp_no_mem_attention and can_use_sdp:
+        with torch.backends.cuda.sdp_kernel(enable_flash=True, enable_math=True, enable_mem_efficient=False):
+            x = F.scaled_dot_product_attention(
+                q, k, v, dropout_p=0.0, attn_mask=bias
+            )
+    elif cmd_opts.opt_sdp_attention and can_use_sdp:
+        x = F.scaled_dot_product_attention(
+            q, k, v, dropout_p=0.0, attn_mask=bias
+        )
+    else:
+        # vanilla mode
+        q = q * self.scale
+        attn = (q @ k.transpose(-2, -1))
 
-    x = (attn @ v).transpose(1, 2).reshape(B, N, -1)
+        attn += bias
+
+        attn = attn.softmax(dim=-1)
+        # attn = self.attn_drop(attn) # dropout doesn't matter as we're not training.
+
+        x = (attn @ v).transpose(1, 2)
+    x = x.reshape(B, N, -1)
     x = self.proj(x)
     x = self.proj_drop(x)
     return x
