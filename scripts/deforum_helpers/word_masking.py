@@ -4,6 +4,8 @@ from PIL import Image
 from torchvision import transforms
 from clipseg.models.clipseg import CLIPDensePredT
 from modules.shared import opts
+from torch.nn.functional import interpolate
+import cv2
 
 preclipseg_transform = transforms.Compose([
       transforms.ToTensor(),
@@ -37,4 +39,8 @@ def get_word_mask(root, frame, word_mask):
     word_masks = [word_mask]
     with torch.no_grad():
         preds = root.clipseg_model(img.repeat(len(word_masks),1,1,1), word_masks)[0]
-    return Image.fromarray(torch.sigmoid(preds[0][0]).multiply(255).to(dtype=torch.uint8,device='cpu').numpy())
+
+    mask = torch.sigmoid(preds[0][0]).unsqueeze(0).unsqueeze(0) # add batch, channels dims
+    resized_mask = interpolate(mask, size=(frame.size[1], frame.size[0])).squeeze() # rescale mask back to the target resolution
+    numpy_array = resized_mask.multiply(255).to(dtype=torch.uint8,device='cpu').numpy()
+    return Image.fromarray(cv2.threshold(numpy_array, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1])
