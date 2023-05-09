@@ -359,7 +359,6 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                     seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0, info="Starting seed for the animation. -1 for random")
                     n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True, info="if seed is set to random (-1), generate a few vids in one run", visible=False)
                     batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name, info="output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}")
-                # with gr.Accordion('Restore Faces, Tiling & more', open=False) as run_more_settings_accord:
                 with gr.Row(variant='compact'):
                     restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
                     tiling = gr.Checkbox(label='Tiling', value=d.tiling)
