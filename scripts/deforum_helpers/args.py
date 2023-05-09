@@ -380,7 +380,7 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                             resume_from_timestring = gr.Checkbox(label="Resume from timestring", value=da.resume_from_timestring, interactive=True)
                             resume_timestring = gr.Textbox(label="Resume timestring", lines=1, value = da.resume_timestring, interactive=True)
                     with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
-                        pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True)    
+                        pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True, info="ONLY in use when working with a P2P ckpt!")    
             # KEYFRAMES TAB
             with gr.TabItem('Keyframes'): #TODO make a some sort of the original dictionary parsing
                 with gr.Row(variant='compact'):
