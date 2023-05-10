@@ -1,4 +1,5 @@
 import os
+import gc
 from glob import glob
 import bisect
 from tqdm import tqdm
@@ -39,7 +40,9 @@ def run_film_interp_infer(
     print(f"Total frames to FILM-interpolate: {len(image_paths)}. Total frame-pairs: {len(image_paths)-1}.")
     
     model = torch.jit.load(args.model_path, map_location='cpu')
-    model.eval()   
+    model = model.half()
+    model = model.cuda()
+    model.eval()
 
     for i in tqdm(range(len(image_paths) - 1), desc='FILM progress'):
         img1 = image_paths[i]
@@ -48,9 +51,6 @@ def run_film_interp_infer(
         img_batch_2, crop_region_2 = load_image(img2)
         img_batch_1 = torch.from_numpy(img_batch_1).permute(0, 3, 1, 2)
         img_batch_2 = torch.from_numpy(img_batch_2).permute(0, 3, 1, 2)
-
-        model = model.half()
-        model = model.cuda()
 
         save_path = os.path.join(args.save_folder, f"{i}_to_{i+1}.jpg")
 
@@ -114,5 +114,10 @@ def run_film_interp_infer(
                 if not i == len(frames) - 1:
                     cv2.imwrite(frame_path, frame)
             next_number += 1
-
+    
+    # remove FILM model from memory
+    if model is not None:
+        del model
+        torch.cuda.empty_cache()
+        gc.collect()
     print(f"Interpolation \033[0;32mdone\033[0m in {time.time()-start_time:.2f} seconds!")
