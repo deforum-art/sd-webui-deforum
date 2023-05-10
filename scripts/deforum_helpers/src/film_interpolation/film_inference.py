@@ -9,6 +9,7 @@ import cv2
 from .film_util import load_image
 import time
 from types import SimpleNamespace
+from modules.shared import cmd_opts
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -40,7 +41,9 @@ def run_film_interp_infer(
     print(f"Total frames to FILM-interpolate: {len(image_paths)}. Total frame-pairs: {len(image_paths)-1}.")
     
     model = torch.jit.load(args.model_path, map_location='cpu')
-    model = model.half()
+    # half precision the model if user didn't pass --no-half/ --precision full cmd arg flags
+    if not cmd_opts.no_half:
+        model = model.half()
     model = model.cuda()
     model.eval()
 
