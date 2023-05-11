@@ -237,6 +237,7 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
     if processed is None:
         # Mask functions
         if args.use_mask:
+            mask_image = args.mask_image
             mask = prepare_mask(args.mask_file if mask_image is None else mask_image, 
                                 (args.W, args.H),
                                 args.mask_contrast_adjust, 
