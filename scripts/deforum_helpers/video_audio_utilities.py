@@ -218,7 +218,7 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
             add_soundtrack_status = f"\rError adding audio to video: {e}"
             
     
-    add_srt = opts.data.get("deforum_save_gen_info_as_srt") and opts.data.get("deforum_embed_srt")
+    add_srt = opts.data.get("deforum_save_gen_info_as_srt", False) and opts.data.get("deforum_embed_srt", False)
     add_srt_status = None
     if add_srt:
         srt_filename = Path(outmp4_path).with_suffix('.srt')
