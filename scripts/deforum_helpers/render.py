@@ -265,7 +265,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             if predict_depths: depth_model.to(root.device)
         
         if turbo_steps == 1 and opts.data.get("deforum_save_gen_info_as_srt"):
-            params_string = format_animation_params(keys, frame_idx)
+            params_string = format_animation_params(keys, prompt_series, frame_idx)
             write_frame_subtitle(srt_filename, frame_idx, srt_frame_duration, f"F#: {frame_idx}; Seed: {args.seed}; {params_string}")
             params_string = None
             
@@ -290,7 +290,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                             turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow, 1)
 
                 if opts.data.get("deforum_save_gen_info_as_srt"):
-                    params_string = format_animation_params(keys, tween_frame_idx)
+                    params_string = format_animation_params(keys, prompt_series, tween_frame_idx)
                     write_frame_subtitle(srt_filename, tween_frame_idx, srt_frame_duration, f"F#: {tween_frame_idx}; Seed: {args.seed}; {params_string}")
                     params_string = None
 

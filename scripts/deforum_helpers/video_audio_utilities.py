@@ -13,6 +13,7 @@ from modules.shared import state, opts
 from .general_utils import checksum, duplicate_pngs_from_folder, clean_gradio_path_strings
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
+from pathlib import Path
 
 # DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
@@ -215,16 +216,46 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
             os.replace(outmp4_path+'.temp.mp4', outmp4_path)
             print("\r" + " " * len(msg_to_print), end="", flush=True)
             print(f"\r{msg_to_print}", flush=True)
-            print(f"\rFFmpeg Video+Audio stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
+            print(f"\rFFmpeg audio embedding \033[0;32mdone\033[0m in {time.time() - audio_add_start_time:.2f} seconds!", flush=True)
         except Exception as e:
+            # print("\r" + " " * len(msg_to_print), end="", flush=True)
+            # print(f"\r{msg_to_print}", flush=True)
+            print(f'\rError adding audio to video: {e}', flush=True)
+            # print(f"FFMPEG Video (sorry, no audio) stitching \033[33mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
+    
+    embed_srt = opts.data.get("deforum_save_gen_info_as_srt") and opts.data.get("deforum_embed_srt")
+
+    if embed_srt:
+        srt_filename = Path(outmp4_path).with_suffix('.srt')
+        srt_add_start_time = time.time()
+        try:
+            cmd = [
+                ffmpeg_location,
+                '-i', outmp4_path,
+                '-i', srt_filename,
+                '-c', 'copy',
+                '-c:s', 'mov_text',
+                outmp4_path+'.temp.mp4'
+            ]
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode != 0:
+                print("\r" + " " * len(msg_to_print), end="", flush=True)
+                print(f"\r{msg_to_print}", flush=True)
+                raise RuntimeError(stderr)
+            os.replace(outmp4_path+'.temp.mp4', outmp4_path)
             print("\r" + " " * len(msg_to_print), end="", flush=True)
             print(f"\r{msg_to_print}", flush=True)
-            print(f'\rError adding audio to video. Actual error: {e}', flush=True)
-            print(f"FFMPEG Video (sorry, no audio) stitching \033[33mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
-    else:
-        print("\r" + " " * len(msg_to_print), end="", flush=True)
-        print(f"\r{msg_to_print}", flush=True)
-        print(f"\rVideo stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
+            print(f"\rFFmpeg subtitle embedding \033[0;32mdone\033[0m in {time.time() - srt_add_start_time:.2f} seconds!", flush=True)
+        except Exception as e:
+            # print("\r" + " " * len(msg_to_print), end="", flush=True)
+            # print(f"\r{msg_to_print}", flush=True)
+            print(f'\rError adding subtitle to video: {e}', flush=True)
+            # print(f"FFMPEG Video (sorry, no audio) stitching \033[33mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
+
+    print("\r" + " " * len(msg_to_print), end="", flush=True)
+    print(f"\r{msg_to_print}", flush=True)
+    print(f"\rVideo stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
 
 def get_frame_name(path):
     name = os.path.basename(path)

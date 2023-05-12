@@ -71,14 +71,14 @@ def write_frame_subtitle(filename, frame_number, frame_duration, text):
         f.write(f"{time_to_srt_format(frame_start_time)} --> {time_to_srt_format(frame_end_time)}\n")
         f.write(f"{text}\n\n")
 
-def format_animation_params(keys, frame_idx):
+def format_animation_params(keys, prompt_series, frame_idx):
     params_to_print = opts.data.get("deforum_save_gen_info_as_srt_params", ['Seed'])
     params_string = ""
     for key, value in param_dict.items():
         if value['user'] in params_to_print:
             backend_key = value['backend']
             print_key = value['print']
-            param_value = keys.__dict__[backend_key][frame_idx]
+            param_value = getattr(keys, backend_key)[frame_idx]
             if isinstance(param_value, float) and param_value == int(param_value):
                 formatted_value = str(int(param_value))
             elif isinstance(param_value, float) and not param_value.is_integer():
@@ -87,8 +87,13 @@ def format_animation_params(keys, frame_idx):
                 formatted_value = f"{param_value}"
             params_string += f"{print_key}: {formatted_value}; "
 
+    if "Prompt" in params_to_print:
+        params_string += f"Prompt: {prompt_series[frame_idx]}; "        
+
     params_string = params_string.rstrip("; ")  # Remove trailing semicolon and whitespace
     return params_string
     
 def get_user_values():
-    return [v["user"] for v in param_dict.values()]
+    items = [v["user"] for v in param_dict.values()]
+    items.append("Prompt")
+    return items
