@@ -305,16 +305,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 if advance_next:
                     turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
 
-                # do optical flow cadence after animation warping
-                if cadence_flow is not None:
-                    cadence_flow = abs_flow_to_rel_flow(cadence_flow, args.W, args.H)
-                    cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
-                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow, args.W, args.H) * tween
-                    if advance_prev:
-                        turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc, cadence_flow_factor)
-                    if advance_next:
-                        turbo_next_image = image_transform_optical_flow(turbo_next_image, cadence_flow_inc, cadence_flow_factor)
-
                 # hybrid video motion - warps turbo_prev_image or turbo_next_image to match motion
                 if tween_frame_idx > 0:
                     if anim_args.hybrid_motion in ['Affine', 'Perspective']:
@@ -345,6 +335,16 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                             if advance_next:
                                 turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, hybrid_comp_schedules['flow_factor'])
                             prev_flow = flow
+
+                # do optical flow cadence after animation warping
+                if cadence_flow is not None:
+                    cadence_flow = abs_flow_to_rel_flow(cadence_flow, args.W, args.H)
+                    cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow, args.W, args.H) * tween
+                    if advance_prev:
+                        turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc, cadence_flow_factor)
+                    if advance_next:
+                        turbo_next_image = image_transform_optical_flow(turbo_next_image, cadence_flow_inc, cadence_flow_factor)
 
                 turbo_prev_frame_idx = turbo_next_frame_idx = tween_frame_idx
 
