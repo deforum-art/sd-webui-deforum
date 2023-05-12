@@ -63,6 +63,7 @@ def init_srt_file(filename, fps, precision=20):
     return frame_duration
 
 def write_frame_subtitle(filename, frame_number, frame_duration, text):
+    print(f"Writing subtitle: {text}")
     frame_start_time = Decimal(frame_number) * frame_duration
     frame_end_time = (Decimal(frame_number) + Decimal(1)) * frame_duration
 

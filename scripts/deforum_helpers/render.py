@@ -266,7 +266,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         
         if turbo_steps == 1 and opts.data.get("deforum_save_gen_info_as_srt"):
             params_string = format_animation_params(keys, prompt_series, frame_idx)
-            write_frame_subtitle(srt_filename, frame_idx, srt_frame_duration, f"F#: {frame_idx}; Seed: {args.seed}; {params_string}")
+            write_frame_subtitle(srt_filename, frame_idx, srt_frame_duration, f"F#: {frame_idx}; Cadence: false; Seed: {args.seed}; {params_string}")
             params_string = None
             
         # emit in-between frames
@@ -291,7 +291,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
                 if opts.data.get("deforum_save_gen_info_as_srt"):
                     params_string = format_animation_params(keys, prompt_series, tween_frame_idx)
-                    write_frame_subtitle(srt_filename, tween_frame_idx, srt_frame_duration, f"F#: {tween_frame_idx}; Seed: {args.seed}; {params_string}")
+                    write_frame_subtitle(srt_filename, tween_frame_idx, srt_frame_duration, f"F#: {tween_frame_idx}; Cadence: {tween < 1.0}; Seed: {args.seed}; {params_string}")
                     params_string = None
 
                 print(f"Creating in-between {'' if cadence_flow is None else anim_args.optical_flow_cadence + ' optical flow '}cadence frame: {tween_frame_idx}; tween:{tween:0.2f};")
