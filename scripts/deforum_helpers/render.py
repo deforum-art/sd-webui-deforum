@@ -558,7 +558,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         if frame_idx == 0 and (anim_args.color_coherence == 'Image' or (anim_args.color_coherence == 'Video Input' and hybrid_available)):
             image = maintain_colors(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR), color_match_sample, anim_args.color_coherence)
             image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        elif color_match_sample is not None and anim_args.color_coherence != 'None':
+        elif color_match_sample is not None and anim_args.color_coherence != 'None' and not anim_args.legacy_colormatch:
             image = maintain_colors(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR), color_match_sample, anim_args.color_coherence)
             image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
@@ -572,7 +572,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             image = do_overlay_mask(args, anim_args, image, frame_idx)
 
         # on strength 0, set color match to generation
-        if not args.use_init and not anim_args.color_coherence in ['Image', 'Video Input']:
+        if ((not anim_args.legacy_colormatch and not args.use_init) or (anim_args.legacy_colormatch and strength == 0)) and not anim_args.color_coherence in ['Image', 'Video Input']:
             color_match_sample = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
 
         opencv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
