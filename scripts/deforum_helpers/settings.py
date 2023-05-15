@@ -40,7 +40,7 @@ def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_
         if "animation_prompts_negative" in jdata:
             args_dict_main['animation_prompts_negative'] = jdata["animation_prompts_negative"] # Update the args_dict_main
         keys_to_exclude = get_keys_to_exclude()
-        for dicts in [args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, video_args_dict]:
+        for dicts in [args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict]:
             for k, v in dicts.items():
                 # Check if the key is not in the keys_to_exclude list before processing
                 if k not in keys_to_exclude:
