@@ -47,6 +47,11 @@ for i in range(1, 6): # 5 CN models in total
     deprecation_map[f"cn_{i}_guidance_end"] = dynamic_num_to_schedule_formatter
 
 def handle_deprecated_settings(settings_json):
+    # Set legacy_colormatch mode to True when importing old files, so results are backwards-compatible. Print a message about it too
+    if 'legacy_colormatch' not in settings_json:
+        settings_json['legacy_colormatch'] = True
+        print('\033[33mlegacy_colormatch is missing from settings file, so we are setting it to *True* for backwards compatability. You are welcome to test your file with that setting being disabled for better color coherency.\033[0m')
+        print("")
     for setting_name, deprecation_info in deprecation_map.items():
         if setting_name in settings_json:
             if deprecation_info is None:
