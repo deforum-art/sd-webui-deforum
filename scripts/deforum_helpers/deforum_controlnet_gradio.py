@@ -33,12 +33,15 @@ class ToolButton(gr.Button, gr.components.FormComponent):
         def get_block_name(self):
             return "button"
 
-model_free_preprocessors = ["reference_only"]
+model_free_preprocessors = [
+    "reference_only",
+    "reference_adain",
+    "reference_adain+attn"
+]
 flag_preprocessor_resolution = "Preprocessor Resolution"
 preprocessor_sliders_config = {
     "none": [],
     "inpaint": [],
-    "reference_only": [],
     "canny": [
         {
             "name": flag_preprocessor_resolution,
@@ -235,6 +238,36 @@ preprocessor_sliders_config = {
             "step": 0.01
         }
     ],
+    "reference_only": [
+        None,
+        {
+            "name": r'Style Fidelity (only for "Balanced" mode)',
+            "value": 0.5,
+            "min": 0.0,
+            "max": 1.0,
+            "step": 0.01
+        }
+    ],
+    "reference_adain": [
+        None,
+        {
+            "name": r'Style Fidelity (only for "Balanced" mode)',
+            "value": 0.5,
+            "min": 0.0,
+            "max": 1.0,
+            "step": 0.01
+        }
+    ],
+    "reference_adain+attn": [
+        None,
+        {
+            "name": r'Style Fidelity (only for "Balanced" mode)',
+            "value": 0.5,
+            "min": 0.0,
+            "max": 1.0,
+            "step": 0.01
+        }
+    ],
     "color": [
         {
             "name": flag_preprocessor_resolution,
@@ -267,8 +300,6 @@ preprocessor_sliders_config = {
     ],
 }
 def build_sliders(module, pp):
-    
-
     grs = []
     if module not in preprocessor_sliders_config:
         grs += [
