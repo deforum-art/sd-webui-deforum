@@ -152,7 +152,7 @@ def get_quick_vid_info(vid_path):
     return video_fps, video_frame_count, (video_width, video_height)
     
 # Stitch images to a h264 mp4 video using ffmpeg
-def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow'):
+def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch_from_frame=0, stitch_to_frame=None, imgs_path=None, add_soundtrack=None, audio_path=None, crf=17, preset='veryslow', srt_path=None):
     start_time = time.time()
 
     print(f"Got a request to stitch frames to video using FFmpeg.\nFrames:\n{imgs_path}\nTo Video:\n{outmp4_path}")
@@ -192,10 +192,11 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         raise Exception(f'Error stitching frames to video. Actual runtime error:{e}')
     
     add_soundtrack_status = None
+    add_soundtrack_success = None
     if add_soundtrack != 'None':
-        audio_path = clean_gradio_path_strings(audio_path)
-        audio_add_start_time = time.time()
         try:
+            audio_path = clean_gradio_path_strings(audio_path)
+            audio_add_start_time = time.time()            
             cmd = [
                 ffmpeg_location,
                 '-i',
@@ -214,20 +215,21 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
                 raise RuntimeError(stderr)
             os.replace(outmp4_path+'.temp.mp4', outmp4_path)
             add_soundtrack_status = f"\rFFmpeg audio embedding \033[0;32mdone\033[0m in {time.time() - audio_add_start_time:.2f} seconds!"
+            add_soundtrack_success = True
         except Exception as e:
             add_soundtrack_status = f"\rError adding audio to video: {e}"
+            add_soundtrack_success = False
             
-    
-    add_srt = opts.data.get("deforum_save_gen_info_as_srt", False) and opts.data.get("deforum_embed_srt", False)
+    add_srt = opts.data.get("deforum_save_gen_info_as_srt", False) and opts.data.get("deforum_embed_srt", False) and srt_path is not None
     add_srt_status = None
+    add_srt_success = None
     if add_srt:
-        srt_filename = Path(outmp4_path).with_suffix('.srt')
-        srt_add_start_time = time.time()
         try:
+            srt_add_start_time = time.time()
             cmd = [
                 ffmpeg_location,
                 '-i', outmp4_path,
-                '-i', srt_filename,
+                '-i', srt_path,
                 '-c', 'copy',
                 '-c:s', 'mov_text',
                 outmp4_path+'.temp.mp4'
@@ -238,16 +240,23 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
                 raise RuntimeError(stderr)
             os.replace(outmp4_path+'.temp.mp4', outmp4_path)
             add_srt_status = f"\rFFmpeg subtitle embedding \033[0;32mdone\033[0m in {time.time() - srt_add_start_time:.2f} seconds!"
+            add_srt_success = True
         except Exception as e:
             add_srt_status = f"\rError adding subtitles to video: {e}"
+            add_srt_success = False
 
     print("\r" + " " * len(msg_to_print), end="", flush=True)
     print(f"\r{msg_to_print}", flush=True)
-    print(f"\rVideo stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!", flush=True)
+
+    status_summary = f"\rVideo stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!"
     if add_soundtrack_status:
         print(add_soundtrack_status, flush=True)
+        status_summary += " Audio embedded successfully." if add_soundtrack_success else " Sorry, no audio - see above for errors."
     if add_srt_status:
         print(add_srt_status, flush=True)
+        status_summary += " Subtitles embedded successfully." if add_srt_success else " Sorry, no subtitles - see above for errors."
+
+    print(status_summary, flush=True)
 
 def get_frame_name(path):
     name = os.path.basename(path)
