@@ -232,6 +232,7 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
                 '-i', srt_path,
                 '-c', 'copy',
                 '-c:s', 'mov_text',
+                '-metadata:s:s:0', 'title=Deforum Data',
                 outmp4_path+'.temp.mp4'
             ]
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
