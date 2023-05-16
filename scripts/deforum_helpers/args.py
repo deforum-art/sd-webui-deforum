@@ -102,6 +102,7 @@ def DeforumAnimArgs():
     color_coherence_image_path = ""
     color_coherence_video_every_N_frames = 1
     color_force_grayscale = False 
+    legacy_colormatch = False 
     diffusion_cadence = '2' #['1','2','3','4','5','6','7','8']
     optical_flow_cadence = 'None' #['None', 'RAFT','DIS Medium', 'DIS Fine', 'Farneback']
     cadence_flow_factor_schedule = "0: (1)"
@@ -543,6 +544,8 @@ def setup_deforum_setting_dictionary(self, is_img2img, is_extension = True):
                         with gr.Row(variant='compact'):
                             color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image'], value=da.color_coherence, type="value", elem_id="color_coherence", interactive=True, info="choose an algorithm/ method for keeping color coherence across the animation")
                             color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True, info="force all frames to be in grayscale")
+                        with gr.Row(variant='compact'):
+                            legacy_colormatch = gr.Checkbox(label="Legacy colormatch", value=da.legacy_colormatch, interactive=True)
                         with gr.Row(visible=False) as color_coherence_image_path_row:
                             color_coherence_image_path = gr.Textbox(label="Color coherence image path", lines=1, value=da.color_coherence_image_path, interactive=True)
                         with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
@@ -1054,7 +1057,7 @@ anim_args_names =   str(r'''animation_mode, max_frames, border,
                         enable_checkpoint_scheduling, checkpoint_schedule,
                         enable_clipskip_scheduling, clipskip_schedule, enable_noise_multiplier_scheduling, noise_multiplier_schedule,
                         kernel_schedule, sigma_schedule, amount_schedule, threshold_schedule,
-                        color_coherence, color_coherence_image_path, color_coherence_video_every_N_frames, color_force_grayscale,
+                        color_coherence, color_coherence_image_path, color_coherence_video_every_N_frames, color_force_grayscale, legacy_colormatch,
                         diffusion_cadence, optical_flow_cadence, cadence_flow_factor_schedule,
                         optical_flow_redo_generation, redo_flow_factor_schedule, diffusion_redo,
                         noise_type, perlin_w, perlin_h, perlin_octaves, perlin_persistence,
