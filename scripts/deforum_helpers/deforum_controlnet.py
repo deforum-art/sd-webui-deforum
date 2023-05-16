@@ -14,7 +14,7 @@ from rich.table import Table
 from rich import box
 from modules import scripts
 from modules.shared import opts
-from .deforum_controlnet_gradio import hide_ui_by_cn_status, hide_file_textboxes, ToolButton, build_sliders
+from .deforum_controlnet_gradio import hide_ui_by_cn_status, hide_file_textboxes, ToolButton
 from .general_utils import count_files_in_folder, clean_gradio_path_strings # TODO: do it another way
 from .video_audio_utilities import vid2frames, convert_image
 from .animation_key_frames import ControlNetKeys
@@ -54,7 +54,51 @@ def setup_controlnet_ui_raw():
     cnet = find_controlnet()
     cn_models = cnet.get_models()
     cn_preprocessors = cnet.get_modules()
+    
+    cn_modules = cnet.get_modules_detail()
+    preprocessor_sliders_config = {}
 
+    for config_name, config_values in cn_modules.items():
+        sliders = config_values.get('sliders', [])
+        preprocessor_sliders_config[config_name] = sliders
+
+    model_free_preprocessors = ["reference_only", "reference_adain", "reference_adain+attn"]
+    flag_preprocessor_resolution = "Preprocessor Resolution"
+    
+    def build_sliders(module, pp):
+        grs = []
+        if module not in preprocessor_sliders_config:
+            grs += [
+                gr.update(label=flag_preprocessor_resolution, value=512, minimum=64, maximum=2048, step=1, visible=not pp, interactive=not pp),
+                gr.update(visible=False, interactive=False),
+                gr.update(visible=False, interactive=False),
+                gr.update(visible=True)
+            ]
+        else:
+            for slider_config in preprocessor_sliders_config[module]:
+                if isinstance(slider_config, dict):
+                    visible = True
+                    if slider_config['name'] == flag_preprocessor_resolution:
+                        visible = not pp
+                    grs.append(gr.update(
+                        label=slider_config['name'],
+                        value=slider_config['value'],
+                        minimum=slider_config['min'],
+                        maximum=slider_config['max'],
+                        step=slider_config['step'] if 'step' in slider_config else 1,
+                        visible=visible,
+                        interactive=visible))
+                else:
+                    grs.append(gr.update(visible=False, interactive=False))
+            while len(grs) < 3:
+                grs.append(gr.update(visible=False, interactive=False))
+            grs.append(gr.update(visible=True))
+        if module in model_free_preprocessors:
+            grs += [gr.update(visible=False, value='None'), gr.update(visible=False)]
+        else:
+            grs += [gr.update(visible=True), gr.update(visible=True)]
+        return grs
+        
     refresh_symbol = '\U0001f504'  # 🔄
     switch_values_symbol = '\U000021C5' # ⇅
     model_dropdowns = []
