@@ -81,7 +81,7 @@ def on_ui_tabs():
         component_list = [components[name] for name in get_component_names()]
 
         submit.click(
-                    fn=wrap_gradio_gpu_call(run_deforum, extra_outputs=[None, '', '']),
+                    fn=wrap_gradio_gpu_call(run_deforum),
                     _js="submit_deforum",
                     inputs=[dummy_component, dummy_component] + component_list,
                     outputs=[

@@ -46,14 +46,14 @@ def run_deforum(*args, **kwargs):
             print("*END OF TRACEBACK*\n")
             print("User friendly error message:")
             print(f"Error: {e}. Check your prompts with a JSON validator please.")
-            return None, None, None, None, f"Error: '{e}'. Check your prompts with a JSON validator please. Full error message is in your terminal/ cli.", ''
+            return None, None, None, f"Error: '{e}'. Check your prompts with a JSON validator please. Full error message is in your terminal/ cli."
         if args_loaded_ok is False:
             if times_to_run > 1:
                 print(f"\033[31mWARNING:\033[0m skipped running from the following setting file, as it contains an invalid JSON: {os.path.basename(args_dict['custom_settings_file'][i].name)}")
                 continue
             else:
                 print(f"\033[31mERROR!\033[0m Couldn't load data from '{os.path.basename(args_dict['custom_settings_file'][i].name)}'. Make sure it's a valid JSON using a JSON validator")
-                return None, None, None, None, f"Couldn't load data from '{os.path.basename(args_dict['custom_settings_file'][i].name)}'. Make sure it's a valid JSON using a JSON validator", ''
+                return None, None, None, f"Couldn't load data from '{os.path.basename(args_dict['custom_settings_file'][i].name)}'. Make sure it's a valid JSON using a JSON validator"
 
         root.initial_clipskip = shared.opts.data.get("CLIP_stop_at_last_layers", 1)
         root.initial_img2img_fix_steps = shared.opts.data.get("img2img_fix_steps", False)
@@ -90,7 +90,7 @@ def run_deforum(*args, **kwargs):
             print("*END OF TRACEBACK*\n")
             print("User friendly error message:")
             print(f"Error: {e}. Check your schedules/ init values please. Also make sure you don't have a backwards slash in any of your PATHs - use / instead of \\.")
-            return None, None, None, None, f"Error: '{e}'. Check your schedules/ init values please. Also make sure you don't have a backwards slash in any of your PATHs - use / instead of \\. Full error message is in your terminal/ cli.", ''
+            return None, None, None, f"Error: '{e}'. Check your schedules/ init values please. Also make sure you don't have a backwards slash in any of your PATHs - use / instead of \\. Full error message is in your terminal/ cli."
         finally:
             shared.total_tqdm = tqdm_backup
             # reset shared.opts.data vals to what they were before we started the animation. Else they will stick to the last value - it actually updates webui settings (config.json)
@@ -186,4 +186,4 @@ def run_deforum(*args, **kwargs):
             persistent_sett_path = shared.opts.data.get("deforum_persistent_settings_path")
             deforum_settings.save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
 
-    return processed.images, args.timestring, generation_info_js, processed.info, ''
+    return processed.images, args.timestring, generation_info_js, processed.info
