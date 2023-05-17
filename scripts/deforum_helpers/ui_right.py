@@ -6,15 +6,11 @@ from webui import wrap_gradio_gpu_call
 from .run_deforum import run_deforum
 from .settings import save_settings, load_all_settings, load_video_settings
 from .ui_left import setup_deforum_left_side_ui
+from scripts.deforum_extend_paths import deforum_sys_extend
 import gradio as gr
 
 def on_ui_tabs():
-    deforum_folder_name = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-3])
-    basedirs = [os.getcwd()]
-    if 'google.colab' in sys.modules:
-        basedirs.append('/content/gdrive/MyDrive/sd/stable-diffusion-webui') #for TheLastBen's colab
-    for basedir in basedirs:
-        sys.path.extend([os.path.join(deforum_folder_name, 'scripts', 'deforum_helpers', 'src')])
+    deforum_sys_extend()
 
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
         components = {}
