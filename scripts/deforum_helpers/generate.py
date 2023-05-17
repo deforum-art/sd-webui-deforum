@@ -1,25 +1,18 @@
-import numpy as np
 import cv2
 from PIL import Image
+import math, json, itertools
+import requests
+import numexpr
+from .deforum_controlnet import is_controlnet_enabled, process_with_controlnet
 from .prompt import split_weighted_subprompts
 from .load_images import load_img, prepare_mask, check_mask_for_errors
 from .webui_sd_pipeline import get_webui_sd_pipeline
-from .animation import sample_from_cv2, sample_to_cv2
 from .rich import console
-#Webui
-import cv2
 from .animation import sample_from_cv2, sample_to_cv2
+from .prompt import check_is_number
 from modules import processing, sd_models
 from modules.shared import opts, sd_model, state, cmd_opts
 from modules.processing import process_images, StableDiffusionProcessingTxt2Img
-from .deforum_controlnet import is_controlnet_enabled, process_with_controlnet
-import math, json, itertools
-import requests
-
-import numexpr
-from .prompt import check_is_number
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def load_mask_latent(mask_input, shape):
     # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
@@ -99,8 +92,6 @@ def generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, 
     return image, False
 
 def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
-    assert args.prompt is not None
-
     # Setup the pipeline
     p = get_webui_sd_pipeline(args, root, frame)
     p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame, anim_args.max_frames)
@@ -149,7 +140,6 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
             
     else: # they passed in a single init image
         image_init0 = args.init_image
-
 
     available_samplers = { 
         'euler a':'Euler a',
