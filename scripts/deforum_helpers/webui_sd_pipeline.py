@@ -3,15 +3,11 @@ from modules.shared import opts, sd_model
 import os
 
 def get_webui_sd_pipeline(args, root, frame):
-    import re
-    assert args.prompt is not None
-    
     # Setup the pipeline
     p = StableDiffusionProcessingImg2Img(
         sd_model=sd_model,
         outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
-        #we'll setup the rest later
-    )
+    )    #we'll setup the rest later
     
     os.makedirs(args.outdir, exist_ok=True)
     p.width, p.height = map(lambda x: x - x % 8, (args.W, args.H))
