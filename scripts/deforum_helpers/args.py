@@ -166,8 +166,6 @@ def DeforumArgs():
     seed = -1 #
     sampler = 'euler_ancestral' # ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
     steps = 25 #
-    #**Save & Display Settings**
-    save_sample_per_step = False
     #**Batch Settings**
     batch_name = "Deforum_{timestring}" 
     seed_behavior = "iter" # ["iter","fixed","random","ladder","alternate","schedule"]

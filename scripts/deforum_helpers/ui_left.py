@@ -523,7 +523,6 @@ def setup_deforum_left_side_ui(is_img2img, d, da, dp, dv, dr, dloopArgs):
                         perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True)
                         perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True)
                         seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False)
-                        save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
     show_info_on_ui.change(fn=change_css, inputs=show_info_on_ui, outputs = gr.outputs.HTML())
     fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
