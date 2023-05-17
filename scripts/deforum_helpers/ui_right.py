@@ -34,9 +34,9 @@ def on_ui_tabs():
                             btn: gr.update(value="Update the video", visible=True),
                         }
                     btn.click(
-                        show_vid,
-                        [],
-                        [i1, close_btn, btn],
+                        fn=show_vid,
+                        inputs=[],
+                        outputs=[i1, close_btn, btn],
                         )
                     def close_vid(): # Close video button related func
                         return {
@@ -46,9 +46,9 @@ def on_ui_tabs():
                         }
                     
                     close_btn.click(
-                        close_vid,
-                        [],
-                        [i1, close_btn, btn],
+                        fn=close_vid,
+                        inputs=[],
+                        outputs=[i1, close_btn, btn],
                         )
                 id_part = 'deforum'
                 with gr.Row(elem_id=f"{id_part}_generate_box", variant='compact'):
