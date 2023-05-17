@@ -9,7 +9,6 @@ from deforum_helpers.upscaling import make_upscale_v2
 import gradio as gr
 import sys, os, shutil
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
-from PIL import Image
 from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, get_ffmpeg_params
 import gc
 import torch
@@ -139,13 +138,11 @@ def run_deforum(*args, **kwargs):
                 else:
                     print(f"** FFMPEG DID NOT STITCH ANY VIDEO ** Error: {e}")
                 pass
-                
+       
         if root.initial_info is None:
-            root.initial_info = "An error has occured and nothing has been generated!"
-            root.initial_info += "\nPlease, report the bug to https://github.com/deforum-art/deforum-for-automatic1111-webui/issues"
-            a = np.random.rand(args.W, args.H, 3)*255
-            root.first_frame = Image.fromarray(a.astype('uint8')).convert('RGB')
-            root.initial_seed = 6934
+             initial_info_err_msg = "Critical error in the final stage of animation handling (after ffmpeg). Please open an issue in https://github.com/deforum-art/sd-webui-deforum/issues" 
+             print(initial_info_err_msg)
+             return None, None, None, initial_info_err_msg
         # FRAME INTERPOLATION TIME
         if need_to_frame_interpolate: 
             print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
