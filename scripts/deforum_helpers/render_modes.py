@@ -1,7 +1,6 @@
 import os
 import time
 import pathlib
-import json
 from .render import render_animation
 from .seed import next_seed
 from .video_audio_utilities import vid2frames
