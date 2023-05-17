@@ -9,7 +9,6 @@ from .video_audio_utilities import direct_stitch_vid_from_frames
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount
 
 def setup_deforum_left_side_ui(is_img2img, d, da, dp, dv, dr, dloopArgs):
-    btn = i1 = gr.HTML("")
     # MAIN (TOP) EXTENSION INFO ACCORD
     with gr.Accordion("Info, Links and Help", open=False, elem_id='main_top_info_accord'):
             gr.HTML(value=get_gradio_html('main'))
