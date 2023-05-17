@@ -34,5 +34,4 @@ def get_webui_sd_pipeline(args, root, frame):
     p.image_cfg_scale = args.pix2pix_img_cfg_scale
     p.outpath_samples = root.outpath_samples
     
-
     return p
