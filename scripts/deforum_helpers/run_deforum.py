@@ -8,7 +8,7 @@ from deforum_helpers.general_utils import get_deforum_version
 from deforum_helpers.upscaling import make_upscale_v2
 import gradio as gr
 import sys, os, shutil
-from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
+from modules.processing import Processed, StableDiffusionProcessingImg2Img
 from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, get_ffmpeg_params
 import gc
 import torch
@@ -161,10 +161,7 @@ def run_deforum(*args, **kwargs):
             
         root.initial_info += "\n The animation is stored in " + args.outdir
         reset_frames_cache(root) # cleanup the RAM in any case
-        processed = Processed(p, [root.first_frame], root.initial_seed, root.initial_info)
-        
-        if processed is None:
-            processed = process_images(p)
+        processed = Processed(p, None, None, root.initial_info)
 
         shared.total_tqdm.clear()
 
