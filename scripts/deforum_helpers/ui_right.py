@@ -27,21 +27,18 @@ def on_ui_tabs():
                 with gr.Row(variant='compact'):
                     i1 = gr.HTML(i1_store, elem_id='deforum_header')
                     components['i1'] = i1
-                    # Show video
-                    def show_vid():
+                    def show_vid(): # Show video button related func
                         return {
                             i1: gr.update(value=i1_store, visible=True),
                             close_btn: gr.update(visible=True),
                             btn: gr.update(value="Update the video", visible=True),
                         }
-                
                     btn.click(
                         show_vid,
                         [],
                         [i1, close_btn, btn],
                         )
-                    # Close video
-                    def close_vid():
+                    def close_vid(): # Close video button related func
                         return {
                             i1: gr.update(value=i1_store_backup, visible=True),
                             close_btn: gr.update(visible=False),
@@ -75,7 +72,6 @@ def on_ui_tabs():
 
                 with gr.Row(variant='compact'):
                     settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="Settings File", info="settings file path can be relative to webui folder OR full - absolute")
-                    #reuse_latest_settings_btn = gr.Button('Reuse Latest', elem_id='deforum_reuse_latest_settings_btn')#TODO
                 with gr.Row(variant='compact'):
                     save_settings_btn = gr.Button('Save Settings', elem_id='deforum_save_settings_btn')
                     load_settings_btn = gr.Button('Load All Settings', elem_id='deforum_load_settings_btn')
@@ -98,39 +94,36 @@ def on_ui_tabs():
         
         settings_component_list = [components[name] for name in get_settings_component_names()]
         video_settings_component_list = [components[name] for name in video_args_names]
-        stuff = gr.HTML("") # wrap gradio call garbage
-        stuff.visible = False
 
         save_settings_btn.click(
             fn=wrap_gradio_call(save_settings),
             inputs=[settings_path] + settings_component_list + video_settings_component_list,
-            outputs=[stuff],
+            outputs=[],
         )
         
         load_settings_btn.click(
-        fn=wrap_gradio_call(lambda *args, **kwargs: load_all_settings(*args, ui_launch=False, **kwargs)),
-        inputs=[settings_path] + settings_component_list,
-        outputs=settings_component_list + [stuff],
+            fn=wrap_gradio_call(lambda *args, **kwargs: load_all_settings(*args, ui_launch=False, **kwargs)),
+            inputs=[settings_path] + settings_component_list,
+            outputs=settings_component_list,
         )
 
         load_video_settings_btn.click(
             fn=wrap_gradio_call(load_video_settings),
             inputs=[settings_path] + video_settings_component_list,
-            outputs=video_settings_component_list + [stuff],
+            outputs=video_settings_component_list,
         )
         
+    # handle persistent settings - load the persistent file upon UI launch
     def trigger_load_general_settings():
         print("Loading general settings...")
         wrapped_fn = wrap_gradio_call(lambda *args, **kwargs: load_all_settings(*args, ui_launch=True, **kwargs))
         inputs = [settings_path.value] + [component.value for component in settings_component_list]
-        outputs = settings_component_list + [stuff]
+        outputs = settings_component_list
         updated_values = wrapped_fn(*inputs, *outputs)[0]
-
         settings_component_name_to_obj = {name: component for name, component in zip(get_settings_component_names(), settings_component_list)}
         for key, value in updated_values.items():
             settings_component_name_to_obj[key].value = value['value']
-
-            
+    # actually check persistent setting status
     if opts.data.get("deforum_enable_persistent_settings", False):
         trigger_load_general_settings()
         
