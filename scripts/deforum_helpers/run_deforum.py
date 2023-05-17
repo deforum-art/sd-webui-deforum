@@ -1,5 +1,10 @@
 import sys, os, shutil
 import traceback
+import gc
+import torch
+import gradio as gr
+import modules.shared as shared
+from modules.processing import Processed, StableDiffusionProcessingImg2Img
 import deforum_helpers.args as deforum_args
 from deforum_helpers.deforum_tqdm import DeforumTQDM
 from deforum_helpers.settings import save_settings_from_animation_run
@@ -7,13 +12,7 @@ from deforum_helpers.save_images import dump_frames_cache, reset_frames_cache
 from deforum_helpers.frame_interpolation import process_video_interpolation
 from deforum_helpers.general_utils import get_deforum_version
 from deforum_helpers.upscaling import make_upscale_v2
-import gradio as gr
-import sys, os, shutil
-from modules.processing import Processed, StableDiffusionProcessingImg2Img
 from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, get_ffmpeg_params
-import gc
-import torch
-import modules.shared as shared
 
 def run_deforum(*args, **kwargs):
     f_location, f_crf, f_preset = get_ffmpeg_params() # get params for ffmpeg exec
