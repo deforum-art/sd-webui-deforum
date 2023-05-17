@@ -1,18 +1,13 @@
 import numpy as np
 import cv2
+import py3d_tools as p3d # this is actually a file in our /src folder!
 from functools import reduce
 import math
-# import py3d_tools as p3d
 import torch
 from einops import rearrange
+from modules.shared import state, opts
 from .prompt import check_is_number
 from .general_utils import debug_print
-import py3d_tools as p3d
-
-# Webui
-from modules.shared import state, opts
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def sample_from_cv2(sample: np.ndarray) -> torch.Tensor:
     sample = ((sample.astype(float) / 255.0) * 2) - 1

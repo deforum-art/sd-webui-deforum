@@ -18,8 +18,6 @@ import time
 import subprocess
 from modules.shared import opts
 
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-
 def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location, resize_mode, upscaling_resize, upscaling_resize_w, upscaling_resize_h, extras_upscaler_1, extras_upscaler_2, extras_upscaler_2_visibility, f_crf, f_preset, keep_imgs, orig_vid_name):        
     parent_folder = os.path.dirname(img_folder_path)
     grandparent_folder = os.path.dirname(parent_folder)

@@ -4,8 +4,6 @@ from pathlib import Path
 from multiprocessing import freeze_support
 from modules.shared import opts
 
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-
 def extract_frames(input_video_path, output_imgs_path):
     # Open the video file
     vidcap = cv2.VideoCapture(input_video_path)
@@ -22,7 +20,6 @@ def extract_frames(input_video_path, output_imgs_path):
         if success:
             cv2.imwrite(os.path.join(output_imgs_path, f"frame{i}.png"), image)
     print(f"{frame_count} frames extracted and saved to {output_imgs_path}")
-    
     
 def video2humanmasks(input_frames_path, output_folder_path, output_type, fps):
     # freeze support is needed for video outputting
