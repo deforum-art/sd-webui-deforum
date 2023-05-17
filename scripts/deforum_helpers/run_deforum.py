@@ -26,15 +26,15 @@ def run_deforum(*args, **kwargs):
     args_dict = {component_names[i]: args[i+2] for i in range(0, len(component_names))}
     p = StableDiffusionProcessingImg2Img(
         sd_model=shared.sd_model,
-        outpath_samples = shared.opts.outdir_samples or shared.opts.outdir_img2img_samples,
-        outpath_grids = shared.opts.outdir_grids or shared.opts.outdir_img2img_grids
+        outpath_samples = shared.opts.outdir_samples or shared.opts.outdir_img2img_samples
     ) #we'll setup the rest later
 
     times_to_run = 1
+    # find how how many times in total we need to run according to file count uploaded to Batch Mode uplaod box
     if args_dict['custom_settings_file'] is not None and len(args_dict['custom_settings_file']) > 1:
         times_to_run = len(args_dict['custom_settings_file'])
         
-    for i in range(times_to_run):
+    for i in range(times_to_run): # run for as many times as we need
         print(f"\033[4;33mDeforum extension for auto1111 webui, v2.4b\033[0m")
         print(f"Git commit: {get_deforum_version()}")
         args_dict['self'] = None
