@@ -324,19 +324,6 @@ def process_args(args_dict_main, run_id):
     loop_args = SimpleNamespace(**loop_args_dict)
     controlnet_args = SimpleNamespace(**controlnet_args_dict)
 
-    p.width, p.height = map(lambda x: x - x % 8, (args.W, args.H))
-    p.steps = args.steps
-    p.seed = args.seed
-    p.sampler_name = args.sampler
-    p.batch_size = 1
-    p.tiling = args.tiling
-    p.restore_faces = args.restore_faces
-    p.seed_enable_extras = args.seed_enable_extras
-    p.subseed = args.subseed
-    p.subseed_strength = args.subseed_strength
-    p.seed_resize_from_w = args.seed_resize_from_w
-    p.seed_resize_from_h = args.seed_resize_from_h
-    p.fill = args.fill
     if args.seed == -1:
         root.raw_seed = -1
     args.seed = get_fixed_seed(args.seed)
