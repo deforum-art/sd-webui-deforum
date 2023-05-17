@@ -261,8 +261,8 @@ def get_settings_component_names():
     return [name for name in get_component_names()] #if name not in video_args_names]
     
 def setup_deforum_setting_ui(is_img2img):
-    from .ui_left import setup_deforum_setting_dictionary
-    ds = setup_deforum_setting_dictionary(is_img2img,d,da,dp,dv,dr,dloopArgs)
+    from .ui_left import setup_deforum_left_side_ui
+    ds = setup_deforum_left_side_ui(is_img2img,d,da,dp,dv,dr,dloopArgs)
     return [ds[name] for name in (['btn'] + get_component_names())]
     
 def pack_args(args_dict):
