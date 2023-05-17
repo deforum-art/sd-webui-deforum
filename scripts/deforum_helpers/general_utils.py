@@ -24,8 +24,7 @@ def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_na
     import cv2
     #TODO: don't copy-paste at all if the input is a video (now it copy-pastes, and if input is deforum run is also converts to make sure no errors rise cuz of 24-32 bit depth differences)
     temp_convert_raw_png_path = os.path.join(from_folder, to_folder)
-    if not os.path.exists(temp_convert_raw_png_path):
-                os.makedirs(temp_convert_raw_png_path)
+    os.makedirs(temp_convert_raw_png_path, exist_ok=True)
                 
     frames_handled = 0
     for f in os.listdir(from_folder):
@@ -44,8 +43,7 @@ def convert_images_from_list(paths, output_dir, format):
     import os
     from PIL import Image
     # Ensure that the output directory exists
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
 
     # Loop over all input images
     for i, path in enumerate(paths):

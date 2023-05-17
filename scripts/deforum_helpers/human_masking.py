@@ -14,8 +14,7 @@ def extract_frames(input_video_path, output_imgs_path):
     frame_count = int(vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
     
     # Create the output directory if it does not exist
-    if not os.path.exists(output_imgs_path):
-        os.makedirs(output_imgs_path)
+    os.makedirs(output_imgs_path, exist_ok=True)
         
     # Extract the frames
     for i in range(frame_count):

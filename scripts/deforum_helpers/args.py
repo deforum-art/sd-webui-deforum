@@ -224,7 +224,6 @@ def DeforumOutputArgs():
     r_upscale_factor = 'x2' # ['2x', 'x3', 'x4']
     r_upscale_model = 'realesr-animevideov3' # 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest do only 4x: 'realesrgan-x4plus', 'realesrgan-x4plus-anime'
     r_upscale_keep_imgs = True
-    
     store_frames_in_ram = False
     #**Interpolate Video Settings**
     frame_interpolation_engine = "None" # ["None", "RIFE v4.6", "FILM"]
@@ -232,6 +231,7 @@ def DeforumOutputArgs():
     frame_interpolation_slow_mo_enabled = False
     frame_interpolation_slow_mo_amount = 2 #[2 to 10]
     frame_interpolation_keep_imgs = False
+    
     return locals()
 
 i1_store_backup = f"<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.4b | Git commit: {get_deforum_version()}</p>"
