@@ -1,6 +1,3 @@
-
-
-
 def DeforumAnimPrompts():
     return r"""{
     "0": "tiny cute swamp bunny, highly detailed, intricate, ultra hd, sharp photo, crepuscular rays, in focus, by tomasz alen kopera",
