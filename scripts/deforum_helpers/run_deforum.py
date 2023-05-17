@@ -131,8 +131,6 @@ def run_deforum(*args, **kwargs):
         if video_args.skip_video_creation:
             print("\nSkipping video creation, uncheck 'Skip video creation' in 'Output' tab if you want to get a video too :)")
         else:
-            import subprocess # DO WE USE IT?
-
             image_path = os.path.join(args.outdir, f"{args.timestring}_%09d.png")
             mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
             max_video_frames = anim_args.max_frames
