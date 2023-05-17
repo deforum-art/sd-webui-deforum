@@ -1,12 +1,12 @@
 import os
 import json
+from modules.shared import opts
+import modules.shared as sh
 import deforum_helpers.args as deforum_args
 from .args import DeforumArgs, DeforumAnimArgs
 from .defaults import mask_fill_choices
 from .deprecation_utils import handle_deprecated_settings
 from .general_utils import get_deforum_version, clean_gradio_path_strings
-from modules.shared import opts
-import modules.shared as sh
 
 def get_keys_to_exclude():
     return ["seed_enable_extras", "subseed", "subseed_strength", "init_sample",
