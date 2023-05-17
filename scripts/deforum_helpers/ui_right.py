@@ -1,5 +1,5 @@
 import os, sys
-from .args import d, da, dp, dv, dr, dloopArgs, i1_store, i1_store_backup, get_component_names, get_settings_component_names, video_args_names
+from .args import i1_store, i1_store_backup, get_component_names, get_settings_component_names, video_args_names
 from modules.shared import opts, state
 from modules.ui import create_output_panel, wrap_gradio_call
 from webui import wrap_gradio_gpu_call
@@ -18,8 +18,7 @@ def on_ui_tabs():
         with gr.Row(elem_id='deforum_progress_row').style(equal_height=False, variant='compact'):
             with gr.Column(scale=1, variant='panel'):
                 # setting the left side of the ui:
-                components = setup_deforum_left_side_ui(True, d, da,dp,dv,dr,dloopArgs)
-        
+                components = setup_deforum_left_side_ui()
             with gr.Column(scale=1, variant='compact'):
                 with gr.Row(variant='compact'):
                     btn = gr.Button("Click here after the generation to show the video")
