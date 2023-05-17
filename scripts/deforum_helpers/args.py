@@ -22,7 +22,6 @@ def RootArgs():
     frames_cache = []
     raw_batch_name = None
     raw_seed = None
-    initial_seed = None
     initial_info = None
     first_frame = None
     outpath_samples = ""
