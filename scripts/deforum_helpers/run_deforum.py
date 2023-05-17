@@ -1,7 +1,8 @@
 import sys, os, shutil
 import traceback
 import deforum_helpers.args as deforum_args
-import deforum_helpers.settings as deforum_settings
+from deforum_helpers.deforum_tqdm import DeforumTQDM
+from deforum_helpers.settings import save_settings_from_animation_run
 from deforum_helpers.save_images import dump_frames_cache, reset_frames_cache
 from deforum_helpers.frame_interpolation import process_video_interpolation
 from deforum_helpers.general_utils import get_deforum_version
@@ -66,7 +67,7 @@ def run_deforum(*args, **kwargs):
         from deforum_helpers.render_modes import render_input_video, render_animation_with_video_mask, render_interpolation
 
         tqdm_backup = shared.total_tqdm
-        shared.total_tqdm = deforum_settings.DeforumTQDM(args, anim_args, parseq_args, video_args)
+        shared.total_tqdm = DeforumTQDM(args, anim_args, parseq_args, video_args)
         try: # dispatch to appropriate renderer
             if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
                 if anim_args.use_mask_video: 
