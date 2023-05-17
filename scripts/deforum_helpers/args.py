@@ -167,7 +167,6 @@ def DeforumArgs():
     sampler = 'euler_ancestral' # ["klms","dpm2","dpm2_ancestral","heun","euler","euler_ancestral","plms", "ddim"]
     steps = 25 #
     #**Save & Display Settings**
-    save_settings = True 
     save_sample_per_step = False
     #**Batch Settings**
     n_batch = 1 #

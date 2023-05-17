@@ -17,9 +17,6 @@ deforum_titles = {
     "Resize seed from width": "Normally, changing the resolution will completely change an image, even when using the same seed. If you generated an image with a particular seed and then changed the resolution, put the original resolution here to get an image that more closely resemles the original",
     "Resize seed from height": "Normally, changing the resolution will completely change an image, even when using the same seed. If you generated an image with a particular seed and then changed the resolution, put the original resolution here to get an image that more closely resemles the original",
     "Steps": "How many times to improve the generated image iteratively; higher values take longer; very low values can produce bad results",
-    //"ddim_eta": "";
-    //"n_batch": "",
-    //"save_settings": "",
     "Batch name": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports placeholders like {seed}, {w}, {h}, {prompts} and more",
 	"Pix2Pix img CFG schedule": "*Only in use with pix2pix checkpoints!*",
     "Filename format": "specify the format of the filename for output images",
