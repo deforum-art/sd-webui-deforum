@@ -1,6 +1,7 @@
 import os
 import time
 import pathlib
+import re, numexpr
 from .render import render_animation
 from .seed import next_seed
 from .video_audio_utilities import vid2frames
@@ -10,13 +11,8 @@ from .animation_key_frames import DeformAnimKeys
 from .parseq_adapter import ParseqAnimKeys
 from .save_images import save_image
 from .settings import save_settings_from_animation_run
-
 # Webui
 from modules.shared import opts, cmd_opts, state
-
-import re, numexpr
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
     # create a folder for the video input frames to live in
