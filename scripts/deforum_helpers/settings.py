@@ -2,14 +2,12 @@ from math import ceil
 import os
 import json
 import deforum_helpers.args as deforum_args
-from .args import mask_fill_choices, DeforumArgs, DeforumAnimArgs
+from .args import DeforumArgs, DeforumAnimArgs
+from .defaults import mask_fill_choices
 from .deprecation_utils import handle_deprecated_settings
 from .general_utils import get_deforum_version, clean_gradio_path_strings
 from modules.shared import opts
 import modules.shared as sh
-import logging
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def get_keys_to_exclude():
     return ["n_batch", "seed_enable_extras", "scale", "subseed", "subseed_strength", "init_sample",
@@ -128,7 +126,7 @@ def load_all_settings(*args, ui_launch=False, **kwargs):
             val = mask_fill_choices[val]
         elif key in {'reroll_blank_frames', 'noise_type'} and key not in jdata:
             default_key_val = (DeforumArgs if key != 'noise_type' else DeforumAnimArgs)[key]
-            logging.debug(f"{key} not found in load file, using default value: {default_key_val}")
+            print(f"{key} not found in load file, using default value: {default_key_val}")
             val = default_key_val
         elif key in {'animation_prompts_positive', 'animation_prompts_negative'}:
             val = jdata.get(key, default_val)

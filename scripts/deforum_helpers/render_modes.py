@@ -131,7 +131,6 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
             print("** RESUMING **")
         
         # grab inputs for current frame generation
-        args.n_samples = 1
         args.prompt = prompt_to_print
         args.scale = keys.cfg_scale_schedule_series[frame_idx]
         args.pix2pix_img_cfg_scale = keys.pix2pix_img_cfg_scale_series[frame_idx]

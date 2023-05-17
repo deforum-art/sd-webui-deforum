@@ -12,13 +12,10 @@ from modules import devices
 import shutil
 from queue import Queue, Empty
 import modules.scripts as scr
-from .depth import DepthModel
 from .frame_interpolation import clean_folder_name
 from rife.inference_video import duplicate_pngs_from_folder
 from .video_audio_utilities import get_quick_vid_info, vid2frames, ffmpeg_stitch_video
 from modules.shared import opts
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def process_depth_vid_upload_logic(file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, vid_file_name, keep_imgs, f_location, f_crf, f_preset, f_models_path):
     print("got a request to *vid2depth* an existing video.")
@@ -179,6 +176,7 @@ def stitch_video(img_batch_id, fps, img_folder_path, audio_path, ffmpeg_location
 
 # Midas/Adabins Depth mode with the usual workflow
 def load_depth_model(models_path, midas_weight_vid2depth):
+    from .depth import DepthModel
     device = ('cpu' if cmd_opts.lowvram or cmd_opts.medvram else sh_device)
     keep_in_vram = False # TODO: Future  - handle this too?
     print('Loading Depth Model')

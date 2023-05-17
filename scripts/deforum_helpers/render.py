@@ -152,7 +152,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         # advance start_frame to next frame
         start_frame = next_frame + 1
 
-    args.n_samples = 1
     frame_idx = start_frame
 
     # reset the mask vals as they are overwritten in the compose_mask algorithm

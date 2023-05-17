@@ -1,6 +1,52 @@
 import gradio as gr
-from .video_audio_utilities import extract_number, get_quick_vid_info
+import modules.paths as ph
+from .general_utils import get_os
+from .upscaling import process_ncnn_upscale_vid_upload_logic
+from .video_audio_utilities import extract_number, get_quick_vid_info, get_ffmpeg_params
+from .frame_interpolation import process_interp_vid_upload_logic, process_interp_pics_upload_logic
+from .vid2depth import process_depth_vid_upload_logic
+f_models_path = ph.models_path + '/Deforum'
 
+# START gradio-to-frame-interoplation/ upscaling functions
+def upload_vid_to_interpolate(file, engine, x_am, sl_enabled, sl_am, keep_imgs, in_vid_fps):
+    # print msg and do nothing if vid not uploaded or interp_x not provided
+    if not file or engine == 'None':
+        return print("Please upload a video and set a proper value for 'Interp X'. Can't interpolate x0 times :)")
+    f_location, f_crf, f_preset = get_ffmpeg_params()
+
+    process_interp_vid_upload_logic(file, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, in_vid_fps, f_models_path, file.orig_name)
+
+def upload_pics_to_interpolate(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, fps, add_audio, audio_track):
+    from PIL import Image
+    
+    if pic_list is None or len(pic_list) < 2:
+        return print("Please upload at least 2 pics for interpolation.")
+    f_location, f_crf, f_preset = get_ffmpeg_params()
+    # make sure all uploaded pics have the same resolution
+    pic_sizes = [Image.open(picture_path.name).size for picture_path in pic_list]
+    if len(set(pic_sizes)) != 1:
+        return print("All uploaded pics need to be of the same Width and Height / resolution.")
+        
+    resolution = pic_sizes[0]
+    
+    process_interp_pics_upload_logic(pic_list, engine, x_am, sl_enabled, sl_am, keep_imgs, f_location, f_crf, f_preset, fps, f_models_path, resolution, add_audio, audio_track)
+
+def ncnn_upload_vid_to_upscale(vid_path, in_vid_fps, in_vid_res, out_vid_res, upscale_model, upscale_factor, keep_imgs):
+    if vid_path is None:
+        print("Please upload a video :)")
+        return
+    f_location, f_crf, f_preset = get_ffmpeg_params()
+    current_user = get_os()
+    process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, f_models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, current_user)
+    
+def upload_vid_to_depth(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs):
+    # print msg and do nothing if vid not uploaded
+    if not vid_to_depth_chosen_file:
+        return print("Please upload a video :()")
+    f_location, f_crf, f_preset = get_ffmpeg_params()
+    
+    process_depth_vid_upload_logic(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, vid_to_depth_chosen_file.orig_name, depth_keep_imgs, f_location, f_crf, f_preset, f_models_path)
+# END gradio-to-frame-interoplation/ upscaling functions    
 def auto_hide_n_batch(choice):
     return gr.update(visible=True) if choice == -1 else gr.update(value=1, visible=False)
     

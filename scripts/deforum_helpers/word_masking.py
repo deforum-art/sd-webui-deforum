@@ -2,7 +2,6 @@ import os
 import torch
 from PIL import Image
 from torchvision import transforms
-from clipseg.models.clipseg import CLIPDensePredT
 from modules.shared import opts
 from torch.nn.functional import interpolate
 import cv2
@@ -13,9 +12,10 @@ preclipseg_transform = transforms.Compose([
       transforms.Resize((512, 512)), #TODO: check if the size is hardcoded
 ])
 
-def find_clipseg(root):
+def find_clipseg():
+    basedirs = [os.getcwd()]
     src_basedirs = []
-    for basedir in root.basedirs:
+    for basedir in basedirs:
         src_basedirs.append(os.path.join(os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-2]), 'deforum_helpers', 'src'))
 
     for basedir in src_basedirs:
@@ -25,9 +25,10 @@ def find_clipseg(root):
     raise Exception('CLIPseg weights not found!')
 
 def setup_clipseg(root):
+    from clipseg.models.clipseg import CLIPDensePredT
     model = CLIPDensePredT(version='ViT-B/16', reduce_dim=64)
     model.eval()
-    model.load_state_dict(torch.load(find_clipseg(root), map_location=root.device), strict=False)
+    model.load_state_dict(torch.load(find_clipseg(), map_location=root.device), strict=False)
 
     model.to(root.device)
     root.clipseg_model = model
