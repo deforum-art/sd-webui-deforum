@@ -56,8 +56,6 @@ def run_deforum(*args, **kwargs):
                 print(f"\033[31mERROR!\033[0m Couldn't load data from '{os.path.basename(args_dict['custom_settings_file'][i].name)}'. Make sure it's a valid JSON using a JSON validator")
                 return None, None, None, None, f"Couldn't load data from '{os.path.basename(args_dict['custom_settings_file'][i].name)}'. Make sure it's a valid JSON using a JSON validator", plaintext_to_html('')
 
-        root.clipseg_model = None
-        
         root.initial_clipskip = shared.opts.data.get("CLIP_stop_at_last_layers", 1)
         root.initial_img2img_fix_steps = shared.opts.data.get("img2img_fix_steps", False)
         root.initial_noise_multiplier = shared.opts.data.get("initial_noise_multiplier", 1.0)
@@ -102,8 +100,6 @@ def run_deforum(*args, **kwargs):
             shared.opts.data["initial_noise_multiplier"] = root.initial_noise_multiplier
             shared.opts.data["eta_ddim"] = root.initial_ddim_eta
             shared.opts.data["eta_ancestral"] = root.initial_ancestral_eta
-            
-            
         
         if video_args.store_frames_in_ram:
             dump_frames_cache(root)
