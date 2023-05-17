@@ -172,9 +172,6 @@ def run_deforum(*args, **kwargs):
         if getattr(shared.opts, 'samples_log_stdout', False):
             print(generation_info_js)
 
-        if shared.opts.do_not_show_images:
-            processed.images = []
-            
         if shared.opts.data.get("deforum_enable_persistent_settings", False):
             persistent_sett_path = shared.opts.data.get("deforum_persistent_settings_path")
             deforum_settings.save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
