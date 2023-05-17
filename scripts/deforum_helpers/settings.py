@@ -166,9 +166,6 @@ def load_video_settings(*args, **kwargs):
         else:
             ret.append(data[key])
     
-    #stuff
-    ret.append("")
-    
     return ret
 
 import tqdm
