@@ -1,9 +1,5 @@
 import sys, os, shutil
 import traceback
-deforum_folder_name = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-3])
-
-basedirs = [os.getcwd()]
-
 import deforum_helpers.args as deforum_args
 import deforum_helpers.settings as deforum_settings
 from deforum_helpers.save_images import dump_frames_cache, reset_frames_cache
@@ -14,7 +10,7 @@ import gradio as gr
 import sys, os, shutil
 from modules.processing import Processed, StableDiffusionProcessingImg2Img, process_images
 from PIL import Image
-from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, find_ffmpeg_binary, get_ffmpeg_params
+from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, get_ffmpeg_params
 import gc
 import torch
 import modules.shared as shared
