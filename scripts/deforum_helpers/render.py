@@ -35,7 +35,6 @@ from modules import lowvram, devices, sd_hijack
 from .RAFT import RAFT
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
     if opts.data.get("deforum_save_gen_info_as_srt", False): # create .srt file and set timeframe mechanism using FPS
         srt_filename = os.path.join(args.outdir, f"{args.timestring}.srt")
