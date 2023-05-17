@@ -169,7 +169,6 @@ def DeforumArgs():
     #**Save & Display Settings**
     save_sample_per_step = False
     #**Batch Settings**
-    n_batch = 1 #
     batch_name = "Deforum_{timestring}" 
     seed_behavior = "iter" # ["iter","fixed","random","ladder","alternate","schedule"]
     seed_iter_N = 1
@@ -331,7 +330,7 @@ def process_args(args_dict_main, run_id):
     p.steps = args.steps
     p.seed = args.seed
     p.sampler_name = args.sampler
-    p.batch_size = args.n_batch
+    p.batch_size = 1
     p.tiling = args.tiling
     p.restore_faces = args.restore_faces
     p.seed_enable_extras = args.seed_enable_extras

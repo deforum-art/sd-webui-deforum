@@ -10,9 +10,9 @@ from modules.shared import opts
 import modules.shared as sh
 
 def get_keys_to_exclude():
-    return ["n_batch", "seed_enable_extras", "scale", "subseed", "subseed_strength", "init_sample",
+    return ["seed_enable_extras", "scale", "subseed", "subseed_strength", "init_sample",
         "noise_mask", "seed_internal", "perlin_w", "perlin_h", "image_path", "outdir"]
-    ''' n_batch = used to control how many times we run with one click of the generate button, logic in args and deforum .py files
+    '''
         scale is used to set p.scale with our scale schedule
         perlin params are used just not shown in ui for now, so not to be deleted
         image_path and outdir are in use, not to be deleted

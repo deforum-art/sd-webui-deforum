@@ -18,7 +18,6 @@ def get_webui_sd_pipeline(args, root, frame):
     p.steps = args.steps
     p.seed = args.seed
     p.sampler_name = args.sampler
-    p.batch_size = args.n_batch
     p.tiling = args.tiling
     p.restore_faces = args.restore_faces
     p.subseed = args.subseed

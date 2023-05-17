@@ -47,9 +47,7 @@ def upload_vid_to_depth(vid_to_depth_chosen_file, mode, thresholding, threshold_
     
     process_depth_vid_upload_logic(vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, vid_to_depth_chosen_file.orig_name, depth_keep_imgs, f_location, f_crf, f_preset, f_models_path)
 # END gradio-to-frame-interoplation/ upscaling functions    
-def auto_hide_n_batch(choice):
-    return gr.update(visible=True) if choice == -1 else gr.update(value=1, visible=False)
-    
+
 def change_visibility_from_skip_video(choice):
     return gr.update(visible=False) if choice else gr.update(visible=True) 
 

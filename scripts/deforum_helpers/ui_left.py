@@ -27,7 +27,6 @@ def setup_deforum_left_side_ui(is_img2img, d, da, dp, dv, dr, dloopArgs):
                     H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True) 
                 with gr.Row(variant='compact'):
                     seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0, info="Starting seed for the animation. -1 for random")
-                    n_batch = gr.Slider(label="# of vids", minimum=1, maximum=100, step=1, value=d.n_batch, interactive=True, info="if seed is set to random (-1), generate a few vids in one run", visible=False)
                     batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value = d.batch_name, info="output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}")
                 with gr.Row(variant='compact'):
                     restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
@@ -527,7 +526,6 @@ def setup_deforum_left_side_ui(is_img2img, d, da, dp, dv, dr, dloopArgs):
                         save_sample_per_step = gr.Checkbox(label="Save sample per step", value=d.save_sample_per_step, interactive=True)
     # Gradio's Change functions - hiding and renaming elements based on other elements
     show_info_on_ui.change(fn=change_css, inputs=show_info_on_ui, outputs = gr.outputs.HTML())
-    # seed.change(fn=auto_hide_n_batch, inputs=seed, outputs=n_batch)
     fps.change(fn=change_gif_button_visibility, inputs=fps, outputs=make_gif)
     r_upscale_model.change(fn=update_r_upscale_factor, inputs=r_upscale_model, outputs=r_upscale_factor)
     ncnn_upscale_model.change(fn=update_r_upscale_factor, inputs=ncnn_upscale_model, outputs=ncnn_upscale_factor)
