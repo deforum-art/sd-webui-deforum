@@ -250,7 +250,6 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
             #doing this after contrast and brightness adjustments to ensure that mask is not passed as black or blank
             mask = check_mask_for_errors(mask, args.invert_mask)
             args.noise_mask = mask
-            
         else:
             mask = None
 
@@ -268,12 +267,8 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
         processed = processing.process_images(p)
     
     if root.initial_info == None:
-        root.initial_seed = processed.seed
         root.initial_info = processed.info
         
-    if root.first_frame == None:
-        root.first_frame = processed.images[0]
-    
     results = processed.images[0]
     
     return results
