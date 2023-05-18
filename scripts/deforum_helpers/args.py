@@ -209,7 +209,6 @@ def DeforumOutputArgs():
     make_gif = False
     delete_imgs = False # True will delete all imgs after a successful mp4 creation
     image_path = "C:/SD/20230124234916_%09d.png" 
-    # mp4_path = "testvidmanualsettings.mp4" 
     add_soundtrack = 'None' # ["File","Init Video"]
     soundtrack_path = "https://deforum.github.io/a1/A1.mp3"
     # End-Run upscaling
