@@ -25,6 +25,15 @@ def RootArgs():
     current_user_os = get_os()
     tmp_deforum_run_duplicated_folder = os.path.join(tempfile.gettempdir(), 'tmp_run_deforum')
     return locals()
+    
+def CoreArgs(): # TODO: change or do something with this ugliness
+    subseed = -1
+    subseed_strength = 0
+    timestring = ""
+    init_sample = None
+    noise_mask = None
+    seed_internal = 0
+    return locals()
 
 def DeforumAnimArgs():
     animation_mode = '2D' # ['None', '2D', '3D', 'Video Input', 'Interpolation']
@@ -141,7 +150,6 @@ def DeforumAnimArgs():
     hybrid_comp_mask_equalize = "None" # ['None','Before','After','Both']
     hybrid_comp_mask_auto_contrast = False 
     hybrid_comp_save_extra_frames = False 
-
     return locals()
     
 def DeforumArgs():
@@ -185,7 +193,6 @@ def DeforumArgs():
     full_res_mask_padding = 4
     reroll_blank_frames = 'reroll' # reroll, interrupt, or ignore
     reroll_patience = 10
-
     return locals()
 
 def LoopArgs():
@@ -223,7 +230,6 @@ def DeforumOutputArgs():
     frame_interpolation_slow_mo_enabled = False
     frame_interpolation_slow_mo_amount = 2 #[2 to 10]
     frame_interpolation_keep_imgs = False
-    
     return locals()
 
 def get_component_names():
@@ -235,12 +241,7 @@ def get_settings_component_names():
     
 def pack_args(args_dict):
     args_dict = {name: args_dict[name] for name in DeforumArgs()}
-    args_dict['subseed'] = -1
-    args_dict['subseed_strength'] = 0
-    args_dict['timestring'] = ""
-    args_dict['init_sample'] = None
-    args_dict['noise_mask'] = None
-    args_dict['seed_internal'] = 0
+    args_dict.update({name: CoreArgs()[name] for name in CoreArgs()})
     return args_dict
     
 def pack_anim_args(args_dict):
