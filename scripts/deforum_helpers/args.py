@@ -231,27 +231,14 @@ def DeforumOutputArgs():
     
     return locals()
 
-d = SimpleNamespace(**DeforumArgs()) #default args
-da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
-dp = SimpleNamespace(**ParseqArgs()) #default parseq ars
-dv = SimpleNamespace(**DeforumOutputArgs()) #default video args
-dr = SimpleNamespace(**RootArgs()) # ROOT args
-dloopArgs = SimpleNamespace(**LoopArgs())
-
-anim_args_names = list(DeforumAnimArgs().keys())
-args_names = list(DeforumArgs().keys())
-video_args_names = list(DeforumOutputArgs().keys())
-parseq_args_names = list(ParseqArgs().keys())
-loop_args_names = list(LoopArgs().keys())
-
 def get_component_names():
-    return ['override_settings_with_file', 'custom_settings_file'] + anim_args_names +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + args_names + video_args_names + parseq_args_names + loop_args_names + controlnet_component_names()
+    return ['override_settings_with_file', 'custom_settings_file'] + list(DeforumAnimArgs().keys()) +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + list(DeforumArgs().keys()) + list(DeforumOutputArgs().keys()) + list(ParseqArgs().keys()) + list(LoopArgs().keys()) + controlnet_component_names()
 
 def get_settings_component_names():
-    return [name for name in get_component_names()] #if name not in video_args_names]
+    return [name for name in get_component_names()]
     
 def pack_args(args_dict):
-    args_dict = {name: args_dict[name] for name in args_names}
+    args_dict = {name: args_dict[name] for name in list(DeforumArgs().keys())}
     args_dict['subseed'] = -1
     args_dict['subseed_strength'] = 0
     args_dict['timestring'] = ""
@@ -261,16 +248,16 @@ def pack_args(args_dict):
     return args_dict
     
 def pack_anim_args(args_dict):
-    return {name: args_dict[name] for name in (anim_args_names)}
+    return {name: args_dict[name] for name in (list(DeforumAnimArgs().keys()))}
    
 def pack_video_args(args_dict):
-    return {name: args_dict[name] for name in video_args_names}
+    return {name: args_dict[name] for name in list(DeforumOutputArgs().keys())}
 
 def pack_parseq_args(args_dict):
-    return {name: args_dict[name] for name in parseq_args_names}
+    return {name: args_dict[name] for name in list(ParseqArgs().keys())}
     
 def pack_loop_args(args_dict):
-    return {name: args_dict[name] for name in loop_args_names}
+    return {name: args_dict[name] for name in list(LoopArgs().keys())}
 
 def pack_controlnet_args(args_dict):
     return {name: args_dict[name] for name in controlnet_component_names()}

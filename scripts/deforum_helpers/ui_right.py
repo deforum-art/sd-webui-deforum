@@ -1,4 +1,4 @@
-from .args import get_component_names, get_settings_component_names, video_args_names
+from .args import DeforumOutputArgs, get_component_names, get_settings_component_names
 from modules.shared import opts, state
 from modules.ui import create_output_panel, wrap_gradio_call
 from webui import wrap_gradio_gpu_call
@@ -97,7 +97,7 @@ def on_ui_tabs():
                 )
         
         settings_component_list = [components[name] for name in get_settings_component_names()]
-        video_settings_component_list = [components[name] for name in video_args_names]
+        video_settings_component_list = [components[name] for name in list(DeforumOutputArgs().keys())]
 
         save_settings_btn.click(
             fn=wrap_gradio_call(save_settings),

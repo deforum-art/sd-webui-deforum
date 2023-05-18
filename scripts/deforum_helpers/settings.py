@@ -2,8 +2,7 @@ import os
 import json
 from modules.shared import opts
 import modules.shared as sh
-import deforum_helpers.args as deforum_args
-from .args import DeforumArgs, DeforumAnimArgs
+from .args import DeforumArgs, DeforumAnimArgs, DeforumOutputArgs, get_settings_component_names
 from .defaults import mask_fill_choices
 from .deprecation_utils import handle_deprecated_settings
 from .general_utils import get_deforum_version, clean_gradio_path_strings
@@ -71,7 +70,7 @@ def save_settings(*args, **kwargs):
     from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args, pack_video_args
     settings_path = args[0].strip()
     settings_path = clean_gradio_path_strings(settings_path)
-    settings_component_names = deforum_args.get_settings_component_names()
+    settings_component_names = get_settings_component_names()
     data = {settings_component_names[i]: args[i+1] for i in range(0, len(settings_component_names))}
     args_dict = pack_args(data)
     anim_args_dict = pack_anim_args(data)
@@ -98,7 +97,7 @@ def load_all_settings(*args, ui_launch=False, **kwargs):
     import gradio as gr
     settings_path = args[0].strip()
     settings_path = clean_gradio_path_strings(settings_path)
-    settings_component_names = deforum_args.get_settings_component_names()
+    settings_component_names = get_settings_component_names()
     data = {settings_component_names[i]: args[i+1] for i in range(len(settings_component_names))}
     print(f"reading custom settings from {settings_path}")
 
@@ -142,12 +141,13 @@ def load_all_settings(*args, ui_launch=False, **kwargs):
 
 def load_video_settings(*args, **kwargs):
     video_settings_path = args[0].strip()
-    data = {deforum_args.video_args_names[i]: args[i+1] for i in range(0, len(deforum_args.video_args_names))}
+    vid_args_names = list(DeforumOutputArgs().keys())
+    data = {vid_args_names[i]: args[i+1] for i in range(0, len(vid_args_names))}
     print(f"reading custom video settings from {video_settings_path}")
     jdata = {}
     if not os.path.isfile(video_settings_path):
         print('The custom video settings file does not exist. The values will be unchanged.')
-        return [data[name] for name in deforum_args.video_args_names] + [""]
+        return [data[name] for name in vid_args_names] + [""]
     else:
         with open(video_settings_path, "r") as f:
             jdata = json.loads(f.read())
