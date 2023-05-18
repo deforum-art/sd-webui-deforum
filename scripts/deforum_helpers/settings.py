@@ -47,6 +47,7 @@ def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_
         print(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict)
         return True
 
+# save settings function that get calls when run_deforum is being called
 def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, full_out_file_path = None):
     if full_out_file_path:
         args.__dict__["seed"] = root.raw_seed
