@@ -1,14 +1,10 @@
 import requests
 import os
 from PIL import Image, ImageOps
-import cv2
 import numpy as np
 import socket
 import torchvision.transforms.functional as TF
-from modules.shared import opts
 from .general_utils import clean_gradio_path_strings
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def load_img(path : str, shape=None, use_alpha_as_mask=False):
     # use_alpha_as_mask: Read the alpha channel of the image as the mask image
@@ -95,15 +91,9 @@ def check_mask_for_errors(mask_input, invert_mask=False):
         return mask_input    
  
 def get_mask(args):
-    # return check_mask_for_errors(
-    #     prepare_mask(args.mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
-    # )
     return prepare_mask(args.mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
 
 def get_mask_from_file(mask_file, args):
-    # return check_mask_for_errors(
-    #     prepare_mask(mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
-    # )
     return prepare_mask(mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
 
 def blank_if_none(mask, w, h, mode):
