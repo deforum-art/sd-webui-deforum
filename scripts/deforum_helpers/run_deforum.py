@@ -161,7 +161,7 @@ def run_deforum(*args, **kwargs):
             
         root.initial_info += "\n The animation is stored in " + args.outdir
         reset_frames_cache(root) # cleanup the RAM in any case
-        processed = Processed(p, None, None, root.initial_info)
+        processed = Processed(p, [root.first_frame], 0, root.initial_info)
 
         shared.total_tqdm.clear()
 

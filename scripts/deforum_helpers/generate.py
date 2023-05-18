@@ -259,6 +259,9 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
     if root.initial_info == None:
         root.initial_info = processed.info
         
+    if root.first_frame == None:
+        root.first_frame = processed.images[0]
+        
     results = processed.images[0]
     
     return results
