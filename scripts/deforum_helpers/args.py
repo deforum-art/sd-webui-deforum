@@ -16,7 +16,6 @@ def RootArgs():
     models_path = ph.models_path + '/Deforum'
     half_precision = not cmd_opts.no_half
     mask_preset_names = ['everywhere','video_mask']
-    p = None
     frames_cache = []
     raw_batch_name = None
     raw_seed = None
@@ -24,8 +23,6 @@ def RootArgs():
     first_frame = None
     outpath_samples = ""
     animation_prompts = None
-    color_corrections = None 
-    initial_clipskip = None
     current_user_os = get_os()
     tmp_deforum_run_duplicated_folder = os.path.join(tempfile.gettempdir(), 'tmp_run_deforum')
     return locals()
@@ -274,8 +271,7 @@ def process_args(args_dict_main, run_id):
     controlnet_args_dict = pack_controlnet_args(args_dict_main)
     
     root = SimpleNamespace(**RootArgs())
-    root.p = args_dict_main['p']
-    p = root.p
+    p = args_dict_main['p']
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
     
     args_loaded_ok = True # can use this later to error cleanly upon wrong gen param in ui
