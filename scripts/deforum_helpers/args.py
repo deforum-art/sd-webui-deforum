@@ -21,7 +21,6 @@ def RootArgs():
     raw_seed = None
     initial_info = None
     first_frame = None
-    outpath_samples = ""
     animation_prompts = None
     current_user_os = get_os()
     tmp_deforum_run_duplicated_folder = os.path.join(tempfile.gettempdir(), 'tmp_run_deforum')
@@ -319,7 +318,6 @@ def process_args(args_dict_main, run_id):
     root.raw_batch_name = args.batch_name
     args.batch_name = substitute_placeholders(args.batch_name, current_arg_list, full_base_folder_path)
     args.outdir = os.path.join(p.outpath_samples, str(args.batch_name))
-    root.outpath_samples = args.outdir
     args.outdir = os.path.join(os.getcwd(), args.outdir)
     os.makedirs(args.outdir, exist_ok=True)
     
