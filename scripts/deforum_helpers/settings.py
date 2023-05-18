@@ -52,8 +52,8 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
         args.__dict__["seed"] = root.raw_seed
         args.__dict__["batch_name"] = root.raw_batch_name
     args.__dict__["prompts"] = root.animation_prompts
-    args.__dict__["positive_prompts"] = root.positive_prompts
-    args.__dict__["negative_prompts"] = root.negative_prompts
+    args.__dict__["positive_prompts"] = args.positive_prompts
+    args.__dict__["negative_prompts"] = args.negative_prompts
     exclude_keys = get_keys_to_exclude()
     settings_filename = full_out_file_path if full_out_file_path else os.path.join(args.outdir, f"{args.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:

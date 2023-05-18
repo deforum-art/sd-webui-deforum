@@ -285,8 +285,6 @@ def process_args(args_dict_main, run_id):
     for key in root.animation_prompts:
         animationPromptCurr = root.animation_prompts[key]
         root.animation_prompts[key] = f"{positive_prompts} {animationPromptCurr} {'' if '--neg' in animationPromptCurr else '--neg'} {negative_prompts}"
-    root.positive_prompts = positive_prompts
-    root.negative_prompts = negative_prompts
     
     os.makedirs(root.models_path, exist_ok=True)
 
