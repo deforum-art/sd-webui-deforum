@@ -235,7 +235,7 @@ def get_settings_component_names():
     return [name for name in get_component_names()]
     
 def pack_args(args_dict):
-    args_dict = {name: args_dict[name] for name in list(DeforumArgs().keys())}
+    args_dict = {name: args_dict[name] for name in DeforumArgs()}
     args_dict['subseed'] = -1
     args_dict['subseed_strength'] = 0
     args_dict['timestring'] = ""
@@ -245,16 +245,16 @@ def pack_args(args_dict):
     return args_dict
     
 def pack_anim_args(args_dict):
-    return {name: args_dict[name] for name in (list(DeforumAnimArgs().keys()))}
+    return {name: args_dict[name] for name in DeforumAnimArgs()}
    
 def pack_video_args(args_dict):
-    return {name: args_dict[name] for name in list(DeforumOutputArgs().keys())}
+    return {name: args_dict[name] for name in DeforumOutputArgs()}
 
 def pack_parseq_args(args_dict):
-    return {name: args_dict[name] for name in list(ParseqArgs().keys())}
+    return {name: args_dict[name] for name in ParseqArgs()}
     
 def pack_loop_args(args_dict):
-    return {name: args_dict[name] for name in list(LoopArgs().keys())}
+    return {name: args_dict[name] for name in LoopArgs()}
 
 def pack_controlnet_args(args_dict):
     return {name: args_dict[name] for name in controlnet_component_names()}
