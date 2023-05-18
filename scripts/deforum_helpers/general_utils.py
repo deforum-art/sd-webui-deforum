@@ -59,6 +59,7 @@ def get_deforum_version():
     try:
         for ext in mext.extensions:
             if ext.name in ["deforum", "deforum-for-automatic1111-webui", "sd-webui-deforum"] and ext.enabled:
+                ext.read_info_from_repo() # need this call to get exten info on ui-launch, not to be removed
                 return ext.version
         return "Unknown"
     except:

@@ -233,9 +233,6 @@ def DeforumOutputArgs():
     
     return locals()
 
-i1_store_backup = f"<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.4b | Git commit: {get_deforum_version()}</p>"
-i1_store = i1_store_backup
-
 d = SimpleNamespace(**DeforumArgs()) #default args
 da = SimpleNamespace(**DeforumAnimArgs()) #default anim args
 dp = SimpleNamespace(**ParseqArgs()) #default parseq ars

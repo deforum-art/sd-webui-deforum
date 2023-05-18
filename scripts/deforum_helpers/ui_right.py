@@ -1,15 +1,20 @@
-from .args import i1_store, i1_store_backup, get_component_names, get_settings_component_names, video_args_names
+from .args import get_component_names, get_settings_component_names, video_args_names
 from modules.shared import opts, state
 from modules.ui import create_output_panel, wrap_gradio_call
 from webui import wrap_gradio_gpu_call
 from .run_deforum import run_deforum
 from .settings import save_settings, load_all_settings, load_video_settings
+from .general_utils import get_deforum_version
 from .ui_left import setup_deforum_left_side_ui
 from scripts.deforum_extend_paths import deforum_sys_extend
 import gradio as gr
 
 def on_ui_tabs():
+    # extend paths using sys.path.extend so we can access all of our files and folders
     deforum_sys_extend()
+    # set text above generate button
+    i1_store_backup = f"<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.4b | Git commit: {get_deforum_version()}</p>"
+    i1_store = i1_store_backup
 
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
         components = {}
