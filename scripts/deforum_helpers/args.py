@@ -229,7 +229,8 @@ def DeforumOutputArgs():
     return locals()
 
 def get_component_names():
-    return ['override_settings_with_file', 'custom_settings_file'] + list(DeforumAnimArgs().keys()) +['animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative'] + list(DeforumArgs().keys()) + list(DeforumOutputArgs().keys()) + list(ParseqArgs().keys()) + list(LoopArgs().keys()) + controlnet_component_names()
+    return ['override_settings_with_file', 'custom_settings_file', *DeforumAnimArgs().keys(), 'animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative',
+            *DeforumArgs().keys(), *DeforumOutputArgs().keys(), *ParseqArgs().keys(), *LoopArgs().keys(), *controlnet_component_names()]
 
 def get_settings_component_names():
     return [name for name in get_component_names()]
