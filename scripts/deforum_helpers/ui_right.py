@@ -32,8 +32,9 @@ def on_ui_tabs():
                     i1 = gr.HTML(i1_store, elem_id='deforum_header')
                     components['i1'] = i1
                     def show_vid(): # Show video button related func
+                        from .run_deforum import last_vid_data # get latest vid preview data (this import needs to stay inside the function!)
                         return {
-                            i1: gr.update(value=i1_store, visible=True),
+                            i1: gr.update(value=last_vid_data, visible=True),
                             close_btn: gr.update(visible=True),
                             btn: gr.update(value="Update the video", visible=True),
                         }
