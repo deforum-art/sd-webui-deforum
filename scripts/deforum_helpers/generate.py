@@ -255,9 +255,6 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
             process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=True, frame_idx=frame)
     
         processed = processing.process_images(p)
-    
-    if root.initial_info == None:
-        root.initial_info = processed.info
         
     if root.first_frame == None:
         root.first_frame = processed.images[0]

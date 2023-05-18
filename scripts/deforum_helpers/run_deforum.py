@@ -142,11 +142,7 @@ def run_deforum(*args, **kwargs):
                 else:
                     print(f"** FFMPEG DID NOT STITCH ANY VIDEO ** Error: {e}")
                 pass
-       
-        if root.initial_info is None:
-             initial_info_err_msg = "Critical error in the final stage of animation handling (after ffmpeg). Please open an issue in https://github.com/deforum-art/sd-webui-deforum/issues" 
-             print(initial_info_err_msg)
-             return None, None, None, initial_info_err_msg
+
         # FRAME INTERPOLATION TIME
         if need_to_frame_interpolate: 
             print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
@@ -163,9 +159,10 @@ def run_deforum(*args, **kwargs):
         if video_args.delete_imgs and not video_args.skip_video_creation:
             handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=args.timestring)
             
-        root.initial_info += "\n The animation is stored in " + args.outdir
+        # root.initial_info += "\n The animation is stored in " + args.outdir
+        initial_msg_to_print = "\n The animation is stored in " + args.outdir
         reset_frames_cache(root) # cleanup the RAM in any case
-        processed = Processed(p, [root.first_frame], 0, root.initial_info)
+        processed = Processed(p, [root.first_frame], 0, initial_msg_to_print)
 
         shared.total_tqdm.clear()
 
