@@ -9,18 +9,13 @@ from .general_utils import clean_gradio_path_strings
 def load_img(path : str, shape=None, use_alpha_as_mask=False):
     # use_alpha_as_mask: Read the alpha channel of the image as the mask image
     image = load_image(path)
-    if use_alpha_as_mask:
-        image = image.convert('RGBA')
-    else:
-        image = image.convert('RGB')
-
-    if shape is not None:
-        image = image.resize(shape, resample=Image.LANCZOS)
+    image = image.convert('RGBA') if use_alpha_as_mask else image.convert('RGB')
+    image = image.resize(shape, resample=Image.LANCZOS) if shape is not None else image
 
     mask_image = None
     if use_alpha_as_mask:
         # Split alpha channel into a mask_image
-        red, green, blue, alpha = Image.Image.split(image)
+        red, green, blue, alpha = Image.Image.split(image) # not interested in R G or B, just in the alpha channel
         mask_image = alpha.convert('L')
         image = image.convert('RGB')
         
@@ -42,8 +37,7 @@ def load_image(image_path :str):
             s = socket.create_connection((host, 80), 2)
             s.close()
         except:
-            raise ConnectionError("There is no active internet connection available - please use local masks and init files only.")
-        
+            raise ConnectionError("There is no active internet connection available (couldn't connect to google.com as a network test) - please use *local* masks and init files only.")
         try:
             response = requests.get(image_path, stream=True)
         except requests.exceptions.RequestException as e:
