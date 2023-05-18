@@ -14,7 +14,7 @@ from .parseq_adapter import ParseqAnimKeys
 from .save_images import save_image
 from .settings import save_settings_from_animation_run
 
-def render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+def render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
     # create a folder for the video input frames to live in
     video_in_frame_path = os.path.join(args.outdir, 'inputframes') 
     os.makedirs(video_in_frame_path, exist_ok=True)
@@ -45,10 +45,10 @@ def render_input_video(args, anim_args, video_args, parseq_args, loop_args, cont
         args.use_mask = True
         args.overlay_mask = True
 
-    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
+    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)
 
 # Modified a copy of the above to allow using masking video with out a init video.
-def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
     # create a folder for the video input frames to live in
     mask_in_frame_path = os.path.join(args.outdir, 'maskframes') 
     os.makedirs(mask_in_frame_path, exist_ok=True)
@@ -64,7 +64,7 @@ def render_animation_with_video_mask(args, anim_args, video_args, parseq_args, l
     #args.use_init = True
     print(f"Loading {anim_args.max_frames} input frames from {mask_in_frame_path} and saving video frames to {args.outdir}")
 
-    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
+    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)
 
 def get_parsed_value(value, frame_idx, max_f):
     pattern = r'`.*?`'
@@ -77,7 +77,7 @@ def get_parsed_value(value, frame_idx, max_f):
         parsed_value = parsed_value.replace(matched_string, str(value))
     return parsed_value
 
-def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
@@ -98,7 +98,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         prompt_series = keys.prompts
     else: 
         print("Generating interpolated prompts for all frames")
-        prompt_series = interpolate_prompts(animation_prompts, anim_args.max_frames)
+        prompt_series = interpolate_prompts(root.animation_prompts, anim_args.max_frames)
     
     state.job_count = anim_args.max_frames
     frame_idx = 0

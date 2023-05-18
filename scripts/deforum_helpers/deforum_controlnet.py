@@ -304,7 +304,7 @@ def process_controlnet_input_frames(args, anim_args, controlnet_args, video_path
             print(f"Loading {anim_args.max_frames} input frames from {frame_path} and saving video frames to {args.outdir}")
             print(f'ControlNet {id} {"video mask" if mask_path else "base video"} unpacked!')
 
-def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+def unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
     # this func gets called from render.py once for an entire animation run -->
     # tries to trigger an extraction of CN input frames (regular + masks) from video or image
     for i in range(1, num_of_models+1):

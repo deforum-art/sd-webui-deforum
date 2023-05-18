@@ -73,13 +73,13 @@ def run_deforum(*args, **kwargs):
         try: # dispatch to appropriate renderer
             if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
                 if anim_args.use_mask_video: 
-                    render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root) # allow mask video without an input video
+                    render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root) # allow mask video without an input video
                 else:    
-                    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)
+                    render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)
             elif anim_args.animation_mode == 'Video Input':
-                render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)#TODO: prettify code
+                render_input_video(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)#TODO: prettify code
             elif anim_args.animation_mode == 'Interpolation':
-                render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root.animation_prompts, root)
+                render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)
             else:
                 print('Other modes are not available yet!')
         except Exception as e:

@@ -33,7 +33,7 @@ from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 from .RAFT import RAFT
 
-def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
 
     if opts.data.get("deforum_save_gen_info_as_srt", False): # create .srt file and set timeframe mechanism using FPS
         srt_filename = os.path.join(args.outdir, f"{args.timestring}.srt")
@@ -60,7 +60,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     # handle controlnet video input frames generation
     if is_controlnet_enabled(controlnet_args):
-        unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
+        unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
@@ -89,7 +89,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
-        for i, prompt in animation_prompts.items():
+        for i, prompt in root.animation_prompts.items():
             if str(i).isdigit():
                 prompt_series[int(i)] = prompt
             else:
