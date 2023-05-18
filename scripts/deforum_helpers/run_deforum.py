@@ -5,21 +5,21 @@ import torch
 import gradio as gr
 import modules.shared as shared
 from modules.processing import Processed, StableDiffusionProcessingImg2Img
-import deforum_helpers.args as deforum_args
-from deforum_helpers.deforum_tqdm import DeforumTQDM
-from deforum_helpers.settings import save_settings_from_animation_run
-from deforum_helpers.save_images import dump_frames_cache, reset_frames_cache
-from deforum_helpers.frame_interpolation import process_video_interpolation
-from deforum_helpers.general_utils import get_deforum_version
-from deforum_helpers.upscaling import make_upscale_v2
-from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, get_ffmpeg_params
+from .args import get_component_names, process_args
+from .deforum_tqdm import DeforumTQDM
+from .settings import save_settings_from_animation_run
+from .save_images import dump_frames_cache, reset_frames_cache
+from .frame_interpolation import process_video_interpolation
+from .general_utils import get_deforum_version
+from .upscaling import make_upscale_v2
+from .video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, get_ffmpeg_params
 
 # this global param will contain the latest generated video HTML-data-URL info (for preview inside the UI when needed)
 last_vid_data = None
 
 def run_deforum(*args, **kwargs):
     f_location, f_crf, f_preset = get_ffmpeg_params() # get params for ffmpeg exec
-    component_names = deforum_args.get_component_names()
+    component_names = get_component_names()
     args_dict = {component_names[i]: args[i+2] for i in range(0, len(component_names))}
     p = StableDiffusionProcessingImg2Img(
         sd_model=shared.sd_model,
@@ -37,7 +37,7 @@ def run_deforum(*args, **kwargs):
         args_dict['self'] = None
         args_dict['p'] = p
         try:
-            args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = deforum_args.process_args(args_dict, i)
+            args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = process_args(args_dict, i)
         except Exception as e:
             print("\n*START OF TRACEBACK*")
             traceback.print_exc()
