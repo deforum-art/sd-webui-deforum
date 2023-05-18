@@ -143,10 +143,6 @@ def run_deforum(*args, **kwargs):
                     print(f"** FFMPEG DID NOT STITCH ANY VIDEO ** Error: {e}")
                 pass
        
-        if root.initial_info is None:
-             initial_info_err_msg = "Critical error in the final stage of animation handling (after ffmpeg). Please open an issue in https://github.com/deforum-art/sd-webui-deforum/issues" 
-             print(initial_info_err_msg)
-             return None, None, None, initial_info_err_msg
         # FRAME INTERPOLATION TIME
         if need_to_frame_interpolate: 
             print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
