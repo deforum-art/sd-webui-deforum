@@ -1,4 +1,3 @@
-import os, sys
 from .args import i1_store, i1_store_backup, get_component_names, get_settings_component_names, video_args_names
 from modules.shared import opts, state
 from modules.ui import create_output_panel, wrap_gradio_call
