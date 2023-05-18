@@ -3,16 +3,14 @@ import time
 import json
 import tempfile
 from types import SimpleNamespace
-
 from modules.shared import cmd_opts
 from modules.processing import get_fixed_seed
 import modules.shared as sh
 import modules.paths as ph
-
 from .general_utils import get_os, get_deforum_version, substitute_placeholders
 from .deforum_controlnet import controlnet_component_names
 from .defaults import get_guided_imgs_default_json
-       
+
 def RootArgs():
     device = sh.device
     models_path = ph.models_path + '/Deforum'
