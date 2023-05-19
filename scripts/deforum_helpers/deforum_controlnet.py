@@ -202,7 +202,7 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
             # On very first frame, check if use init enabled, and if init image is provided
             if frame_idx == 0 and args.use_init and args.init_image is not None:
                 cn_image_np = load_image(args.init_image)
-                # convert to uint8 for compatability with CN
+                # convert to uint8 for compatibility with CN
                 cn_image_np = np.array(cn_image_np).astype('uint8')
             # Not first frame, use previous img (init_sample)
             elif frame_idx > 0 and args.init_sample:
