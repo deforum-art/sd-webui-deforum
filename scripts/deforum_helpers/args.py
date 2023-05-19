@@ -280,7 +280,7 @@ def process_args(args_dict_main, run_id):
 
     positive_prompts = args_dict_main['animation_prompts_positive']
     negative_prompts = args_dict_main['animation_prompts_negative']
-    negative_prompts = negative_prompts.replace('--neg', '')  # remove --neg from negative_prompts if recieved by mistake
+    negative_prompts = negative_prompts.replace('--neg', '')  # remove --neg from negative_prompts if received by mistake
     for key in root.animation_prompts:
         animationPromptCurr = root.animation_prompts[key]
         root.animation_prompts[key] = f"{positive_prompts} {animationPromptCurr} {'' if '--neg' in animationPromptCurr else '--neg'} {negative_prompts}"

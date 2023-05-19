@@ -1,8 +1,8 @@
 from types import SimpleNamespace
 from modules.ui_components import FormRow
 import modules.shared as sh
-from .defaults import *  ## TODO: change this to not *
-from .deforum_controlnet import setup_controlnet_ui, controlnet_component_names, controlnet_infotext
+from .defaults import *  # TODO: change this to not *
+from .deforum_controlnet import setup_controlnet_ui, controlnet_infotext
 from .gradio_funcs import *
 from .video_audio_utilities import direct_stitch_vid_from_frames
 from .frame_interpolation import set_interp_out_fps, gradio_f_interp_get_fps_and_fcount
@@ -474,7 +474,7 @@ def setup_deforum_left_side_ui():
                                 # Interp Slow-Mo (setting final output fps, not really doing anything direclty with RIFE/FILM)
                                 frame_interpolation_slow_mo_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo X", value=dv.frame_interpolation_x_amount, interactive=True)
                         with gr.Row(visible=False) as interp_existing_video_row:
-                            # Intrpolate any existing video from the connected PC
+                            # Interpolate any existing video from the connected PC
                             with gr.Accordion('Interpolate existing Video/ Images', open=False) as interp_existing_video_accord:
                                 with gr.Row(variant='compact') as interpolate_upload_files_row:
                                     # A drag-n-drop UI box to which the user uploads a *single* (at this stage) video
