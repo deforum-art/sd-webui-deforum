@@ -1,3 +1,4 @@
+import os
 from math import ceil
 import tqdm
 from modules.shared import progress_print_out, opts, cmd_opts
