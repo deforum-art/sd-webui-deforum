@@ -2,7 +2,7 @@ from modules.processing import StableDiffusionProcessingImg2Img
 from modules.shared import opts, sd_model
 import os
 
-def get_webui_sd_pipeline(args, root, frame):
+def get_webui_sd_pipeline(args, root):
     # Setup the pipeline
     p = StableDiffusionProcessingImg2Img(
         sd_model=sd_model,

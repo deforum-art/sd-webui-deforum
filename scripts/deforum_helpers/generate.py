@@ -93,7 +93,7 @@ def generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, 
 
 def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
     # Setup the pipeline
-    p = get_webui_sd_pipeline(args, root, frame)
+    p = get_webui_sd_pipeline(args, root)
     p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame, anim_args.max_frames)
     
     if not args.use_init and args.strength > 0 and args.strength_0_no_init:
