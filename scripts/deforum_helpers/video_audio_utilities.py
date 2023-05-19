@@ -13,9 +13,6 @@ from modules.shared import state, opts
 from .general_utils import checksum, duplicate_pngs_from_folder, clean_gradio_path_strings
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
-from pathlib import Path
-
-# DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def convert_image(input_path, output_path):
     # Read the input image

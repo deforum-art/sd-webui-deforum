@@ -2,7 +2,6 @@ import os
 import torch
 from PIL import Image
 from torchvision import transforms
-from modules.shared import opts
 from torch.nn.functional import interpolate
 import cv2
 
