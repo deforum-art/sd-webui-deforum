@@ -1,7 +1,6 @@
 import os
 import cv2
 import torch
-import gc
 import numpy as np
 from .general_utils import download_file_with_checksum
 from midas.dpt_depth import DPTDepthModel

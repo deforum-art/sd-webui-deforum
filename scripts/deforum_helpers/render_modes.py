@@ -3,7 +3,7 @@ import time
 import pathlib
 import re
 import numexpr
-from modules.shared import opts, cmd_opts, state
+from modules.shared import opts, state
 from .render import render_animation
 from .seed import next_seed
 from .video_audio_utilities import vid2frames

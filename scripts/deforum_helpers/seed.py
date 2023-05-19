@@ -1,6 +1,5 @@
 import random
-from modules.shared import opts
-   
+
 def next_seed(args):
     if args.seed_behavior == 'iter':
         args.seed += 1 if args.seed_internal % args.seed_iter_N == 0 else 0

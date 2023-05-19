@@ -1,5 +1,4 @@
 import torch
-from PIL import Image
 from zoedepth.models.builder import build_model
 from zoedepth.utils.config import get_config
 

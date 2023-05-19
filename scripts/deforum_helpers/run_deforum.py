@@ -1,13 +1,12 @@
-import sys, os, shutil
+import os
+import shutil
 import traceback
 import gc
 import torch
-import gradio as gr
 import modules.shared as shared
 from modules.processing import Processed, StableDiffusionProcessingImg2Img
 from .args import get_component_names, process_args
 from .deforum_tqdm import DeforumTQDM
-from .settings import save_settings_from_animation_run
 from .save_images import dump_frames_cache, reset_frames_cache
 from .frame_interpolation import process_video_interpolation
 from .general_utils import get_deforum_version
@@ -24,10 +23,10 @@ def run_deforum(*args, **kwargs):
     p = StableDiffusionProcessingImg2Img(
         sd_model=shared.sd_model,
         outpath_samples = shared.opts.outdir_samples or shared.opts.outdir_img2img_samples
-    ) #we'll setup the rest later
+    )  # we'll set up the rest later
 
     times_to_run = 1
-    # find how how many times in total we need to run according to file count uploaded to Batch Mode uplaod box
+    # find how many times in total we need to run according to file count uploaded to Batch Mode upload box
     if args_dict['custom_settings_file'] is not None and len(args_dict['custom_settings_file']) > 1:
         times_to_run = len(args_dict['custom_settings_file'])
         

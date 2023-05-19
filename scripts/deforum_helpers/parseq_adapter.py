@@ -6,10 +6,6 @@ from operator import itemgetter
 import numpy as np
 import pandas as pd
 import requests
-import traceback
-import sys
-
-from modules.shared import opts
 from .animation_key_frames import DeformAnimKeys
 from .rich import console
 

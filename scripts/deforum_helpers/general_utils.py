@@ -1,4 +1,5 @@
-import os, shutil
+import os
+import shutil
 import hashlib
 from modules.shared import opts
 from basicsr.utils.download_util import load_file_from_url

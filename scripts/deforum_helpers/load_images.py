@@ -1,7 +1,6 @@
 import requests
 import os
-from PIL import Image, ImageOps
-import numpy as np
+from PIL import Image
 import socket
 import torchvision.transforms.functional as TF
 from .general_utils import clean_gradio_path_strings

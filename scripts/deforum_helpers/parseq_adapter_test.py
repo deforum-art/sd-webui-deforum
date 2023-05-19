@@ -4,15 +4,11 @@
 
 import unittest
 from .parseq_adapter import ParseqAnimKeys 
-from .animation_key_frames import DeformAnimKeys 
+from .animation_key_frames import DeformAnimKeys
 from unittest.mock import patch
 from unittest.mock import MagicMock, PropertyMock
 
 from types import SimpleNamespace
-
-from modules.shared import opts
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 class TestParseqAnimKeys(unittest.TestCase):
 

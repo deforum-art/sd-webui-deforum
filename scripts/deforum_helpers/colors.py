@@ -1,7 +1,6 @@
 import cv2
 import pkg_resources
 from skimage.exposure import match_histograms
-from modules.shared import opts
 
 def maintain_colors(prev_img, color_match_sample, mode):
     skimage_version = pkg_resources.get_distribution('scikit-image').version

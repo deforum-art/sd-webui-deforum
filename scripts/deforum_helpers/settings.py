@@ -1,6 +1,5 @@
 import os
 import json
-from modules.shared import opts
 import modules.shared as sh
 from .args import DeforumArgs, DeforumAnimArgs, DeforumOutputArgs, get_settings_component_names
 from .defaults import mask_fill_choices

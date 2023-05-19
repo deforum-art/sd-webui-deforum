@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from modules.shared import opts
 
 def unsharp_mask(img, kernel_size=(5, 5), sigma=1.0, amount=1.0, threshold=0, mask=None):
     if amount == 0:
