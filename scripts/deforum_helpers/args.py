@@ -155,7 +155,7 @@ def DeforumAnimArgs():
 def DeforumArgs():
     # set default image size and make sure to resize to multiples of 64 if needed
     W, H = map(lambda x: x - x % 64, (512, 512))
-    # wether or not to show gradio's info section for all params in the ui. it's a realtime toggle
+    # whether to show gradio's info section for all params in the ui. it's a realtime toggle
     show_info_on_ui = True
     # **Webui stuff**
     tiling = False
