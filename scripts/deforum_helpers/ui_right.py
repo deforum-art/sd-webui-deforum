@@ -30,7 +30,7 @@ def on_ui_tabs():
     # extend paths using sys.path.extend so we can access all of our files and folders
     deforum_sys_extend()
     # set text above generate button
-    i1_store_backup = f"<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.4b | Git commit: {get_deforum_version()}</p>"
+    i1_store_backup = f"<p style=\"text-align:center;font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 3.0 | Git commit: {get_deforum_version()}</p>"
     i1_store = i1_store_backup
 
     with gr.Blocks(analytics_enabled=False) as deforum_interface:
