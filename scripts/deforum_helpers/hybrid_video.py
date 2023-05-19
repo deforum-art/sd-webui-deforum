@@ -115,7 +115,7 @@ def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_c
         hybrid_mask = ImageOps.invert(hybrid_mask)
 
     # if a mask type is selected, make composition
-    if hybrid_mask == None:
+    if hybrid_mask is None:
         hybrid_comp = video_image
     else:
         # ensure grayscale
