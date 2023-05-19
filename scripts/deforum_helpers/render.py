@@ -60,7 +60,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     # handle controlnet video input frames generation
     if is_controlnet_enabled(controlnet_args):
-        unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)
+        unpack_controlnet_vids(args, anim_args, controlnet_args)
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
