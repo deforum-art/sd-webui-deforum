@@ -1,3 +1,20 @@
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
 import os
 import pandas as pd
 import cv2
@@ -20,8 +37,7 @@ from .seed import next_seed
 from .image_sharpening import unsharp_mask
 from .load_images import get_mask, load_img, load_image, get_mask_from_file
 from .hybrid_video import (
-    hybrid_generation, hybrid_composite, get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion,get_flow_for_hybrid_motion_prev,
-    image_transform_ransac, image_transform_optical_flow, get_flow_from_images, abs_flow_to_rel_flow, rel_flow_to_abs_flow)
+    hybrid_generation, hybrid_composite, get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion,get_flow_for_hybrid_motion_prev, image_transform_ransac, image_transform_optical_flow, get_flow_from_images, abs_flow_to_rel_flow, rel_flow_to_abs_flow)
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import save_settings_from_animation_run
@@ -34,10 +50,9 @@ from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 from .RAFT import RAFT
 
-def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root):
-    DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
 
-    if opts.data.get("deforum_save_gen_info_as_srt"): # create .srt file and set timeframe mechanism using FPS
+    if opts.data.get("deforum_save_gen_info_as_srt", False): # create .srt file and set timeframe mechanism using FPS
         srt_filename = os.path.join(args.outdir, f"{args.timestring}.srt")
         srt_frame_duration = init_srt_file(srt_filename, video_args.fps)
 
@@ -62,7 +77,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     # handle controlnet video input frames generation
     if is_controlnet_enabled(controlnet_args):
-        unpack_controlnet_vids(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, animation_prompts, root)
+        unpack_controlnet_vids(args, anim_args, controlnet_args)
 
     # use parseq if manifest is provided
     use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
@@ -91,7 +106,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
-        for i, prompt in animation_prompts.items():
+        for i, prompt in root.animation_prompts.items():
             if str(i).isdigit():
                 prompt_series[int(i)] = prompt
             else:
@@ -152,7 +167,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         # advance start_frame to next frame
         start_frame = next_frame + 1
 
-    args.n_samples = 1
     frame_idx = start_frame
 
     # reset the mask vals as they are overwritten in the compose_mask algorithm

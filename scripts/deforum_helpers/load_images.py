@@ -1,30 +1,37 @@
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
 import requests
 import os
-from PIL import Image, ImageOps
-import cv2
-import numpy as np
+from PIL import Image
 import socket
 import torchvision.transforms.functional as TF
-from modules.shared import opts
 from .general_utils import clean_gradio_path_strings
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def load_img(path : str, shape=None, use_alpha_as_mask=False):
     # use_alpha_as_mask: Read the alpha channel of the image as the mask image
     image = load_image(path)
-    if use_alpha_as_mask:
-        image = image.convert('RGBA')
-    else:
-        image = image.convert('RGB')
-
-    if shape is not None:
-        image = image.resize(shape, resample=Image.LANCZOS)
+    image = image.convert('RGBA') if use_alpha_as_mask else image.convert('RGB')
+    image = image.resize(shape, resample=Image.LANCZOS) if shape is not None else image
 
     mask_image = None
     if use_alpha_as_mask:
         # Split alpha channel into a mask_image
-        red, green, blue, alpha = Image.Image.split(image)
+        red, green, blue, alpha = Image.Image.split(image) # not interested in R G or B, just in the alpha channel
         mask_image = alpha.convert('L')
         image = image.convert('RGB')
         
@@ -46,8 +53,7 @@ def load_image(image_path :str):
             s = socket.create_connection((host, 80), 2)
             s.close()
         except:
-            raise ConnectionError("There is no active internet connection available - please use local masks and init files only.")
-        
+            raise ConnectionError("There is no active internet connection available (couldn't connect to google.com as a network test) - please use *local* masks and init files only.")
         try:
             response = requests.get(image_path, stream=True)
         except requests.exceptions.RequestException as e:
@@ -95,15 +101,9 @@ def check_mask_for_errors(mask_input, invert_mask=False):
         return mask_input    
  
 def get_mask(args):
-    # return check_mask_for_errors(
-    #     prepare_mask(args.mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
-    # )
     return prepare_mask(args.mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
 
 def get_mask_from_file(mask_file, args):
-    # return check_mask_for_errors(
-    #     prepare_mask(mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
-    # )
     return prepare_mask(mask_file, (args.W, args.H), args.mask_contrast_adjust, args.mask_brightness_adjust)
 
 def blank_if_none(mask, w, h, mode):

@@ -1,4 +1,22 @@
-import os, shutil
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
+import os
+import shutil
 import hashlib
 from modules.shared import opts
 from basicsr.utils.download_util import load_file_from_url
@@ -24,8 +42,7 @@ def duplicate_pngs_from_folder(from_folder, to_folder, img_batch_id, orig_vid_na
     import cv2
     #TODO: don't copy-paste at all if the input is a video (now it copy-pastes, and if input is deforum run is also converts to make sure no errors rise cuz of 24-32 bit depth differences)
     temp_convert_raw_png_path = os.path.join(from_folder, to_folder)
-    if not os.path.exists(temp_convert_raw_png_path):
-                os.makedirs(temp_convert_raw_png_path)
+    os.makedirs(temp_convert_raw_png_path, exist_ok=True)
                 
     frames_handled = 0
     for f in os.listdir(from_folder):
@@ -44,8 +61,7 @@ def convert_images_from_list(paths, output_dir, format):
     import os
     from PIL import Image
     # Ensure that the output directory exists
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
 
     # Loop over all input images
     for i, path in enumerate(paths):
@@ -61,6 +77,7 @@ def get_deforum_version():
     try:
         for ext in mext.extensions:
             if ext.name in ["deforum", "deforum-for-automatic1111-webui", "sd-webui-deforum"] and ext.enabled:
+                ext.read_info_from_repo() # need this call to get exten info on ui-launch, not to be removed
                 return ext.version
         return "Unknown"
     except:

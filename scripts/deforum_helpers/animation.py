@@ -1,17 +1,30 @@
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
 import numpy as np
 import cv2
+import py3d_tools as p3d # this is actually a file in our /src folder!
 from functools import reduce
 import math
-import py3d_tools as p3d
 import torch
 from einops import rearrange
+from modules.shared import state, opts
 from .prompt import check_is_number
 from .general_utils import debug_print
-
-# Webui
-from modules.shared import state, opts
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def sample_from_cv2(sample: np.ndarray) -> torch.Tensor:
     sample = ((sample.astype(float) / 255.0) * 2) - 1

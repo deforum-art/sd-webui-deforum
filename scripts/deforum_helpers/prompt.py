@@ -1,8 +1,22 @@
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
 import re
 import numexpr
-from modules.shared import opts
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def check_is_number(value):
     float_pattern = r'^(?=.)([+-]?([0-9]*)(\.([0-9]+))?)$'
@@ -10,8 +24,8 @@ def check_is_number(value):
 
 def parse_weight(match, frame = 0, max_frames = 0)->float:
     w_raw = match.group("weight")
-    max_f = max_frames
-    if w_raw == None:
+    max_f = max_frames  # this line has to be left intact as it's in use by numexpr even though it looks like it doesn't
+    if w_raw is None:
         return 1
     if check_is_number(w_raw):
         return float(w_raw)

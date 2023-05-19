@@ -1,9 +1,24 @@
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
 import os
 import torch
 from PIL import Image
 from torchvision import transforms
-from clipseg.models.clipseg import CLIPDensePredT
-from modules.shared import opts
 from torch.nn.functional import interpolate
 import cv2
 
@@ -13,9 +28,10 @@ preclipseg_transform = transforms.Compose([
       transforms.Resize((512, 512)), #TODO: check if the size is hardcoded
 ])
 
-def find_clipseg(root):
+def find_clipseg():
+    basedirs = [os.getcwd()]
     src_basedirs = []
-    for basedir in root.basedirs:
+    for basedir in basedirs:
         src_basedirs.append(os.path.join(os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-2]), 'deforum_helpers', 'src'))
 
     for basedir in src_basedirs:
@@ -25,9 +41,10 @@ def find_clipseg(root):
     raise Exception('CLIPseg weights not found!')
 
 def setup_clipseg(root):
+    from clipseg.models.clipseg import CLIPDensePredT
     model = CLIPDensePredT(version='ViT-B/16', reduce_dim=64)
     model.eval()
-    model.load_state_dict(torch.load(find_clipseg(root), map_location=root.device), strict=False)
+    model.load_state_dict(torch.load(find_clipseg(), map_location=root.device), strict=False)
 
     model.to(root.device)
     root.clipseg_model = model

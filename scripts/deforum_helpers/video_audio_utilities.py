@@ -1,3 +1,20 @@
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
 import os
 import cv2
 import shutil
@@ -13,9 +30,6 @@ from modules.shared import state, opts
 from .general_utils import checksum, duplicate_pngs_from_folder, clean_gradio_path_strings
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
-from pathlib import Path
-
-# DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def convert_image(input_path, output_path):
     # Read the input image

@@ -1,21 +1,32 @@
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
 import os
 import pathlib
 import random
-
 import cv2
 import numpy as np
 import PIL
-import torch
 from PIL import Image, ImageChops, ImageOps, ImageEnhance
 from scipy.ndimage.filters import gaussian_filter
-
 from .consistency_check import make_consistency
 from .human_masking import video2humanmasks
 from .load_images import load_image
 from .video_audio_utilities import vid2frames, get_quick_vid_info, get_frame_name
-from modules.shared import opts
-
-# DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def delete_all_imgs_in_folder(folder_path):
         files = list(pathlib.Path(folder_path).glob('*.jpg'))
@@ -115,7 +126,7 @@ def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_c
         hybrid_mask = ImageOps.invert(hybrid_mask)
 
     # if a mask type is selected, make composition
-    if hybrid_mask == None:
+    if hybrid_mask is None:
         hybrid_comp = video_image
     else:
         # ensure grayscale
@@ -249,7 +260,7 @@ def image_transform_affine(image_cv2, M, depth=None):
             (image_cv2.shape[1],image_cv2.shape[0]),
             borderMode=cv2.BORDER_REFLECT_101
         )
-    else:
+    else:  # NEED TO IMPLEMENT THE FOLLOWING FUNCTION
         return depth_based_affine_warp(
             image_cv2,
             depth,
@@ -264,7 +275,7 @@ def image_transform_perspective(image_cv2, M, depth=None):
             (image_cv2.shape[1], image_cv2.shape[0]),
             borderMode=cv2.BORDER_REFLECT_101
         )
-    else:
+    else:  # NEED TO IMPLEMENT THE FOLLOWING FUNCTION
         return render_3d_perspective(
             image_cv2,
             depth,

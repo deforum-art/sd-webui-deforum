@@ -1,13 +1,24 @@
-from typing import List, Tuple
-from einops import rearrange
-import numpy as np, os, torch
-from PIL import Image
-from torchvision.utils import make_grid
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
+import os
+import cv2
+import gc
 import time
-from modules.shared import opts
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
-
 
 def get_output_folder(output_path, batch_folder):
     out_path = os.path.join(output_path,time.strftime('%Y-%m'))
@@ -21,8 +32,6 @@ def save_image(image, image_type, filename, args, video_args, root):
         root.frames_cache.append({'path':os.path.join(args.outdir, filename), 'image':image, 'image_type':image_type})
     else:
         image.save(os.path.join(args.outdir, filename))
-
-import cv2, gc
 
 def reset_frames_cache(root):
     root.frames_cache = []

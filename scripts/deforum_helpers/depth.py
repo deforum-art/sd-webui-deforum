@@ -1,19 +1,33 @@
-import math, os, subprocess
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
+import gc
 import cv2
-import hashlib
 import numpy as np
 import torch
-import gc
-import torchvision.transforms as T
-from einops import rearrange, repeat
 from PIL import Image
-from modules import lowvram, devices
-from modules.shared import opts, cmd_opts
-from .general_utils import debug_print
+from einops import rearrange, repeat
+from modules import devices
+from modules.shared import cmd_opts
+from .depth_adabins import AdaBinsModel
+from .depth_leres import LeReSDepth
 from .depth_midas import MidasDepth
 from .depth_zoe import ZoeDepth
-from .depth_leres import LeReSDepth
-from .depth_adabins import AdaBinsModel
+from .general_utils import debug_print
 
 class DepthModel:
     _instance = None

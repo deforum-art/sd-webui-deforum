@@ -1,21 +1,18 @@
 # thanks to https://github.com/n00mkrad for the inspiration and a bit of code. Also thanks for https://github.com/XmYx for the initial reorganization of this script
-import os, sys
+import os
 from types import SimpleNamespace
 import cv2
 import torch
-import argparse
 import shutil
 import numpy as np
 from tqdm import tqdm
 from torch.nn import functional as F
 import warnings
 import _thread
-from queue import Queue, Empty
-import subprocess
+from queue import Queue
 import time
 from .model.pytorch_msssim import ssim_matlab
 
-sys.path.append('../../')
 from deforum_helpers.video_audio_utilities import ffmpeg_stitch_video
 from deforum_helpers.general_utils import duplicate_pngs_from_folder
 

@@ -1,3 +1,22 @@
+/*
+ * 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+ * Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Artem Khrapov): https://github.com/kabachuha/
+ */
+
 // mouseover tooltips for various UI elements
 
 deforum_titles = {
@@ -17,9 +36,6 @@ deforum_titles = {
     "Resize seed from width": "Normally, changing the resolution will completely change an image, even when using the same seed. If you generated an image with a particular seed and then changed the resolution, put the original resolution here to get an image that more closely resemles the original",
     "Resize seed from height": "Normally, changing the resolution will completely change an image, even when using the same seed. If you generated an image with a particular seed and then changed the resolution, put the original resolution here to get an image that more closely resemles the original",
     "Steps": "How many times to improve the generated image iteratively; higher values take longer; very low values can produce bad results",
-    //"ddim_eta": "";
-    //"n_batch": "",
-    //"save_settings": "",
     "Batch name": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports placeholders like {seed}, {w}, {h}, {prompts} and more",
 	"Pix2Pix img CFG schedule": "*Only in use with pix2pix checkpoints!*",
     "Filename format": "specify the format of the filename for output images",

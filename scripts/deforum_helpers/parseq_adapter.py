@@ -1,3 +1,20 @@
+# 'Deforum' plugin for Automatic1111's Stable Diffusion WebUI.
+# Copyright (C) 2023 Artem Khrapov (kabachuha) and Deforum team listed in AUTHORS.md
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the dev team: https://discord.gg/deforum
+
 import copy
 import json
 import logging
@@ -6,16 +23,10 @@ from operator import itemgetter
 import numpy as np
 import pandas as pd
 import requests
-import traceback
-import sys
-
-from modules.shared import opts
 from .animation_key_frames import DeformAnimKeys
 from .rich import console
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 class ParseqAnimKeys():
     def __init__(self, parseq_args, anim_args, video_args, mute=False):

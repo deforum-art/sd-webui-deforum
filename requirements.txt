@@ -6,4 +6,3 @@ pims
 imageio_ffmpeg
 rich
 gdown
-py3d
