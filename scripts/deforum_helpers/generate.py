@@ -47,14 +47,14 @@ def pairwise_repl(iterable):
     next(b, None)
     return zip(a, b)
 
-def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
+def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, sampler_name=None):
     if state.interrupted:
         return None
         
     if args.reroll_blank_frames == 'ignore':
-        return generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame, return_sample, sampler_name)
+        return generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame, sampler_name)
     
-    image, caught_vae_exception = generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, root, frame, return_sample, sampler_name)
+    image, caught_vae_exception = generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, root, frame, sampler_name)
 
     if caught_vae_exception or not image.getbbox():
         patience = args.reroll_patience
@@ -63,7 +63,7 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
             while caught_vae_exception or not image.getbbox():
                 print("Rerolling with +1 seed...")
                 args.seed += 1
-                image, caught_vae_exception = generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, root, frame, return_sample, sampler_name)
+                image, caught_vae_exception = generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, root, frame, sampler_name)
                 patience -= 1
                 if patience == 0:
                     print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
@@ -77,12 +77,12 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0,
             return None
     return image
 
-def generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
+def generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, sampler_name=None):
     if cmd_opts.disable_nan_check:
-        image = generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame, return_sample, sampler_name)
+        image = generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame, sampler_name)
     else:
         try:
-            image = generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame, return_sample, sampler_name)
+            image = generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame, sampler_name)
         except Exception as e:
             if "A tensor with all NaNs was produced in VAE." in repr(e):
                 print(e)
@@ -91,7 +91,7 @@ def generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, 
                 raise e
     return image, False
 
-def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, return_sample=False, sampler_name=None):
+def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, sampler_name=None):
     # Setup the pipeline
     p = get_webui_sd_pipeline(args, root)
     p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame, anim_args.max_frames)
