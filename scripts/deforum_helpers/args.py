@@ -260,7 +260,7 @@ def pack_controlnet_args(args_dict):
     return {name: args_dict[name] for name in controlnet_component_names()}
 
 def process_args(args_dict_main, run_id):
-    from deforum_helpers.settings import load_args
+    from .settings import load_args
     override_settings_with_file = args_dict_main['override_settings_with_file']
     custom_settings_file = args_dict_main['custom_settings_file']
     args_dict = pack_args(args_dict_main)
