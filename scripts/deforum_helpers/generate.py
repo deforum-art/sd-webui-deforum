@@ -1,4 +1,3 @@
-import cv2
 from PIL import Image
 import math
 import json
@@ -6,14 +5,13 @@ import itertools
 import requests
 import numexpr
 from modules import processing, sd_models
-from modules.shared import opts, sd_model, state, cmd_opts
-from modules.processing import process_images, StableDiffusionProcessingTxt2Img
+from modules.shared import sd_model, state, cmd_opts
 from .deforum_controlnet import is_controlnet_enabled, process_with_controlnet
 from .prompt import split_weighted_subprompts
 from .load_images import load_img, prepare_mask, check_mask_for_errors
 from .webui_sd_pipeline import get_webui_sd_pipeline
 from .rich import console
-from .animation import sample_from_cv2, sample_to_cv2
+from .defaults import get_samplers_list
 from .prompt import check_is_number
 
 def load_mask_latent(mask_input, shape):
@@ -143,25 +141,7 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
     else:  # they passed in a single init image
         image_init0 = args.init_image
 
-    available_samplers = {
-        'euler a': 'Euler a',
-        'euler': 'Euler',
-        'lms': 'LMS',
-        'heun': 'Heun',
-        'dpm2': 'DPM2',
-        'dpm2 a': 'DPM2 a',
-        'dpm++ 2s a': 'DPM++ 2S a',
-        'dpm++ 2m': 'DPM++ 2M',
-        'dpm++ sde': 'DPM++ SDE',
-        'dpm fast': 'DPM fast',
-        'dpm adaptive': 'DPM adaptive',
-        'lms karras': 'LMS Karras',
-        'dpm2 karras': 'DPM2 Karras',
-        'dpm2 a karras': 'DPM2 a Karras',
-        'dpm++ 2s a karras': 'DPM++ 2S a Karras',
-        'dpm++ 2m karras': 'DPM++ 2M Karras',
-        'dpm++ sde karras': 'DPM++ SDE Karras'
-    }
+    available_samplers = get_samplers_list()
     if sampler_name is not None:
         if sampler_name in available_samplers.keys():
             p.sampler_name = available_samplers[sampler_name]
@@ -194,7 +174,7 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
 
         if anim_args.animation_mode != 'Interpolation':
             print(f"Not using an init image (doing pure txt2img)")
-        p_txt = StableDiffusionProcessingTxt2Img(
+        p_txt = processing.StableDiffusionProcessingTxt2Img(
             sd_model=sd_model,
             outpath_samples=root.tmp_deforum_run_duplicated_folder,
             outpath_grids=root.tmp_deforum_run_duplicated_folder,
@@ -215,8 +195,8 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
             height=p.height,
             restore_faces=p.restore_faces,
             tiling=p.tiling,
-            enable_hr=None,
-            denoising_strength=None,
+            enable_hr=False,
+            denoising_strength=0,
         )
 
         print_combined_table(args, anim_args, p_txt, keys, frame)  # print dynamic table to cli
@@ -259,10 +239,10 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
 
         processed = processing.process_images(p)
 
-    if root.initial_info == None:
+    if root.initial_info is None:
         root.initial_info = processed.info
 
-    if root.first_frame == None:
+    if root.first_frame is None:
         root.first_frame = processed.images[0]
 
     results = processed.images[0]
