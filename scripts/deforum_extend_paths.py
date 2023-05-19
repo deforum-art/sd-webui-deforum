@@ -1,4 +1,5 @@
-import sys, os
+import os
+import sys
 
 def deforum_sys_extend():
     deforum_folder_name = os.path.sep.join(os.path.abspath(__file__).split(os.path.sep)[:-2])
