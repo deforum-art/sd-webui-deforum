@@ -207,7 +207,7 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
             # Not first frame, use previous img (init_sample)
             elif frame_idx > 0 and args.init_sample:
                 cn_image_np = np.array(args.init_sample).astype('uint8')
-        else: # loopback mode is DISABLED
+        else:  # loopback mode is DISABLED
             cn_inputframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_inputframes') # set input frames folder path
             if os.path.exists(cn_inputframes):
                 if count_files_in_folder(cn_inputframes) == 1:
