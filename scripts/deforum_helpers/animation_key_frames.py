@@ -103,12 +103,12 @@ class FrameInterpolater():
             elif is_single_string:# take previous string value and replicate it
                 key_frame_series[i] = key_frame_series[i-1]
         key_frame_series = key_frame_series.astype(float) if not is_single_string else key_frame_series # as string
-        
+
         if interp_method == 'Cubic' and len(key_frames.items()) <= 3:
-            interp_method = 'Quadratic'    
+            interp_method = 'Quadratic'
         if interp_method == 'Quadratic' and len(key_frames.items()) <= 2:
             interp_method = 'Linear'
-            
+
         key_frame_series[0] = key_frame_series[key_frame_series.first_valid_index()]
         key_frame_series[self.max_frames-1] = key_frame_series[key_frame_series.last_valid_index()]
         key_frame_series = key_frame_series.interpolate(method=interp_method.lower(), limit_direction='both')
