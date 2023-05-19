@@ -1,8 +1,5 @@
 import re
 import numexpr
-from modules.shared import opts
-
-DEBUG_MODE = opts.data.get("deforum_debug_mode_enabled", False)
 
 def check_is_number(value):
     float_pattern = r'^(?=.)([+-]?([0-9]*)(\.([0-9]+))?)$'
@@ -10,8 +7,7 @@ def check_is_number(value):
 
 def parse_weight(match, frame = 0, max_frames = 0)->float:
     w_raw = match.group("weight")
-    max_f = max_frames
-    if w_raw == None:
+    if w_raw is None:
         return 1
     if check_is_number(w_raw):
         return float(w_raw)
