@@ -7,6 +7,7 @@ def check_is_number(value):
 
 def parse_weight(match, frame = 0, max_frames = 0)->float:
     w_raw = match.group("weight")
+    max_f = max_frames  # this line has to be left intact as it's in use by numexpr even though it looks like it doesn't
     if w_raw is None:
         return 1
     if check_is_number(w_raw):
