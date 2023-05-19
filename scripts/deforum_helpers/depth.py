@@ -1,19 +1,16 @@
-import math, os, subprocess
+import gc
 import cv2
-import hashlib
 import numpy as np
 import torch
-import gc
-import torchvision.transforms as T
-from einops import rearrange, repeat
 from PIL import Image
-from modules import lowvram, devices
-from modules.shared import opts, cmd_opts
-from .general_utils import debug_print
+from einops import rearrange, repeat
+from modules import devices
+from modules.shared import cmd_opts
+from .depth_adabins import AdaBinsModel
+from .depth_leres import LeReSDepth
 from .depth_midas import MidasDepth
 from .depth_zoe import ZoeDepth
-from .depth_leres import LeReSDepth
-from .depth_adabins import AdaBinsModel
+from .general_utils import debug_print
 
 class DepthModel:
     _instance = None
