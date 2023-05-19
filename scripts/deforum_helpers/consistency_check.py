@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# Contact the author (Artem Khrapov): https://github.com/kabachuha/
+# Contact the dev team: https://discord.gg/deforum
 
 
 # The code below is taken from https://github.com/Sxela/flow_tools/blob/main under GPL-3.0 license

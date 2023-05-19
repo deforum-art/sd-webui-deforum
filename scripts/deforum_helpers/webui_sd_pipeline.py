@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# Contact the author (Artem Khrapov): https://github.com/kabachuha/
+# Contact the dev team: https://discord.gg/deforum
 
 from modules.processing import StableDiffusionProcessingImg2Img
 from modules.shared import opts, sd_model

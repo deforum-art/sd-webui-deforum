@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# Contact the author (Artem Khrapov): https://github.com/kabachuha/
+# Contact the dev team: https://discord.gg/deforum
 
 ##
 # From /scripts directory, run like: python -m unittest deforum_helpers.parseq_adapter_test
