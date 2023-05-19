@@ -1,15 +1,15 @@
-import os
-import time
 import json
+import os
 import tempfile
+import time
 from types import SimpleNamespace
-from modules.shared import cmd_opts
-from modules.processing import get_fixed_seed
-import modules.shared as sh
 import modules.paths as ph
-from .general_utils import get_os, get_deforum_version, substitute_placeholders
-from .deforum_controlnet import controlnet_component_names
+import modules.shared as sh
+from modules.processing import get_fixed_seed
+from modules.shared import cmd_opts
 from .defaults import get_guided_imgs_default_json
+from .deforum_controlnet import controlnet_component_names
+from .general_utils import get_os, substitute_placeholders
 
 def RootArgs():
     device = sh.device
