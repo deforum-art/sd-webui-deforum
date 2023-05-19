@@ -246,7 +246,7 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
             mask = None
 
         assert not ((mask is not None and args.use_mask and args.overlay_mask) and (
-                    args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
+                args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
 
         p.init_images = [init_image]
         p.image_mask = mask
