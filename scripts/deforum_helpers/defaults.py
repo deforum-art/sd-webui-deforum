@@ -1,3 +1,24 @@
+def get_samplers_list():
+    return { 
+        'euler a':'Euler a',
+        'euler':'Euler',
+        'lms':'LMS',
+        'heun':'Heun',
+        'dpm2':'DPM2',
+        'dpm2 a':'DPM2 a',
+        'dpm++ 2s a':'DPM++ 2S a',
+        'dpm++ 2m':'DPM++ 2M',
+        'dpm++ sde':'DPM++ SDE',
+        'dpm fast':'DPM fast',
+        'dpm adaptive':'DPM adaptive',
+        'lms karras':'LMS Karras' ,
+        'dpm2 karras':'DPM2 Karras',
+        'dpm2 a karras':'DPM2 a Karras',
+        'dpm++ 2s a karras':'DPM++ 2S a Karras',
+        'dpm++ 2m karras':'DPM++ 2M Karras',
+        'dpm++ sde karras':'DPM++ SDE Karras'
+        }
+
 def DeforumAnimPrompts():
     return r"""{
     "0": "tiny cute swamp bunny, highly detailed, intricate, ultra hd, sharp photo, crepuscular rays, in focus, by tomasz alen kopera",

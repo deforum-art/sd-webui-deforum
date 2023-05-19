@@ -15,6 +15,7 @@ from .webui_sd_pipeline import get_webui_sd_pipeline
 from .rich import console
 from .animation import sample_from_cv2, sample_to_cv2
 from .prompt import check_is_number
+from .defaults import get_samplers_list
 
 def load_mask_latent(mask_input, shape):
     # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
@@ -93,13 +94,48 @@ def generate_with_nans_check(args, keys, anim_args, loop_args, controlnet_args, 
                 raise e
     return image, False
 
-def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, sampler_name=None):
-    # Setup the pipeline
+def prepare_pipeline(args, root, frame, anim_args):
     p = get_webui_sd_pipeline(args, root)
     p.prompt, p.negative_prompt = split_weighted_subprompts(args.prompt, frame, anim_args.max_frames)
-    
     if not args.use_init and args.strength > 0 and args.strength_0_no_init:
         args.strength = 0
+    return p
+
+def parse_json_images(jsonImages, anim_args):
+    parsedImages = {}
+    max_f = anim_args.max_frames - 1
+    for key, value in jsonImages.items():
+        if check_is_number(key):
+            parsedImages[key] = value
+        else:
+            parsedImages[int(numexpr.evaluate(key))] = value
+    return parsedImages
+
+def handle_samplers(p, sampler_name, available_samplers):
+    if sampler_name is not None:
+        if sampler_name in available_samplers.keys():
+            p.sampler_name = available_samplers[sampler_name]
+        else:
+            raise RuntimeError(f"Sampler name '{sampler_name}' is invalid. Please check the available sampler list in the 'Run' tab")
+    return p
+
+def prepare_init_image(args, loop_args, anim_args, blendFactor, colorCorrectionFactor, init_image2):
+    init_image = None
+    image_init0 = args.init_sample
+    if loop_args.use_looper and isJson(loop_args.imagesToKeyframe) and anim_args.animation_mode in ['2D','3D']:
+        init_image = Image.blend(init_image, init_image2, blendFactor)
+        correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
+    return init_image, correction_colors
+
+def handle_checkpoint(args):
+    if args.checkpoint is not None:
+        info = sd_models.get_closet_checkpoint_match(args.checkpoint)
+        if info is None:
+            raise RuntimeError(f"Unknown checkpoint: {args.checkpoint}")
+        sd_models.reload_model_weights(info=info)
+     
+def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, frame = 0, sampler_name=None):
+    p = prepare_pipeline(args, root, frame, anim_args)
     processed = None
     mask_image = None
     init_image = None
@@ -111,68 +147,33 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
         blendFactor = .07
         colorCorrectionFactor = loop_args.colorCorrectionFactor
         jsonImages = json.loads(loop_args.imagesToKeyframe)
-        # find which image to show
-        parsedImages = {}
-        frameToChoose = 0
-        max_f = anim_args.max_frames - 1
-        
-        for key, value in jsonImages.items():
-            if check_is_number(key):# default case 0:(1 + t %5), 30:(5-t%2)
-                parsedImages[key] = value
-            else:# math on the left hand side case 0:(1 + t %5), maxKeyframes/2:(5-t%2)
-                parsedImages[int(numexpr.evaluate(key))] = value
+
+        parsedImages = parse_json_images(jsonImages, anim_args)
 
         framesToImageSwapOn = list(map(int, list(parsedImages.keys())))
 
-        for swappingFrame in framesToImageSwapOn[1:]:
-            frameToChoose += (frame >= int(swappingFrame))
-        
-        #find which frame to do our swapping on for tweening
+        frameToChoose = sum(frame >= int(swapFrame) for swapFrame in framesToImageSwapOn[1:])
+
         skipFrame = 25
         for fs, fe in pairwise_repl(framesToImageSwapOn):
             if fs <= frame <= fe:
                 skipFrame = fe - fs
 
-        if frame % skipFrame <= tweeningFrames: # number of tweening frames
+        if frame % skipFrame <= tweeningFrames:
             blendFactor = loop_args.blendFactorMax - loop_args.blendFactorSlope*math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
+        
         init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
                                 shape=(args.W, args.H),
                                 use_alpha_as_mask=args.use_alpha_as_mask)
         image_init0 = list(jsonImages.values())[0]
             
-    else: # they passed in a single init image
+    else: 
         image_init0 = args.init_image
-
-    available_samplers = { 
-        'euler a':'Euler a',
-        'euler':'Euler',
-        'lms':'LMS',
-        'heun':'Heun',
-        'dpm2':'DPM2',
-        'dpm2 a':'DPM2 a',
-        'dpm++ 2s a':'DPM++ 2S a',
-        'dpm++ 2m':'DPM++ 2M',
-        'dpm++ sde':'DPM++ SDE',
-        'dpm fast':'DPM fast',
-        'dpm adaptive':'DPM adaptive',
-        'lms karras':'LMS Karras' ,
-        'dpm2 karras':'DPM2 Karras',
-        'dpm2 a karras':'DPM2 a Karras',
-        'dpm++ 2s a karras':'DPM++ 2S a Karras',
-        'dpm++ 2m karras':'DPM++ 2M Karras',
-        'dpm++ sde karras':'DPM++ SDE Karras'
-    }
-    if sampler_name is not None:
-        if sampler_name in available_samplers.keys():
-            p.sampler_name = available_samplers[sampler_name]
-        else:
-            raise RuntimeError(f"Sampler name '{sampler_name}' is invalid. Please check the available sampler list in the 'Run' tab")
-
-    if args.checkpoint is not None:
-        info = sd_models.get_closet_checkpoint_match(args.checkpoint)
-        if info is None:
-            raise RuntimeError(f"Unknown checkpoint: {args.checkpoint}")
-        sd_models.reload_model_weights(info=info)
+    available_samplers = get_samplers_list()
+            
+    p = handle_samplers(p, sampler_name, available_samplers)
+    
+    handle_checkpoint(args)
     
     if args.init_sample is not None:
         # TODO: cleanup init_sample remains later
