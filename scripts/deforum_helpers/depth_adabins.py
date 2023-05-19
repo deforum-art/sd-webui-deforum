@@ -2,6 +2,7 @@ import os
 import torch
 import numpy as np
 from PIL import Image
+import torchvision.transforms.functional as TF
 from .general_utils import download_file_with_checksum
 from infer import InferenceHelper
 
