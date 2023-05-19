@@ -1,8 +1,13 @@
 import cv2
 from PIL import Image
-import math, json, itertools
+import math
+import json
+import itertools
 import requests
 import numexpr
+from modules import processing, sd_models
+from modules.shared import opts, sd_model, state, cmd_opts
+from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 from .deforum_controlnet import is_controlnet_enabled, process_with_controlnet
 from .prompt import split_weighted_subprompts
 from .load_images import load_img, prepare_mask, check_mask_for_errors
@@ -10,9 +15,6 @@ from .webui_sd_pipeline import get_webui_sd_pipeline
 from .rich import console
 from .animation import sample_from_cv2, sample_to_cv2
 from .prompt import check_is_number
-from modules import processing, sd_models
-from modules.shared import opts, sd_model, state, cmd_opts
-from modules.processing import process_images, StableDiffusionProcessingTxt2Img
 
 def load_mask_latent(mask_input, shape):
     # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
