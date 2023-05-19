@@ -249,7 +249,7 @@ def image_transform_affine(image_cv2, M, depth=None):
             (image_cv2.shape[1],image_cv2.shape[0]),
             borderMode=cv2.BORDER_REFLECT_101
         )
-    else:
+    else:  # NEED TO IMPLEMENT THE FOLLOWING FUNCTION
         return depth_based_affine_warp(
             image_cv2,
             depth,
@@ -264,7 +264,7 @@ def image_transform_perspective(image_cv2, M, depth=None):
             (image_cv2.shape[1], image_cv2.shape[0]),
             borderMode=cv2.BORDER_REFLECT_101
         )
-    else:
+    else:  # NEED TO IMPLEMENT THE FOLLOWING FUNCTION
         return render_3d_perspective(
             image_cv2,
             depth,
