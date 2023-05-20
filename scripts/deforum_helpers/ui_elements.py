@@ -7,42 +7,39 @@ from .gradio_funcs import upload_vid_to_interpolate, upload_pics_to_interpolate,
 
 def get_tab_run(d, da):
     with gr.TabItem('Run'):  # RUN TAB
-        from modules.sd_samplers import samplers_for_img2img
         with gr.Row(variant='compact'):
-            sampler = gr.Dropdown(label="Sampler", choices=[x.name for x in samplers_for_img2img], value=samplers_for_img2img[0].name, type="value", elem_id="sampler", interactive=True)
-            steps = gr.Slider(label="Steps", minimum=0, maximum=200, step=1, value=d.steps, interactive=True)
+            sampler = d.sampler["type"](label=d.sampler["label"], choices=d.sampler["choices"], value=d.sampler["default"], type="value")
+            steps = d.steps["type"](label=d.steps["label"], minimum=d.steps["min"], maximum=d.steps["max"], value=d.steps["default"])
         with gr.Row(variant='compact'):
-            W = gr.Slider(label="Width", minimum=64, maximum=2048, step=64, value=d.W, interactive=True)
-            H = gr.Slider(label="Height", minimum=64, maximum=2048, step=64, value=d.H, interactive=True)
+            W = d.W["type"](label=d.W["label"], minimum=d.W["min"], maximum=d.W["max"], steps=d.W["steps"], value=d.W["default"])
+            H = d.H["type"](label=d.H["label"], minimum=d.H["min"], maximum=d.H["max"], steps=d.H["steps"], value=d.H["default"])
         with gr.Row(variant='compact'):
-            seed = gr.Number(label="Seed", value=d.seed, interactive=True, precision=0, info="Starting seed for the animation. -1 for random")
-            batch_name = gr.Textbox(label="Batch name", lines=1, interactive=True, value=d.batch_name,
-                                    info="output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}")
+            seed = d.seed["type"](label=d.seed["label"], lines=d.seed["lines"], value=d.seed["default"], info=d.seed["info"])
+            batch_name = d.batch_name["type"](label=d.batch_name["label"], lines=d.batch_name["lines"], value=d.batch_name["default"], info=d.batch_name["info"])
         with gr.Row(variant='compact'):
             # Seed enable extras is INVISIBLE in the ui!
-            seed_enable_extras = gr.Checkbox(label="Enable subseed controls", value=False, visible=False)
-            restore_faces = gr.Checkbox(label='Restore Faces', value=d.restore_faces)
-            tiling = gr.Checkbox(label='Tiling', value=d.tiling)
-            enable_ddim_eta_scheduling = gr.Checkbox(label='Enable DDIM ETA scheduling', value=da.enable_ddim_eta_scheduling, visible=False)
-            enable_ancestral_eta_scheduling = gr.Checkbox(label='Enable Ancestral ETA scheduling', value=da.enable_ancestral_eta_scheduling)
+            seed_enable_extras = d.seed_enable_extras["type"](label=d.seed_enable_extras["label"], value=d.seed_enable_extras["default"], info=d.seed_enable_extras["info"], visible=d.seed_enable_extras["visible"])
+            restore_faces = d.restore_faces["type"](label=d.restore_faces["label"], value=d.restore_faces["default"], info=d.restore_faces["info"])
+            tiling = d.tiling["type"](label=d.tiling["label"], value=d.tiling["default"], info=d.tiling["info"])
+            enable_ddim_eta_scheduling = da.enable_ddim_eta_scheduling["type"](label=da.enable_ddim_eta_scheduling["label"], value=da.enable_ddim_eta_scheduling["default"], info=da.enable_ddim_eta_scheduling["info"], visible=da.enable_ddim_eta_scheduling["visible"])
+            enable_ancestral_eta_scheduling = da.enable_ancestral_eta_scheduling["type"](label=da.enable_ancestral_eta_scheduling["label"], value=da.enable_ancestral_eta_scheduling["default"], info=da.enable_ancestral_eta_scheduling["info"])
         with gr.Row(variant='compact') as eta_sch_row:
-            ddim_eta_schedule = gr.Textbox(label="DDIM ETA Schedule", lines=1, value=da.ddim_eta_schedule, interactive=True, visible=False)
-            ancestral_eta_schedule = gr.Textbox(label="Ancestral ETA Schedule", lines=1, value=da.ancestral_eta_schedule, interactive=True, visible=False)
+            ddim_eta_schedule = da.ddim_eta_schedule["type"](label=da.ddim_eta_schedule["label"], value=da.ddim_eta_schedule["default"], visible=da.ddim_eta_schedule["visible"])
+            ancestral_eta_schedule = da.ancestral_eta_schedule["type"](label=da.ancestral_eta_schedule["label"], value=da.ancestral_eta_schedule["default"], visible=da.ancestral_eta_schedule["visible"])
         # RUN FROM SETTING FILE ACCORD
         with gr.Accordion('Batch Mode, Resume and more', open=False):
             with gr.Tab('Batch Mode/ run from setting files'):
-                with gr.Row(variant='compact'):
+                with gr.Row(variant='compact'):  # TODO: handle this inside one of the args functions?
                     override_settings_with_file = gr.Checkbox(label="Enable batch mode", value=False, interactive=True, elem_id='override_settings',
                                                               info="run from a list of setting .txt files. Upload them to the box on the right (visible when enabled)")
                     custom_settings_file = gr.File(label="Setting files", interactive=True, file_count="multiple", file_types=[".txt"], elem_id="custom_setting_file", visible=False)
             # RESUME ANIMATION ACCORD
             with gr.Tab('Resume Animation'):
                 with gr.Row(variant='compact'):
-                    resume_from_timestring = gr.Checkbox(label="Resume from timestring", value=da.resume_from_timestring, interactive=True)
-                    resume_timestring = gr.Textbox(label="Resume timestring", lines=1, value=da.resume_timestring, interactive=True)
+                    resume_from_timestring = da.resume_from_timestring["type"](label=da.resume_from_timestring["label"], value=da.resume_from_timestring["default"], info=da.resume_from_timestring["info"])
+                    resume_timestring = da.resume_timestring["type"](label=da.resume_timestring["label"], value=da.resume_timestring["default"], info=da.resume_timestring["info"])
             with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
-                pix2pix_img_cfg_scale_schedule = gr.Textbox(label="Pix2Pix img CFG schedule", value=da.pix2pix_img_cfg_scale_schedule, interactive=True,
-                                                            info="ONLY in use when working with a P2P ckpt!")
+                pix2pix_img_cfg_scale_schedule = da.pix2pix_img_cfg_scale_schedule["type"](label=da.pix2pix_img_cfg_scale_schedule["label"], value=da.pix2pix_img_cfg_scale_schedule["default"], info=da.pix2pix_img_cfg_scale_schedule["info"])
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
 def get_tab_keyframes(d, da, dloopArgs):

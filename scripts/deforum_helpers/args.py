@@ -69,7 +69,12 @@ def DeforumAnimArgs():
         "near_schedule": "0: (200)",
         "far_schedule": "0: (10000)",
         "seed_schedule": '0:(s), 1:(-1), "max_f-2":(-1), "max_f-1":(s)',
-        "pix2pix_img_cfg_scale_schedule": "0:(1.5)",
+        "pix2pix_img_cfg_scale_schedule": {
+            "label": "Pix2Pix img CFG schedule",
+            "type": gr.Textbox,
+            "default": "0:(1.5)",
+            "info": "ONLY in use when working with a P2P ckpt!"
+        },
         "enable_subseed_scheduling": False,
         "subseed_schedule": "0:(1)",
         "subseed_strength_schedule": "0:(0)",
@@ -84,14 +89,45 @@ def DeforumAnimArgs():
         "clipskip_schedule": '0: (2)',
         "enable_noise_multiplier_scheduling": True,  # Noise Multiplier Scheduling
         "noise_multiplier_schedule": '0: (1.05)',
-        # resume params
-        "resume_from_timestring": False,
-        "resume_timestring": "20230129210106",
-        # DDIM AND Ancestral ETA scheds
-        "enable_ddim_eta_scheduling": False,
-        "ddim_eta_schedule": "0:(0)",
-        "enable_ancestral_eta_scheduling": False,
-        "ancestral_eta_schedule": "0:(1)",
+        "resume_from_timestring": {
+            "label": "Resume from timestring",
+            "type": gr.Checkbox,
+            "default": False,
+            "info": ""
+        },
+        "resume_timestring": {
+            "label": "Resume timestring",
+            "type": gr.Textbox,
+            "default": "20230129210106",
+            "info": ""
+        },
+        "enable_ddim_eta_scheduling": {
+            "label": "Enable DDIM ETA scheduling",
+            "type": gr.Checkbox,
+            "default": False,
+            "visible": False,
+            "info": ""
+        },
+        "ddim_eta_schedule": {
+            "label": "DDIM ETA Schedule",
+            "type": gr.Textbox,
+            "default": "0: (0)",
+            "visible": False,
+            "info": ""
+        },
+        "enable_ancestral_eta_scheduling": {
+            "label": "Enable Ancestral ETA scheduling",
+            "type": gr.Checkbox,
+            "default": False,
+            "info": ""
+        },
+        "ancestral_eta_schedule": {
+            "label": "Ancestral ETA Schedule",
+            "type": gr.Textbox,
+            "default": "0: (1)",
+            "visible": False,
+            "info": ""
+        },
         # Anti-blur
         "amount_schedule": "0: (0.1)",
         "kernel_schedule": "0: (5)",
@@ -157,48 +193,94 @@ def DeforumAnimArgs():
     }
 
 def DeforumArgs():
+    from modules.sd_samplers import samplers_for_img2img
     return {
-        "W": 512,  # width
-        "H": 512,  # height
-        # whether to show gradio's info section for all params in the ui. it's a realtime toggle
-        "show_info_on_ui": True,
-        # **Webui stuff**
-        "tiling": False,
-        "restore_faces": False,
-        "seed_enable_extras": False,
-        "seed_resize_from_w": 0,
-        "seed_resize_from_h": 0,
-        # **Sampling Settings**
-        "seed": -1,
-        "sampler": 'euler_ancestral',
-        "steps": 25,
-        # **Batch Settings**
-        "batch_name": "Deforum_{timestring}",
-        "seed_behavior": "iter",
-        "seed_iter_N": 1,
-        # **Init Settings**
-        "use_init": False,
-        "strength": 0.8,
-        "strength_0_no_init": True,
-        "init_image": "https://deforum.github.io/a1/I1.png",
-        # Whiter areas of the mask are areas that change more
-        "use_mask": False,
-        "use_alpha_as_mask": False,
-        "mask_file": "https://deforum.github.io/a1/M1.jpg",
-        "invert_mask": False,
-        # Adjust mask image, 1.0 is no adjustment. Should be positive numbers.
-        "mask_contrast_adjust": 1.0,
-        "mask_brightness_adjust": 1.0,
-        # Overlay the masked image at the end of the generation so it does not get degraded by encoding and decoding
-        "overlay_mask": True,
-        # Blur edges of final overlay mask, if used. Minimum = 0 (no blur)
-        "mask_overlay_blur": 4,
-        "fill": 1,
-        "full_res_mask": True,
-        "full_res_mask_padding": 4,
-        "reroll_blank_frames": 'reroll',
-        "reroll_patience": 10
-    }
+            "W": {
+                "label": "Width",
+                "type": gr.Slider,
+                "min": 8,
+                "max": 2048,
+                "steps": 8,
+                "default": 512,
+            },
+            "H": {
+                "label": "Height",
+                "type": gr.Slider,
+                "min": 64,
+                "max": 2048,
+                "steps": 64,
+                "default": 512,
+            },
+            "show_info_on_ui": True,
+            "tiling": {
+                "label": "Tiling",
+                "type": gr.Checkbox,
+                "default": False,
+                "info": "Enable for seamless-tiling of each generated image. Experimental"
+            },
+            "restore_faces": {
+                "label": "Restore faces",
+                "type": gr.Checkbox,
+                "default": False,
+                "info": "enable to trigger webui's face restoration on each frame during the generation"
+            },
+            "seed_enable_extras": {
+                "label": "Enable subseed controls",
+                "type": gr.Checkbox,
+                "visible": False,
+                "default": False,
+                "info": ""
+            },
+            "seed_resize_from_w": 0,
+            "seed_resize_from_h": 0,
+            "seed": {
+                "label": "Seed",
+                "type": gr.Number,
+                "lines": 1,
+                "default": -1,
+                "info": "Starting seed for the animation. -1 for random"
+            },
+            "sampler": {
+                "label": "Sampler",
+                "type": gr.Dropdown,
+                "choices": [x.name for x in samplers_for_img2img],
+                "default": samplers_for_img2img[0].name,
+            },
+            "steps": {
+                "label": "Steps",
+                "type": gr.Slider,
+                "min": 1,
+                "max": 200,
+                "steps": 1,
+                "default": 25,
+            },
+            "batch_name": {
+                "label": "Batch name",
+                "type": gr.Textbox,
+                "lines": 1,
+                "default": "Deforum_{timestring}",
+                "info": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}"
+            },
+            "seed_behavior": "Iter",
+            "seed_iter_N": 1,
+            "use_init": False,
+            "strength": 0.8,
+            "strength_0_no_init": True,
+            "init_image": "https://deforum.github.io/a1/I1.png",
+            "use_mask": False,
+            "use_alpha_as_mask": False,
+            "mask_file": "https://deforum.github.io/a1/M1.jpg",
+            "invert_mask": False,
+            "mask_contrast_adjust": 1.0,
+            "mask_brightness_adjust": 1.0,
+            "overlay_mask": True,
+            "mask_overlay_blur": 4,
+            "fill": 1,
+            "full_res_mask": True,
+            "full_res_mask_padding": 4,
+            "reroll_blank_frames": False,
+            "reroll_patience": 10
+        }
 
 def LoopArgs():
     return {
