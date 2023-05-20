@@ -451,8 +451,8 @@ def get_tab_output(da, dv):
             with gr.Row(equal_height=True, variant='compact', visible=True) as r_upscale_row:
                 r_upscale_video = create_gr_elem(dv.r_upscale_video)
                 r_upscale_model = create_gr_elem(dv.r_upscale_model)
-                r_upscale_factor = gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
-                r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True, info="don't delete upscaled imgs")
+                r_upscale_factor = create_gr_elem(dv.r_upscale_factor)
+                r_upscale_keep_imgs = create_gr_elem(dv.r_upscale_keep_imgs)
         # FRAME INTERPOLATION TAB
         with gr.Tab('Frame Interpolation') as frame_interp_tab:
             with gr.Accordion('Important notes and Help', open=False, elem_id="f_interp_accord"):
@@ -461,19 +461,16 @@ def get_tab_output(da, dv):
                 with gr.Row(variant='compact'):
                     # Interpolation Engine
                     with gr.Column(min_width=110, scale=3):
-                        frame_interpolation_engine = gr.Radio(['None', 'RIFE v4.6', 'FILM'], label="Engine", value=dv.frame_interpolation_engine,
-                                                              info="select the frame interpolation engine. hover on the options for more info")
+                        frame_interpolation_engine = create_gr_elem(dv.frame_interpolation_engine)
                     with gr.Column(min_width=30, scale=1):
-                        frame_interpolation_slow_mo_enabled = gr.Checkbox(label="Slow Mo", elem_id="frame_interpolation_slow_mo_enabled", value=dv.frame_interpolation_slow_mo_enabled,
-                                                                          interactive=True, visible=False)
+                        frame_interpolation_slow_mo_enabled = create_gr_elem(dv.frame_interpolation_slow_mo_enabled)
                     with gr.Column(min_width=30, scale=1):
                         # If this is set to True, we keep all the interpolated frames in a folder. Default is False - means we delete them at the end of the run
-                        frame_interpolation_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="frame_interpolation_keep_imgs", value=dv.frame_interpolation_keep_imgs, interactive=True,
-                                                                    visible=False)
+                        frame_interpolation_keep_imgs = create_gr_elem(dv.frame_interpolation_keep_imgs)
                 with gr.Row(variant='compact', visible=False) as frame_interp_amounts_row:
                     with gr.Column(min_width=180) as frame_interp_x_amount_column:
                         # How many times to interpolate (interp X)
-                        frame_interpolation_x_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Interp X", value=dv.frame_interpolation_x_amount, interactive=True)
+                        frame_interpolation_x_amount = create_gr_elem(dv.frame_interpolation_x_amount)
                     with gr.Column(min_width=180, visible=False) as frame_interp_slow_mo_amount_column:
                         # Interp Slow-Mo (setting final output fps, not really doing anything directly with RIFE/FILM)
                         frame_interpolation_slow_mo_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo X", value=dv.frame_interpolation_x_amount, interactive=True)

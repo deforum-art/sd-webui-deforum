@@ -560,7 +560,6 @@ def DeforumOutputArgs():
             "value": False,
             "info": "auto-delete imgs when video is ready"
         },
-            #False,  # True will delete all imgs after a successful mp4 creation
         "image_path": "C:/SD/20230124234916_%09d.png",
         "add_soundtrack": {
                 "label": "Add soundtrack",
@@ -575,21 +574,30 @@ def DeforumOutputArgs():
             "value": "https://deforum.github.io/a1/A1.mp3",
             "info": "abs. path or url to audio file"
         },
-        # End-Run upscaling
         "r_upscale_video": {
             "label": "Upscale",
             "type": "checkbox",
             "value": False,
             "info": "upscale output imgs when run is finished"
         },
-        "r_upscale_factor": 'x2',  # ['2x', 'x3', 'x4'],
+        "r_upscale_factor": {
+                "label": "Upscale factor",
+                "type": "dropdown",
+                "choices": ['x2', 'x3', 'x4'],
+                "value": "2x",
+        },
         "r_upscale_model": {
                 "label": "Upscale model",
                 "type": "dropdown",
                 "choices": ['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'],
                 "value": 'realesr-animevideov3',
-            },
-        "r_upscale_keep_imgs": True,
+        },
+        "r_upscale_keep_imgs": {
+            "label": "Store frames in ram",
+            "type": "checkbox",
+            "value": True,
+            "info": "don't delete upscaled imgs",
+        },
         "store_frames_in_ram": {
             "label": "Store frames in ram",
             "type": "checkbox",
@@ -597,12 +605,36 @@ def DeforumOutputArgs():
             "info": "auto-delete imgs when video is ready",
             "visible": False
         },
-        # **Interpolate Video Settings**
-        "frame_interpolation_engine": "None",  # ["None", "RIFE v4.6", "FILM"]
-        "frame_interpolation_x_amount": 2,  # [2 to 1000 depends on the engine]
-        "frame_interpolation_slow_mo_enabled": False,
-        "frame_interpolation_slow_mo_amount": 2,  # [2 to 10]
-        "frame_interpolation_keep_imgs": False
+        "frame_interpolation_engine": {
+                "label": "Engine",
+                "type": "radio",
+                "choices": ['None', 'RIFE v4.6', 'FILM'],
+                "value": "None",
+                "info": "select the frame interpolation engine. hover on the options for more info"
+        },
+        "frame_interpolation_x_amount": {
+                "label": "Interp X",
+                "type": "slider",
+                "min": 2,
+                "max": 10,
+                "step": 1,
+                "value": 2,
+        },
+        "frame_interpolation_slow_mo_enabled": {
+            "label": "Slow Mo",
+            "type": "checkbox",
+            "value": False,
+            "visible": False,
+            "info": "Slow-Mo the interpolated video, audio will not be used if enabled",
+        },
+        "frame_interpolation_slow_mo_amount": 2,
+        "frame_interpolation_keep_imgs": {
+            "label": "Keep Imgs",
+            "type": "checkbox",
+            "value": False,
+            "info": "how much to slow-mo the video",
+            "visible": False
+        },
     }
 
 def get_component_names():
