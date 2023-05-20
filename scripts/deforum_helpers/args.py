@@ -396,7 +396,7 @@ def DeforumArgs():
                 "type": gr.Radio,
                 "radio_type": "index",
                 "choices": mask_fill_choices,
-                "value": mask_fill_choices[1],
+                "value": "fill",
                 "info": ""
             },
             "full_res_mask": {
@@ -417,7 +417,7 @@ def DeforumArgs():
                 "label": "Reroll blank frames",
                 "type": gr.Radio,
                 "radio_type": "index",
-                "choices": "['reroll', 'interrupt', 'ignore']",
+                "choices": ['reroll', 'interrupt', 'ignore'],
                 "value": "ignore",
                 "info": ""
             },

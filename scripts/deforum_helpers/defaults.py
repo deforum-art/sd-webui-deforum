@@ -193,6 +193,6 @@ def get_gradio_html(section_name):
         return get_frames_to_video_info_html()
     else:
         return None
-        
-mask_fill_choices=['fill', 'original', 'latent noise', 'latent nothing']
+
+mask_fill_choices = ['fill', 'original', 'latent noise', 'latent nothing']
         
