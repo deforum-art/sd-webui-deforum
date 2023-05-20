@@ -1,7 +1,7 @@
 import gradio as gr
 import modules.shared as sh
 from modules.ui_components import FormRow
-from .defaults import get_gradio_html, DeforumAnimPrompts, mask_fill_choices
+from .defaults import get_gradio_html, DeforumAnimPrompts
 from .video_audio_utilities import direct_stitch_vid_from_frames
 from .gradio_funcs import upload_vid_to_interpolate, upload_pics_to_interpolate, ncnn_upload_vid_to_upscale, upload_vid_to_depth
 
@@ -42,8 +42,19 @@ def get_tab_run(d, da):
                 pix2pix_img_cfg_scale_schedule = create_gr_elem(da.pix2pix_img_cfg_scale_schedule)
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
+gradio_elements = {
+    "number": gr.Number,
+    "checkbox": gr.Checkbox,
+    "slider": gr.Slider,
+    "textbox": gr.Textbox,
+    "dropdown": gr.Dropdown,
+    "radio": gr.Radio
+}
+
 def create_gr_elem(d):
-    obj_type = d["type"]
+    obj_type_str = d["type"]
+    obj_type = gradio_elements[obj_type_str]
+
     elem_params = {
         'label': d.get("label"),
         'value': d.get("value"),
