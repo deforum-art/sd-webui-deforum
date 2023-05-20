@@ -147,7 +147,7 @@ def get_guided_imgs_info_html():
         
 def get_main_info_html():
     return """
-        <p>StableDiffusion WebUI-based re-implementation of <strong><a href="https://deforum.github.io">deforum.github.io</a> maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong> & <a href="https://github.com/hithereai">hithereai</a></strong></p>
+        <p><strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong> & <a href="https://github.com/hithereai">hithereai</a></strong></p>
         <p><a  style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/FAQ-&-Troubleshooting">FOR HELP CLICK HERE</a></p>
         <ul style="list-style-type:circle; margin-left:1em">
         <li>The code for this extension: <a  style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">here</a>.</li>
@@ -159,11 +159,9 @@ def get_main_info_html():
         <li><a style="color:SteelBlue" href="https://www.framesync.xyz/">framesync.xyz</a> is also a good option, it makes compact math formulae for Deforum keyframes by selecting various waveforms.</li>
         <li>The other site allows for making keyframes using <a style="color:SteelBlue" href="https://www.chigozie.co.uk/keyframe-string-generator/">interactive splines and Bezier curves</a> (select Disco output format).</li>
         <li>If you want to use Width/Height which are not multiples of 64, please change noise_type to 'Uniform', in Keyframes --> Noise.</li>
+        <li><strong>This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See more information in the <a href="https://github.com/deforum-art/sd-webui-deforum/blob/automatic1111-webui/LICENSE">LICENSE</a></strong></li>
         </ul>
         <italic>If you liked this extension, please <a style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">give it a star on GitHub</a>!</italic> 😊
-        <ul style="list-style-type:circle; margin-left:1em">
-        <li>This program comes with <strong>ABSOLUTELY NO WARRANTY</strong>. This is free software, and you are welcome to redistribute it under certain conditions. See more information in the <a style="color:SteelBlue" href="https://github.com/deforum-art/sd-webui-deforum/blob/automatic1111-webui/LICENSE">LICENSE</a></li>
-        </ul>
         """
 def get_frame_interpolation_info_html():
     return """
