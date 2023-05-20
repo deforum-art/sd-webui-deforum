@@ -100,9 +100,9 @@ def get_tab_keyframes(d, da, dloopArgs):
                     seed_schedule = gr.Textbox(label="Seed schedule", lines=1, value=da.seed_schedule, interactive=True)
             with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
                 with gr.Row(variant='compact'):
-                    enable_subseed_scheduling = gr.Checkbox(label="Enable Subseed scheduling", value=da.enable_subseed_scheduling, interactive=True)
-                    subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value=da.subseed_schedule, interactive=True)
-                    subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value=da.subseed_strength_schedule, interactive=True)
+                    enable_subseed_scheduling = da.enable_subseed_scheduling["type"](label=da.enable_subseed_scheduling["label"], value=da.enable_subseed_scheduling["default"])
+                    subseed_schedule = da.subseed_schedule["type"](label=da.subseed_schedule["label"], value=da.subseed_schedule["default"])
+                    subseed_strength_schedule = da.subseed_strength_schedule["type"](label=da.subseed_strength_schedule["label"], value=da.subseed_strength_schedule["default"])
                 with gr.Row(variant='compact'):
                     seed_resize_from_w = d.seed_resize_from_w["type"](label=d.seed_resize_from_w["label"], value=d.seed_resize_from_w["default"], minimum=d.seed_resize_from_w["min"], maximum=d.seed_resize_from_w["max"], step=d.seed_resize_from_w["step"])
                     seed_resize_from_h = d.seed_resize_from_h["type"](label=d.seed_resize_from_h["label"], value=d.seed_resize_from_h["default"], minimum=d.seed_resize_from_h["min"], maximum=d.seed_resize_from_h["max"], step=d.seed_resize_from_h["step"])

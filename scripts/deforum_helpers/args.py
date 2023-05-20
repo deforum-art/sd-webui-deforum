@@ -42,21 +42,21 @@ def DeforumAnimArgs():
         "animation_mode": '2D',  # ['None', '2D', '3D', 'Video Input', 'Interpolation']
         "max_frames": 120,
         "border": 'replicate',  # ['wrap', 'replicate']
-        "angle": "0:(0)",
-        "zoom": "0:(1.0025+0.002*sin(1.25*3.14*t/30))",
-        "translation_x": "0:(0)",
-        "translation_y": "0:(0)",
-        "translation_z": "0:(1.75)",
-        "transform_center_x": "0:(0.5)",
-        "transform_center_y": "0:(0.5)",
+        "angle": "0: (0)",
+        "zoom": "0: (1.0025+0.002*sin(1.25*3.14*t/30))",
+        "translation_x": "0: (0)",
+        "translation_y": "0: (0)",
+        "translation_z": "0: (1.75)",
+        "transform_center_x": "0: (0.5)",
+        "transform_center_y": "0: (0.5)",
         "rotation_3d_x": "0:(0)",
         "rotation_3d_y": "0:(0)",
         "rotation_3d_z": "0:(0)",
         "enable_perspective_flip": False,
         "perspective_flip_theta": "0:(0)",
-        "perspective_flip_phi": "0:(0)",
-        "perspective_flip_gamma": "0:(0)",
-        "perspective_flip_fv": "0:(53)",
+        "perspective_flip_phi": "0: (0)",
+        "perspective_flip_gamma": "0: (0)",
+        "perspective_flip_fv": "0: (53)",
         "noise_schedule": "0: (0.065)",
         "strength_schedule": "0: (0.65)",
         "contrast_schedule": "0: (1.0)",
@@ -75,9 +75,24 @@ def DeforumAnimArgs():
             "default": "0:(1.5)",
             "info": "ONLY in use when working with a P2P ckpt!"
         },
-        "enable_subseed_scheduling": False,
-        "subseed_schedule": "0:(1)",
-        "subseed_strength_schedule": "0:(0)",
+        "enable_subseed_scheduling": {
+            "label": "Enable Subseed scheduling",
+            "type": gr.Checkbox,
+            "default": False,
+            "info": ""
+        },
+        "subseed_schedule": {
+            "label": "Subseed schedule",
+            "type": gr.Textbox,
+            "default": "0: (1)",
+            "info": ""
+        },
+        "subseed_strength_schedule": {
+            "label": "Subseed strength schedule",
+            "type": gr.Textbox,
+            "default": "0: (0)",
+            "info": ""
+        },
         "enable_sampler_scheduling": False,  # Sampler Scheduling
         "sampler_schedule": '0: ("Euler a")',
         "use_noise_mask": False,  # Composable mask scheduling
