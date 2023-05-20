@@ -188,7 +188,12 @@ def DeforumAnimArgs():
         "midas_weight": 0.2,  # midas/ zoe weight - only relevant in old/ legacy depth_algorithm modes. see above ^
         "padding_mode": 'border',  # ['border', 'reflection', 'zeros']
         "sampling_mode": 'bicubic',  # ['bicubic', 'bilinear', 'nearest']
-        "save_depth_maps": False,
+        "save_depth_maps": {
+                "label": "Save 3D depth maps",
+                "type": "checkbox",
+                "value": False,
+                "info": "save animation's depth maps as extra files"
+            },
         # **Video Input:**
         "video_init_path": {
                 "label": "Video init path/ URL",
@@ -344,8 +349,8 @@ def DeforumArgs():
             "seed_behavior": {
                 "label": "Seed behavior",
                 "type": "radio",
-                "choices": "['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule']",
-                "value": "Iter",
+                "choices": ['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'],
+                "value": "iter",
                 "info": "controls the seed behavior that is used for animation. hover on the options to see more info"
             },
             "seed_iter_N": {
@@ -529,19 +534,69 @@ def ParseqArgs():
 
 def DeforumOutputArgs():
     return {
-        "skip_video_creation": False,
-        "fps": 15,
-        "make_gif": False,
-        "delete_imgs": False,  # True will delete all imgs after a successful mp4 creation
+        "skip_video_creation": {
+            "label": "Skip video creation",
+            "type": "checkbox",
+            "value": False,
+            "info": "If enabled, only images will be saved"
+        },
+        "fps": {
+                "label": "FPS",
+                "type": "slider",
+                "min": 1,
+                "max": 240,
+                "step": 1,
+                "value": 15,
+        },
+        "make_gif": {
+            "label": "Make GIF",
+            "type": "checkbox",
+            "value": False,
+            "info": "make gif in addition to the video/s"
+        },
+        "delete_imgs": {
+            "label": "Delete Imgs",
+            "type": "checkbox",
+            "value": False,
+            "info": "auto-delete imgs when video is ready"
+        },
+            #False,  # True will delete all imgs after a successful mp4 creation
         "image_path": "C:/SD/20230124234916_%09d.png",
-        "add_soundtrack": 'None',  # ["File","Init Video"]
-        "soundtrack_path": "https://deforum.github.io/a1/A1.mp3",
+        "add_soundtrack": {
+                "label": "Add soundtrack",
+                "type": "radio",
+                "choices": ['None', 'File', 'Init Video'],
+                "value": "None",
+                "info": "add audio to video from file/url or init video"
+        },
+        "soundtrack_path": {
+            "label": "Soundtrack path",
+            "type": "textbox",
+            "value": "https://deforum.github.io/a1/A1.mp3",
+            "info": "abs. path or url to audio file"
+        },
         # End-Run upscaling
-        "r_upscale_video": False,
+        "r_upscale_video": {
+            "label": "Upscale",
+            "type": "checkbox",
+            "value": False,
+            "info": "upscale output imgs when run is finished"
+        },
         "r_upscale_factor": 'x2',  # ['2x', 'x3', 'x4'],
-        "r_upscale_model": 'realesr-animevideov3',  # 'realesr-animevideov3' (default of realesrgan engine, does 2-4x), the rest do only 4x:'realesrgan-x4plus', 'realesrgan-x4plus-anime'
+        "r_upscale_model": {
+                "label": "Upscale model",
+                "type": "dropdown",
+                "choices": ['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'],
+                "value": 'realesr-animevideov3',
+            },
         "r_upscale_keep_imgs": True,
-        "store_frames_in_ram": False,
+        "store_frames_in_ram": {
+            "label": "Store frames in ram",
+            "type": "checkbox",
+            "value": False,
+            "info": "auto-delete imgs when video is ready",
+            "visible": False
+        },
         # **Interpolate Video Settings**
         "frame_interpolation_engine": "None",  # ["None", "RIFE v4.6", "FILM"]
         "frame_interpolation_x_amount": 2,  # [2 to 1000 depends on the engine]

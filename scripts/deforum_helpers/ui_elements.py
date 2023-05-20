@@ -437,24 +437,20 @@ def get_tab_output(da, dv):
         # VID OUTPUT ACCORD
         with gr.Accordion('Video Output Settings', open=True):
             with gr.Row(variant='compact') as fps_out_format_row:
-                fps = gr.Slider(label="FPS", value=dv.fps, minimum=1, maximum=240, step=1)
+                fps = create_gr_elem(dv.fps)
             with gr.Column(variant='compact'):
                 with gr.Row(variant='compact') as soundtrack_row:
-                    add_soundtrack = gr.Radio(['None', 'File', 'Init Video'], label="Add soundtrack", value=dv.add_soundtrack, info="add audio to video from file/url or init video",
-                                              elem_id="add_soundtrack")
-                    soundtrack_path = gr.Textbox(label="Soundtrack path", lines=1, interactive=True, value=dv.soundtrack_path, info="abs. path or url to audio file")
-                    # TODO: auto-hide if video input is selected?!
+                    add_soundtrack = create_gr_elem(dv.add_soundtrack)
+                    soundtrack_path = create_gr_elem(dv.soundtrack_path)
                 with gr.Row(variant='compact'):
-                    skip_video_creation = gr.Checkbox(label="Skip video creation", value=dv.skip_video_creation, interactive=True, info="If enabled, only images will be saved")
-                    delete_imgs = gr.Checkbox(label="Delete Imgs", value=dv.delete_imgs, interactive=True, info="auto-delete imgs when video is ready")
-                    store_frames_in_ram = gr.Checkbox(label="Store frames in ram", value=dv.store_frames_in_ram, interactive=True, visible=False)
-                    save_depth_maps = gr.Checkbox(label="Save depth maps", value=da.save_depth_maps, interactive=True, info="save animation's depth maps as extra files")
-                    # the following param only shows for windows and linux users!
-                    make_gif = gr.Checkbox(label="Make GIF", value=dv.make_gif, interactive=True, info="make gif in addition to the video/s")
+                    skip_video_creation = create_gr_elem(dv.skip_video_creation)
+                    delete_imgs = create_gr_elem(dv.delete_imgs)
+                    store_frames_in_ram = create_gr_elem(dv.store_frames_in_ram)
+                    save_depth_maps = create_gr_elem(da.save_depth_maps)
+                    make_gif = create_gr_elem(dv.make_gif)
             with gr.Row(equal_height=True, variant='compact', visible=True) as r_upscale_row:
-                r_upscale_video = gr.Checkbox(label="Upscale", value=dv.r_upscale_video, interactive=True, info="upscale output imgs when run is finished")
-                r_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True,
-                                              value=dv.r_upscale_model, type="value")
+                r_upscale_video = create_gr_elem(dv.r_upscale_video)
+                r_upscale_model = create_gr_elem(dv.r_upscale_model)
                 r_upscale_factor = gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value=dv.r_upscale_factor, type="value")
                 r_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=dv.r_upscale_keep_imgs, interactive=True, info="don't delete upscaled imgs")
         # FRAME INTERPOLATION TAB
