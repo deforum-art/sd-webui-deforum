@@ -44,21 +44,20 @@ def get_tab_run(d, da):
 
 def create_gr_elem(d):
     obj_type = d["type"]
-    # Common, shared-to-all params
-    elem_params = {'label': d.get("label"), 'value': d.get("default")}
-    # Additional parameters for various gr.types
-    if obj_type == gr.Slider:
-        elem_params.update({'minimum': d.get("min"), 'maximum': d.get("max"), 'step': d.get("step")})
-    elif obj_type == gr.Number:
-        elem_params.update({'precision': d.get("precision")})
-    if 'visible' in d:
-        elem_params.update({'visible': d.get("visible")})
-    if 'info' in d:
-        elem_params.update({'info': d.get("info")})
-    if 'lines' in d:
-        elem_params.update({'lines': d.get("lines")})
-
-    return obj_type(**elem_params)
+    elem_params = {
+        'label': d.get("label"),
+        'value': d.get("value"),
+        'minimum': d.get("min"),
+        'maximum': d.get("max"),
+        'step': d.get("step"),
+        'precision': d.get("precision"),
+        'choices': d.get("choices"),
+        'visible': d.get("visible"),
+        'info': d.get("info"),
+        'lines': d.get("lines"),
+        'type': d.get("radio_type")
+    }
+    return obj_type(**{k: v for k, v in elem_params.items() if v is not None})
 
 def get_tab_keyframes(d, da, dloopArgs):
     with gr.TabItem('Keyframes'):  # TODO make a some sort of the original dictionary parsing
@@ -232,8 +231,8 @@ def get_tab_keyframes(d, da, dloopArgs):
                                                info="this option renders N times before the final render. it is suggested to lower your steps if you up your redo. seed is randomized during redo generations and restored afterwards")
                 with gr.Row(variant='compact'):
                     # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
-                    reroll_blank_frames = gr.Radio(['reroll', 'interrupt', 'ignore'], label="Reroll blank frames", value=d.reroll_blank_frames, elem_id="reroll_blank_frames")
-                    reroll_patience = gr.Number(value=d.reroll_patience, label="Reroll patience", interactive=True)
+                    reroll_blank_frames = create_gr_elem(d.reroll_blank_frames)
+                    reroll_patience = create_gr_elem(d.reroll_patience)
             # ANTI BLUR INNER TAB
             with gr.TabItem('Anti Blur', elem_id='anti_blur_accord') as anti_blur_tab:
                 with gr.Row(variant='compact'):
@@ -338,11 +337,10 @@ def get_tab_init(d, da, dp):
             with gr.Row(variant='compact'):
                 mask_overlay_blur = create_gr_elem(d.mask_overlay_blur)
             with gr.Row(variant='compact'):
-                choice = mask_fill_choices[d.fill]
-                fill = gr.Radio(label='Mask fill', choices=mask_fill_choices, value=choice, type="index")
+                fill = create_gr_elem(d.fill)
             with gr.Row(variant='compact'):
-                full_res_mask = gr.Checkbox(label="Full res mask", value=d.full_res_mask, interactive=True)
-                full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="Full res mask padding", value=d.full_res_mask_padding, interactive=True)
+                full_res_mask = create_gr_elem(d.full_res_mask)
+                full_res_mask_padding = create_gr_elem(d.full_res_mask_padding)
             with gr.Row(variant='compact'):
                 with gr.Column(min_width=240):
                     mask_contrast_adjust = create_gr_elem(d.mask_contrast_adjust)

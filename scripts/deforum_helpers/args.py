@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import modules.paths as ph
 import modules.shared as sh
 from modules.processing import get_fixed_seed
-from .defaults import get_guided_imgs_default_json
+from .defaults import get_guided_imgs_default_json, mask_fill_choices
 from .deforum_controlnet import controlnet_component_names
 from .general_utils import get_os, substitute_placeholders
 
@@ -64,13 +64,13 @@ def DeforumAnimArgs():
         "enable_steps_scheduling": {
             "label": "Enable steps scheduling",
             "type": gr.Checkbox,
-            "default": False,
+            "value": False,
             "info": ""
         },
         "steps_schedule": {
             "label": "Steps schedule",
             "type": gr.Textbox,
-            "default": "0: (25)",
+            "value": "0: (25)",
             "info": "mainly allows using more than 200 steps. otherwise, it's a mirror-like param of 'strength schedule'"
         },
         "fov_schedule": "0: (70)",
@@ -81,31 +81,31 @@ def DeforumAnimArgs():
         "seed_schedule": {
             "label": "Seed schedule",
             "type": gr.Textbox,
-            "default": '0:(s), 1:(-1), "max_f-2":(-1), "max_f-1":(s)',
+            "value": '0:(s), 1:(-1), "max_f-2":(-1), "max_f-1":(s)',
             "info": ""
         },
         "pix2pix_img_cfg_scale_schedule": {
             "label": "Pix2Pix img CFG schedule",
             "type": gr.Textbox,
-            "default": "0:(1.5)",
+            "value": "0:(1.5)",
             "info": "ONLY in use when working with a P2P ckpt!"
         },
         "enable_subseed_scheduling": {
             "label": "Enable Subseed scheduling",
             "type": gr.Checkbox,
-            "default": False,
+            "value": False,
             "info": ""
         },
         "subseed_schedule": {
             "label": "Subseed schedule",
             "type": gr.Textbox,
-            "default": "0: (1)",
+            "value": "0: (1)",
             "info": ""
         },
         "subseed_strength_schedule": {
             "label": "Subseed strength schedule",
             "type": gr.Textbox,
-            "default": "0: (0)",
+            "value": "0: (0)",
             "info": ""
         },
         "enable_sampler_scheduling": False,  # Sampler Scheduling
@@ -122,39 +122,39 @@ def DeforumAnimArgs():
         "resume_from_timestring": {
             "label": "Resume from timestring",
             "type": gr.Checkbox,
-            "default": False,
+            "value": False,
             "info": ""
         },
         "resume_timestring": {
             "label": "Resume timestring",
             "type": gr.Textbox,
-            "default": "20230129210106",
+            "value": "20230129210106",
             "info": ""
         },
         "enable_ddim_eta_scheduling": {
             "label": "Enable DDIM ETA scheduling",
             "type": gr.Checkbox,
-            "default": False,
+            "value": False,
             "visible": False,
             "info": ""
         },
         "ddim_eta_schedule": {
             "label": "DDIM ETA Schedule",
             "type": gr.Textbox,
-            "default": "0: (0)",
+            "value": "0: (0)",
             "visible": False,
             "info": ""
         },
         "enable_ancestral_eta_scheduling": {
             "label": "Enable Ancestral ETA scheduling",
             "type": gr.Checkbox,
-            "default": False,
+            "value": False,
             "info": ""
         },
         "ancestral_eta_schedule": {
             "label": "Ancestral ETA Schedule",
             "type": gr.Textbox,
-            "default": "0: (1)",
+            "value": "0: (1)",
             "visible": False,
             "info": ""
         },
@@ -231,7 +231,7 @@ def DeforumArgs():
                 "min": 8,
                 "max": 2048,
                 "step": 8,
-                "default": 512,
+                "value": 512,
             },
             "H": {
                 "label": "Height",
@@ -239,26 +239,26 @@ def DeforumArgs():
                 "min": 64,
                 "max": 2048,
                 "step": 64,
-                "default": 512,
+                "value": 512,
             },
             "show_info_on_ui": True,
             "tiling": {
                 "label": "Tiling",
                 "type": gr.Checkbox,
-                "default": False,
+                "value": False,
                 "info": "Enable for seamless-tiling of each generated image. Experimental"
             },
             "restore_faces": {
                 "label": "Restore faces",
                 "type": gr.Checkbox,
-                "default": False,
+                "value": False,
                 "info": "enable to trigger webui's face restoration on each frame during the generation"
             },
             "seed_enable_extras": {
                 "label": "Enable subseed controls",
                 "type": gr.Checkbox,
                 "visible": False,
-                "default": False,
+                "value": False,
                 "info": ""
             },
             "seed_resize_from_w": {
@@ -267,7 +267,7 @@ def DeforumArgs():
                 "min": 0,
                 "max": 2048,
                 "step": 64,
-                "default": 0,
+                "value": 0,
             },
             "seed_resize_from_h": {
                 "label": "Resize seed from height",
@@ -275,20 +275,20 @@ def DeforumArgs():
                 "min": 0,
                 "max": 2048,
                 "step": 64,
-                "default": 0,
+                "value": 0,
             },
             "seed": {
                 "label": "Seed",
                 "type": gr.Number,
                 "precision": 0,
-                "default": -1,
+                "value": -1,
                 "info": "Starting seed for the animation. -1 for random"
             },
             "sampler": {
                 "label": "Sampler",
                 "type": gr.Dropdown,
                 "choices": [x.name for x in samplers_for_img2img],
-                "default": samplers_for_img2img[0].name,
+                "value": samplers_for_img2img[0].name,
             },
             "steps": {
                 "label": "step",
@@ -296,32 +296,32 @@ def DeforumArgs():
                 "min": 1,
                 "max": 200,
                 "step": 1,
-                "default": 25,
+                "value": 25,
             },
             "batch_name": {
                 "label": "Batch name",
                 "type": gr.Textbox,
-                "default": "Deforum_{timestring}",
+                "value": "Deforum_{timestring}",
                 "info": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}"
             },
             "seed_behavior": {
                 "label": "Seed behavior",
                 "type": gr.Radio,
                 "choices": "['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule']",
-                "default": "Iter",
+                "value": "Iter",
                 "info": "controls the seed behavior that is used for animation. hover on the options to see more info"
             },
             "seed_iter_N": {
                 "label": "Seed iter N",
                 "type": gr.Number,
                 "precision": 0,
-                "default": 1,
+                "value": 1,
                 "info": "for how many frames the same seed should stick before iterating to the next one"
             },
             "use_init": {
                 "label": "Use init",
                 "type": gr.Checkbox,
-                "default": False,
+                "value": False,
                 "info": ""
             },
             "strength": {
@@ -330,57 +330,57 @@ def DeforumArgs():
                 "min": 0,
                 "max": 1,
                 "step": 0.01,
-                "default": 0.8,
+                "value": 0.8,
             },
             "strength_0_no_init": {
                 "label": "Strength 0 no init",
                 "type": gr.Checkbox,
-                "default": True,
+                "value": True,
                 "info": ""
             },
             "init_image": {
                 "label": "Init image",
                 "type": gr.Textbox,
-                "default": "https://deforum.github.io/a1/I1.png",
+                "value": "https://deforum.github.io/a1/I1.png",
                 "info": ""
             },
             "use_mask": {
                 "label": "Use mask",
                 "type": gr.Checkbox,
-                "default": False,
+                "value": False,
                 "info": ""
             },
             "use_alpha_as_mask": {
                 "label": "Use alpha as mask",
                 "type": gr.Checkbox,
-                "default": False,
+                "value": False,
                 "info": ""
             },
             "mask_file": "https://deforum.github.io/a1/M1.jpg",
             "invert_mask": {
                 "label": "Invert mask",
                 "type": gr.Checkbox,
-                "default": False,
+                "value": False,
                 "info": ""
             },
             "mask_contrast_adjust": {
                 "label": "Mask contrast adjust",
                 "type": gr.Number,
                 "precision": None,
-                "default": 1.0,
+                "value": 1.0,
                 "info": ""
             },
             "mask_brightness_adjust": {
                 "label": "Mask brightness adjust",
                 "type": gr.Number,
                 "precision": None,
-                "default": 1.0,
+                "value": 1.0,
                 "info": ""
             },
             "overlay_mask": {
                 "label": "Overlay mask",
                 "type": gr.Checkbox,
-                "default": True,
+                "value": True,
                 "info": ""
             },
             "mask_overlay_blur": {
@@ -389,13 +389,45 @@ def DeforumArgs():
                 "min": 0,
                 "max": 64,
                 "step": 1,
-                "default": 4,
+                "value": 4,
             },
-            "fill": 1,
-            "full_res_mask": True,
-            "full_res_mask_padding": 4,
-            "reroll_blank_frames": False,
-            "reroll_patience": 10
+            "fill": {
+                "label": "Mask fill",
+                "type": gr.Radio,
+                "radio_type": "index",
+                "choices": mask_fill_choices,
+                "value": mask_fill_choices[1],
+                "info": ""
+            },
+            "full_res_mask": {
+                "label": "Full res mask",
+                "type": gr.Checkbox,
+                "value": True,
+                "info": ""
+            },
+            "full_res_mask_padding": {
+                "label": "Full res mask padding",
+                "type": gr.Slider,
+                "min": 0,
+                "max": 512,
+                "step": 1,
+                "value": 4,
+            },
+            "reroll_blank_frames": {
+                "label": "Reroll blank frames",
+                "type": gr.Radio,
+                "radio_type": "index",
+                "choices": "['reroll', 'interrupt', 'ignore']",
+                "value": "ignore",
+                "info": ""
+            },
+            "reroll_patience": {
+                "label": "Reroll patience",
+                "type": gr.Number,
+                "precision": None,
+                "value": 10,
+                "info": ""
+            },
         }
 
 def LoopArgs():
@@ -403,38 +435,38 @@ def LoopArgs():
         "use_looper": {
             "label": "Enable guided images mode",
             "type": gr.Checkbox,
-            "default": False,
+            "value": False,
         },
         "init_images": {
             "label": "Images to use for keyframe guidance",
             "type": gr.Textbox,
             "lines": 9,
-            "default": get_guided_imgs_default_json(),
+            "value": get_guided_imgs_default_json(),
         },
         "image_strength_schedule": {
             "label": "Image strength schedule",
             "type": gr.Textbox,
-            "default": "0:(0.75)",
+            "value": "0:(0.75)",
         },
         "blendFactorMax": {
             "label": "Blend factor max",
             "type": gr.Textbox,
-            "default": "0:(0.35)",
+            "value": "0:(0.35)",
         },
         "blendFactorSlope": {
             "label": "Blend factor slope",
             "type": gr.Textbox,
-            "default": "0:(0.25)",
+            "value": "0:(0.25)",
         },
         "tweening_frames_schedule": {
             "label": "Tweening frames schedule",
             "type": gr.Textbox,
-            "default": "0:(20)",
+            "value": "0:(20)",
         },
         "color_correction_factor": {
             "label": "Color correction factor",
             "type": gr.Textbox,
-            "default": "0:(0.075)",
+            "value": "0:(0.075)",
         }
     }
 
