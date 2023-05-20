@@ -6,7 +6,6 @@ from types import SimpleNamespace
 import modules.paths as ph
 import modules.shared as sh
 from modules.processing import get_fixed_seed
-from modules.shared import cmd_opts
 from .defaults import get_guided_imgs_default_json
 from .deforum_controlnet import controlnet_component_names
 from .general_utils import get_os, substitute_placeholders
@@ -15,7 +14,7 @@ def RootArgs():
     return {
         "device": sh.device,
         "models_path": ph.models_path + '/Deforum',
-        "half_precision": not cmd_opts.no_half,
+        "half_precision": not sh.cmd_opts.no_half,
         "mask_preset_names": ['everywhere', 'video_mask'],
         "frames_cache": [],
         "raw_batch_name": None,
