@@ -2,6 +2,7 @@ import json
 import os
 import tempfile
 import time
+import gradio as gr
 from types import SimpleNamespace
 import modules.paths as ph
 import modules.shared as sh
@@ -201,14 +202,43 @@ def DeforumArgs():
 
 def LoopArgs():
     return {
-        "use_looper": False,
-        "init_images": get_guided_imgs_default_json(),
-        "image_strength_schedule": "0:(0.75)",
-        "blendFactorMax": "0:(0.35)",
-        "blendFactorSlope": "0:(0.25)",
-        "tweening_frames_schedule": "0:(20)",
-        "color_correction_factor": "0:(0.075)"
+        "use_looper": {
+            "label": "Enable guided images mode",
+            "type": gr.Checkbox,
+            "default": False,
+        },
+        "init_images": {
+            "label": "Images to use for keyframe guidance",
+            "type": gr.Textbox,
+            "default": get_guided_imgs_default_json(),
+        },
+        "image_strength_schedule": {
+            "label": "Image strength schedule",
+            "type": gr.Textbox,
+            "default": "0:(0.75)",
+        },
+        "blendFactorMax": {
+            "label": "Blend factor max",
+            "type": gr.Textbox,
+            "default": "0:(0.35)",
+        },
+        "blendFactorSlope": {
+            "label": "Blend factor slope",
+            "type": gr.Textbox,
+            "default": "0:(0.25)",
+        },
+        "tweening_frames_schedule": {
+            "label": "Tweening frames schedule",
+            "type": gr.Textbox,
+            "default": "0:(20)",
+        },
+        "color_correction_factor": {
+            "label": "Color correction factor",
+            "type": gr.Textbox,
+            "default": "0:(0.075)",
+        }
     }
+
 
 def ParseqArgs():
     return {
