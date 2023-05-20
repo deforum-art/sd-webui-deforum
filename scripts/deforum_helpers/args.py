@@ -246,36 +246,24 @@ def get_component_names():
 def get_settings_component_names():
     return [name for name in get_component_names()]
 
-def pack_args(args_dict):
+def pack_default_args(args_dict):
     args_dict = {name: args_dict[name] for name in DeforumArgs()}
     args_dict.update({name: CoreArgs()[name] for name in CoreArgs()})
     return args_dict
 
-def pack_anim_args(args_dict):
-    return {name: args_dict[name] for name in DeforumAnimArgs()}
-
-def pack_video_args(args_dict):
-    return {name: args_dict[name] for name in DeforumOutputArgs()}
-
-def pack_parseq_args(args_dict):
-    return {name: args_dict[name] for name in ParseqArgs()}
-
-def pack_loop_args(args_dict):
-    return {name: args_dict[name] for name in LoopArgs()}
-
-def pack_controlnet_args(args_dict):
-    return {name: args_dict[name] for name in controlnet_component_names()}
+def pack_args(args_dict, arg_set):
+    return {name: args_dict[name] for name in arg_set()}
 
 def process_args(args_dict_main, run_id):
     from .settings import load_args
     override_settings_with_file = args_dict_main['override_settings_with_file']
     custom_settings_file = args_dict_main['custom_settings_file']
-    args_dict = pack_args(args_dict_main)
-    anim_args_dict = pack_anim_args(args_dict_main)
-    video_args_dict = pack_video_args(args_dict_main)
-    parseq_args_dict = pack_parseq_args(args_dict_main)
-    loop_args_dict = pack_loop_args(args_dict_main)
-    controlnet_args_dict = pack_controlnet_args(args_dict_main)
+    args_dict = pack_default_args(args_dict_main)
+    anim_args_dict = pack_args(args_dict_main, DeforumAnimArgs)
+    video_args_dict = pack_args(args_dict_main, DeforumOutputArgs)
+    parseq_args_dict = pack_args(args_dict_main, ParseqArgs)
+    loop_args_dict = pack_args(args_dict_main, LoopArgs)
+    controlnet_args_dict = pack_args(args_dict_main, controlnet_component_names)
 
     root = SimpleNamespace(**RootArgs())
     p = args_dict_main['p']
