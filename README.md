@@ -65,9 +65,3 @@ Main extension tab:
 Keyframes tab:
 
 ![image](https://user-images.githubusercontent.com/121192995/226101140-bfe6cce7-9b78-4a1d-be9a-43e1fc78239e.png)
-
-## Licensing
-
-The 'extension' part of this project is licensed under the Affero GNU General Public License version 3.
-
-For license inheritance from the Deforum notebook and the previous versions of the extension and for the third party code used under permissive licenses, see the LICENSE file.
