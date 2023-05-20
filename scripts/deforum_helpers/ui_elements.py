@@ -361,9 +361,9 @@ def get_tab_init(d, da, dp):
         with gr.Accordion('Parseq', open=False):
             gr.HTML(value=get_gradio_html('parseq'))
             with gr.Row(variant='compact'):
-                parseq_manifest = gr.Textbox(label="Parseq Manifest (JSON or URL)", lines=4, value=dp.parseq_manifest, interactive=True)
+                parseq_manifest = create_gr_elem(dp.parseq_manifest)
             with gr.Row(variant='compact'):
-                parseq_use_deltas = gr.Checkbox(label="Use delta values for movement parameters", value=dp.parseq_use_deltas, interactive=True)
+                parseq_use_deltas = create_gr_elem(dp.parseq_use_deltas)
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
 def get_tab_hybrid(da):

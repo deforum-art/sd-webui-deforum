@@ -471,8 +471,17 @@ def LoopArgs():
 
 def ParseqArgs():
     return {
-        "parseq_manifest": None,
-        "parseq_use_deltas": True
+        "parseq_manifest": {
+            "label": "Parseq Manifest (JSON or URL)",
+            "type": "textbox",
+            "lines": 4,
+            "value": None,
+        },
+        "parseq_use_deltas": {
+            "label": "Use delta values for movement parameters",
+            "type": "checkbox",
+            "value": True,
+        }
     }
 
 def DeforumOutputArgs():
