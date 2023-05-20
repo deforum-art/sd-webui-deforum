@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# Contact the dev team: https://discord.gg/deforum
+# Contact the author (Artem Khrapov): https://github.com/kabachuha/
 
 # At the moment there are three types of masks: mask from variable, file mask and word mask
 # Variable masks include video_mask (which can be set to auto-generated human masks) and everywhere
