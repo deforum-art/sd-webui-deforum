@@ -7,6 +7,7 @@ from .deforum_controlnet import setup_controlnet_ui
 from .ui_elements import get_tab_run, get_tab_keyframes, get_tab_prompts, get_tab_init, get_tab_hybrid, get_tab_output
 
 def set_arg_lists():
+    # convert dicts to NameSpaces for easy working (args.param instead of args['param']
     d = SimpleNamespace(**DeforumArgs())  # default args
     da = SimpleNamespace(**DeforumAnimArgs())  # default anim args
     dp = SimpleNamespace(**ParseqArgs())  # default parseq ars
