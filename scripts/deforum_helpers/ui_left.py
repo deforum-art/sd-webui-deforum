@@ -63,11 +63,7 @@ def get_tab_run(d, da):
             sampler.change(fn=show_when_ancestral_samplers, inputs=sampler, outputs=output)
         enable_ancestral_eta_scheduling.change(fn=hide_if_false, inputs=enable_ancestral_eta_scheduling, outputs=ancestral_eta_schedule)
         enable_ddim_eta_scheduling.change(fn=hide_if_false, inputs=enable_ddim_eta_scheduling, outputs=ddim_eta_schedule)
-    return {key: value for key, value in locals().items() if key in [
-        "sampler", "steps", "W", "H", "seed", "batch_name",
-        "restore_faces", "tiling", "enable_ddim_eta_scheduling", "enable_ancestral_eta_scheduling", "ddim_eta_schedule", "ancestral_eta_schedule", "override_settings_with_file",
-        "custom_settings_file", "resume_from_timestring", "resume_timestring", "pix2pix_img_cfg_scale_schedule"
-    ]}
+    return {k: v for k, v in {**locals(), **vars()}.items() if isinstance(v, (gr.Dropdown, gr.Slider, gr.Number, gr.Textbox, gr.Checkbox, gr.File))}
 
 def setup_deforum_left_side_ui():
     d, da, dp, dv, dr, dloopArgs = set_arg_lists()
