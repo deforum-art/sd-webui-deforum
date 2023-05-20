@@ -200,7 +200,7 @@ def DeforumArgs():
                 "type": gr.Slider,
                 "min": 8,
                 "max": 2048,
-                "steps": 8,
+                "step": 8,
                 "default": 512,
             },
             "H": {
@@ -208,7 +208,7 @@ def DeforumArgs():
                 "type": gr.Slider,
                 "min": 64,
                 "max": 2048,
-                "steps": 64,
+                "step": 64,
                 "default": 512,
             },
             "show_info_on_ui": True,
@@ -231,8 +231,22 @@ def DeforumArgs():
                 "default": False,
                 "info": ""
             },
-            "seed_resize_from_w": 0,
-            "seed_resize_from_h": 0,
+            "seed_resize_from_w": {
+                "label": "Resize seed from width",
+                "type": gr.Slider,
+                "min": 0,
+                "max": 2048,
+                "step": 64,
+                "default": 0,
+            },
+            "seed_resize_from_h": {
+                "label": "Resize seed from height",
+                "type": gr.Slider,
+                "min": 0,
+                "max": 2048,
+                "step": 64,
+                "default": 0,
+            },
             "seed": {
                 "label": "Seed",
                 "type": gr.Number,
@@ -247,11 +261,11 @@ def DeforumArgs():
                 "default": samplers_for_img2img[0].name,
             },
             "steps": {
-                "label": "Steps",
+                "label": "step",
                 "type": gr.Slider,
                 "min": 1,
                 "max": 200,
-                "steps": 1,
+                "step": 1,
                 "default": 25,
             },
             "batch_name": {
@@ -261,7 +275,13 @@ def DeforumArgs():
                 "default": "Deforum_{timestring}",
                 "info": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}"
             },
-            "seed_behavior": "Iter",
+            "seed_behavior": {
+                "label": "Seed behavior",
+                "type": gr.Radio,
+                "choices": "['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule']",
+                "default": "Iter",
+                "info": "controls the seed behavior that is used for animation. hover on the options to see more info"
+            },
             "seed_iter_N": 1,
             "use_init": False,
             "strength": 0.8,

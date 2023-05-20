@@ -11,8 +11,8 @@ def get_tab_run(d, da):
             sampler = d.sampler["type"](label=d.sampler["label"], choices=d.sampler["choices"], value=d.sampler["default"], type="value")
             steps = d.steps["type"](label=d.steps["label"], minimum=d.steps["min"], maximum=d.steps["max"], value=d.steps["default"])
         with gr.Row(variant='compact'):
-            W = d.W["type"](label=d.W["label"], minimum=d.W["min"], maximum=d.W["max"], steps=d.W["steps"], value=d.W["default"])
-            H = d.H["type"](label=d.H["label"], minimum=d.H["min"], maximum=d.H["max"], steps=d.H["steps"], value=d.H["default"])
+            W = d.W["type"](label=d.W["label"], minimum=d.W["min"], maximum=d.W["max"], step=d.W["step"], value=d.W["default"])
+            H = d.H["type"](label=d.H["label"], minimum=d.H["min"], maximum=d.H["max"], step=d.H["step"], value=d.H["default"])
         with gr.Row(variant='compact'):
             seed = d.seed["type"](label=d.seed["label"], lines=d.seed["lines"], value=d.seed["default"], info=d.seed["info"])
             batch_name = d.batch_name["type"](label=d.batch_name["label"], lines=d.batch_name["lines"], value=d.batch_name["default"], info=d.batch_name["info"])
@@ -92,8 +92,7 @@ def get_tab_keyframes(d, da, dloopArgs):
                     clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value=da.clipskip_schedule, interactive=True)
             with gr.TabItem('Seed') as a3:
                 with gr.Row(variant='compact'):
-                    seed_behavior = gr.Radio(['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'], label="Seed behavior", value=d.seed_behavior, elem_id="seed_behavior",
-                                             info="controls the seed behavior that is used for animation. hover on the options to see more info")
+                    seed_behavior = d.seed_behavior["type"](label=d.seed_behavior["label"], choices=d.seed_behavior["choices"], value=d.seed_behavior["default"], info=d.seed_behavior["info"])
                 with gr.Row(variant='compact') as seed_iter_N_row:
                     seed_iter_N = gr.Number(label="Seed iter N", value=d.seed_iter_N, interactive=True, precision=0,
                                             info="for how many frames the same seed should stick before iterating to the next one")
@@ -105,8 +104,8 @@ def get_tab_keyframes(d, da, dloopArgs):
                     subseed_schedule = gr.Textbox(label="Subseed schedule", lines=1, value=da.subseed_schedule, interactive=True)
                     subseed_strength_schedule = gr.Textbox(label="Subseed strength schedule", lines=1, value=da.subseed_strength_schedule, interactive=True)
                 with gr.Row(variant='compact'):
-                    seed_resize_from_w = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from width", value=0)
-                    seed_resize_from_h = gr.Slider(minimum=0, maximum=2048, step=64, label="Resize seed from height", value=0)
+                    seed_resize_from_w = d.seed_resize_from_w["type"](label=d.seed_resize_from_w["label"], value=d.seed_resize_from_w["default"], minimum=d.seed_resize_from_w["min"], maximum=d.seed_resize_from_w["max"], step=d.seed_resize_from_w["step"])
+                    seed_resize_from_h = d.seed_resize_from_h["type"](label=d.seed_resize_from_h["label"], value=d.seed_resize_from_h["default"], minimum=d.seed_resize_from_h["min"], maximum=d.seed_resize_from_h["max"], step=d.seed_resize_from_h["step"])
             # Steps Scheduling
             with gr.TabItem('Step') as a13:
                 with gr.Row(variant='compact'):
