@@ -159,14 +159,16 @@ def setup_controlnet_ui_raw():
         selected = dd if dd in cn_models else "None"
         return gr.Dropdown.update(value=selected, choices=cn_models)
 
-    with gr.Tabs():
-        model_params = {}
-        for i in range(1, num_of_models + 1):
-            with gr.Tab(f"CN Model {i}"):
-                model_params[i] = create_model_in_tab_ui(i)
+    with gr.TabItem('ControlNet'):
+        gr.HTML(controlnet_infotext())
+        with gr.Tabs():
+            model_params = {}
+            for i in range(1, num_of_models + 1):
+                with gr.Tab(f"CN Model {i}"):
+                    model_params[i] = create_model_in_tab_ui(i)
 
-                for key, value in model_params[i].items():
-                    locals()[f"cn_{i}_{key}"] = value
+                    for key, value in model_params[i].items():
+                        locals()[f"cn_{i}_{key}"] = value
 
     return locals()
 
