@@ -210,31 +210,37 @@ def LoopArgs():
         "init_images": {
             "label": "Images to use for keyframe guidance",
             "type": gr.Textbox,
+            "lines": 9,
             "default": get_guided_imgs_default_json(),
         },
         "image_strength_schedule": {
             "label": "Image strength schedule",
             "type": gr.Textbox,
+            "lines": 1,
             "default": "0:(0.75)",
         },
         "blendFactorMax": {
             "label": "Blend factor max",
             "type": gr.Textbox,
+            "lines": 1,
             "default": "0:(0.35)",
         },
         "blendFactorSlope": {
             "label": "Blend factor slope",
             "type": gr.Textbox,
+            "lines": 1,
             "default": "0:(0.25)",
         },
         "tweening_frames_schedule": {
             "label": "Tweening frames schedule",
             "type": gr.Textbox,
+            "lines": 1,
             "default": "0:(20)",
         },
         "color_correction_factor": {
             "label": "Color correction factor",
             "type": gr.Textbox,
+            "lines": 1,
             "default": "0:(0.075)",
         }
     }

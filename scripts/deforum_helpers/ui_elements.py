@@ -66,19 +66,19 @@ def get_tab_keyframes(d, da, dloopArgs):
             with gr.Row(variant='compact'):
                 use_looper = dloopArgs.use_looper["type"](label=dloopArgs.use_looper["label"], value=dloopArgs.use_looper["default"])
             with gr.Row(variant='compact'):
-                init_images = dloopArgs.init_images["type"](label=dloopArgs.init_images["label"], lines=9, value=dloopArgs.init_images["default"])
+                init_images = dloopArgs.init_images["type"](label=dloopArgs.init_images["label"], lines=dloopArgs.init_images["lines"], value=dloopArgs.init_images["default"])
             # GUIDED IMAGES SCHEDULES ACCORD
             with gr.Accordion('Guided images schedules', open=False):
                 with gr.Row(variant='compact'):
-                    image_strength_schedule = dloopArgs.image_strength_schedule["type"](label=dloopArgs.image_strength_schedule["label"], lines=1, value=dloopArgs.image_strength_schedule["default"])
+                    image_strength_schedule = dloopArgs.image_strength_schedule["type"](label=dloopArgs.image_strength_schedule["label"], lines=dloopArgs.image_strength_schedule["lines"], value=dloopArgs.image_strength_schedule["default"])
                 with gr.Row(variant='compact'):
-                    blendFactorMax = dloopArgs.blendFactorMax["type"](label=dloopArgs.blendFactorMax["label"], lines=1, value=dloopArgs.blendFactorMax["default"])
+                    blendFactorMax = dloopArgs.blendFactorMax["type"](label=dloopArgs.blendFactorMax["label"], lines=dloopArgs.blendFactorMax["lines"], value=dloopArgs.blendFactorMax["default"])
                 with gr.Row(variant='compact'):
-                    blendFactorSlope = dloopArgs.blendFactorSlope["type"](label=dloopArgs.blendFactorSlope["label"], lines=1, value=dloopArgs.blendFactorSlope["default"])
+                    blendFactorSlope = dloopArgs.blendFactorSlope["type"](label=dloopArgs.blendFactorSlope["label"], lines=dloopArgs.blendFactorSlope["lines"], value=dloopArgs.blendFactorSlope["default"])
                 with gr.Row(variant='compact'):
-                    tweening_frames_schedule = dloopArgs.tweening_frames_schedule["type"](label=dloopArgs.tweening_frames_schedule["label"], lines=1, value=dloopArgs.tweening_frames_schedule["default"])
+                    tweening_frames_schedule = dloopArgs.tweening_frames_schedule["type"](label=dloopArgs.tweening_frames_schedule["label"], lines=dloopArgs.tweening_frames_schedule["lines"], value=dloopArgs.tweening_frames_schedule["default"])
                 with gr.Row(variant='compact'):
-                    color_correction_factor = dloopArgs.color_correction_factor["type"](label=dloopArgs.color_correction_factor["label"], lines=1, value=dloopArgs.color_correction_factor["default"])
+                    color_correction_factor = dloopArgs.color_correction_factor["type"](label=dloopArgs.color_correction_factor["label"], lines=dloopArgs.color_correction_factor["lines"], value=dloopArgs.color_correction_factor["default"])
         # EXTRA SCHEDULES TABS
         with gr.Tabs(elem_id='extra_schedules'):
             with gr.TabItem('Strength'):
