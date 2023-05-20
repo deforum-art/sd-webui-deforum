@@ -327,15 +327,15 @@ def get_tab_init(d, da, dp):
         # VIDEO INIT INNER-TAB
         with gr.Tab('Video Init'):
             with gr.Row(variant='compact'):
-                video_init_path = gr.Textbox(label="Video init path", lines=1, value=da.video_init_path, interactive=True)
+                video_init_path = create_gr_elem(da.video_init_path)
             with gr.Row(variant='compact'):
-                extract_from_frame = gr.Number(label="Extract from frame", value=da.extract_from_frame, interactive=True, precision=0)
-                extract_to_frame = gr.Number(label="Extract to frame", value=da.extract_to_frame, interactive=True, precision=0)
-                extract_nth_frame = gr.Number(label="Extract nth frame", value=da.extract_nth_frame, interactive=True, precision=0)
-                overwrite_extracted_frames = gr.Checkbox(label="Overwrite extracted frames", value=False, interactive=True)
-                use_mask_video = gr.Checkbox(label="Use mask video", value=False, interactive=True)
+                extract_from_frame = create_gr_elem(da.extract_from_frame)
+                extract_to_frame = create_gr_elem(da.extract_to_frame)
+                extract_nth_frame = create_gr_elem(da.extract_nth_frame)
+                overwrite_extracted_frames = create_gr_elem(da.overwrite_extracted_frames)
+                use_mask_video = create_gr_elem(da.use_mask_video)
             with gr.Row(variant='compact'):
-                video_mask_path = gr.Textbox(label="Video mask path", lines=1, value=da.video_mask_path, interactive=True)
+                video_mask_path = create_gr_elem(da.video_mask_path)
         # MASK INIT INNER-TAB
         with gr.Tab('Mask Init'):
             with gr.Row(variant='compact'):
@@ -344,7 +344,7 @@ def get_tab_init(d, da, dp):
                 invert_mask = create_gr_elem(d.invert_mask)
                 overlay_mask = create_gr_elem(d.overlay_mask)
             with gr.Row(variant='compact'):
-                mask_file = gr.Textbox(label="Mask file", lines=1, interactive=True, value=d.mask_file)
+                mask_file = create_gr_elem(d.mask_file)
             with gr.Row(variant='compact'):
                 mask_overlay_blur = create_gr_elem(d.mask_overlay_blur)
             with gr.Row(variant='compact'):

@@ -190,13 +190,51 @@ def DeforumAnimArgs():
         "sampling_mode": 'bicubic',  # ['bicubic', 'bilinear', 'nearest']
         "save_depth_maps": False,
         # **Video Input:**
-        "video_init_path": 'https://deforum.github.io/a1/V1.mp4',
-        "extract_nth_frame": 1,
-        "extract_from_frame": 0,
-        "extract_to_frame": -1,  # minus 1 for unlimited frames
-        "overwrite_extracted_frames": True,
-        "use_mask_video": False,
-        "video_mask_path": 'https://deforum.github.io/a1/VM1.mp4',
+        "video_init_path": {
+                "label": "Video init path/ URL",
+                "type": "textbox",
+                "value": 'https://deforum.github.io/a1/V1.mp4',
+                "info": ""
+            },
+        "extract_nth_frame": {
+                "label": "Extract nth frame",
+                "type": "number",
+                "precision": 0,
+                "value": 1,
+                "info": ""
+            },
+        "extract_from_frame": {
+                "label": "Extract from frame",
+                "type": "number",
+                "precision": 0,
+                "value": 0,
+                "info": ""
+        },
+        "extract_to_frame": {
+                "label": "Extract to frame",
+                "type": "number",
+                "precision": 0,
+                "value": -1,
+                "info": ""
+        },
+        "overwrite_extracted_frames": {
+                "label": "Overwrite extracted frames",
+                "type": "checkbox",
+                "value": False,
+                "info": ""
+            },
+        "use_mask_video": {
+                "label": "Use mask video",
+                "type": "checkbox",
+                "value": False,
+                "info": ""
+            },
+        "video_mask_path": {
+                "label": "Video mask path",
+                "type": "textbox",
+                "value": 'https://deforum.github.io/a1/VM1.mp4',
+                "info": ""
+            },
         # **Hybrid Video for 2D/3D Animation Mode:**
         "hybrid_comp_alpha_schedule": "0:(0.5)",
         "hybrid_comp_mask_blend_alpha_schedule": "0:(0.5)",
@@ -355,7 +393,12 @@ def DeforumArgs():
                 "value": False,
                 "info": ""
             },
-            "mask_file": "https://deforum.github.io/a1/M1.jpg",
+            "mask_file": {
+                "label": "Mask file",
+                "type": "textbox",
+                "value": "https://deforum.github.io/a1/M1.jpg",
+                "info": ""
+            },
             "invert_mask": {
                 "label": "Invert mask",
                 "type": "checkbox",
