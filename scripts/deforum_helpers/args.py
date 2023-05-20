@@ -61,14 +61,29 @@ def DeforumAnimArgs():
         "strength_schedule": "0: (0.65)",
         "contrast_schedule": "0: (1.0)",
         "cfg_scale_schedule": "0: (7)",
-        "enable_steps_scheduling": False,
-        "steps_schedule": "0: (25)",
+        "enable_steps_scheduling": {
+            "label": "Enable steps scheduling",
+            "type": gr.Checkbox,
+            "default": False,
+            "info": ""
+        },
+        "steps_schedule": {
+            "label": "Steps schedule",
+            "type": gr.Textbox,
+            "default": "0: (25)",
+            "info": "mainly allows using more than 200 steps. otherwise, it's a mirror-like param of 'strength schedule'"
+        },
         "fov_schedule": "0: (70)",
         "aspect_ratio_schedule": "0: (1)",
         "aspect_ratio_use_old_formula": False,
         "near_schedule": "0: (200)",
         "far_schedule": "0: (10000)",
-        "seed_schedule": '0:(s), 1:(-1), "max_f-2":(-1), "max_f-1":(s)',
+        "seed_schedule": {
+            "label": "Seed schedule",
+            "type": gr.Textbox,
+            "default": '0:(s), 1:(-1), "max_f-2":(-1), "max_f-1":(s)',
+            "info": ""
+        },
         "pix2pix_img_cfg_scale_schedule": {
             "label": "Pix2Pix img CFG schedule",
             "type": gr.Textbox,
@@ -265,7 +280,7 @@ def DeforumArgs():
             "seed": {
                 "label": "Seed",
                 "type": gr.Number,
-                "lines": 1,
+                "precision": 0,
                 "default": -1,
                 "info": "Starting seed for the animation. -1 for random"
             },
@@ -286,7 +301,6 @@ def DeforumArgs():
             "batch_name": {
                 "label": "Batch name",
                 "type": gr.Textbox,
-                "lines": 1,
                 "default": "Deforum_{timestring}",
                 "info": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}"
             },
@@ -297,19 +311,86 @@ def DeforumArgs():
                 "default": "Iter",
                 "info": "controls the seed behavior that is used for animation. hover on the options to see more info"
             },
-            "seed_iter_N": 1,
-            "use_init": False,
-            "strength": 0.8,
-            "strength_0_no_init": True,
-            "init_image": "https://deforum.github.io/a1/I1.png",
-            "use_mask": False,
-            "use_alpha_as_mask": False,
+            "seed_iter_N": {
+                "label": "Seed iter N",
+                "type": gr.Number,
+                "precision": 0,
+                "default": 1,
+                "info": "for how many frames the same seed should stick before iterating to the next one"
+            },
+            "use_init": {
+                "label": "Use init",
+                "type": gr.Checkbox,
+                "default": False,
+                "info": ""
+            },
+            "strength": {
+                "label": "strength",
+                "type": gr.Slider,
+                "min": 0,
+                "max": 1,
+                "step": 0.01,
+                "default": 0.8,
+            },
+            "strength_0_no_init": {
+                "label": "Strength 0 no init",
+                "type": gr.Checkbox,
+                "default": True,
+                "info": ""
+            },
+            "init_image": {
+                "label": "Init image",
+                "type": gr.Textbox,
+                "default": "https://deforum.github.io/a1/I1.png",
+                "info": ""
+            },
+            "use_mask": {
+                "label": "Use mask",
+                "type": gr.Checkbox,
+                "default": False,
+                "info": ""
+            },
+            "use_alpha_as_mask": {
+                "label": "Use alpha as mask",
+                "type": gr.Checkbox,
+                "default": False,
+                "info": ""
+            },
             "mask_file": "https://deforum.github.io/a1/M1.jpg",
-            "invert_mask": False,
-            "mask_contrast_adjust": 1.0,
-            "mask_brightness_adjust": 1.0,
-            "overlay_mask": True,
-            "mask_overlay_blur": 4,
+            "invert_mask": {
+                "label": "Invert mask",
+                "type": gr.Checkbox,
+                "default": False,
+                "info": ""
+            },
+            "mask_contrast_adjust": {
+                "label": "Mask contrast adjust",
+                "type": gr.Number,
+                "precision": None,
+                "default": 1.0,
+                "info": ""
+            },
+            "mask_brightness_adjust": {
+                "label": "Mask brightness adjust",
+                "type": gr.Number,
+                "precision": None,
+                "default": 1.0,
+                "info": ""
+            },
+            "overlay_mask": {
+                "label": "Overlay mask",
+                "type": gr.Checkbox,
+                "default": True,
+                "info": ""
+            },
+            "mask_overlay_blur": {
+                "label": "Mask overlay blur",
+                "type": gr.Slider,
+                "min": 0,
+                "max": 64,
+                "step": 1,
+                "default": 4,
+            },
             "fill": 1,
             "full_res_mask": True,
             "full_res_mask_padding": 4,
@@ -333,35 +414,29 @@ def LoopArgs():
         "image_strength_schedule": {
             "label": "Image strength schedule",
             "type": gr.Textbox,
-            "lines": 1,
             "default": "0:(0.75)",
         },
         "blendFactorMax": {
             "label": "Blend factor max",
             "type": gr.Textbox,
-            "lines": 1,
             "default": "0:(0.35)",
         },
         "blendFactorSlope": {
             "label": "Blend factor slope",
             "type": gr.Textbox,
-            "lines": 1,
             "default": "0:(0.25)",
         },
         "tweening_frames_schedule": {
             "label": "Tweening frames schedule",
             "type": gr.Textbox,
-            "lines": 1,
             "default": "0:(20)",
         },
         "color_correction_factor": {
             "label": "Color correction factor",
             "type": gr.Textbox,
-            "lines": 1,
             "default": "0:(0.075)",
         }
     }
-
 
 def ParseqArgs():
     return {

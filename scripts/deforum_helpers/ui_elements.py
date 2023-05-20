@@ -8,24 +8,24 @@ from .gradio_funcs import upload_vid_to_interpolate, upload_pics_to_interpolate,
 def get_tab_run(d, da):
     with gr.TabItem('Run'):  # RUN TAB
         with gr.Row(variant='compact'):
-            sampler = d.sampler["type"](label=d.sampler["label"], choices=d.sampler["choices"], value=d.sampler["default"], type="value")
-            steps = d.steps["type"](label=d.steps["label"], minimum=d.steps["min"], maximum=d.steps["max"], value=d.steps["default"])
+            sampler = create_gr_elem(d.sampler)
+            steps = create_gr_elem(d.steps)
         with gr.Row(variant='compact'):
-            W = d.W["type"](label=d.W["label"], minimum=d.W["min"], maximum=d.W["max"], step=d.W["step"], value=d.W["default"])
-            H = d.H["type"](label=d.H["label"], minimum=d.H["min"], maximum=d.H["max"], step=d.H["step"], value=d.H["default"])
+            W = create_gr_elem(d.W)
+            H = create_gr_elem(d.H)
         with gr.Row(variant='compact'):
-            seed = d.seed["type"](label=d.seed["label"], lines=d.seed["lines"], value=d.seed["default"], info=d.seed["info"])
-            batch_name = d.batch_name["type"](label=d.batch_name["label"], lines=d.batch_name["lines"], value=d.batch_name["default"], info=d.batch_name["info"])
+            seed = create_gr_elem(d.seed)
+            batch_name = create_gr_elem(d.batch_name)
         with gr.Row(variant='compact'):
             # Seed enable extras is INVISIBLE in the ui!
-            seed_enable_extras = d.seed_enable_extras["type"](label=d.seed_enable_extras["label"], value=d.seed_enable_extras["default"], info=d.seed_enable_extras["info"], visible=d.seed_enable_extras["visible"])
-            restore_faces = d.restore_faces["type"](label=d.restore_faces["label"], value=d.restore_faces["default"], info=d.restore_faces["info"])
-            tiling = d.tiling["type"](label=d.tiling["label"], value=d.tiling["default"], info=d.tiling["info"])
-            enable_ddim_eta_scheduling = da.enable_ddim_eta_scheduling["type"](label=da.enable_ddim_eta_scheduling["label"], value=da.enable_ddim_eta_scheduling["default"], info=da.enable_ddim_eta_scheduling["info"], visible=da.enable_ddim_eta_scheduling["visible"])
-            enable_ancestral_eta_scheduling = da.enable_ancestral_eta_scheduling["type"](label=da.enable_ancestral_eta_scheduling["label"], value=da.enable_ancestral_eta_scheduling["default"], info=da.enable_ancestral_eta_scheduling["info"])
+            seed_enable_extras = create_gr_elem(d.seed_enable_extras)
+            restore_faces = create_gr_elem(d.restore_faces)
+            tiling = create_gr_elem(d.tiling)
+            enable_ddim_eta_scheduling = create_gr_elem(da.enable_ddim_eta_scheduling)
+            enable_ancestral_eta_scheduling = create_gr_elem(da.enable_ancestral_eta_scheduling)
         with gr.Row(variant='compact') as eta_sch_row:
-            ddim_eta_schedule = da.ddim_eta_schedule["type"](label=da.ddim_eta_schedule["label"], value=da.ddim_eta_schedule["default"], visible=da.ddim_eta_schedule["visible"])
-            ancestral_eta_schedule = da.ancestral_eta_schedule["type"](label=da.ancestral_eta_schedule["label"], value=da.ancestral_eta_schedule["default"], visible=da.ancestral_eta_schedule["visible"])
+            ddim_eta_schedule = create_gr_elem(da.ddim_eta_schedule)
+            ancestral_eta_schedule = create_gr_elem(da.ancestral_eta_schedule)
         # RUN FROM SETTING FILE ACCORD
         with gr.Accordion('Batch Mode, Resume and more', open=False):
             with gr.Tab('Batch Mode/ run from setting files'):
@@ -36,11 +36,29 @@ def get_tab_run(d, da):
             # RESUME ANIMATION ACCORD
             with gr.Tab('Resume Animation'):
                 with gr.Row(variant='compact'):
-                    resume_from_timestring = da.resume_from_timestring["type"](label=da.resume_from_timestring["label"], value=da.resume_from_timestring["default"], info=da.resume_from_timestring["info"])
-                    resume_timestring = da.resume_timestring["type"](label=da.resume_timestring["label"], value=da.resume_timestring["default"], info=da.resume_timestring["info"])
+                    resume_from_timestring = create_gr_elem(da.resume_from_timestring)
+                    resume_timestring = create_gr_elem(da.resume_timestring)
             with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
-                pix2pix_img_cfg_scale_schedule = da.pix2pix_img_cfg_scale_schedule["type"](label=da.pix2pix_img_cfg_scale_schedule["label"], value=da.pix2pix_img_cfg_scale_schedule["default"], info=da.pix2pix_img_cfg_scale_schedule["info"])
+                pix2pix_img_cfg_scale_schedule = create_gr_elem(da.pix2pix_img_cfg_scale_schedule)
     return {k: v for k, v in {**locals(), **vars()}.items()}
+
+def create_gr_elem(d):
+    obj_type = d["type"]
+    # Common, shared-to-all params
+    elem_params = {'label': d.get("label"), 'value': d.get("default")}
+    # Additional parameters for various gr.types
+    if obj_type == gr.Slider:
+        elem_params.update({'minimum': d.get("min"), 'maximum': d.get("max"), 'step': d.get("step")})
+    elif obj_type == gr.Number:
+        elem_params.update({'precision': d.get("precision")})
+    if 'visible' in d:
+        elem_params.update({'visible': d.get("visible")})
+    if 'info' in d:
+        elem_params.update({'info': d.get("info")})
+    if 'lines' in d:
+        elem_params.update({'lines': d.get("lines")})
+
+    return obj_type(**elem_params)
 
 def get_tab_keyframes(d, da, dloopArgs):
     with gr.TabItem('Keyframes'):  # TODO make a some sort of the original dictionary parsing
@@ -61,21 +79,21 @@ def get_tab_keyframes(d, da, dloopArgs):
             with gr.Accordion('*READ ME before you use this mode!*', open=False):
                 gr.HTML(value=get_gradio_html('guided_imgs'))
             with gr.Row(variant='compact'):
-                use_looper = dloopArgs.use_looper["type"](label=dloopArgs.use_looper["label"], value=dloopArgs.use_looper["default"])
+                use_looper = create_gr_elem(dloopArgs.use_looper)
             with gr.Row(variant='compact'):
-                init_images = dloopArgs.init_images["type"](label=dloopArgs.init_images["label"], lines=dloopArgs.init_images["lines"], value=dloopArgs.init_images["default"])
+                init_images = create_gr_elem(dloopArgs.init_images)
             # GUIDED IMAGES SCHEDULES ACCORD
             with gr.Accordion('Guided images schedules', open=False):
                 with gr.Row(variant='compact'):
-                    image_strength_schedule = dloopArgs.image_strength_schedule["type"](label=dloopArgs.image_strength_schedule["label"], lines=dloopArgs.image_strength_schedule["lines"], value=dloopArgs.image_strength_schedule["default"])
+                    image_strength_schedule = create_gr_elem(dloopArgs.image_strength_schedule)
                 with gr.Row(variant='compact'):
-                    blendFactorMax = dloopArgs.blendFactorMax["type"](label=dloopArgs.blendFactorMax["label"], lines=dloopArgs.blendFactorMax["lines"], value=dloopArgs.blendFactorMax["default"])
+                    blendFactorMax = create_gr_elem(dloopArgs.blendFactorMax)
                 with gr.Row(variant='compact'):
-                    blendFactorSlope = dloopArgs.blendFactorSlope["type"](label=dloopArgs.blendFactorSlope["label"], lines=dloopArgs.blendFactorSlope["lines"], value=dloopArgs.blendFactorSlope["default"])
+                    blendFactorSlope = create_gr_elem(dloopArgs.blendFactorSlope)
                 with gr.Row(variant='compact'):
-                    tweening_frames_schedule = dloopArgs.tweening_frames_schedule["type"](label=dloopArgs.tweening_frames_schedule["label"], lines=dloopArgs.tweening_frames_schedule["lines"], value=dloopArgs.tweening_frames_schedule["default"])
+                    tweening_frames_schedule = create_gr_elem(dloopArgs.tweening_frames_schedule)
                 with gr.Row(variant='compact'):
-                    color_correction_factor = dloopArgs.color_correction_factor["type"](label=dloopArgs.color_correction_factor["label"], lines=dloopArgs.color_correction_factor["lines"], value=dloopArgs.color_correction_factor["default"])
+                    color_correction_factor = create_gr_elem(dloopArgs.color_correction_factor)
         # EXTRA SCHEDULES TABS
         with gr.Tabs(elem_id='extra_schedules'):
             with gr.TabItem('Strength'):
@@ -92,27 +110,25 @@ def get_tab_keyframes(d, da, dloopArgs):
                     clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value=da.clipskip_schedule, interactive=True)
             with gr.TabItem('Seed') as a3:
                 with gr.Row(variant='compact'):
-                    seed_behavior = d.seed_behavior["type"](label=d.seed_behavior["label"], choices=d.seed_behavior["choices"], value=d.seed_behavior["default"], info=d.seed_behavior["info"])
+                    seed_behavior = create_gr_elem(d.seed_behavior)
                 with gr.Row(variant='compact') as seed_iter_N_row:
-                    seed_iter_N = gr.Number(label="Seed iter N", value=d.seed_iter_N, interactive=True, precision=0,
-                                            info="for how many frames the same seed should stick before iterating to the next one")
+                    seed_iter_N = create_gr_elem(d.seed_iter_N)
                 with gr.Row(visible=False) as seed_schedule_row:
-                    seed_schedule = gr.Textbox(label="Seed schedule", lines=1, value=da.seed_schedule, interactive=True)
+                    seed_schedule = create_gr_elem(da.seed_schedule)
             with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
                 with gr.Row(variant='compact'):
-                    enable_subseed_scheduling = da.enable_subseed_scheduling["type"](label=da.enable_subseed_scheduling["label"], value=da.enable_subseed_scheduling["default"])
-                    subseed_schedule = da.subseed_schedule["type"](label=da.subseed_schedule["label"], value=da.subseed_schedule["default"])
-                    subseed_strength_schedule = da.subseed_strength_schedule["type"](label=da.subseed_strength_schedule["label"], value=da.subseed_strength_schedule["default"])
+                    enable_subseed_scheduling = create_gr_elem(da.enable_subseed_scheduling)
+                    subseed_schedule = create_gr_elem(da.subseed_schedule)
+                    subseed_strength_schedule = create_gr_elem(da.subseed_strength_schedule)
                 with gr.Row(variant='compact'):
-                    seed_resize_from_w = d.seed_resize_from_w["type"](label=d.seed_resize_from_w["label"], value=d.seed_resize_from_w["default"], minimum=d.seed_resize_from_w["min"], maximum=d.seed_resize_from_w["max"], step=d.seed_resize_from_w["step"])
-                    seed_resize_from_h = d.seed_resize_from_h["type"](label=d.seed_resize_from_h["label"], value=d.seed_resize_from_h["default"], minimum=d.seed_resize_from_h["min"], maximum=d.seed_resize_from_h["max"], step=d.seed_resize_from_h["step"])
+                    seed_resize_from_w = create_gr_elem(d.seed_resize_from_w)
+                    seed_resize_from_h = create_gr_elem(d.seed_resize_from_h)
             # Steps Scheduling
             with gr.TabItem('Step') as a13:
                 with gr.Row(variant='compact'):
-                    enable_steps_scheduling = gr.Checkbox(label="Enable steps scheduling", value=da.enable_steps_scheduling, interactive=True)
+                    enable_steps_scheduling = create_gr_elem(da.enable_steps_scheduling)
                 with gr.Row(variant='compact'):
-                    steps_schedule = gr.Textbox(label="Steps schedule", lines=1, value=da.steps_schedule, interactive=True,
-                                                info="mainly allows using more than 200 steps. otherwise, it's a mirror-like param of 'strength schedule'")
+                    steps_schedule = create_gr_elem(da.steps_schedule)
             # Sampler Scheduling
             with gr.TabItem('Sampler') as a14:
                 with gr.Row(variant='compact'):
@@ -291,13 +307,13 @@ def get_tab_init(d, da, dp):
         with gr.Tab('Image Init'):
             with gr.Row(variant='compact'):
                 with gr.Column(min_width=150):
-                    use_init = gr.Checkbox(label="Use init", value=d.use_init, interactive=True, visible=True)
+                    use_init = create_gr_elem(d.use_init)
                 with gr.Column(min_width=150):
-                    strength_0_no_init = gr.Checkbox(label="Strength 0 no init", value=d.strength_0_no_init, interactive=True)
+                    strength_0_no_init = create_gr_elem(d.strength_0_no_init)
                 with gr.Column(min_width=170):
-                    strength = gr.Slider(label="Strength", minimum=0, maximum=1, step=0.01, value=d.strength, interactive=True)
+                    strength = create_gr_elem(d.strength)
             with gr.Row(variant='compact'):
-                init_image = gr.Textbox(label="Init image", lines=1, interactive=True, value=d.init_image)
+                init_image = create_gr_elem(d.init_image)
         # VIDEO INIT INNER-TAB
         with gr.Tab('Video Init'):
             with gr.Row(variant='compact'):
@@ -313,14 +329,14 @@ def get_tab_init(d, da, dp):
         # MASK INIT INNER-TAB
         with gr.Tab('Mask Init'):
             with gr.Row(variant='compact'):
-                use_mask = gr.Checkbox(label="Use mask", value=d.use_mask, interactive=True)
-                use_alpha_as_mask = gr.Checkbox(label="Use alpha as mask", value=d.use_alpha_as_mask, interactive=True)
-                invert_mask = gr.Checkbox(label="Invert mask", value=d.invert_mask, interactive=True)
-                overlay_mask = gr.Checkbox(label="Overlay mask", value=d.overlay_mask, interactive=True)
+                use_mask = create_gr_elem(d.use_mask)
+                use_alpha_as_mask = create_gr_elem(d.use_alpha_as_mask)
+                invert_mask = create_gr_elem(d.invert_mask)
+                overlay_mask = create_gr_elem(d.overlay_mask)
             with gr.Row(variant='compact'):
                 mask_file = gr.Textbox(label="Mask file", lines=1, interactive=True, value=d.mask_file)
             with gr.Row(variant='compact'):
-                mask_overlay_blur = gr.Slider(label="Mask overlay blur", minimum=0, maximum=64, step=1, value=d.mask_overlay_blur, interactive=True)
+                mask_overlay_blur = create_gr_elem(d.mask_overlay_blur)
             with gr.Row(variant='compact'):
                 choice = mask_fill_choices[d.fill]
                 fill = gr.Radio(label='Mask fill', choices=mask_fill_choices, value=choice, type="index")
@@ -329,9 +345,9 @@ def get_tab_init(d, da, dp):
                 full_res_mask_padding = gr.Slider(minimum=0, maximum=512, step=1, label="Full res mask padding", value=d.full_res_mask_padding, interactive=True)
             with gr.Row(variant='compact'):
                 with gr.Column(min_width=240):
-                    mask_contrast_adjust = gr.Number(label="Mask contrast adjust", value=d.mask_contrast_adjust, interactive=True)
+                    mask_contrast_adjust = create_gr_elem(d.mask_contrast_adjust)
                 with gr.Column(min_width=250):
-                    mask_brightness_adjust = gr.Number(label="Mask brightness adjust", value=d.mask_brightness_adjust, interactive=True)
+                    mask_brightness_adjust = create_gr_elem(d.mask_brightness_adjust)
         # PARSEQ ACCORD
         with gr.Accordion('Parseq', open=False):
             gr.HTML(value=get_gradio_html('parseq'))
