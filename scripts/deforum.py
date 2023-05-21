@@ -14,7 +14,8 @@ def init_deforum():
     from deforum_helpers.ui_right import on_ui_tabs
     from deforum_helpers.ui_settings import on_ui_settings
 
-    # trigger webui's extensions mechanism using our imported main functions
+    # trigger webui's extensions mechanism using our imported main functions -
+    # first to create the actual deforum gui, then to make the deforum tab in webui's settings section
     script_callbacks.on_ui_tabs(on_ui_tabs)
     script_callbacks.on_ui_settings(on_ui_settings)
 
