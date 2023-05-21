@@ -7,16 +7,16 @@ from .gradio_funcs import upload_vid_to_interpolate, upload_pics_to_interpolate,
 
 def get_tab_run(d, da):
     with gr.TabItem('Run'):  # RUN TAB
-        with gr.Row(variant='compact'):
+        with FormRow():
             sampler = create_gr_elem(d.sampler)
             steps = create_gr_elem(d.steps)
-        with gr.Row(variant='compact'):
+        with FormRow():
             W = create_gr_elem(d.W)
             H = create_gr_elem(d.H)
-        with gr.Row(variant='compact'):
+        with FormRow():
             seed = create_gr_elem(d.seed)
             batch_name = create_gr_elem(d.batch_name)
-        with gr.Row(variant='compact'):
+        with FormRow():
             # Seed enable extras is INVISIBLE in the ui!
             seed_enable_extras = create_gr_elem(d.seed_enable_extras)
             restore_faces = create_gr_elem(d.restore_faces)
@@ -29,13 +29,13 @@ def get_tab_run(d, da):
         # RUN FROM SETTING FILE ACCORD
         with gr.Accordion('Batch Mode, Resume and more', open=False):
             with gr.Tab('Batch Mode/ run from setting files'):
-                with gr.Row(variant='compact'):  # TODO: handle this inside one of the args functions?
+                with FormRow():  # TODO: handle this inside one of the args functions?
                     override_settings_with_file = gr.Checkbox(label="Enable batch mode", value=False, interactive=True, elem_id='override_settings',
                                                               info="run from a list of setting .txt files. Upload them to the box on the right (visible when enabled)")
                     custom_settings_file = gr.File(label="Setting files", interactive=True, file_count="multiple", file_types=[".txt"], elem_id="custom_setting_file", visible=False)
             # RESUME ANIMATION ACCORD
             with gr.Tab('Resume Animation'):
-                with gr.Row(variant='compact'):
+                with FormRow():
                     resume_from_timestring = create_gr_elem(da.resume_from_timestring)
                     resume_timestring = create_gr_elem(da.resume_timestring)
             with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
@@ -72,14 +72,14 @@ def create_gr_elem(d):
 
 def get_tab_keyframes(d, da, dloopArgs):
     with gr.TabItem('Keyframes'):  # TODO make a some sort of the original dictionary parsing
-        with gr.Row(variant='compact'):
+        with FormRow():
             with gr.Column(scale=2):
                 animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="Animation mode", value=da.animation_mode, elem_id="animation_mode",
                                           info="control animation mode, will hide non relevant params upon change")
             with gr.Column(scale=1, min_width=180):
                 border = gr.Radio(['replicate', 'wrap'], label="Border", value=da.border, elem_id="border",
                                   info="controls pixel generation method for images smaller than the frame. hover on the options to see more info")
-        with gr.Row(variant='compact'):
+        with FormRow():
             diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True,
                                           info="# of in-between frames that will not be directly diffused")
             max_frames = gr.Number(label="Max frames", lines=1, value=da.max_frames, interactive=True, precision=0, info="end the animation at this frame number")
@@ -88,92 +88,92 @@ def get_tab_keyframes(d, da, dloopArgs):
             # GUIDED IMAGES INFO ACCORD
             with gr.Accordion('*READ ME before you use this mode!*', open=False):
                 gr.HTML(value=get_gradio_html('guided_imgs'))
-            with gr.Row(variant='compact'):
+            with FormRow():
                 use_looper = create_gr_elem(dloopArgs.use_looper)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 init_images = create_gr_elem(dloopArgs.init_images)
             # GUIDED IMAGES SCHEDULES ACCORD
             with gr.Accordion('Guided images schedules', open=False):
-                with gr.Row(variant='compact'):
+                with FormRow():
                     image_strength_schedule = create_gr_elem(dloopArgs.image_strength_schedule)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     blendFactorMax = create_gr_elem(dloopArgs.blendFactorMax)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     blendFactorSlope = create_gr_elem(dloopArgs.blendFactorSlope)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     tweening_frames_schedule = create_gr_elem(dloopArgs.tweening_frames_schedule)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     color_correction_factor = create_gr_elem(dloopArgs.color_correction_factor)
         # EXTRA SCHEDULES TABS
         with gr.Tabs(elem_id='extra_schedules'):
             with gr.TabItem('Strength'):
-                with gr.Row(variant='compact'):
+                with FormRow():
                     strength_schedule = create_gr_elem(da.strength_schedule)
             with gr.TabItem('CFG'):
-                with gr.Row(variant='compact'):
+                with FormRow():
                     cfg_scale_schedule = create_gr_elem(da.cfg_scale_schedule)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     enable_clipskip_scheduling = create_gr_elem(da.enable_clipskip_scheduling)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     clipskip_schedule = create_gr_elem(da.clipskip_schedule)
             with gr.TabItem('Seed') as a3:
-                with gr.Row(variant='compact'):
+                with FormRow():
                     seed_behavior = create_gr_elem(d.seed_behavior)
                 with gr.Row(variant='compact') as seed_iter_N_row:
                     seed_iter_N = create_gr_elem(d.seed_iter_N)
                 with gr.Row(visible=False) as seed_schedule_row:
                     seed_schedule = create_gr_elem(da.seed_schedule)
             with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
-                with gr.Row(variant='compact'):
+                with FormRow():
                     enable_subseed_scheduling = create_gr_elem(da.enable_subseed_scheduling)
                     subseed_schedule = create_gr_elem(da.subseed_schedule)
                     subseed_strength_schedule = create_gr_elem(da.subseed_strength_schedule)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     seed_resize_from_w = create_gr_elem(d.seed_resize_from_w)
                     seed_resize_from_h = create_gr_elem(d.seed_resize_from_h)
             # Steps Scheduling
             with gr.TabItem('Step') as a13:
-                with gr.Row(variant='compact'):
+                with FormRow():
                     enable_steps_scheduling = create_gr_elem(da.enable_steps_scheduling)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     steps_schedule = create_gr_elem(da.steps_schedule)
             # Sampler Scheduling
             with gr.TabItem('Sampler') as a14:
-                with gr.Row(variant='compact'):
+                with FormRow():
                     enable_sampler_scheduling = create_gr_elem(da.enable_sampler_scheduling)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     sampler_schedule = create_gr_elem(da.sampler_schedule)
             # Checkpoint Scheduling
             with gr.TabItem('Checkpoint') as a15:
-                with gr.Row(variant='compact'):
+                with FormRow():
                     enable_checkpoint_scheduling = create_gr_elem(da.enable_checkpoint_scheduling)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     checkpoint_schedule = create_gr_elem(da.checkpoint_schedule)
         # MOTION INNER TAB
         with gr.Tabs(elem_id='motion_noise_etc'):
             with gr.TabItem('Motion') as motion_tab:
                 with gr.Column(visible=True) as only_2d_motion_column:
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         zoom = create_gr_elem(da.zoom)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         angle = create_gr_elem(da.angle)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         transform_center_x = create_gr_elem(da.transform_center_x)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         transform_center_y = create_gr_elem(da.transform_center_y)
                 with gr.Column(visible=True) as both_anim_mode_motion_params_column:
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         translation_x = create_gr_elem(da.translation_x)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         translation_y = create_gr_elem(da.translation_y)
                 with gr.Column(visible=False) as only_3d_motion_column:
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         translation_z = create_gr_elem(da.translation_z)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         rotation_3d_x = create_gr_elem(da.rotation_3d_x)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         rotation_3d_y = create_gr_elem(da.rotation_3d_y)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         rotation_3d_z = create_gr_elem(da.rotation_3d_z)
                 # PERSPECTIVE FLIP - inner params are hidden if not enabled
                 with gr.Row(variant='compact') as enable_per_f_row:
@@ -189,9 +189,9 @@ def get_tab_keyframes(d, da, dloopArgs):
             # NOISE INNER TAB
             with gr.TabItem('Noise'):
                 with gr.Column() as noise_tab_column:
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         noise_type = create_gr_elem(da.noise_type)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         noise_schedule = create_gr_elem(da.noise_schedule)
                     with gr.Row(variant='compact') as perlin_row:
                         with gr.Column(min_width=220):
@@ -201,16 +201,16 @@ def get_tab_keyframes(d, da, dloopArgs):
                             # following two params are INVISIBLE IN UI as of 21-05-23
                             perlin_w = create_gr_elem(da.perlin_w)
                             perlin_h = create_gr_elem(da.perlin_h)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         enable_noise_multiplier_scheduling = create_gr_elem(da.enable_noise_multiplier_scheduling)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         noise_multiplier_schedule = create_gr_elem(da.noise_multiplier_schedule)
             # COHERENCE INNER TAB
             with gr.TabItem('Coherence', open=False) as coherence_accord:
-                with gr.Row(variant='compact'):
+                with FormRow():
                     color_coherence = create_gr_elem(da.color_coherence)
                     color_force_grayscale = create_gr_elem(da.color_force_grayscale)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     legacy_colormatch = create_gr_elem(da.legacy_colormatch)
                 with gr.Row(visible=False) as color_coherence_image_path_row:
                     color_coherence_image_path = create_gr_elem(da.color_coherence_image_path)
@@ -221,29 +221,29 @@ def get_tab_keyframes(d, da, dloopArgs):
                         optical_flow_cadence = create_gr_elem(da.optical_flow_cadence)
                     with gr.Column(min_width=220, visible=False) as cadence_flow_factor_schedule_column:
                         cadence_flow_factor_schedule = create_gr_elem(da.cadence_flow_factor_schedule)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     with gr.Column(min_width=220):
                         optical_flow_redo_generation = create_gr_elem(da.optical_flow_redo_generation)
                     with gr.Column(min_width=220, visible=False) as redo_flow_factor_schedule_column:
                         redo_flow_factor_schedule = create_gr_elem(da.redo_flow_factor_schedule)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value=da.contrast_schedule, interactive=True,
                                                    info="adjusts the overall contrast per frame [neutral at 1.0, recommended to *not* play with this param]")
                     diffusion_redo = gr.Slider(label="Redo generation", minimum=0, maximum=50, step=1, value=da.diffusion_redo, interactive=True,
                                                info="this option renders N times before the final render. it is suggested to lower your steps if you up your redo. seed is randomized during redo generations and restored afterwards")
-                with gr.Row(variant='compact'):
+                with FormRow():
                     # what to do with blank frames (they may result from glitches or the NSFW filter being turned on): reroll with +1 seed, interrupt the animation generation, or do nothing
                     reroll_blank_frames = create_gr_elem(d.reroll_blank_frames)
                     reroll_patience = create_gr_elem(d.reroll_patience)
             # ANTI BLUR INNER TAB
             with gr.TabItem('Anti Blur', elem_id='anti_blur_accord') as anti_blur_tab:
-                with gr.Row(variant='compact'):
+                with FormRow():
                     amount_schedule = create_gr_elem(da.amount_schedule)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     kernel_schedule = create_gr_elem(da.kernel_schedule)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     sigma_schedule = create_gr_elem(da.sigma_schedule)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     threshold_schedule = create_gr_elem(da.threshold_schedule)
             with gr.TabItem('Depth Warping & FOV', elem_id='depth_warp_fov_tab') as depth_warp_fov_tab:
                 # this html only shows when not in 2d/3d mode
@@ -275,22 +275,22 @@ def get_tab_prompts(da):
         # PROMPTS INFO ACCORD
         with gr.Accordion(label='*Important* notes on Prompts', elem_id='prompts_info_accord', open=False, visible=True) as prompts_info_accord:
             gr.HTML(value=get_gradio_html('prompts'))
-        with gr.Row(variant='compact'):
+        with FormRow():
             animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value=DeforumAnimPrompts(),
                                            info="full prompts list in a JSON format.  value on left side is the frame number")
-        with gr.Row(variant='compact'):
+        with FormRow():
             animation_prompts_positive = gr.Textbox(label="Prompts positive", lines=1, interactive=True, placeholder="words in here will be added to the start of all positive prompts")
-        with gr.Row(variant='compact'):
+        with FormRow():
             animation_prompts_negative = gr.Textbox(label="Prompts negative", value="nsfw, nude", lines=1, interactive=True,
                                                     placeholder="words in here will be added to the end of all negative prompts")
         # COMPOSABLE MASK SCHEDULING ACCORD
         with gr.Accordion('Composable Mask scheduling', open=False):
             gr.HTML(value=get_gradio_html('composable_masks'))
-            with gr.Row(variant='compact'):
+            with FormRow():
                 mask_schedule = create_gr_elem(da.mask_schedule)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 use_noise_mask = create_gr_elem(da.use_noise_mask)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 noise_mask_schedule = create_gr_elem(da.noise_mask_schedule)
 
     return {k: v for k, v in {**locals(), **vars()}.items()}
@@ -299,44 +299,44 @@ def get_tab_init(d, da, dp):
     with gr.TabItem('Init'):
         # IMAGE INIT INNER-TAB
         with gr.Tab('Image Init'):
-            with gr.Row(variant='compact'):
+            with FormRow():
                 with gr.Column(min_width=150):
                     use_init = create_gr_elem(d.use_init)
                 with gr.Column(min_width=150):
                     strength_0_no_init = create_gr_elem(d.strength_0_no_init)
                 with gr.Column(min_width=170):
                     strength = create_gr_elem(d.strength)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 init_image = create_gr_elem(d.init_image)
         # VIDEO INIT INNER-TAB
         with gr.Tab('Video Init'):
-            with gr.Row(variant='compact'):
+            with FormRow():
                 video_init_path = create_gr_elem(da.video_init_path)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 extract_from_frame = create_gr_elem(da.extract_from_frame)
                 extract_to_frame = create_gr_elem(da.extract_to_frame)
                 extract_nth_frame = create_gr_elem(da.extract_nth_frame)
                 overwrite_extracted_frames = create_gr_elem(da.overwrite_extracted_frames)
                 use_mask_video = create_gr_elem(da.use_mask_video)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 video_mask_path = create_gr_elem(da.video_mask_path)
         # MASK INIT INNER-TAB
         with gr.Tab('Mask Init'):
-            with gr.Row(variant='compact'):
+            with FormRow():
                 use_mask = create_gr_elem(d.use_mask)
                 use_alpha_as_mask = create_gr_elem(d.use_alpha_as_mask)
                 invert_mask = create_gr_elem(d.invert_mask)
                 overlay_mask = create_gr_elem(d.overlay_mask)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 mask_file = create_gr_elem(d.mask_file)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 mask_overlay_blur = create_gr_elem(d.mask_overlay_blur)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 fill = create_gr_elem(d.fill)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 full_res_mask = create_gr_elem(d.full_res_mask)
                 full_res_mask_padding = create_gr_elem(d.full_res_mask_padding)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 with gr.Column(min_width=240):
                     mask_contrast_adjust = create_gr_elem(d.mask_contrast_adjust)
                 with gr.Column(min_width=250):
@@ -344,9 +344,9 @@ def get_tab_init(d, da, dp):
         # PARSEQ ACCORD
         with gr.Accordion('Parseq', open=False):
             gr.HTML(value=get_gradio_html('parseq'))
-            with gr.Row(variant='compact'):
+            with FormRow():
                 parseq_manifest = create_gr_elem(dp.parseq_manifest)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 parseq_use_deltas = create_gr_elem(dp.parseq_use_deltas)
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
@@ -359,30 +359,30 @@ def get_tab_hybrid(da):
             gr.HTML(value=get_gradio_html('hybrid_video'))
         # HYBRID SETTINGS ACCORD
         with gr.Accordion("Hybrid Settings", open=True) as hybrid_settings_accord:
-            with gr.Row(variant='compact'):
+            with FormRow():
                 hybrid_composite = gr.Radio(['None', 'Normal', 'Before Motion', 'After Generation'], label="Hybrid composite", value=da.hybrid_composite, elem_id="hybrid_composite")
-            with gr.Row(variant='compact'):
+            with FormRow():
                 with gr.Column(min_width=340):
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         hybrid_generate_inputframes = gr.Checkbox(label="Generate inputframes", value=da.hybrid_generate_inputframes, interactive=True)
                         hybrid_use_first_frame_as_init_image = gr.Checkbox(label="First frame as init image", value=da.hybrid_use_first_frame_as_init_image, interactive=True, visible=False)
                         hybrid_use_init_image = gr.Checkbox(label="Use init image as video", value=da.hybrid_use_init_image, interactive=True, visible=True)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 with gr.Column(variant='compact'):
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         hybrid_motion = gr.Radio(['None', 'Optical Flow', 'Perspective', 'Affine'], label="Hybrid motion", value=da.hybrid_motion, elem_id="hybrid_motion")
                 with gr.Column(variant='compact'):
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         with gr.Column(scale=1):
                             hybrid_flow_method = gr.Radio(['RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method",
                                                           visible=False)
-                    with gr.Row(variant='compact'):
+                    with FormRow():
                         with gr.Column(variant='compact'):
                             hybrid_flow_consistency = gr.Checkbox(label="Flow consistency mask", value=da.hybrid_flow_consistency, interactive=True, visible=False)
                             hybrid_consistency_blur = gr.Slider(label="Consistency mask blur", minimum=0, maximum=16, step=1, value=da.hybrid_consistency_blur, interactive=True, visible=False)
                         with gr.Column(variant='compact'):
                             hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=da.hybrid_motion_use_prev_img, interactive=True, visible=False)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type,
                                                  elem_id="hybrid_comp_mask_type", visible=False)
             with gr.Row(visible=False, variant='compact') as hybrid_comp_mask_row:
@@ -390,7 +390,7 @@ def get_tab_hybrid(da):
                 with gr.Column(variant='compact'):
                     hybrid_comp_mask_auto_contrast = gr.Checkbox(label="Comp mask auto contrast", value=False, interactive=True)
                     hybrid_comp_mask_inverse = gr.Checkbox(label="Comp mask inverse", value=da.hybrid_comp_mask_inverse, interactive=True)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 hybrid_comp_save_extra_frames = gr.Checkbox(label="Comp save extra frames", value=False, interactive=True)
         # HYBRID SCHEDULES ACCORD
         with gr.Accordion("Hybrid Schedules", open=False, visible=False) as hybrid_sch_accord:
@@ -411,7 +411,7 @@ def get_tab_hybrid(da):
                                                                                 value=da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, interactive=True)
         # HUMANS MASKING ACCORD
         with gr.Accordion("Humans Masking", open=False, visible=False) as humans_masking_accord:
-            with gr.Row(variant='compact'):
+            with FormRow():
                 hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="Generate human masks", value=da.hybrid_generate_human_masks,
                                                        elem_id="hybrid_generate_human_masks")
 
@@ -427,7 +427,7 @@ def get_tab_output(da, dv):
                 with gr.Row(variant='compact') as soundtrack_row:
                     add_soundtrack = create_gr_elem(dv.add_soundtrack)
                     soundtrack_path = create_gr_elem(dv.soundtrack_path)
-                with gr.Row(variant='compact'):
+                with FormRow():
                     skip_video_creation = create_gr_elem(dv.skip_video_creation)
                     delete_imgs = create_gr_elem(dv.delete_imgs)
                     store_frames_in_ram = create_gr_elem(dv.store_frames_in_ram)
@@ -443,7 +443,7 @@ def get_tab_output(da, dv):
             with gr.Accordion('Important notes and Help', open=False, elem_id="f_interp_accord"):
                 gr.HTML(value=get_gradio_html('frame_interpolation'))
             with gr.Column(variant='compact'):
-                with gr.Row(variant='compact'):
+                with FormRow():
                     # Interpolation Engine
                     with gr.Column(min_width=110, scale=3):
                         frame_interpolation_engine = create_gr_elem(dv.frame_interpolation_engine)
@@ -537,25 +537,25 @@ def get_tab_output(da, dv):
         # Vid2Depth TAB
         with gr.TabItem('Vid2depth'):
             vid_to_depth_chosen_file = gr.File(label="Video to get Depth from", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_depth_chosen_file")
-            with gr.Row(variant='compact'):
+            with FormRow():
                 mode = gr.Dropdown(label='Mode', elem_id="mode", choices=['Depth (Midas/Adabins)', 'Anime Remove Background', 'Mixed', 'None (just grayscale)'], value='Depth (Midas/Adabins)')
                 threshold_value = gr.Slider(label="Threshold Value Lower", value=127, minimum=0, maximum=255, step=1)
                 threshold_value_max = gr.Slider(label="Threshold Value Upper", value=255, minimum=0, maximum=255, step=1)
-            with gr.Row(variant='compact'):
+            with FormRow():
                 thresholding = gr.Radio(['None', 'Simple', 'Simple (Auto-value)', 'Adaptive (Mean)', 'Adaptive (Gaussian)'], label="Thresholding Mode", value='None')
-            with gr.Row(variant='compact'):
+            with FormRow():
                 adapt_block_size = gr.Number(label="Block size", value=11)
                 adapt_c = gr.Number(label="C", value=2)
                 invert = gr.Checkbox(label='Closer is brighter', value=True, elem_id="invert")
-            with gr.Row(variant='compact'):
+            with FormRow():
                 end_blur = gr.Slider(label="End blur width", value=0, minimum=0, maximum=255, step=1)
                 midas_weight_vid2depth = gr.Slider(label="MiDaS weight (vid2depth)", value=da.midas_weight, minimum=0, maximum=1, step=0.05, interactive=True,
                                                    info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
                 depth_keep_imgs = gr.Checkbox(label='Keep Imgs', value=True, elem_id="depth_keep_imgs")
-            with gr.Row(variant='compact'):
+            with FormRow():
                 # This is the actual button that's pressed to initiate the Upscaling:
                 depth_btn = gr.Button(value="*Get depth from uploaded video*")
-            with gr.Row(variant='compact'):
+            with FormRow():
                 # Show a text about CLI outputs:
                 gr.HTML("* check your CLI for outputs")
                 # make the function call when the UPSCALE button is clicked
@@ -565,7 +565,7 @@ def get_tab_output(da, dv):
         # STITCH FRAMES TO VID TAB
         with gr.TabItem('Frames to Video') as stitch_imgs_to_vid_row:
             gr.HTML(value=get_gradio_html('frames_to_video'))
-            with gr.Row(variant='compact'):
+            with FormRow():
                 image_path = create_gr_elem(dv.image_path)
             ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
             ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames, inputs=[image_path, fps, add_soundtrack, soundtrack_path])
