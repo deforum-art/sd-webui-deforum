@@ -1090,6 +1090,13 @@ def process_args(args_dict_main, run_id):
     controlnet_args_dict = pack_args(args_dict_main, controlnet_component_names)
 
     root = SimpleNamespace(**RootArgs())
+    args = SimpleNamespace(**args_dict)
+    anim_args = SimpleNamespace(**anim_args_dict)
+    video_args = SimpleNamespace(**video_args_dict)
+    parseq_args = SimpleNamespace(**parseq_args_dict)
+    loop_args = SimpleNamespace(**loop_args_dict)
+    controlnet_args = SimpleNamespace(**controlnet_args_dict)
+
     p = args_dict_main['p']
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
 
@@ -1101,13 +1108,6 @@ def process_args(args_dict_main, run_id):
     negative_prompts = args_dict_main['animation_prompts_negative']
     negative_prompts = negative_prompts.replace('--neg', '')  # remove --neg from negative_prompts if received by mistake
     root.animation_prompts = {key: f"{positive_prompts} {val} {'' if '--neg' in val else '--neg'} {negative_prompts}" for key, val in root.animation_prompts.items()}
-
-    args = SimpleNamespace(**args_dict)
-    anim_args = SimpleNamespace(**anim_args_dict)
-    video_args = SimpleNamespace(**video_args_dict)
-    parseq_args = SimpleNamespace(**parseq_args_dict)
-    loop_args = SimpleNamespace(**loop_args_dict)
-    controlnet_args = SimpleNamespace(**controlnet_args_dict)
 
     if args.seed == -1:
         root.raw_seed = -1
