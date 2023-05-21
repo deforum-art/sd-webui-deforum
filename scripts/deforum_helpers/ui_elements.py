@@ -142,82 +142,78 @@ def get_tab_keyframes(d, da, dloopArgs):
             # Sampler Scheduling
             with gr.TabItem('Sampler') as a14:
                 with gr.Row(variant='compact'):
-                    enable_sampler_scheduling = gr.Checkbox(label="Enable sampler scheduling", value=da.enable_sampler_scheduling, interactive=True)
+                    enable_sampler_scheduling = create_gr_elem(da.enable_sampler_scheduling)
                 with gr.Row(variant='compact'):
-                    sampler_schedule = gr.Textbox(label="Sampler schedule", lines=1, value=da.sampler_schedule, interactive=True,
-                                                  info="allows keyframing different samplers. Use names as they appear in ui dropdown in 'run' tab")
+                    sampler_schedule = create_gr_elem(da.sampler_schedule)
             # Checkpoint Scheduling
             with gr.TabItem('Checkpoint') as a15:
                 with gr.Row(variant='compact'):
-                    enable_checkpoint_scheduling = gr.Checkbox(label="Enable checkpoint scheduling", value=da.enable_checkpoint_scheduling, interactive=True)
+                    enable_checkpoint_scheduling = create_gr_elem(da.enable_checkpoint_scheduling)
                 with gr.Row(variant='compact'):
-                    checkpoint_schedule = gr.Textbox(label="Checkpoint schedule", lines=1, value=da.checkpoint_schedule, interactive=True,
-                                                     info="allows keyframing different sd models. use *full* name as appears in ui dropdown")
+                    checkpoint_schedule = create_gr_elem(da.checkpoint_schedule)
         # MOTION INNER TAB
         with gr.Tabs(elem_id='motion_noise_etc'):
             with gr.TabItem('Motion') as motion_tab:
                 with gr.Column(visible=True) as only_2d_motion_column:
                     with gr.Row(variant='compact'):
-                        zoom = gr.Textbox(label="Zoom", lines=1, value=da.zoom, interactive=True, info="scale the canvas size, multiplicatively. [static = 1.0]")
+                        zoom = create_gr_elem(da.zoom)
                     with gr.Row(variant='compact'):
-                        angle = gr.Textbox(label="Angle", lines=1, value=da.angle, interactive=True, info="rotate canvas clockwise/anticlockwise in degrees per frame")
+                        angle = create_gr_elem(da.angle)
                     with gr.Row(variant='compact'):
-                        transform_center_x = gr.Textbox(label="Transform Center X", lines=1, value=da.transform_center_x, interactive=True, info="x center axis for 2D angle/zoom")
+                        transform_center_x = create_gr_elem(da.transform_center_x)
                     with gr.Row(variant='compact'):
-                        transform_center_y = gr.Textbox(label="Transform Center Y", lines=1, value=da.transform_center_y, interactive=True, info="y center axis for 2D angle/zoom")
+                        transform_center_y = create_gr_elem(da.transform_center_y)
                 with gr.Column(visible=True) as both_anim_mode_motion_params_column:
                     with gr.Row(variant='compact'):
-                        translation_x = gr.Textbox(label="Translation X", lines=1, value=da.translation_x, interactive=True, info="move canvas left/right in pixels per frame")
+                        translation_x = create_gr_elem(da.translation_x)
                     with gr.Row(variant='compact'):
-                        translation_y = gr.Textbox(label="Translation Y", lines=1, value=da.translation_y, interactive=True, info="move canvas up/down in pixels per frame")
+                        translation_y = create_gr_elem(da.translation_y)
                 with gr.Column(visible=False) as only_3d_motion_column:
                     with gr.Row(variant='compact'):
-                        translation_z = gr.Textbox(label="Translation Z", lines=1, value=da.translation_z, interactive=True, info="move canvas towards/away from view [speed set by FOV]")
+                        translation_z = create_gr_elem(da.translation_z)
                     with gr.Row(variant='compact'):
-                        rotation_3d_x = gr.Textbox(label="Rotation 3D X", lines=1, value=da.rotation_3d_x, interactive=True, info="tilt canvas up/down in degrees per frame")
+                        rotation_3d_x = create_gr_elem(da.rotation_3d_x)
                     with gr.Row(variant='compact'):
-                        rotation_3d_y = gr.Textbox(label="Rotation 3D Y", lines=1, value=da.rotation_3d_y, interactive=True, info="pan canvas left/right in degrees per frame")
+                        rotation_3d_y = create_gr_elem(da.rotation_3d_y)
                     with gr.Row(variant='compact'):
-                        rotation_3d_z = gr.Textbox(label="Rotation 3D Z", lines=1, value=da.rotation_3d_z, interactive=True, info="roll canvas clockwise/anticlockwise")
-                # PERSPECTIVE FLIP - params are hidden if not enabled
+                        rotation_3d_z = create_gr_elem(da.rotation_3d_z)
+                # PERSPECTIVE FLIP - inner params are hidden if not enabled
                 with gr.Row(variant='compact') as enable_per_f_row:
-                    enable_perspective_flip = gr.Checkbox(label="Enable perspective flip", value=da.enable_perspective_flip, interactive=True)
+                    enable_perspective_flip = create_gr_elem(da.enable_perspective_flip)
                 with gr.Row(variant='compact', visible=False) as per_f_th_row:
-                    perspective_flip_theta = gr.Textbox(label="Perspective flip theta", lines=1, value=da.perspective_flip_theta, interactive=True)
+                    perspective_flip_theta = create_gr_elem(da.perspective_flip_theta)
                 with gr.Row(variant='compact', visible=False) as per_f_ph_row:
-                    perspective_flip_phi = gr.Textbox(label="Perspective flip phi", lines=1, value=da.perspective_flip_phi, interactive=True)
+                    perspective_flip_phi = create_gr_elem(da.perspective_flip_phi)
                 with gr.Row(variant='compact', visible=False) as per_f_ga_row:
-                    perspective_flip_gamma = gr.Textbox(label="Perspective flip gamma", lines=1, value=da.perspective_flip_gamma, interactive=True)
+                    perspective_flip_gamma = create_gr_elem(da.perspective_flip_gamma)
                 with gr.Row(variant='compact', visible=False) as per_f_f_row:
-                    perspective_flip_fv = gr.Textbox(label="Perspective flip fv", lines=1, value=da.perspective_flip_fv, interactive=True,
-                                                     info="the 2D vanishing point of perspective (rec. range 30-160)")
+                    perspective_flip_fv = create_gr_elem(da.perspective_flip_fv)
             # NOISE INNER TAB
             with gr.TabItem('Noise'):
                 with gr.Column() as noise_tab_column:
                     with gr.Row(variant='compact'):
-                        noise_type = gr.Radio(['uniform', 'perlin'], label="Noise type", value=da.noise_type, elem_id="noise_type")
+                        noise_type = create_gr_elem(da.noise_type)
                     with gr.Row(variant='compact'):
-                        noise_schedule = gr.Textbox(label="Noise schedule", lines=1, value=da.noise_schedule, interactive=True)
+                        noise_schedule = create_gr_elem(da.noise_schedule)
                     with gr.Row(variant='compact') as perlin_row:
                         with gr.Column(min_width=220):
-                            perlin_octaves = gr.Slider(label="Perlin octaves", minimum=1, maximum=7, value=da.perlin_octaves, step=1, interactive=True)
+                            perlin_octaves = create_gr_elem(da.perlin_octaves)
                         with gr.Column(min_width=220):
-                            perlin_persistence = gr.Slider(label="Perlin persistence", minimum=0, maximum=1, value=da.perlin_persistence, step=0.02, interactive=True)
-                            # following two params are INVISIBLE IN UI
-                            perlin_w = gr.Slider(label="Perlin W", minimum=0.1, maximum=16, step=0.1, value=da.perlin_w, interactive=True, visible=False)
-                            perlin_h = gr.Slider(label="Perlin H", minimum=0.1, maximum=16, step=0.1, value=da.perlin_h, interactive=True, visible=False)
+                            perlin_persistence = create_gr_elem(da.perlin_persistence)
+                            # following two params are INVISIBLE IN UI as of 21-05-23
+                            perlin_w = create_gr_elem(da.perlin_w)
+                            perlin_h = create_gr_elem(da.perlin_h)
                     with gr.Row(variant='compact'):
-                        enable_noise_multiplier_scheduling = gr.Checkbox(label="Enable noise multiplier scheduling", value=da.enable_noise_multiplier_scheduling, interactive=True)
+                        enable_noise_multiplier_scheduling = create_gr_elem(da.enable_noise_multiplier_scheduling)
                     with gr.Row(variant='compact'):
-                        noise_multiplier_schedule = gr.Textbox(label="Noise multiplier schedule", lines=1, value=da.noise_multiplier_schedule, interactive=True)
+                        noise_multiplier_schedule = create_gr_elem(da.noise_multiplier_schedule)
             # COHERENCE INNER TAB
             with gr.TabItem('Coherence', open=False) as coherence_accord:
                 with gr.Row(variant='compact'):
-                    color_coherence = gr.Dropdown(label="Color coherence", choices=['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image'], value=da.color_coherence, type="value",
-                                                  elem_id="color_coherence", interactive=True, info="choose an algorithm/ method for keeping color coherence across the animation")
-                    color_force_grayscale = gr.Checkbox(label="Color force Grayscale", value=da.color_force_grayscale, interactive=True, info="force all frames to be in grayscale")
+                    color_coherence = create_gr_elem(da.color_coherence)
+                    color_force_grayscale = create_gr_elem(da.color_force_grayscale)
                 with gr.Row(variant='compact'):
-                    legacy_colormatch = gr.Checkbox(label="Legacy colormatch", value=da.legacy_colormatch, interactive=True)
+                    legacy_colormatch = create_gr_elem(da.legacy_colormatch)
                 with gr.Row(visible=False) as color_coherence_image_path_row:
                     color_coherence_image_path = gr.Textbox(label="Color coherence image path", lines=1, value=da.color_coherence_image_path, interactive=True)
                 with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
@@ -258,14 +254,10 @@ def get_tab_keyframes(d, da, dloopArgs):
                 # this html only shows when not in 2d/3d mode
                 depth_warp_msg_html = gr.HTML(value='Please switch to 3D animation mode to view this section.', elem_id='depth_warp_msg_html')
                 with gr.Row(variant='compact', visible=False) as depth_warp_row_1:
-                    use_depth_warping = gr.Checkbox(label="Use depth warping", value=da.use_depth_warping, interactive=True)
-                    # this following html only shows when using LeReS depth
-                    leres_license_msg = gr.HTML(
-                        value='Note that LeReS has a Non-Commercial <a href="https://github.com/aim-uofa/AdelaiDepth/blob/main/LeReS/LICENSE" target="_blank">license</a>. Use it only for fun/personal use.',
-                        visible=False, elem_id='leres_license_msg')
-                    depth_algorithm = gr.Dropdown(label="Depth Algorithm", choices=['Midas+AdaBins (old)', 'Zoe+AdaBins (old)', 'Midas-3-Hybrid', 'AdaBins', 'Zoe', 'Leres'],
-                                                  value=da.depth_algorithm, type="value", elem_id="df_depth_algorithm",
-                                                  interactive=True)  # 'Midas-3.1-BeitLarge' is temporarily removed until fixed 04-05-23
+                    use_depth_warping = create_gr_elem(da.use_depth_warping)
+                    # *the following html only shows when LeReS depth is selected*
+                    leres_license_msg = gr.HTML(value=get_gradio_html('leres'), visible=False, elem_id='leres_license_msg')
+                    depth_algorithm = create_gr_elem(da.depth_algorithm)
                     midas_weight = gr.Number(label="MiDaS/Zoe weight", value=da.midas_weight, interactive=True, visible=False,
                                              info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
                 with gr.Row(variant='compact', visible=False) as depth_warp_row_2:
@@ -276,15 +268,14 @@ def get_tab_keyframes(d, da, dloopArgs):
                     aspect_ratio_use_old_formula = gr.Checkbox(label="Use old aspect ratio formula", value=da.aspect_ratio_use_old_formula, interactive=True,
                                                                info="for backward compatibility. uses the formula width/height")
                 with gr.Row(variant='compact', visible=False) as depth_warp_row_4:
-                    aspect_ratio_schedule = gr.Textbox(label="Aspect Ratio schedule", lines=1, value=da.aspect_ratio_schedule, interactive=True,
-                                                       info="adjusts the aspect ratio for the depth calculation")
+                    aspect_ratio_schedule = create_gr_elem(da.aspect_ratio_schedule)
                 with gr.Row(variant='compact', visible=False) as depth_warp_row_5:
-                    fov_schedule = gr.Textbox(label="FOV schedule", lines=1, value=da.fov_schedule, interactive=True,
-                                              info="adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]")
+                    fov_schedule = create_gr_elem(da.fov_schedule)
                 with gr.Row(variant='compact', visible=False) as depth_warp_row_6:
-                    near_schedule = gr.Textbox(label="Near schedule", lines=1, value=da.near_schedule, interactive=True)
+                    near_schedule = create_gr_elem(da.near_schedule)
                 with gr.Row(variant='compact', visible=False) as depth_warp_row_7:
-                    far_schedule = gr.Textbox(label="Far schedule", lines=1, value=da.far_schedule, interactive=True)
+                    far_schedule = create_gr_elem(da.far_schedule)
+
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
 def get_tab_prompts(da):

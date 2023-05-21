@@ -36,27 +36,112 @@ def CoreArgs():  # TODO: change or do something with this ugliness
         "seed_internal": 0
     }
 
+# ['Midas+AdaBins (old)','Zoe+AdaBins (old)', 'Midas-3-Hybrid','Midas-3.1-BeitLarge', 'AdaBins', 'Zoe', 'Leres'] Midas-3.1-BeitLarge is temporarily removed 04-05-23 until fixed
 def DeforumAnimArgs():
     return {
         "animation_mode": '2D',  # ['None', '2D', '3D', 'Video Input', 'Interpolation']
         "max_frames": 120,
         "border": 'replicate',  # ['wrap', 'replicate']
-        "angle": "0: (0)",
-        "zoom": "0: (1.0025+0.002*sin(1.25*3.14*t/30))",
-        "translation_x": "0: (0)",
-        "translation_y": "0: (0)",
-        "translation_z": "0: (1.75)",
-        "transform_center_x": "0: (0.5)",
-        "transform_center_y": "0: (0.5)",
-        "rotation_3d_x": "0:(0)",
-        "rotation_3d_y": "0:(0)",
-        "rotation_3d_z": "0:(0)",
-        "enable_perspective_flip": False,
-        "perspective_flip_theta": "0:(0)",
-        "perspective_flip_phi": "0: (0)",
-        "perspective_flip_gamma": "0: (0)",
-        "perspective_flip_fv": "0: (53)",
-        "noise_schedule": "0: (0.065)",
+        "angle": {
+            "label": "Angle",
+            "type": "textbox",
+            "value": "0: (0)",
+            "info": "rotate canvas clockwise/anticlockwise in degrees per frame"
+        },
+
+        "zoom": {
+            "label": "Zoom",
+            "type": "textbox",
+            "value": "0: (1.0025+0.002*sin(1.25*3.14*t/30))",
+            "info": "scale the canvas size, multiplicatively. [static = 1.0]"
+        },
+
+        "translation_x": {
+            "label": "Translation X",
+            "type": "textbox",
+            "value": "0: (0)",
+            "info": "move canvas left/right in pixels per frame"
+        },
+
+        "translation_y": {
+            "label": "Translation Y",
+            "type": "textbox",
+            "value": "0: (0)",
+            "info": "move canvas up/down in pixels per frame"
+        },
+        "translation_z": {
+            "label": "Translation Z",
+            "type": "textbox",
+            "value": "0: (1.75)",
+            "info": "move canvas towards/away from view [speed set by FOV]"
+        },
+        "transform_center_x": {
+            "label": "Transform Center X",
+            "type": "textbox",
+            "value": "0: (0.5)",
+            "info": "X center axis for 2D angle/zoom"
+        },
+
+        "transform_center_y": {
+            "label": "Transform Center Y",
+            "type": "textbox",
+            "value": "0: (0.5)",
+            "info": "Y center axis for 2D angle/zoom"
+        },
+        "rotation_3d_x": {
+            "label": "Rotation 3D X",
+            "type": "textbox",
+            "value": "0: (0)",
+            "info": "tilt canvas up/down in degrees per frame"
+        },
+        "rotation_3d_y": {
+            "label": "Rotation 3D Y",
+            "type": "textbox",
+            "value": "0: (0)",
+            "info": "pan canvas left/right in degrees per frame"
+        },
+        "rotation_3d_z": {
+            "label": "Rotation 3D Z",
+            "type": "textbox",
+            "value": "0: (0)",
+            "info": "roll canvas clockwise/anticlockwise"
+        },
+        "enable_perspective_flip": {
+            "label": "Enable perspective flip",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
+        "perspective_flip_theta": {
+            "label": "Perspective flip theta",
+            "type": "textbox",
+            "value": "0: (0)",
+            "info": ""
+        },
+        "perspective_flip_phi": {
+            "label": "Perspective flip phi",
+            "type": "textbox",
+            "value": "0: (0)",
+            "info": ""
+        },
+        "perspective_flip_gamma": {
+            "label": "Perspective flip gamma",
+            "type": "textbox",
+            "value": "0: (0)",
+            "info": ""
+        },
+        "perspective_flip_fv": {
+            "label": "Perspective flip tv",
+            "type": "textbox",
+            "value": "0: (53)",
+            "info": "the 2D vanishing point of perspective (rec. range 30-160)"
+        },
+        "noise_schedule": {
+            "label": "Noise schedule",
+            "type": "textbox",
+            "value": "0: (0.065)",
+            "info": ""
+        },
         "strength_schedule": "0: (0.65)",
         "contrast_schedule": "0: (1.0)",
         "cfg_scale_schedule": "0: (7)",
@@ -72,11 +157,31 @@ def DeforumAnimArgs():
             "value": "0: (25)",
             "info": "mainly allows using more than 200 steps. otherwise, it's a mirror-like param of 'strength schedule'"
         },
-        "fov_schedule": "0: (70)",
-        "aspect_ratio_schedule": "0: (1)",
+        "fov_schedule": {
+            "label": "FOV schedule",
+            "type": "textbox",
+            "value": "0: (70)",
+            "info": "adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]"
+        },
+        "aspect_ratio_schedule": {
+            "label": "Aspect Ratio schedule",
+            "type": "textbox",
+            "value": "0: (25)",
+            "info": "adjusts the aspect ratio for the depth calculations"
+        },
         "aspect_ratio_use_old_formula": False,
-        "near_schedule": "0: (200)",
-        "far_schedule": "0: (10000)",
+        "near_schedule": {
+            "label": "Near schedule",
+            "type": "textbox",
+            "value": "0: (200)",
+            "info": ""
+        },
+        "far_schedule": {
+            "label": "Far schedule",
+            "type": "textbox",
+            "value": "0: (10000)",
+            "info": ""
+        },
         "seed_schedule": {
             "label": "Seed schedule",
             "type": "textbox",
@@ -107,17 +212,47 @@ def DeforumAnimArgs():
             "value": "0: (0)",
             "info": ""
         },
-        "enable_sampler_scheduling": False,  # Sampler Scheduling
-        "sampler_schedule": '0: ("Euler a")',
+        "enable_sampler_scheduling": {
+            "label": "Enable sampler scheduling",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
+        "sampler_schedule": {
+            "label": "Sampler schedule",
+            "type": "textbox",
+            "value": '0: ("Euler a")',
+            "info": "allows keyframing different samplers. Use names as they appear in ui dropdown in 'run' tab"
+        },
         "use_noise_mask": False,  # Composable mask scheduling
         "mask_schedule": '0: ("{video_mask}")',
         "noise_mask_schedule": '0: ("{video_mask}")',
-        "enable_checkpoint_scheduling": False,  # Checkpoint Scheduling
-        "checkpoint_schedule": '0: ("model1.ckpt"), 100: ("model2.safetensors")',
+        "enable_checkpoint_scheduling": {
+            "label": "Enable checkpoint scheduling",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
+        "checkpoint_schedule": {
+            "label": "allows keyframing different sd models. use *full* name as appears in ui dropdown",
+            "type": "textbox",
+            "value": '0: ("model1.ckpt"), 100: ("model2.safetensors")',
+            "info": "allows keyframing different sd models. use *full* name as appears in ui dropdown"
+        },
         "enable_clipskip_scheduling": False,  # CLIP skip Scheduling
         "clipskip_schedule": '0: (2)',
-        "enable_noise_multiplier_scheduling": True,  # Noise Multiplier Scheduling
-        "noise_multiplier_schedule": '0: (1.05)',
+        "enable_noise_multiplier_scheduling": {
+            "label": "Enable noise multiplier scheduling",
+            "type": "checkbox",
+            "value": True,
+            "info": ""
+        },
+        "noise_multiplier_schedule": {
+            "label": "Noise multiplier schedule",
+            "type": "textbox",
+            "value": "0: (1.05)",
+            "info": ""
+        },
         "resume_from_timestring": {
             "label": "Resume from timestring",
             "type": "checkbox",
@@ -157,89 +292,146 @@ def DeforumAnimArgs():
             "visible": False,
             "info": ""
         },
-        # Anti-blur
         "amount_schedule": "0: (0.1)",
         "kernel_schedule": "0: (5)",
         "sigma_schedule": "0: (1.0)",
         "threshold_schedule": "0: (0.0)",
-        # Coherence
-        "color_coherence": 'LAB',  # ['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image']
+        "color_coherence": {
+            "label": "Color coherence",
+            "type": "dropdown",
+            "choices": ['None', 'HSV', 'LAB', 'RGB', 'Video Input', 'Image'],
+            "value": "LAB",
+            "info": "choose an algorithm/ method for keeping color coherence across the animation"
+        },
         "color_coherence_image_path": "",
         "color_coherence_video_every_N_frames": 1,
-        "color_force_grayscale": False,
-        "legacy_colormatch": False,
+        "color_force_grayscale": {
+            "label": "Color force Grayscale",
+            "type": "checkbox",
+            "value": False,
+            "info": "force all frames to be in grayscale"
+        },
+        "legacy_colormatch": {
+            "label": "Legacy colormatch",
+            "type": "checkbox",
+            "value": False,
+            "info": "apply colormatch before adding noise (use with CN's Tile)"
+        },
         "diffusion_cadence": '2',  # ['1','2','3','4','5','6','7','8']
         "optical_flow_cadence": 'None',  # ['None', 'RAFT','DIS Medium', 'DIS Fine', 'Farneback']
         "cadence_flow_factor_schedule": "0: (1)",
         "optical_flow_redo_generation": 'None',  # ['None', 'RAFT', 'DIS Medium', 'DIS Fine', 'Farneback']
         "redo_flow_factor_schedule": "0: (1)",
         "diffusion_redo": '0',
-        # **Noise settings:**
-        "noise_type": 'perlin',  # ['uniform', 'perlin']
-        # Perlin params
-        "perlin_w": 8,
-        "perlin_h": 8,
-        "perlin_octaves": 4,
-        "perlin_persistence": 0.5,
-        # **3D Depth Warping:**
-        "use_depth_warping": True,
-        "depth_algorithm": 'Midas-3-Hybrid',
-        # ['Midas+AdaBins (old)','Zoe+AdaBins (old)', 'Midas-3-Hybrid','Midas-3.1-BeitLarge', 'AdaBins', 'Zoe', 'Leres'] Midas-3.1-BeitLarge is temporarily removed 04-05-23 until fixed
-        "midas_weight": 0.2,  # midas/ zoe weight - only relevant in old/ legacy depth_algorithm modes. see above ^
+        "noise_type": {
+            "label": "Noise type",
+            "type": "radio",
+            "choices": ['uniform', 'perlin'],
+            "value": "perlin",
+            "info": ""
+        },
+        "perlin_w": {
+            "label": "Perlin W",
+            "type": "slider",
+            "min": 0.1,
+            "max": 16,
+            "step": 0.1,
+            "value": 8,
+            "visible": False
+        },
+        "perlin_h": {
+            "label": "Perlin H",
+            "type": "slider",
+            "min": 0.1,
+            "max": 16,
+            "step": 0.1,
+            "value": 8,
+            "visible": False
+        },
+        "perlin_octaves": {
+            "label": "Perlin octaves",
+            "type": "slider",
+            "min": 1,
+            "max": 7,
+            "step": 1,
+            "value": 4
+        },
+        "perlin_persistence": {
+            "label": "Perlin persistence",
+            "type": "slider",
+            "min": 0,
+            "max": 1,
+            "step": 0.02,
+            "value": 0.5
+        },
+        "use_depth_warping": {
+            "label": "Use depth warping",
+            "type": "checkbox",
+            "value": True,
+            "info": ""
+        },
+        "depth_algorithm": {
+            "label": "Depth Algorithm",
+            "type": "dropdown",
+            "choices": ['Midas+AdaBins (old)', 'Zoe+AdaBins (old)', 'Midas-3-Hybrid', 'AdaBins', 'Zoe', 'Leres'],
+            "value": "Midas-3-Hybrid",
+            "info": "choose an algorithm/ method for keeping color coherence across the animation"
+        },
+        "midas_weight": 0.2,
         "padding_mode": 'border',  # ['border', 'reflection', 'zeros']
         "sampling_mode": 'bicubic',  # ['bicubic', 'bilinear', 'nearest']
         "save_depth_maps": {
-                "label": "Save 3D depth maps",
-                "type": "checkbox",
-                "value": False,
-                "info": "save animation's depth maps as extra files"
-            },
+            "label": "Save 3D depth maps",
+            "type": "checkbox",
+            "value": False,
+            "info": "save animation's depth maps as extra files"
+        },
         # **Video Input:**
         "video_init_path": {
-                "label": "Video init path/ URL",
-                "type": "textbox",
-                "value": 'https://deforum.github.io/a1/V1.mp4',
-                "info": ""
-            },
+            "label": "Video init path/ URL",
+            "type": "textbox",
+            "value": 'https://deforum.github.io/a1/V1.mp4',
+            "info": ""
+        },
         "extract_nth_frame": {
-                "label": "Extract nth frame",
-                "type": "number",
-                "precision": 0,
-                "value": 1,
-                "info": ""
-            },
+            "label": "Extract nth frame",
+            "type": "number",
+            "precision": 0,
+            "value": 1,
+            "info": ""
+        },
         "extract_from_frame": {
-                "label": "Extract from frame",
-                "type": "number",
-                "precision": 0,
-                "value": 0,
-                "info": ""
+            "label": "Extract from frame",
+            "type": "number",
+            "precision": 0,
+            "value": 0,
+            "info": ""
         },
         "extract_to_frame": {
-                "label": "Extract to frame",
-                "type": "number",
-                "precision": 0,
-                "value": -1,
-                "info": ""
+            "label": "Extract to frame",
+            "type": "number",
+            "precision": 0,
+            "value": -1,
+            "info": ""
         },
         "overwrite_extracted_frames": {
-                "label": "Overwrite extracted frames",
-                "type": "checkbox",
-                "value": False,
-                "info": ""
-            },
+            "label": "Overwrite extracted frames",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
         "use_mask_video": {
-                "label": "Use mask video",
-                "type": "checkbox",
-                "value": False,
-                "info": ""
-            },
+            "label": "Use mask video",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
         "video_mask_path": {
-                "label": "Video mask path",
-                "type": "textbox",
-                "value": 'https://deforum.github.io/a1/VM1.mp4',
-                "info": ""
-            },
+            "label": "Video mask path",
+            "type": "textbox",
+            "value": 'https://deforum.github.io/a1/VM1.mp4',
+            "info": ""
+        },
         # **Hybrid Video for 2D/3D Animation Mode:**
         "hybrid_comp_alpha_schedule": "0:(0.5)",
         "hybrid_comp_mask_blend_alpha_schedule": "0:(0.5)",
@@ -267,215 +459,215 @@ def DeforumAnimArgs():
 def DeforumArgs():
     from modules.sd_samplers import samplers_for_img2img
     return {
-            "W": {
-                "label": "Width",
-                "type": "slider",
-                "min": 8,
-                "max": 2048,
-                "step": 8,
-                "value": 512,
-            },
-            "H": {
-                "label": "Height",
-                "type": "slider",
-                "min": 64,
-                "max": 2048,
-                "step": 64,
-                "value": 512,
-            },
-            "show_info_on_ui": True,
-            "tiling": {
-                "label": "Tiling",
-                "type": "checkbox",
-                "value": False,
-                "info": "Enable for seamless-tiling of each generated image. Experimental"
-            },
-            "restore_faces": {
-                "label": "Restore faces",
-                "type": "checkbox",
-                "value": False,
-                "info": "enable to trigger webui's face restoration on each frame during the generation"
-            },
-            "seed_enable_extras": {
-                "label": "Enable subseed controls",
-                "type": "checkbox",
-                "visible": False,
-                "value": False,
-                "info": ""
-            },
-            "seed_resize_from_w": {
-                "label": "Resize seed from width",
-                "type": "slider",
-                "min": 0,
-                "max": 2048,
-                "step": 64,
-                "value": 0,
-            },
-            "seed_resize_from_h": {
-                "label": "Resize seed from height",
-                "type": "slider",
-                "min": 0,
-                "max": 2048,
-                "step": 64,
-                "value": 0,
-            },
-            "seed": {
-                "label": "Seed",
-                "type": "number",
-                "precision": 0,
-                "value": -1,
-                "info": "Starting seed for the animation. -1 for random"
-            },
-            "sampler": {
-                "label": "Sampler",
-                "type": "dropdown",
-                "choices": [x.name for x in samplers_for_img2img],
-                "value": samplers_for_img2img[0].name,
-            },
-            "steps": {
-                "label": "step",
-                "type": "slider",
-                "min": 1,
-                "max": 200,
-                "step": 1,
-                "value": 25,
-            },
-            "batch_name": {
-                "label": "Batch name",
-                "type": "textbox",
-                "value": "Deforum_{timestring}",
-                "info": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}"
-            },
-            "seed_behavior": {
-                "label": "Seed behavior",
-                "type": "radio",
-                "choices": ['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'],
-                "value": "iter",
-                "info": "controls the seed behavior that is used for animation. hover on the options to see more info"
-            },
-            "seed_iter_N": {
-                "label": "Seed iter N",
-                "type": "number",
-                "precision": 0,
-                "value": 1,
-                "info": "for how many frames the same seed should stick before iterating to the next one"
-            },
-            "use_init": {
-                "label": "Use init",
-                "type": "checkbox",
-                "value": False,
-                "info": ""
-            },
-            "strength": {
-                "label": "strength",
-                "type": "slider",
-                "min": 0,
-                "max": 1,
-                "step": 0.01,
-                "value": 0.8,
-            },
-            "strength_0_no_init": {
-                "label": "Strength 0 no init",
-                "type": "checkbox",
-                "value": True,
-                "info": ""
-            },
-            "init_image": {
-                "label": "Init image",
-                "type": "textbox",
-                "value": "https://deforum.github.io/a1/I1.png",
-                "info": ""
-            },
-            "use_mask": {
-                "label": "Use mask",
-                "type": "checkbox",
-                "value": False,
-                "info": ""
-            },
-            "use_alpha_as_mask": {
-                "label": "Use alpha as mask",
-                "type": "checkbox",
-                "value": False,
-                "info": ""
-            },
-            "mask_file": {
-                "label": "Mask file",
-                "type": "textbox",
-                "value": "https://deforum.github.io/a1/M1.jpg",
-                "info": ""
-            },
-            "invert_mask": {
-                "label": "Invert mask",
-                "type": "checkbox",
-                "value": False,
-                "info": ""
-            },
-            "mask_contrast_adjust": {
-                "label": "Mask contrast adjust",
-                "type": "number",
-                "precision": None,
-                "value": 1.0,
-                "info": ""
-            },
-            "mask_brightness_adjust": {
-                "label": "Mask brightness adjust",
-                "type": "number",
-                "precision": None,
-                "value": 1.0,
-                "info": ""
-            },
-            "overlay_mask": {
-                "label": "Overlay mask",
-                "type": "checkbox",
-                "value": True,
-                "info": ""
-            },
-            "mask_overlay_blur": {
-                "label": "Mask overlay blur",
-                "type": "slider",
-                "min": 0,
-                "max": 64,
-                "step": 1,
-                "value": 4,
-            },
-            "fill": {
-                "label": "Mask fill",
-                "type": "radio",
-                "radio_type": "index",
-                "choices": mask_fill_choices,
-                "value": "fill",
-                "info": ""
-            },
-            "full_res_mask": {
-                "label": "Full res mask",
-                "type": "checkbox",
-                "value": True,
-                "info": ""
-            },
-            "full_res_mask_padding": {
-                "label": "Full res mask padding",
-                "type": "slider",
-                "min": 0,
-                "max": 512,
-                "step": 1,
-                "value": 4,
-            },
-            "reroll_blank_frames": {
-                "label": "Reroll blank frames",
-                "type": "radio",
-                "radio_type": "index",
-                "choices": ['reroll', 'interrupt', 'ignore'],
-                "value": "ignore",
-                "info": ""
-            },
-            "reroll_patience": {
-                "label": "Reroll patience",
-                "type": "number",
-                "precision": None,
-                "value": 10,
-                "info": ""
-            },
-        }
+        "W": {
+            "label": "Width",
+            "type": "slider",
+            "min": 8,
+            "max": 2048,
+            "step": 8,
+            "value": 512,
+        },
+        "H": {
+            "label": "Height",
+            "type": "slider",
+            "min": 64,
+            "max": 2048,
+            "step": 64,
+            "value": 512,
+        },
+        "show_info_on_ui": True,
+        "tiling": {
+            "label": "Tiling",
+            "type": "checkbox",
+            "value": False,
+            "info": "Enable for seamless-tiling of each generated image. Experimental"
+        },
+        "restore_faces": {
+            "label": "Restore faces",
+            "type": "checkbox",
+            "value": False,
+            "info": "enable to trigger webui's face restoration on each frame during the generation"
+        },
+        "seed_enable_extras": {
+            "label": "Enable subseed controls",
+            "type": "checkbox",
+            "visible": False,
+            "value": False,
+            "info": ""
+        },
+        "seed_resize_from_w": {
+            "label": "Resize seed from width",
+            "type": "slider",
+            "min": 0,
+            "max": 2048,
+            "step": 64,
+            "value": 0,
+        },
+        "seed_resize_from_h": {
+            "label": "Resize seed from height",
+            "type": "slider",
+            "min": 0,
+            "max": 2048,
+            "step": 64,
+            "value": 0,
+        },
+        "seed": {
+            "label": "Seed",
+            "type": "number",
+            "precision": 0,
+            "value": -1,
+            "info": "Starting seed for the animation. -1 for random"
+        },
+        "sampler": {
+            "label": "Sampler",
+            "type": "dropdown",
+            "choices": [x.name for x in samplers_for_img2img],
+            "value": samplers_for_img2img[0].name,
+        },
+        "steps": {
+            "label": "step",
+            "type": "slider",
+            "min": 1,
+            "max": 200,
+            "step": 1,
+            "value": 25,
+        },
+        "batch_name": {
+            "label": "Batch name",
+            "type": "textbox",
+            "value": "Deforum_{timestring}",
+            "info": "output images will be placed in a folder with this name ({timestring} token will be replaced) inside the img2img output folder. Supports params placeholders. e.g {seed}, {w}, {h}, {prompts}"
+        },
+        "seed_behavior": {
+            "label": "Seed behavior",
+            "type": "radio",
+            "choices": ['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'],
+            "value": "iter",
+            "info": "controls the seed behavior that is used for animation. hover on the options to see more info"
+        },
+        "seed_iter_N": {
+            "label": "Seed iter N",
+            "type": "number",
+            "precision": 0,
+            "value": 1,
+            "info": "for how many frames the same seed should stick before iterating to the next one"
+        },
+        "use_init": {
+            "label": "Use init",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
+        "strength": {
+            "label": "strength",
+            "type": "slider",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "value": 0.8,
+        },
+        "strength_0_no_init": {
+            "label": "Strength 0 no init",
+            "type": "checkbox",
+            "value": True,
+            "info": ""
+        },
+        "init_image": {
+            "label": "Init image",
+            "type": "textbox",
+            "value": "https://deforum.github.io/a1/I1.png",
+            "info": ""
+        },
+        "use_mask": {
+            "label": "Use mask",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
+        "use_alpha_as_mask": {
+            "label": "Use alpha as mask",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
+        "mask_file": {
+            "label": "Mask file",
+            "type": "textbox",
+            "value": "https://deforum.github.io/a1/M1.jpg",
+            "info": ""
+        },
+        "invert_mask": {
+            "label": "Invert mask",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
+        "mask_contrast_adjust": {
+            "label": "Mask contrast adjust",
+            "type": "number",
+            "precision": None,
+            "value": 1.0,
+            "info": ""
+        },
+        "mask_brightness_adjust": {
+            "label": "Mask brightness adjust",
+            "type": "number",
+            "precision": None,
+            "value": 1.0,
+            "info": ""
+        },
+        "overlay_mask": {
+            "label": "Overlay mask",
+            "type": "checkbox",
+            "value": True,
+            "info": ""
+        },
+        "mask_overlay_blur": {
+            "label": "Mask overlay blur",
+            "type": "slider",
+            "min": 0,
+            "max": 64,
+            "step": 1,
+            "value": 4,
+        },
+        "fill": {
+            "label": "Mask fill",
+            "type": "radio",
+            "radio_type": "index",
+            "choices": mask_fill_choices,
+            "value": "fill",
+            "info": ""
+        },
+        "full_res_mask": {
+            "label": "Full res mask",
+            "type": "checkbox",
+            "value": True,
+            "info": ""
+        },
+        "full_res_mask_padding": {
+            "label": "Full res mask padding",
+            "type": "slider",
+            "min": 0,
+            "max": 512,
+            "step": 1,
+            "value": 4,
+        },
+        "reroll_blank_frames": {
+            "label": "Reroll blank frames",
+            "type": "radio",
+            "radio_type": "index",
+            "choices": ['reroll', 'interrupt', 'ignore'],
+            "value": "ignore",
+            "info": ""
+        },
+        "reroll_patience": {
+            "label": "Reroll patience",
+            "type": "number",
+            "precision": None,
+            "value": 10,
+            "info": ""
+        },
+    }
 
 def LoopArgs():
     return {
@@ -541,12 +733,12 @@ def DeforumOutputArgs():
             "info": "If enabled, only images will be saved"
         },
         "fps": {
-                "label": "FPS",
-                "type": "slider",
-                "min": 1,
-                "max": 240,
-                "step": 1,
-                "value": 15,
+            "label": "FPS",
+            "type": "slider",
+            "min": 1,
+            "max": 240,
+            "step": 1,
+            "value": 15,
         },
         "make_gif": {
             "label": "Make GIF",
@@ -566,11 +758,11 @@ def DeforumOutputArgs():
             "value": "C:/SD/20230124234916_%09d.png",
         },
         "add_soundtrack": {
-                "label": "Add soundtrack",
-                "type": "radio",
-                "choices": ['None', 'File', 'Init Video'],
-                "value": "None",
-                "info": "add audio to video from file/url or init video"
+            "label": "Add soundtrack",
+            "type": "radio",
+            "choices": ['None', 'File', 'Init Video'],
+            "value": "None",
+            "info": "add audio to video from file/url or init video"
         },
         "soundtrack_path": {
             "label": "Soundtrack path",
@@ -585,16 +777,16 @@ def DeforumOutputArgs():
             "info": "upscale output imgs when run is finished"
         },
         "r_upscale_factor": {
-                "label": "Upscale factor",
-                "type": "dropdown",
-                "choices": ['x2', 'x3', 'x4'],
-                "value": "2x",
+            "label": "Upscale factor",
+            "type": "dropdown",
+            "choices": ['x2', 'x3', 'x4'],
+            "value": "2x",
         },
         "r_upscale_model": {
-                "label": "Upscale model",
-                "type": "dropdown",
-                "choices": ['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'],
-                "value": 'realesr-animevideov3',
+            "label": "Upscale model",
+            "type": "dropdown",
+            "choices": ['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'],
+            "value": 'realesr-animevideov3',
         },
         "r_upscale_keep_imgs": {
             "label": "Store frames in ram",
@@ -610,19 +802,19 @@ def DeforumOutputArgs():
             "visible": False
         },
         "frame_interpolation_engine": {
-                "label": "Engine",
-                "type": "radio",
-                "choices": ['None', 'RIFE v4.6', 'FILM'],
-                "value": "None",
-                "info": "select the frame interpolation engine. hover on the options for more info"
+            "label": "Engine",
+            "type": "radio",
+            "choices": ['None', 'RIFE v4.6', 'FILM'],
+            "value": "None",
+            "info": "select the frame interpolation engine. hover on the options for more info"
         },
         "frame_interpolation_x_amount": {
-                "label": "Interp X",
-                "type": "slider",
-                "min": 2,
-                "max": 10,
-                "step": 1,
-                "value": 2,
+            "label": "Interp X",
+            "type": "slider",
+            "min": 2,
+            "max": 10,
+            "step": 1,
+            "value": 2,
         },
         "frame_interpolation_slow_mo_enabled": {
             "label": "Slow Mo",
@@ -632,12 +824,12 @@ def DeforumOutputArgs():
             "info": "Slow-Mo the interpolated video, audio will not be used if enabled",
         },
         "frame_interpolation_slow_mo_amount": {
-                "label": "Slow-Mo X",
-                "type": "slider",
-                "min": 2,
-                "max": 10,
-                "step": 1,
-                "value": 2,
+            "label": "Slow-Mo X",
+            "type": "slider",
+            "min": 2,
+            "max": 10,
+            "step": 1,
+            "value": 2,
         },
         "frame_interpolation_keep_imgs": {
             "label": "Keep Imgs",
