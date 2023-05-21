@@ -453,15 +453,15 @@ def get_tab_output(da, dv):
                             interpolate_button = gr.Button(value="*Interpolate Video*")
                             interpolate_pics_button = gr.Button(value="*Interpolate Pics*")
                         # Show a text about CLI outputs:
-                        gr.HTML("* check your CLI for outputs *", elem_id="below_interpolate_butts_msg")  # TODO: CSS THIS TO CENTER OF ROW!
+                        gr.HTML("* check your CLI for outputs *", elem_id="below_interpolate_butts_msg")
                         # make the function call when the interpolation button is clicked
-                        interpolate_button.click(upload_vid_to_interpolate,
+                        interpolate_button.click(fn=upload_vid_to_interpolate,
                                                  inputs=[vid_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled,
                                                          frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, in_vid_fps_ui_window])
-                        interpolate_pics_button.click(upload_pics_to_interpolate,
+                        interpolate_pics_button.click(fn=upload_pics_to_interpolate,
                                                       inputs=[pics_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled,
                                                               frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, fps, add_soundtrack, soundtrack_path])
-        # VIDEO UPSCALE TAB
+        # VIDEO UPSCALE TAB - not built using our args.py at all - all data and params are here and in .upscaling file
         with gr.TabItem('Video Upscaling'):
             vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
             with gr.Column():
@@ -478,10 +478,10 @@ def get_tab_output(da, dv):
                         ncnn_upscale_factor = create_gr_elem(dv.r_upscale_factor)  # note that we re-use *r_upscale_facto*r in here to create the gradio element as they are the same
                         ncnn_upscale_keep_imgs = create_gr_elem(dv.r_upscale_keep_imgs)  # note that we re-use *r_upscale_keep_imgs* in here to create the gradio element as they are the same
                 ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
-                ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,
+                ncnn_upscale_btn.click(fn=ncnn_upload_vid_to_upscale,
                                        inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model,
                                                ncnn_upscale_factor, ncnn_upscale_keep_imgs])
-        # Vid2Depth TAB
+        # Vid2Depth TAB - not built using our args.py at all - all data and params are here and in .vid2depth file
         with gr.TabItem('Vid2depth'):
             vid_to_depth_chosen_file = gr.File(label="Video to get Depth from", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_depth_chosen_file")
             with FormRow():
@@ -497,7 +497,7 @@ def get_tab_output(da, dv):
             with FormRow():
                 end_blur = gr.Slider(label="End blur width", value=0, minimum=0, maximum=255, step=1)
                 midas_weight_vid2depth = gr.Slider(label="MiDaS weight (vid2depth)", value=da.midas_weight, minimum=0, maximum=1, step=0.05, interactive=True,
-                                                   info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
+                                                   info="sets a midpoint at which a depth-map is to be drawn: range [-1 to +1]")
                 depth_keep_imgs = gr.Checkbox(label='Keep Imgs', value=True, elem_id="depth_keep_imgs")
             with FormRow():
                 # This is the actual button that's pressed to initiate the Upscaling:
@@ -506,7 +506,7 @@ def get_tab_output(da, dv):
                 # Show a text about CLI outputs:
                 gr.HTML("* check your CLI for outputs")
                 # make the function call when the UPSCALE button is clicked
-            depth_btn.click(upload_vid_to_depth,
+            depth_btn.click(fn=upload_vid_to_depth,
                             inputs=[vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth,
                                     depth_keep_imgs])
         # STITCH FRAMES TO VID TAB
@@ -515,6 +515,6 @@ def get_tab_output(da, dv):
             with FormRow():
                 image_path = create_gr_elem(dv.image_path)
             ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
-            ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames, inputs=[image_path, fps, add_soundtrack, soundtrack_path])
+            ffmpeg_stitch_imgs_but.click(fn=direct_stitch_vid_from_frames, inputs=[image_path, fps, add_soundtrack, soundtrack_path])
 
     return {k: v for k, v in {**locals(), **vars()}.items()}
