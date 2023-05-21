@@ -136,7 +136,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         args.checkpoint = keys.checkpoint_schedule_series[frame_idx] if anim_args.enable_checkpoint_scheduling else None
         if anim_args.enable_subseed_scheduling:
             root.subseed = int(keys.subseed_schedule_series[frame_idx])
-            root.subseed = keys.subseed_strength_schedule_series[frame_idx]
+            root.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
         else:
             root.subseed, root.subseed_strength = keys.subseed_schedule_series[frame_idx], keys.subseed_strength_schedule_series[frame_idx]
         if use_parseq:
