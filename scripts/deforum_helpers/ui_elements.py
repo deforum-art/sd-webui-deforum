@@ -482,30 +482,6 @@ def get_tab_output(da, dv):
                 ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,
                                        inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model,
                                                ncnn_upscale_factor, ncnn_upscale_keep_imgs])
-                with gr.Column(visible=False):  # Upscale V1. Disabled 06-03-23
-                    selected_tab = gr.State(value=0)
-                    with gr.Tabs(elem_id="extras_resize_mode"):
-                        with gr.TabItem('Scale by', elem_id="extras_scale_by_tab") as tab_scale_by:
-                            upscaling_resize = gr.Slider(minimum=1.0, maximum=8.0, step=0.05, label="Resize", value=2, elem_id="extras_upscaling_resize")
-                        with gr.TabItem('Scale to', elem_id="extras_scale_to_tab") as tab_scale_to:
-                            with FormRow():
-                                upscaling_resize_w = gr.Slider(label="Width", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_w")
-                                upscaling_resize_h = gr.Slider(label="Height", minimum=1, maximum=7680, step=1, value=512, elem_id="extras_upscaling_resize_h")
-                                upscaling_crop = gr.Checkbox(label='Crop to fit', value=True, elem_id="extras_upscaling_crop")
-                    with FormRow():
-                        extras_upscaler_1 = gr.Dropdown(label='Upscaler 1', elem_id="extras_upscaler_1", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[3].name)
-                        extras_upscaler_2 = gr.Dropdown(label='Upscaler 2', elem_id="extras_upscaler_2", choices=[x.name for x in sh.sd_upscalers], value=sh.sd_upscalers[0].name)
-                    with FormRow():
-                        with gr.Column(scale=3):
-                            extras_upscaler_2_visibility = gr.Slider(minimum=0.0, maximum=1.0, step=0.001, label="Upscaler 2 visibility", value=0.0, elem_id="extras_upscaler_2_visibility")
-                        with gr.Column(scale=1, min_width=80):
-                            upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", elem_id="upscale_keep_imgs", value=True, interactive=True)
-                    tab_scale_by.select(fn=lambda: 0, inputs=[], outputs=[selected_tab])
-                    tab_scale_to.select(fn=lambda: 1, inputs=[], outputs=[selected_tab])
-                    # This is the actual button that's pressed to initiate the Upscaling:
-                    upscale_btn = gr.Button(value="*Upscale uploaded video*")
-                    # Show a text about CLI outputs:
-                    gr.HTML("* check your CLI for outputs")
         # Vid2Depth TAB
         with gr.TabItem('Vid2depth'):
             vid_to_depth_chosen_file = gr.File(label="Video to get Depth from", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_depth_chosen_file")
