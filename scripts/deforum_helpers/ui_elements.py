@@ -215,9 +215,9 @@ def get_tab_keyframes(d, da, dloopArgs):
                 with gr.Row(variant='compact'):
                     legacy_colormatch = create_gr_elem(da.legacy_colormatch)
                 with gr.Row(visible=False) as color_coherence_image_path_row:
-                    color_coherence_image_path = gr.Textbox(label="Color coherence image path", lines=1, value=da.color_coherence_image_path, interactive=True)
+                    color_coherence_image_path = create_gr_elem(da.color_coherence_image_path)
                 with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
-                    color_coherence_video_every_N_frames = gr.Number(label="Color coherence video every N frames", value=1, interactive=True)
+                    color_coherence_video_every_N_frames = create_gr_elem(da.color_coherence_video_every_N_frames)
                 with gr.Row(variant='compact') as optical_flow_cadence_row:
                     with gr.Column(min_width=220) as optical_flow_cadence_column:
                         optical_flow_cadence = gr.Dropdown(choices=['None', 'RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'], label="Optical flow cadence", value=da.optical_flow_cadence,
@@ -243,13 +243,13 @@ def get_tab_keyframes(d, da, dloopArgs):
             # ANTI BLUR INNER TAB
             with gr.TabItem('Anti Blur', elem_id='anti_blur_accord') as anti_blur_tab:
                 with gr.Row(variant='compact'):
-                    amount_schedule = gr.Textbox(label="Amount schedule", lines=1, value=da.amount_schedule, interactive=True)
+                    amount_schedule = create_gr_elem(da.amount_schedule)
                 with gr.Row(variant='compact'):
-                    kernel_schedule = gr.Textbox(label="Kernel schedule", lines=1, value=da.kernel_schedule, interactive=True)
+                    kernel_schedule = create_gr_elem(da.kernel_schedule)
                 with gr.Row(variant='compact'):
-                    sigma_schedule = gr.Textbox(label="Sigma schedule", lines=1, value=da.sigma_schedule, interactive=True)
+                    sigma_schedule = create_gr_elem(da.sigma_schedule)
                 with gr.Row(variant='compact'):
-                    threshold_schedule = gr.Textbox(label="Threshold schedule", lines=1, value=da.threshold_schedule, interactive=True)
+                    threshold_schedule = create_gr_elem(da.threshold_schedule)
             with gr.TabItem('Depth Warping & FOV', elem_id='depth_warp_fov_tab') as depth_warp_fov_tab:
                 # this html only shows when not in 2d/3d mode
                 depth_warp_msg_html = gr.HTML(value='Please switch to 3D animation mode to view this section.', elem_id='depth_warp_msg_html')
@@ -258,15 +258,12 @@ def get_tab_keyframes(d, da, dloopArgs):
                     # *the following html only shows when LeReS depth is selected*
                     leres_license_msg = gr.HTML(value=get_gradio_html('leres'), visible=False, elem_id='leres_license_msg')
                     depth_algorithm = create_gr_elem(da.depth_algorithm)
-                    midas_weight = gr.Number(label="MiDaS/Zoe weight", value=da.midas_weight, interactive=True, visible=False,
-                                             info="sets a midpoint at which a depthmap is to be drawn: range [-1 to +1]")
+                    midas_weight = create_gr_elem(da.midas_weight)
                 with gr.Row(variant='compact', visible=False) as depth_warp_row_2:
-                    padding_mode = gr.Radio(['border', 'reflection', 'zeros'], label="Padding mode", value=da.padding_mode, elem_id="padding_mode",
-                                            info="controls the handling of pixels outside the field of view as they come into the scene. hover on the options for more info")
-                    sampling_mode = gr.Radio(['bicubic', 'bilinear', 'nearest'], label="Sampling mode", value=da.sampling_mode, elem_id="sampling_mode")
+                    padding_mode = create_gr_elem(da.padding_mode)
+                    sampling_mode = create_gr_elem(da.sampling_mode)
                 with gr.Row(variant='compact', visible=False) as depth_warp_row_3:
-                    aspect_ratio_use_old_formula = gr.Checkbox(label="Use old aspect ratio formula", value=da.aspect_ratio_use_old_formula, interactive=True,
-                                                               info="for backward compatibility. uses the formula width/height")
+                    aspect_ratio_use_old_formula = create_gr_elem(da.aspect_ratio_use_old_formula)
                 with gr.Row(variant='compact', visible=False) as depth_warp_row_4:
                     aspect_ratio_schedule = create_gr_elem(da.aspect_ratio_schedule)
                 with gr.Row(variant='compact', visible=False) as depth_warp_row_5:

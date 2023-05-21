@@ -169,7 +169,12 @@ def DeforumAnimArgs():
             "value": "0: (25)",
             "info": "adjusts the aspect ratio for the depth calculations"
         },
-        "aspect_ratio_use_old_formula": False,
+        "aspect_ratio_use_old_formula": {
+            "label": "Use old aspect ratio formula",
+            "type": "checkbox",
+            "value": False,
+            "info": "for backward compatibility. uses the formula: `width/height`"
+        },
         "near_schedule": {
             "label": "Near schedule",
             "type": "textbox",
@@ -292,10 +297,30 @@ def DeforumAnimArgs():
             "visible": False,
             "info": ""
         },
-        "amount_schedule": "0: (0.1)",
-        "kernel_schedule": "0: (5)",
-        "sigma_schedule": "0: (1.0)",
-        "threshold_schedule": "0: (0.0)",
+        "amount_schedule": {
+            "label": "Amount schedule",
+            "type": "textbox",
+            "value": "0: (0.1)",
+            "info": ""
+        },
+        "kernel_schedule": {
+            "label": "Kernel schedule",
+            "type": "textbox",
+            "value": "0: (5)",
+            "info": ""
+        },
+        "sigma_schedule": {
+            "label": "Sigma schedule",
+            "type": "textbox",
+            "value": "0: (1)",
+            "info": ""
+        },
+        "threshold_schedule": {
+            "label": "Threshold schedule",
+            "type": "textbox",
+            "value": "0: (0)",
+            "info": ""
+        },
         "color_coherence": {
             "label": "Color coherence",
             "type": "dropdown",
@@ -303,8 +328,19 @@ def DeforumAnimArgs():
             "value": "LAB",
             "info": "choose an algorithm/ method for keeping color coherence across the animation"
         },
-        "color_coherence_image_path": "",
-        "color_coherence_video_every_N_frames": 1,
+        "color_coherence_image_path": {
+            "label": "Color coherence image path",
+            "type": "textbox",
+            "value": "",
+            "info": ""
+        },
+        "color_coherence_video_every_N_frames": {
+            "label": "Color coherence video every N frames",
+            "type": "number",
+            "precision": 0,
+            "value": 1,
+            "info": "",
+        },
         "color_force_grayscale": {
             "label": "Color force Grayscale",
             "type": "checkbox",
@@ -377,9 +413,28 @@ def DeforumAnimArgs():
             "value": "Midas-3-Hybrid",
             "info": "choose an algorithm/ method for keeping color coherence across the animation"
         },
-        "midas_weight": 0.2,
-        "padding_mode": 'border',  # ['border', 'reflection', 'zeros']
-        "sampling_mode": 'bicubic',  # ['bicubic', 'bilinear', 'nearest']
+        "midas_weight": {
+            "label": "MiDaS/Zoe weight",
+            "type": "number",
+            "precision": None,
+            "value": 0.2,
+            "info": "sets a midpoint at which a depth-map is to be drawn: range [-1 to +1]",
+            "visible": False
+        },
+        "padding_mode": {
+            "label": "Padding mode",
+            "type": "radio",
+            "choices": ['border', 'reflection', 'zeros'],
+            "value": "border",
+            "info": "controls the handling of pixels outside the field of view as they come into the scene"
+        },
+        "sampling_mode": {
+            "label": "Padding mode",
+            "type": "radio",
+            "choices": ['bicubic', 'bilinear', 'nearest'],
+            "value": "bicubic",
+            "info": ""
+        },
         "save_depth_maps": {
             "label": "Save 3D depth maps",
             "type": "checkbox",
