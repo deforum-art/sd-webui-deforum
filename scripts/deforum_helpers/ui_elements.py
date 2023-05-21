@@ -4,6 +4,8 @@ from .defaults import get_gradio_html, DeforumAnimPrompts
 from .video_audio_utilities import direct_stitch_vid_from_frames
 from .gradio_funcs import upload_vid_to_interpolate, upload_pics_to_interpolate, ncnn_upload_vid_to_upscale, upload_vid_to_depth
 
+# All get_tab functions use FormRow() by default, unless we have a gr.File inside that row, then we use gr.Row() instead
+
 def get_tab_run(d, da):
     with gr.TabItem('Run'):  # RUN TAB
         with FormRow():
@@ -28,7 +30,7 @@ def get_tab_run(d, da):
         # RUN FROM SETTING FILE ACCORD
         with gr.Accordion('Batch Mode, Resume and more', open=False):
             with gr.Tab('Batch Mode/ run from setting files'):
-                with FormRow():  # TODO: handle this inside one of the args functions?
+                with gr.Row():  # TODO: handle this inside one of the args functions?
                     override_settings_with_file = gr.Checkbox(label="Enable batch mode", value=False, interactive=True, elem_id='override_settings',
                                                               info="run from a list of setting .txt files. Upload them to the box on the right (visible when enabled)")
                     custom_settings_file = gr.File(label="Setting files", interactive=True, file_count="multiple", file_types=[".txt"], elem_id="custom_setting_file", visible=False)
@@ -53,9 +55,9 @@ def create_gr_elem(d):
 def get_tab_keyframes(d, da, dloopArgs):
     with gr.TabItem('Keyframes'):  # TODO make a some sort of the original dictionary parsing
         with FormRow():
-            with gr.Column(scale=2):
+            with FormColumn(scale=2):
                 animation_mode = create_gr_elem(da.animation_mode)
-            with gr.Column(scale=1, min_width=180):
+            with FormColumn(scale=1, min_width=180):
                 border = create_gr_elem(da.border)
         with FormRow():
             diffusion_cadence = create_gr_elem(da.diffusion_cadence)
@@ -96,9 +98,9 @@ def get_tab_keyframes(d, da, dloopArgs):
             with gr.TabItem('Seed') as a3:
                 with FormRow():
                     seed_behavior = create_gr_elem(d.seed_behavior)
-                with gr.Row(variant='compact') as seed_iter_N_row:
+                with FormRow() as seed_iter_N_row:
                     seed_iter_N = create_gr_elem(d.seed_iter_N)
-                with gr.Row(visible=False) as seed_schedule_row:
+                with FormRow(visible=False) as seed_schedule_row:
                     seed_schedule = create_gr_elem(da.seed_schedule)
             with gr.TabItem('SubSeed', open=False) as subseed_sch_tab:
                 with FormRow():
@@ -138,12 +140,12 @@ def get_tab_keyframes(d, da, dloopArgs):
                         transform_center_x = create_gr_elem(da.transform_center_x)
                     with FormRow():
                         transform_center_y = create_gr_elem(da.transform_center_y)
-                with gr.Column(visible=True) as both_anim_mode_motion_params_column:
+                with FormColumn(visible=True) as both_anim_mode_motion_params_column:
                     with FormRow():
                         translation_x = create_gr_elem(da.translation_x)
                     with FormRow():
                         translation_y = create_gr_elem(da.translation_y)
-                with gr.Column(visible=False) as only_3d_motion_column:
+                with FormColumn(visible=False) as only_3d_motion_column:
                     with FormRow():
                         translation_z = create_gr_elem(da.translation_z)
                     with FormRow():
@@ -153,27 +155,27 @@ def get_tab_keyframes(d, da, dloopArgs):
                     with FormRow():
                         rotation_3d_z = create_gr_elem(da.rotation_3d_z)
                 # PERSPECTIVE FLIP - inner params are hidden if not enabled
-                with gr.Row(variant='compact') as enable_per_f_row:
+                with FormRow() as enable_per_f_row:
                     enable_perspective_flip = create_gr_elem(da.enable_perspective_flip)
-                with gr.Row(variant='compact', visible=False) as per_f_th_row:
+                with FormRow(visible=False) as per_f_th_row:
                     perspective_flip_theta = create_gr_elem(da.perspective_flip_theta)
-                with gr.Row(variant='compact', visible=False) as per_f_ph_row:
+                with FormRow(visible=False) as per_f_ph_row:
                     perspective_flip_phi = create_gr_elem(da.perspective_flip_phi)
-                with gr.Row(variant='compact', visible=False) as per_f_ga_row:
+                with FormRow(visible=False) as per_f_ga_row:
                     perspective_flip_gamma = create_gr_elem(da.perspective_flip_gamma)
-                with gr.Row(variant='compact', visible=False) as per_f_f_row:
+                with FormRow(visible=False) as per_f_f_row:
                     perspective_flip_fv = create_gr_elem(da.perspective_flip_fv)
             # NOISE INNER TAB
             with gr.TabItem('Noise'):
-                with gr.Column() as noise_tab_column:
+                with FormColumn() as noise_tab_column:
                     with FormRow():
                         noise_type = create_gr_elem(da.noise_type)
                     with FormRow():
                         noise_schedule = create_gr_elem(da.noise_schedule)
-                    with gr.Row(variant='compact') as perlin_row:
-                        with gr.Column(min_width=220):
+                    with FormRow() as perlin_row:
+                        with FormColumn(min_width=220):
                             perlin_octaves = create_gr_elem(da.perlin_octaves)
-                        with gr.Column(min_width=220):
+                        with FormColumn(min_width=220):
                             perlin_persistence = create_gr_elem(da.perlin_persistence)
                             # following two params are INVISIBLE IN UI as of 21-05-23
                             perlin_w = create_gr_elem(da.perlin_w)
@@ -189,19 +191,19 @@ def get_tab_keyframes(d, da, dloopArgs):
                     color_force_grayscale = create_gr_elem(da.color_force_grayscale)
                 with FormRow():
                     legacy_colormatch = create_gr_elem(da.legacy_colormatch)
-                with gr.Row(visible=False) as color_coherence_image_path_row:
+                with FormRow(visible=False) as color_coherence_image_path_row:
                     color_coherence_image_path = create_gr_elem(da.color_coherence_image_path)
-                with gr.Row(visible=False) as color_coherence_video_every_N_frames_row:
+                with FormRow(visible=False) as color_coherence_video_every_N_frames_row:
                     color_coherence_video_every_N_frames = create_gr_elem(da.color_coherence_video_every_N_frames)
-                with gr.Row(variant='compact') as optical_flow_cadence_row:
-                    with gr.Column(min_width=220) as optical_flow_cadence_column:
+                with FormRow() as optical_flow_cadence_row:
+                    with FormColumn(min_width=220) as optical_flow_cadence_column:
                         optical_flow_cadence = create_gr_elem(da.optical_flow_cadence)
-                    with gr.Column(min_width=220, visible=False) as cadence_flow_factor_schedule_column:
+                    with FormColumn(min_width=220, visible=False) as cadence_flow_factor_schedule_column:
                         cadence_flow_factor_schedule = create_gr_elem(da.cadence_flow_factor_schedule)
                 with FormRow():
-                    with gr.Column(min_width=220):
+                    with FormColumn(min_width=220):
                         optical_flow_redo_generation = create_gr_elem(da.optical_flow_redo_generation)
-                    with gr.Column(min_width=220, visible=False) as redo_flow_factor_schedule_column:
+                    with FormColumn(min_width=220, visible=False) as redo_flow_factor_schedule_column:
                         redo_flow_factor_schedule = create_gr_elem(da.redo_flow_factor_schedule)
                 with FormRow():
                     contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value=da.contrast_schedule, interactive=True,
@@ -225,24 +227,24 @@ def get_tab_keyframes(d, da, dloopArgs):
             with gr.TabItem('Depth Warping & FOV', elem_id='depth_warp_fov_tab') as depth_warp_fov_tab:
                 # this html only shows when not in 2d/3d mode
                 depth_warp_msg_html = gr.HTML(value='Please switch to 3D animation mode to view this section.', elem_id='depth_warp_msg_html')
-                with gr.Row(variant='compact', visible=False) as depth_warp_row_1:
+                with FormRow(visible=False) as depth_warp_row_1:
                     use_depth_warping = create_gr_elem(da.use_depth_warping)
                     # *the following html only shows when LeReS depth is selected*
                     leres_license_msg = gr.HTML(value=get_gradio_html('leres'), visible=False, elem_id='leres_license_msg')
                     depth_algorithm = create_gr_elem(da.depth_algorithm)
                     midas_weight = create_gr_elem(da.midas_weight)
-                with gr.Row(variant='compact', visible=False) as depth_warp_row_2:
+                with FormRow(visible=False) as depth_warp_row_2:
                     padding_mode = create_gr_elem(da.padding_mode)
                     sampling_mode = create_gr_elem(da.sampling_mode)
-                with gr.Row(variant='compact', visible=False) as depth_warp_row_3:
+                with FormRow(visible=False) as depth_warp_row_3:
                     aspect_ratio_use_old_formula = create_gr_elem(da.aspect_ratio_use_old_formula)
-                with gr.Row(variant='compact', visible=False) as depth_warp_row_4:
+                with FormRow(visible=False) as depth_warp_row_4:
                     aspect_ratio_schedule = create_gr_elem(da.aspect_ratio_schedule)
-                with gr.Row(variant='compact', visible=False) as depth_warp_row_5:
+                with FormRow(visible=False) as depth_warp_row_5:
                     fov_schedule = create_gr_elem(da.fov_schedule)
-                with gr.Row(variant='compact', visible=False) as depth_warp_row_6:
+                with FormRow(visible=False) as depth_warp_row_6:
                     near_schedule = create_gr_elem(da.near_schedule)
-                with gr.Row(variant='compact', visible=False) as depth_warp_row_7:
+                with FormRow(visible=False) as depth_warp_row_7:
                     far_schedule = create_gr_elem(da.far_schedule)
 
     return {k: v for k, v in {**locals(), **vars()}.items()}
@@ -314,9 +316,9 @@ def get_tab_init(d, da, dp):
                 full_res_mask = create_gr_elem(d.full_res_mask)
                 full_res_mask_padding = create_gr_elem(d.full_res_mask_padding)
             with FormRow():
-                with gr.Column(min_width=240):
+                with FormColumn(min_width=240):
                     mask_contrast_adjust = create_gr_elem(d.mask_contrast_adjust)
-                with gr.Column(min_width=250):
+                with FormColumn(min_width=250):
                     mask_brightness_adjust = create_gr_elem(d.mask_brightness_adjust)
         # PARSEQ ACCORD
         with gr.Accordion('Parseq', open=False):
@@ -339,7 +341,7 @@ def get_tab_hybrid(da):
             with FormRow():
                 hybrid_composite = gr.Radio(['None', 'Normal', 'Before Motion', 'After Generation'], label="Hybrid composite", value=da.hybrid_composite, elem_id="hybrid_composite")
             with FormRow():
-                with gr.Column(min_width=340):
+                with FormColumn(min_width=340):
                     with FormRow():
                         hybrid_generate_inputframes = create_gr_elem(da.hybrid_generate_inputframes)
                         hybrid_use_first_frame_as_init_image = create_gr_elem(da.hybrid_use_first_frame_as_init_image)
@@ -350,7 +352,7 @@ def get_tab_hybrid(da):
                         hybrid_motion = create_gr_elem(da.hybrid_motion)
                 with FormColumn():
                     with FormRow():
-                        with gr.Column(scale=1):
+                        with FormColumn(scale=1):
                             hybrid_flow_method = create_gr_elem(da.hybrid_flow_method)
                     with FormRow():
                         with FormColumn():
@@ -369,17 +371,17 @@ def get_tab_hybrid(da):
                 hybrid_comp_save_extra_frames = gr.Checkbox(label="Comp save extra frames", value=False, interactive=True)
         # HYBRID SCHEDULES ACCORD
         with gr.Accordion("Hybrid Schedules", open=False, visible=False) as hybrid_sch_accord:
-            with gr.Row(variant='compact') as hybrid_comp_alpha_schedule_row:
+            with FormRow() as hybrid_comp_alpha_schedule_row:
                 hybrid_comp_alpha_schedule = create_gr_elem(da.hybrid_comp_alpha_schedule)
-            with gr.Row(variant='compact') as hybrid_flow_factor_schedule_row:
+            with FormRow() as hybrid_flow_factor_schedule_row:
                 hybrid_flow_factor_schedule = create_gr_elem(da.hybrid_flow_factor_schedule)
-            with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_blend_alpha_schedule_row:
+            with FormRow(visible=False) as hybrid_comp_mask_blend_alpha_schedule_row:
                 hybrid_comp_mask_blend_alpha_schedule = create_gr_elem(da.hybrid_comp_mask_blend_alpha_schedule)
-            with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_contrast_schedule_row:
+            with FormRow(visible=False) as hybrid_comp_mask_contrast_schedule_row:
                 hybrid_comp_mask_contrast_schedule = create_gr_elem(da.hybrid_comp_mask_contrast_schedule)
-            with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row:
+            with FormRow(visible=False) as hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row:
                 hybrid_comp_mask_auto_contrast_cutoff_high_schedule = create_gr_elem(da.hybrid_comp_mask_auto_contrast_cutoff_high_schedule)
-            with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row:
+            with FormRow(visible=False) as hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row:
                 hybrid_comp_mask_auto_contrast_cutoff_low_schedule = create_gr_elem(da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule)
         # HUMANS MASKING ACCORD
         with gr.Accordion("Humans Masking", open=False, visible=False) as humans_masking_accord:
@@ -392,10 +394,10 @@ def get_tab_output(da, dv):
     with gr.TabItem('Output', elem_id='output_tab'):
         # VID OUTPUT ACCORD
         with gr.Accordion('Video Output Settings', open=True):
-            with gr.Row(variant='compact') as fps_out_format_row:
+            with FormRow() as fps_out_format_row:
                 fps = create_gr_elem(dv.fps)
             with FormColumn():
-                with gr.Row(variant='compact') as soundtrack_row:
+                with FormRow() as soundtrack_row:
                     add_soundtrack = create_gr_elem(dv.add_soundtrack)
                     soundtrack_path = create_gr_elem(dv.soundtrack_path)
                 with FormRow():
@@ -404,7 +406,7 @@ def get_tab_output(da, dv):
                     store_frames_in_ram = create_gr_elem(dv.store_frames_in_ram)
                     save_depth_maps = create_gr_elem(da.save_depth_maps)
                     make_gif = create_gr_elem(dv.make_gif)
-            with gr.Row(equal_height=True, variant='compact', visible=True) as r_upscale_row:
+            with FormRow(equal_height=True) as r_upscale_row:
                 r_upscale_video = create_gr_elem(dv.r_upscale_video)
                 r_upscale_model = create_gr_elem(dv.r_upscale_model)
                 r_upscale_factor = create_gr_elem(dv.r_upscale_factor)
@@ -413,8 +415,8 @@ def get_tab_output(da, dv):
         with gr.Tab('Frame Interpolation') as frame_interp_tab:
             with gr.Accordion('Important notes and Help', open=False, elem_id="f_interp_accord"):
                 gr.HTML(value=get_gradio_html('frame_interpolation'))
-            with FormColumn():
-                with FormRow():
+            with gr.Column():
+                with gr.Row():
                     # Interpolation Engine
                     with gr.Column(min_width=110, scale=3):
                         frame_interpolation_engine = create_gr_elem(dv.frame_interpolation_engine)
@@ -423,7 +425,7 @@ def get_tab_output(da, dv):
                     with gr.Column(min_width=30, scale=1):
                         # If this is set to True, we keep all the interpolated frames in a folder. Default is False - means we delete them at the end of the run
                         frame_interpolation_keep_imgs = create_gr_elem(dv.frame_interpolation_keep_imgs)
-                with gr.Row(variant='compact', visible=False) as frame_interp_amounts_row:
+                with FormRow(visible=False) as frame_interp_amounts_row:
                     with gr.Column(min_width=180) as frame_interp_x_amount_column:
                         # How many times to interpolate (interp X)
                         frame_interpolation_x_amount = create_gr_elem(dv.frame_interpolation_x_amount)
@@ -440,20 +442,20 @@ def get_tab_output(da, dv):
                             # A drag-n-drop UI box to which the user uploads a pictures to interpolate
                             pics_to_interpolate_chosen_file = gr.File(label="Pics to Interpolate", interactive=True, file_count="multiple", file_types=["image"],
                                                                       elem_id="pics_to_interpolate_chosen_file")
-                        with gr.Row(variant='compact', visible=False) as interp_live_stats_row:
-                            # Non interactive textbox showing uploaded input vid total Frame Count
+                        with FormRow(visible=False) as interp_live_stats_row:
+                            # Non-interactive textbox showing uploaded input vid total Frame Count
                             in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing uploaded input vid FPS
+                            # Non-interactive textbox showing uploaded input vid FPS
                             in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')
-                            # Non interactive textbox showing expected output interpolated video FPS
+                            # Non-interactive textbox showing expected output interpolated video FPS
                             out_interp_vid_estimated_fps = gr.Textbox(label="Interpolated Vid FPS", value='---')
-                        with gr.Row(variant='compact') as interp_buttons_row:
+                        with FormRow() as interp_buttons_row:
                             # This is the actual button that's pressed to initiate the interpolation:
                             interpolate_button = gr.Button(value="*Interpolate Video*")
                             interpolate_pics_button = gr.Button(value="*Interpolate Pics*")
                         # Show a text about CLI outputs:
                         gr.HTML("* check your CLI for outputs *", elem_id="below_interpolate_butts_msg")  # TODO: CSS THIS TO CENTER OF ROW!
-                        # make the functin call when the interpolation button is clicked
+                        # make the function call when the interpolation button is clicked
                         interpolate_button.click(upload_vid_to_interpolate,
                                                  inputs=[vid_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled,
                                                          frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, in_vid_fps_ui_window])
@@ -465,14 +467,14 @@ def get_tab_output(da, dv):
             vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
             with gr.Column():
                 # NCNN UPSCALE TAB
-                with gr.Row(variant='compact') as ncnn_upload_vid_stats_row:
+                with FormRow() as ncnn_upload_vid_stats_row:
                     ncnn_upscale_in_vid_frame_count_window = gr.Textbox(label="In Frame Count", lines=1, interactive=False,
                                                                         value='---')  # Non-interactive textbox showing uploaded input vid Frame Count
                     ncnn_upscale_in_vid_fps_ui_window = gr.Textbox(label="In FPS", lines=1, interactive=False, value='---')  # Non-interactive textbox showing uploaded input vid FPS
                     ncnn_upscale_in_vid_res = gr.Textbox(label="In Res", lines=1, interactive=False, value='---')  # Non-interactive textbox showing uploaded input resolution
                     ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')  # Non-interactive textbox showing expected output resolution
                 with gr.Column():
-                    with gr.Row(variant='compact', visible=True) as ncnn_actual_upscale_row:
+                    with FormRow() as ncnn_actual_upscale_row:
                         ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True,
                                                          value="realesr-animevideov3", type="value")
                         ncnn_upscale_factor = gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value="x2", type="value")
