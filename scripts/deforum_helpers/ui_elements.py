@@ -42,16 +42,16 @@ def get_tab_run(d, da):
                 pix2pix_img_cfg_scale_schedule = create_gr_elem(da.pix2pix_img_cfg_scale_schedule)
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
-gradio_elements = {
-    "number": gr.Number,
-    "checkbox": gr.Checkbox,
-    "slider": gr.Slider,
-    "textbox": gr.Textbox,
-    "dropdown": gr.Dropdown,
-    "radio": gr.Radio
-}
-
 def create_gr_elem(d):
+    gradio_elements = {
+        "number": gr.Number,
+        "checkbox": gr.Checkbox,
+        "slider": gr.Slider,
+        "textbox": gr.Textbox,
+        "dropdown": gr.Dropdown,
+        "radio": gr.Radio
+    }
+
     obj_type_str = d["type"]
     obj_type = gradio_elements[obj_type_str]
 
