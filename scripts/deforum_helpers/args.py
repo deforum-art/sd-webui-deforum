@@ -39,9 +39,27 @@ def CoreArgs():  # TODO: change or do something with this ugliness
 # ['Midas+AdaBins (old)','Zoe+AdaBins (old)', 'Midas-3-Hybrid','Midas-3.1-BeitLarge', 'AdaBins', 'Zoe', 'Leres'] Midas-3.1-BeitLarge is temporarily removed 04-05-23 until fixed
 def DeforumAnimArgs():
     return {
-        "animation_mode": '2D',  # ['None', '2D', '3D', 'Video Input', 'Interpolation']
-        "max_frames": 120,
-        "border": 'replicate',  # ['wrap', 'replicate']
+        "animation_mode": {
+            "label": "Animation mode",
+            "type": "radio",
+            "choices": ['None', '2D', '3D', 'Video Input', 'Interpolation'],
+            "value": "2D",
+            "info": "control animation mode, will hide non relevant params upon change"
+        },
+        "max_frames": {
+            "label": "Max frames",
+            "type": "number",
+            "precision": 0,
+            "value": 120,
+            "info": "end the animation at this frame number",
+        },
+        "border": {
+            "label": "Border mode",
+            "type": "radio",
+            "choices": ['replicate', 'wrap'],
+            "value": "replicate",
+            "info": "controls pixel generation method for images smaller than the frame. hover on the options to see more info"
+        },
         "angle": {
             "label": "Angle",
             "type": "textbox",
@@ -388,7 +406,15 @@ def DeforumAnimArgs():
             "value": False,
             "info": "apply colormatch before adding noise (use with CN's Tile)"
         },
-        "diffusion_cadence": '2',  # ['1','2','3','4','5','6','7','8']
+        "diffusion_cadence": {
+            "label": "Cadence",
+            "type": "slider",
+            "min": 1,
+            "max": 50,
+            "step": 1,
+            "value": 2,
+            "info": "# of in-between frames that will not be directly diffused"
+        },
         "optical_flow_cadence": {
             "label": "Optical flow cadence",
             "type": "dropdown",
@@ -498,7 +524,6 @@ def DeforumAnimArgs():
             "value": False,
             "info": "save animation's depth maps as extra files"
         },
-        # **Video Input:**
         "video_init_path": {
             "label": "Video init path/ URL",
             "type": "textbox",
@@ -745,7 +770,6 @@ def DeforumArgs():
         "fill": {
             "label": "Mask fill",
             "type": "radio",
-            "radio_type": "index",
             "choices": mask_fill_choices,
             "value": "fill",
             "info": ""
@@ -767,7 +791,6 @@ def DeforumArgs():
         "reroll_blank_frames": {
             "label": "Reroll blank frames",
             "type": "radio",
-            "radio_type": "index",
             "choices": ['reroll', 'interrupt', 'ignore'],
             "value": "ignore",
             "info": ""

@@ -68,21 +68,19 @@ def create_gr_elem(d):
         'lines': d.get("lines"),
         'type': d.get("radio_type")
     }
+
     return obj_type(**{k: v for k, v in elem_params.items() if v is not None})
 
 def get_tab_keyframes(d, da, dloopArgs):
     with gr.TabItem('Keyframes'):  # TODO make a some sort of the original dictionary parsing
         with FormRow():
             with gr.Column(scale=2):
-                animation_mode = gr.Radio(['2D', '3D', 'Interpolation', 'Video Input'], label="Animation mode", value=da.animation_mode, elem_id="animation_mode",
-                                          info="control animation mode, will hide non relevant params upon change")
+                animation_mode = create_gr_elem(da.animation_mode)
             with gr.Column(scale=1, min_width=180):
-                border = gr.Radio(['replicate', 'wrap'], label="Border", value=da.border, elem_id="border",
-                                  info="controls pixel generation method for images smaller than the frame. hover on the options to see more info")
+                border = create_gr_elem(da.border)
         with FormRow():
-            diffusion_cadence = gr.Slider(label="Cadence", minimum=1, maximum=50, step=1, value=da.diffusion_cadence, interactive=True,
-                                          info="# of in-between frames that will not be directly diffused")
-            max_frames = gr.Number(label="Max frames", lines=1, value=da.max_frames, interactive=True, precision=0, info="end the animation at this frame number")
+            diffusion_cadence = create_gr_elem(da.diffusion_cadence)
+            max_frames = create_gr_elem(da.max_frames)
         # GUIDED IMAGES ACCORD
         with gr.Accordion('Guided Images', open=False, elem_id='guided_images_accord') as guided_images_accord:
             # GUIDED IMAGES INFO ACCORD
