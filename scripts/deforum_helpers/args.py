@@ -325,7 +325,7 @@ def DeforumAnimArgs():
             "type": "checkbox",
             "value": False,
             "visible": False,
-            "info": ""
+            "info": "noise multiplier; higher = more unpredictable results"
         },
         "ddim_eta_schedule": {
             "label": "DDIM ETA Schedule",
@@ -338,7 +338,7 @@ def DeforumAnimArgs():
             "label": "Enable Ancestral ETA scheduling",
             "type": "checkbox",
             "value": False,
-            "info": ""
+            "info": "noise multiplier; applies to Euler a and other samplers that have the letter 'a' in them"
         },
         "ancestral_eta_schedule": {
             "label": "Ancestral ETA Schedule",
@@ -710,7 +710,7 @@ def DeforumArgs():
             "label": "Tiling",
             "type": "checkbox",
             "value": False,
-            "info": "Enable for seamless-tiling of each generated image. Experimental"
+            "info": "enable for seamless-tiling of each generated image. Experimental"
         },
         "restore_faces": {
             "label": "Restore faces",
