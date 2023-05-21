@@ -409,8 +409,8 @@ def DeforumAnimArgs():
         "diffusion_cadence": {
             "label": "Cadence",
             "type": "slider",
-            "min": 1,
-            "max": 50,
+            "minimum": 1,
+            "maximum": 50,
             "step": 1,
             "value": 2,
             "info": "# of in-between frames that will not be directly diffused"
@@ -452,8 +452,8 @@ def DeforumAnimArgs():
         "perlin_w": {
             "label": "Perlin W",
             "type": "slider",
-            "min": 0.1,
-            "max": 16,
+            "minimum": 0.1,
+            "maximum": 16,
             "step": 0.1,
             "value": 8,
             "visible": False
@@ -461,8 +461,8 @@ def DeforumAnimArgs():
         "perlin_h": {
             "label": "Perlin H",
             "type": "slider",
-            "min": 0.1,
-            "max": 16,
+            "minimum": 0.1,
+            "maximum": 16,
             "step": 0.1,
             "value": 8,
             "visible": False
@@ -470,16 +470,16 @@ def DeforumAnimArgs():
         "perlin_octaves": {
             "label": "Perlin octaves",
             "type": "slider",
-            "min": 1,
-            "max": 7,
+            "minimum": 1,
+            "maximum": 7,
             "step": 1,
             "value": 4
         },
         "perlin_persistence": {
             "label": "Perlin persistence",
             "type": "slider",
-            "min": 0,
-            "max": 1,
+            "minimum": 0,
+            "maximum": 1,
             "step": 0.02,
             "value": 0.5
         },
@@ -599,16 +599,16 @@ def DeforumArgs():
         "W": {
             "label": "Width",
             "type": "slider",
-            "min": 8,
-            "max": 2048,
+            "minimum": 8,
+            "maximum": 2048,
             "step": 8,
             "value": 512,
         },
         "H": {
             "label": "Height",
             "type": "slider",
-            "min": 64,
-            "max": 2048,
+            "minimum": 64,
+            "maximum": 2048,
             "step": 64,
             "value": 512,
         },
@@ -635,16 +635,16 @@ def DeforumArgs():
         "seed_resize_from_w": {
             "label": "Resize seed from width",
             "type": "slider",
-            "min": 0,
-            "max": 2048,
+            "minimum": 0,
+            "maximum": 2048,
             "step": 64,
             "value": 0,
         },
         "seed_resize_from_h": {
             "label": "Resize seed from height",
             "type": "slider",
-            "min": 0,
-            "max": 2048,
+            "minimum": 0,
+            "maximum": 2048,
             "step": 64,
             "value": 0,
         },
@@ -664,8 +664,8 @@ def DeforumArgs():
         "steps": {
             "label": "step",
             "type": "slider",
-            "min": 1,
-            "max": 200,
+            "minimum": 1,
+            "maximum": 200,
             "step": 1,
             "value": 25,
         },
@@ -698,8 +698,8 @@ def DeforumArgs():
         "strength": {
             "label": "strength",
             "type": "slider",
-            "min": 0,
-            "max": 1,
+            "minimum": 0,
+            "maximum": 1,
             "step": 0.01,
             "value": 0.8,
         },
@@ -762,8 +762,8 @@ def DeforumArgs():
         "mask_overlay_blur": {
             "label": "Mask overlay blur",
             "type": "slider",
-            "min": 0,
-            "max": 64,
+            "minimum": 0,
+            "maximum": 64,
             "step": 1,
             "value": 4,
         },
@@ -783,8 +783,8 @@ def DeforumArgs():
         "full_res_mask_padding": {
             "label": "Full res mask padding",
             "type": "slider",
-            "min": 0,
-            "max": 512,
+            "minimum": 0,
+            "maximum": 512,
             "step": 1,
             "value": 4,
         },
@@ -870,8 +870,8 @@ def DeforumOutputArgs():
         "fps": {
             "label": "FPS",
             "type": "slider",
-            "min": 1,
-            "max": 240,
+            "minimum": 1,
+            "maximum": 240,
             "step": 1,
             "value": 15,
         },
@@ -946,8 +946,8 @@ def DeforumOutputArgs():
         "frame_interpolation_x_amount": {
             "label": "Interp X",
             "type": "slider",
-            "min": 2,
-            "max": 10,
+            "minimum": 2,
+            "maximum": 10,
             "step": 1,
             "value": 2,
         },
@@ -961,8 +961,8 @@ def DeforumOutputArgs():
         "frame_interpolation_slow_mo_amount": {
             "label": "Slow-Mo X",
             "type": "slider",
-            "min": 2,
-            "max": 10,
+            "minimum": 2,
+            "maximum": 10,
             "step": 1,
             "value": 2,
         },
