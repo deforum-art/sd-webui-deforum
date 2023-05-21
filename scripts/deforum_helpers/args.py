@@ -1111,8 +1111,6 @@ def process_args(args_dict_main, run_id):
     negative_prompts = negative_prompts.replace('--neg', '')  # remove --neg from negative_prompts if received by mistake
     root.animation_prompts = {key: f"{positive_prompts} {val} {'' if '--neg' in val else '--neg'} {negative_prompts}" for key, val in root.animation_prompts.items()}
 
-    os.makedirs(root.models_path, exist_ok=True)  # TODO: this can and probably should be removed from here to the launch of the webui funcs
-
     args = SimpleNamespace(**args_dict)
     anim_args = SimpleNamespace(**anim_args_dict)
     video_args = SimpleNamespace(**video_args_dict)
