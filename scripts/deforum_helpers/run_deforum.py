@@ -17,7 +17,7 @@ from .video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_
 last_vid_data = None
 
 def run_deforum(*args):
-    f_location, f_crf, f_preset = get_ffmpeg_params() # get params for ffmpeg exec
+    f_location, f_crf, f_preset = get_ffmpeg_params()  # get params for ffmpeg exec
     component_names = get_component_names()
     args_dict = {component_names[i]: args[i+2] for i in range(0, len(component_names))}
     p = StableDiffusionProcessingImg2Img(
@@ -105,7 +105,7 @@ def run_deforum(*args):
         if video_args.add_soundtrack != 'None':
             real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
         
-        # Establish path of subtitles file
+        # Establish path of subtitle file
         if shared.opts.data.get("deforum_save_gen_info_as_srt", False) and shared.opts.data.get("deforum_embed_srt", False):
             srt_path = os.path.join(args.outdir, f"{root.timestring}.srt")
         else:
