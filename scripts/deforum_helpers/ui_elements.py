@@ -507,8 +507,7 @@ def get_tab_output(da, dv):
                 gr.HTML("* check your CLI for outputs")
                 # make the function call when the UPSCALE button is clicked
             depth_btn.click(fn=upload_vid_to_depth,
-                            inputs=[vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth,
-                                    depth_keep_imgs])
+                            inputs=[vid_to_depth_chosen_file, mode, thresholding, threshold_value, threshold_value_max, adapt_block_size, adapt_c, invert, end_blur, midas_weight_vid2depth, depth_keep_imgs])
         # STITCH FRAMES TO VID TAB
         with gr.TabItem('Frames to Video') as stitch_imgs_to_vid_row:
             gr.HTML(value=get_gradio_html('frames_to_video'))
