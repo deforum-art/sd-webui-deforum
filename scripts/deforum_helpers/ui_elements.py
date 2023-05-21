@@ -1,5 +1,4 @@
 import gradio as gr
-import modules.shared as sh
 from modules.ui_components import FormRow, FormColumn
 from .defaults import get_gradio_html, DeforumAnimPrompts
 from .video_audio_utilities import direct_stitch_vid_from_frames
