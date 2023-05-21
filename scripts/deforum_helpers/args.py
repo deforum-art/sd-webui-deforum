@@ -19,21 +19,17 @@ def RootArgs():
         "frames_cache": [],
         "raw_batch_name": None,
         "raw_seed": None,
+        "timestring": "",
+        "subseed": -1,
+        "subseed_strength": 0,
+        "seed_internal": 0,
+        "init_sample": None,
+        "noise_mask": None,
         "initial_info": None,
         "first_frame": None,
         "animation_prompts": None,
         "current_user_os": get_os(),
         "tmp_deforum_run_duplicated_folder": os.path.join(tempfile.gettempdir(), 'tmp_run_deforum')
-    }
-
-def CoreArgs():  # TODO: change or do something with this ugliness
-    return {
-        "subseed": -1,
-        "subseed_strength": 0,
-        "timestring": "",
-        "init_sample": None,
-        "noise_mask": None,
-        "seed_internal": 0
     }
 
 # ['Midas+AdaBins (old)','Zoe+AdaBins (old)', 'Midas-3-Hybrid','Midas-3.1-BeitLarge', 'AdaBins', 'Zoe', 'Leres'] Midas-3.1-BeitLarge is temporarily removed 04-05-23 until fixed
@@ -1079,11 +1075,6 @@ def get_component_names():
 def get_settings_component_names():
     return [name for name in get_component_names()]
 
-def pack_default_args(args_dict):
-    args_dict = {name: args_dict[name] for name in DeforumArgs()}
-    args_dict.update({name: CoreArgs()[name] for name in CoreArgs()})
-    return args_dict
-
 def pack_args(args_dict, arg_set):
     return {name: args_dict[name] for name in arg_set()}
 
@@ -1091,7 +1082,7 @@ def process_args(args_dict_main, run_id):
     from .settings import load_args
     override_settings_with_file = args_dict_main['override_settings_with_file']
     custom_settings_file = args_dict_main['custom_settings_file']
-    args_dict = pack_default_args(args_dict_main)
+    args_dict = pack_args(args_dict_main, DeforumArgs)
     anim_args_dict = pack_args(args_dict_main, DeforumAnimArgs)
     video_args_dict = pack_args(args_dict_main, DeforumOutputArgs)
     parseq_args_dict = pack_args(args_dict_main, ParseqArgs)
@@ -1123,7 +1114,7 @@ def process_args(args_dict_main, run_id):
     args.seed = get_fixed_seed(args.seed)
     if root.raw_seed != -1:
         root.raw_seed = args.seed
-    args.timestring = time.strftime('%Y%m%d%H%M%S')
+    root.timestring = time.strftime('%Y%m%d%H%M%S')
     args.strength = max(0.0, min(1.0, args.strength))
     args.prompts = json.loads(args_dict_main['animation_prompts'])
     args.positive_prompts = args_dict_main['animation_prompts_positive']
@@ -1132,12 +1123,10 @@ def process_args(args_dict_main, run_id):
     if not args.use_init and not anim_args.hybrid_use_init_image:
         args.init_image = None
 
-    if anim_args.animation_mode == 'None':
-        anim_args.max_frames = 1
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
 
-    current_arg_list = [args, anim_args, video_args, parseq_args]
+    current_arg_list = [args, anim_args, video_args, parseq_args, root]
     full_base_folder_path = os.path.join(os.getcwd(), p.outpath_samples)
     root.raw_batch_name = args.batch_name
     args.batch_name = substitute_placeholders(args.batch_name, current_arg_list, full_base_folder_path)

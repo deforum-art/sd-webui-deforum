@@ -154,9 +154,9 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
             raise RuntimeError(f"Unknown checkpoint: {args.checkpoint}")
         sd_models.reload_model_weights(info=info)
 
-    if args.init_sample is not None:
+    if root.init_sample is not None:
         # TODO: cleanup init_sample remains later
-        img = args.init_sample
+        img = root.init_sample
         init_image = img
         image_init0 = img
         if loop_args.use_looper and isJson(loop_args.imagesToKeyframe) and anim_args.animation_mode in ['2D', '3D']:
@@ -202,7 +202,7 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
         print_combined_table(args, anim_args, p_txt, keys, frame)  # print dynamic table to cli
 
         if is_controlnet_enabled(controlnet_args):
-            process_with_controlnet(p_txt, args, anim_args, loop_args, controlnet_args, root, is_img2img=False, frame_idx=frame)
+            process_with_controlnet(p_txt, args, anim_args, controlnet_args, root, is_img2img=False, frame_idx=frame)
 
         processed = processing.process_images(p_txt)
 
@@ -221,12 +221,12 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
             # prevent loaded mask from throwing errors in Image operations if completely black and crop and resize in webui pipeline
             # doing this after contrast and brightness adjustments to ensure that mask is not passed as black or blank
             mask = check_mask_for_errors(mask, args.invert_mask)
-            args.noise_mask = mask
+            root.noise_mask = mask
         else:
             mask = None
 
         assert not ((mask is not None and args.use_mask and args.overlay_mask) and (
-                args.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
+                root.init_sample is None and init_image is None)), "Need an init image when use_mask == True and overlay_mask == True"
 
         p.init_images = [init_image]
         p.image_mask = mask
@@ -235,7 +235,7 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
         print_combined_table(args, anim_args, p, keys, frame)  # print dynamic table to cli
 
         if is_controlnet_enabled(controlnet_args):
-            process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=True, frame_idx=frame)
+            process_with_controlnet(p, args, anim_args, controlnet_args, root, is_img2img=True, frame_idx=frame)
 
         processed = processing.process_images(p)
 

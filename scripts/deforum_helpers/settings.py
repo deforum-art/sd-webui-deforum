@@ -7,12 +7,11 @@ from .deprecation_utils import handle_deprecated_settings
 from .general_utils import get_deforum_version, clean_gradio_path_strings
 
 def get_keys_to_exclude():
-    return ["seed_enable_extras", "subseed", "subseed_strength", "init_sample",
-        "noise_mask", "seed_internal", "perlin_w", "perlin_h", "image_path", "outdir"]
+    return ["seed_enable_extras", "init_sample",
+        "noise_mask", "perlin_w", "perlin_h", "image_path", "outdir"]
     '''
         perlin params are used just not shown in ui for now, so not to be deleted
         image_path and outdir are in use, not to be deleted
-        seed params are not to be touched, are used internally in various files
         init_sample could probably be removed in the future but it requires some actual code changes as it's in use
     '''
        
@@ -54,7 +53,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
     args.__dict__["positive_prompts"] = args.positive_prompts
     args.__dict__["negative_prompts"] = args.negative_prompts
     exclude_keys = get_keys_to_exclude()
-    settings_filename = full_out_file_path if full_out_file_path else os.path.join(args.outdir, f"{args.timestring}_settings.txt")
+    settings_filename = full_out_file_path if full_out_file_path else os.path.join(args.outdir, f"{root.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         s = {}
         for d in (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, video_args.__dict__):

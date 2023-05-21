@@ -135,24 +135,24 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         scheduled_clipskip = int(keys.clipskip_schedule_series[frame_idx]) if anim_args.enable_clipskip_scheduling and keys.clipskip_schedule_series[frame_idx] is not None else None
         args.checkpoint = keys.checkpoint_schedule_series[frame_idx] if anim_args.enable_checkpoint_scheduling else None
         if anim_args.enable_subseed_scheduling:
-            args.subseed = int(keys.subseed_schedule_series[frame_idx])
-            args.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
+            root.subseed = int(keys.subseed_schedule_series[frame_idx])
+            root.subseed = keys.subseed_strength_schedule_series[frame_idx]
         else:
-            args.subseed, args.subseed_strength = keys.subseed_schedule_series[frame_idx], keys.subseed_strength_schedule_series[frame_idx]
+            root.subseed, root.subseed_strength = keys.subseed_schedule_series[frame_idx], keys.subseed_strength_schedule_series[frame_idx]
         if use_parseq:
             anim_args.enable_subseed_scheduling = True
-            args.subseed, args.subseed_strength = int(keys.subseed_schedule_series[frame_idx]), keys.subseed_strength_schedule_series[frame_idx]
+            root.subseed, root.subseed_strength = int(keys.subseed_schedule_series[frame_idx]), keys.subseed_strength_schedule_series[frame_idx]
         args.seed = int(keys.seed_schedule_series[frame_idx]) if args.seed_behavior == 'schedule' or use_parseq else args.seed
         opts.data["CLIP_stop_at_last_layers"] = scheduled_clipskip if scheduled_clipskip is not None else opts.data["CLIP_stop_at_last_layers"]
 
         image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
-        filename = f"{args.timestring}_{frame_idx:09}.png"
+        filename = f"{root.timestring}_{frame_idx:09}.png"
 
         save_image(image, 'PIL', filename, args, video_args, root)
 
         state.current_image = image
         
         if args.seed_behavior != 'schedule':
-            args.seed = next_seed(args)
+            args.seed = next_seed(args, root)
 
         frame_idx += 1

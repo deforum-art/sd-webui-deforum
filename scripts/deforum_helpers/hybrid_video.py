@@ -79,7 +79,7 @@ def hybrid_generation(args, anim_args, root):
 def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_comp_schedules, root):
     video_frame = os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg")
     video_depth_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_vid_depth{frame_idx:09}.jpg")
-    depth_frame = os.path.join(args.outdir, f"{args.timestring}_depth_{frame_idx-1:09}.png")
+    depth_frame = os.path.join(args.outdir, f"{root.timestring}_depth_{frame_idx-1:09}.png")
     mask_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_mask{frame_idx:09}.jpg")
     comp_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_comp{frame_idx:09}.jpg")
     prev_frame = os.path.join(args.outdir, 'hybridframes', get_frame_name(anim_args.video_init_path) + f"_prev{frame_idx:09}.jpg")

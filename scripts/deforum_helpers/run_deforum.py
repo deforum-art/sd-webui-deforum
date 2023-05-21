@@ -108,7 +108,7 @@ def run_deforum(*args, **kwargs):
         
         # Establish path of subtitles file
         if shared.opts.data.get("deforum_save_gen_info_as_srt", False) and shared.opts.data.get("deforum_embed_srt", False):
-            srt_path = os.path.join(args.outdir, f"{args.timestring}.srt")
+            srt_path = os.path.join(args.outdir, f"{root.timestring}.srt")
         else:
             srt_path = None
 
@@ -123,8 +123,8 @@ def run_deforum(*args, **kwargs):
         if video_args.skip_video_creation:
             print("\nSkipping video creation, uncheck 'Skip video creation' in 'Output' tab if you want to get a video too :)")
         else:
-            image_path = os.path.join(args.outdir, f"{args.timestring}_%09d.png")
-            mp4_path = os.path.join(args.outdir, f"{args.timestring}.mp4")
+            image_path = os.path.join(args.outdir, f"{root.timestring}_%09d.png")
+            mp4_path = os.path.join(args.outdir, f"{root.timestring}.mp4")
             max_video_frames = anim_args.max_frames
 
             # Stitch video using ffmpeg!
@@ -145,18 +145,18 @@ def run_deforum(*args, **kwargs):
         # FRAME INTERPOLATION TIME
         if need_to_frame_interpolate: 
             print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
-            process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount,frame_interpolation_slow_mo_enabled=video_args.frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=args.timestring, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None, srt_path=srt_path)
+            process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount,frame_interpolation_slow_mo_enabled=video_args.frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=root.timestring, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None, srt_path=srt_path)
         
         if video_args.make_gif and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
-            make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
+            make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = root.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
         
         # Upscale video once generation is done:
         if video_args.r_upscale_video and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
             # out mp4 path is defined in make_upscale func
-            make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = args.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=f_location, stitch_from_frame=0, stitch_to_frame=max_video_frames, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track, srt_path=srt_path)
+            make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = root.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=f_location, stitch_from_frame=0, stitch_to_frame=max_video_frames, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track, srt_path=srt_path)
             
         if video_args.delete_imgs and not video_args.skip_video_creation:
-            handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=args.timestring)
+            handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=root.timestring)
             
         root.initial_info += "\n The animation is stored in " + args.outdir
         reset_frames_cache(root) # cleanup the RAM in any case
@@ -172,4 +172,4 @@ def run_deforum(*args, **kwargs):
             persistent_sett_path = shared.opts.data.get("deforum_persistent_settings_path")
             deforum_settings.save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
 
-    return processed.images, args.timestring, generation_info_js, processed.info
+    return processed.images, root.timestring, generation_info_js, processed.info
