@@ -63,7 +63,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         unpack_controlnet_vids(args, anim_args, controlnet_args)
 
     # use parseq if manifest is provided
-    use_parseq = parseq_args.parseq_manifest != None and parseq_args.parseq_manifest.strip()
+    use_parseq = parseq_args.parseq_manifest is not None and parseq_args.parseq_manifest.strip()
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args, args.seed) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
     loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
@@ -536,7 +536,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
                 disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
                 # color match on last one only
-                if (n == int(anim_args.diffusion_redo)):
+                if n == int(anim_args.diffusion_redo):
                     disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)
                 args.seed = stored_seed
                 root.init_sample = Image.fromarray(cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB))
