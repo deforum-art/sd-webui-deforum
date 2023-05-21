@@ -130,7 +130,7 @@ def get_tab_keyframes(d, da, dloopArgs):
         # MOTION INNER TAB
         with gr.Tabs(elem_id='motion_noise_etc'):
             with gr.TabItem('Motion') as motion_tab:
-                with gr.Column() as only_2d_motion_column:
+                with FormColumn() as only_2d_motion_column:
                     with FormRow():
                         zoom = create_gr_elem(da.zoom)
                     with FormRow():
