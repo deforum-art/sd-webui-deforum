@@ -10,7 +10,7 @@ def init_deforum():
     # create the Models/Deforum folder, where many of the deforum related models/ packages will be downloaded
     os.makedirs(ph.models_path + '/Deforum', exist_ok=True)
 
-    # import our on_ui_tabs and on_ui_settings function from the respected files
+    # import our on_ui_tabs and on_ui_settings functions from the respected files
     from deforum_helpers.ui_right import on_ui_tabs
     from deforum_helpers.ui_settings import on_ui_settings
 
