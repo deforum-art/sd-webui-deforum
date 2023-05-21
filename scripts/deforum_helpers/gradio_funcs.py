@@ -20,8 +20,7 @@ def handle_change_functions(l_vars):
     for output in diffusion_cadence_outputs:
         l_vars['animation_mode'].change(fn=change_diffusion_cadence_visibility, inputs=l_vars['animation_mode'], outputs=output)
     three_d_related_outputs = [l_vars['only_3d_motion_column'], l_vars['depth_warp_row_1'], l_vars['depth_warp_row_2'], l_vars['depth_warp_row_3'], l_vars['depth_warp_row_4'],
-                               l_vars['depth_warp_row_5'], l_vars['depth_warp_row_6'],
-                               l_vars['depth_warp_row_7']]
+                               l_vars['depth_warp_row_5'], l_vars['depth_warp_row_6'], l_vars['depth_warp_row_7']]
     for output in three_d_related_outputs:
         l_vars['animation_mode'].change(fn=disble_3d_related_stuff, inputs=l_vars['animation_mode'], outputs=output)
     pers_flip_outputs = [l_vars['per_f_th_row'], l_vars['per_f_ph_row'], l_vars['per_f_ga_row'], l_vars['per_f_f_row']]

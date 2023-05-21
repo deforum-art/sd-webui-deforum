@@ -108,16 +108,14 @@ def get_tab_keyframes(d, da, dloopArgs):
         with gr.Tabs(elem_id='extra_schedules'):
             with gr.TabItem('Strength'):
                 with gr.Row(variant='compact'):
-                    strength_schedule = gr.Textbox(label="Strength schedule", lines=1, value=da.strength_schedule, interactive=True,
-                                                   info="amount of presence of previous frame to influence next frame, also controls steps in the following formula [steps - (strength_schedule * steps)]")
+                    strength_schedule = create_gr_elem(da.strength_schedule)
             with gr.TabItem('CFG'):
                 with gr.Row(variant='compact'):
-                    cfg_scale_schedule = gr.Textbox(label="CFG scale schedule", lines=1, value=da.cfg_scale_schedule, interactive=True,
-                                                    info="how closely the image should conform to the prompt. Lower values produce more creative results. (recommended range 5-15)")
+                    cfg_scale_schedule = create_gr_elem(da.cfg_scale_schedule)
                 with gr.Row(variant='compact'):
-                    enable_clipskip_scheduling = gr.Checkbox(label="Enable CLIP skip scheduling", value=da.enable_clipskip_scheduling, interactive=True)
+                    enable_clipskip_scheduling = create_gr_elem(da.enable_clipskip_scheduling)
                 with gr.Row(variant='compact'):
-                    clipskip_schedule = gr.Textbox(label="CLIP skip schedule", lines=1, value=da.clipskip_schedule, interactive=True)
+                    clipskip_schedule = create_gr_elem(da.clipskip_schedule)
             with gr.TabItem('Seed') as a3:
                 with gr.Row(variant='compact'):
                     seed_behavior = create_gr_elem(d.seed_behavior)
@@ -220,17 +218,14 @@ def get_tab_keyframes(d, da, dloopArgs):
                     color_coherence_video_every_N_frames = create_gr_elem(da.color_coherence_video_every_N_frames)
                 with gr.Row(variant='compact') as optical_flow_cadence_row:
                     with gr.Column(min_width=220) as optical_flow_cadence_column:
-                        optical_flow_cadence = gr.Dropdown(choices=['None', 'RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'], label="Optical flow cadence", value=da.optical_flow_cadence,
-                                                           elem_id="optical_flow_cadence", interactive=True, info="use optical flow estimation for your in-between (cadence) frames")
+                        optical_flow_cadence = create_gr_elem(da.optical_flow_cadence)
                     with gr.Column(min_width=220, visible=False) as cadence_flow_factor_schedule_column:
-                        cadence_flow_factor_schedule = gr.Textbox(label="Cadence flow factor schedule", lines=1, value=da.cadence_flow_factor_schedule, interactive=True)
+                        cadence_flow_factor_schedule = create_gr_elem(da.cadence_flow_factor_schedule)
                 with gr.Row(variant='compact'):
                     with gr.Column(min_width=220):
-                        optical_flow_redo_generation = gr.Dropdown(choices=['None', 'RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'], label="Optical flow generation",
-                                                                   value=da.optical_flow_redo_generation, elem_id="optical_flow_redo_generation", visible=True, interactive=True,
-                                                                   info="this option takes twice as long because it generates twice in order to capture the optical flow from the previous image to the first generation, then warps the previous image and redoes the generation")
+                        optical_flow_redo_generation = create_gr_elem(da.optical_flow_redo_generation)
                     with gr.Column(min_width=220, visible=False) as redo_flow_factor_schedule_column:
-                        redo_flow_factor_schedule = gr.Textbox(label="Generation flow factor schedule", lines=1, value=da.redo_flow_factor_schedule, interactive=True)
+                        redo_flow_factor_schedule = create_gr_elem(da.redo_flow_factor_schedule)
                 with gr.Row(variant='compact'):
                     contrast_schedule = gr.Textbox(label="Contrast schedule", lines=1, value=da.contrast_schedule, interactive=True,
                                                    info="adjusts the overall contrast per frame [neutral at 1.0, recommended to *not* play with this param]")
@@ -292,11 +287,12 @@ def get_tab_prompts(da):
         with gr.Accordion('Composable Mask scheduling', open=False):
             gr.HTML(value=get_gradio_html('composable_masks'))
             with gr.Row(variant='compact'):
-                mask_schedule = gr.Textbox(label="Mask schedule", lines=1, value=da.mask_schedule, interactive=True)
+                mask_schedule = create_gr_elem(da.mask_schedule)
             with gr.Row(variant='compact'):
-                use_noise_mask = gr.Checkbox(label="Use noise mask", value=da.use_noise_mask, interactive=True)
+                use_noise_mask = create_gr_elem(da.use_noise_mask)
             with gr.Row(variant='compact'):
-                noise_mask_schedule = gr.Textbox(label="Noise mask schedule", lines=1, value=da.noise_mask_schedule, interactive=True)
+                noise_mask_schedule = create_gr_elem(da.noise_mask_schedule)
+
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
 def get_tab_init(d, da, dp):
@@ -418,6 +414,7 @@ def get_tab_hybrid(da):
             with gr.Row(variant='compact'):
                 hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="Generate human masks", value=da.hybrid_generate_human_masks,
                                                        elem_id="hybrid_generate_human_masks")
+
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
 def get_tab_output(da, dv):
@@ -572,4 +569,5 @@ def get_tab_output(da, dv):
                 image_path = create_gr_elem(dv.image_path)
             ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
             ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames, inputs=[image_path, fps, add_soundtrack, soundtrack_path])
+
     return {k: v for k, v in {**locals(), **vars()}.items()}

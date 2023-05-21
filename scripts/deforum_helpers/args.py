@@ -142,9 +142,19 @@ def DeforumAnimArgs():
             "value": "0: (0.065)",
             "info": ""
         },
-        "strength_schedule": "0: (0.65)",
+        "strength_schedule": {
+            "label": "Strength schedule",
+            "type": "textbox",
+            "value": "0: (0.65)",
+            "info": "amount of presence of previous frame to influence next frame, also controls steps in the following formula [steps - (strength_schedule * steps)]"
+        },
         "contrast_schedule": "0: (1.0)",
-        "cfg_scale_schedule": "0: (7)",
+        "cfg_scale_schedule": {
+            "label": "CFG scale schedule",
+            "type": "textbox",
+            "value": "0: (7)",
+            "info": "how closely the image should conform to the prompt. Lower values produce more creative results. (recommended range 5-15)`"
+        },
         "enable_steps_scheduling": {
             "label": "Enable steps scheduling",
             "type": "checkbox",
@@ -229,9 +239,24 @@ def DeforumAnimArgs():
             "value": '0: ("Euler a")',
             "info": "allows keyframing different samplers. Use names as they appear in ui dropdown in 'run' tab"
         },
-        "use_noise_mask": False,  # Composable mask scheduling
-        "mask_schedule": '0: ("{video_mask}")',
-        "noise_mask_schedule": '0: ("{video_mask}")',
+        "use_noise_mask": {
+            "label": "Use noise mask",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
+        "mask_schedule": {
+            "label": "Mask schedule",
+            "type": "textbox",
+            "value": '0: ("{video_mask}")',
+            "info": ""
+        },
+        "noise_mask_schedule": {
+            "label": "Noise mask schedule",
+            "type": "textbox",
+            "value": '0: ("{video_mask}")',
+            "info": ""
+        },
         "enable_checkpoint_scheduling": {
             "label": "Enable checkpoint scheduling",
             "type": "checkbox",
@@ -244,8 +269,18 @@ def DeforumAnimArgs():
             "value": '0: ("model1.ckpt"), 100: ("model2.safetensors")',
             "info": "allows keyframing different sd models. use *full* name as appears in ui dropdown"
         },
-        "enable_clipskip_scheduling": False,  # CLIP skip Scheduling
-        "clipskip_schedule": '0: (2)',
+        "enable_clipskip_scheduling": {
+            "label": "Enable CLIP skip scheduling",
+            "type": "checkbox",
+            "value": False,
+            "info": ""
+        },
+        "clipskip_schedule": {
+            "label": "CLIP skip schedule",
+            "type": "textbox",
+            "value": "0: (2)",
+            "info": ""
+        },
         "enable_noise_multiplier_scheduling": {
             "label": "Enable noise multiplier scheduling",
             "type": "checkbox",
@@ -354,10 +389,32 @@ def DeforumAnimArgs():
             "info": "apply colormatch before adding noise (use with CN's Tile)"
         },
         "diffusion_cadence": '2',  # ['1','2','3','4','5','6','7','8']
-        "optical_flow_cadence": 'None',  # ['None', 'RAFT','DIS Medium', 'DIS Fine', 'Farneback']
-        "cadence_flow_factor_schedule": "0: (1)",
-        "optical_flow_redo_generation": 'None',  # ['None', 'RAFT', 'DIS Medium', 'DIS Fine', 'Farneback']
-        "redo_flow_factor_schedule": "0: (1)",
+        "optical_flow_cadence": {
+            "label": "Optical flow cadence",
+            "type": "dropdown",
+            "choices": ['None', 'RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'],
+            "value": "None",
+            "info": "use optical flow estimation for your in-between (cadence) frames"
+        },
+        "cadence_flow_factor_schedule": {
+            "label": "Cadence flow factor schedule",
+            "type": "textbox",
+            "value": "0: (1)",
+            "info": ""
+        },
+        "optical_flow_redo_generation": {
+            "label": "Optical flow generation",
+            "type": "dropdown",
+            "choices": ['None', 'RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'],
+            "value": "None",
+            "info": "this option takes twice as long because it generates twice in order to capture the optical flow from the previous image to the first generation, then warps the previous image and redoes the generation"
+        },
+        "redo_flow_factor_schedule": {
+            "label": "Generation flow factor schedule",
+            "type": "textbox",
+            "value": "0: (1)",
+            "info": ""
+        },
         "diffusion_redo": '0',
         "noise_type": {
             "label": "Noise type",
