@@ -16,6 +16,7 @@ def RootArgs():
         "device": sh.device,
         "models_path": ph.models_path + '/Deforum',
         "half_precision": not sh.cmd_opts.no_half,
+        "clipseg_model": None,
         "mask_preset_names": ['everywhere', 'video_mask'],
         "frames_cache": [],
         "raw_batch_name": None,
