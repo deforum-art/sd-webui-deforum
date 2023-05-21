@@ -43,6 +43,9 @@ def get_tab_run(d, da):
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
 def create_gr_elem(d):
+    # Capitalize and CamelCase the orig value under "type", which defines gr.inputs.type in lower_case.
+    # Examples: "dropdown" becomes gr.Dropdown, and "checkbox_group" becomes gr.CheckboxGroup.
+    # Then create gradio element based on the passed in 'd' (for data)
     obj_type_str = ''.join(word.title() for word in d["type"].split('_'))
     obj_type = getattr(gr, obj_type_str)
 
