@@ -5,6 +5,7 @@ import time
 from types import SimpleNamespace
 import modules.paths as ph
 import modules.shared as sh
+from modules.sd_samplers import samplers_for_img2img
 from modules.processing import get_fixed_seed
 from .defaults import get_guided_imgs_default_json, mask_fill_choices
 from .deforum_controlnet import controlnet_component_names
@@ -32,7 +33,7 @@ def RootArgs():
         "tmp_deforum_run_duplicated_folder": os.path.join(tempfile.gettempdir(), 'tmp_run_deforum')
     }
 
-# ['Midas+AdaBins (old)','Zoe+AdaBins (old)', 'Midas-3-Hybrid','Midas-3.1-BeitLarge', 'AdaBins', 'Zoe', 'Leres'] Midas-3.1-BeitLarge is temporarily removed 04-05-23 until fixed
+# 'Midas-3.1-BeitLarge' is temporarily removed until fixed. Can add it back anytime as it's supported in the back-end depth code
 def DeforumAnimArgs():
     return {
         "animation_mode": {
@@ -687,7 +688,6 @@ def DeforumAnimArgs():
     }
 
 def DeforumArgs():
-    from modules.sd_samplers import samplers_for_img2img
     return {
         "W": {
             "label": "Width",

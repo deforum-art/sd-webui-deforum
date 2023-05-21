@@ -7,14 +7,10 @@ from .deprecation_utils import handle_deprecated_settings
 from .general_utils import get_deforum_version, clean_gradio_path_strings
 
 def get_keys_to_exclude():
-    return ["seed_enable_extras", "init_sample",
-        "noise_mask", "perlin_w", "perlin_h", "image_path", "outdir"]
-    '''
-        perlin params are used just not shown in ui for now, so not to be deleted
-        image_path and outdir are in use, not to be deleted
-        init_sample could probably be removed in the future but it requires some actual code changes as it's in use
-    '''
-       
+    return ["seed_enable_extras", "init_sample", "perlin_w", "perlin_h", "image_path", "outdir"]
+    # perlin params are used just not shown in ui for now, so not to be deleted
+    # image_path and outdir are in use, not to be deleted
+
 def load_args(args_dict_main, args, anim_args, parseq_args, loop_args, controlnet_args, video_args, custom_settings_file, root, run_id):
     custom_settings_file = custom_settings_file[run_id]
     print(f"reading custom settings from {custom_settings_file.name}")
