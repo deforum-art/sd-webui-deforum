@@ -66,7 +66,6 @@ def create_gr_elem(d):
         'visible': d.get("visible"),
         'info': d.get("info"),
         'lines': d.get("lines"),
-        'type': d.get("radio_type")
     }
 
     return obj_type(**{k: v for k, v in elem_params.items() if v is not None})
