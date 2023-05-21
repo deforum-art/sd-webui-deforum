@@ -560,7 +560,11 @@ def DeforumOutputArgs():
             "value": False,
             "info": "auto-delete imgs when video is ready"
         },
-        "image_path": "C:/SD/20230124234916_%09d.png",
+        "image_path": {
+            "label": "Image path",
+            "type": "textbox",
+            "value": "C:/SD/20230124234916_%09d.png",
+        },
         "add_soundtrack": {
                 "label": "Add soundtrack",
                 "type": "radio",
@@ -627,7 +631,14 @@ def DeforumOutputArgs():
             "visible": False,
             "info": "Slow-Mo the interpolated video, audio will not be used if enabled",
         },
-        "frame_interpolation_slow_mo_amount": 2,
+        "frame_interpolation_slow_mo_amount": {
+                "label": "Slow-Mo X",
+                "type": "slider",
+                "min": 2,
+                "max": 10,
+                "step": 1,
+                "value": 2,
+        },
         "frame_interpolation_keep_imgs": {
             "label": "Keep Imgs",
             "type": "checkbox",

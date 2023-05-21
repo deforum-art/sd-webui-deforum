@@ -473,7 +473,7 @@ def get_tab_output(da, dv):
                         frame_interpolation_x_amount = create_gr_elem(dv.frame_interpolation_x_amount)
                     with gr.Column(min_width=180, visible=False) as frame_interp_slow_mo_amount_column:
                         # Interp Slow-Mo (setting final output fps, not really doing anything directly with RIFE/FILM)
-                        frame_interpolation_slow_mo_amount = gr.Slider(minimum=2, maximum=10, step=1, label="Slow-Mo X", value=dv.frame_interpolation_x_amount, interactive=True)
+                        frame_interpolation_slow_mo_amount = create_gr_elem(dv.frame_interpolation_slow_mo_amount)
                 with gr.Row(visible=False) as interp_existing_video_row:
                     # Interpolate any existing video from the connected PC
                     with gr.Accordion('Interpolate existing Video/ Images', open=False) as interp_existing_video_accord:
@@ -581,7 +581,7 @@ def get_tab_output(da, dv):
         with gr.TabItem('Frames to Video') as stitch_imgs_to_vid_row:
             gr.HTML(value=get_gradio_html('frames_to_video'))
             with gr.Row(variant='compact'):
-                image_path = gr.Textbox(label="Image path", lines=1, interactive=True, value=dv.image_path)
+                image_path = create_gr_elem(dv.image_path)
             ffmpeg_stitch_imgs_but = gr.Button(value="*Stitch frames to video*")
             ffmpeg_stitch_imgs_but.click(direct_stitch_vid_from_frames, inputs=[image_path, fps, add_soundtrack, soundtrack_path])
     return {k: v for k, v in {**locals(), **vars()}.items()}
