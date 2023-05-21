@@ -16,7 +16,7 @@ from .video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_
 # this global param will contain the latest generated video HTML-data-URL info (for preview inside the UI when needed)
 last_vid_data = None
 
-def run_deforum(*args, **kwargs):
+def run_deforum(*args):
     f_location, f_crf, f_preset = get_ffmpeg_params() # get params for ffmpeg exec
     component_names = get_component_names()
     args_dict = {component_names[i]: args[i+2] for i in range(0, len(component_names))}
