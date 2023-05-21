@@ -164,8 +164,6 @@ def run_deforum(*args, **kwargs):
         shared.total_tqdm.clear()
 
         generation_info_js = processed.js()
-        if getattr(shared.opts, 'samples_log_stdout', False):
-            print(generation_info_js)
 
         if shared.opts.data.get("deforum_enable_persistent_settings", False):
             persistent_sett_path = shared.opts.data.get("deforum_persistent_settings_path")
