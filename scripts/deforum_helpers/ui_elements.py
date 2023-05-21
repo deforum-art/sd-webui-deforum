@@ -43,11 +43,10 @@ def get_tab_run(d, da):
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
 def create_gr_elem(d):
-    gradio_keys = ['label', 'value', 'minimum', 'maximum', 'step', 'precision', 'choices', 'visible', 'info', 'lines']
     obj_type_str = ''.join(word.title() for word in d["type"].split('_'))
     obj_type = getattr(gr, obj_type_str)
 
-    return obj_type(**{k: d[k] for k in gradio_keys if k in d and d[k] is not None})
+    return obj_type(**{k: v for k, v in d.items() if k != "type" and v is not None})
 
 def get_tab_keyframes(d, da, dloopArgs):
     with gr.TabItem('Keyframes'):  # TODO make a some sort of the original dictionary parsing
