@@ -4,8 +4,18 @@ from .defaults import get_gradio_html, DeforumAnimPrompts
 from .video_audio_utilities import direct_stitch_vid_from_frames
 from .gradio_funcs import upload_vid_to_interpolate, upload_pics_to_interpolate, ncnn_upload_vid_to_upscale, upload_vid_to_depth
 
-# All get_tab functions use FormRow() by default, unless we have a gr.File inside that row, then we use gr.Row() instead
+def create_gr_elem(d):
+    # Capitalize and CamelCase the orig value under "type", which defines gr.inputs.type in lower_case.
+    # Examples: "dropdown" becomes gr.Dropdown, and "checkbox_group" becomes gr.CheckboxGroup.
+    # Then create gradio element based on the passed in 'd' (for data).
+    obj_type_str = ''.join(word.title() for word in d["type"].split('_'))
+    obj_type = getattr(gr, obj_type_str)
 
+    return obj_type(**{k: v for k, v in d.items() if k != "type" and v is not None})
+
+# ******** Important message ********
+# All get_tab functions use FormRow()/ FormColumn() by default, unless we have a gr.File inside that row/column, then we use gr.Row()/gr.Column() instead
+# ******** Important message ********
 def get_tab_run(d, da):
     with gr.TabItem('Run'):  # RUN TAB
         with FormRow():
@@ -42,15 +52,6 @@ def get_tab_run(d, da):
             with gr.Row(variant='compact') as pix2pix_img_cfg_scale_row:
                 pix2pix_img_cfg_scale_schedule = create_gr_elem(da.pix2pix_img_cfg_scale_schedule)
     return {k: v for k, v in {**locals(), **vars()}.items()}
-
-def create_gr_elem(d):
-    # Capitalize and CamelCase the orig value under "type", which defines gr.inputs.type in lower_case.
-    # Examples: "dropdown" becomes gr.Dropdown, and "checkbox_group" becomes gr.CheckboxGroup.
-    # Then create gradio element based on the passed in 'd' (for data).
-    obj_type_str = ''.join(word.title() for word in d["type"].split('_'))
-    obj_type = getattr(gr, obj_type_str)
-
-    return obj_type(**{k: v for k, v in d.items() if k != "type" and v is not None})
 
 def get_tab_keyframes(d, da, dloopArgs):
     with gr.TabItem('Keyframes'):  # TODO make a some sort of the original dictionary parsing
@@ -95,7 +96,7 @@ def get_tab_keyframes(d, da, dloopArgs):
                     enable_clipskip_scheduling = create_gr_elem(da.enable_clipskip_scheduling)
                 with FormRow():
                     clipskip_schedule = create_gr_elem(da.clipskip_schedule)
-            with gr.TabItem('Seed') as a3:
+            with gr.TabItem('Seed'):
                 with FormRow():
                     seed_behavior = create_gr_elem(d.seed_behavior)
                 with FormRow() as seed_iter_N_row:
@@ -111,19 +112,19 @@ def get_tab_keyframes(d, da, dloopArgs):
                     seed_resize_from_w = create_gr_elem(d.seed_resize_from_w)
                     seed_resize_from_h = create_gr_elem(d.seed_resize_from_h)
             # Steps Scheduling
-            with gr.TabItem('Step') as a13:
+            with gr.TabItem('Step'):
                 with FormRow():
                     enable_steps_scheduling = create_gr_elem(da.enable_steps_scheduling)
                 with FormRow():
                     steps_schedule = create_gr_elem(da.steps_schedule)
             # Sampler Scheduling
-            with gr.TabItem('Sampler') as a14:
+            with gr.TabItem('Sampler'):
                 with FormRow():
                     enable_sampler_scheduling = create_gr_elem(da.enable_sampler_scheduling)
                 with FormRow():
                     sampler_schedule = create_gr_elem(da.sampler_schedule)
             # Checkpoint Scheduling
-            with gr.TabItem('Checkpoint') as a15:
+            with gr.TabItem('Checkpoint'):
                 with FormRow():
                     enable_checkpoint_scheduling = create_gr_elem(da.enable_checkpoint_scheduling)
                 with FormRow():
@@ -131,7 +132,7 @@ def get_tab_keyframes(d, da, dloopArgs):
         # MOTION INNER TAB
         with gr.Tabs(elem_id='motion_noise_etc'):
             with gr.TabItem('Motion') as motion_tab:
-                with gr.Column(visible=True) as only_2d_motion_column:
+                with gr.Column() as only_2d_motion_column:
                     with FormRow():
                         zoom = create_gr_elem(da.zoom)
                     with FormRow():
@@ -140,7 +141,7 @@ def get_tab_keyframes(d, da, dloopArgs):
                         transform_center_x = create_gr_elem(da.transform_center_x)
                     with FormRow():
                         transform_center_y = create_gr_elem(da.transform_center_y)
-                with FormColumn(visible=True) as both_anim_mode_motion_params_column:
+                with FormColumn() as both_anim_mode_motion_params_column:
                     with FormRow():
                         translation_x = create_gr_elem(da.translation_x)
                     with FormRow():
@@ -252,7 +253,7 @@ def get_tab_keyframes(d, da, dloopArgs):
 def get_tab_prompts(da):
     with gr.TabItem('Prompts'):
         # PROMPTS INFO ACCORD
-        with gr.Accordion(label='*Important* notes on Prompts', elem_id='prompts_info_accord', open=False, visible=True) as prompts_info_accord:
+        with gr.Accordion(label='*Important* notes on Prompts', elem_id='prompts_info_accord', open=False) as prompts_info_accord:
             gr.HTML(value=get_gradio_html('prompts'))
         with FormRow():
             animation_prompts = gr.Textbox(label="Prompts", lines=8, interactive=True, value=DeforumAnimPrompts(),
