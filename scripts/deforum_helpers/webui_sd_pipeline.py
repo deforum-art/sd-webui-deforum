@@ -3,7 +3,7 @@ from modules.shared import opts, sd_model
 import os
 
 def get_webui_sd_pipeline(args, root):
-    # Setup the pipeline
+    # Set up the pipeline
     p = StableDiffusionProcessingImg2Img(
         sd_model=sd_model,
         outpath_samples = opts.outdir_samples or opts.outdir_img2img_samples,
@@ -16,8 +16,8 @@ def get_webui_sd_pipeline(args, root):
     p.sampler_name = args.sampler
     p.tiling = args.tiling
     p.restore_faces = args.restore_faces
-    p.subseed = args.subseed
-    p.subseed_strength = args.subseed_strength
+    p.subseed = root.subseed
+    p.subseed_strength = root.subseed_strength
     p.seed_resize_from_w = args.seed_resize_from_w
     p.seed_resize_from_h = args.seed_resize_from_h
     p.fill = args.fill

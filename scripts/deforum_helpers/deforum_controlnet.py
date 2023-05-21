@@ -159,14 +159,16 @@ def setup_controlnet_ui_raw():
         selected = dd if dd in cn_models else "None"
         return gr.Dropdown.update(value=selected, choices=cn_models)
 
-    with gr.Tabs():
-        model_params = {}
-        for i in range(1, num_of_models + 1):
-            with gr.Tab(f"CN Model {i}"):
-                model_params[i] = create_model_in_tab_ui(i)
+    with gr.TabItem('ControlNet'):
+        gr.HTML(controlnet_infotext())
+        with gr.Tabs():
+            model_params = {}
+            for i in range(1, num_of_models + 1):
+                with gr.Tab(f"CN Model {i}"):
+                    model_params[i] = create_model_in_tab_ui(i)
 
-                for key, value in model_params[i].items():
-                    locals()[f"cn_{i}_{key}"] = value
+                    for key, value in model_params[i].items():
+                        locals()[f"cn_{i}_{key}"] = value
 
     return locals()
 
@@ -195,7 +197,7 @@ def controlnet_component_names():
         'processor_res', 'threshold_a', 'threshold_b', 'resize_mode', 'control_mode', 'loopback_mode'
     ]]
 
-def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root, is_img2img=True, frame_idx=0):
+def process_with_controlnet(p, args, anim_args, controlnet_args, root, is_img2img=True, frame_idx=0):
     CnSchKeys = ControlNetKeys(anim_args, controlnet_args)
 
     def read_cn_data(cn_idx):
@@ -208,8 +210,8 @@ def process_with_controlnet(p, args, anim_args, loop_args, controlnet_args, root
                 # convert to uint8 for compatibility with CN
                 cn_image_np = np.array(cn_image_np).astype('uint8')
             # Not first frame, use previous img (init_sample)
-            elif frame_idx > 0 and args.init_sample:
-                cn_image_np = np.array(args.init_sample).astype('uint8')
+            elif frame_idx > 0 and root.init_sample:
+                cn_image_np = np.array(root.init_sample).astype('uint8')
         else:  # loopback mode is DISABLED
             cn_inputframes = os.path.join(args.outdir, f'controlnet_{cn_idx}_inputframes')  # set input frames folder path
             if os.path.exists(cn_inputframes):

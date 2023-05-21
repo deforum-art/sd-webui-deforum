@@ -6,12 +6,12 @@ def deforum_sys_extend():
 
     basedirs = [os.getcwd()]
     if 'google.colab' in sys.modules:
-        basedirs.append('/content/gdrive/MyDrive/sd/stable-diffusion-webui') # for TheLastBen's colab
-    for basedir in basedirs:
+        basedirs.append('/content/gdrive/MyDrive/sd/stable-diffusion-webui')  # for TheLastBen's colab
+    for _ in basedirs:
         deforum_paths_to_ensure = [
             os.path.join(deforum_folder_name, 'scripts'),
             os.path.join(deforum_folder_name, 'scripts', 'deforum_helpers', 'src')
-            ]
+        ]
         for deforum_scripts_path_fix in deforum_paths_to_ensure:
-            if not deforum_scripts_path_fix in sys.path:
+            if deforum_scripts_path_fix not in sys.path:
                 sys.path.extend([deforum_scripts_path_fix])

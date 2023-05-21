@@ -174,6 +174,9 @@ def get_frames_to_video_info_html():
             <li>If non-deforum frames, use the correct number of counting digits. For files like 'bunnies-0000.jpg', you'd use 'bunnies-%04d.jpg'</li>
         </ul>
         """
+def get_leres_info_html():
+    return 'Note that LeReS has a Non-Commercial <a href="https://github.com/aim-uofa/AdelaiDepth/blob/main/LeReS/LICENSE" target="_blank">license</a>. Use it only for fun/personal use.'
+
 def get_gradio_html(section_name):
     if section_name.lower() == 'hybrid_video':
         return get_hybrid_info_html()
@@ -191,8 +194,10 @@ def get_gradio_html(section_name):
         return get_frame_interpolation_info_html()
     elif section_name.lower() == 'frames_to_video':
         return get_frames_to_video_info_html()
+    elif section_name.lower() == 'leres':
+        return get_leres_info_html()
     else:
-        return None
-        
-mask_fill_choices=['fill', 'original', 'latent noise', 'latent nothing']
+        return ""
+
+mask_fill_choices = ['fill', 'original', 'latent noise', 'latent nothing']
         
