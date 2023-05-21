@@ -1075,34 +1075,25 @@ def get_component_names():
 def get_settings_component_names():
     return [name for name in get_component_names()]
 
-def pack_args(args_dict, arg_set):
-    return {name: args_dict[name] for name in arg_set()}
-
 def process_args(args_dict_main, run_id):
     from .settings import load_args
     override_settings_with_file = args_dict_main['override_settings_with_file']
     custom_settings_file = args_dict_main['custom_settings_file']
-    args_dict = pack_args(args_dict_main, DeforumArgs)
-    anim_args_dict = pack_args(args_dict_main, DeforumAnimArgs)
-    video_args_dict = pack_args(args_dict_main, DeforumOutputArgs)
-    parseq_args_dict = pack_args(args_dict_main, ParseqArgs)
-    loop_args_dict = pack_args(args_dict_main, LoopArgs)
-    controlnet_args_dict = pack_args(args_dict_main, controlnet_component_names)
+    p = args_dict_main['p']
 
     root = SimpleNamespace(**RootArgs())
-    args = SimpleNamespace(**args_dict)
-    anim_args = SimpleNamespace(**anim_args_dict)
-    video_args = SimpleNamespace(**video_args_dict)
-    parseq_args = SimpleNamespace(**parseq_args_dict)
-    loop_args = SimpleNamespace(**loop_args_dict)
-    controlnet_args = SimpleNamespace(**controlnet_args_dict)
+    args = SimpleNamespace(**{name: args_dict_main[name] for name in DeforumArgs()})
+    anim_args = SimpleNamespace(**{name: args_dict_main[name] for name in DeforumAnimArgs()})
+    video_args = SimpleNamespace(**{name: args_dict_main[name] for name in DeforumOutputArgs()})
+    parseq_args = SimpleNamespace(**{name: args_dict_main[name] for name in ParseqArgs()})
+    loop_args = SimpleNamespace(**{name: args_dict_main[name] for name in LoopArgs()})
+    controlnet_args = SimpleNamespace(**{name: args_dict_main[name] for name in controlnet_component_names()})
 
-    p = args_dict_main['p']
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
 
-    args_loaded_ok = True  # can use this later to error cleanly upon wrong gen param in ui
+    args_loaded_ok = True
     if override_settings_with_file:
-        args_loaded_ok = load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id)
+        args_loaded_ok = load_args(args_dict_main, args, anim_args, parseq_args, loop_args, controlnet_args, video_args, custom_settings_file, root, run_id)
 
     positive_prompts = args_dict_main['animation_prompts_positive']
     negative_prompts = args_dict_main['animation_prompts_negative']

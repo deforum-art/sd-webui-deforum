@@ -29,7 +29,7 @@ def run_deforum(*args, **kwargs):
     # find how many times in total we need to run according to file count uploaded to Batch Mode upload box
     if args_dict['custom_settings_file'] is not None and len(args_dict['custom_settings_file']) > 1:
         times_to_run = len(args_dict['custom_settings_file'])
-        
+
     for i in range(times_to_run): # run for as many times as we need
         print(f"\033[4;33mDeforum extension for auto1111 webui, v2.4b\033[0m")
         print(f"Git commit: {get_deforum_version()}")
@@ -69,10 +69,10 @@ def run_deforum(*args, **kwargs):
 
         tqdm_backup = shared.total_tqdm
         shared.total_tqdm = DeforumTQDM(args, anim_args, parseq_args, video_args)
-        try: # dispatch to appropriate renderer
+        try:  # dispatch to appropriate renderer
             if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
                 if anim_args.use_mask_video: 
-                    render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root) # allow mask video without an input video
+                    render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)  # allow mask video without an input video
                 else:    
                     render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)
             elif anim_args.animation_mode == 'Video Input':

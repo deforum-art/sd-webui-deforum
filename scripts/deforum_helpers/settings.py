@@ -15,7 +15,7 @@ def get_keys_to_exclude():
         init_sample could probably be removed in the future but it requires some actual code changes as it's in use
     '''
        
-def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict, custom_settings_file, root, run_id):
+def load_args(args_dict_main, args, anim_args, parseq_args, loop_args, controlnet_args, video_args, custom_settings_file, root, run_id):
     custom_settings_file = custom_settings_file[run_id]
     print(f"reading custom settings from {custom_settings_file.name}")
     if not os.path.isfile(custom_settings_file.name):
@@ -29,20 +29,20 @@ def load_args(args_dict_main, args_dict, anim_args_dict, parseq_args_dict, loop_
         handle_deprecated_settings(jdata)
         root.animation_prompts = jdata.get("prompts", root.animation_prompts)
         if "animation_prompts_positive" in jdata:
-            args_dict_main['animation_prompts_positive'] = jdata["animation_prompts_positive"] # Update the args_dict_main
+            args_dict_main['animation_prompts_positive'] = jdata["animation_prompts_positive"]
         if "animation_prompts_negative" in jdata:
-            args_dict_main['animation_prompts_negative'] = jdata["animation_prompts_negative"] # Update the args_dict_main
+            args_dict_main['animation_prompts_negative'] = jdata["animation_prompts_negative"]
         keys_to_exclude = get_keys_to_exclude()
-        for dicts in [args_dict, anim_args_dict, parseq_args_dict, loop_args_dict, controlnet_args_dict, video_args_dict]:
-            for k, v in dicts.items():
-                # Check if the key is not in the keys_to_exclude list before processing
+        for args_namespace in [args, anim_args, parseq_args, loop_args, controlnet_args, video_args]:
+            for k, v in vars(args_namespace).items():
                 if k not in keys_to_exclude:
                     if k in jdata:
-                        dicts[k] = jdata[k]
+                        setattr(args_namespace, k, jdata[k])
                     else:
                         print(f"Key {k} doesn't exist in the custom settings data! Using default value of {v}")
-        print(args_dict, anim_args_dict, parseq_args_dict, loop_args_dict)
+        print(args, anim_args, parseq_args, loop_args)
         return True
+
 
 # save settings function that get calls when run_deforum is being called
 def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, full_out_file_path = None):
