@@ -1,6 +1,6 @@
 import gradio as gr
 import modules.shared as sh
-from modules.ui_components import FormRow
+from modules.ui_components import FormRow, FormColumn
 from .defaults import get_gradio_html, DeforumAnimPrompts
 from .video_audio_utilities import direct_stitch_vid_from_frames
 from .gradio_funcs import upload_vid_to_interpolate, upload_pics_to_interpolate, ncnn_upload_vid_to_upscale, upload_vid_to_depth
@@ -342,30 +342,28 @@ def get_tab_hybrid(da):
             with FormRow():
                 with gr.Column(min_width=340):
                     with FormRow():
-                        hybrid_generate_inputframes = gr.Checkbox(label="Generate inputframes", value=da.hybrid_generate_inputframes, interactive=True)
-                        hybrid_use_first_frame_as_init_image = gr.Checkbox(label="First frame as init image", value=da.hybrid_use_first_frame_as_init_image, interactive=True, visible=False)
-                        hybrid_use_init_image = gr.Checkbox(label="Use init image as video", value=da.hybrid_use_init_image, interactive=True, visible=True)
+                        hybrid_generate_inputframes = create_gr_elem(da.hybrid_generate_inputframes)
+                        hybrid_use_first_frame_as_init_image = create_gr_elem(da.hybrid_use_first_frame_as_init_image)
+                        hybrid_use_init_image = create_gr_elem(da.hybrid_use_init_image)
             with FormRow():
-                with gr.Column(variant='compact'):
+                with FormColumn():
                     with FormRow():
-                        hybrid_motion = gr.Radio(['None', 'Optical Flow', 'Perspective', 'Affine'], label="Hybrid motion", value=da.hybrid_motion, elem_id="hybrid_motion")
-                with gr.Column(variant='compact'):
+                        hybrid_motion = create_gr_elem(da.hybrid_motion)
+                with FormColumn():
                     with FormRow():
                         with gr.Column(scale=1):
-                            hybrid_flow_method = gr.Radio(['RAFT', 'DIS Medium', 'DIS Fine', 'Farneback'], label="Flow method", value=da.hybrid_flow_method, elem_id="hybrid_flow_method",
-                                                          visible=False)
+                            hybrid_flow_method = create_gr_elem(da.hybrid_flow_method)
                     with FormRow():
-                        with gr.Column(variant='compact'):
-                            hybrid_flow_consistency = gr.Checkbox(label="Flow consistency mask", value=da.hybrid_flow_consistency, interactive=True, visible=False)
-                            hybrid_consistency_blur = gr.Slider(label="Consistency mask blur", minimum=0, maximum=16, step=1, value=da.hybrid_consistency_blur, interactive=True, visible=False)
-                        with gr.Column(variant='compact'):
-                            hybrid_motion_use_prev_img = gr.Checkbox(label="Motion use prev img", value=da.hybrid_motion_use_prev_img, interactive=True, visible=False)
+                        with FormColumn():
+                            hybrid_flow_consistency = create_gr_elem(da.hybrid_flow_consistency)
+                            hybrid_consistency_blur = create_gr_elem(da.hybrid_consistency_blur)
+                        with FormColumn():
+                            hybrid_motion_use_prev_img = create_gr_elem(da.hybrid_motion_use_prev_img)
             with FormRow():
-                hybrid_comp_mask_type = gr.Radio(['None', 'Depth', 'Video Depth', 'Blend', 'Difference'], label="Comp mask type", value=da.hybrid_comp_mask_type,
-                                                 elem_id="hybrid_comp_mask_type", visible=False)
+                hybrid_comp_mask_type = create_gr_elem(da.hybrid_comp_mask_type)
             with gr.Row(visible=False, variant='compact') as hybrid_comp_mask_row:
-                hybrid_comp_mask_equalize = gr.Radio(['None', 'Before', 'After', 'Both'], label="Comp mask equalize", value=da.hybrid_comp_mask_equalize, elem_id="hybrid_comp_mask_equalize")
-                with gr.Column(variant='compact'):
+                hybrid_comp_mask_equalize = create_gr_elem(da.hybrid_comp_mask_equalize)
+                with FormColumn():
                     hybrid_comp_mask_auto_contrast = gr.Checkbox(label="Comp mask auto contrast", value=False, interactive=True)
                     hybrid_comp_mask_inverse = gr.Checkbox(label="Comp mask inverse", value=da.hybrid_comp_mask_inverse, interactive=True)
             with FormRow():
@@ -373,25 +371,21 @@ def get_tab_hybrid(da):
         # HYBRID SCHEDULES ACCORD
         with gr.Accordion("Hybrid Schedules", open=False, visible=False) as hybrid_sch_accord:
             with gr.Row(variant='compact') as hybrid_comp_alpha_schedule_row:
-                hybrid_comp_alpha_schedule = gr.Textbox(label="Comp alpha schedule", lines=1, value=da.hybrid_comp_alpha_schedule, interactive=True)
+                hybrid_comp_alpha_schedule = create_gr_elem(da.hybrid_comp_alpha_schedule)
             with gr.Row(variant='compact') as hybrid_flow_factor_schedule_row:
-                hybrid_flow_factor_schedule = gr.Textbox(label="Flow factor schedule", visible=False, lines=1, value=da.hybrid_flow_factor_schedule, interactive=True)
+                hybrid_flow_factor_schedule = create_gr_elem(da.hybrid_flow_factor_schedule)
             with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_blend_alpha_schedule_row:
-                hybrid_comp_mask_blend_alpha_schedule = gr.Textbox(label="Comp mask blend alpha schedule", lines=1, value=da.hybrid_comp_mask_blend_alpha_schedule, interactive=True,
-                                                                   elem_id="hybridelemtest")
+                hybrid_comp_mask_blend_alpha_schedule = create_gr_elem(da.hybrid_comp_mask_blend_alpha_schedule)
             with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_contrast_schedule_row:
-                hybrid_comp_mask_contrast_schedule = gr.Textbox(label="Comp mask contrast schedule", lines=1, value=da.hybrid_comp_mask_contrast_schedule, interactive=True)
+                hybrid_comp_mask_contrast_schedule = create_gr_elem(da.hybrid_comp_mask_contrast_schedule)
             with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_auto_contrast_cutoff_high_schedule_row:
-                hybrid_comp_mask_auto_contrast_cutoff_high_schedule = gr.Textbox(label="Comp mask auto contrast cutoff high schedule", lines=1,
-                                                                                 value=da.hybrid_comp_mask_auto_contrast_cutoff_high_schedule, interactive=True)
+                hybrid_comp_mask_auto_contrast_cutoff_high_schedule = create_gr_elem(da.hybrid_comp_mask_auto_contrast_cutoff_high_schedule)
             with gr.Row(variant='compact', visible=False) as hybrid_comp_mask_auto_contrast_cutoff_low_schedule_row:
-                hybrid_comp_mask_auto_contrast_cutoff_low_schedule = gr.Textbox(label="Comp mask auto contrast cutoff low schedule", lines=1,
-                                                                                value=da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule, interactive=True)
+                hybrid_comp_mask_auto_contrast_cutoff_low_schedule = create_gr_elem(da.hybrid_comp_mask_auto_contrast_cutoff_low_schedule)
         # HUMANS MASKING ACCORD
         with gr.Accordion("Humans Masking", open=False, visible=False) as humans_masking_accord:
             with FormRow():
-                hybrid_generate_human_masks = gr.Radio(['None', 'PNGs', 'Video', 'Both'], label="Generate human masks", value=da.hybrid_generate_human_masks,
-                                                       elem_id="hybrid_generate_human_masks")
+                hybrid_generate_human_masks = create_gr_elem(da.hybrid_generate_human_masks)
 
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
@@ -401,7 +395,7 @@ def get_tab_output(da, dv):
         with gr.Accordion('Video Output Settings', open=True):
             with gr.Row(variant='compact') as fps_out_format_row:
                 fps = create_gr_elem(dv.fps)
-            with gr.Column(variant='compact'):
+            with FormColumn():
                 with gr.Row(variant='compact') as soundtrack_row:
                     add_soundtrack = create_gr_elem(dv.add_soundtrack)
                     soundtrack_path = create_gr_elem(dv.soundtrack_path)
@@ -420,7 +414,7 @@ def get_tab_output(da, dv):
         with gr.Tab('Frame Interpolation') as frame_interp_tab:
             with gr.Accordion('Important notes and Help', open=False, elem_id="f_interp_accord"):
                 gr.HTML(value=get_gradio_html('frame_interpolation'))
-            with gr.Column(variant='compact'):
+            with FormColumn():
                 with FormRow():
                     # Interpolation Engine
                     with gr.Column(min_width=110, scale=3):
