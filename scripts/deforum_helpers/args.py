@@ -718,13 +718,6 @@ def DeforumArgs():
             "value": False,
             "info": "enable to trigger webui's face restoration on each frame during the generation"
         },
-        "seed_enable_extras": {
-            "label": "Enable subseed controls",
-            "type": "checkbox",
-            "visible": False,
-            "value": False,
-            "info": ""
-        },
         "seed_resize_from_w": {
             "label": "Resize seed from width",
             "type": "slider",

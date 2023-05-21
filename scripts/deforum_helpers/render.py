@@ -464,7 +464,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             root.subseed_strength = float(keys.subseed_strength_schedule_series[frame_idx])
 
         if use_parseq:
-            args.seed_enable_extras = True
             anim_args.enable_subseed_scheduling = True
             root.subseed = int(keys.subseed_schedule_series[frame_idx])
             root.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]

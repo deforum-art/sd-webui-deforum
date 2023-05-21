@@ -28,8 +28,6 @@ def get_tab_run(d, da):
             seed = create_gr_elem(d.seed)
             batch_name = create_gr_elem(d.batch_name)
         with FormRow():
-            # Seed enable extras is INVISIBLE in the ui!
-            seed_enable_extras = create_gr_elem(d.seed_enable_extras)
             restore_faces = create_gr_elem(d.restore_faces)
             tiling = create_gr_elem(d.tiling)
             enable_ddim_eta_scheduling = create_gr_elem(da.enable_ddim_eta_scheduling)
