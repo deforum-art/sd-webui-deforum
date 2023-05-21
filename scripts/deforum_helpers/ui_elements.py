@@ -476,10 +476,9 @@ def get_tab_output(da, dv):
                     ncnn_upscale_out_vid_res = gr.Textbox(label="Out Res", value='---')  # Non-interactive textbox showing expected output resolution
                 with gr.Column():
                     with FormRow() as ncnn_actual_upscale_row:
-                        ncnn_upscale_model = gr.Dropdown(label="Upscale model", choices=['realesr-animevideov3', 'realesrgan-x4plus', 'realesrgan-x4plus-anime'], interactive=True,
-                                                         value="realesr-animevideov3", type="value")
-                        ncnn_upscale_factor = gr.Dropdown(choices=['x2', 'x3', 'x4'], label="Upscale factor", interactive=True, value="x2", type="value")
-                        ncnn_upscale_keep_imgs = gr.Checkbox(label="Keep Imgs", value=True, interactive=True)  # fix value
+                        ncnn_upscale_model = create_gr_elem(dv.r_upscale_model)  # note that we re-use *r_upscale_model* in here to create the gradio element as they are the same
+                        ncnn_upscale_factor = create_gr_elem(dv.r_upscale_factor)  # note that we re-use *r_upscale_facto*r in here to create the gradio element as they are the same
+                        ncnn_upscale_keep_imgs = create_gr_elem(dv.r_upscale_keep_imgs)  # note that we re-use *r_upscale_keep_imgs* in here to create the gradio element as they are the same
                 ncnn_upscale_btn = gr.Button(value="*Upscale uploaded video*")
                 ncnn_upscale_btn.click(ncnn_upload_vid_to_upscale,
                                        inputs=[vid_to_upscale_chosen_file, ncnn_upscale_in_vid_fps_ui_window, ncnn_upscale_in_vid_res, ncnn_upscale_out_vid_res, ncnn_upscale_model,
