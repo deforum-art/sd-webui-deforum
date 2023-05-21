@@ -4,7 +4,7 @@ import modules.paths as ph
 from scripts.deforum_extend_paths import deforum_sys_extend
 
 def init_deforum():
-    # use sys.path.extend to make sure all files are available for importation
+    # use sys.path.extend to make sure all of our files are available for importation
     deforum_sys_extend()
 
     # create the Models/Deforum folder, where many of the deforum related models/ packages will be downloaded
