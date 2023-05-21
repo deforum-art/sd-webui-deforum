@@ -40,8 +40,7 @@ def run_deforum(*args, **kwargs):
         except Exception as e:
             print("\n*START OF TRACEBACK*")
             traceback.print_exc()
-            print("*END OF TRACEBACK*\n")
-            print("User friendly error message:")
+            print("*END OF TRACEBACK*\nUser friendly error message:")
             print(f"Error: {e}. Check your prompts with a JSON validator please.")
             return None, None, None, f"Error: '{e}'. Check your prompts with a JSON validator please. Full error message is in your terminal/ cli."
         if args_loaded_ok is False:
@@ -115,7 +114,7 @@ def run_deforum(*args, **kwargs):
         # Delete folder with duplicated imgs from OS temp folder
         shutil.rmtree(root.tmp_deforum_run_duplicated_folder, ignore_errors=True)
 
-        # Decide whether or not we need to try and frame interpolate laters
+        # Decide whether we need to try and frame interpolate later
         need_to_frame_interpolate = False
         if video_args.frame_interpolation_engine != "None" and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
             need_to_frame_interpolate = True
@@ -131,8 +130,8 @@ def run_deforum(*args, **kwargs):
             try:
                 f_location, f_crf, f_preset = get_ffmpeg_params() # get params for ffmpeg exec
                 ffmpeg_stitch_video(ffmpeg_location=f_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=f_crf, preset=f_preset, srt_path=srt_path)
-                mp4 = open(mp4_path,'rb').read()
-                data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
+                mp4 = open(mp4_path, 'rb').read()
+                data_url = f"data:video/mp4;base64, {b64encode(mp4).decode()}"
                 global last_vid_data
                 last_vid_data = f'<p style=\"font-weight:bold;margin-bottom:0em\">Deforum extension for auto1111 — version 2.4b </p><video controls loop><source src="{data_url}" type="video/mp4"></video>'
             except Exception as e:
@@ -158,8 +157,8 @@ def run_deforum(*args, **kwargs):
         if video_args.delete_imgs and not video_args.skip_video_creation:
             handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=root.timestring)
             
-        root.initial_info += "\n The animation is stored in " + args.outdir
-        reset_frames_cache(root) # cleanup the RAM in any case
+        root.initial_info += f"\n The animation is stored in {args.outdir}"
+        reset_frames_cache(root)  # cleanup the RAM in any case
         processed = Processed(p, [root.first_frame], 0, root.initial_info)
 
         shared.total_tqdm.clear()
