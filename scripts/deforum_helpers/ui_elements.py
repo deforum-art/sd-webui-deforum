@@ -83,7 +83,7 @@ def get_tab_keyframes(d, da, dloopArgs):
                 with FormRow():
                     color_correction_factor = create_gr_elem(dloopArgs.color_correction_factor)
         # EXTRA SCHEDULES TABS
-        with gr.Tabs(elem_id='extra_schedules'):
+        with gr.Tabs():
             with gr.TabItem('Strength'):
                 with FormRow():
                     strength_schedule = create_gr_elem(da.strength_schedule)
