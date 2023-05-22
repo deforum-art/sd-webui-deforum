@@ -1,7 +1,8 @@
 import os
 import json
 import modules.shared as sh
-from .args import DeforumArgs, DeforumAnimArgs, DeforumOutputArgs, get_settings_component_names
+from .args import DeforumArgs, DeforumAnimArgs, DeforumOutputArgs, ParseqArgs, LoopArgs, get_settings_component_names, pack_args
+from .deforum_controlnet import controlnet_component_names
 from .defaults import mask_fill_choices
 from .deprecation_utils import handle_deprecated_settings
 from .general_utils import get_deforum_version, clean_gradio_path_strings
@@ -39,7 +40,6 @@ def load_args(args_dict_main, args, anim_args, parseq_args, loop_args, controlne
         print(args, anim_args, parseq_args, loop_args)
         return True
 
-
 # save settings function that get calls when run_deforum is being called
 def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, full_out_file_path = None):
     if full_out_file_path:
@@ -61,20 +61,19 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
 
 # In gradio gui settings save/ load funcs:
 def save_settings(*args, **kwargs):
-    from deforum_helpers.args import pack_args, pack_anim_args, pack_parseq_args, pack_loop_args, pack_controlnet_args, pack_video_args
     settings_path = args[0].strip()
     settings_path = clean_gradio_path_strings(settings_path)
     settings_component_names = get_settings_component_names()
     data = {settings_component_names[i]: args[i+1] for i in range(0, len(settings_component_names))}
-    args_dict = pack_args(data)
-    anim_args_dict = pack_anim_args(data)
-    parseq_dict = pack_parseq_args(data)
+    args_dict = pack_args(data, DeforumArgs)
+    anim_args_dict = pack_args(data, DeforumAnimArgs)
+    parseq_dict = pack_args(data, ParseqArgs)
     args_dict["prompts"] = json.loads(data['animation_prompts'])
     args_dict["animation_prompts_positive"] = data['animation_prompts_positive']
     args_dict["animation_prompts_negative"] = data['animation_prompts_negative']
-    loop_dict = pack_loop_args(data)
-    controlnet_dict = pack_controlnet_args(data)
-    video_args_dict = pack_video_args(data)
+    loop_dict = pack_args(data, LoopArgs)
+    controlnet_dict = pack_args(data, controlnet_component_names)
+    video_args_dict = pack_args(data, DeforumOutputArgs)
     combined = {**args_dict, **anim_args_dict, **parseq_dict, **loop_dict, **controlnet_dict, **video_args_dict}
     exclude_keys = get_keys_to_exclude()
     filtered_combined = {k: v for k, v in combined.items() if k not in exclude_keys}

@@ -1069,6 +1069,9 @@ def get_component_names():
 def get_settings_component_names():
     return [name for name in get_component_names()]
 
+def pack_args(args_dict, keys_function):
+    return {name: args_dict[name] for name in keys_function()}
+
 def process_args(args_dict_main, run_id):
     from .settings import load_args
     override_settings_with_file = args_dict_main['override_settings_with_file']
