@@ -693,9 +693,9 @@ def DeforumArgs():
         "W": {
             "label": "Width",
             "type": "slider",
-            "minimum": 8,
+            "minimum": 64,
             "maximum": 2048,
-            "step": 8,
+            "step": 64,
             "value": 512,
         },
         "H": {
