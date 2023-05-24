@@ -424,6 +424,8 @@ def get_tab_output(da, dv):
                     with gr.Column(min_width=30, scale=1):
                         # If this is set to True, we keep all the interpolated frames in a folder. Default is False - means we delete them at the end of the run
                         frame_interpolation_keep_imgs = create_gr_elem(dv.frame_interpolation_keep_imgs)
+                    with gr.Column(min_width=30, scale=1):
+                        frame_interpolation_use_upscaled = create_gr_elem(dv.frame_interpolation_use_upscaled)                        
                 with FormRow(visible=False) as frame_interp_amounts_row:
                     with gr.Column(min_width=180) as frame_interp_x_amount_column:
                         # How many times to interpolate (interp X)
@@ -457,10 +459,10 @@ def get_tab_output(da, dv):
                         # make the function call when the interpolation button is clicked
                         interpolate_button.click(fn=upload_vid_to_interpolate,
                                                  inputs=[vid_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled,
-                                                         frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, in_vid_fps_ui_window])
+                                                         frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, frame_interpolation_use_upscaled, in_vid_fps_ui_window])
                         interpolate_pics_button.click(fn=upload_pics_to_interpolate,
                                                       inputs=[pics_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled,
-                                                              frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, fps, add_soundtrack, soundtrack_path])
+                                                              frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, frame_interpolation_use_upscaled, fps, add_soundtrack, soundtrack_path])
         # VIDEO UPSCALE TAB - not built using our args.py at all - all data and params are here and in .upscaling file
         with gr.TabItem('Video Upscaling'):
             vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")

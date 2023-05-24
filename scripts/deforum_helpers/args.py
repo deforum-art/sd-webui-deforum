@@ -1011,7 +1011,7 @@ def DeforumOutputArgs():
             "value": 'realesr-animevideov3',
         },
         "r_upscale_keep_imgs": {
-            "label": "Store frames in ram",
+            "label": "Keep upscaled images on disk",
             "type": "checkbox",
             "value": True,
             "info": "don't delete upscaled imgs",
@@ -1057,9 +1057,17 @@ def DeforumOutputArgs():
             "label": "Keep Imgs",
             "type": "checkbox",
             "value": False,
-            "info": "how much to slow-mo the video",
+            "info": "Keep interpolated images on disk",
             "visible": False
         },
+        "frame_interpolation_use_upscaled": {
+            "label": "Use Upscaled",
+            "type": "checkbox",
+            "value": False,
+            "info": "Interpolate upscaled images, if available",
+            "visible": False
+        },        
+
     }
 
 def get_component_names():
