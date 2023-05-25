@@ -1002,7 +1002,7 @@ def DeforumOutputArgs():
             "label": "Upscale factor",
             "type": "dropdown",
             "choices": ['x2', 'x3', 'x4'],
-            "value": "2x",
+            "value": "x2",
         },
         "r_upscale_model": {
             "label": "Upscale model",
