@@ -1011,7 +1011,7 @@ def DeforumOutputArgs():
             "value": 'realesr-animevideov3',
         },
         "r_upscale_keep_imgs": {
-            "label": "Keep upscaled images on disk",
+            "label": "Keep Imgs",
             "type": "checkbox",
             "value": True,
             "info": "don't delete upscaled imgs",
