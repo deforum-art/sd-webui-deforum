@@ -1057,7 +1057,7 @@ def DeforumOutputArgs():
             "label": "Keep Imgs",
             "type": "checkbox",
             "value": False,
-            "info": "Keep Imgs",
+            "info": "Don't delete interpolated imgs",
             "visible": False
         },
     }
