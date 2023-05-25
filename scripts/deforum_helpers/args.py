@@ -1002,7 +1002,7 @@ def DeforumOutputArgs():
             "label": "Upscale factor",
             "type": "dropdown",
             "choices": ['x2', 'x3', 'x4'],
-            "value": "2x",
+            "value": "x2",
         },
         "r_upscale_model": {
             "label": "Upscale model",
@@ -1011,7 +1011,7 @@ def DeforumOutputArgs():
             "value": 'realesr-animevideov3',
         },
         "r_upscale_keep_imgs": {
-            "label": "Store frames in ram",
+            "label": "Keep Imgs",
             "type": "checkbox",
             "value": True,
             "info": "don't delete upscaled imgs",
@@ -1057,7 +1057,7 @@ def DeforumOutputArgs():
             "label": "Keep Imgs",
             "type": "checkbox",
             "value": False,
-            "info": "how much to slow-mo the video",
+            "info": "Keep Imgs",
             "visible": False
         },
     }
