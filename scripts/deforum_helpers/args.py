@@ -1057,9 +1057,17 @@ def DeforumOutputArgs():
             "label": "Keep Imgs",
             "type": "checkbox",
             "value": False,
-            "info": "Don't delete interpolated imgs",
+            "info": "Keep interpolated images on disk",
             "visible": False
         },
+        "frame_interpolation_use_upscaled": {
+            "label": "Use Upscaled",
+            "type": "checkbox",
+            "value": False,
+            "info": "Interpolate upscaled images, if available",
+            "visible": False
+        },        
+
     }
 
 def get_component_names():

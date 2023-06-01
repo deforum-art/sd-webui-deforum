@@ -96,12 +96,12 @@ def process_video_interpolation(frame_interpolation_engine, frame_interpolation_
         actual_model_folder_name = extract_rife_name(frame_interpolation_engine)
         
         # run actual rife interpolation and video stitching etc - the whole suite
-        run_rife_new_video_infer(interp_x_amount=frame_interpolation_x_amount, slow_mo_enabled = frame_interpolation_slow_mo_enabled, slow_mo_x_amount=frame_interpolation_slow_mo_amount, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs, orig_vid_name=orig_vid_name, UHD=UHD, srt_path=srt_path)
+        return run_rife_new_video_infer(interp_x_amount=frame_interpolation_x_amount, slow_mo_enabled = frame_interpolation_slow_mo_enabled, slow_mo_x_amount=frame_interpolation_slow_mo_amount, model=actual_model_folder_name, fps=fps, deforum_models_path=deforum_models_path, audio_track=real_audio_track, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, ffmpeg_location=ffmpeg_location, ffmpeg_crf=ffmpeg_crf, ffmpeg_preset=ffmpeg_preset, keep_imgs=keep_interp_imgs, orig_vid_name=orig_vid_name, UHD=UHD, srt_path=srt_path)
     elif frame_interpolation_engine == 'FILM':
-        prepare_film_inference(deforum_models_path=deforum_models_path, x_am=frame_interpolation_x_amount, sl_enabled=frame_interpolation_slow_mo_enabled, sl_am=frame_interpolation_slow_mo_amount, keep_imgs=keep_interp_imgs, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, f_location=ffmpeg_location, f_crf=ffmpeg_crf, f_preset=ffmpeg_preset, fps=fps, audio_track=real_audio_track, orig_vid_name=orig_vid_name, is_random_pics_run=is_random_pics_run, srt_path=srt_path)
+        return prepare_film_inference(deforum_models_path=deforum_models_path, x_am=frame_interpolation_x_amount, sl_enabled=frame_interpolation_slow_mo_enabled, sl_am=frame_interpolation_slow_mo_amount, keep_imgs=keep_interp_imgs, raw_output_imgs_path=raw_output_imgs_path, img_batch_id=img_batch_id, f_location=ffmpeg_location, f_crf=ffmpeg_crf, f_preset=ffmpeg_preset, fps=fps, audio_track=real_audio_track, orig_vid_name=orig_vid_name, is_random_pics_run=is_random_pics_run, srt_path=srt_path)
     else:
         print("Unknown Frame Interpolation engine chosen. Doing nothing.")
-        return
+        return None
         
 def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_imgs, raw_output_imgs_path, img_batch_id, f_location, f_crf, f_preset, fps, audio_track, orig_vid_name, is_random_pics_run, srt_path=None):
     import shutil 
@@ -170,6 +170,8 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
     if orig_vid_name:
         shutil.rmtree(raw_output_imgs_path, ignore_errors=True)
+    
+    return interp_vid_path
 
 def check_and_download_film_model(model_name, model_dest_folder):
     from basicsr.utils.download_util import load_file_from_url
