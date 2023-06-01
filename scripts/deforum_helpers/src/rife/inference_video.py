@@ -199,6 +199,7 @@ def run_rife_new_video_infer(
         # remove folder with raw (non-interpolated) vid input frames in case of input VID and not PNGs
         if orig_vid_name is not None:
             shutil.rmtree(raw_output_imgs_path)
+        return vid_out_path
     except Exception as e:
         print(f'Video stitching gone wrong. *Interpolated frames were saved to HD as backup!*. Actual error: {e}')
     

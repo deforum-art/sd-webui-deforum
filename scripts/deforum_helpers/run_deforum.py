@@ -12,6 +12,7 @@ from .frame_interpolation import process_video_interpolation
 from .general_utils import get_deforum_version
 from .upscaling import make_upscale_v2
 from .video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, get_ffmpeg_params
+from pathlib import Path
 from .settings import save_settings_from_animation_run
 
 # this global param will contain the latest generated video HTML-data-URL info (for preview inside the UI when needed)
@@ -141,12 +142,7 @@ def run_deforum(*args):
                 else:
                     print(f"** FFMPEG DID NOT STITCH ANY VIDEO ** Error: {e}")
                 pass
-       
-        # FRAME INTERPOLATION TIME
-        if need_to_frame_interpolate: 
-            print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
-            process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount,frame_interpolation_slow_mo_enabled=video_args.frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=args.outdir, img_batch_id=root.timestring, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None, srt_path=srt_path)
-        
+              
         if video_args.make_gif and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
             make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = root.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
         
@@ -154,7 +150,27 @@ def run_deforum(*args):
         if video_args.r_upscale_video and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
             # out mp4 path is defined in make_upscale func
             make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = root.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=f_location, stitch_from_frame=0, stitch_to_frame=max_video_frames, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track, srt_path=srt_path)
+
+        # FRAME INTERPOLATION TIME
+        if need_to_frame_interpolate: 
+            print(f"Got a request to *frame interpolate* using {video_args.frame_interpolation_engine}")
+            path_to_interpolate = args.outdir
             
+            upscaled_folder_path = os.path.join(args.outdir, f"{root.timestring}_upscaled")
+            use_upscaled_images = video_args.frame_interpolation_use_upscaled and os.path.exists(upscaled_folder_path) and len(os.listdir(upscaled_folder_path)) > 1
+            if use_upscaled_images:
+                print(f"Using upscaled images for frame interpolation.")
+                path_to_interpolate = upscaled_folder_path
+            
+            ouput_vid_path = process_video_interpolation(frame_interpolation_engine=video_args.frame_interpolation_engine, frame_interpolation_x_amount=video_args.frame_interpolation_x_amount,frame_interpolation_slow_mo_enabled=video_args.frame_interpolation_slow_mo_enabled, frame_interpolation_slow_mo_amount=video_args.frame_interpolation_slow_mo_amount, orig_vid_fps=video_args.fps, deforum_models_path=root.models_path, real_audio_track=real_audio_track, raw_output_imgs_path=path_to_interpolate, img_batch_id=root.timestring, ffmpeg_location=f_location, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, keep_interp_imgs=video_args.frame_interpolation_keep_imgs, orig_vid_name=None, resolution=None, srt_path=srt_path)
+
+            # If the interpolated video was stitched from the upscaled frames, the video needs to be moved
+            # out of the upscale directory.
+            if use_upscaled_images and ouput_vid_path and os.path.exists(ouput_vid_path):
+                ouput_vid_path_final = os.path.join(args.outdir, Path(ouput_vid_path).stem + "_upscaled.mp4")
+                print(f"Moving upscaled, interpolated vid from {ouput_vid_path} to {ouput_vid_path_final}")
+                shutil.move(ouput_vid_path, ouput_vid_path_final)
+
         if video_args.delete_imgs and not video_args.skip_video_creation:
             handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=root.timestring)
             

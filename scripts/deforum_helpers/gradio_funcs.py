@@ -87,7 +87,7 @@ def handle_change_functions(l_vars):
                                                               l_vars['frame_interpolation_slow_mo_amount']],
                                                       outputs=[l_vars['in_vid_fps_ui_window'], l_vars['in_vid_frame_count_window'], l_vars['out_interp_vid_estimated_fps']])
     l_vars['vid_to_interpolate_chosen_file'].change(fn=hide_interp_stats, inputs=[l_vars['vid_to_interpolate_chosen_file']], outputs=[l_vars['interp_live_stats_row']])
-    interp_hide_list = [l_vars['frame_interpolation_slow_mo_enabled'], l_vars['frame_interpolation_keep_imgs'], l_vars['frame_interp_amounts_row'], l_vars['interp_existing_video_row']]
+    interp_hide_list = [l_vars['frame_interpolation_slow_mo_enabled'], l_vars['frame_interpolation_keep_imgs'], l_vars['frame_interpolation_use_upscaled'], l_vars['frame_interp_amounts_row'], l_vars['interp_existing_video_row']]
     for output in interp_hide_list:
         l_vars['frame_interpolation_engine'].change(fn=hide_interp_by_interp_status, inputs=l_vars['frame_interpolation_engine'], outputs=output)
 
