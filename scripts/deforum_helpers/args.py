@@ -889,6 +889,12 @@ def DeforumArgs():
             "value": 10,
             "info": ""
         },
+        "motion_preview_mode": {
+            "label": "Motion preview mode (dry run).",
+            "type": "checkbox",
+            "value": False,
+            "info": "Preview motion only. Only run stable diffusion for init, and draw motion reference rectangle."
+        },        
     }
 
 def LoopArgs():

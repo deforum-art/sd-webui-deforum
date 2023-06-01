@@ -19,6 +19,8 @@ def create_gr_elem(d):
 def get_tab_run(d, da):
     with gr.TabItem('Run'):  # RUN TAB
         with FormRow():
+            motion_preview_mode = create_gr_elem(d.motion_preview_mode)
+        with FormRow():
             sampler = create_gr_elem(d.sampler)
             steps = create_gr_elem(d.steps)
         with FormRow():

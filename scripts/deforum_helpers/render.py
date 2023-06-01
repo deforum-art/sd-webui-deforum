@@ -603,7 +603,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     sd_hijack.model_hijack.hijack(sd_model)
             frame_idx += 1
 
-        state.current_image = image
+        state.assign_current_image(image)
 
         args.seed = next_seed(args, root)
 

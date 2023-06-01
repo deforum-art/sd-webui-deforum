@@ -13,6 +13,10 @@ from .webui_sd_pipeline import get_webui_sd_pipeline
 from .rich import console
 from .defaults import get_samplers_list
 from .prompt import check_is_number
+import cv2
+import numpy as np
+from types import SimpleNamespace
+
 
 def load_mask_latent(mask_input, shape):
     # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object
@@ -68,12 +72,12 @@ def generate(args, keys, anim_args, loop_args, controlnet_args, root, frame=0, s
                 if patience == 0:
                     print("Rerolling with +1 seed failed for 10 iterations! Try setting webui's precision to 'full' and if it fails, please report this to the devs! Interrupting...")
                     state.interrupted = True
-                    state.current_image = image
+                    state.assign_current_image(image)
                     return None
         elif args.reroll_blank_frames == 'interrupt':
             print("Interrupting to save your eyes...")
             state.interrupted = True
-            state.current_image = image
+            state.assign_current_image(image)
             return None
     return image
 
@@ -237,7 +241,11 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
         if is_controlnet_enabled(controlnet_args):
             process_with_controlnet(p, args, anim_args, controlnet_args, root, is_img2img=True, frame_idx=frame)
 
-        processed = processing.process_images(p)
+        if args.motion_preview_mode:
+            processed = mock_process_images(args, p, init_image)
+        else:
+            processed = processing.process_images(p)
+
 
     if root.initial_info is None:
         root.initial_info = processed.info
@@ -248,6 +256,25 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, fram
     results = processed.images[0]
 
     return results
+
+# Run this instead of actual diffusion when doing motion preview.
+def mock_process_images(args, p, init_image):
+  
+    input_image = cv2.cvtColor(np.array(init_image), cv2.COLOR_RGB2BGR)
+
+    start_point = (int(args.H/3), int(args.W/3))
+    end_point = (int(args.H-args.H/3), int(args.W-args.W/3))
+    color = (255, 255, 255, float(p.denoising_strength))
+    thickness = 2
+    mock_generated_image = np.zeros_like(input_image, np.uint8)
+    cv2.rectangle(mock_generated_image, start_point, end_point, color, thickness)
+
+
+    blend = cv2.addWeighted(input_image, float(1.0-p.denoising_strength), mock_generated_image, float(p.denoising_strength), 0)
+
+    image = Image.fromarray(cv2.cvtColor(blend, cv2.COLOR_BGR2RGB))
+    state.assign_current_image(image)
+    return SimpleNamespace(images = [image], info = "Generating motion preview...")
 
 def print_combined_table(args, anim_args, p, keys, frame_idx):
     from rich.table import Table
