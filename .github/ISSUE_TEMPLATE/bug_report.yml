@@ -28,7 +28,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        *Please fill this form with as much information as possible, don't forget to fill "What OS..." and "What browsers" and *provide screenshots if possible**
+        *Please fill this form with as much information as possible, don't forget to fill "What OS..." and *provide screenshots if possible**
+  - type: markdown
+    attributes:
+      value: |
+        **Forewarning:* if you won't provide the full crash log, your issue will be discarded*
   - type: textarea
     id: what-did
     attributes:
@@ -50,23 +54,13 @@ body:
   - type: textarea
     id: what-should
     attributes:
-      label: What should have happened?
-      description: Tell what you think the normal behavior should be
-  - type: textarea
-    id: commits
-    attributes:
-      label: WebUI and Deforum extension Commit IDs
-      description: Which commit of the webui/deforum extension are you running on? (Do not write *Latest version/repo/commit*, as this means nothing and will have changed by the time we read your issue. Rather, copy the **Commit** link at the bottom of the UI, or if you can't launch the webui at all, enter your cmd/terminal, CD into the main webui folder to get the webui commit id, and cd into the extensions/deforum folder to get the deforum commit id, both using the command 'git rev-parse HEAD'.)
-      value: |
-             webui commit id - 
-             deforum exten commit id - 
-    validations:
-      required: true
+      label: What should have happened/how would you fix it?
+      description: Tell what you think the normal behavior should be or any ideas on how to solve it
   - type: textarea
     id: what-torch
     attributes:
       label: Torch version
-      description: Which Torch version your WebUI is working with
+      description: Which Torch version your WebUI is working with. You can find it by looking at the bottom of the page.
     validations:
       required: true
   - type: dropdown
@@ -93,14 +87,14 @@ body:
     id: customsettings
     attributes:
       label: Webui core settings
-      description: Send here a link to your ui-config.json file in the core 'stable-diffusion-webui' folder (ideally, upload it to GitHub gists). Friendly reminder - if you have 'With img2img, do exactly the amount of steps the slider specified' checked, your issue will be discarded immediately. 😉
+      description: Send here a link to your ui-config.json file in the core 'stable-diffusion-webui' folder. Notice: if you have 'With img2img, do exactly the amount of steps the slider specified' checked, your issue will be discarded.
     validations:
       required: true
   - type: textarea
     id: logs
     attributes:
       label: Console logs
-      description: Please provide **FULL cmd/terminal logs FROM THE MOMENT YOU STARTED UI to the end of it**, after your bug happened. If it's very long, provide a link to GitHub gists or similar service.
+      description: Now, it's the most important part which most users fail for the first time! Please provide the **full** cmd/terminal logs from the moment you started the webui (i.e. clicked the launch file or started it from cmd) to the part when your bug happened.
       render: Shell
     validations:
       required: true
@@ -108,4 +102,4 @@ body:
     id: misc
     attributes:
       label: Additional information
-      description: Please provide us with any relevant additional info or context.
+      description: Any relevant additional info or context.
