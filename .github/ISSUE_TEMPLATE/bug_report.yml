@@ -94,7 +94,7 @@ body:
     id: logs
     attributes:
       label: Console logs
-      description: Now, it's the most important part which most users fail for the first time! Please provide the **full** cmd/terminal logs from the moment you started the webui (i.e. clicked the launch file or started it from cmd) to the part when your bug happened.
+      description: Now, it is the most important part which most users fail for the first time! Please provide the **full** cmd/terminal logs from the moment you started the webui (i.e. clicked the launch file or started it from cmd) to the part when your bug happened.
       render: Shell
     validations:
       required: true
