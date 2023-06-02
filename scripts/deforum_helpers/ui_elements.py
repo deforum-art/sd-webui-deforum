@@ -459,7 +459,7 @@ def get_tab_output(da, dv):
                         # make the function call when the interpolation button is clicked
                         interpolate_button.click(fn=upload_vid_to_interpolate,
                                                  inputs=[vid_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled,
-                                                         frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, frame_interpolation_use_upscaled, in_vid_fps_ui_window])
+                                                         frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, in_vid_fps_ui_window])
                         interpolate_pics_button.click(fn=upload_pics_to_interpolate,
                                                       inputs=[pics_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled,
                                                               frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, frame_interpolation_use_upscaled, fps, add_soundtrack, soundtrack_path])
