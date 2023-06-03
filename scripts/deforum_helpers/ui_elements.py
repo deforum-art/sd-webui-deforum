@@ -9,15 +9,15 @@ def create_gr_elem(d):
     # Examples: "dropdown" becomes gr.Dropdown, and "checkbox_group" becomes gr.CheckboxGroup.
     obj_type_str = ''.join(word.title() for word in d["type"].split('_'))
     obj_type = getattr(gr, obj_type_str)
-
-    # Prepare parameters for gradio element creation
-    params = {k: v for k, v in d.items() if k != "type" and v is not None}
-
-    # If we're creating a Radio element and 'radio_type' is specified, then use it to set gr.radio's type
-    if obj_type_str == 'Radio' and 'radio_type' in params:
-        params['type'] = params.pop('radio_type')
-
-    return obj_type(**params)
+    return obj_type(**{k: v for k, v in d.items() if k != "type" and v is not None})
+    # # Prepare parameters for gradio element creation
+    # params = {k: v for k, v in d.items() if k != "type" and v is not None}
+    #
+    # # If we're creating a Radio element and 'radio_type' is specified, then use it to set gr.radio's type
+    # if obj_type_str == 'Radio' and 'radio_type' in params:
+    #     params['type'] = params.pop('radio_type')
+    #
+    # return obj_type(**params)
 
 # ******** Important message ********
 # All get_tab functions use FormRow()/ FormColumn() by default, unless we have a gr.File inside that row/column, then we use gr.Row()/gr.Column() instead
