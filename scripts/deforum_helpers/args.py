@@ -766,7 +766,7 @@ def DeforumArgs():
             "label": "Seed behavior",
             "type": "radio",
             "choices": ['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'],
-            "value": "iter",
+            "value": "ladder",
             "info": "controls the seed behavior that is used for animation. hover on the options to see more info"
         },
         "seed_iter_N": {
