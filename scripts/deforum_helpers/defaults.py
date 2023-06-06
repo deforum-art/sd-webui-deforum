@@ -21,7 +21,7 @@ def get_samplers_list():
 
 def DeforumAnimPrompts():
     return r"""{
-    "0": "tiny cute swamp bunny, highly detailed, intricate, ultra hd, sharp photo, crepuscular rays, in focus, by tomasz alen kopera",
+    "0": "tiny cute bunny, vibrant diffraction, highly detailed, intricate, ultra hd, sharp photo, crepuscular rays, in focus, by tomasz alen kopera",
     "30": "anthropomorphic clean cat, surrounded by fractals, epic angle and pose, symmetrical, 3d, depth of field, ruan jia and fenghua zhong",
     "60": "a beautiful coconut --neg photo, realistic",
     "90": "a beautiful durian, trending on Artstation"
