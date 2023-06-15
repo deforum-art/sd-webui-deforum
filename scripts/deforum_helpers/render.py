@@ -15,7 +15,7 @@ from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
 from .video_audio_utilities import get_frame_name, get_next_frame
 from .depth import DepthModel
 from .colors import maintain_colors
-from .parseq_adapter import ParseqAnimKeys
+from .parseq_adapter import ParseqAdapter
 from .seed import next_seed
 from .image_sharpening import unsharp_mask
 from .load_images import get_mask, load_img, load_image, get_mask_from_file
@@ -62,11 +62,12 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     if is_controlnet_enabled(controlnet_args):
         unpack_controlnet_vids(args, anim_args, controlnet_args)
 
-    # use parseq if manifest is provided
-    use_parseq = parseq_args.parseq_manifest is not None and parseq_args.parseq_manifest.strip()
+    # initialise Parseq adapter
+    parseq_adapter = ParseqAdapter(parseq_args, args, anim_args, video_args, loop_args, controlnet_args)
+
     # expand key frame strings to values
-    keys = DeformAnimKeys(anim_args, args.seed) if not use_parseq else ParseqAnimKeys(parseq_args, anim_args, video_args)
-    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
+    keys = DeformAnimKeys(anim_args, args.seed) if not parseq_adapter.use_parseq else parseq_adapter.anim_keys
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed) if not parseq_adapter.use_parseq else parseq_adapter.looper_keys
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
@@ -81,11 +82,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     # Always enable pseudo-3d with parseq. No need for an extra toggle:
     # Whether it's used or not in practice is defined by the schedules
-    if use_parseq:
+    if parseq_adapter.use_parseq:
         anim_args.flip_2d_perspective = True
 
-        # expand prompts out to per-frame
-    if use_parseq and keys.manages_prompts():
+    # expand prompts out to per-frame
+    if parseq_adapter.manages_prompts():
         prompt_series = keys.prompts
     else:
         prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
@@ -450,7 +451,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         # grab prompt for current frame
         args.prompt = prompt_series[frame_idx]
 
-        if args.seed_behavior == 'schedule' or use_parseq:
+        if args.seed_behavior == 'schedule' or parseq_adapter.manages_seed():
             args.seed = int(keys.seed_schedule_series[frame_idx])
 
         if anim_args.enable_checkpoint_scheduling:
@@ -463,7 +464,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             root.subseed = int(keys.subseed_schedule_series[frame_idx])
             root.subseed_strength = float(keys.subseed_strength_schedule_series[frame_idx])
 
-        if use_parseq:
+        if parseq_adapter.manages_seed():
             anim_args.enable_subseed_scheduling = True
             root.subseed = int(keys.subseed_schedule_series[frame_idx])
             root.subseed_strength = keys.subseed_strength_schedule_series[frame_idx]
@@ -517,7 +518,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             print(f"Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before generation.")
             stored_seed = args.seed
             args.seed = random.randint(0, 2 ** 32 - 1)
-            disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+            disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
             disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
             disposable_flow = get_flow_from_images(prev_img, disposable_image, anim_args.optical_flow_redo_generation, raft_model)
             disposable_image = cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB)
@@ -533,7 +534,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             for n in range(0, int(anim_args.diffusion_redo)):
                 print(f"Redo generation {n + 1} of {int(anim_args.diffusion_redo)} before final generation")
                 args.seed = random.randint(0, 2 ** 32 - 1)
-                disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+                disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
                 disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
                 # color match on last one only
                 if n == int(anim_args.diffusion_redo):
@@ -544,7 +545,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             gc.collect()
 
         # generation
-        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
 
         if image is None:
             break
