@@ -16,7 +16,7 @@ class DeforumTQDM:
         from .parseq_adapter import ParseqAdapter
         deforum_total = 0
         # FIXME: get only amount of steps
-        parseq_adapter = ParseqAdapter(self._parseq_args, self._args, self._anim_args, self._video_args, None, None, mute=True)
+        parseq_adapter = ParseqAdapter(self._parseq_args, self._anim_args, self._video_args, None, mute=True)
         keys = DeformAnimKeys(self._anim_args) if not parseq_adapter.use_parseq else parseq_adapter.anim_keys
 
         start_frame = 0

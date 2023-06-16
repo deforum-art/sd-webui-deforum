@@ -80,7 +80,7 @@ def get_parsed_value(value, frame_idx, max_f):
 def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
 
     # use parseq if manifest is provided
-    parseq_adapter = ParseqAdapter(parseq_args, args, anim_args, video_args, loop_args, controlnet_args)
+    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args)
 
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args) if not parseq_adapter.use_parseq else parseq_adapter.anim_keys

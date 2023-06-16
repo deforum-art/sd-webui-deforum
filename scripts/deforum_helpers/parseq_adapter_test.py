@@ -18,7 +18,7 @@ DEFAULT_ARGS = SimpleNamespace(anim_args = SimpleNamespace(max_frames=2),
 
 def buildParseqAdapter(parseq_use_deltas, parseq_manifest, setup_args=DEFAULT_ARGS):
     return ParseqAdapter(SimpleNamespace(parseq_use_deltas=parseq_use_deltas, parseq_manifest=parseq_manifest),
-                         setup_args.args, setup_args.anim_args, setup_args.video_args, setup_args.loop_args, setup_args.controlnet_args)
+                         setup_args.anim_args, setup_args.video_args, setup_args.controlnet_args)
 
 class TestParseqAnimKeys(unittest.TestCase):
 
@@ -230,53 +230,7 @@ class TestParseqAnimKeys(unittest.TestCase):
             """)
         #TODO - this is a hacky check to make sure we're falling back to the mock.
         #There must be a better way to inject an expected value via patch and check for that...
-        self.assertRegex(str(parseq_adapter.cn_keys.cn_1_weight_schedule_series[0]), r'MagicMock')
-
-    @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
-    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
-    @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_looper(self, mock_deformanimkeys, mock_looperanimkeys, mock_controlnetkeys):
-        parseq_adapter = buildParseqAdapter(parseq_use_deltas=False, parseq_manifest=""" 
-            {                
-                "options": {
-                    "output_fps": 30
-                },
-                "rendered_frames": [
-                    {
-                        "frame": 0,
-                        "guided_blendFactorMax": 0.5
-                    },
-                    {
-                        "frame": 1,
-                        "guided_blendFactorMax": 0.5
-                    }
-                ]
-            }
-            """)
-        self.assertEqual(parseq_adapter.looper_keys.blendFactorMax_series[0], 0.5)
-
-    @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
-    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
-    @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_looper_fallback(self, mock_deformanimkeys, mock_looperanimkeys, mock_controlnetkeys):
-        parseq_adapter = buildParseqAdapter(parseq_use_deltas=False, parseq_manifest=""" 
-            {                
-                "options": {
-                    "output_fps": 30
-                },
-                "rendered_frames": [
-                    {
-                        "frame": 0
-                    },
-                    {
-                        "frame": 1
-                    }
-                ]
-            }
-            """)
-        #TODO - this is a hacky check to make sure we're falling back to the mock.
-        #There must be a better way to inject an expected value via patch and check for that...
-        self.assertRegex(str(parseq_adapter.looper_keys.blendFactorMax_series[0]), r'MagicMock')              
+        self.assertRegex(str(parseq_adapter.cn_keys.cn_1_weight_schedule_series[0]), r'MagicMock')           
         
 if __name__ == '__main__':
     unittest.main()
