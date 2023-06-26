@@ -6,7 +6,7 @@ import numexpr
 from modules.shared import opts, state
 from .render import render_animation
 from .seed import next_seed
-from .video_audio_utilities import vid2frames
+from .video_audio_utilities import vid2frames, render_preview
 from .prompt import interpolate_prompts
 from .generate import generate
 from .animation_key_frames import DeformAnimKeys
@@ -156,3 +156,5 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
             args.seed = next_seed(args, root)
 
         frame_idx += 1
+
+        render_preview(args, anim_args, video_args, root, frame_idx)
