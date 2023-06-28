@@ -10,7 +10,7 @@ import glob
 import concurrent.futures
 from pkg_resources import resource_filename
 from modules.shared import state, opts
-from .general_utils import checksum, clean_gradio_path_strings
+from .general_utils import checksum, clean_gradio_path_strings, debug_print
 from basicsr.utils.download_util import load_file_from_url
 from .rich import console
 import shutil
@@ -417,17 +417,29 @@ def get_matching_frame(f, img_batch_id=None):
     return ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and ((img_batch_id is not None and f.startswith(img_batch_id) or img_batch_id is None))
 
 def render_preview(args, anim_args, video_args, root, frame_idx):
-    if ("on" not in opts.data.get("deforum_preview", 0).lower()) or (frame_idx % opts.data.get("deforum_preview_interval_frames", 0) != 0):
+    is_preview_on = "on" in opts.data.get("deforum_preview", 0).lower()
+    preview_interval_frames = opts.data.get("deforum_preview_interval_frames", 50)
+    is_preview_frame = (frame_idx % preview_interval_frames) == 0
+    is_close_to_end = frame_idx >= (anim_args.max_frames-1)
+
+    debug_print(f"render preview video: frame_idx={frame_idx} preview_interval_frames={preview_interval_frames} anim_args.max_frames={anim_args.max_frames} is_preview_on={is_preview_on} is_preview_frame={is_preview_frame} is_close_to_end={is_close_to_end} ")
+
+    if not is_preview_on or not is_preview_frame or is_close_to_end:
+        debug_print(f"No preview video on frame {frame_idx}.")
         return
     
     f_location, f_crf, f_preset = get_ffmpeg_params() # get params for ffmpeg exec
     image_path, mp4_temp_path, real_audio_track, srt_path = get_ffmpeg_paths(args.outdir, root.timestring, anim_args, video_args, "_preview__rendering__")
     mp4_preview_path = mp4_temp_path.replace("_preview__rendering__", "_preview")
-    print(f"--> Rendering preview video up to frame {frame_idx} to {mp4_preview_path}...")
-
     def task():
-        ffmpeg_stitch_video(ffmpeg_location=f_location, fps=video_args.fps, outmp4_path=mp4_temp_path, stitch_from_frame=0, stitch_to_frame=frame_idx, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=f_crf, preset=f_preset, srt_path=srt_path)
-        shutil.move(mp4_temp_path, mp4_preview_path) # rename so that _preview file is always in a watchable state
+        if os.path.exists(mp4_temp_path):
+            print(f"--! Skipping preview video on frame {frame_idx} (previous preview still rendering to {mp4_temp_path}...")            
+        else:
+            print(f"--> Rendering preview video up to frame {frame_idx} to {mp4_preview_path}...")
+            try:
+                ffmpeg_stitch_video(ffmpeg_location=f_location, fps=video_args.fps, outmp4_path=mp4_temp_path, stitch_from_frame=0, stitch_to_frame=frame_idx, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=f_crf, preset=f_preset, srt_path=srt_path)
+            finally:
+                shutil.move(mp4_temp_path, mp4_preview_path)
         
     if "concurrent" in opts.data.get("deforum_preview", 0).lower():
         Thread(target=task).start()
