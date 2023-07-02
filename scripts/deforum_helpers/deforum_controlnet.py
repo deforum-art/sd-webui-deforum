@@ -13,6 +13,7 @@ from .general_utils import count_files_in_folder, clean_gradio_path_strings  # T
 from .video_audio_utilities import vid2frames, convert_image
 from .animation_key_frames import ControlNetKeys
 from .load_images import load_image
+from .general_utils import debug_print
 
 cnet = None
 # number of CN model tabs to show in the deforum gui
@@ -197,8 +198,8 @@ def controlnet_component_names():
         'processor_res', 'threshold_a', 'threshold_b', 'resize_mode', 'control_mode', 'loopback_mode'
     ]]
 
-def process_with_controlnet(p, args, anim_args, controlnet_args, root, is_img2img=True, frame_idx=0):
-    CnSchKeys = ControlNetKeys(anim_args, controlnet_args)
+def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_adapter, is_img2img=True, frame_idx=0):
+    CnSchKeys = ControlNetKeys(anim_args, controlnet_args) if not parseq_adapter.use_parseq else parseq_adapter.cn_keys
 
     def read_cn_data(cn_idx):
         cn_mask_np, cn_image_np = None, None
@@ -264,6 +265,8 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, is_img2im
             cnu['weight'] = getattr(CnSchKeys, f"cn_{model_num}_weight_schedule_series")[frame_idx]
             cnu['guidance_start'] = getattr(CnSchKeys, f"cn_{model_num}_guidance_start_schedule_series")[frame_idx]
             cnu['guidance_end'] = getattr(CnSchKeys, f"cn_{model_num}_guidance_end_schedule_series")[frame_idx]
+            if cnu['enabled']:
+                debug_print(f"ControlNet {model_num}: weight={cnu['weight']}, guidance_start={cnu['guidance_start']}, guidance_end={cnu['guidance_end']}")
         cnu['image'] = {'image': img_np, 'mask': mask_np} if mask_np is not None else img_np
 
         return cnu
