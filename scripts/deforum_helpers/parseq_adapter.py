@@ -11,6 +11,8 @@ from .rich import console
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+IGNORED_FIELDS = ['fi', 'use_looper', 'imagesToKeyframe', 'schedules']
+
 class ParseqAdapter():
     def __init__(self, parseq_args, anim_args, video_args, controlnet_args, loop_args, mute=False):
 
@@ -184,12 +186,12 @@ class ParseqAbstractDecorator():
 
     def managed_fields(self):
         all_parseq_fields = self.all_parseq_fields()
-        deforum_fields = [self.strip_suffixes(property) for property, _ in vars(self.fallback_keys).items() if property not in ['fi'] and not property.startswith('_')]
+        deforum_fields = [self.strip_suffixes(property) for property, _ in vars(self.fallback_keys).items() if property not in IGNORED_FIELDS and not property.startswith('_')]
         return [field for field in deforum_fields if field in all_parseq_fields]
 
     def unmanaged_fields(self):
         all_parseq_fields = self.all_parseq_fields()
-        deforum_fields = [self.strip_suffixes(property) for property, _ in vars(self.fallback_keys).items() if property not in ['fi'] and not property.startswith('_')]
+        deforum_fields = [self.strip_suffixes(property) for property, _ in vars(self.fallback_keys).items() if property not in IGNORED_FIELDS and not property.startswith('_')]
         return [field for field in deforum_fields if field not in all_parseq_fields]
 
 
