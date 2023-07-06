@@ -8,9 +8,10 @@ from .deprecation_utils import handle_deprecated_settings
 from .general_utils import get_deforum_version, clean_gradio_path_strings
 
 def get_keys_to_exclude():
-    return ["init_sample", "perlin_w", "perlin_h", "image_path", "outdir"]
+    return ["init_sample", "perlin_w", "perlin_h", "image_path", "outdir", "init_image_box"]
     # perlin params are used just not shown in ui for now, so not to be deleted
     # image_path and outdir are in use, not to be deleted
+    # init_image_box is PIL object not string, so ignore.
 
 def load_args(args_dict_main, args, anim_args, parseq_args, loop_args, controlnet_args, video_args, custom_settings_file, root, run_id):
     custom_settings_file = custom_settings_file[run_id]

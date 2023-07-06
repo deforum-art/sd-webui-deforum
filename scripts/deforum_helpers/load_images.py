@@ -5,9 +5,9 @@ import socket
 import torchvision.transforms.functional as TF
 from .general_utils import clean_gradio_path_strings
 
-def load_img(path : str, shape=None, use_alpha_as_mask=False):
+def load_img(path : str, image_box :Image.Image, shape=None, use_alpha_as_mask=False):
     # use_alpha_as_mask: Read the alpha channel of the image as the mask image
-    image = load_image(path)
+    image = load_image(path, image_box)
     image = image.convert('RGBA') if use_alpha_as_mask else image.convert('RGB')
     image = image.resize(shape, resample=Image.LANCZOS) if shape is not None else image
 
@@ -27,7 +27,11 @@ def load_img(path : str, shape=None, use_alpha_as_mask=False):
 
     return image, mask_image
 
-def load_image(image_path :str):
+def load_image(image_path :str, image_box :Image.Image):
+    # If init_image_box was used then no need to fetch the image via URL, just return the Image object directly.
+    if isinstance(image_box, Image.Image):
+        return image_box
+
     image_path = clean_gradio_path_strings(image_path)
     image = None
     if image_path.startswith('http://') or image_path.startswith('https://'):
@@ -55,10 +59,8 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
     """
     prepares mask for use in webui
     """
-    if isinstance(mask_input, Image.Image):
-        mask = mask_input
-    else :
-        mask = load_image(mask_input)
+    # Aparently 'mask_input' can be both path and Image object.
+    mask = load_image(mask_input, mask_input)
     mask = mask.resize(mask_shape, resample=Image.LANCZOS)
     if mask_brightness_adjust != 1:
         mask = TF.adjust_brightness(mask, mask_brightness_adjust)

@@ -797,9 +797,17 @@ def DeforumArgs():
             "info": ""
         },
         "init_image": {
-            "label": "Init image",
+            "label": "Init image URL",
             "type": "textbox",
             "value": "https://deforum.github.io/a1/I1.png",
+            "info": "Use web address or local path. Note: if the image box below is used then this field is ignored."
+        },
+        "init_image_box": {
+            "label": "Init image box",
+            "type": "image",
+            "type_param": "pil",
+            "source": "upload",
+            "interactive": True,
             "info": ""
         },
         "use_mask": {
@@ -857,7 +865,7 @@ def DeforumArgs():
         "fill": {
             "label": "Mask fill",
             "type": "radio",
-            "radio_type": "index",
+            "type_param": "index",
             "choices": ['fill', 'original', 'latent noise', 'latent nothing'],
             "value": 'original',
             "info": ""
@@ -1119,6 +1127,7 @@ def process_args(args_dict_main, run_id):
 
     if not args.use_init and not anim_args.hybrid_use_init_image:
         args.init_image = None
+        args.init_image_box = None
 
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True

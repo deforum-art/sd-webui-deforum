@@ -163,8 +163,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     mask_image = None
 
-    if args.use_init and args.init_image != None and args.init_image != '':
+    if args.use_init and ((args.init_image != None and args.init_image != '') or args.init_image_box != None):
         _, mask_image = load_img(args.init_image,
+                                 args.init_image_box,
                                  shape=(args.W, args.H),
                                  use_alpha_as_mask=args.use_alpha_as_mask)
         mask_vals['video_mask'] = mask_image
@@ -186,7 +187,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     # get color match for 'Image' color coherence only once, before loop
     if anim_args.color_coherence == 'Image':
-        color_match_sample = load_image(anim_args.color_coherence_image_path)
+        color_match_sample = load_image(anim_args.color_coherence_image_path, None)
         color_match_sample = color_match_sample.resize((args.W, args.H), PIL.Image.LANCZOS)
         color_match_sample = cv2.cvtColor(np.array(color_match_sample), cv2.COLOR_RGB2BGR)
 
@@ -477,6 +478,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
+            args.init_image_box = None  # init_image_box not used in this case
             args.strength = max(0.0, min(1.0, strength))
         if anim_args.use_mask_video:
             args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
