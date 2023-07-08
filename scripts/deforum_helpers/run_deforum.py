@@ -11,9 +11,10 @@ from .save_images import dump_frames_cache, reset_frames_cache
 from .frame_interpolation import process_video_interpolation
 from .general_utils import get_deforum_version
 from .upscaling import make_upscale_v2
-from .video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, get_ffmpeg_params
+from .video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, handle_input_frames_deletion, handle_cn_frames_deletion, get_ffmpeg_params
 from pathlib import Path
 from .settings import save_settings_from_animation_run
+from .deforum_controlnet import num_of_models
 
 # this global param will contain the latest generated video HTML-data-URL info (for preview inside the UI when needed)
 last_vid_data = None
@@ -173,7 +174,16 @@ def run_deforum(*args):
 
         if video_args.delete_imgs and not video_args.skip_video_creation:
             handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=root.timestring)
-            
+
+        if video_args.delete_input_frames:
+            # Check if the path exists
+            if os.path.exists(os.path.join(args.outdir, 'inputframes')):
+                print(f"Deleting inputframes")
+                handle_input_frames_deletion(imgs_folder_path=os.path.join(args.outdir, 'inputframes'))
+            # Now do CN input frame deletion
+            cn_inputframes_list = [os.path.join(args.outdir, f'controlnet_{i}_inputframes') for i in range(1, num_of_models + 1)]
+            handle_cn_frames_deletion(cn_inputframes_list)
+
         root.initial_info += f"\n The animation is stored in {args.outdir}"
         reset_frames_cache(root)  # cleanup the RAM in any case
         processed = Processed(p, [root.first_frame], 0, root.initial_info)

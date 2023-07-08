@@ -337,7 +337,7 @@ def get_tab_init(d, da, dp):
 def get_tab_hybrid(da):
     with gr.TabItem('Hybrid Video'):
         # this html only shows when not in 2d/3d mode
-        hybrid_msg_html = gr.HTML(value='Please, change animation mode to 2D or 3D to enable Hybrid Mode', visible=False, elem_id='hybrid_msg_html')
+        hybrid_msg_html = gr.HTML(value='Change animation mode to 2D or 3D to enable Hybrid Mode', visible=False, elem_id='hybrid_msg_html')
         # HYBRID INFO ACCORD
         with gr.Accordion("Info & Help", open=False):
             gr.HTML(value=get_gradio_html('hybrid_video'))
@@ -408,6 +408,7 @@ def get_tab_output(da, dv):
                 with FormRow():
                     skip_video_creation = create_gr_elem(dv.skip_video_creation)
                     delete_imgs = create_gr_elem(dv.delete_imgs)
+                    delete_input_frames = create_gr_elem(dv.delete_input_frames)
                     store_frames_in_ram = create_gr_elem(dv.store_frames_in_ram)
                     save_depth_maps = create_gr_elem(da.save_depth_maps)
                     make_gif = create_gr_elem(dv.make_gif)

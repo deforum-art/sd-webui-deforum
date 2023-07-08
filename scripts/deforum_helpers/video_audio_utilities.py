@@ -390,11 +390,43 @@ def handle_imgs_deletion(vid_path=None, imgs_folder_path=None, batch_id=None):
             print("Did not delete imgs as there was a mismatch between # of frames in folder, and # of frames in actual video. Please check and delete manually. ")
     except Exception as e:
         print(f"Error deleting raw images. Please delete them manually if you want. Actual error:\n{e}")
-    
+
+# handle deletion of inputframes created by video frame extraction
+def handle_input_frames_deletion(imgs_folder_path=None):
+    try:
+        total_imgs_to_delete = count_matching_frames(imgs_folder_path, None)
+        if total_imgs_to_delete is None or total_imgs_to_delete == 0:
+            return
+        print("Deleting input frames, as requested:")
+        total_imgs_deleted = delete_input_frames(imgs_folder_path)
+        print(f"Deleted {total_imgs_deleted} out of {total_imgs_to_delete} inputframes!")
+        os.rmdir(imgs_folder_path)
+    except Exception as e:
+        print(f"Error deleting input frames. Please delete them manually if you want. Actual error:\n{e}")
+
+def handle_cn_frames_deletion(cn_input_frames_list):
+    try:
+        for cn_inputframes_folder in cn_input_frames_list:
+            if os.path.exists(cn_inputframes_folder):
+                total_cn_imgs_to_delete = count_matching_frames(cn_inputframes_folder, None)
+                if total_cn_imgs_to_delete is None or total_cn_imgs_to_delete == 0:
+                    continue
+                total_imgs_deleted = delete_input_frames(cn_inputframes_folder)
+                print(f"Deleted {total_imgs_deleted} CN inputframes out of {total_cn_imgs_to_delete}!")
+                os.rmdir(cn_inputframes_folder)
+    except Exception as e:
+        print(f"Error deleting CN input frames. Please delete them manually if you want. Actual error:\n{e}")
+
 def delete_matching_frames(from_folder, img_batch_id):
     return sum(1 for f in os.listdir(from_folder) if get_matching_frame(f, img_batch_id) and os.remove(os.path.join(from_folder, f)) is None)
+
+# delete inputframes
+def delete_input_frames(from_folder):
+    return sum(1 for f in os.listdir(from_folder) if os.remove(os.path.join(from_folder, f)) is None)
     
 def count_matching_frames(from_folder, img_batch_id):
+    if str(from_folder).endswith("inputframes"):
+        return sum(1 for f in os.listdir(from_folder))
     return sum(1 for f in os.listdir(from_folder) if get_matching_frame(f, img_batch_id))
 
 def get_matching_frame(f, img_batch_id=None):
