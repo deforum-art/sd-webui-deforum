@@ -34,6 +34,8 @@ from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 from .RAFT import RAFT
 
+from deforum_api import JobStatusTracker
+
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
     if opts.data.get("deforum_save_gen_info_as_srt", False):  # create .srt file and set timeframe mechanism using FPS
         srt_filename = os.path.join(args.outdir, f"{root.timestring}.srt")
@@ -607,6 +609,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         state.current_image = image
 
         args.seed = next_seed(args, root)
+
+        JobStatusTracker().update_phase(root.job_id, phase="GENERATING", progress=frame_idx/anim_args.max_frames)
 
     if predict_depths and not keep_in_vram:
         depth_model.delete_model()  # handles adabins too
