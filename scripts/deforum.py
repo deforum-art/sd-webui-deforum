@@ -1,11 +1,20 @@
 import os
-from modules import script_callbacks
+
 import modules.paths as ph
+from scripts.deforum_helpers.deforum_api_server import DeforumApiServer
+from modules import script_callbacks
+from modules.shared import cmd_opts
 from scripts.deforum_extend_paths import deforum_sys_extend
+
 
 def init_deforum():
     # use sys.path.extend to make sure all of our files are available for importation
     deforum_sys_extend()
+
+    if cmd_opts.api:
+        api_server = DeforumApiServer()
+        api_server.start()
+        # TODO - stop server cleanly on shutdown?
 
     # create the Models/Deforum folder, where many of the deforum related models/ packages will be downloaded
     os.makedirs(ph.models_path + '/Deforum', exist_ok=True)
@@ -20,3 +29,4 @@ def init_deforum():
     script_callbacks.on_ui_settings(on_ui_settings)
 
 init_deforum()
+
