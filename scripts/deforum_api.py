@@ -80,15 +80,11 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
 
     @app.get("/deforum_api/batch")
     async def list_batches():
-        return {"TODO": "TODO"}
+        return JobStatusTracker().statuses
 
     @app.get("/deforum_api/batch/{id}")
     async def get_batch(id: str):
         return JobStatusTracker().get(id)
-    
-    @app.get("/deforum_api/batch/{id}/status")
-    async def get_batch_status(id: str):
-        return {"id": id, "status": "TODO"}
 
     @app.delete("/deforum_api/batch/{id}")
     async def stop_batch(id: str):
