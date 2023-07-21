@@ -416,17 +416,17 @@ def count_matching_frames(from_folder, img_batch_id):
 def get_matching_frame(f, img_batch_id=None):
     return ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and ((img_batch_id is not None and f.startswith(img_batch_id) or img_batch_id is None))
 
-def render_preview(args, anim_args, video_args, root, frame_idx):
+def render_preview(args, anim_args, video_args, root, frame_idx, last_preview_frame):
     is_preview_on = "on" in opts.data.get("deforum_preview", 0).lower()
     preview_interval_frames = opts.data.get("deforum_preview_interval_frames", 50)
-    is_preview_frame = (frame_idx % preview_interval_frames) == 0
+    is_preview_frame = (frame_idx % preview_interval_frames) == 0 or (frame_idx - last_preview_frame) >= preview_interval_frames
     is_close_to_end = frame_idx >= (anim_args.max_frames-1)
 
     debug_print(f"render preview video: frame_idx={frame_idx} preview_interval_frames={preview_interval_frames} anim_args.max_frames={anim_args.max_frames} is_preview_on={is_preview_on} is_preview_frame={is_preview_frame} is_close_to_end={is_close_to_end} ")
 
     if not is_preview_on or not is_preview_frame or is_close_to_end:
         debug_print(f"No preview video on frame {frame_idx}.")
-        return
+        return last_preview_frame
     
     f_location, f_crf, f_preset = get_ffmpeg_params() # get params for ffmpeg exec
     image_path, mp4_temp_path, real_audio_track, srt_path = get_ffmpeg_paths(args.outdir, root.timestring, anim_args, video_args, "_preview__rendering__")
@@ -445,3 +445,5 @@ def render_preview(args, anim_args, video_args, root, frame_idx):
         Thread(target=task).start()
     else:
         task()
+
+    return frame_idx
