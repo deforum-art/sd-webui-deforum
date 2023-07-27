@@ -417,7 +417,7 @@ def get_matching_frame(f, img_batch_id=None):
     return ('png' in f or 'jpg' in f) and '-' not in f and '_depth_' not in f and ((img_batch_id is not None and f.startswith(img_batch_id) or img_batch_id is None))
 
 def render_preview(args, anim_args, video_args, root, frame_idx, last_preview_frame):
-    is_preview_on = "on" in opts.data.get("deforum_preview", 0).lower()
+    is_preview_on = "on" in opts.data.get("deforum_preview", "off").lower()
     preview_interval_frames = opts.data.get("deforum_preview_interval_frames", 50)
     is_preview_frame = (frame_idx % preview_interval_frames) == 0 or (frame_idx - last_preview_frame) >= preview_interval_frames
     is_close_to_end = frame_idx >= (anim_args.max_frames-1)
@@ -441,7 +441,7 @@ def render_preview(args, anim_args, video_args, root, frame_idx, last_preview_fr
             finally:
                 shutil.move(mp4_temp_path, mp4_preview_path)
         
-    if "concurrent" in opts.data.get("deforum_preview", 0).lower():
+    if "concurrent" in opts.data.get("deforum_preview", "off").lower():
         Thread(target=task).start()
     else:
         task()
