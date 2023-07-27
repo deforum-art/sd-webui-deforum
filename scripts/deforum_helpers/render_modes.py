@@ -102,6 +102,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
     
     state.job_count = anim_args.max_frames
     frame_idx = 0
+    last_preview_frame = 0
     # INTERPOLATION MODE
     while frame_idx < anim_args.max_frames:
         # print data to cli
@@ -155,6 +156,8 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         if args.seed_behavior != 'schedule':
             args.seed = next_seed(args, root)
 
+        last_preview_frame = render_preview(args, anim_args, video_args, root, frame_idx, last_preview_frame)
+
         frame_idx += 1
 
-        render_preview(args, anim_args, video_args, root, frame_idx)
+        

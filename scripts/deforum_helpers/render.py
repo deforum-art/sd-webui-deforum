@@ -192,6 +192,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     # Webui
     state.job_count = anim_args.max_frames
+    last_preview_frame = 0
 
     while frame_idx < anim_args.max_frames:
         # Webui
@@ -608,8 +609,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         args.seed = next_seed(args, root)
 
-        render_preview(args, anim_args, video_args, root, frame_idx)
-                
+        last_preview_frame = render_preview(args, anim_args, video_args, root, frame_idx, last_preview_frame)                
 
     if predict_depths and not keep_in_vram:
         depth_model.delete_model()  # handles adabins too
