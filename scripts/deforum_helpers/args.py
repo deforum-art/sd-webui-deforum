@@ -648,7 +648,7 @@ def DeforumAnimArgs():
             "label": "Consistency mask blur",
             "type": "slider",
             "minimum": 0,
-            "maximum": 64,
+            "maximum": 16,
             "step": 1,
             "value": 2,
             "visible": False
