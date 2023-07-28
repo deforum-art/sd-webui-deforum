@@ -63,11 +63,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         unpack_controlnet_vids(args, anim_args, controlnet_args)
 
     # initialise Parseq adapter
-    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args)
+    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args, loop_args)
 
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args, args.seed) if not parseq_adapter.use_parseq else parseq_adapter.anim_keys
-    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed) if not parseq_adapter.use_parseq else parseq_adapter.looper_keys
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
