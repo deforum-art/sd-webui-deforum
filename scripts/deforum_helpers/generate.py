@@ -279,7 +279,7 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
     rows2 = []
     if anim_args.animation_mode not in ['Video Input', 'Interpolation']:
         if anim_args.animation_mode == '2D':
-            field_names2 = ["Angle", "Zoom"]
+            field_names2 = ["Angle", "Zoom", "Tr C X", "Tr C Y"]
         else:
             field_names2 = []
         field_names2 += ["Tr X", "Tr Y"]
@@ -294,7 +294,9 @@ def print_combined_table(args, anim_args, p, keys, frame_idx):
             table.add_column(field_name, justify="center")
 
         if anim_args.animation_mode == '2D':
-            rows2 += [f"{keys.angle_series[frame_idx]:.5g}", f"{keys.zoom_series[frame_idx]:.5g}"]
+            rows2 += [f"{keys.angle_series[frame_idx]:.5g}", f"{keys.zoom_series[frame_idx]:.5g}",
+                      f"{keys.transform_center_x_series[frame_idx]:.5g}", f"{keys.transform_center_y_series[frame_idx]:.5g}"]
+            
         rows2 += [f"{keys.translation_x_series[frame_idx]:.5g}", f"{keys.translation_y_series[frame_idx]:.5g}"]
 
         if anim_args.animation_mode == '3D':
