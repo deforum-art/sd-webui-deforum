@@ -12,7 +12,7 @@ from .generate import generate, isJson
 from .noise import add_noise
 from .animation import anim_frame_warp
 from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
-from .video_audio_utilities import get_frame_name, get_next_frame
+from .video_audio_utilities import get_frame_name, get_next_frame, render_preview
 from .depth import DepthModel
 from .colors import maintain_colors
 from .parseq_adapter import ParseqAdapter
@@ -63,11 +63,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         unpack_controlnet_vids(args, anim_args, controlnet_args)
 
     # initialise Parseq adapter
-    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args)
+    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args, loop_args)
 
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args, args.seed) if not parseq_adapter.use_parseq else parseq_adapter.anim_keys
-    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed) if not parseq_adapter.use_parseq else parseq_adapter.looper_keys
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
@@ -192,6 +192,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     # Webui
     state.job_count = anim_args.max_frames
+    last_preview_frame = 0
 
     while frame_idx < anim_args.max_frames:
         # Webui
@@ -608,8 +609,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         args.seed = next_seed(args, root)
 
+        last_preview_frame = render_preview(args, anim_args, video_args, root, frame_idx, last_preview_frame)                
+
     if predict_depths and not keep_in_vram:
         depth_model.delete_model()  # handles adabins too
 
     if load_raft:
         raft_model.delete_model()
+
