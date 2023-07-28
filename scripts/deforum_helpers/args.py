@@ -975,6 +975,12 @@ def DeforumOutputArgs():
             "value": False,
             "info": "auto-delete imgs when video is ready"
         },
+        "delete_input_frames": {
+            "label": "Delete All Inputframes",
+            "type": "checkbox",
+            "value": False,
+            "info": "auto-delete inputframes (incl CN ones) when video is ready"
+        },
         "image_path": {
             "label": "Image path",
             "type": "textbox",
