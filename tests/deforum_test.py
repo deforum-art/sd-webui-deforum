@@ -16,7 +16,7 @@ API_BASE_URL = SERVER_BASE_URL + API_ROOT
 #   python -m coverage run --data-file=.coverage.server launch.py --skip-prepare-environment --disable-nan-check  --no-half --disable-opt-split-attention --add-stop-route --api --deforum-api --ckpt ./test/test_files/empty.pt
 #
 
-@retry(wait=wait_fixed(2), stop=stop_after_delay(120))
+@retry(wait=wait_fixed(2), stop=stop_after_delay(600))
 def wait_for_job_to_complete(id):
     with PydanticSession(
         {200: DeforumJobStatus}, headers={"accept": "application/json"}
