@@ -11,16 +11,21 @@ from .save_images import dump_frames_cache, reset_frames_cache
 from .frame_interpolation import process_video_interpolation
 from .general_utils import get_deforum_version
 from .upscaling import make_upscale_v2
-from .video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, get_ffmpeg_params
+from .video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, handle_input_frames_deletion, handle_cn_frames_deletion, get_ffmpeg_params, get_ffmpeg_paths
 from pathlib import Path
 from .settings import save_settings_from_animation_run
+from .deforum_controlnet import num_of_models
 
 from deforum_api import JobStatusTracker
+from deforum_api_models import DeforumJobPhase
+
 
 # this global param will contain the latest generated video HTML-data-URL info (for preview inside the UI when needed)
 last_vid_data = None
 
 def run_deforum(*args):
+    print("started run_deforum")
+
     f_location, f_crf, f_preset = get_ffmpeg_params()  # get params for ffmpeg exec
     component_names = get_component_names()
     args_dict = {component_names[i]: args[i+2] for i in range(0, len(component_names))}
@@ -34,9 +39,10 @@ def run_deforum(*args):
     if args_dict['custom_settings_file'] is not None and len(args_dict['custom_settings_file']) > 1:
         times_to_run = len(args_dict['custom_settings_file'])
 
+    print(f"times_to_run: {times_to_run}")
     for i in range(times_to_run): # run for as many times as we need
         job_id = f"{args[0]}-{i}"
-        JobStatusTracker().start_job(job_id)
+        JobStatusTracker().update_phase(job_id, DeforumJobPhase.PREPARING)
         print(f"\033[4;33mDeforum extension for auto1111 webui\033[0m")
         print(f"Git commit: {get_deforum_version()}")
         print(f"Starting job {job_id}...")
@@ -79,7 +85,8 @@ def run_deforum(*args):
         tqdm_backup = shared.total_tqdm
         shared.total_tqdm = DeforumTQDM(args, anim_args, parseq_args, video_args)
         try:  # dispatch to appropriate renderer
-            JobStatusTracker().update_phase(job_id, phase="GENERATING")
+            JobStatusTracker().update_phase(job_id, DeforumJobPhase.GENERATING)
+            JobStatusTracker().update_output_info(job_id, outdir=args.outdir, timestring=root.timestring)
             if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
                 if anim_args.use_mask_video: 
                     render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)  # allow mask video without an input video
@@ -108,23 +115,13 @@ def run_deforum(*args):
             shared.opts.data["eta_ddim"] = root.initial_ddim_eta
             shared.opts.data["eta_ancestral"] = root.initial_ancestral_eta
         
-        JobStatusTracker().update_phase(job_id, phase="POST_PROCESSING")
+        JobStatusTracker().update_phase(job_id, DeforumJobPhase.POST_PROCESSING)
 
         if video_args.store_frames_in_ram:
             dump_frames_cache(root)
         
         from base64 import b64encode
         
-        real_audio_track = None
-        if video_args.add_soundtrack != 'None':
-            real_audio_track = anim_args.video_init_path if video_args.add_soundtrack == 'Init Video' else video_args.soundtrack_path
-        
-        # Establish path of subtitle file
-        if shared.opts.data.get("deforum_save_gen_info_as_srt", False) and shared.opts.data.get("deforum_embed_srt", False):
-            srt_path = os.path.join(args.outdir, f"{root.timestring}.srt")
-        else:
-            srt_path = None
-
         # Delete folder with duplicated imgs from OS temp folder
         shutil.rmtree(root.tmp_deforum_run_duplicated_folder, ignore_errors=True)
 
@@ -136,14 +133,11 @@ def run_deforum(*args):
         if video_args.skip_video_creation:
             print("\nSkipping video creation, uncheck 'Skip video creation' in 'Output' tab if you want to get a video too :)")
         else:
-            image_path = os.path.join(args.outdir, f"{root.timestring}_%09d.png")
-            mp4_path = os.path.join(args.outdir, f"{root.timestring}.mp4")
-            max_video_frames = anim_args.max_frames
-
             # Stitch video using ffmpeg!
             try:
                 f_location, f_crf, f_preset = get_ffmpeg_params() # get params for ffmpeg exec
-                ffmpeg_stitch_video(ffmpeg_location=f_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=max_video_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=f_crf, preset=f_preset, srt_path=srt_path)
+                image_path, mp4_path, real_audio_track, srt_path = get_ffmpeg_paths(args.outdir, root.timestring, anim_args, video_args)
+                ffmpeg_stitch_video(ffmpeg_location=f_location, fps=video_args.fps, outmp4_path=mp4_path, stitch_from_frame=0, stitch_to_frame=anim_args.max_frames, imgs_path=image_path, add_soundtrack=video_args.add_soundtrack, audio_path=real_audio_track, crf=f_crf, preset=f_preset, srt_path=srt_path)
                 mp4 = open(mp4_path, 'rb').read()
                 data_url = f"data:video/mp4;base64, {b64encode(mp4).decode()}"
                 global last_vid_data
@@ -161,7 +155,7 @@ def run_deforum(*args):
         # Upscale video once generation is done:
         if video_args.r_upscale_video and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
             # out mp4 path is defined in make_upscale func
-            make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = root.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=f_location, stitch_from_frame=0, stitch_to_frame=max_video_frames, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track, srt_path=srt_path)
+            make_upscale_v2(upscale_factor = video_args.r_upscale_factor, upscale_model = video_args.r_upscale_model, keep_imgs = video_args.r_upscale_keep_imgs, imgs_raw_path = args.outdir, imgs_batch_id = root.timestring, fps = video_args.fps, deforum_models_path = root.models_path, current_user_os = root.current_user_os, ffmpeg_location=f_location, stitch_from_frame=0, stitch_to_frame=anim_args.max_frames, ffmpeg_crf=f_crf, ffmpeg_preset=f_preset, add_soundtrack = video_args.add_soundtrack ,audio_path=real_audio_track, srt_path=srt_path)
 
         # FRAME INTERPOLATION TIME
         if need_to_frame_interpolate: 
@@ -185,7 +179,16 @@ def run_deforum(*args):
 
         if video_args.delete_imgs and not video_args.skip_video_creation:
             handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=root.timestring)
-            
+
+        if video_args.delete_input_frames:
+            # Check if the path exists
+            if os.path.exists(os.path.join(args.outdir, 'inputframes')):
+                print(f"Deleting inputframes")
+                handle_input_frames_deletion(imgs_folder_path=os.path.join(args.outdir, 'inputframes'))
+            # Now do CN input frame deletion
+            cn_inputframes_list = [os.path.join(args.outdir, f'controlnet_{i}_inputframes') for i in range(1, num_of_models + 1)]
+            handle_cn_frames_deletion(cn_inputframes_list)
+
         root.initial_info += f"\n The animation is stored in {args.outdir}"
         reset_frames_cache(root)  # cleanup the RAM in any case
         processed = Processed(p, [root.first_frame], 0, root.initial_info)

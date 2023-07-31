@@ -12,19 +12,20 @@ from types import SimpleNamespace
 DEFAULT_ARGS = SimpleNamespace(anim_args = SimpleNamespace(max_frames=2),
                                video_args = SimpleNamespace(fps=30),
                                args = SimpleNamespace(seed=-1),
-                               loop_args = SimpleNamespace(),
-                               controlnet_args = SimpleNamespace())
+                               controlnet_args = SimpleNamespace(),
+                               loop_args = SimpleNamespace())
 
 
 def buildParseqAdapter(parseq_use_deltas, parseq_manifest, setup_args=DEFAULT_ARGS):
     return ParseqAdapter(SimpleNamespace(parseq_use_deltas=parseq_use_deltas, parseq_manifest=parseq_manifest),
-                         setup_args.anim_args, setup_args.video_args, setup_args.controlnet_args)
+                         setup_args.anim_args, setup_args.video_args, setup_args.controlnet_args, setup_args.loop_args)
 
 class TestParseqAnimKeys(unittest.TestCase):
 
     @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
     @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_withprompt(self, mock_deformanimkeys, mock_controlnetkeys):
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    def test_withprompt(self,  mock_deformanimkeys, mock_controlnetkeys, mock_looperanimkeys):
         parseq_adapter = buildParseqAdapter(parseq_use_deltas=True, parseq_manifest=""" 
             {                
                 "options": {
@@ -47,7 +48,8 @@ class TestParseqAnimKeys(unittest.TestCase):
 
     @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
     @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_withoutprompt(self, mock_deformanimkeys, mock_controlnetkeys):
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    def test_withoutprompt(self,  mock_deformanimkeys, mock_controlnetkeys, mock_looperanimkeys):
         parseq_adapter = buildParseqAdapter(parseq_use_deltas=True, parseq_manifest=""" 
             {                
                 "options": {
@@ -67,7 +69,8 @@ class TestParseqAnimKeys(unittest.TestCase):
 
     @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
     @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_withseed(self, mock_deformanimkeys, mock_controlnetkeys):
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    def test_withseed(self,  mock_deformanimkeys, mock_controlnetkeys, mock_looperanimkeys):
         parseq_adapter = buildParseqAdapter(parseq_use_deltas=True, parseq_manifest=""" 
             {                
                 "options": {
@@ -90,7 +93,8 @@ class TestParseqAnimKeys(unittest.TestCase):
 
     @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
     @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_withoutseed(self, mock_deformanimkeys, mock_controlnetkeys):
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    def test_withoutseed(self,  mock_deformanimkeys, mock_controlnetkeys, mock_looperanimkeys):
         parseq_adapter = buildParseqAdapter(parseq_use_deltas=True, parseq_manifest=""" 
             {                
                 "options": {
@@ -111,7 +115,8 @@ class TestParseqAnimKeys(unittest.TestCase):
 
     @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
     @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_usedelta(self, mock_deformanimkeys, mock_controlnetkeys):
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    def test_usedelta(self,  mock_deformanimkeys, mock_controlnetkeys, mock_looperanimkeys):
         parseq_adapter = buildParseqAdapter(parseq_use_deltas=True, parseq_manifest=""" 
             {                
                 "options": {
@@ -135,7 +140,8 @@ class TestParseqAnimKeys(unittest.TestCase):
 
     @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
     @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_usenondelta(self, mock_deformanimkeys, mock_controlnetkeys):
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    def test_usenondelta(self,  mock_deformanimkeys, mock_controlnetkeys, mock_looperanimkeys):
         parseq_adapter = buildParseqAdapter(parseq_use_deltas=False, parseq_manifest=""" 
             {                
                 "options": {
@@ -159,7 +165,8 @@ class TestParseqAnimKeys(unittest.TestCase):
 
     @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
     @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_fallbackonundefined(self, mock_deformanimkeys, mock_controlnetkeys):
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    def test_fallbackonundefined(self,  mock_deformanimkeys, mock_controlnetkeys, mock_looperanimkeys):
         parseq_adapter = buildParseqAdapter(parseq_use_deltas=False, parseq_manifest=""" 
             {                
                 "options": {
@@ -181,7 +188,8 @@ class TestParseqAnimKeys(unittest.TestCase):
 
     @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
     @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_cn(self, mock_deformanimkeys, mock_controlnetkeys):
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    def test_cn(self,  mock_deformanimkeys, mock_controlnetkeys, mock_looperanimkeys):
         parseq_adapter = buildParseqAdapter(parseq_use_deltas=False, parseq_manifest=""" 
             {                
                 "options": {
@@ -203,7 +211,8 @@ class TestParseqAnimKeys(unittest.TestCase):
 
     @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
     @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
-    def test_cn_fallback(self, mock_deformanimkeys, mock_controlnetkeys):
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    def test_cn_fallback(self,  mock_deformanimkeys, mock_controlnetkeys, mock_looperanimkeys):
         parseq_adapter = buildParseqAdapter(parseq_use_deltas=False, parseq_manifest=""" 
             {                
                 "options": {
@@ -223,5 +232,51 @@ class TestParseqAnimKeys(unittest.TestCase):
         #There must be a better way to inject an expected value via patch and check for that...
         self.assertRegex(str(parseq_adapter.cn_keys.cn_1_weight_schedule_series[0]), r'MagicMock')           
         
+    @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
+    def test_looper(self, mock_deformanimkeys, mock_looperanimkeys, mock_controlnetkeys):
+        parseq_adapter = buildParseqAdapter(parseq_use_deltas=False, parseq_manifest=""" 
+            {                
+                "options": {
+                    "output_fps": 30
+                },
+                "rendered_frames": [
+                    {
+                        "frame": 0,
+                        "guided_blendFactorMax": 0.4
+                    },
+                    {
+                        "frame": 1,
+                        "guided_blendFactorMax": 0.4
+                    }
+                ]
+            }
+            """)
+        self.assertEqual(parseq_adapter.looper_keys.blendFactorMax_series[0], 0.4)
+
+    @patch('deforum_helpers.parseq_adapter.DeformAnimKeys')
+    @patch('deforum_helpers.parseq_adapter.LooperAnimKeys')
+    @patch('deforum_helpers.parseq_adapter.ControlNetKeys')
+    def test_looper_fallback(self, mock_deformanimkeys, mock_looperanimkeys, mock_controlnetkeys):
+        parseq_adapter = buildParseqAdapter(parseq_use_deltas=False, parseq_manifest=""" 
+            {                
+                "options": {
+                    "output_fps": 30
+                },
+                "rendered_frames": [
+                    {
+                        "frame": 0
+                    },
+                    {
+                        "frame": 1
+                    }
+                ]
+            }
+            """)
+        #TODO - this is a hacky check to make sure we're falling back to the mock.
+        #There must be a better way to inject an expected value via patch and check for that...
+        self.assertRegex(str(parseq_adapter.looper_keys.blendFactorMax_series[0]), r'MagicMock') 
+
 if __name__ == '__main__':
     unittest.main()

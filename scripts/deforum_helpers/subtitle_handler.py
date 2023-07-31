@@ -1,5 +1,4 @@
 from decimal import Decimal, getcontext
-from modules.shared import opts
 
 param_dict = {
     "angle": {"backend": "angle_series", "user": "Angle", "print": "Angle"},
@@ -71,8 +70,7 @@ def write_frame_subtitle(filename, frame_number, frame_duration, text):
         f.write(f"{time_to_srt_format(frame_start_time)} --> {time_to_srt_format(frame_end_time)}\n")
         f.write(f"{text}\n\n")
 
-def format_animation_params(keys, prompt_series, frame_idx):
-    params_to_print = opts.data.get("deforum_save_gen_info_as_srt_params", ['Seed'])
+def format_animation_params(keys, prompt_series, frame_idx, params_to_print):
     params_string = ""
     for key, value in param_dict.items():
         if value['user'] in params_to_print:
