@@ -163,7 +163,7 @@ class ApiState(metaclass=Singleton):
             print("started task")
             try:
                 if opts_overrides is not None and len(opts_overrides)>1:
-                    original_opts = {k: opts.data[k] for k in opts_overrides.keys()}
+                    original_opts = {k: opts.data[k] for k in opts_overrides.keys() if k in opts.data}
                     print(f"Captured options to override: {original_opts}")                
                     print(f"Overriding with: {opts_overrides}")
                     for k, v in opts_overrides.items():
