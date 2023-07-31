@@ -40,13 +40,13 @@ def load_image(image_path :str):
         try:
             response = requests.get(image_path, stream=True)
         except requests.exceptions.RequestException as e:
-            raise ConnectionError("Failed to download image due to no internet connection. Error: {}".format(e))
+            raise ConnectionError(f"Failed to download image {image_path} due to no internet connection. Error: {e}")
         if response.status_code == 404 or response.status_code != 200:
-            raise ConnectionError("Init image url or mask image url is not valid")
+            raise ConnectionError(f"Init image url or mask image url is not valid: {image_path}")
         image = Image.open(response.raw).convert('RGB')
     else:
         if not os.path.exists(image_path):
-            raise RuntimeError("Init image path or mask image path is not valid")
+            raise RuntimeError(f"Init image path or mask image path is not valid: {image_path}")
         image = Image.open(image_path).convert('RGB')
         
     return image
