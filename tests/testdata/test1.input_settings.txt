@@ -37,7 +37,7 @@
     },
     "animation_prompts_positive": "",
     "animation_prompts_negative": "",
-    "animation_mode": "3D",
+    "animation_mode": "2D",
     "max_frames": 10,
     "border": "replicate",
     "angle": "0:(0)",
