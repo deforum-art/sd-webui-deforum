@@ -15,3 +15,4 @@ scripts/deforum_helpers/navigation.py
 htmlcov
 tests/results.xml
 .coverage*
+serverlog.txt

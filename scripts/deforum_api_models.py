@@ -11,6 +11,7 @@ class DeforumJobStatusCategory(str, Enum):
     ACCEPTED = "ACCEPTED"
     SUCCEEDED = "SUCCEEDED"
     FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
 
 class DeforumJobPhase(str, Enum):
     QUEUED = "QUEUED"
@@ -38,4 +39,6 @@ class DeforumJobStatus(BaseModel):
     updates: int                    # number of status updates so far
     message: Optional[str]
     outdir: Optional[str]
-    timestring: Optional[str]    
+    timestring: Optional[str]
+    deforum_settings : Optional[List[Dict[str, Any]]]
+    options_overrides : Optional[Dict[str, Any]]

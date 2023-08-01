@@ -189,7 +189,7 @@ def run_deforum(*args):
             cn_inputframes_list = [os.path.join(args.outdir, f'controlnet_{i}_inputframes') for i in range(1, num_of_models + 1)]
             handle_cn_frames_deletion(cn_inputframes_list)
 
-        root.initial_info += f"\n The animation is stored in {args.outdir}"
+        root.initial_info = (root.initial_info or " ") + f"\n The animation is stored in {args.outdir}"
         reset_frames_cache(root)  # cleanup the RAM in any case
         processed = Processed(p, [root.first_frame], 0, root.initial_info)
 
@@ -201,6 +201,7 @@ def run_deforum(*args):
             persistent_sett_path = shared.opts.data.get("deforum_persistent_settings_path")
             save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
 
-        JobStatusTracker().complete_job(root.job_id)
+        if (not shared.state.interrupted):
+            JobStatusTracker().complete_job(root.job_id)
 
     return processed.images, root.timestring, generation_info_js, processed.info
