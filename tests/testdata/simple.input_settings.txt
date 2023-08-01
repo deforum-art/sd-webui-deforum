@@ -38,7 +38,7 @@
     "animation_prompts_positive": "",
     "animation_prompts_negative": "",
     "animation_mode": "2D",
-    "max_frames": 10,
+    "max_frames": 5,
     "border": "replicate",
     "angle": "0:(0)",
     "zoom": "0:(1.0025+0.002*sin(1.25*3.14*t/30))",

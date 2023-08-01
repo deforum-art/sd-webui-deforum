@@ -61,11 +61,23 @@ jobs:
           --deforum-api
           --api     
           2>&1 | tee serverlog.txt &
-      - name: Run tests
+      - name: Run tests (with  continue-on-error due to mysterious non-zero return code on success)
+        continue-on-error: true
+        id: runtests
         run: |
           wait-for-it --service 127.0.0.1:7860 -t 600
           cd extensions/deforum
-          python -m coverage run --data-file=.coverage.client -m pytest -vv --junitxml=tests/results.xml tests -s
+          python -m coverage run --data-file=.coverage.client -m pytest -vv --junitxml=tests/results.xml tests
+      - name: Check for test failures (necessary because of continue-on-error above)
+        id: testresults
+        uses: mavrosxristoforos/get-xml-info@1.1.0
+        with:
+          xml-file: 'extensions/deforum/tests/results.xml'
+          xpath: '//testsuite/@failures'
+      - name: Fail if there were test failures
+        run: |
+          echo "Test failures: ${{ steps.testresults.outputs.info }}"
+          [ ${{ steps.testresults.outputs.info }} -eq 0 ]
       - name: Kill test server
         if: always()
         run: curl -vv -XPOST http://127.0.0.1:7860/sdapi/v1/server-stop && sleep 10
@@ -86,3 +98,11 @@ jobs:
         with:
           name: htmlcov
           path: htmlcov
+      - name: Surface failing tests
+        if: always()
+        uses: pmeier/pytest-results-action@main
+        with:
+          path: extensions/deforum/tests/results.xml
+          summary: true
+          display-options: fEX
+          fail-on-empty: true

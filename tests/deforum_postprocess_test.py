@@ -1,13 +1,17 @@
-import os
+import glob
 import json
-from scripts.deforum_api_models import DeforumJobStatus, DeforumJobStatusCategory, DeforumJobPhase
+import os
+
+import pytest
 import requests
 from moviepy.editor import VideoFileClip
-import glob
-from utils import wait_for_job_to_complete, wait_for_job_to_enter_phase, wait_for_job_to_enter_status, API_BASE_URL
+from utils import API_BASE_URL, gpu_disabled, wait_for_job_to_complete
 
+from scripts.deforum_api_models import (DeforumJobPhase,
+                                        DeforumJobStatusCategory)
 from scripts.deforum_helpers.subtitle_handler import get_user_values
 
+@pytest.mark.skipif(gpu_disabled(), reason="requires GPU-enabled server")  
 def test_post_process_FILM(snapshot):
     with open('tests/testdata/simple.input_settings.txt', 'r') as settings_file:
         deforum_settings = json.load(settings_file)
@@ -44,6 +48,7 @@ def test_post_process_FILM(snapshot):
     assert clip.duration * clip.fps == deforum_settings['max_frames'] * deforum_settings["frame_interpolation_x_amount"], "Video frame count does not match input settings (including interpolation)"
     assert clip.size == [deforum_settings['W'], deforum_settings['H']] , "Video dimensions are not as expected"    
 
+@pytest.mark.skipif(gpu_disabled(), reason="requires GPU-enabled server")  
 def test_post_process_RIFE(snapshot):
     with open('tests/testdata/simple.input_settings.txt', 'r') as settings_file:
         deforum_settings = json.load(settings_file)
@@ -80,6 +85,7 @@ def test_post_process_RIFE(snapshot):
     assert clip.duration * clip.fps == deforum_settings['max_frames'] * deforum_settings["frame_interpolation_x_amount"], "Video frame count does not match input settings (including interpolation)"
     assert clip.size == [deforum_settings['W'], deforum_settings['H']] , "Video dimensions are not as expected"        
 
+@pytest.mark.skipif(gpu_disabled(), reason="requires GPU-enabled server")  
 def test_post_process_UPSCALE(snapshot):
     with open('tests/testdata/simple.input_settings.txt', 'r') as settings_file:
         deforum_settings = json.load(settings_file)
@@ -117,6 +123,7 @@ def test_post_process_UPSCALE(snapshot):
     assert clip.size == [deforum_settings['W']*4, deforum_settings['H']*4] , "Video dimensions are not as expected (including upscaling)"
 
 
+@pytest.mark.skipif(gpu_disabled(), reason="requires GPU-enabled server")  
 def test_post_process_UPSCALE_FILM(snapshot):
     with open('tests/testdata/simple.input_settings.txt', 'r') as settings_file:
         deforum_settings = json.load(settings_file)

@@ -6,7 +6,6 @@ import tempfile
 import traceback
 import logging
 import threading
-import debugpy
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from datetime import datetime
@@ -192,7 +191,6 @@ def deforum_api(_: gr.Blocks, app: FastAPI):
     # Cancel a single job
     @app.delete("/deforum_api/jobs/{id}")
     async def cancel_job(id: str, response: Response):
-        debugpy.breakpoint()
         try: 
             if _cancel_job(id):
                 return {"id": id, "message": "Job cancelled."}
