@@ -56,4 +56,5 @@ def start_server(request):
         wait_for_service('http://localhost:7860/deforum_api/jobs/')
        
     else:
-        print("Assuming server is already running...")
+        print("Checking server is already running / waiting for it to come up...")
+        wait_for_service('http://localhost:7860/deforum_api/jobs/')
