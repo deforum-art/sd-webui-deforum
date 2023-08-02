@@ -34,6 +34,8 @@ from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 from .RAFT import RAFT
 
+from deforum_api import JobStatusTracker
+
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
     if opts.data.get("deforum_save_gen_info_as_srt", False):  # create .srt file and set timeframe mechanism using FPS
         srt_filename = os.path.join(args.outdir, f"{root.timestring}.srt")
@@ -265,7 +267,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             if predict_depths: depth_model.to(root.device)
 
         if turbo_steps == 1 and opts.data.get("deforum_save_gen_info_as_srt"):
-            params_string = format_animation_params(keys, prompt_series, frame_idx)
+            params_to_print = opts.data.get("deforum_save_gen_info_as_srt_params", ['Seed'])
+            params_string = format_animation_params(keys, prompt_series, frame_idx, params_to_print)
             write_frame_subtitle(srt_filename, frame_idx, srt_frame_duration, f"F#: {frame_idx}; Cadence: false; Seed: {args.seed}; {params_string}")
             params_string = None
 
@@ -290,7 +293,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                             turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow, 1)
 
                 if opts.data.get("deforum_save_gen_info_as_srt"):
-                    params_string = format_animation_params(keys, prompt_series, tween_frame_idx)
+                    params_to_print = opts.data.get("deforum_save_gen_info_as_srt_params", ['Seed'])
+                    params_string = format_animation_params(keys, prompt_series, tween_frame_idx, params_to_print)
                     write_frame_subtitle(srt_filename, tween_frame_idx, srt_frame_duration, f"F#: {tween_frame_idx}; Cadence: {tween < 1.0}; Seed: {args.seed}; {params_string}")
                     params_string = None
 
@@ -609,7 +613,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         args.seed = next_seed(args, root)
 
-        last_preview_frame = render_preview(args, anim_args, video_args, root, frame_idx, last_preview_frame)                
+        last_preview_frame = render_preview(args, anim_args, video_args, root, frame_idx, last_preview_frame)            
+
+        JobStatusTracker().update_phase(root.job_id, phase="GENERATING", progress=frame_idx/anim_args.max_frames)
+
 
     if predict_depths and not keep_in_vram:
         depth_model.delete_model()  # handles adabins too

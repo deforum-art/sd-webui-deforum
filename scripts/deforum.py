@@ -1,7 +1,10 @@
 import os
-from modules import script_callbacks
+
 import modules.paths as ph
+from modules import script_callbacks
+from modules.shared import cmd_opts
 from scripts.deforum_extend_paths import deforum_sys_extend
+
 
 def init_deforum():
     # use sys.path.extend to make sure all of our files are available for importation
@@ -20,3 +23,4 @@ def init_deforum():
     script_callbacks.on_ui_settings(on_ui_settings)
 
 init_deforum()
+

@@ -259,5 +259,5 @@ class ParseqLooperKeysDecorator(ParseqAbstractDecorator):
         self.blendFactorMax_series = super().parseq_to_series('guided_blendFactorMax')
         self.blendFactorSlope_series = super().parseq_to_series('guided_blendFactorSlope')
         self.tweening_frames_schedule_series = super().parseq_to_series('guided_tweening_frames')
-        self.color_correction_factor_series = super().parseq_to_series('guidedcolor_correction_factor')
+        self.color_correction_factor_series = super().parseq_to_series('guided_color_correction_factor')
 

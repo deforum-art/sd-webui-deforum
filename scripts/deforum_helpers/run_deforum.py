@@ -16,10 +16,16 @@ from pathlib import Path
 from .settings import save_settings_from_animation_run
 from .deforum_controlnet import num_of_models
 
+from deforum_api import JobStatusTracker
+from deforum_api_models import DeforumJobPhase
+
+
 # this global param will contain the latest generated video HTML-data-URL info (for preview inside the UI when needed)
 last_vid_data = None
 
 def run_deforum(*args):
+    print("started run_deforum")
+
     f_location, f_crf, f_preset = get_ffmpeg_params()  # get params for ffmpeg exec
     component_names = get_component_names()
     args_dict = {component_names[i]: args[i+2] for i in range(0, len(component_names))}
@@ -33,14 +39,19 @@ def run_deforum(*args):
     if args_dict['custom_settings_file'] is not None and len(args_dict['custom_settings_file']) > 1:
         times_to_run = len(args_dict['custom_settings_file'])
 
+    print(f"times_to_run: {times_to_run}")
     for i in range(times_to_run): # run for as many times as we need
-        print(f"\033[4;33mDeforum extension for auto1111 webui, v2.4b\033[0m")
+        job_id = f"{args[0]}-{i}"
+        JobStatusTracker().update_phase(job_id, DeforumJobPhase.PREPARING)
+        print(f"\033[4;33mDeforum extension for auto1111 webui\033[0m")
         print(f"Git commit: {get_deforum_version()}")
+        print(f"Starting job {job_id}...")
         args_dict['self'] = None
         args_dict['p'] = p
         try:
             args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args = process_args(args_dict, i)
         except Exception as e:
+            JobStatusTracker().fail_job(job_id, error_type="TERMINAL", message="Invalid arguments.")
             print("\n*START OF TRACEBACK*")
             traceback.print_exc()
             print("*END OF TRACEBACK*\nUser friendly error message:")
@@ -51,6 +62,7 @@ def run_deforum(*args):
                 print(f"\033[31mWARNING:\033[0m skipped running from the following setting file, as it contains an invalid JSON: {os.path.basename(args_dict['custom_settings_file'][i].name)}")
                 continue
             else:
+                JobStatusTracker().fail_job(job_id, error_type="TERMINAL", message="Invalid settings file.")
                 print(f"\033[31mERROR!\033[0m Couldn't load data from '{os.path.basename(args_dict['custom_settings_file'][i].name)}'. Make sure it's a valid JSON using a JSON validator")
                 return None, None, None, f"Couldn't load data from '{os.path.basename(args_dict['custom_settings_file'][i].name)}'. Make sure it's a valid JSON using a JSON validator"
 
@@ -59,7 +71,8 @@ def run_deforum(*args):
         root.initial_noise_multiplier = shared.opts.data.get("initial_noise_multiplier", 1.0)
         root.initial_ddim_eta = shared.opts.data.get("eta_ddim", 0.0)
         root.initial_ancestral_eta = shared.opts.data.get("eta_ancestral", 1.0)
-       
+        root.job_id = job_id
+
         # clean up unused memory
         reset_frames_cache(root)
         gc.collect()
@@ -72,6 +85,8 @@ def run_deforum(*args):
         tqdm_backup = shared.total_tqdm
         shared.total_tqdm = DeforumTQDM(args, anim_args, parseq_args, video_args)
         try:  # dispatch to appropriate renderer
+            JobStatusTracker().update_phase(job_id, DeforumJobPhase.GENERATING)
+            JobStatusTracker().update_output_info(job_id, outdir=args.outdir, timestring=root.timestring)
             if anim_args.animation_mode == '2D' or anim_args.animation_mode == '3D':
                 if anim_args.use_mask_video: 
                     render_animation_with_video_mask(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root)  # allow mask video without an input video
@@ -84,6 +99,7 @@ def run_deforum(*args):
             else:
                 print('Other modes are not available yet!')
         except Exception as e:
+            JobStatusTracker().fail_job(job_id, error_type="RETRYABLE", message="Generation error.")
             print("\n*START OF TRACEBACK*")
             traceback.print_exc()
             print("*END OF TRACEBACK*\n")
@@ -99,6 +115,8 @@ def run_deforum(*args):
             shared.opts.data["eta_ddim"] = root.initial_ddim_eta
             shared.opts.data["eta_ancestral"] = root.initial_ancestral_eta
         
+        JobStatusTracker().update_phase(job_id, DeforumJobPhase.POST_PROCESSING)
+
         if video_args.store_frames_in_ram:
             dump_frames_cache(root)
         
@@ -171,7 +189,7 @@ def run_deforum(*args):
             cn_inputframes_list = [os.path.join(args.outdir, f'controlnet_{i}_inputframes') for i in range(1, num_of_models + 1)]
             handle_cn_frames_deletion(cn_inputframes_list)
 
-        root.initial_info += f"\n The animation is stored in {args.outdir}"
+        root.initial_info = (root.initial_info or " ") + f"\n The animation is stored in {args.outdir}"
         reset_frames_cache(root)  # cleanup the RAM in any case
         processed = Processed(p, [root.first_frame], 0, root.initial_info)
 
@@ -182,5 +200,8 @@ def run_deforum(*args):
         if shared.opts.data.get("deforum_enable_persistent_settings", False):
             persistent_sett_path = shared.opts.data.get("deforum_persistent_settings_path")
             save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
+
+        if (not shared.state.interrupted):
+            JobStatusTracker().complete_job(root.job_id)
 
     return processed.images, root.timestring, generation_info_js, processed.info

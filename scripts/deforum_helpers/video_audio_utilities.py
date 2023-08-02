@@ -137,18 +137,18 @@ def is_vid_path_valid(video_path):
     if video_path.startswith('http://') or video_path.startswith('https://'):
         response = requests.head(video_path, allow_redirects=True)
         if response.status_code == 404:
-            raise ConnectionError("Video URL is not valid. Response status code: {}".format(response.status_code))
+            raise ConnectionError(f"Video URL {video_path} is not valid. Response status code: {response.status_code}")
         elif response.status_code == 302:
             response = requests.head(response.headers['location'], allow_redirects=True)
         if response.status_code != 200:
-            raise ConnectionError("Video URL is not valid. Response status code: {}".format(response.status_code))
+            raise ConnectionError(f"Video URL {video_path} is not valid. Response status code: {response.status_code}")
         if extension not in file_formats:
-            raise ValueError("Video file format '{}' not supported. Supported formats are: {}".format(extension, file_formats))
+            raise ValueError(f"Video file {video_path} has format '{extension}', which not supported. Supported formats are: {file_formats}")
     else:
         if not os.path.exists(video_path):
-            raise RuntimeError("Video path does not exist.")
+            raise RuntimeError(f"Video path does not exist: {video_path}")
         if extension not in file_formats:
-            raise ValueError("Video file format '{}' not supported. Supported formats are: {}".format(extension, file_formats))
+            raise ValueError(f"Video file {video_path} has format '{extension}', which is not supported. Supported formats are: {file_formats}")
     return True
 
 # quick-retreive frame count, FPS and H/W dimensions of a video (local or URL-based)
