@@ -410,7 +410,7 @@ def DeforumAnimArgs():
             "minimum": 1,
             "maximum": 50,
             "step": 1,
-            "value": 2,
+            "value": 1,
             "info": "# of in-between frames that will not be directly diffused"
         },
         "optical_flow_cadence": {
