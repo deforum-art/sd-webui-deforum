@@ -414,11 +414,62 @@ def deforum_init_batch(_: gr.Blocks, app: FastAPI):
         import os
         os._exit(0)
 
+# A simplified, but safe version of Deforum's API
+def deforum_simple_api(_: gr.Blocks, app: FastAPI):
+    from fastapi.exceptions import RequestValidationError
+    from fastapi.responses import JSONResponse
+    from fastapi import FastAPI, Query, Request, UploadFile
+    from fastapi.encoders import jsonable_encoder
+    from deforum_helpers.general_utils import get_deforum_version
+    import uuid, pathlib
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        return JSONResponse(
+            status_code=422,
+            content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
+        )
+
+    @app.get("/deforum/api_version")
+    async def deforum_api_version():
+        return JSONResponse(content={"version": '1.0'})
+    
+    @app.get("/deforum/version")
+    async def deforum_version():
+        return JSONResponse(content={"version": get_deforum_version()})
+    
+    @app.post("/deforum/run")
+    async def deforum_run(settings_json:str, allowed_params:str = ""):
+        try:
+            allowed_params = allowed_params.split(';')
+            deforum_settings = json.loads(settings_json)
+            with open(os.path.join(pathlib.Path(__file__).parent.absolute(), 'default_settings.txt'), 'r', 'utf-8') as f:
+                default_settings = json.loads(f.read())
+            for k, v in default_settings.items():
+                if k in deforum_settings and k in allowed_params:
+                    default_settings[k] = v
+            deforum_settings = default_settings
+            run_id = uuid.uuid4().hex
+            deforum_settings['batch_name'] = run_id
+            deforum_settings = json.dumps(deforum_settings, indent=4, ensure_ascii=False)
+            settings_file = f"{run_id}.txt"
+            with open(settings_file, 'w', 'utf-8') as f:
+                f.write(deforum_settings)
+            [batch_id, job_ids] = make_ids(1)
+            outdir = os.path.join(os.getcwd(), opts.outdir_samples or opts.outdir_img2img_samples, str(run_id))
+            run_deforum_batch(batch_id, job_ids, [settings_file], None)
+            return JSONResponse(content={"outdir": outdir})
+        except Exception as e:
+            print(e)
+            return JSONResponse(status_code=500, content={"detail": "An error occurred while processing the video."},)
+
 # Setup A1111 initialisation hooks
 try:
     import modules.script_callbacks as script_callbacks    
     if cmd_opts.deforum_api:
         script_callbacks.on_app_started(deforum_api)
+    if cmd_opts.deforum_simple_api:
+        script_callbacks.on_app_started(deforum_simple_api)
     if cmd_opts.deforum_run_now:       
         script_callbacks.on_app_started(deforum_init_batch)
 except:
