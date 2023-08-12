@@ -913,7 +913,7 @@ def DeforumArgs():
             "label": "Motion preview mode (dry run).",
             "type": "checkbox",
             "value": False,
-            "info": "Preview motion only. Only run stable diffusion for init, and draw motion reference rectangle."
+            "info": "Preview motion only. Uses a static picture for init, and draw motion reference rectangle."
         },        
     }
 
