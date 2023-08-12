@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import os
 import pathlib
 import random
@@ -64,6 +80,8 @@ def hybrid_generation(args, anim_args, root):
     if not anim_args.hybrid_use_init_image:
         # determine max frames from length of input frames
         anim_args.max_frames = len(inputfiles)
+        if anim_args.max_frames < 1:
+            raise Exception(f"Error: No input frames found in {video_in_frame_path}! Please check your input video path and whether you've opted to extract input frames.")
         print(f"Using {anim_args.max_frames} input frames from {video_in_frame_path}...")
 
     # use first frame as init

@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import gradio as gr
 import modules.paths as ph
 from .general_utils import get_os
@@ -75,7 +91,7 @@ def handle_change_functions(l_vars):
         l_vars['hybrid_comp_mask_type'].change(fn=hide_if_none, inputs=l_vars['hybrid_comp_mask_type'], outputs=output)
     # End of hybrid related
     skip_video_creation_outputs = [l_vars['fps_out_format_row'], l_vars['soundtrack_row'], l_vars['store_frames_in_ram'], l_vars['make_gif'], l_vars['r_upscale_row'],
-                                   l_vars['delete_imgs']]
+                                   l_vars['delete_imgs'], l_vars['delete_input_frames']]
     for output in skip_video_creation_outputs:
         l_vars['skip_video_creation'].change(fn=change_visibility_from_skip_video, inputs=l_vars['skip_video_creation'], outputs=output)
     l_vars['frame_interpolation_slow_mo_enabled'].change(fn=hide_if_false, inputs=l_vars['frame_interpolation_slow_mo_enabled'], outputs=l_vars['frame_interp_slow_mo_amount_column'])

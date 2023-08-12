@@ -1,0 +1,231 @@
+{
+    "meta": {
+        "generated_by": "sd_parseq",
+        "version": "0.1.94",
+        "generated_at": "Tue, 01 Aug 2023 03:02:03 GMT",
+        "doc_id": "doc-9d687a32-6bb4-41e3-a974-e8c5a6a18571",
+        "version_id": "version-9762c158-b3e0-471e-ad6b-97259c8a5141"
+    },
+    "prompts": {
+        "format": "v2",
+        "enabled": true,
+        "commonPrompt": {
+            "name": "Common",
+            "positive": "",
+            "negative": "",
+            "allFrames": true,
+            "from": 0,
+            "to": 119,
+            "overlap": {
+                "inFrames": 0,
+                "outFrames": 0,
+                "type": "none",
+                "custom": "prompt_weight_1"
+            }
+        },
+        "commonPromptPos": "append",
+        "promptList": [
+            {
+                "name": "Prompt 1",
+                "positive": "Parseq prompt!",
+                "negative": "neg parseq prompt!",
+                "allFrames": false,
+                "from": 0,
+                "to": 119,
+                "overlap": {
+                    "inFrames": 0,
+                    "outFrames": 0,
+                    "type": "none",
+                    "custom": "prompt_weight_1"
+                }
+            }
+        ]
+    },
+    "options": {
+        "input_fps": 20,
+        "bpm": 140,
+        "output_fps": 20,
+        "cc_window_width": 0,
+        "cc_window_slide_rate": 1,
+        "cc_use_input": false
+    },
+    "managedFields": [
+        "seed",
+        "angle"
+    ],
+    "displayedFields": [
+        "seed",
+        "angle"
+    ],
+    "keyframes": [
+        {
+            "frame": 0,
+            "zoom": 1,
+            "zoom_i": "C",
+            "seed": 55,
+            "noise": 0.04,
+            "strength": 0.6,
+            "prompt_weight_1": 1,
+            "prompt_weight_1_i": "bez(0,0.6,1,0.4)",
+            "prompt_weight_2": 0,
+            "prompt_weight_2_i": "bez(0,0.6,1,0.4)",
+            "angle": "",
+            "angle_i": "sin(p=1b, a=45)"
+        },
+        {
+            "frame": 10,
+            "prompt_weight_1": 0,
+            "prompt_weight_2": 1,
+            "seed": 56
+        }
+    ],
+    "timeSeries": [],
+    "keyframeLock": "frames",
+    "reverseRender": false,
+    "rendered_frames": [
+        {
+            "frame": 0,
+            "seed": 55,
+            "angle": 0,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 55,
+            "subseed_strength": 0,
+            "seed_delta": 55,
+            "seed_pc": 98.21428571428571,
+            "angle_delta": 0,
+            "angle_pc": 0
+        },
+        {
+            "frame": 1,
+            "seed": 55.1,
+            "angle": 30.11087728614862,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 56,
+            "subseed_strength": 0.10000000000000142,
+            "seed_delta": 0.10000000000000142,
+            "seed_pc": 98.39285714285715,
+            "angle_delta": 30.11087728614862,
+            "angle_pc": 67.28163648031882
+        },
+        {
+            "frame": 2,
+            "seed": 55.2,
+            "angle": 44.7534852915723,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 56,
+            "subseed_strength": 0.20000000000000284,
+            "seed_delta": 0.10000000000000142,
+            "seed_pc": 98.57142857142858,
+            "angle_delta": 14.642608005423675,
+            "angle_pc": 100
+        },
+        {
+            "frame": 3,
+            "seed": 55.3,
+            "angle": 36.405764746872634,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 56,
+            "subseed_strength": 0.29999999999999716,
+            "seed_delta": 0.09999999999999432,
+            "seed_pc": 98.75,
+            "angle_delta": -8.347720544699662,
+            "angle_pc": 81.34732861516005
+        },
+        {
+            "frame": 4,
+            "seed": 55.4,
+            "angle": 9.356026086799169,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 56,
+            "subseed_strength": 0.3999999999999986,
+            "seed_delta": 0.10000000000000142,
+            "seed_pc": 98.92857142857142,
+            "angle_delta": -27.049738660073466,
+            "angle_pc": 20.905692653530693
+        },
+        {
+            "frame": 5,
+            "seed": 55.5,
+            "angle": -22.500000000000004,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 56,
+            "subseed_strength": 0.5,
+            "seed_delta": 0.10000000000000142,
+            "seed_pc": 99.10714285714286,
+            "angle_delta": -31.856026086799172,
+            "angle_pc": -50.275413978175834
+        },
+        {
+            "frame": 6,
+            "seed": 55.6,
+            "angle": -42.79754323328191,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 56,
+            "subseed_strength": 0.6000000000000014,
+            "seed_delta": 0.10000000000000142,
+            "seed_pc": 99.28571428571429,
+            "angle_delta": -20.297543233281903,
+            "angle_pc": -95.62952014676112
+        },
+        {
+            "frame": 7,
+            "seed": 55.7,
+            "angle": -41.109545593917034,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 56,
+            "subseed_strength": 0.7000000000000028,
+            "seed_delta": 0.10000000000000142,
+            "seed_pc": 99.46428571428572,
+            "angle_delta": 1.6879976393648732,
+            "angle_pc": -91.85775214172767
+        },
+        {
+            "frame": 8,
+            "seed": 55.8,
+            "angle": -18.303148938411006,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 56,
+            "subseed_strength": 0.7999999999999972,
+            "seed_delta": 0.09999999999999432,
+            "seed_pc": 99.64285714285714,
+            "angle_delta": 22.806396655506028,
+            "angle_pc": -40.89770622145878
+        },
+        {
+            "frame": 9,
+            "seed": 55.9,
+            "angle": 13.905764746872622,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 56,
+            "subseed_strength": 0.8999999999999986,
+            "seed_delta": 0.10000000000000142,
+            "seed_pc": 99.82142857142857,
+            "angle_delta": 32.208913685283626,
+            "angle_pc": 31.0719146369842
+        },
+        {
+            "frame": 10,
+            "seed": 56,
+            "angle": 38.97114317029975,
+            "deforum_prompt": "Parseq prompt! --neg neg parseq prompt!",
+            "subseed": 56,
+            "subseed_strength": 0,
+            "seed_delta": 0.10000000000000142,
+            "seed_pc": 100,
+            "angle_delta": 25.065378423427127,
+            "angle_pc": 87.07957138175908
+        }
+    ],
+    "rendered_frames_meta": {
+        "seed": {
+            "max": 56,
+            "min": 55,
+            "isFlat": false
+        },
+        "angle": {
+            "max": 44.7534852915723,
+            "min": -42.79754323328191,
+            "isFlat": false
+        }
+    }
+}
