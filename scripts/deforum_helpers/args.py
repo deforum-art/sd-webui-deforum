@@ -27,6 +27,9 @@ from .defaults import get_guided_imgs_default_json, mask_fill_choices
 from .deforum_controlnet import controlnet_component_names
 from .general_utils import get_os, substitute_placeholders
 
+from PIL import Image
+import pathlib
+
 def RootArgs():
     return {
         "device": sh.device,
@@ -906,6 +909,12 @@ def DeforumArgs():
             "value": 10,
             "info": ""
         },
+        "motion_preview_mode": {
+            "label": "Motion preview mode (dry run).",
+            "type": "checkbox",
+            "value": False,
+            "info": "Preview motion only. Only run stable diffusion for init, and draw motion reference rectangle."
+        },        
     }
 
 def LoopArgs():
@@ -1152,5 +1161,10 @@ def process_args(args_dict_main, run_id):
     args.outdir = os.path.join(p.outpath_samples, str(args.batch_name))
     args.outdir = os.path.join(os.getcwd(), args.outdir)
     os.makedirs(args.outdir, exist_ok=True)
+
+    default_img = Image.open(os.path.join(pathlib.Path(__file__).parent.absolute(), '114763196.jpg'))
+    assert default_img is not None
+    default_img = default_img.resize((args.W,args.H))
+    root.default_img = default_img
 
     return args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
