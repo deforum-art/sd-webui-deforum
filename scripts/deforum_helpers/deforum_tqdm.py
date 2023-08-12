@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import os
 from math import ceil
 import tqdm
@@ -13,11 +29,11 @@ class DeforumTQDM:
 
     def reset(self):
         from .animation_key_frames import DeformAnimKeys
-        from .parseq_adapter import ParseqAnimKeys
+        from .parseq_adapter import ParseqAdapter
         deforum_total = 0
         # FIXME: get only amount of steps
-        use_parseq = self._parseq_args.parseq_manifest is not None and self._parseq_args.parseq_manifest.strip()
-        keys = DeformAnimKeys(self._anim_args) if not use_parseq else ParseqAnimKeys(self._parseq_args, self._anim_args, self._video_args, mute=True)
+        parseq_adapter = ParseqAdapter(self._parseq_args, self._anim_args, self._video_args, None, None, mute=True)
+        keys = DeformAnimKeys(self._anim_args) if not parseq_adapter.use_parseq else parseq_adapter.anim_keys
 
         start_frame = 0
         if self._anim_args.resume_from_timestring:

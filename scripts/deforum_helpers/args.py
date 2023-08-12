@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import json
 import os
 import tempfile
@@ -410,7 +426,7 @@ def DeforumAnimArgs():
             "minimum": 1,
             "maximum": 50,
             "step": 1,
-            "value": 2,
+            "value": 1,
             "info": "# of in-between frames that will not be directly diffused"
         },
         "optical_flow_cadence": {
@@ -857,7 +873,7 @@ def DeforumArgs():
         "fill": {
             "label": "Mask fill",
             "type": "radio",
-            # "radio_type": "index",
+            "radio_type": "index",
             "choices": ['fill', 'original', 'latent noise', 'latent nothing'],
             "value": 'original',
             "info": ""
@@ -980,6 +996,12 @@ def DeforumOutputArgs():
             "type": "checkbox",
             "value": False,
             "info": "auto-delete imgs when video is ready"
+        },
+        "delete_input_frames": {
+            "label": "Delete All Inputframes",
+            "type": "checkbox",
+            "value": False,
+            "info": "auto-delete inputframes (incl CN ones) when video is ready"
         },
         "image_path": {
             "label": "Image path",

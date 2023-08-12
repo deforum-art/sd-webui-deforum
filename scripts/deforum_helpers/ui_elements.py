@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import gradio as gr
 from modules.ui_components import FormRow, FormColumn
 from .defaults import get_gradio_html, DeforumAnimPrompts
@@ -9,15 +25,15 @@ def create_gr_elem(d):
     # Examples: "dropdown" becomes gr.Dropdown, and "checkbox_group" becomes gr.CheckboxGroup.
     obj_type_str = ''.join(word.title() for word in d["type"].split('_'))
     obj_type = getattr(gr, obj_type_str)
-    return obj_type(**{k: v for k, v in d.items() if k != "type" and v is not None})
-    # # Prepare parameters for gradio element creation
-    # params = {k: v for k, v in d.items() if k != "type" and v is not None}
-    #
-    # # If we're creating a Radio element and 'radio_type' is specified, then use it to set gr.radio's type
-    # if obj_type_str == 'Radio' and 'radio_type' in params:
-    #     params['type'] = params.pop('radio_type')
-    #
-    # return obj_type(**params)
+
+    # Prepare parameters for gradio element creation
+    params = {k: v for k, v in d.items() if k != "type" and v is not None}
+
+    # If we're creating a Radio element and 'radio_type' is specified, then use it to set gr.radio's type
+    if obj_type_str == 'Radio' and 'radio_type' in params:
+        params['type'] = params.pop('radio_type')
+
+    return obj_type(**params)
 
 # ******** Important message ********
 # All get_tab functions use FormRow()/ FormColumn() by default, unless we have a gr.File inside that row/column, then we use gr.Row()/gr.Column() instead
@@ -339,7 +355,7 @@ def get_tab_init(d, da, dp):
 def get_tab_hybrid(da):
     with gr.TabItem('Hybrid Video'):
         # this html only shows when not in 2d/3d mode
-        hybrid_msg_html = gr.HTML(value='Please, change animation mode to 2D or 3D to enable Hybrid Mode', visible=False, elem_id='hybrid_msg_html')
+        hybrid_msg_html = gr.HTML(value='Change animation mode to 2D or 3D to enable Hybrid Mode', visible=False, elem_id='hybrid_msg_html')
         # HYBRID INFO ACCORD
         with gr.Accordion("Info & Help", open=False):
             gr.HTML(value=get_gradio_html('hybrid_video'))
@@ -410,6 +426,7 @@ def get_tab_output(da, dv):
                 with FormRow():
                     skip_video_creation = create_gr_elem(dv.skip_video_creation)
                     delete_imgs = create_gr_elem(dv.delete_imgs)
+                    delete_input_frames = create_gr_elem(dv.delete_input_frames)
                     store_frames_in_ram = create_gr_elem(dv.store_frames_in_ram)
                     save_depth_maps = create_gr_elem(da.save_depth_maps)
                     make_gif = create_gr_elem(dv.make_gif)
@@ -470,7 +487,7 @@ def get_tab_output(da, dv):
                                                          frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, in_vid_fps_ui_window])
                         interpolate_pics_button.click(fn=upload_pics_to_interpolate,
                                                       inputs=[pics_to_interpolate_chosen_file, frame_interpolation_engine, frame_interpolation_x_amount, frame_interpolation_slow_mo_enabled,
-                                                              frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, frame_interpolation_use_upscaled, fps, add_soundtrack, soundtrack_path])
+                                                              frame_interpolation_slow_mo_amount, frame_interpolation_keep_imgs, fps, add_soundtrack, soundtrack_path])
         # VIDEO UPSCALE TAB - not built using our args.py at all - all data and params are here and in .upscaling file
         with gr.TabItem('Video Upscaling'):
             vid_to_upscale_chosen_file = gr.File(label="Video to Upscale", interactive=True, file_count="single", file_types=["video"], elem_id="vid_to_upscale_chosen_file")
