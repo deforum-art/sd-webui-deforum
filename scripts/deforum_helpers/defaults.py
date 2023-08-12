@@ -146,7 +146,7 @@ def get_guided_imgs_info_html():
         
 def get_main_info_html():
     return """
-        <p><strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/kabachuha">kabachuha</a></strong> & <a href="https://github.com/hithereai">hithereai</a></strong></p>
+        <p><strong>Made by <a href="https://deforum.github.io">deforum.github.io</a>, port for AUTOMATIC1111's webui maintained by <a href="https://github.com/deforum-art">Deforum LLC.</a></strong></p>
         <p><a  style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui/wiki/FAQ-&-Troubleshooting">FOR HELP CLICK HERE</a></p>
         <ul style="list-style-type:circle; margin-left:1em">
         <li>The code for this extension: <a  style="color:SteelBlue" href="https://github.com/deforum-art/deforum-for-automatic1111-webui">here</a>.</li>
