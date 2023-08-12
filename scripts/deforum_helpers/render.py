@@ -121,6 +121,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # load depth model for 3D
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
     predict_depths = predict_depths or (anim_args.hybrid_composite and anim_args.hybrid_comp_mask_type in ['Depth', 'Video Depth'])
+    predict_depths = predict_depths and not args.motion_preview_mode
     if predict_depths:
         keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
 
@@ -139,6 +140,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     load_raft = (anim_args.optical_flow_cadence == "RAFT" and int(anim_args.diffusion_cadence) > 1) or \
                 (anim_args.hybrid_motion == "Optical Flow" and anim_args.hybrid_flow_method == "RAFT") or \
                 (anim_args.optical_flow_redo_generation == "RAFT")
+    load_raft = load_raft and not args.motion_preview_mode
     if load_raft:
         print("Loading RAFT model...")
         raft_model = RAFT()
@@ -533,15 +535,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             devices.torch_gc()
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
             sd_hijack.model_hijack.hijack(sd_model)
+        
+        optical_flow_redo_generation = anim_args.optical_flow_redo_generation if not args.motion_preview_mode else 'None'
 
         # optical flow redo before generation
-        if anim_args.optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
-            print(f"Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before generation.")
+        if optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
+            print(f"Optical flow redo is diffusing and warping using {optical_flow_redo_generation} optical flow before generation.")
             stored_seed = args.seed
             args.seed = random.randint(0, 2 ** 32 - 1)
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
             disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
-            disposable_flow = get_flow_from_images(prev_img, disposable_image, anim_args.optical_flow_redo_generation, raft_model)
+            disposable_flow = get_flow_from_images(prev_img, disposable_image, optical_flow_redo_generation, raft_model)
             disposable_image = cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB)
             disposable_image = image_transform_optical_flow(disposable_image, disposable_flow, redo_flow_factor)
             args.seed = stored_seed
@@ -550,7 +554,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             gc.collect()
 
         # diffusion redo
-        if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0:
+        if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0 and not args.motion_preview_mode:
             stored_seed = args.seed
             for n in range(0, int(anim_args.diffusion_redo)):
                 print(f"Redo generation {n + 1} of {int(anim_args.diffusion_redo)} before final generation")
