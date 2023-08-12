@@ -257,12 +257,12 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, pars
 
         print_combined_table(args, anim_args, p, keys, frame)  # print dynamic table to cli
 
-        if is_controlnet_enabled(controlnet_args):
-            process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_adapter, is_img2img=True, frame_idx=frame)
-
         if args.motion_preview_mode:
             processed = mock_process_images(args, p, init_image)
         else:
+            if is_controlnet_enabled(controlnet_args):
+                process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_adapter, is_img2img=True, frame_idx=frame)
+            
             processed = processing.process_images(p)
 
 
