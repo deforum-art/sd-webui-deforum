@@ -461,6 +461,7 @@ def deforum_simple_api(_: gr.Blocks, app: FastAPI):
             return JSONResponse(content={"outdir": outdir})
         except Exception as e:
             print(e)
+            traceback.print_exc()
             return JSONResponse(status_code=500, content={"detail": "An error occurred while processing the video."},)
 
 # Setup A1111 initialisation hooks
