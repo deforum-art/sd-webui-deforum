@@ -445,9 +445,9 @@ def deforum_simple_api(_: gr.Blocks, app: FastAPI):
             deforum_settings = json.loads(settings_json)
             with open(os.path.join(pathlib.Path(__file__).parent.absolute(), 'default_settings.txt'), 'r', encoding='utf-8') as f:
                 default_settings = json.loads(f.read())
-            for k, v in default_settings.items():
+            for k, _ in default_settings.items():
                 if k in deforum_settings and k in allowed_params:
-                    default_settings[k] = v
+                    default_settings[k] = deforum_settings[k]
             deforum_settings = default_settings
             run_id = uuid.uuid4().hex
             deforum_settings['batch_name'] = run_id
