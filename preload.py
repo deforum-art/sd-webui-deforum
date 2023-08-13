@@ -23,6 +23,12 @@ def preload(parser):
         default=None,
     )
     parser.add_argument(
+        "--deforum-simple-api",
+        action="store_true",
+        help="Enable the simplified version of Deforum API",
+        default=None,
+    )
+    parser.add_argument(
         "--deforum-run-now",
         type=str,
         help="Comma-delimited list of deforum settings files to run immediately on startup",
