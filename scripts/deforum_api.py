@@ -443,7 +443,7 @@ def deforum_simple_api(_: gr.Blocks, app: FastAPI):
         try:
             allowed_params = allowed_params.split(';')
             deforum_settings = json.loads(settings_json)
-            with open(os.path.join(pathlib.Path(__file__).parent.absolute(), 'default_settings.txt'), 'r', 'utf-8') as f:
+            with open(os.path.join(pathlib.Path(__file__).parent.absolute(), 'default_settings.txt'), 'r', encoding='utf-8') as f:
                 default_settings = json.loads(f.read())
             for k, v in default_settings.items():
                 if k in deforum_settings and k in allowed_params:
@@ -453,11 +453,14 @@ def deforum_simple_api(_: gr.Blocks, app: FastAPI):
             deforum_settings['batch_name'] = run_id
             deforum_settings = json.dumps(deforum_settings, indent=4, ensure_ascii=False)
             settings_file = f"{run_id}.txt"
-            with open(settings_file, 'w', 'utf-8') as f:
+            with open(settings_file, 'w', encoding='utf-8') as f:
                 f.write(deforum_settings)
+            class SettingsWrapper:
+                def __init__(self, filename):
+                    self.name = filename
             [batch_id, job_ids] = make_ids(1)
             outdir = os.path.join(os.getcwd(), opts.outdir_samples or opts.outdir_img2img_samples, str(run_id))
-            run_deforum_batch(batch_id, job_ids, [settings_file], None)
+            run_deforum_batch(batch_id, job_ids, [SettingsWrapper(settings_file)], None)
             return JSONResponse(content={"outdir": outdir})
         except Exception as e:
             print(e)
