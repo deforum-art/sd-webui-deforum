@@ -234,6 +234,11 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, pars
 
             processed = processing.process_images(p_txt)
 
+            try:
+                p_txt.close()
+            except Exception as e:
+                ...
+
     if processed is None:
         # Mask functions
         if args.use_mask:
