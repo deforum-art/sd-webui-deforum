@@ -88,6 +88,9 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
 
         name = get_frame_name(video_path)
 
+        if not (video_path.startswith('http://') or video_path.startswith('https://')):
+            video_path = os.path.realpath(video_path)
+
         vidcap = cv2.VideoCapture(video_path)
         video_fps = vidcap.get(cv2.CAP_PROP_FPS)
 
@@ -161,6 +164,7 @@ def is_vid_path_valid(video_path):
         if extension not in file_formats:
             raise ValueError(f"Video file {video_path} has format '{extension}', which not supported. Supported formats are: {file_formats}")
     else:
+        video_path = os.path.realpath(video_path)
         if not os.path.exists(video_path):
             raise RuntimeError(f"Video path does not exist: {video_path}")
         if extension not in file_formats:

@@ -80,6 +80,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
 def save_settings(*args, **kwargs):
     settings_path = args[0].strip()
     settings_path = clean_gradio_path_strings(settings_path)
+    settings_path = os.path.realpath(settings_path)
     settings_component_names = get_settings_component_names()
     data = {settings_component_names[i]: args[i+1] for i in range(0, len(settings_component_names))}
     args_dict = pack_args(data, DeforumArgs)
@@ -107,6 +108,7 @@ def load_all_settings(*args, ui_launch=False, **kwargs):
     import gradio as gr
     settings_path = args[0].strip()
     settings_path = clean_gradio_path_strings(settings_path)
+    settings_path = os.path.realpath(settings_path)
     settings_component_names = get_settings_component_names()
     data = {settings_component_names[i]: args[i+1] for i in range(len(settings_component_names))}
     print(f"reading custom settings from {settings_path}")

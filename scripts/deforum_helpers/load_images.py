@@ -65,6 +65,7 @@ def load_image(image_path :str, image_box :Image.Image):
             raise ConnectionError(f"Init image url or mask image url is not valid: {image_path}")
         image = Image.open(response.raw).convert('RGB')
     else:
+        image_path = os.path.realpath(image_path)
         if not os.path.exists(image_path):
             raise RuntimeError(f"Init image path or mask image path is not valid: {image_path}")
         image = Image.open(image_path).convert('RGB')

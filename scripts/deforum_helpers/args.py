@@ -1169,6 +1169,7 @@ def process_args(args_dict_main, run_id):
     args.batch_name = substitute_placeholders(args.batch_name, current_arg_list, full_base_folder_path)
     args.outdir = os.path.join(p.outpath_samples, str(args.batch_name))
     args.outdir = os.path.join(os.getcwd(), args.outdir)
+    args.outdir = os.path.realpath(args.outdir)
     os.makedirs(args.outdir, exist_ok=True)
 
     default_img = Image.open(os.path.join(pathlib.Path(__file__).parent.absolute(), '114763196.jpg'))

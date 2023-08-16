@@ -333,6 +333,9 @@ def unpack_controlnet_vids(args, anim_args, controlnet_args):
         vid_path = clean_gradio_path_strings(getattr(controlnet_args, f'cn_{i}_vid_path', None))
         mask_path = clean_gradio_path_strings(getattr(controlnet_args, f'cn_{i}_mask_vid_path', None))
 
+        vid_path = os.path.realpath(vid_path)
+        mask_path = os.path.realpath(mask_path)
+
         if vid_path:  # Process base video, if available
             process_controlnet_input_frames(args, anim_args, controlnet_args, vid_path, None, 'inputframes', i)
 
