@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import os
 import time
 import pathlib
@@ -6,7 +22,7 @@ import numexpr
 from modules.shared import opts, state
 from .render import render_animation
 from .seed import next_seed
-from .video_audio_utilities import vid2frames
+from .video_audio_utilities import vid2frames, render_preview
 from .prompt import interpolate_prompts
 from .generate import generate
 from .animation_key_frames import DeformAnimKeys
@@ -80,7 +96,7 @@ def get_parsed_value(value, frame_idx, max_f):
 def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
 
     # use parseq if manifest is provided
-    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args)
+    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args, loop_args)
 
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args) if not parseq_adapter.use_parseq else parseq_adapter.anim_keys
@@ -102,6 +118,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
     
     state.job_count = anim_args.max_frames
     frame_idx = 0
+    last_preview_frame = 0
     # INTERPOLATION MODE
     while frame_idx < anim_args.max_frames:
         # print data to cli
@@ -155,4 +172,8 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, co
         if args.seed_behavior != 'schedule':
             args.seed = next_seed(args, root)
 
+        last_preview_frame = render_preview(args, anim_args, video_args, root, frame_idx, last_preview_frame)
+
         frame_idx += 1
+
+        

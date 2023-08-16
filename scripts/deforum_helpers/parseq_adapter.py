@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import copy
 import json
 import logging
@@ -6,13 +22,15 @@ from operator import itemgetter
 import numpy as np
 import pandas as pd
 import requests
-from .animation_key_frames import DeformAnimKeys, ControlNetKeys
+from .animation_key_frames import DeformAnimKeys, ControlNetKeys, LooperAnimKeys
 from .rich import console
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+IGNORED_FIELDS = ['fi', 'use_looper', 'imagesToKeyframe', 'schedules']
+
 class ParseqAdapter():
-    def __init__(self, parseq_args, anim_args, video_args, controlnet_args, mute=False):
+    def __init__(self, parseq_args, anim_args, video_args, controlnet_args, loop_args, mute=False):
 
         # Basic data extraction
         self.use_parseq = parseq_args.parseq_manifest and parseq_args.parseq_manifest.strip()
@@ -26,6 +44,8 @@ class ParseqAdapter():
         # Wrap the original schedules with Parseq decorators, so that Parseq values will override the original values IFF appropriate.
         self.anim_keys = ParseqAnimKeysDecorator(self, DeformAnimKeys(anim_args))
         self.cn_keys = ParseqControlNetKeysDecorator(self, ControlNetKeys(anim_args, controlnet_args)) if controlnet_args else None
+        # -1 because seed seems to be unused in LooperAnimKeys
+        self.looper_keys = ParseqLooperKeysDecorator(self, LooperAnimKeys(loop_args, anim_args, -1)) if loop_args else None
 
         # Validation
         if (self.use_parseq):
@@ -78,9 +98,11 @@ class ParseqAdapter():
         table.add_column("Parseq", style="cyan")
         table.add_column("Deforum", style="green")
 
-        table.add_row("Anim Fields", '\n'.join(self.anim_keys.managed_fields()), '\n'.join(self.anim_keys.unmanaged_fields()))
+        table.add_row("Animation", '\n'.join(self.anim_keys.managed_fields()), '\n'.join(self.anim_keys.unmanaged_fields()))
         if self.cn_keys:
-            table.add_row("Cn Fields", '\n'.join(self.cn_keys.managed_fields()), '\n'.join(self.cn_keys.unmanaged_fields()))
+            table.add_row("ControlNet", '\n'.join(self.cn_keys.managed_fields()), '\n'.join(self.cn_keys.unmanaged_fields()))
+        if self.looper_keys:
+            table.add_row("Guided Images", '\n'.join(self.looper_keys.managed_fields()), '\n'.join(self.looper_keys.unmanaged_fields()))            
         table.add_row("Prompts", "✅" if self.manages_prompts() else "❌", "✅" if not self.manages_prompts() else "❌")
         table.add_row("Frames", str(len(self.rendered_frames)), str(self.required_frames) + (" ⚠️" if str(self.required_frames) != str(len(self.rendered_frames))+"" else ""))
         table.add_row("FPS", str(self.config_output_fps), str(self.required_fps) + (" ⚠️" if str(self.required_fps) != str(self.config_output_fps) else ""))
@@ -180,12 +202,12 @@ class ParseqAbstractDecorator():
 
     def managed_fields(self):
         all_parseq_fields = self.all_parseq_fields()
-        deforum_fields = [self.strip_suffixes(property) for property, _ in vars(self.fallback_keys).items() if property not in ['fi'] and not property.startswith('_')]
+        deforum_fields = [self.strip_suffixes(property) for property, _ in vars(self.fallback_keys).items() if property not in IGNORED_FIELDS and not property.startswith('_')]
         return [field for field in deforum_fields if field in all_parseq_fields]
 
     def unmanaged_fields(self):
         all_parseq_fields = self.all_parseq_fields()
-        deforum_fields = [self.strip_suffixes(property) for property, _ in vars(self.fallback_keys).items() if property not in ['fi'] and not property.startswith('_')]
+        deforum_fields = [self.strip_suffixes(property) for property, _ in vars(self.fallback_keys).items() if property not in IGNORED_FIELDS and not property.startswith('_')]
         return [field for field in deforum_fields if field not in all_parseq_fields]
 
 
@@ -239,5 +261,19 @@ class ParseqAnimKeysDecorator(ParseqAbstractDecorator):
         self.prompts = super().parseq_to_series('deforum_prompt') # formatted as "{positive} --neg {negative}"
 
 
+class ParseqLooperKeysDecorator(ParseqAbstractDecorator):
+    def __init__(self, adapter: ParseqAdapter, looper_keys):
+        super().__init__(adapter, looper_keys)
 
+        # The Deforum UI offers an "Image strength schedule" in the Guided Images section,
+        # which simply overrides the strength schedule if guided images is enabled.
+        # In Parseq, we just re-use the same strength schedule.
+        self.image_strength_schedule_series = super().parseq_to_series('strength')
+
+        # We explicitly state the mapping for all other guided images fields so we can strip the prefix
+        # that we use in Parseq.
+        self.blendFactorMax_series = super().parseq_to_series('guided_blendFactorMax')
+        self.blendFactorSlope_series = super().parseq_to_series('guided_blendFactorSlope')
+        self.tweening_frames_schedule_series = super().parseq_to_series('guided_tweening_frames')
+        self.color_correction_factor_series = super().parseq_to_series('guided_color_correction_factor')
 

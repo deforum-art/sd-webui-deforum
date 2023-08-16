@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import os
 import pandas as pd
 import cv2
@@ -12,7 +28,7 @@ from .generate import generate, isJson
 from .noise import add_noise
 from .animation import anim_frame_warp
 from .animation_key_frames import DeformAnimKeys, LooperAnimKeys
-from .video_audio_utilities import get_frame_name, get_next_frame
+from .video_audio_utilities import get_frame_name, get_next_frame, render_preview
 from .depth import DepthModel
 from .colors import maintain_colors
 from .parseq_adapter import ParseqAdapter
@@ -33,6 +49,8 @@ from .prompt import prepare_prompt
 from modules.shared import opts, cmd_opts, state, sd_model
 from modules import lowvram, devices, sd_hijack
 from .RAFT import RAFT
+
+from deforum_api import JobStatusTracker
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
     if opts.data.get("deforum_save_gen_info_as_srt", False):  # create .srt file and set timeframe mechanism using FPS
@@ -63,11 +81,11 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         unpack_controlnet_vids(args, anim_args, controlnet_args)
 
     # initialise Parseq adapter
-    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args)
+    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args, loop_args)
 
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args, args.seed) if not parseq_adapter.use_parseq else parseq_adapter.anim_keys
-    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed)
+    loopSchedulesAndData = LooperAnimKeys(loop_args, anim_args, args.seed) if not parseq_adapter.use_parseq else parseq_adapter.looper_keys
 
     # create output folder for the batch
     os.makedirs(args.outdir, exist_ok=True)
@@ -103,6 +121,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # load depth model for 3D
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
     predict_depths = predict_depths or (anim_args.hybrid_composite and anim_args.hybrid_comp_mask_type in ['Depth', 'Video Depth'])
+    predict_depths = predict_depths and not args.motion_preview_mode
     if predict_depths:
         keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
 
@@ -121,6 +140,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     load_raft = (anim_args.optical_flow_cadence == "RAFT" and int(anim_args.diffusion_cadence) > 1) or \
                 (anim_args.hybrid_motion == "Optical Flow" and anim_args.hybrid_flow_method == "RAFT") or \
                 (anim_args.optical_flow_redo_generation == "RAFT")
+    load_raft = load_raft and not args.motion_preview_mode
     if load_raft:
         print("Loading RAFT model...")
         raft_model = RAFT()
@@ -193,6 +213,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     # Webui
     state.job_count = anim_args.max_frames
+    last_preview_frame = 0
 
     while frame_idx < anim_args.max_frames:
         # Webui
@@ -265,7 +286,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             if predict_depths: depth_model.to(root.device)
 
         if turbo_steps == 1 and opts.data.get("deforum_save_gen_info_as_srt"):
-            params_string = format_animation_params(keys, prompt_series, frame_idx)
+            params_to_print = opts.data.get("deforum_save_gen_info_as_srt_params", ['Seed'])
+            params_string = format_animation_params(keys, prompt_series, frame_idx, params_to_print)
             write_frame_subtitle(srt_filename, frame_idx, srt_frame_duration, f"F#: {frame_idx}; Cadence: false; Seed: {args.seed}; {params_string}")
             params_string = None
 
@@ -290,7 +312,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                             turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow, 1)
 
                 if opts.data.get("deforum_save_gen_info_as_srt"):
-                    params_string = format_animation_params(keys, prompt_series, tween_frame_idx)
+                    params_to_print = opts.data.get("deforum_save_gen_info_as_srt_params", ['Seed'])
+                    params_string = format_animation_params(keys, prompt_series, tween_frame_idx, params_to_print)
                     write_frame_subtitle(srt_filename, tween_frame_idx, srt_frame_duration, f"F#: {tween_frame_idx}; Cadence: {tween < 1.0}; Seed: {args.seed}; {params_string}")
                     params_string = None
 
@@ -514,15 +537,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             devices.torch_gc()
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
             sd_hijack.model_hijack.hijack(sd_model)
+        
+        optical_flow_redo_generation = anim_args.optical_flow_redo_generation if not args.motion_preview_mode else 'None'
 
         # optical flow redo before generation
-        if anim_args.optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
-            print(f"Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before generation.")
+        if optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
+            print(f"Optical flow redo is diffusing and warping using {optical_flow_redo_generation} optical flow before generation.")
             stored_seed = args.seed
             args.seed = random.randint(0, 2 ** 32 - 1)
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
             disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
-            disposable_flow = get_flow_from_images(prev_img, disposable_image, anim_args.optical_flow_redo_generation, raft_model)
+            disposable_flow = get_flow_from_images(prev_img, disposable_image, optical_flow_redo_generation, raft_model)
             disposable_image = cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB)
             disposable_image = image_transform_optical_flow(disposable_image, disposable_flow, redo_flow_factor)
             args.seed = stored_seed
@@ -531,7 +556,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             gc.collect()
 
         # diffusion redo
-        if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0:
+        if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0 and not args.motion_preview_mode:
             stored_seed = args.seed
             for n in range(0, int(anim_args.diffusion_redo)):
                 print(f"Redo generation {n + 1} of {int(anim_args.diffusion_redo)} before final generation")
@@ -606,12 +631,18 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     sd_hijack.model_hijack.hijack(sd_model)
             frame_idx += 1
 
-        state.current_image = image
+        state.assign_current_image(image)
 
         args.seed = next_seed(args, root)
+
+        last_preview_frame = render_preview(args, anim_args, video_args, root, frame_idx, last_preview_frame)            
+
+        JobStatusTracker().update_phase(root.job_id, phase="GENERATING", progress=frame_idx/anim_args.max_frames)
+
 
     if predict_depths and not keep_in_vram:
         depth_model.delete_model()  # handles adabins too
 
     if load_raft:
         raft_model.delete_model()
+

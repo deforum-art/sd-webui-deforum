@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import gradio as gr
 from modules import ui_components
 from modules.shared import opts, cmd_opts, OptionInfo
@@ -17,3 +33,5 @@ def on_ui_settings():
     opts.add_option("deforum_save_gen_info_as_srt", OptionInfo(False, "Save an .srt (subtitles) file with the generation info along with each animation", gr.Checkbox, {"interactive": True}, section=section))  
     opts.add_option("deforum_embed_srt", OptionInfo(False, "If .srt file is saved, soft-embed the subtitles into the rendered video file", gr.Checkbox, {"interactive": True}, section=section))  
     opts.add_option("deforum_save_gen_info_as_srt_params", OptionInfo(['Noise Schedule'], "Choose which animation params are to be saved to the .srt file (Frame # and Seed will always be saved):", ui_components.DropdownMulti, lambda: {"interactive": True, "choices": srt_ui_params}, section=section)) 
+    opts.add_option("deforum_preview", OptionInfo("Off", "Generate preview video during generation? (Preview does not include frame interpolation or upscaling.)", gr.Dropdown, {"interactive": True, "choices": ['Off', 'On', 'On, concurrent (don\'t pause generation)']}, section=section))
+    opts.add_option("deforum_preview_interval_frames", OptionInfo(100, "Generate preview every N frames", gr.Slider, {"interactive": True, "minimum": 10, "maximum": 500}, section=section))
