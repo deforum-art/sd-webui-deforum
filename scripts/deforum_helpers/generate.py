@@ -123,6 +123,7 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, pars
     mask_image = None
     init_image = None
     image_init0 = None
+    image_init0_box = None
 
     if loop_args.use_looper and anim_args.animation_mode in ['2D', '3D']:
 
@@ -157,12 +158,14 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, pars
         if frame % skipFrame <= tweeningFrames:  # number of tweening frames
             blendFactor = loop_args.blendFactorMax - loop_args.blendFactorSlope * math.cos((frame % tweeningFrames) / (tweeningFrames / 2))
         init_image2, _ = load_img(list(jsonImages.values())[frameToChoose],
+                                  None, # init_image_box not used in this case
                                   shape=(args.W, args.H),
                                   use_alpha_as_mask=args.use_alpha_as_mask)
         image_init0 = list(jsonImages.values())[0]
 
     else:  # they passed in a single init image
         image_init0 = args.init_image
+        image_init0_box = args.init_image_box
 
     available_samplers = get_samplers_list()
     if sampler_name is not None:
@@ -181,15 +184,15 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, pars
         # TODO: cleanup init_sample remains later
         img = root.init_sample
         init_image = img
-        image_init0 = img
         if loop_args.use_looper and isJson(loop_args.imagesToKeyframe) and anim_args.animation_mode in ['2D', '3D']:
             init_image = Image.blend(init_image, init_image2, blendFactor)
             correction_colors = Image.blend(init_image, init_image2, colorCorrectionFactor)
             p.color_corrections = [processing.setup_color_correction(correction_colors)]
 
     # this is the first pass
-    elif (loop_args.use_looper and anim_args.animation_mode in ['2D', '3D']) or (args.use_init and ((args.init_image != None and args.init_image != ''))):
+    elif (loop_args.use_looper and anim_args.animation_mode in ['2D', '3D']) or (args.use_init and ((args.init_image != None and args.init_image != '') or args.init_image_box != None)):
         init_image, mask_image = load_img(image_init0,  # initial init image
+                                          image_init0_box,  # initial init image from box (if single init image is used, not json list)
                                           shape=(args.W, args.H),
                                           use_alpha_as_mask=args.use_alpha_as_mask)
 

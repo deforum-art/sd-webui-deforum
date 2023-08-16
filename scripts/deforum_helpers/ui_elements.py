@@ -29,9 +29,11 @@ def create_gr_elem(d):
     # Prepare parameters for gradio element creation
     params = {k: v for k, v in d.items() if k != "type" and v is not None}
 
-    # If we're creating a Radio element and 'radio_type' is specified, then use it to set gr.radio's type
-    if obj_type_str == 'Radio' and 'radio_type' in params:
-        params['type'] = params.pop('radio_type')
+    # Special case: Since some elements can have 'type' parameter and we are already using 'type' to specify
+    # which element to use we need a separate parameter that will be used to overwrite 'type' at this point.
+    # E.g. for Radio element we should specify 'type_param' which is then used to set gr.radio's type.
+    if 'type_param' in params:
+        params['type'] = params.pop('type_param')
 
     return obj_type(**params)
 
@@ -310,6 +312,8 @@ def get_tab_init(d, da, dp):
                     strength = create_gr_elem(d.strength)
             with FormRow():
                 init_image = create_gr_elem(d.init_image)
+            with FormRow():
+                init_image_box = create_gr_elem(d.init_image_box)
         # VIDEO INIT INNER-TAB
         with gr.Tab('Video Init'):
             with FormRow():

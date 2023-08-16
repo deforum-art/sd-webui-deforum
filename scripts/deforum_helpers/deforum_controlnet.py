@@ -222,8 +222,8 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_ad
         # Loopback mode ENABLED:
         if getattr(controlnet_args, f'cn_{cn_idx}_loopback_mode'):
             # On very first frame, check if use init enabled, and if init image is provided
-            if frame_idx == 0 and args.use_init and args.init_image is not None:
-                cn_image_np = load_image(args.init_image)
+            if frame_idx == 0 and args.use_init and (args.init_image is not None or args.init_image_box is not None):
+                cn_image_np = load_image(args.init_image, args.init_image_box)
                 # convert to uint8 for compatibility with CN
                 cn_image_np = np.array(cn_image_np).astype('uint8')
             # Not first frame, use previous img (init_sample)
