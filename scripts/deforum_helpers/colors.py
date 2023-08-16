@@ -19,10 +19,8 @@ import pkg_resources
 from skimage.exposure import match_histograms
 
 def maintain_colors(prev_img, color_match_sample, mode):
-    skimage_version = pkg_resources.get_distribution('scikit-image').version
-    is_skimage_v20_or_higher = pkg_resources.parse_version(skimage_version) >= pkg_resources.parse_version('0.20.0')
     
-    match_histograms_kwargs = {'channel_axis': -1} if is_skimage_v20_or_higher else {'multichannel': True}
+    match_histograms_kwargs = {'channel_axis': -1}
     
     if mode == 'RGB':
         return match_histograms(prev_img, color_match_sample, **match_histograms_kwargs)
