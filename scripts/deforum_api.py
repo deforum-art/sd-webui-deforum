@@ -28,7 +28,7 @@ from datetime import datetime
 from typing import Any, Dict, List
 from deforum_api_models import Batch, DeforumJobErrorType, DeforumJobStatusCategory, DeforumJobPhase, DeforumJobStatus
 from contextlib import contextmanager
-
+from deforum_extend_paths import deforum_sys_extend
 
 import gradio as gr
 from deforum_helpers.args import (DeforumAnimArgs, DeforumArgs,
@@ -124,6 +124,8 @@ def run_deforum_batch(batch_id: str, job_ids: [str], deforum_settings_files: Lis
 # Each submitted batch will be given a batch ID which the user can use to query the status of all jobs in the batch.
 #
 def deforum_api(_: gr.Blocks, app: FastAPI):  
+
+    deforum_sys_extend()
 
     apiState = ApiState()
 
@@ -404,6 +406,7 @@ class JobStatusTracker(metaclass=Singleton):
         return self.statuses[job_id] if job_id in self.statuses else None
 
 def deforum_init_batch(_: gr.Blocks, app: FastAPI):
+    deforum_sys_extend()
     settings_files = [open(filename, 'r') for filename in cmd_opts.deforum_run_now.split(",")]
     [batch_id, job_ids] = make_ids(len(settings_files))
     log.info(f"Starting init batch {batch_id} with job(s) {job_ids}...")
@@ -416,6 +419,7 @@ def deforum_init_batch(_: gr.Blocks, app: FastAPI):
 
 # A simplified, but safe version of Deforum's API
 def deforum_simple_api(_: gr.Blocks, app: FastAPI):
+    deforum_sys_extend()
     from fastapi.exceptions import RequestValidationError
     from fastapi.responses import JSONResponse
     from fastapi import FastAPI, Query, Request, UploadFile
