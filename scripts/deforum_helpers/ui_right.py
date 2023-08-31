@@ -17,7 +17,7 @@
 from .args import DeforumOutputArgs, get_component_names, get_settings_component_names
 from modules.shared import opts, state
 from modules.ui import create_output_panel, wrap_gradio_call
-from webui import wrap_gradio_gpu_call
+from call_queue import wrap_gradio_gpu_call
 from .run_deforum import run_deforum
 from .settings import save_settings, load_all_settings, load_video_settings
 from .general_utils import get_deforum_version
