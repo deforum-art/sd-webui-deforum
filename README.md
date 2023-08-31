@@ -66,3 +66,8 @@ Keyframes tab:
 
 ![image](https://user-images.githubusercontent.com/121192995/226101140-bfe6cce7-9b78-4a1d-be9a-43e1fc78239e.png)
 
+## License
+
+This program is distributed under the terms of the GNU Affero Public License v3.0, copyright (c) 2023 Deforum LLC.
+
+Some of its sublicensed integrated 3rd party components may have other licenses, see LICENSE for usage terms.

@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import os
 import json
 import modules.shared as sh
@@ -8,9 +24,10 @@ from .deprecation_utils import handle_deprecated_settings
 from .general_utils import get_deforum_version, clean_gradio_path_strings
 
 def get_keys_to_exclude():
-    return ["init_sample", "perlin_w", "perlin_h", "image_path", "outdir"]
+    return ["init_sample", "perlin_w", "perlin_h", "image_path", "outdir", "init_image_box"]
     # perlin params are used just not shown in ui for now, so not to be deleted
     # image_path and outdir are in use, not to be deleted
+    # init_image_box is PIL object not string, so ignore.
 
 def load_args(args_dict_main, args, anim_args, parseq_args, loop_args, controlnet_args, video_args, custom_settings_file, root, run_id):
     custom_settings_file = custom_settings_file[run_id]
@@ -63,6 +80,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
 def save_settings(*args, **kwargs):
     settings_path = args[0].strip()
     settings_path = clean_gradio_path_strings(settings_path)
+    settings_path = os.path.realpath(settings_path)
     settings_component_names = get_settings_component_names()
     data = {settings_component_names[i]: args[i+1] for i in range(0, len(settings_component_names))}
     args_dict = pack_args(data, DeforumArgs)
@@ -90,6 +108,7 @@ def load_all_settings(*args, ui_launch=False, **kwargs):
     import gradio as gr
     settings_path = args[0].strip()
     settings_path = clean_gradio_path_strings(settings_path)
+    settings_path = os.path.realpath(settings_path)
     settings_component_names = get_settings_component_names()
     data = {settings_component_names[i]: args[i+1] for i in range(len(settings_component_names))}
     print(f"reading custom settings from {settings_path}")

@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import requests
 import os
 from PIL import Image
@@ -5,9 +21,9 @@ import socket
 import torchvision.transforms.functional as TF
 from .general_utils import clean_gradio_path_strings
 
-def load_img(path : str, shape=None, use_alpha_as_mask=False):
+def load_img(path : str, image_box :Image.Image, shape=None, use_alpha_as_mask=False):
     # use_alpha_as_mask: Read the alpha channel of the image as the mask image
-    image = load_image(path)
+    image = load_image(path, image_box)
     image = image.convert('RGBA') if use_alpha_as_mask else image.convert('RGB')
     image = image.resize(shape, resample=Image.LANCZOS) if shape is not None else image
 
@@ -27,7 +43,11 @@ def load_img(path : str, shape=None, use_alpha_as_mask=False):
 
     return image, mask_image
 
-def load_image(image_path :str):
+def load_image(image_path :str, image_box :Image.Image):
+    # If init_image_box was used then no need to fetch the image via URL, just return the Image object directly.
+    if isinstance(image_box, Image.Image):
+        return image_box
+
     image_path = clean_gradio_path_strings(image_path)
     image = None
     if image_path.startswith('http://') or image_path.startswith('https://'):
@@ -45,6 +65,7 @@ def load_image(image_path :str):
             raise ConnectionError(f"Init image url or mask image url is not valid: {image_path}")
         image = Image.open(response.raw).convert('RGB')
     else:
+        image_path = os.path.realpath(image_path)
         if not os.path.exists(image_path):
             raise RuntimeError(f"Init image path or mask image path is not valid: {image_path}")
         image = Image.open(image_path).convert('RGB')
@@ -55,10 +76,8 @@ def prepare_mask(mask_input, mask_shape, mask_brightness_adjust=1.0, mask_contra
     """
     prepares mask for use in webui
     """
-    if isinstance(mask_input, Image.Image):
-        mask = mask_input
-    else :
-        mask = load_image(mask_input)
+    # Aparently 'mask_input' can be both path and Image object.
+    mask = load_image(mask_input, mask_input)
     mask = mask.resize(mask_shape, resample=Image.LANCZOS)
     if mask_brightness_adjust != 1:
         mask = TF.adjust_brightness(mask, mask_brightness_adjust)

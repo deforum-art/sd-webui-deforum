@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 # This helper script is responsible for ControlNet/Deforum integration
 # https://github.com/Mikubill/sd-webui-controlnet — controlnet repo
 
@@ -206,8 +222,8 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_ad
         # Loopback mode ENABLED:
         if getattr(controlnet_args, f'cn_{cn_idx}_loopback_mode'):
             # On very first frame, check if use init enabled, and if init image is provided
-            if frame_idx == 0 and args.use_init and args.init_image is not None:
-                cn_image_np = load_image(args.init_image)
+            if frame_idx == 0 and args.use_init and (args.init_image is not None or args.init_image_box is not None):
+                cn_image_np = load_image(args.init_image, args.init_image_box)
                 # convert to uint8 for compatibility with CN
                 cn_image_np = np.array(cn_image_np).astype('uint8')
             # Not first frame, use previous img (init_sample)

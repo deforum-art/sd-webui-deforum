@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import os
 import cv2
 import shutil
@@ -72,6 +88,9 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
 
         name = get_frame_name(video_path)
 
+        if not (video_path.startswith('http://') or video_path.startswith('https://')):
+            video_path = os.path.realpath(video_path)
+
         vidcap = cv2.VideoCapture(video_path)
         video_fps = vidcap.get(cv2.CAP_PROP_FPS)
 
@@ -145,6 +164,7 @@ def is_vid_path_valid(video_path):
         if extension not in file_formats:
             raise ValueError(f"Video file {video_path} has format '{extension}', which not supported. Supported formats are: {file_formats}")
     else:
+        video_path = os.path.realpath(video_path)
         if not os.path.exists(video_path):
             raise RuntimeError(f"Video path does not exist: {video_path}")
         if extension not in file_formats:

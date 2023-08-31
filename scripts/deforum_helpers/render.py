@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import os
 import pandas as pd
 import cv2
@@ -105,6 +121,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # load depth model for 3D
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
     predict_depths = predict_depths or (anim_args.hybrid_composite and anim_args.hybrid_comp_mask_type in ['Depth', 'Video Depth'])
+    predict_depths = predict_depths and not args.motion_preview_mode
     if predict_depths:
         keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
 
@@ -123,6 +140,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     load_raft = (anim_args.optical_flow_cadence == "RAFT" and int(anim_args.diffusion_cadence) > 1) or \
                 (anim_args.hybrid_motion == "Optical Flow" and anim_args.hybrid_flow_method == "RAFT") or \
                 (anim_args.optical_flow_redo_generation == "RAFT")
+    load_raft = load_raft and not args.motion_preview_mode
     if load_raft:
         print("Loading RAFT model...")
         raft_model = RAFT()
@@ -165,8 +183,9 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     mask_image = None
 
-    if args.use_init and args.init_image != None and args.init_image != '':
+    if args.use_init and ((args.init_image != None and args.init_image != '') or args.init_image_box != None):
         _, mask_image = load_img(args.init_image,
+                                 args.init_image_box,
                                  shape=(args.W, args.H),
                                  use_alpha_as_mask=args.use_alpha_as_mask)
         mask_vals['video_mask'] = mask_image
@@ -188,7 +207,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     # get color match for 'Image' color coherence only once, before loop
     if anim_args.color_coherence == 'Image':
-        color_match_sample = load_image(anim_args.color_coherence_image_path)
+        color_match_sample = load_image(anim_args.color_coherence_image_path, None)
         color_match_sample = color_match_sample.resize((args.W, args.H), PIL.Image.LANCZOS)
         color_match_sample = cv2.cvtColor(np.array(color_match_sample), cv2.COLOR_RGB2BGR)
 
@@ -482,6 +501,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             init_frame = get_next_frame(args.outdir, anim_args.video_init_path, frame_idx, False)
             print(f"Using video init frame {init_frame}")
             args.init_image = init_frame
+            args.init_image_box = None  # init_image_box not used in this case
             args.strength = max(0.0, min(1.0, strength))
         if anim_args.use_mask_video:
             args.mask_file = get_mask_from_file(get_next_frame(args.outdir, anim_args.video_mask_path, frame_idx, True), args)
@@ -517,15 +537,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             devices.torch_gc()
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
             sd_hijack.model_hijack.hijack(sd_model)
+        
+        optical_flow_redo_generation = anim_args.optical_flow_redo_generation if not args.motion_preview_mode else 'None'
 
         # optical flow redo before generation
-        if anim_args.optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
-            print(f"Optical flow redo is diffusing and warping using {anim_args.optical_flow_redo_generation} optical flow before generation.")
+        if optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
+            print(f"Optical flow redo is diffusing and warping using {optical_flow_redo_generation} optical flow before generation.")
             stored_seed = args.seed
             args.seed = random.randint(0, 2 ** 32 - 1)
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
             disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
-            disposable_flow = get_flow_from_images(prev_img, disposable_image, anim_args.optical_flow_redo_generation, raft_model)
+            disposable_flow = get_flow_from_images(prev_img, disposable_image, optical_flow_redo_generation, raft_model)
             disposable_image = cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB)
             disposable_image = image_transform_optical_flow(disposable_image, disposable_flow, redo_flow_factor)
             args.seed = stored_seed
@@ -534,7 +556,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             gc.collect()
 
         # diffusion redo
-        if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0:
+        if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0 and not args.motion_preview_mode:
             stored_seed = args.seed
             for n in range(0, int(anim_args.diffusion_redo)):
                 print(f"Redo generation {n + 1} of {int(anim_args.diffusion_redo)} before final generation")
@@ -609,7 +631,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     sd_hijack.model_hijack.hijack(sd_model)
             frame_idx += 1
 
-        state.current_image = image
+        state.assign_current_image(image)
 
         args.seed = next_seed(args, root)
 

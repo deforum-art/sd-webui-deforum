@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import os
 import shutil
 import traceback
@@ -55,8 +71,8 @@ def run_deforum(*args):
             print("\n*START OF TRACEBACK*")
             traceback.print_exc()
             print("*END OF TRACEBACK*\nUser friendly error message:")
-            print(f"Error: {e}. Check your prompts with a JSON validator please.")
-            return None, None, None, f"Error: '{e}'. Check your prompts with a JSON validator please. Full error message is in your terminal/ cli."
+            print(f"Error: {e}. Please, check your prompts with a JSON validator.")
+            return None, None, None, f"Error: '{e}'. Please, check your prompts with a JSON validator. Full error message is in your terminal/ cli."
         if args_loaded_ok is False:
             if times_to_run > 1:
                 print(f"\033[31mWARNING:\033[0m skipped running from the following setting file, as it contains an invalid JSON: {os.path.basename(args_dict['custom_settings_file'][i].name)}")
@@ -104,8 +120,8 @@ def run_deforum(*args):
             traceback.print_exc()
             print("*END OF TRACEBACK*\n")
             print("User friendly error message:")
-            print(f"Error: {e}. Check your schedules/ init values please. Also make sure you don't have a backwards slash in any of your PATHs - use / instead of \\.")
-            return None, None, None, f"Error: '{e}'. Check your schedules/ init values please. Also make sure you don't have a backwards slash in any of your PATHs - use / instead of \\. Full error message is in your terminal/ cli."
+            print(f"Error: {e}. Please, check your schedules/ init values.")
+            return None, None, None, f"Error: '{e}'. Before reporting, please check your schedules/ init values. Full error message is in your terminal/ cli."
         finally:
             shared.total_tqdm = tqdm_backup
             # reset shared.opts.data vals to what they were before we started the animation. Else they will stick to the last value - it actually updates webui settings (config.json)
@@ -200,6 +216,12 @@ def run_deforum(*args):
         if shared.opts.data.get("deforum_enable_persistent_settings", False):
             persistent_sett_path = shared.opts.data.get("deforum_persistent_settings_path")
             save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, persistent_sett_path)
+
+        # Close the pipeline, not to interfere with ControlNet
+        try:
+            p.close()
+        except Exception as e:
+            ...
 
         if (not shared.state.interrupted):
             JobStatusTracker().complete_job(root.job_id)

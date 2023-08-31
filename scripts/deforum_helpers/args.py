@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import json
 import os
 import tempfile
@@ -10,6 +26,9 @@ from modules.processing import get_fixed_seed
 from .defaults import get_guided_imgs_default_json, mask_fill_choices
 from .deforum_controlnet import controlnet_component_names
 from .general_utils import get_os, substitute_placeholders
+
+from PIL import Image
+import pathlib
 
 def RootArgs():
     return {
@@ -410,7 +429,7 @@ def DeforumAnimArgs():
             "minimum": 1,
             "maximum": 50,
             "step": 1,
-            "value": 2,
+            "value": 1,
             "info": "# of in-between frames that will not be directly diffused"
         },
         "optical_flow_cadence": {
@@ -797,9 +816,17 @@ def DeforumArgs():
             "info": ""
         },
         "init_image": {
-            "label": "Init image",
+            "label": "Init image URL",
             "type": "textbox",
             "value": "https://deforum.github.io/a1/I1.png",
+            "info": "Use web address or local path. Note: if the image box below is used then this field is ignored."
+        },
+        "init_image_box": {
+            "label": "Init image box",
+            "type": "image",
+            "type_param": "pil",
+            "source": "upload",
+            "interactive": True,
             "info": ""
         },
         "use_mask": {
@@ -857,7 +884,7 @@ def DeforumArgs():
         "fill": {
             "label": "Mask fill",
             "type": "radio",
-            "radio_type": "index",
+            "type_param": "index",
             "choices": ['fill', 'original', 'latent noise', 'latent nothing'],
             "value": 'original',
             "info": ""
@@ -890,6 +917,12 @@ def DeforumArgs():
             "value": 10,
             "info": ""
         },
+        "motion_preview_mode": {
+            "label": "Motion preview mode (dry run).",
+            "type": "checkbox",
+            "value": False,
+            "info": "Preview motion only. Uses a static picture for init, and draw motion reference rectangle."
+        },        
     }
 
 def LoopArgs():
@@ -1125,6 +1158,7 @@ def process_args(args_dict_main, run_id):
 
     if not args.use_init and not anim_args.hybrid_use_init_image:
         args.init_image = None
+        args.init_image_box = None
 
     elif anim_args.animation_mode == 'Video Input':
         args.use_init = True
@@ -1135,6 +1169,12 @@ def process_args(args_dict_main, run_id):
     args.batch_name = substitute_placeholders(args.batch_name, current_arg_list, full_base_folder_path)
     args.outdir = os.path.join(p.outpath_samples, str(args.batch_name))
     args.outdir = os.path.join(os.getcwd(), args.outdir)
+    args.outdir = os.path.realpath(args.outdir)
     os.makedirs(args.outdir, exist_ok=True)
+
+    default_img = Image.open(os.path.join(pathlib.Path(__file__).parent.absolute(), '114763196.jpg'))
+    assert default_img is not None
+    default_img = default_img.resize((args.W,args.H))
+    root.default_img = default_img
 
     return args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args

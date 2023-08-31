@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import os
 import pathlib
 import random
@@ -72,6 +88,7 @@ def hybrid_generation(args, anim_args, root):
     if anim_args.hybrid_use_first_frame_as_init_image:
         for f in inputfiles:
             args.init_image = str(f)
+            args.init_image_box = None  # init_image_box not used in this case
             args.use_init = True
             print(f"Using init_image from video: {args.init_image}")
             break
@@ -88,7 +105,7 @@ def hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_c
     prev_img = cv2.cvtColor(prev_img, cv2.COLOR_BGR2RGB)
     prev_img_hybrid = Image.fromarray(prev_img)
     if anim_args.hybrid_use_init_image:
-        video_image = load_image(args.init_image)
+        video_image = load_image(args.init_image, args.init_image_box)
     else:
         video_image = Image.open(video_frame)
     video_image = video_image.resize((args.W, args.H), PIL.Image.LANCZOS)

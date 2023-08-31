@@ -1,3 +1,19 @@
+# Copyright (C) 2023 Deforum LLC
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+# Contact the authors: https://deforum.github.io/
+
 import gradio as gr
 from modules.ui_components import FormRow, FormColumn
 from .defaults import get_gradio_html, DeforumAnimPrompts
@@ -13,9 +29,11 @@ def create_gr_elem(d):
     # Prepare parameters for gradio element creation
     params = {k: v for k, v in d.items() if k != "type" and v is not None}
 
-    # If we're creating a Radio element and 'radio_type' is specified, then use it to set gr.radio's type
-    if obj_type_str == 'Radio' and 'radio_type' in params:
-        params['type'] = params.pop('radio_type')
+    # Special case: Since some elements can have 'type' parameter and we are already using 'type' to specify
+    # which element to use we need a separate parameter that will be used to overwrite 'type' at this point.
+    # E.g. for Radio element we should specify 'type_param' which is then used to set gr.radio's type.
+    if 'type_param' in params:
+        params['type'] = params.pop('type_param')
 
     return obj_type(**params)
 
@@ -24,6 +42,8 @@ def create_gr_elem(d):
 # ******** Important message ********
 def get_tab_run(d, da):
     with gr.TabItem('Run'):  # RUN TAB
+        with FormRow():
+            motion_preview_mode = create_gr_elem(d.motion_preview_mode)
         with FormRow():
             sampler = create_gr_elem(d.sampler)
             steps = create_gr_elem(d.steps)
@@ -292,6 +312,8 @@ def get_tab_init(d, da, dp):
                     strength = create_gr_elem(d.strength)
             with FormRow():
                 init_image = create_gr_elem(d.init_image)
+            with FormRow():
+                init_image_box = create_gr_elem(d.init_image_box)
         # VIDEO INIT INNER-TAB
         with gr.Tab('Video Init'):
             with FormRow():
