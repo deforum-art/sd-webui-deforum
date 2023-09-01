@@ -200,13 +200,13 @@ def DeforumAnimArgs():
             "label": "Steps schedule",
             "type": "textbox",
             "value": "0: (25)",
-            "info": "mainly allows using more than 200 steps. otherwise, it's a mirror-like param of 'strength schedule'"
+            "info": "mainly allows using more than 200 steps. Otherwise, it's a mirror-like param of 'strength schedule'"
         },
         "fov_schedule": {
             "label": "FOV schedule",
             "type": "textbox",
             "value": "0: (70)",
-            "info": "adjusts the scale at which the canvas is moved in 3D by the translation_z value. [maximum range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]"
+            "info": "adjusts the scale at which the canvas is moved in 3D by the translation_z value. [Range -180 to +180, with 0 being undefined. Values closer to 180 will make the image have less depth, while values closer to 0 will allow more depth]"
         },
         "aspect_ratio_schedule": {
             "label": "Aspect Ratio schedule",
@@ -218,7 +218,7 @@ def DeforumAnimArgs():
             "label": "Use old aspect ratio formula",
             "type": "checkbox",
             "value": False,
-            "info": "for backward compatibility. uses the formula: `width/height`"
+            "info": "for backward compatibility. Uses the formula: `width/height`"
         },
         "near_schedule": {
             "label": "Near schedule",
@@ -272,7 +272,7 @@ def DeforumAnimArgs():
             "label": "Sampler schedule",
             "type": "textbox",
             "value": '0: ("Euler a")',
-            "info": "allows keyframing different samplers. Use names as they appear in ui dropdown in 'run' tab"
+            "info": "allows keyframing of samplers. Use names as they appear in ui dropdown in 'run' tab"
         },
         "use_noise_mask": {
             "label": "Use noise mask",
@@ -299,10 +299,10 @@ def DeforumAnimArgs():
             "info": ""
         },
         "checkpoint_schedule": {
-            "label": "allows keyframing different sd models. use *full* name as appears in ui dropdown",
+            "label": "allows keyframing different sd models. Use *full* name as appears in ui dropdown",
             "type": "textbox",
             "value": '0: ("model1.ckpt"), 100: ("model2.safetensors")',
-            "info": "allows keyframing different sd models. use *full* name as appears in ui dropdown"
+            "info": "allows keyframing different sd models. Use *full* name as appears in ui dropdown"
         },
         "enable_clipskip_scheduling": {
             "label": "Enable CLIP skip scheduling",
@@ -358,7 +358,7 @@ def DeforumAnimArgs():
             "label": "Enable Ancestral ETA scheduling",
             "type": "checkbox",
             "value": False,
-            "info": "noise multiplier; applies to Euler a and other samplers that have the letter 'a' in them"
+            "info": "noise multiplier; applies to Euler A and other samplers that have the letter 'a' in them"
         },
         "ancestral_eta_schedule": {
             "label": "Ancestral ETA Schedule",
@@ -768,7 +768,7 @@ def DeforumArgs():
             "value": samplers_for_img2img[0].name,
         },
         "steps": {
-            "label": "step",
+            "label": "Steps",
             "type": "slider",
             "minimum": 1,
             "maximum": 200,
@@ -786,7 +786,7 @@ def DeforumArgs():
             "type": "radio",
             "choices": ['iter', 'fixed', 'random', 'ladder', 'alternate', 'schedule'],
             "value": "iter",
-            "info": "controls the seed behavior that is used for animation. hover on the options to see more info"
+            "info": "controls the seed behavior that is used for animation. Hover on the options to see more info"
         },
         "seed_iter_N": {
             "label": "Seed iter N",
@@ -1000,13 +1000,13 @@ def DeforumOutputArgs():
             "label": "Make GIF",
             "type": "checkbox",
             "value": False,
-            "info": "make gif in addition to the video/s"
+            "info": "make GIF in addition to the video/s"
         },
         "delete_imgs": {
             "label": "Delete Imgs",
             "type": "checkbox",
             "value": False,
-            "info": "auto-delete imgs when video is ready"
+            "info": "auto-delete imgs when video is ready. Will break Resume from timestring!"
         },
         "delete_input_frames": {
             "label": "Delete All Inputframes",
@@ -1079,7 +1079,7 @@ def DeforumOutputArgs():
             "value": 2,
         },
         "frame_interpolation_slow_mo_enabled": {
-            "label": "Slow Mo",
+            "label": "Slow-Mo",
             "type": "checkbox",
             "value": False,
             "visible": False,
