@@ -292,7 +292,13 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_ad
     cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i + 1}", img_np, mask_np, frame_idx, CnSchKeys))
                 for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
 
-    p.script_args = {"enabled": True}
+    # Fake script args to satisfy ControlNet
+    controlnet_script = next((script for script in p.scripts.alwayson_scripts if script.title().lower()  == "controlnet"), None)
+    if not controlnet_script:
+        raise Exception("ControlNet script not found.")
+    fake_script_args = [None] * controlnet_script.args_to
+    p.script_args = fake_script_args
+    
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
 
 def process_controlnet_input_frames(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
