@@ -23,7 +23,7 @@ import scripts
 from PIL import Image
 import numpy as np
 import importlib
-from modules import scripts
+from modules import scripts, shared
 from .deforum_controlnet_gradio import hide_ui_by_cn_status, hide_file_textboxes, ToolButton
 from .general_utils import count_files_in_folder, clean_gradio_path_strings  # TODO: do it another way
 from .video_audio_utilities import vid2frames, convert_image
@@ -32,8 +32,12 @@ from .load_images import load_image
 from .general_utils import debug_print
 
 cnet = None
-# number of CN model tabs to show in the deforum gui
+# number of CN model tabs to show in the deforum gui. If the user has set it in the A1111 UI to a value less than 5
+# then we set it to 5. Else, we respect the value they specified
+max_models = shared.opts.data.get("control_net_max_models_num", 1)
 num_of_models = 5
+if (max_models is not None):
+    num_of_models = 5 if max_models <= 5 else max_models
 
 def find_controlnet():
     global cnet
@@ -292,7 +296,12 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_ad
     cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i + 1}", img_np, mask_np, frame_idx, CnSchKeys))
                 for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
 
-    p.script_args = {"enabled": True}
+    # Fake script args to satisfy ControlNet
+    controlnet_script = next((script for script in p.scripts.alwayson_scripts if script.title().lower() == "controlnet"), None)
+    if not controlnet_script:
+        raise Exception("ControlNet script not found.")
+    fake_script_args = [None] * controlnet_script.args_to
+    p.script_args = fake_script_args
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
 
 def process_controlnet_input_frames(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
