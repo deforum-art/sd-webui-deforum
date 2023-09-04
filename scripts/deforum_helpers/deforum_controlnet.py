@@ -18,12 +18,13 @@
 # https://github.com/Mikubill/sd-webui-controlnet — controlnet repo
 
 import os
+import copy
 import gradio as gr
 import scripts
 from PIL import Image
 import numpy as np
 import importlib
-from modules import scripts, shared
+from modules import scripts
 from .deforum_controlnet_gradio import hide_ui_by_cn_status, hide_file_textboxes, ToolButton
 from .general_utils import count_files_in_folder, clean_gradio_path_strings  # TODO: do it another way
 from .video_audio_utilities import vid2frames, convert_image
@@ -32,12 +33,8 @@ from .load_images import load_image
 from .general_utils import debug_print
 
 cnet = None
-# number of CN model tabs to show in the deforum gui. If the user has set it in the A1111 UI to a value less than 5
-# then we set it to 5. Else, we respect the value they specified
-max_models = shared.opts.data.get("control_net_max_models_num", 1)
+# number of CN model tabs to show in the deforum gui
 num_of_models = 5
-if (max_models is not None):
-    num_of_models = 5 if max_models <= 5 else max_models
 
 def find_controlnet():
     global cnet
@@ -268,7 +265,27 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_ad
     if not any(os.path.exists(cn_inputframes) for cn_inputframes in cn_inputframes_list) and not any_loopback_mode:
         print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
 
-    p.scripts = scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img
+    # Remove all scripts except controlnet.
+    #
+    # This is required because controlnet's access to p.script_args invokes @script_args.setter, 
+    # which triggers *all* alwayson_scripts' setup() functions, with whatever happens to be in script_args.
+    # In the case of seed.py (which we really don't need with deforum), this ovewrites our p.seed & co, which we
+    # had carefully prepared previously. So let's remove the scripts to avoid the problem.
+    #
+    # An alternative would be to populate all the args with the correct values
+    # for all scripts, but this seems even more fragile, as it would break
+    # if a1111 adds or removed scripts.
+    #
+    # Note that we must copy scripts.scripts_img2img or scripts.scripts_txt2img before mutating it
+    # because it persists across requests. Shallow-copying is sufficient because we only mutate a top-level
+    # reference (scripts.alwayson_scripts)
+    #
+    p.scripts = copy.copy(scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img)
+    controlnet_script = find_controlnet_script(p)
+    p.scripts.alwayson_scripts =  [controlnet_script]
+    # Filling the list with None is safe because only the length will be considered,
+    # and all cn args will be replaced.
+    p.script_args_value = [None] * controlnet_script.args_to
 
     def create_cnu_dict(cn_args, prefix, img_np, mask_np, frame_idx, CnSchKeys):
 
@@ -296,13 +313,13 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_ad
     cn_units = [cnet.ControlNetUnit(**create_cnu_dict(controlnet_args, f"cn_{i + 1}", img_np, mask_np, frame_idx, CnSchKeys))
                 for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
 
-    # Fake script args to satisfy ControlNet
-    controlnet_script = next((script for script in p.scripts.alwayson_scripts if script.title().lower() == "controlnet"), None)
+    cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
+
+def find_controlnet_script(p):
+    controlnet_script = next((script for script in p.scripts.alwayson_scripts if script.title().lower()  == "controlnet"), None)
     if not controlnet_script:
         raise Exception("ControlNet script not found.")
-    fake_script_args = [None] * controlnet_script.args_to
-    p.script_args = fake_script_args
-    cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
+    return controlnet_script
 
 def process_controlnet_input_frames(args, anim_args, controlnet_args, video_path, mask_path, outdir_suffix, id):
     if (video_path or mask_path) and getattr(controlnet_args, f'cn_{id}_enabled'):

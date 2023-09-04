@@ -95,15 +95,22 @@ def block_forward(self, x, resolution, shared_rel_pos_bias: Optional[torch.Tenso
     """
     Modification of timm.models.beit.py: Block.forward to support arbitrary window sizes.
     """
-    if self.gamma_1 is None:
-        x = x + self.drop_path(self.attn(self.norm1(x), resolution, shared_rel_pos_bias=shared_rel_pos_bias))
-        x = x + self.drop_path(self.mlp(self.norm2(x)))
-    else:
-        x = x + self.drop_path(self.gamma_1 * self.attn(self.norm1(x), resolution,
-                                                        shared_rel_pos_bias=shared_rel_pos_bias))
-        x = x + self.drop_path(self.gamma_2 * self.mlp(self.norm2(x)))
-    return x
 
+    if hasattr(self, 'drop_path1'):
+        drop_path_compat = self.drop_path1
+    elif hasattr(self.target, 'drop_path'):
+        drop_path_compat = self.drop_path
+    else:
+        raise AttributeError("Neither drop_path1 nor drop_path exists on the target.")        
+
+    if self.gamma_1 is None:
+        x = x + drop_path_compat(self.attn(self.norm1(x), resolution, shared_rel_pos_bias=shared_rel_pos_bias))
+        x = x + drop_path_compat(self.mlp(self.norm2(x)))
+    else:
+        x = x + drop_path_compat(self.gamma_1 * self.attn(self.norm1(x), resolution,
+                                                        shared_rel_pos_bias=shared_rel_pos_bias))
+        x = x + drop_path_compat(self.gamma_2 * self.mlp(self.norm2(x)))
+    return x
 
 def beit_forward_features(self, x):
     """
