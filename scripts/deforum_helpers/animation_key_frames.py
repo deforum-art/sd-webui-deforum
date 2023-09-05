@@ -80,7 +80,7 @@ class ControlNetKeys():
         num_of_models = 5
         if (max_models is not None):
             num_of_models = 5 if max_models <= 5 else max_models
-        for i in range(1, num_of_models + 1): # 5 CN models in total
+        for i in range(1, num_of_models + 1):
             for suffix in ['weight', 'guidance_start', 'guidance_end']:
                 prefix = f"cn_{i}"
                 input_key = f"{prefix}_{suffix}"

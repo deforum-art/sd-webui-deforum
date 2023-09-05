@@ -24,7 +24,7 @@ import scripts
 from PIL import Image
 import numpy as np
 import importlib
-from modules import scripts
+from modules import scripts, shared
 from .deforum_controlnet_gradio import hide_ui_by_cn_status, hide_file_textboxes, ToolButton
 from .general_utils import count_files_in_folder, clean_gradio_path_strings  # TODO: do it another way
 from .video_audio_utilities import vid2frames, convert_image
@@ -33,8 +33,12 @@ from .load_images import load_image
 from .general_utils import debug_print
 
 cnet = None
-# number of CN model tabs to show in the deforum gui
+# number of CN model tabs to show in the deforum gui. If the user has set it in the A1111 UI to a value less than 5
+# then we set it to 5. Else, we respect the value they specified
+max_models = shared.opts.data.get("control_net_max_models_num", 1)
 num_of_models = 5
+if (max_models is not None):
+    num_of_models = 5 if max_models <= 5 else max_models
 
 def find_controlnet():
     global cnet
