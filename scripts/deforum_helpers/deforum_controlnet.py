@@ -35,8 +35,7 @@ from .general_utils import debug_print
 cnet = None
 # number of CN model tabs to show in the deforum gui. If the user has set it in the A1111 UI to a value less than 5
 # then we set it to 5. Else, we respect the value they specified
-max_models = shared.opts.data.get("control_net_max_models_num", 1)
-num_of_models = 5
+max_models = shared.opts.data.get("control_net_unit_count", 1) if shared.opts.data.get("control_net_unit_count", 1) is not None else shared.opts.data.get("control_net_max_models_num", 1)
 if (max_models is not None):
     num_of_models = 5 if max_models <= 5 else max_models
 
@@ -299,7 +298,7 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_ad
         ]
         cnu = {k: getattr(cn_args, f"{prefix}_{k}") for k in keys}
         model_num = int(prefix.split('_')[-1])  # Extract model number from prefix (e.g., "cn_1" -> 1)
-        if 1 <= model_num <= 5:
+        if 1 <= model_num <= num_of_models:
             # if in loopmode and no init image (img_np, after processing in this case) provided, disable CN unit for the very first frame. Will be enabled in the next frame automatically
             if getattr(cn_args, f"cn_{model_num}_loopback_mode") and frame_idx == 0 and img_np is None:
                 cnu['enabled'] = False
