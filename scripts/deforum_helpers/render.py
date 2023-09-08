@@ -23,6 +23,7 @@ import gc
 import random
 import PIL
 import time
+import math
 from PIL import Image, ImageOps
 from .generate import generate, isJson
 from .noise import add_noise
@@ -35,9 +36,11 @@ from .parseq_adapter import ParseqAdapter
 from .seed import next_seed
 from .image_sharpening import unsharp_mask
 from .load_images import get_mask, load_img, load_image, get_mask_from_file
-from .hybrid_video import (
-    hybrid_generation, hybrid_composite, get_matrix_for_hybrid_motion, get_matrix_for_hybrid_motion_prev, get_flow_for_hybrid_motion, get_flow_for_hybrid_motion_prev, image_transform_ransac,
-    image_transform_optical_flow, get_flow_from_images, abs_flow_to_rel_flow, rel_flow_to_abs_flow)
+from .hybrid_video import hybrid_generation, hybrid_composite, image_transform_optical_flow, get_flow_from_images
+from .hybrid_render import hybrid_motion_for_cadence, hybrid_motion_before_generation, hybrid_motion_after_generation
+from .cadence_flow import cadence_optflow_setup, cadence_optflow_warp_blend
+from .cadence import get_cadence_keys, get_cadence_tweens
+from .generation import optical_flow_generation, redo_generation
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import save_settings_from_animation_run
@@ -57,14 +60,18 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         srt_filename = os.path.join(args.outdir, f"{root.timestring}.srt")
         srt_frame_duration = init_srt_file(srt_filename, video_args.fps)
 
+    # needs to be setup outside of 2D/3D conditional
+    hybrid_available = anim_args.hybrid_composite != 'None' or anim_args.hybrid_motion != 'None'
+
     if anim_args.animation_mode in ['2D', '3D']:
-        # handle hybrid video generation
-        if anim_args.hybrid_composite != 'None' or anim_args.hybrid_motion in ['Affine', 'Perspective', 'Optical Flow']:
+        # handle hybrid video frame generation and setup vars used later
+        if hybrid_available:
             args, anim_args, inputfiles = hybrid_generation(args, anim_args, root)
             # path required by hybrid functions, even if hybrid_comp_save_extra_frames is False
             hybrid_frame_path = os.path.join(args.outdir, 'hybridframes')
+
         # initialize prev_flow
-        if anim_args.hybrid_motion == 'Optical Flow':
+        if anim_args.hybrid_motion != 'None':
             prev_flow = None
 
         if loop_args.use_looper:
@@ -107,7 +114,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     if parseq_adapter.manages_prompts():
         prompt_series = keys.prompts
     else:
-        prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames)])
+        prompt_series = pd.Series([np.nan for a in range(anim_args.max_frames + 1)])
         for i, prompt in root.animation_prompts.items():
             if str(i).isdigit():
                 prompt_series[int(i)] = prompt
@@ -120,17 +127,16 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
     # load depth model for 3D
     predict_depths = (anim_args.animation_mode == '3D' and anim_args.use_depth_warping) or anim_args.save_depth_maps
-    predict_depths = predict_depths or (anim_args.hybrid_composite and anim_args.hybrid_comp_mask_type in ['Depth', 'Video Depth'])
-    predict_depths = predict_depths and not args.motion_preview_mode
-    if predict_depths:
+    predict_depths_for_hybrid = anim_args.hybrid_composite != 'None' and anim_args.hybrid_comp_mask_type in ['Depth', 'Video Depth']
+    if predict_depths or predict_depths_for_hybrid:
         keep_in_vram = opts.data.get("deforum_keep_3d_models_in_vram")
 
         device = ('cpu' if cmd_opts.lowvram or cmd_opts.medvram else root.device)
         depth_model = DepthModel(root.models_path, device, root.half_precision, keep_in_vram=keep_in_vram, depth_algorithm=anim_args.depth_algorithm, Width=args.W, Height=args.H,
                                  midas_weight=anim_args.midas_weight)
 
-        # depth-based hybrid composite mask requires saved depth maps
-        if anim_args.hybrid_composite != 'None' and anim_args.hybrid_comp_mask_type == 'Depth':
+        # the 'Depth' hybrid composite mask requires the saved depth maps because it refers to the previous frame's depth
+        if predict_depths_for_hybrid and anim_args.hybrid_comp_mask_type == 'Depth':
             anim_args.save_depth_maps = True
     else:
         depth_model = None
@@ -139,8 +145,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     raft_model = None
     load_raft = (anim_args.optical_flow_cadence == "RAFT" and int(anim_args.diffusion_cadence) > 1) or \
                 (anim_args.hybrid_motion == "Optical Flow" and anim_args.hybrid_flow_method == "RAFT") or \
+                (anim_args.previous_image_flow == "RAFT") or \
                 (anim_args.optical_flow_redo_generation == "RAFT")
-    load_raft = load_raft and not args.motion_preview_mode
     if load_raft:
         print("Loading RAFT model...")
         raft_model = RAFT()
@@ -150,15 +156,17 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     turbo_prev_image, turbo_prev_frame_idx = None, 0
     turbo_next_image, turbo_next_frame_idx = None, 0
 
-    # initialize vars
+    # initialize crucial vars, set master frame index
     prev_img = None
+    prev_imgs = []
+    prev_imgs_max = 2
     color_match_sample = None
-    start_frame = 0
+    frame_idx = 0
+    resume_skip_cadence = False
 
-    # resume animation (requires at least two frames - see function)
+    # resume animation (requires at least two "actual" frames - see function)
     if anim_args.resume_from_timestring:
-        # determine last frame and frame to start on
-        prev_frame, next_frame, prev_img, next_img = get_resume_vars(
+        prev_frame_idx, next_frame_idx, prev_img, next_img, frame_idx, resume_skip_cadence = get_resume_vars(
             folder=args.outdir,
             timestring=anim_args.resume_timestring,
             cadence=turbo_steps
@@ -166,13 +174,8 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         # set up turbo step vars
         if turbo_steps > 1:
-            turbo_prev_image, turbo_prev_frame_idx = prev_img, prev_frame
-            turbo_next_image, turbo_next_frame_idx = next_img, next_frame
-
-        # advance start_frame to next frame
-        start_frame = next_frame + 1
-
-    frame_idx = start_frame
+            turbo_prev_image, turbo_prev_frame_idx = prev_img, prev_frame_idx
+            turbo_next_image, turbo_next_frame_idx = next_img, next_frame_idx
 
     # reset the mask vals as they are overwritten in the compose_mask algorithm
     mask_vals = {}
@@ -215,7 +218,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     state.job_count = anim_args.max_frames
     last_preview_frame = 0
 
-    while frame_idx < anim_args.max_frames:
+    while frame_idx <= anim_args.max_frames:
         # Webui
 
         state.job = f"frame {frame_idx + 1}/{anim_args.max_frames}"
@@ -228,7 +231,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 time.sleep(0.1)
             print("** RESUMING **")
 
-        print(f"\033[36mAnimation frame: \033[0m{frame_idx}/{anim_args.max_frames}  ")
+        print(f"Animation frame index in progress: {frame_idx}/{anim_args.max_frames} ")
 
         noise = keys.noise_schedule_series[frame_idx]
         strength = keys.strength_schedule_series[frame_idx]
@@ -238,15 +241,15 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
         sigma = keys.sigma_schedule_series[frame_idx]
         amount = keys.amount_schedule_series[frame_idx]
         threshold = keys.threshold_schedule_series[frame_idx]
-        cadence_flow_factor = keys.cadence_flow_factor_schedule_series[frame_idx]
+        hybrid_flow_factor = keys.hybrid_flow_factor_schedule_series[frame_idx]
+        previous_image_flow_factor = keys.previous_image_flow_factor_schedule_series[frame_idx]
         redo_flow_factor = keys.redo_flow_factor_schedule_series[frame_idx]
         hybrid_comp_schedules = {
             "alpha": keys.hybrid_comp_alpha_schedule_series[frame_idx],
             "mask_blend_alpha": keys.hybrid_comp_mask_blend_alpha_schedule_series[frame_idx],
             "mask_contrast": keys.hybrid_comp_mask_contrast_schedule_series[frame_idx],
             "mask_auto_contrast_cutoff_low": int(keys.hybrid_comp_mask_auto_contrast_cutoff_low_schedule_series[frame_idx]),
-            "mask_auto_contrast_cutoff_high": int(keys.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx]),
-            "flow_factor": keys.hybrid_flow_factor_schedule_series[frame_idx]
+            "mask_auto_contrast_cutoff_high": int(keys.hybrid_comp_mask_auto_contrast_cutoff_high_schedule_series[frame_idx])
         }
         scheduled_sampler_name = None
         scheduled_clipskip = None
@@ -286,111 +289,99 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             if predict_depths: depth_model.to(root.device)
 
         if turbo_steps == 1 and opts.data.get("deforum_save_gen_info_as_srt"):
-            params_to_print = opts.data.get("deforum_save_gen_info_as_srt_params", ['Seed'])
-            params_string = format_animation_params(keys, prompt_series, frame_idx, params_to_print)
+            params_string = format_animation_params(keys, prompt_series, frame_idx)
             write_frame_subtitle(srt_filename, frame_idx, srt_frame_duration, f"F#: {frame_idx}; Cadence: false; Seed: {args.seed}; {params_string}")
             params_string = None
 
-        # emit in-between frames
-        if turbo_steps > 1:
-            tween_frame_start_idx = max(start_frame, frame_idx - turbo_steps)
+        # emit in-between frames - at cadence > 1 frames all saved in this loop, at cadence 1 frames are saved after generation
+        if turbo_steps > 1 and not resume_skip_cadence:
+            # setup vars for the start of each cadence loop
+            tween_frame_start_idx = max(0, frame_idx - turbo_steps)
             cadence_flow = None
+
             for tween_frame_idx in range(tween_frame_start_idx, frame_idx):
-                # update progress during cadence
+                # update ui progress during cadence
                 state.job = f"frame {tween_frame_idx + 1}/{anim_args.max_frames}"
                 state.job_no = tween_frame_idx + 1
-                # cadence vars
-                tween = float(tween_frame_idx - tween_frame_start_idx + 1) / float(frame_idx - tween_frame_start_idx)
+
+                # vars that need refreshing within cadence loop
                 advance_prev = turbo_prev_image is not None and tween_frame_idx > turbo_prev_frame_idx
                 advance_next = tween_frame_idx > turbo_next_frame_idx
+                diffusion_cadence_easing, cadence_flow_easing, hybrid_flow_factor, cadence_flow_factor = get_cadence_keys(keys, tween_frame_idx)
 
-                # optical flow cadence setup before animation warping
-                if anim_args.animation_mode in ['2D', '3D'] and anim_args.optical_flow_cadence != 'None':
-                    if keys.strength_schedule_series[tween_frame_start_idx] > 0:
-                        if cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
-                            cadence_flow = get_flow_from_images(turbo_prev_image, turbo_next_image, anim_args.optical_flow_cadence, raft_model) / 2
-                            turbo_next_image = image_transform_optical_flow(turbo_next_image, -cadence_flow, 1)
+                # eased tweens locked with master tween
+                tween, tween_images, tween_flow = get_cadence_tweens(tween_frame_idx, tween_frame_start_idx, frame_idx, diffusion_cadence_easing, cadence_flow_easing)
 
-                if opts.data.get("deforum_save_gen_info_as_srt"):
-                    params_to_print = opts.data.get("deforum_save_gen_info_as_srt_params", ['Seed'])
-                    params_string = format_animation_params(keys, prompt_series, tween_frame_idx, params_to_print)
-                    write_frame_subtitle(srt_filename, tween_frame_idx, srt_frame_duration, f"F#: {tween_frame_idx}; Cadence: {tween < 1.0}; Seed: {args.seed}; {params_string}")
-                    params_string = None
-
-                print(f"Creating in-between {'' if cadence_flow is None else anim_args.optical_flow_cadence + ' optical flow '}cadence frame: {tween_frame_idx}; tween:{tween:0.2f};")
-
+                # load depth model
                 if depth_model is not None:
                     assert (turbo_next_image is not None)
                     depth = depth_model.predict(turbo_next_image, anim_args.midas_weight, root.half_precision)
 
+                # srt files
+                if opts.data.get("deforum_save_gen_info_as_srt"):
+                    params_string = format_animation_params(keys, prompt_series, tween_frame_idx)
+                    write_frame_subtitle(srt_filename, tween_frame_idx, srt_frame_duration, f"F#: {tween_frame_idx}; Cadence: {tween < 1.0}; Seed: {args.seed}; {params_string}")
+                    params_string = None
+
+                # setup cadence_flow once for whole cadence cycle if turbo prev/next are provided, get cadence flow and turbo_next_image warped back half-way
+                if anim_args.optical_flow_cadence != 'None' and cadence_flow is None and turbo_prev_image is not None and turbo_next_image is not None:
+                    cadence_flow, turbo_next_image = cadence_optflow_setup(anim_args, cadence_flow, turbo_prev_image, turbo_next_image, raft_model)
+
+                # setup done, report cadence frame creation in console
+                print(f"Creating in-between {'' if cadence_flow is None else anim_args.optical_flow_cadence + ' optical flow '}cadence frame: {tween_frame_idx}; tween:{tween:0.2f}; tween_images:{tween_images:0.2f}; tween_flow:{tween_flow:0.2f};")
+
+                # cadence flow is warped to match animation warp & divided into increments each cadence step
+                if cadence_flow is not None:
+                    cadence_flow_inc = cadence_optflow_warp_blend(cadence_flow, tween_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
+
+                # animation warping of both images
                 if advance_prev:
                     turbo_prev_image, _ = anim_frame_warp(turbo_prev_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
                 if advance_next:
                     turbo_next_image, _ = anim_frame_warp(turbo_next_image, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
 
-                # hybrid video motion - warps turbo_prev_image or turbo_next_image to match motion
-                if tween_frame_idx > 0:
-                    if anim_args.hybrid_motion in ['Affine', 'Perspective']:
-                        if anim_args.hybrid_motion_use_prev_img:
-                            matrix = get_matrix_for_hybrid_motion_prev(tween_frame_idx - 1, (args.W, args.H), inputfiles, prev_img, anim_args.hybrid_motion)
-                            if advance_prev:
-                                turbo_prev_image = image_transform_ransac(turbo_prev_image, matrix, anim_args.hybrid_motion)
-                            if advance_next:
-                                turbo_next_image = image_transform_ransac(turbo_next_image, matrix, anim_args.hybrid_motion)
-                        else:
-                            matrix = get_matrix_for_hybrid_motion(tween_frame_idx - 1, (args.W, args.H), inputfiles, anim_args.hybrid_motion)
-                            if advance_prev:
-                                turbo_prev_image = image_transform_ransac(turbo_prev_image, matrix, anim_args.hybrid_motion)
-                            if advance_next:
-                                turbo_next_image = image_transform_ransac(turbo_next_image, matrix, anim_args.hybrid_motion)
-                    if anim_args.hybrid_motion in ['Optical Flow']:
-                        if anim_args.hybrid_motion_use_prev_img:
-                            flow = get_flow_for_hybrid_motion_prev(tween_frame_idx - 1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, prev_img, anim_args.hybrid_flow_method, raft_model,
-                                                                   anim_args.hybrid_flow_consistency, anim_args.hybrid_consistency_blur, anim_args.hybrid_comp_save_extra_frames)
-                            if advance_prev:
-                                turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, hybrid_comp_schedules['flow_factor'])
-                            if advance_next:
-                                turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, hybrid_comp_schedules['flow_factor'])
-                            prev_flow = flow
-                        else:
-                            flow = get_flow_for_hybrid_motion(tween_frame_idx - 1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, raft_model,
-                                                              anim_args.hybrid_flow_consistency, anim_args.hybrid_consistency_blur, anim_args.hybrid_comp_save_extra_frames)
-                            if advance_prev:
-                                turbo_prev_image = image_transform_optical_flow(turbo_prev_image, flow, hybrid_comp_schedules['flow_factor'])
-                            if advance_next:
-                                turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, hybrid_comp_schedules['flow_factor'])
-                            prev_flow = flow
+                # hybrid motion for cadence - after animation warping, perspective/affine/optflow from last frame to current frame
+                if anim_args.hybrid_motion != 'None' and tween_frame_idx > 0 and tween < 1:
+                    turbo_prev_image, turbo_next_image, prev_flow = hybrid_motion_for_cadence(turbo_prev_image, turbo_next_image, advance_prev, advance_next, args, anim_args,
+                                                                                              tween_frame_idx, prev_img, prev_flow, hybrid_flow_factor, inputfiles, hybrid_frame_path, raft_model)
 
-                # do optical flow cadence after animation warping
-                if cadence_flow is not None:
-                    cadence_flow = abs_flow_to_rel_flow(cadence_flow, args.W, args.H)
-                    cadence_flow, _ = anim_frame_warp(cadence_flow, args, anim_args, keys, tween_frame_idx, depth_model, depth=depth, device=root.device, half_precision=root.half_precision)
-                    cadence_flow_inc = rel_flow_to_abs_flow(cadence_flow, args.W, args.H) * tween
-                    if advance_prev:
-                        turbo_prev_image = image_transform_optical_flow(turbo_prev_image, cadence_flow_inc, cadence_flow_factor)
-                    if advance_next:
-                        turbo_next_image = image_transform_optical_flow(turbo_next_image, cadence_flow_inc, cadence_flow_factor)
+                # previous image flow - uses flow from a past 'prev_imgs array image to the prev_img to warp the prev_img.
+                if anim_args.previous_image_flow != 'None' and len(prev_imgs) > 1 and previous_image_flow_factor != 0:
+                    flow = get_flow_from_images(prev_imgs[-1], prev_imgs[0], anim_args.previous_image_flow, raft_model)
+                    turbo_next_image = image_transform_optical_flow(turbo_next_image, flow, previous_image_flow_factor)
+                    print(f"Previous image flow {anim_args.previous_image_flow} frame {tween_frame_idx-len(prev_imgs)} to {tween_frame_idx-1} applied to turbo_next_image at flow factor {previous_image_flow_factor}")
 
-                turbo_prev_frame_idx = turbo_next_frame_idx = tween_frame_idx
-
+                # blend cadence images with eased tweening
                 if turbo_prev_image is not None and tween < 1.0:
-                    img = turbo_prev_image * (1.0 - tween) + turbo_next_image * tween
+                    img = turbo_prev_image * (1.0 - tween_images) + turbo_next_image * tween_images
                 else:
                     img = turbo_next_image
 
-                # intercept and override to grayscale
+                # Optical flow cadence application directly after blend of cadence images
+                if cadence_flow is not None and cadence_flow_factor != 0:
+                    img = image_transform_optical_flow(img, cadence_flow_inc, cadence_flow_factor)
+
+                # intercept and override to grayscale before overlay
                 if anim_args.color_force_grayscale:
                     img = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2GRAY)
                     img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
-                    # overlay mask
+                # overlay mask goes last
                 if args.overlay_mask and (anim_args.use_mask_video or args.use_mask):
                     img = do_overlay_mask(args, anim_args, img, tween_frame_idx, True)
 
-                # get prev_img during cadence
+                # update cadence frame index now that all frame-dependent routines are done
+                turbo_prev_frame_idx = turbo_next_frame_idx = tween_frame_idx
+
+                # cadence keeps a prev_img too
                 prev_img = img
 
-                # current image update for cadence frames (left commented because it doesn't currently update the preview)
+                # prev_imgs array keeps prev_img also (will replace prev_img)
+                prev_imgs.insert(0, img.astype(np.uint8))
+                while len(prev_imgs) > prev_imgs_max:
+                    prev_imgs.pop()
+
+                # current image update for cadence frames (commented because it doesn't currently update the preview)
                 # state.current_image = Image.fromarray(cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_BGR2RGB))
 
                 # saving cadence frames
@@ -399,8 +390,13 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                 if anim_args.save_depth_maps:
                     depth_model.save(os.path.join(args.outdir, f"{root.timestring}_depth_{tween_frame_idx:09}.png"), depth)
 
+        # END CADENCE LOOP
+
+        # if reached end of first cadence loop, the skip cadence trigger can be turned off
+        if resume_skip_cadence:
+            resume_skip_cadence = False
+
         # get color match for video outside of prev_img conditional
-        hybrid_available = anim_args.hybrid_composite != 'None' or anim_args.hybrid_motion in ['Optical Flow', 'Affine', 'Perspective']
         if anim_args.color_coherence == 'Video Input' and hybrid_available:
             if int(frame_idx) % int(anim_args.color_coherence_video_every_N_frames) == 0:
                 prev_vid_img = Image.open(os.path.join(args.outdir, 'inputframes', get_frame_name(anim_args.video_init_path) + f"{frame_idx:09}.jpg"))
@@ -417,28 +413,21 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             if anim_args.hybrid_composite == 'Before Motion':
                 args, prev_img = hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_comp_schedules, root)
 
-            # hybrid video motion - warps prev_img to match motion, usually to prepare for compositing
-            if anim_args.hybrid_motion in ['Affine', 'Perspective']:
-                if anim_args.hybrid_motion_use_prev_img:
-                    matrix = get_matrix_for_hybrid_motion_prev(frame_idx - 1, (args.W, args.H), inputfiles, prev_img, anim_args.hybrid_motion)
-                else:
-                    matrix = get_matrix_for_hybrid_motion(frame_idx - 1, (args.W, args.H), inputfiles, anim_args.hybrid_motion)
-                prev_img = image_transform_ransac(prev_img, matrix, anim_args.hybrid_motion)
-            if anim_args.hybrid_motion in ['Optical Flow']:
-                if anim_args.hybrid_motion_use_prev_img:
-                    flow = get_flow_for_hybrid_motion_prev(frame_idx - 1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, prev_img, anim_args.hybrid_flow_method, raft_model,
-                                                           anim_args.hybrid_flow_consistency, anim_args.hybrid_consistency_blur, anim_args.hybrid_comp_save_extra_frames)
-                else:
-                    flow = get_flow_for_hybrid_motion(frame_idx - 1, (args.W, args.H), inputfiles, hybrid_frame_path, prev_flow, anim_args.hybrid_flow_method, raft_model,
-                                                      anim_args.hybrid_flow_consistency, anim_args.hybrid_consistency_blur, anim_args.hybrid_comp_save_extra_frames)
-                prev_img = image_transform_optical_flow(prev_img, flow, hybrid_comp_schedules['flow_factor'])
-                prev_flow = flow
+            # hybrid video motion: Before Generation (normal) warps prev_img to match motion from last frame to current frame
+            if anim_args.hybrid_motion != 'None' and anim_args.hybrid_motion_behavior == 'Before Generation':
+                prev_img, prev_flow = hybrid_motion_before_generation(prev_img, prev_flow, frame_idx, args, anim_args, inputfiles, hybrid_frame_path, hybrid_flow_factor, raft_model)
 
             # do hybrid compositing after motion (normal)
             if anim_args.hybrid_composite == 'Normal':
                 args, prev_img = hybrid_composite(args, anim_args, frame_idx, prev_img, depth_model, hybrid_comp_schedules, root)
 
-            # apply color matching
+            # previous image flow - uses flow from 'prev_imgs array images to prev_img' to warp the prev_img. Doesn't require extra generation!
+            if turbo_steps == 1 and anim_args.previous_image_flow != 'None' and prev_img is not None and len(prev_imgs) > 1 and previous_image_flow_factor != 0:
+                flow = get_flow_from_images(prev_imgs[-1], prev_imgs[0], anim_args.previous_image_flow, raft_model)
+                prev_img = image_transform_optical_flow(prev_img, flow, previous_image_flow_factor)
+                print(f"Previous image flow {anim_args.previous_image_flow} frame {frame_idx-len(prev_imgs)} to {frame_idx-1} applied at flow factor {previous_image_flow_factor}")
+
+            # apply color matching - if no color match, make one for next frame
             if anim_args.color_coherence != 'None':
                 if color_match_sample is None:
                     color_match_sample = prev_img.copy()
@@ -537,82 +526,74 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             devices.torch_gc()
             lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
             sd_hijack.model_hijack.hijack(sd_model)
-        
-        optical_flow_redo_generation = anim_args.optical_flow_redo_generation if not args.motion_preview_mode else 'None'
 
-        # optical flow redo before generation
-        if optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
-            print(f"Optical flow redo is diffusing and warping using {optical_flow_redo_generation} optical flow before generation.")
-            stored_seed = args.seed
-            args.seed = random.randint(0, 2 ** 32 - 1)
-            disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
-            disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
-            disposable_flow = get_flow_from_images(prev_img, disposable_image, optical_flow_redo_generation, raft_model)
-            disposable_image = cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB)
-            disposable_image = image_transform_optical_flow(disposable_image, disposable_flow, redo_flow_factor)
-            args.seed = stored_seed
-            root.init_sample = Image.fromarray(disposable_image)
-            del (disposable_image, disposable_flow, stored_seed)
-            gc.collect()
+        # Optical flow generation, before generation
+        if anim_args.optical_flow_redo_generation != 'None' and prev_img is not None:
+            root.init_sample = optical_flow_generation(prev_img, redo_flow_factor, raft_model, args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
 
-        # diffusion redo
-        if int(anim_args.diffusion_redo) > 0 and prev_img is not None and strength > 0 and not args.motion_preview_mode:
-            stored_seed = args.seed
-            for n in range(0, int(anim_args.diffusion_redo)):
-                print(f"Redo generation {n + 1} of {int(anim_args.diffusion_redo)} before final generation")
-                args.seed = random.randint(0, 2 ** 32 - 1)
-                disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
-                disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
-                # color match on last one only
-                if n == int(anim_args.diffusion_redo):
-                    disposable_image = maintain_colors(prev_img, color_match_sample, anim_args.color_coherence)
-                args.seed = stored_seed
-                root.init_sample = Image.fromarray(cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB))
-            del (disposable_image, stored_seed)
-            gc.collect()
+        # Redo generation, before generation
+        if int(anim_args.diffusion_redo) > 0 and prev_img is not None:
+            root.init_sample = redo_generation(prev_img, args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
 
         # generation
-        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, frame_idx, sampler_name=scheduled_sampler_name)
 
         if image is None:
             break
 
-        # do hybrid video after generation
-        if frame_idx > 0 and anim_args.hybrid_composite == 'After Generation':
-            image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        # RGB to BGR for this section ---------------------------------------
+        image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
+        # hybrid video compositing: After generation
+        if anim_args.hybrid_composite == 'After Generation':
             args, image = hybrid_composite(args, anim_args, frame_idx, image, depth_model, hybrid_comp_schedules, root)
-            image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
-        # color matching on first frame is after generation, color match was collected earlier, so we do an extra generation to avoid the corruption introduced by the color match of first output
-        if frame_idx == 0 and (anim_args.color_coherence == 'Image' or (anim_args.color_coherence == 'Video Input' and hybrid_available)):
-            image = maintain_colors(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR), color_match_sample, anim_args.color_coherence)
-            image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        elif color_match_sample is not None and anim_args.color_coherence != 'None' and not anim_args.legacy_colormatch:
-            image = maintain_colors(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR), color_match_sample, anim_args.color_coherence)
-            image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        # hybrid video motion: After generation, flow from current frame to next frame (skips last frame)
+        if anim_args.hybrid_motion != 'None' and anim_args.hybrid_motion_behavior == 'After Generation' and frame_idx < anim_args.max_frames:
+            image, prev_flow = hybrid_motion_after_generation(image, prev_img, prev_flow, frame_idx, args, anim_args, inputfiles, hybrid_frame_path, hybrid_flow_factor, raft_model)
 
-        # intercept and override to grayscale
+        # color matching for Image/Video on 1st frame is after generation, legacy or not
+        # non-legacy color matching also happens after generation every frame
+        color_match_image_first_frame = (frame_idx == 0) and (anim_args.color_coherence == 'Image' or (anim_args.color_coherence == 'Video Input' and hybrid_available))
+        color_not_legacy = not anim_args.legacy_colormatch and color_match_sample is not None and anim_args.color_coherence != 'None'
+        if color_match_image_first_frame or color_not_legacy:
+            image = maintain_colors(image, color_match_sample, anim_args.color_coherence)
+
+        # on 1st frame, get a color match after 1st generation, unless Image or Video Input (color sample done elsewhere for those)
+        if frame_idx == 0 and not anim_args.color_coherence in ['Image', 'Video Input']:
+            color_match_sample = image
+
+        # BGR back to RGB ---------------------------------------
+        image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+        # intercept and override to grayscale before overlay (PIL RGB functions)
         if anim_args.color_force_grayscale:
             image = ImageOps.grayscale(image)
             image = ImageOps.colorize(image, black="black", white="white")
 
-        # overlay mask
+        # overlay mask last before opencv_image/prev_img are captured
         if args.overlay_mask and (anim_args.use_mask_video or args.use_mask):
             image = do_overlay_mask(args, anim_args, image, frame_idx)
 
-        # on strength 0, set color match to generation
-        if ((not anim_args.legacy_colormatch and not args.use_init) or (anim_args.legacy_colormatch and strength == 0)) and not anim_args.color_coherence in ['Image', 'Video Input']:
-            color_match_sample = cv2.cvtColor(np.asarray(image), cv2.COLOR_RGB2BGR)
-
+        # convert to opencv for end routines - for prev_img capture, and for file saving of cadence 1 frames 
         opencv_image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
+        # important: cadence makes it's own prev_img. If you also make one here, the cadence prev_img can't work the same
+        # 'Video Input' animation mode just doesn't use prev_img
+        # if turbo_steps == 1 or not using_vid_init:
         if not using_vid_init:
             prev_img = opencv_image
 
+            # prev_imgs array for 'Previous image flow'
+            prev_imgs.insert(0, opencv_image.astype(np.uint8))
+            while len(prev_imgs) > prev_imgs_max:
+                prev_imgs.pop()
+
+        # if turbo_steps above 1, it saves all files within cadence loop in next cycle using these vars
         if turbo_steps > 1:
             turbo_prev_image, turbo_prev_frame_idx = turbo_next_image, turbo_next_frame_idx
             turbo_next_image, turbo_next_frame_idx = opencv_image, frame_idx
-            frame_idx += turbo_steps
-        else:
+        else: # if turbo_steps is 1, saves files here
             filename = f"{root.timestring}_{frame_idx:09}.png"
             save_image(image, 'PIL', filename, args, video_args, root)
 
@@ -629,20 +610,20 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
                     devices.torch_gc()
                     lowvram.setup_for_low_vram(sd_model, cmd_opts.medvram)
                     sd_hijack.model_hijack.hijack(sd_model)
-            frame_idx += 1
-
         state.assign_current_image(image)
 
-        args.seed = next_seed(args, root)
+        print(f"\033[36mAnimation frame index complete:\033[0m {frame_idx}/{anim_args.max_frames} ")
 
         last_preview_frame = render_preview(args, anim_args, video_args, root, frame_idx, last_preview_frame)            
 
         JobStatusTracker().update_phase(root.job_id, phase="GENERATING", progress=frame_idx/anim_args.max_frames)
 
+        # advance the seed
+        args.seed = next_seed(args, root)
 
+    # remove things from vram
     if predict_depths and not keep_in_vram:
         depth_model.delete_model()  # handles adabins too
 
     if load_raft:
         raft_model.delete_model()
-
