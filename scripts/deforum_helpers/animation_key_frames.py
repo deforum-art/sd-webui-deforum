@@ -76,10 +76,9 @@ class ControlNetKeys():
     def __init__(self, anim_args, controlnet_args):
         self.fi = FrameInterpolater(max_frames=anim_args.max_frames)
         self.schedules = {}
-        max_models = shared.opts.data.get("control_net_unit_count", 1) if shared.opts.data.get("control_net_unit_count", 1) is not None else shared.opts.data.get("control_net_max_models_num", 1)
+        max_models = shared.opts.data.get("control_net_unit_count", shared.opts.data.get("control_net_max_models_num", 5))
         num_of_models = 5
-        if (max_models is not None):
-            num_of_models = num_of_models if max_models <= 5 else max_models
+        num_of_models = num_of_models if max_models <= 5 else max_models
         for i in range(1, num_of_models + 1):
             for suffix in ['weight', 'guidance_start', 'guidance_end']:
                 prefix = f"cn_{i}"

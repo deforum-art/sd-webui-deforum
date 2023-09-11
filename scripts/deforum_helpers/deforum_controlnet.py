@@ -35,9 +35,8 @@ from .general_utils import debug_print
 cnet = None
 # number of CN model tabs to show in the deforum gui. If the user has set it in the A1111 UI to a value less than 5
 # then we set it to 5. Else, we respect the value they specified
-max_models = shared.opts.data.get("control_net_unit_count", 1) if shared.opts.data.get("control_net_unit_count", 1) is not None else shared.opts.data.get("control_net_max_models_num", 1)
-if (max_models is not None):
-    num_of_models = 5 if max_models <= 5 else max_models
+max_models = shared.opts.data.get("control_net_unit_count", shared.opts.data.get("control_net_max_models_num", 5))
+num_of_models = 5 if max_models <= 5 else max_models
 
 def find_controlnet():
     global cnet
