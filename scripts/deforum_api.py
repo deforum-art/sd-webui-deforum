@@ -79,6 +79,7 @@ def run_deforum_batch(batch_id: str, job_ids: [str], deforum_settings_files: Lis
             # For some values, defaults don't pass validation...
             run_deforum_args[prefixed_gradio_args + component_names.index('animation_prompts')] = '{"0":"dummy value"}'
             run_deforum_args[prefixed_gradio_args + component_names.index('animation_prompts_negative')] = ''
+            run_deforum_args[prefixed_gradio_args + component_names.index('animation_prompts_positive')] = ''
 
             # Arg 0 is a UID for the batch
             run_deforum_args[0] = batch_id
