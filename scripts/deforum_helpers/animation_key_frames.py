@@ -19,6 +19,7 @@ import numpy as np
 import numexpr
 import pandas as pd
 from .prompt import check_is_number
+from modules import scripts, shared
 
 class DeformAnimKeys():
     def __init__(self, anim_args, seed=-1):
@@ -75,7 +76,10 @@ class ControlNetKeys():
     def __init__(self, anim_args, controlnet_args):
         self.fi = FrameInterpolater(max_frames=anim_args.max_frames)
         self.schedules = {}
-        for i in range(1, 6): # 5 CN models in total
+        max_models = shared.opts.data.get("control_net_unit_count", shared.opts.data.get("control_net_max_models_num", 5))
+        num_of_models = 5
+        num_of_models = num_of_models if max_models <= 5 else max_models
+        for i in range(1, num_of_models + 1):
             for suffix in ['weight', 'guidance_start', 'guidance_end']:
                 prefix = f"cn_{i}"
                 input_key = f"{prefix}_{suffix}"
