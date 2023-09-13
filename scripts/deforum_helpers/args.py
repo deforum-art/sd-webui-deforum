@@ -765,7 +765,7 @@ def DeforumArgs():
             "label": "Sampler",
             "type": "dropdown",
             "choices": [x.name for x in samplers_for_img2img],
-            "value": samplers_for_img2img[0].name,
+            "value": "Euler a",
         },
         "steps": {
             "label": "Steps",
