@@ -21,9 +21,8 @@ import time
 from types import SimpleNamespace
 import modules.paths as ph
 import modules.shared as sh
-from modules.sd_samplers import samplers_for_img2img
 from modules.processing import get_fixed_seed
-from .defaults import get_guided_imgs_default_json, mask_fill_choices
+from .defaults import get_guided_imgs_default_json, mask_fill_choices, get_samplers_list
 from .deforum_controlnet import controlnet_component_names
 from .general_utils import get_os, substitute_placeholders
 
@@ -764,7 +763,7 @@ def DeforumArgs():
         "sampler": {
             "label": "Sampler",
             "type": "dropdown",
-            "choices": [x.name for x in samplers_for_img2img],
+            "choices": get_samplers_list().values(),
             "value": "Euler a",
         },
         "steps": {
