@@ -69,9 +69,6 @@ def run_deforum_batch(batch_id: str, job_ids: [str], deforum_settings_files: Lis
     try:
         with A1111OptionsOverrider(opts_overrides):
 
-            print(f"Preview: {opts.deforum_preview}")    
-            print(f"Preview interval frames: {opts.deforum_preview_interval_frames}")    
-
             # Fill deforum args with default values.
             # We are overriding everything with the batch files, but some values are eagerly validated, so must appear valid.
             component_names = get_component_names()
