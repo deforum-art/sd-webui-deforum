@@ -430,11 +430,11 @@ def make_gifski_gif_from_interpolated(imgs_raw_path, imgs_batch_id, fps, models_
     
     interpolated_folder = find_interpolated_folder(imgs_raw_path)
     if current_user_os == "Linux":
-        input_img_pattern =  'frame_0*.png'
+        input_img_pattern =  '*.png'
         input_img_files = [os.path.join(interpolated_folder, file) for file in sorted(glob.glob(os.path.join(interpolated_folder, input_img_pattern)))]
         cmd = [gifski_location, '-o', final_gif_path] + input_img_files + ['--fps', str(fps), '--quality', str(95)]
     elif current_user_os == "Windows":
-        input_img_pattern =  'frame_0*.png'
+        input_img_pattern =  '*.png'
         input_img_pattern_for_gifski = os.path.join(interpolated_folder, input_img_pattern)
         cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps), '--quality', str(95)]
     else: # should never this else as we check before, but just in case
