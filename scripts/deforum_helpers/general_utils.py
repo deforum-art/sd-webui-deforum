@@ -142,3 +142,11 @@ def download_file_with_checksum(url, expected_checksum, dest_folder, dest_filena
         load_file_from_url(url=url, model_dir=dest_folder, file_name=dest_filename, progress=True)
         if checksum(expected_full_path) != expected_checksum:
             raise Exception(f"Error while downloading {dest_filename}.]nPlease manually download from: {url}\nAnd place it in: {dest_folder}")
+
+# Return a stable "random" value that is stable for a given input.
+# Used to generate alternative seeds that will be predictable for a given input.
+def stable_hash(value, max_int=1000000):
+    value_str = str(value).encode('utf-8')
+    hash_obj = hashlib.sha256(value_str)
+    int_value = int(hash_obj.hexdigest(), 16) % max_int    
+    return int_value
