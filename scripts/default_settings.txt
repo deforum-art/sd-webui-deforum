@@ -143,6 +143,7 @@
     "hybrid_comp_save_extra_frames": false,
     "parseq_manifest": "",
     "parseq_use_deltas": true,
+    "parseq_non_schedule_overrides": true,    
     "use_looper": false,
     "init_images": "{\n    \"0\": \"https://deforum.github.io/a1/Gi1.png\",\n    \"max_f/4-5\": \"https://deforum.github.io/a1/Gi2.png\",\n    \"max_f/2-10\": \"https://deforum.github.io/a1/Gi3.png\",\n    \"3*max_f/4-15\": \"https://deforum.github.io/a1/Gi4.jpg\",\n    \"max_f-20\": \"https://deforum.github.io/a1/Gi1.png\"\n}",
     "image_strength_schedule": "0:(0.75)",

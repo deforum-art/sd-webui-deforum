@@ -53,6 +53,10 @@ from .RAFT import RAFT
 from deforum_api import JobStatusTracker
 
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
+
+    # initialise Parseq adapter
+    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args, loop_args)
+
     if opts.data.get("deforum_save_gen_info_as_srt", False):  # create .srt file and set timeframe mechanism using FPS
         srt_filename = os.path.join(args.outdir, f"{root.timestring}.srt")
         srt_frame_duration = init_srt_file(srt_filename, video_args.fps)
@@ -79,9 +83,6 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     # handle controlnet video input frames generation
     if is_controlnet_enabled(controlnet_args):
         unpack_controlnet_vids(args, anim_args, controlnet_args)
-
-    # initialise Parseq adapter
-    parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args, loop_args)
 
     # expand key frame strings to values
     keys = DeformAnimKeys(anim_args, args.seed) if not parseq_adapter.use_parseq else parseq_adapter.anim_keys
