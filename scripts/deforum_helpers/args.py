@@ -979,10 +979,10 @@ def ParseqArgs():
             "info": "Recommended. If you uncheck this, Parseq keyframe values as are treated as relative movement values instead of absolute."
         },
         "parseq_non_schedule_overrides": {
-            "label": "Recommended. If you uncheck this, the FPS, max_frames and cadence in the Parseq doc will be ignored, and the values in the A1111 UI will be used.",
+            "label": "Use FPS, max_frames and cadence from the Parseq manifest, if present (recommended)",
             "type": "checkbox",
             "value": True,
-            "info": "Use FPS, max_frames and cadence from the Parseq manifest, if present (recommended)."
+            "info": "Recommended. If you uncheck this, the FPS, max_frames and cadence in the Parseq doc are ignored, and the values in the A1111 UI are used instead."
         }        
     }
 
