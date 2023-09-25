@@ -52,12 +52,18 @@ def run_deforum(*args):
 
     times_to_run = 1
     # find how many times in total we need to run according to file count uploaded to Batch Mode upload box
-    if args_dict['custom_settings_file'] is not None and len(args_dict['custom_settings_file']) > 1:
+    # but we need to respec the Enable batch mode checkbox. If it's false, then don't increment times_to_run (this check
+    # is necessary because before we were holding onto the length of custom_settings_file even when enable batch mode was
+    # set back to false
+    if args_dict['custom_settings_file'] is not None and args_dict['override_settings_with_file'] and len(args_dict['custom_settings_file']) > 1:
         times_to_run = len(args_dict['custom_settings_file'])
 
     print(f"times_to_run: {times_to_run}")
+    # extract the job_id_prefix before entering the loop. Why? Because once we're in the loop, args gets turned into a SimpleNamespace
+    # so if we're in batch mode, the 2nd time we come into the loop, args[0] throws an exception
+    job_id_prefix = f"{args[0]}"
     for i in range(times_to_run): # run for as many times as we need
-        job_id = f"{args[0]}-{i}"
+        job_id = f"{job_id_prefix}-{i}"
         JobStatusTracker().update_phase(job_id, DeforumJobPhase.PREPARING)
         print(f"\033[4;33mDeforum extension for auto1111 webui\033[0m")
         print(f"Git commit: {get_deforum_version()}")
