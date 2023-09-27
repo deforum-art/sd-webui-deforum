@@ -32,7 +32,17 @@ def get_samplers_list():
         'dpm2 a karras': 'DPM2 a Karras',
         'dpm++ 2s a karras': 'DPM++ 2S a Karras',
         'dpm++ 2m karras': 'DPM++ 2M Karras',
-        'dpm++ sde karras': 'DPM++ SDE Karras'
+        'dpm++ sde karras': 'DPM++ SDE Karras',
+        'dpm++ 2m sde exponential': 'DPM++ 2M SDE Exponential',
+        'dpm++ 2m sde heun': 'DPM++ 2M SDE Heun',
+        'dpm++ 2m sde heun karras': 'DPM++ 2M SDE Heun Karras',
+        'dpm++ 2m sde Heun Exponential': 'DPM++ 2M SDE Heun Exponential',
+        'dpm++ 3m sde': 'DPM++ 3M SDE',
+        'dpm++ 3m sde karras': 'DPM++ 3M SDE Karras',
+        'dpm++ 3m sde exponential': 'DPM++ 3M SDE Exponential',
+        'ddim': 'DDIM',
+        'plms': 'PLMS',
+        'unipc': 'UniPC'
     }
 
 def DeforumAnimPrompts():
