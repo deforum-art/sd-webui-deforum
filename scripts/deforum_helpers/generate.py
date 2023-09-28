@@ -15,6 +15,7 @@
 # Contact the authors: https://deforum.github.io/
 
 from PIL import Image
+import os
 import math
 import json
 import itertools
@@ -29,6 +30,7 @@ from .webui_sd_pipeline import get_webui_sd_pipeline
 from .rich import console
 from .defaults import get_samplers_list
 from .prompt import check_is_number
+from .opts_overrider import A1111OptionsOverrider
 import cv2
 import numpy as np
 from types import SimpleNamespace
@@ -235,7 +237,8 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, pars
             if is_controlnet_enabled(controlnet_args):
                 process_with_controlnet(p_txt, args, anim_args, controlnet_args, root, parseq_adapter, is_img2img=False, frame_idx=frame)
 
-            processed = processing.process_images(p_txt)
+            with A1111OptionsOverrider({"control_net_detectedmap_dir" : os.path.join(args.outdir, "controlnet_detected_map")}):
+                processed = processing.process_images(p_txt)
 
             try:
                 p_txt.close()
@@ -276,7 +279,8 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, root, pars
             if is_controlnet_enabled(controlnet_args):
                 process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_adapter, is_img2img=True, frame_idx=frame)
             
-            processed = processing.process_images(p)
+            with A1111OptionsOverrider({"control_net_detectedmap_dir" : os.path.join(args.outdir, "controlnet_detected_map")}):
+                processed = processing.process_images(p)
 
 
     if root.initial_info is None:

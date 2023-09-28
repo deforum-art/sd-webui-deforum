@@ -543,9 +543,10 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
 
         # optical flow redo before generation
         if optical_flow_redo_generation != 'None' and prev_img is not None and strength > 0:
-            print(f"Optical flow redo is diffusing and warping using {optical_flow_redo_generation} optical flow before generation.")
             stored_seed = args.seed
             args.seed = random.randint(0, 2 ** 32 - 1)
+            print(f"Optical flow redo is diffusing and warping using {optical_flow_redo_generation} and seed {args.seed} optical flow before generation.")
+
             disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
             disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
             disposable_flow = get_flow_from_images(prev_img, disposable_image, optical_flow_redo_generation, raft_model)

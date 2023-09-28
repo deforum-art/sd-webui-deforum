@@ -34,6 +34,7 @@ import gradio as gr
 from deforum_helpers.args import (DeforumAnimArgs, DeforumArgs,
                                   DeforumOutputArgs, LoopArgs, ParseqArgs,
                                   RootArgs, get_component_names)
+from deforum_helpers.opts_overrider import A1111OptionsOverrider
 from fastapi import FastAPI, Response, status
 
 from modules.shared import cmd_opts, opts, state
@@ -67,6 +68,7 @@ def run_deforum_batch(batch_id: str, job_ids: [str], deforum_settings_files: Lis
     log.info(f"Starting batch {batch_id} in thread {threading.get_ident()}.")
     try:
         with A1111OptionsOverrider(opts_overrides):
+
             # Fill deforum args with default values.
             # We are overriding everything with the batch files, but some values are eagerly validated, so must appear valid.
             component_names = get_component_names()
@@ -267,32 +269,6 @@ class ApiState(metaclass=Singleton):
         self.submitted_jobs[batch_id] = future
 
 atexit.register(ApiState.cleanup)
-
-
-class A1111OptionsOverrider(object):
-    def __init__(self, opts_overrides: Dict[str, Any]):
-        self.opts_overrides = opts_overrides
-
-    def __enter__(self):
-        if self.opts_overrides is not None and len(self.opts_overrides)>1:
-            self.original_opts = {k: opts.data[k] for k in self.opts_overrides.keys() if k in opts.data}
-            log.debug(f"Captured options to override: {self.original_opts}")                
-            log.info(f"Setting options: {self.opts_overrides}")
-            for k, v in self.opts_overrides.items():
-                setattr(opts, k, v)
-        else:
-            self.original_opts = None
-        return self
- 
-    def __exit__(self, exception_type, exception_value, traceback):
-        if (exception_type is not None):
-            log.warning(f"Error during batch execution: {exception_type} - {exception_value}")
-            log.debug(f"{traceback}")
-        if (self.original_opts is not None):
-            log.info(f"Restoring options: {self.original_opts}")
-            for k, v in self.original_opts.items():
-                setattr(opts, k, v)
-
 
 # Maintains state that tracks status of submitted jobs, 
 # so that clients can query job status.
