@@ -33,7 +33,7 @@ DEFAULT_ARGS = SimpleNamespace(anim_args = SimpleNamespace(max_frames=2),
 
 
 def buildParseqAdapter(parseq_use_deltas, parseq_manifest, setup_args=DEFAULT_ARGS):
-    return ParseqAdapter(SimpleNamespace(parseq_use_deltas=parseq_use_deltas, parseq_manifest=parseq_manifest),
+    return ParseqAdapter(SimpleNamespace(parseq_use_deltas=parseq_use_deltas, parseq_non_schedule_overrides=False, parseq_manifest=parseq_manifest),
                          setup_args.anim_args, setup_args.video_args, setup_args.controlnet_args, setup_args.loop_args)
 
 class TestParseqAnimKeys(unittest.TestCase):

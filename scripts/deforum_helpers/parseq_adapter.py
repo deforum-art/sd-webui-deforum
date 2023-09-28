@@ -24,6 +24,7 @@ import pandas as pd
 import requests
 from .animation_key_frames import DeformAnimKeys, ControlNetKeys, LooperAnimKeys
 from .rich import console
+from .general_utils import tickOrCross
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -35,11 +36,31 @@ class ParseqAdapter():
         # Basic data extraction
         self.use_parseq = parseq_args.parseq_manifest and parseq_args.parseq_manifest.strip()
         self.use_deltas = parseq_args.parseq_use_deltas
+        self.non_schedule_overrides = parseq_args.parseq_non_schedule_overrides
+
+        self.video_args = video_args
+        self.anim_args = anim_args
 
         self.parseq_json = self.load_manifest(parseq_args) if self.use_parseq else json.loads('{ "rendered_frames": [{"frame": 0}] }')
         self.rendered_frames = self.parseq_json['rendered_frames']       
-        self.max_frame = self.get_max('frame')
-        self.required_frames = anim_args.max_frames        
+
+        # Store the settings from the UI in case we override them, so we can report clearly on what's going on.
+        self.a1111_fps = video_args.fps
+        self.a1111_cadence = anim_args.diffusion_cadence
+        self.a1111_frame_count = anim_args.max_frames
+
+        # These options in the Parseq manifest will override the options used by Deforum _if and only if_ parseq_non_schedule_overrides is true.
+        # Warning: we mutate fields on the actual anim_args and video_args objects
+        if (self.use_parseq):
+            self.fps = self.parseq_json['options']['output_fps'] if 'output_fps' in self.parseq_json['options'] else None
+            self.cadence = self.parseq_json['options']['cadence'] if 'cadence' in self.parseq_json['options'] else None
+            self.frame_count = len(self.rendered_frames)
+            if self.manages_max_frames():
+                anim_args.max_frames = self.frame_count
+            if self.manages_cadence():
+                anim_args.diffusion_cadence = self.cadence
+            if self.manages_fps():
+                video_args.fps = self.fps
 
         # Wrap the original schedules with Parseq decorators, so that Parseq values will override the original values IFF appropriate.
         self.anim_keys = ParseqAnimKeysDecorator(self, DeformAnimKeys(anim_args))
@@ -49,12 +70,10 @@ class ParseqAdapter():
 
         # Validation
         if (self.use_parseq):
-            self.required_fps = video_args.fps
-            self.config_output_fps = self.parseq_json['options']['output_fps']
-            count_defined_frames = len(self.rendered_frames)
-            expected_defined_frames = self.max_frame+1 # frames are 0-indexed
-            if (expected_defined_frames != count_defined_frames): 
-                logging.warning(f"There may be duplicated or missing frame data in the Parseq input: expected {expected_defined_frames} frames including frame 0 because the highest frame number is {self.max_frame}, but there are {count_defined_frames} frames defined.")
+            max_frame = self.get_max('frame')
+            expected_frame_count = max_frame+1
+            if (self.frame_count != expected_frame_count): 
+                logging.warning(f"There may be duplicated or missing frame data in the Parseq input: expected {expected_frame_count} frames including frame 0 because the highest frame number is {max_frame}, but there are {self.frame_count} frames defined.")
             if not mute:
                 self.print_parseq_table()
     
@@ -98,23 +117,33 @@ class ParseqAdapter():
         table.add_column("Parseq", style="cyan")
         table.add_column("Deforum", style="green")
 
-        table.add_row("Animation", '\n'.join(self.anim_keys.managed_fields()), '\n'.join(self.anim_keys.unmanaged_fields()))
+        table.add_row("Animation",         '\n'.join(self.anim_keys.managed_fields()),                      '\n'.join(self.anim_keys.unmanaged_fields()))
         if self.cn_keys:
-            table.add_row("ControlNet", '\n'.join(self.cn_keys.managed_fields()), '\n'.join(self.cn_keys.unmanaged_fields()))
+            table.add_row("ControlNet",    '\n'.join(self.cn_keys.managed_fields()),                        '\n'.join(self.cn_keys.unmanaged_fields()))
         if self.looper_keys:
-            table.add_row("Guided Images", '\n'.join(self.looper_keys.managed_fields()), '\n'.join(self.looper_keys.unmanaged_fields()))            
-        table.add_row("Prompts", "✅" if self.manages_prompts() else "❌", "✅" if not self.manages_prompts() else "❌")
-        table.add_row("Frames", str(len(self.rendered_frames)), str(self.required_frames) + (" ⚠️" if str(self.required_frames) != str(len(self.rendered_frames))+"" else ""))
-        table.add_row("FPS", str(self.config_output_fps), str(self.required_fps) + (" ⚠️" if str(self.required_fps) != str(self.config_output_fps) else ""))
+            table.add_row("Guided Images", '\n'.join(self.looper_keys.managed_fields()),                    '\n'.join(self.looper_keys.unmanaged_fields()))            
+        table.add_row("Prompts",            tickOrCross(self.manages_prompts()),                            tickOrCross(not self.manages_prompts()))
+        table.add_row("Frames",             str(self.frame_count) + tickOrCross(self.manages_max_frames()), str(self.a1111_frame_count) + tickOrCross(not self.manages_max_frames()))
+        table.add_row("FPS",                str(self.fps)  + tickOrCross(self.manages_fps()),               str(self.a1111_fps) + tickOrCross(not self.manages_fps()))
+        table.add_row("Cadence",            str(self.cadence) + tickOrCross(self.manages_cadence()),        str(self.a1111_cadence) + tickOrCross(not self.manages_cadence()))
 
         console.print("\nUse this table to validate your Parseq & Deforum setup:")
         console.print(table)
 
     def manages_prompts(self):
         return self.use_parseq and 'deforum_prompt' in self.rendered_frames[0].keys()
-
+    
     def manages_seed(self):
         return self.use_parseq and 'seed' in self.rendered_frames[0].keys()    
+    
+    def manages_cadence(self):
+        return self.use_parseq and self.non_schedule_overrides and self.cadence
+    
+    def manages_fps(self):
+        return self.use_parseq and self.non_schedule_overrides and self.fps
+    
+    def manages_max_frames(self):
+        return self.use_parseq and self.non_schedule_overrides and self.frame_count
     
     def get_max(self, seriesName):
         return max(self.rendered_frames, key=itemgetter(seriesName))[seriesName]
@@ -135,19 +164,21 @@ class ParseqAbstractDecorator():
                 logging.debug(f"Found {seriesName} in first frame of Parseq data. Assuming it's defined.")
         except KeyError:
             return None
+        
+        required_frames = self.adapter.anim_args.max_frames
 
-        key_frame_series = pd.Series([np.nan for a in range(self.adapter.required_frames)])
+        key_frame_series = pd.Series([np.nan for a in range(required_frames)])
         
         for frame in self.adapter.rendered_frames:
             frame_idx = frame['frame']
-            if frame_idx < self.adapter.required_frames:                
+            if frame_idx < required_frames:                
                 if not np.isnan(key_frame_series[frame_idx]):
                     logging.warning(f"Duplicate frame definition {frame_idx} detected for data {seriesName}. Latest wins.")        
                 key_frame_series[frame_idx] = frame[seriesName]
 
         # If the animation will have more frames than Parseq defines,
         # duplicate final value to match the required frame count.
-        while (frame_idx < self.adapter.required_frames):
+        while (frame_idx < required_frames):
             key_frame_series[frame_idx] = operator.itemgetter(-1)(self.adapter.rendered_frames)[seriesName]
             frame_idx += 1
 

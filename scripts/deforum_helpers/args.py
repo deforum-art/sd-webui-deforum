@@ -967,16 +967,23 @@ def LoopArgs():
 def ParseqArgs():
     return {
         "parseq_manifest": {
-            "label": "Parseq Manifest (JSON or URL)",
+            "label": "Parseq manifest (JSON or URL)",
             "type": "textbox",
             "lines": 4,
             "value": None,
         },
         "parseq_use_deltas": {
-            "label": "Use delta values for movement parameters",
+            "label": "Use delta values for movement parameters (recommended)",
             "type": "checkbox",
             "value": True,
-        }
+            "info": "Recommended. If you uncheck this, Parseq keyframe values as are treated as relative movement values instead of absolute."
+        },
+        "parseq_non_schedule_overrides": {
+            "label": "Use FPS, max_frames and cadence from the Parseq manifest, if present (recommended)",
+            "type": "checkbox",
+            "value": True,
+            "info": "Recommended. If you uncheck this, the FPS, max_frames and cadence in the Parseq doc are ignored, and the values in the A1111 UI are used instead."
+        }        
     }
 
 def DeforumOutputArgs():

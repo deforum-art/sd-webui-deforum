@@ -353,6 +353,8 @@ def get_tab_init(d, da, dp):
             with FormRow():
                 parseq_manifest = create_gr_elem(dp.parseq_manifest)
             with FormRow():
+                parseq_non_schedule_overrides = create_gr_elem(dp.parseq_non_schedule_overrides)                
+            with FormRow():
                 parseq_use_deltas = create_gr_elem(dp.parseq_use_deltas)
     return {k: v for k, v in {**locals(), **vars()}.items()}
 

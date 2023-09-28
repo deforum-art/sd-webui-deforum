@@ -44,7 +44,8 @@
     "options": {
         "input_fps": 20,
         "bpm": 140,
-        "output_fps": 20,
+        "output_fps": 60,
+        "cadence": 2,
         "cc_window_width": 0,
         "cc_window_slide_rate": 1,
         "cc_use_input": false

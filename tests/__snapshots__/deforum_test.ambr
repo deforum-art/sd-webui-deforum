@@ -74,7 +74,52 @@
   
   '''
 # ---
-# name: test_with_parseq_inline
+# name: test_with_parseq_inline_with_overrides
+  '''
+  1
+  00:00:00,000 --> 00:00:00,016
+  F#: 0; Cadence: True; Seed: 56; Angle: 0; Tr.C.X: 0.500; Tr.C.Y: 0.500; Zoom: 1.002; TrX: 0; TrY: 0; TrZ: 0; RotX: 0; RotY: 0; RotZ: 0; PerFlT: 0; PerFlP: 0; PerFlG: 0; PerFlFV: 53; Noise: 0.040; StrSch: 0.650; CtrstSch: 1; CFGSch: 7; P2PCfgSch: 1.500; SubSSch: 55; SubSStrSch: 0; CkptSch: model1.ckpt; StepsSch: 25; SeedSch: 55; SamplerSchedule: Euler a; ClipskipSchedule: 2; NoiseMultiplierSchedule: 1.050; MaskSchedule: {video_mask}; NoiseMaskSchedule: {video_mask}; AmountSchedule: 0.050; KernelSchedule: 5; SigmaSchedule: 1; ThresholdSchedule: 0; AspectRatioSchedule: 1; FieldOfViewSchedule: 70; NearSchedule: 200; CadenceFlowFactorSchedule: 1; RedoFlowFactorSchedule: 1; FarSchedule: 10000; HybridCompAlphaSchedule: 0.500; HybridCompMaskBlendAlphaSchedule: 0.500; HybridCompMaskContrastSchedule: 1; HybridCompMaskAutoContrastCutoffHighSchedule: 100; HybridCompMaskAutoContrastCutoffLowSchedule: 0; HybridFlowFactorSchedule: 1; Prompt: Parseq prompt! --neg neg parseq prompt!
+  
+  2
+  00:00:00,016 --> 00:00:00,033
+  F#: 1; Cadence: False; Seed: 56; Angle: 30.111; Tr.C.X: 0.500; Tr.C.Y: 0.500; Zoom: 1.003; TrX: 0; TrY: 0; TrZ: 0; RotX: 0; RotY: 0; RotZ: 0; PerFlT: 0; PerFlP: 0; PerFlG: 0; PerFlFV: 53; Noise: 0.040; StrSch: 0.650; CtrstSch: 1; CFGSch: 7; P2PCfgSch: 1.500; SubSSch: 56; SubSStrSch: 0.100; CkptSch: model1.ckpt; StepsSch: 25; SeedSch: 55.100; SamplerSchedule: Euler a; ClipskipSchedule: 2; NoiseMultiplierSchedule: 1.050; MaskSchedule: {video_mask}; NoiseMaskSchedule: {video_mask}; AmountSchedule: 0.050; KernelSchedule: 5; SigmaSchedule: 1; ThresholdSchedule: 0; AspectRatioSchedule: 1; FieldOfViewSchedule: 70; NearSchedule: 200; CadenceFlowFactorSchedule: 1; RedoFlowFactorSchedule: 1; FarSchedule: 10000; HybridCompAlphaSchedule: 0.500; HybridCompMaskBlendAlphaSchedule: 0.500; HybridCompMaskContrastSchedule: 1; HybridCompMaskAutoContrastCutoffHighSchedule: 100; HybridCompMaskAutoContrastCutoffLowSchedule: 0; HybridFlowFactorSchedule: 1; Prompt: Parseq prompt! --neg neg parseq prompt!
+  
+  3
+  00:00:00,033 --> 00:00:00,050
+  F#: 2; Cadence: True; Seed: 56; Angle: 14.643; Tr.C.X: 0.500; Tr.C.Y: 0.500; Zoom: 1.003; TrX: 0; TrY: 0; TrZ: 0; RotX: 0; RotY: 0; RotZ: 0; PerFlT: 0; PerFlP: 0; PerFlG: 0; PerFlFV: 53; Noise: 0.040; StrSch: 0.650; CtrstSch: 1; CFGSch: 7; P2PCfgSch: 1.500; SubSSch: 56; SubSStrSch: 0.200; CkptSch: model1.ckpt; StepsSch: 25; SeedSch: 55.200; SamplerSchedule: Euler a; ClipskipSchedule: 2; NoiseMultiplierSchedule: 1.050; MaskSchedule: {video_mask}; NoiseMaskSchedule: {video_mask}; AmountSchedule: 0.050; KernelSchedule: 5; SigmaSchedule: 1; ThresholdSchedule: 0; AspectRatioSchedule: 1; FieldOfViewSchedule: 70; NearSchedule: 200; CadenceFlowFactorSchedule: 1; RedoFlowFactorSchedule: 1; FarSchedule: 10000; HybridCompAlphaSchedule: 0.500; HybridCompMaskBlendAlphaSchedule: 0.500; HybridCompMaskContrastSchedule: 1; HybridCompMaskAutoContrastCutoffHighSchedule: 100; HybridCompMaskAutoContrastCutoffLowSchedule: 0; HybridFlowFactorSchedule: 1; Prompt: Parseq prompt! --neg neg parseq prompt!
+  
+  4
+  00:00:00,050 --> 00:00:00,066
+  F#: 3; Cadence: False; Seed: 56; Angle: -8.348; Tr.C.X: 0.500; Tr.C.Y: 0.500; Zoom: 1.003; TrX: 0; TrY: 0; TrZ: 0; RotX: 0; RotY: 0; RotZ: 0; PerFlT: 0; PerFlP: 0; PerFlG: 0; PerFlFV: 53; Noise: 0.040; StrSch: 0.650; CtrstSch: 1; CFGSch: 7; P2PCfgSch: 1.500; SubSSch: 56; SubSStrSch: 0.300; CkptSch: model1.ckpt; StepsSch: 25; SeedSch: 55.300; SamplerSchedule: Euler a; ClipskipSchedule: 2; NoiseMultiplierSchedule: 1.050; MaskSchedule: {video_mask}; NoiseMaskSchedule: {video_mask}; AmountSchedule: 0.050; KernelSchedule: 5; SigmaSchedule: 1; ThresholdSchedule: 0; AspectRatioSchedule: 1; FieldOfViewSchedule: 70; NearSchedule: 200; CadenceFlowFactorSchedule: 1; RedoFlowFactorSchedule: 1; FarSchedule: 10000; HybridCompAlphaSchedule: 0.500; HybridCompMaskBlendAlphaSchedule: 0.500; HybridCompMaskContrastSchedule: 1; HybridCompMaskAutoContrastCutoffHighSchedule: 100; HybridCompMaskAutoContrastCutoffLowSchedule: 0; HybridFlowFactorSchedule: 1; Prompt: Parseq prompt! --neg neg parseq prompt!
+  
+  5
+  00:00:00,066 --> 00:00:00,083
+  F#: 4; Cadence: True; Seed: 56; Angle: -27.050; Tr.C.X: 0.500; Tr.C.Y: 0.500; Zoom: 1.003; TrX: 0; TrY: 0; TrZ: 0; RotX: 0; RotY: 0; RotZ: 0; PerFlT: 0; PerFlP: 0; PerFlG: 0; PerFlFV: 53; Noise: 0.040; StrSch: 0.650; CtrstSch: 1; CFGSch: 7; P2PCfgSch: 1.500; SubSSch: 56; SubSStrSch: 0.400; CkptSch: model1.ckpt; StepsSch: 25; SeedSch: 55.400; SamplerSchedule: Euler a; ClipskipSchedule: 2; NoiseMultiplierSchedule: 1.050; MaskSchedule: {video_mask}; NoiseMaskSchedule: {video_mask}; AmountSchedule: 0.050; KernelSchedule: 5; SigmaSchedule: 1; ThresholdSchedule: 0; AspectRatioSchedule: 1; FieldOfViewSchedule: 70; NearSchedule: 200; CadenceFlowFactorSchedule: 1; RedoFlowFactorSchedule: 1; FarSchedule: 10000; HybridCompAlphaSchedule: 0.500; HybridCompMaskBlendAlphaSchedule: 0.500; HybridCompMaskContrastSchedule: 1; HybridCompMaskAutoContrastCutoffHighSchedule: 100; HybridCompMaskAutoContrastCutoffLowSchedule: 0; HybridFlowFactorSchedule: 1; Prompt: Parseq prompt! --neg neg parseq prompt!
+  
+  6
+  00:00:00,083 --> 00:00:00,100
+  F#: 5; Cadence: False; Seed: 56; Angle: -31.856; Tr.C.X: 0.500; Tr.C.Y: 0.500; Zoom: 1.004; TrX: 0; TrY: 0; TrZ: 0; RotX: 0; RotY: 0; RotZ: 0; PerFlT: 0; PerFlP: 0; PerFlG: 0; PerFlFV: 53; Noise: 0.040; StrSch: 0.650; CtrstSch: 1; CFGSch: 7; P2PCfgSch: 1.500; SubSSch: 56; SubSStrSch: 0.500; CkptSch: model1.ckpt; StepsSch: 25; SeedSch: 55.500; SamplerSchedule: Euler a; ClipskipSchedule: 2; NoiseMultiplierSchedule: 1.050; MaskSchedule: {video_mask}; NoiseMaskSchedule: {video_mask}; AmountSchedule: 0.050; KernelSchedule: 5; SigmaSchedule: 1; ThresholdSchedule: 0; AspectRatioSchedule: 1; FieldOfViewSchedule: 70; NearSchedule: 200; CadenceFlowFactorSchedule: 1; RedoFlowFactorSchedule: 1; FarSchedule: 10000; HybridCompAlphaSchedule: 0.500; HybridCompMaskBlendAlphaSchedule: 0.500; HybridCompMaskContrastSchedule: 1; HybridCompMaskAutoContrastCutoffHighSchedule: 100; HybridCompMaskAutoContrastCutoffLowSchedule: 0; HybridFlowFactorSchedule: 1; Prompt: Parseq prompt! --neg neg parseq prompt!
+  
+  7
+  00:00:00,100 --> 00:00:00,116
+  F#: 6; Cadence: True; Seed: 56; Angle: -20.298; Tr.C.X: 0.500; Tr.C.Y: 0.500; Zoom: 1.004; TrX: 0; TrY: 0; TrZ: 0; RotX: 0; RotY: 0; RotZ: 0; PerFlT: 0; PerFlP: 0; PerFlG: 0; PerFlFV: 53; Noise: 0.040; StrSch: 0.650; CtrstSch: 1; CFGSch: 7; P2PCfgSch: 1.500; SubSSch: 56; SubSStrSch: 0.600; CkptSch: model1.ckpt; StepsSch: 25; SeedSch: 55.600; SamplerSchedule: Euler a; ClipskipSchedule: 2; NoiseMultiplierSchedule: 1.050; MaskSchedule: {video_mask}; NoiseMaskSchedule: {video_mask}; AmountSchedule: 0.050; KernelSchedule: 5; SigmaSchedule: 1; ThresholdSchedule: 0; AspectRatioSchedule: 1; FieldOfViewSchedule: 70; NearSchedule: 200; CadenceFlowFactorSchedule: 1; RedoFlowFactorSchedule: 1; FarSchedule: 10000; HybridCompAlphaSchedule: 0.500; HybridCompMaskBlendAlphaSchedule: 0.500; HybridCompMaskContrastSchedule: 1; HybridCompMaskAutoContrastCutoffHighSchedule: 100; HybridCompMaskAutoContrastCutoffLowSchedule: 0; HybridFlowFactorSchedule: 1; Prompt: Parseq prompt! --neg neg parseq prompt!
+  
+  8
+  00:00:00,116 --> 00:00:00,133
+  F#: 7; Cadence: False; Seed: 56; Angle: 1.688; Tr.C.X: 0.500; Tr.C.Y: 0.500; Zoom: 1.004; TrX: 0; TrY: 0; TrZ: 0; RotX: 0; RotY: 0; RotZ: 0; PerFlT: 0; PerFlP: 0; PerFlG: 0; PerFlFV: 53; Noise: 0.040; StrSch: 0.650; CtrstSch: 1; CFGSch: 7; P2PCfgSch: 1.500; SubSSch: 56; SubSStrSch: 0.700; CkptSch: model1.ckpt; StepsSch: 25; SeedSch: 55.700; SamplerSchedule: Euler a; ClipskipSchedule: 2; NoiseMultiplierSchedule: 1.050; MaskSchedule: {video_mask}; NoiseMaskSchedule: {video_mask}; AmountSchedule: 0.050; KernelSchedule: 5; SigmaSchedule: 1; ThresholdSchedule: 0; AspectRatioSchedule: 1; FieldOfViewSchedule: 70; NearSchedule: 200; CadenceFlowFactorSchedule: 1; RedoFlowFactorSchedule: 1; FarSchedule: 10000; HybridCompAlphaSchedule: 0.500; HybridCompMaskBlendAlphaSchedule: 0.500; HybridCompMaskContrastSchedule: 1; HybridCompMaskAutoContrastCutoffHighSchedule: 100; HybridCompMaskAutoContrastCutoffLowSchedule: 0; HybridFlowFactorSchedule: 1; Prompt: Parseq prompt! --neg neg parseq prompt!
+  
+  9
+  00:00:00,133 --> 00:00:00,150
+  F#: 8; Cadence: True; Seed: 56; Angle: 22.806; Tr.C.X: 0.500; Tr.C.Y: 0.500; Zoom: 1.004; TrX: 0; TrY: 0; TrZ: 0; RotX: 0; RotY: 0; RotZ: 0; PerFlT: 0; PerFlP: 0; PerFlG: 0; PerFlFV: 53; Noise: 0.040; StrSch: 0.650; CtrstSch: 1; CFGSch: 7; P2PCfgSch: 1.500; SubSSch: 56; SubSStrSch: 0.800; CkptSch: model1.ckpt; StepsSch: 25; SeedSch: 55.800; SamplerSchedule: Euler a; ClipskipSchedule: 2; NoiseMultiplierSchedule: 1.050; MaskSchedule: {video_mask}; NoiseMaskSchedule: {video_mask}; AmountSchedule: 0.050; KernelSchedule: 5; SigmaSchedule: 1; ThresholdSchedule: 0; AspectRatioSchedule: 1; FieldOfViewSchedule: 70; NearSchedule: 200; CadenceFlowFactorSchedule: 1; RedoFlowFactorSchedule: 1; FarSchedule: 10000; HybridCompAlphaSchedule: 0.500; HybridCompMaskBlendAlphaSchedule: 0.500; HybridCompMaskContrastSchedule: 1; HybridCompMaskAutoContrastCutoffHighSchedule: 100; HybridCompMaskAutoContrastCutoffLowSchedule: 0; HybridFlowFactorSchedule: 1; Prompt: Parseq prompt! --neg neg parseq prompt!
+  
+  10
+  00:00:00,150 --> 00:00:00,166
+  F#: 9; Cadence: False; Seed: 56; Angle: 32.209; Tr.C.X: 0.500; Tr.C.Y: 0.500; Zoom: 1.004; TrX: 0; TrY: 0; TrZ: 0; RotX: 0; RotY: 0; RotZ: 0; PerFlT: 0; PerFlP: 0; PerFlG: 0; PerFlFV: 53; Noise: 0.040; StrSch: 0.650; CtrstSch: 1; CFGSch: 7; P2PCfgSch: 1.500; SubSSch: 56; SubSStrSch: 0.900; CkptSch: model1.ckpt; StepsSch: 25; SeedSch: 55.900; SamplerSchedule: Euler a; ClipskipSchedule: 2; NoiseMultiplierSchedule: 1.050; MaskSchedule: {video_mask}; NoiseMaskSchedule: {video_mask}; AmountSchedule: 0.050; KernelSchedule: 5; SigmaSchedule: 1; ThresholdSchedule: 0; AspectRatioSchedule: 1; FieldOfViewSchedule: 70; NearSchedule: 200; CadenceFlowFactorSchedule: 1; RedoFlowFactorSchedule: 1; FarSchedule: 10000; HybridCompAlphaSchedule: 0.500; HybridCompMaskBlendAlphaSchedule: 0.500; HybridCompMaskContrastSchedule: 1; HybridCompMaskAutoContrastCutoffHighSchedule: 100; HybridCompMaskAutoContrastCutoffLowSchedule: 0; HybridFlowFactorSchedule: 1; Prompt: Parseq prompt! --neg neg parseq prompt!
+  
+  
+  '''
+# ---
+# name: test_with_parseq_inline_without_overrides
   '''
   1
   00:00:00,000 --> 00:00:00,050
