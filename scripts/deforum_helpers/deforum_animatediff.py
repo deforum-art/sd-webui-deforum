@@ -114,7 +114,7 @@ def setup_animatediff_ui_raw():
             refresh_models = ToolButton(value=refresh_symbol)
             refresh_models.click(refresh_all_models, model, model)
         with gr.Row(visible=False) as motion_lora_row:
-            motion_lora_schedule = gr.Textbox(label="Motion lora", lines=1, value='0:("")', interactive=True)
+            motion_lora_schedule = gr.Textbox(label="Motion lora schedule", lines=1, value='0:("")', interactive=True)
         with gr.Row(visible=False) as window_row:
             window_length = gr.Textbox(label="Number of sliding window frames", lines=1, value='0:(16)', interactive=True)
         with gr.Row(visible=False) as overlap_row:
