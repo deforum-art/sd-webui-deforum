@@ -63,16 +63,19 @@ def animatediff_infotext():
             <p">If Deforum crashes due to AnimateDiff updates, go <a style='color:Orange;' target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff/issues'>here</a> and report your problem.</p>
            """
 
-def animatediff_component_names():
-    if not find_animatediff():
-        return []
-
-    return [f'animatediff_{i}' for i in [
+def animatediff_component_names_raw():
+    return [
         'enabled', 'model', 'motion_lora_schedule',
         'window_length', # sliding window length (context batch size)
         'window_overlap', # how much do the contexts overlap. if -1, then batch_size // 4
         'latent_power', 'latent_scale',
-    ]]
+    ]
+
+def animatediff_component_names():
+    if not find_animatediff():
+        return []
+
+    return [f'animatediff_{i}' for i in animatediff_component_names_raw()]
 
 def setup_animatediff_ui_raw():
 
@@ -130,7 +133,7 @@ def setup_animatediff_ui_raw():
         ])
 
         return {key: value for key, value in locals().items() if key in 
-            animatediff_component_names()
+            animatediff_component_names_raw()
         }
 
     with gr.TabItem('AnimateDiff'):
