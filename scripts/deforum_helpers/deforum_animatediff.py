@@ -31,6 +31,9 @@ from .video_audio_utilities import vid2frames, convert_image
 #from .animation_key_frames import AnimateDiffKeys
 from .load_images import load_image
 from .general_utils import debug_print
+from modules.shared import opts, cmd_opts, state, sd_model
+
+import modules.paths as ph
 
 #self.last_frame = last_frame
 #self.latent_power_last = latent_power_last
@@ -81,7 +84,7 @@ def setup_animatediff_ui_raw():
 
     cnet = find_animatediff()
 
-    model_dir = shared.opts.data.get("animatediff_model_path", os.path.join(scripts.basedir(), "model"))
+    model_dir = ph.models_path + '/AnimateDiff' # shared.opts.data.get("animatediff_model_path", os.path.join(scripts.basedir(), "model"))
 
     if not os.path.isdir(model_dir):
         os.mkdir(model_dir)
@@ -155,7 +158,64 @@ def setup_animatediff_ui():
     except Exception as e:
         print(f"'AnimateDiff UI setup failed with error: '{e}'!")
         gr.HTML(f"""
-                Failed to setup AnimateDiff UI, check the reason in your commandline log. Please, downgrade your AnimateDiff extension and report the problem <a style='color:Orange;' target='_blank' href='https://github.com/deforum-art/sd-webui-deforum'>here</a> (Deforum) or <a style='color:Orange;' target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff'>here</a> (AnimateDiff).
+                Failed to setup AnimateDiff UI, check the reason in your commandline log. Please, downgrade your AnimateDiff extension to <a style='color:Orange;' target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff/archive/b192a2551a5ed66d4a3ce58d5d19a8872abc87ca.zip'>b192a2551a5ed66d4a3ce58d5d19a8872abc87ca</a> and report the problem <a style='color:Orange;' target='_blank' href='https://github.com/deforum-art/sd-webui-deforum'>here</a> (Deforum) or <a style='color:Orange;' target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff'>here</a> (AnimateDiff).
                 """, elem_id='animatediff_not_found_html_msg')
         return {}
+
+lora_hacker = None
+cfg_hacker = None
+cn_hacker = None
+
+# HACK: writing temp frames to a dir for animatediff processing
+# TODO: 
+def write_temp_frames():
+    #tmp_frame_dir = Path(f'{data_path}/tmp/animatediff-frames/')
+    #tmp_frame_dir.mkdir(parents=True, exist_ok=True)
+    ...
+
+def before_process(p, animatediff_args):
+    global lora_hacker, cfg_hacker, cn_hacker
     
+    from scripts.animatediff_lora import AnimateDiffLora
+    from scripts.animatediff_infv2v import AnimateDiffInfV2V
+    from scripts.animatediff_cn import AnimateDiffControl
+
+    from scripts.animatediff_mm import mm_animatediff as motion_module
+
+    set_p(p, animatediff_args)    
+    motion_module.inject(p.sd_model, animatediff_args.animatediff_model)
+    lora_hacker = AnimateDiffLora(motion_module.mm.using_v2)
+    lora_hacker.hack()
+    cfg_hacker = AnimateDiffInfV2V(p)
+    cfg_hacker.hack(animatediff_args)
+    cn_hacker = AnimateDiffControl(p)
+    cn_hacker.hack(animatediff_args)
+
+def postprocess(
+        p, animatediff_args
+    ):
+    global lora_hacker, cfg_hacker, cn_hacker
+    cn_hacker.restore()
+    cfg_hacker.restore()
+    lora_hacker.restore()
+    from scripts.animatediff_mm import mm_animatediff as motion_module
+    motion_module.restore(p.sd_model)
+
+def animatediff_process_from_args(animatediff_args):
+    args = animatediff_args
+    from scripts.animatediff_ui import AnimateDiffProcess
+
+    return AnimateDiffProcess(
+        model = args.animatediff_model,
+        enable = args.animatediff_enabled,
+        video_length = args.animatediff_enabled,
+        ...
+        # FIXME
+    )
+
+#def set_p(p, animatediff_args):
+#    if animatediff_args.animatediff_window_length < 1:
+#        return
+#    p.batch_size = animatediff_args.animatediff_window_length
+#    if animatediff_args.animatediff_window_overlap == -1:
+#        animatediff_args.animatediff_window_overlap = animatediff_args.animatediff_window_length // 4

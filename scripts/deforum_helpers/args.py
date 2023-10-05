@@ -1146,7 +1146,7 @@ def process_args(args_dict_main, run_id):
 
     args_loaded_ok = True
     if override_settings_with_file:
-        args_loaded_ok = load_args(args_dict_main, args, anim_args, parseq_args, loop_args, controlnet_args, video_args, custom_settings_file, root, run_id)
+        args_loaded_ok = load_args(args_dict_main, args, anim_args, parseq_args, loop_args, animatediff_args, controlnet_args, video_args, custom_settings_file, root, run_id)
 
     positive_prompts = args_dict_main['animation_prompts_positive']
     negative_prompts = args_dict_main['animation_prompts_negative']
@@ -1185,4 +1185,4 @@ def process_args(args_dict_main, run_id):
     default_img = default_img.resize((args.W,args.H))
     root.default_img = default_img
 
-    return args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
+    return args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, animatediff_args, controlnet_args

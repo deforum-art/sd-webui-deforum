@@ -52,10 +52,16 @@ from .RAFT import RAFT
 
 from deforum_api import JobStatusTracker
 
-def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, animatediff_args, controlnet_args, root):
 
     # initialise Parseq adapter
+    # TODO: @rewbs
     parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args, loop_args)
+
+    if animatediff_args.enabled:
+        print("Rendering with AnimateDiff on.")
+        
+        
 
     if opts.data.get("deforum_save_gen_info_as_srt", False):  # create .srt file and set timeframe mechanism using FPS
         srt_filename = os.path.join(args.outdir, f"{root.timestring}.srt")
