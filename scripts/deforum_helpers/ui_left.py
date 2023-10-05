@@ -47,6 +47,7 @@ def setup_deforum_left_side_ui():
             tab_keyframes_params = get_tab_keyframes(d, da, dloopArgs)  # Keyframes tab
             tab_prompts_params = get_tab_prompts(da)  # Prompts tab
             tab_init_params = get_tab_init(d, da, dp)  # Init tab
+            controlnet_dict = animate_diff_ui()  # AnimateDiff tab
             controlnet_dict = setup_controlnet_ui()  # ControlNet tab
             tab_hybrid_params = get_tab_hybrid(da)  # Hybrid tab
             tab_output_params = get_tab_output(da, dv)  # Output tab
