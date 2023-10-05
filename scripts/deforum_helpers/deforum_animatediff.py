@@ -28,7 +28,7 @@ from modules import scripts, shared
 from .deforum_controlnet_gradio import hide_ui_by_cn_status, hide_file_textboxes, ToolButton
 from .general_utils import count_files_in_folder, clean_gradio_path_strings  # TODO: do it another way
 from .video_audio_utilities import vid2frames, convert_image
-from .animation_key_frames import AnimateDiffKeys
+#from .animation_key_frames import AnimateDiffKeys
 from .load_images import load_image
 from .general_utils import debug_print
 
