@@ -118,9 +118,9 @@ def setup_animatediff_ui_raw():
             # TODO: expose cadence as a variable
             window_overlap = gr.Textbox(label="Number of overlapping frames", lines=1, value='0:(15)', interactive=True)
         with gr.Row(visible=False) as latent_power_row:
-            latent_power = gr.Textbox(label="Latent power schedule", lines=1, value='0:(0.0)', interactive=True)
+            latent_power = gr.Textbox(label="Latent power schedule", lines=1, value='0:(1)', interactive=True)
         with gr.Row(visible=False) as latent_scale_row:
-            latent_scale = gr.Textbox(label="Latent scale schedule", lines=1, value='0:(1.0)', interactive=True)
+            latent_scale = gr.Textbox(label="Latent scale schedule", lines=1, value='0:(32)', interactive=True)
         hide_output_list = [enabled, motion_lora_row, mod_row, window_row, overlap_row, latent_power_row, latent_scale_row]
         for cn_output in hide_output_list:
             enabled.change(fn=hide_ui_by_cn_status, inputs=enabled, outputs=cn_output)
@@ -141,3 +141,18 @@ def setup_animatediff_ui_raw():
             locals()[f"animatediff_{key}"] = value
 
     return locals()
+
+def setup_animatediff_ui():
+    if not find_animatediff():
+        gr.HTML("""<a style='target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff'>AnimateDiff not found. Please install it :)</a>""", elem_id='animatediff_not_found_html_msg')
+        return {}
+
+    try:
+        return setup_animatediff_ui_raw()
+    except Exception as e:
+        print(f"'AnimateDiff UI setup failed with error: '{e}'!")
+        gr.HTML(f"""
+                Failed to setup AnimateDiff UI, check the reason in your commandline log. Please, downgrade your AnimateDiff extension and report the problem <a style='color:Orange;' target='_blank' href='https://github.com/deforum-art/sd-webui-deforum'>here</a> (Deforum) or <a style='color:Orange;' target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff'>here</a> (AnimateDiff).
+                """, elem_id='animatediff_not_found_html_msg')
+        return {}
+    
