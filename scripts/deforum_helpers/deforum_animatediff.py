@@ -173,7 +173,7 @@ def write_temp_frames():
     #tmp_frame_dir.mkdir(parents=True, exist_ok=True)
     ...
 
-def before_process(p, animatediff_args):
+def before_process(p, animatediff_args, temp_video_path):
     global lora_hacker, cfg_hacker, cn_hacker
     
     from scripts.animatediff_lora import AnimateDiffLora
@@ -182,7 +182,9 @@ def before_process(p, animatediff_args):
 
     from scripts.animatediff_mm import mm_animatediff as motion_module
 
-    set_p(p, animatediff_args)    
+    animatediff_args = animatediff_process_from_args(animatediff_args, temp_video_path)
+
+    animatediff_args.set_p(p)
     motion_module.inject(p.sd_model, animatediff_args.animatediff_model)
     lora_hacker = AnimateDiffLora(motion_module.mm.using_v2)
     lora_hacker.hack()
@@ -201,16 +203,25 @@ def postprocess(
     from scripts.animatediff_mm import mm_animatediff as motion_module
     motion_module.restore(p.sd_model)
 
-def animatediff_process_from_args(animatediff_args):
+def animatediff_process_from_args(animatediff_args, temp_video_path):
     args = animatediff_args
     from scripts.animatediff_ui import AnimateDiffProcess
 
     return AnimateDiffProcess(
-        model = args.animatediff_model,
-        enable = args.animatediff_enabled,
-        video_length = args.animatediff_enabled,
-        ...
-        # FIXME
+        model=args.animatediff_model,
+        enable=args.animatediff_enabled,
+        video_length=args.animatediff_window_length,
+        fps=8, # Irrelevant?
+        loop_number=0,
+        closed_loop=False,
+        batch_size=args.animatediff_window_length,
+        stride=1, # From Deforum settings
+        overlap=-1,
+        format=['MP4'],
+        video_source=None,
+        video_path=temp_video_path,
+        latent_power=args.animatediff_latent_power,
+        latent_scale=args.animatediff_latent_scale,
     )
 
 #def set_p(p, animatediff_args):
