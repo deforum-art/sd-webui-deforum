@@ -157,10 +157,10 @@ def is_vid_path_valid(video_path):
     # vid path is actually a URL, check it 
     if video_path.startswith('http://') or video_path.startswith('https://'):
         response = requests.head(video_path, allow_redirects=True)
-        extension = video_path.rsplit('?', 1)[0] # remove query string before checking file format extension.
+        extension = extension.rsplit('?', 1)[0] # remove query string before checking file format extension.
         content_disposition = response.headers.get('Content-Disposition')
-        if content_disposition:
-            # Attempt to extract the filename from the Content-Disposition header
+        if content_disposition and extension not in file_formats:
+            # Filename doesn't look valid, but perhaps the content disposition will say otherwise?
             match = re.search(r'filename="?(?P<filename>[^"]+)"?', content_disposition)
             if match:
                 extension = match.group('filename').rsplit('.', 1)[-1].lower()
