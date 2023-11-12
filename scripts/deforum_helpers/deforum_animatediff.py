@@ -28,7 +28,7 @@ from modules import scripts, shared
 from .deforum_controlnet_gradio import hide_ui_by_cn_status, hide_file_textboxes, ToolButton
 from .general_utils import count_files_in_folder, clean_gradio_path_strings  # TODO: do it another way
 from .video_audio_utilities import vid2frames, convert_image
-#from .animation_key_frames import AnimateDiffKeys
+from .animation_key_frames import AnimateDiffKeys
 from .load_images import load_image
 from .general_utils import debug_print
 from modules.shared import opts, cmd_opts, state, sd_model
@@ -68,8 +68,9 @@ def animatediff_infotext():
 
 def animatediff_component_names_raw():
     return [
-        'enabled', 'model', 'motion_lora_schedule',
-        'activation_schedule',
+        'enabled', 'model', 'activation_schedule',
+        'motion_lora_schedule',
+        'video_length_schedule',
         'batch_size_schedule',
         'stride_schedule',
         'overlap_schedule',
@@ -122,10 +123,12 @@ def setup_animatediff_ui_raw():
             refresh_models.click(refresh_all_models, model, model)
         with gr.Row(visible=False) as activation_row:
             gr.Markdown('**Important!** This schedule sets up when AnimateDiff should run on the generated N previous frames. At the moment this is made with binary values: when the expression value is 0, it will make a pass, otherwise normal Deforum frames will be made')
-            activation_schedule = gr.Textbox(label="AnimateDiff activation schedule", lines=1, value='0:("t % ")', interactive=True)
+            activation_schedule = gr.Textbox(label="AnimateDiff activation schedule", lines=1, value='0:("t % 16")', interactive=True)
         gr.Markdown('Internal AnimateDiff settings, see its script in normal tabs')
         with gr.Row(visible=False) as motion_lora_row:
             motion_lora_schedule = gr.Textbox(label="Motion lora schedule", lines=1, value='0:("")', interactive=True)
+        with gr.Row(visible=False) as window_row:
+            video_length_schedule = gr.Textbox(label="N-back video length schedule", lines=1, value='0:(16)', interactive=True)
         with gr.Row(visible=False) as window_row:
             batch_size_schedule = gr.Textbox(label="Batch size", lines=1, value='0:(16)', interactive=True)
         with gr.Row(visible=False) as stride_row:
@@ -179,33 +182,42 @@ def find_animatediff_script(p):
         raise Exception("AnimateDiff script not found.")
     return animatediff_script
 
-def seed_animatediff(p, animatediff_args):
+def seed_animatediff(p, animatediff_args, anim_args, frame_idx):
+    if find_animatediff() is None or not is_animatediff_enabled(animatediff_args):
+        return
+
+    keys = AnimateDiffKeys(animatediff_args, anim_args) # if not parseq_adapter.use_parseq else parseq_adapter.cn_keys
+    
+    # Will do the back-render only on target frames
+    if int(keys.activation_schedule_series[frame_idx]) != 0:
+        return
+
     animatediff_script = find_animatediff_script(p)
     # let's put it before ControlNet to cause less problems
     p.scripts.alwayson_scripts = [animatediff_script] + p.scripts.alwayson_scripts
 
     args_dict = {
-      'model': 'mm_sd_v15_v2.ckpt',   # Motion module
-      'format': ['GIF'],      # Save format, 'GIF' | 'MP4' | 'PNG' | 'WEBP' | 'WEBM' | 'TXT' | 'Frame'
-      'enable': True,         # Enable AnimateDiff
-      'video_length': 16,     # Number of frames
-      'fps': 8,               # FPS
-      'loop_number': 0,       # Display loop number
-      'closed_loop': 'R+P',   # Closed loop, 'N' | 'R-P' | 'R+P' | 'A'
-      'batch_size': 16,       # Context batch size
-      'stride': 1,            # Stride 
-      'overlap': -1,          # Overlap
-      'interp': 'Off',        # Frame interpolation, 'Off' | 'FILM'
-      'interp_x': 10          # Interp X
-      'video_source': 'path/to/video.mp4',  # Video source
-      'video_path': 'path/to/frames',       # Video path
-      'latent_power': 1,      # Latent power
-      'latent_scale': 32,     # Latent scale
-      'last_frame': None,     # Optional last frame
-      'latent_power_last': 1, # Optional latent power for last frame
-      'latent_scale_last': 32,# Optional latent scale for last frame
-      'request_id': ''        # Optional request id. If provided, outputs will have request id as filename suffix
-      }
+        'model': keys.model,   # Motion module
+        'format': ['Frame'],      # Save format, 'GIF' | 'MP4' | 'PNG' | 'WEBP' | 'WEBM' | 'TXT' | 'Frame'
+        'enable': keys.enable,         # Enable AnimateDiff
+        'video_length': keys.video_length_schedule_series[frame_idx],     # Number of frames
+        'fps': 8,               # FPS - don't care
+        'loop_number': 0,       # Display loop number
+        'closed_loop': keys.closed_loop_schedule_series[frame_idx],   # Closed loop, 'N' | 'R-P' | 'R+P' | 'A'
+        'batch_size': keys.batch_size_schedule_series[frame_idx],       # Context batch size
+        'stride': keys.stride_schedule_series[frame_idx],            # Stride 
+        'overlap': keys.overlap_schedule_series[frame_idx],          # Overlap
+        'interp': 'Off',        # Frame interpolation, 'Off' | 'FILM' - don't care
+        'interp_x': 10,          # Interp X - don't care
+        'video_source': '',  # We don't use a video
+        'video_path': 'path/to/frames', # Path with our selected video_length input frames
+        'latent_power': keys.latent_power_schedule_series[frame_idx],      # Latent power
+        'latent_scale': keys.latent_scale_schedule_series[frame_idx],     # Latent scale
+        'last_frame': None,     # Optional last frame
+        'latent_power_last': 1, # Optional latent power for last frame
+        'latent_scale_last': 32,# Optional latent scale for last frame
+        'request_id': ''        # Optional request id. If provided, outputs will have request id as filename suffix
+    }
 
     args = list(args_dict.values())
 

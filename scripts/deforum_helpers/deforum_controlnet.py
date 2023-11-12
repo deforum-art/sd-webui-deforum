@@ -293,8 +293,7 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, animatediff_arg
     p.script_args_value = [None] * controlnet_script.args_to
 
     # Basically, launch AD on a number of previous frames once it hits the seed time
-    if frame_idx % animatediff_args.seed_time == 0: # TODO: make a trigger schedule
-        seed_animatediff(p, animatediff_args)
+    seed_animatediff(p, animatediff_args, frame_idx)
 
     def create_cnu_dict(cn_args, prefix, img_np, mask_np, frame_idx, CnSchKeys):
 
