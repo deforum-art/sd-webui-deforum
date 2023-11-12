@@ -38,6 +38,9 @@ cnet = None
 max_models = shared.opts.data.get("control_net_unit_count", shared.opts.data.get("control_net_max_models_num", 5))
 num_of_models = 5 if max_models <= 5 else max_models
 
+# AnimateDiff support (it requires ControlNet anyway)
+from .deforum_animatediff import seed_animatediff
+
 def find_controlnet():
     global cnet
     if cnet: return cnet
@@ -217,7 +220,7 @@ def controlnet_component_names():
         'processor_res', 'threshold_a', 'threshold_b', 'resize_mode', 'control_mode', 'loopback_mode'
     ]]
 
-def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_adapter, is_img2img=True, frame_idx=0):
+def process_with_controlnet(p, args, anim_args, controlnet_args, animatediff_args, root, parseq_adapter, is_img2img=True, frame_idx=0):
     CnSchKeys = ControlNetKeys(anim_args, controlnet_args) if not parseq_adapter.use_parseq else parseq_adapter.cn_keys
 
     def read_cn_data(cn_idx):
@@ -288,6 +291,10 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_ad
     # Filling the list with None is safe because only the length will be considered,
     # and all cn args will be replaced.
     p.script_args_value = [None] * controlnet_script.args_to
+
+    # Basically, launch AD on a number of previous frames once it hits the seed time
+    if frame_idx % animatediff_args.seed_time == 0: # TODO: make a trigger schedule
+        seed_animatediff(p, animatediff_args)
 
     def create_cnu_dict(cn_args, prefix, img_np, mask_np, frame_idx, CnSchKeys):
 

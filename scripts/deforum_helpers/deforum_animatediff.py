@@ -121,7 +121,6 @@ def setup_animatediff_ui_raw():
         with gr.Row(visible=False) as window_row:
             window_length = gr.Textbox(label="Number of sliding window frames", lines=1, value='0:(16)', interactive=True)
         with gr.Row(visible=False) as overlap_row:
-            # TODO: expose cadence as a variable
             window_overlap = gr.Textbox(label="Number of overlapping frames", lines=1, value='0:(15)', interactive=True)
         with gr.Row(visible=False) as latent_power_row:
             latent_power = gr.Textbox(label="Latent power schedule", lines=1, value='0:(1)', interactive=True)
@@ -167,3 +166,41 @@ def setup_animatediff_ui():
                 Failed to setup AnimateDiff UI, check the reason in your commandline log. Please, downgrade your AnimateDiff extension to <a style='color:Orange;' target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff/archive/b192a2551a5ed66d4a3ce58d5d19a8872abc87ca.zip'>b192a2551a5ed66d4a3ce58d5d19a8872abc87ca</a> and report the problem <a style='color:Orange;' target='_blank' href='https://github.com/deforum-art/sd-webui-deforum'>here</a> (Deforum) or <a style='color:Orange;' target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff'>here</a> (AnimateDiff).
                 """, elem_id='animatediff_not_found_html_msg')
         return {}
+
+def find_animatediff_script(p):
+    animatediff_script = next((script for script in p.scripts.alwayson_scripts if "animatediff" in script.title().lower()), None)
+    if not animatediff_script:
+        raise Exception("AnimateDiff script not found.")
+    return animatediff_script
+
+def seed_animatediff(p, animatediff_args):
+    animatediff_script = find_animatediff_script(p)
+    # let's put it before ControlNet to cause less problems
+    p.scripts.alwayson_scripts = [animatediff_script] + p.scripts.alwayson_scripts
+
+    args_dict = {
+      'model': 'mm_sd_v15_v2.ckpt',   # Motion module
+      'format': ['GIF'],      # Save format, 'GIF' | 'MP4' | 'PNG' | 'WEBP' | 'WEBM' | 'TXT' | 'Frame'
+      'enable': True,         # Enable AnimateDiff
+      'video_length': 16,     # Number of frames
+      'fps': 8,               # FPS
+      'loop_number': 0,       # Display loop number
+      'closed_loop': 'R+P',   # Closed loop, 'N' | 'R-P' | 'R+P' | 'A'
+      'batch_size': 16,       # Context batch size
+      'stride': 1,            # Stride 
+      'overlap': -1,          # Overlap
+      'interp': 'Off',        # Frame interpolation, 'Off' | 'FILM'
+      'interp_x': 10          # Interp X
+      'video_source': 'path/to/video.mp4',  # Video source
+      'video_path': 'path/to/frames',       # Video path
+      'latent_power': 1,      # Latent power
+      'latent_scale': 32,     # Latent scale
+      'last_frame': None,     # Optional last frame
+      'latent_power_last': 1, # Optional latent power for last frame
+      'latent_scale_last': 32,# Optional latent scale for last frame
+      'request_id': ''        # Optional request id. If provided, outputs will have request id as filename suffix
+      }
+
+    args = list(args_dict.values())
+
+    p.script_args_value = args + p.script_args_value
