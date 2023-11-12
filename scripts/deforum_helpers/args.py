@@ -802,12 +802,13 @@ def DeforumArgs():
             "info": ""
         },
         "strength": {
-            "label": "strength",
+            "label": "Strength",
             "type": "slider",
             "minimum": 0,
             "maximum": 1,
             "step": 0.01,
             "value": 0.8,
+            "info": "the inverse of denoise; lower values alter the init image more (high denoise); higher values alter it less (low denoise)"
         },
         "strength_0_no_init": {
             "label": "Strength 0 no init",

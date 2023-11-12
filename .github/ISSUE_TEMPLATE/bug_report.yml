@@ -94,7 +94,7 @@ body:
     id: logs
     attributes:
       label: Console logs
-      description: Now, it is the most important part which most users fail for the first time! Please provide the **full** cmd/terminal logs from the moment you started the webui (i.e. clicked the launch file or started it from cmd) to the part when your bug happened.
+      description: Now, it is the most important part which most users fail for the first time! Please provide the **full** cmd/terminal logs from the moment you started the webui (i.e. clicked the launch file or started it from cmd) to the part when your bug happened. If you have an **excellent reason** for not being able to include the log, include the string 'I have a good reason for not including the log' and explain why. Try to include at least the webui commit hash, deforum extension commit hash, pyton version and model you are working with.
       render: Shell
     validations:
       required: true

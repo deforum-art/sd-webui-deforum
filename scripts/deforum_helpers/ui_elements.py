@@ -15,7 +15,7 @@
 # Contact the authors: https://deforum.github.io/
 
 import gradio as gr
-from modules.ui_components import FormRow, FormColumn
+from modules.ui_components import FormRow, FormColumn, ToolButton
 from .defaults import get_gradio_html, DeforumAnimPrompts
 from .video_audio_utilities import direct_stitch_vid_from_frames
 from .gradio_funcs import upload_vid_to_interpolate, upload_pics_to_interpolate, ncnn_upload_vid_to_upscale, upload_vid_to_depth
@@ -78,6 +78,7 @@ def get_tab_run(d, da):
     return {k: v for k, v in {**locals(), **vars()}.items()}
 
 def get_tab_keyframes(d, da, dloopArgs):
+    components = {}
     with gr.TabItem('Keyframes'):  # TODO make a some sort of the original dictionary parsing
         with FormRow():
             with FormColumn(scale=2):
@@ -154,11 +155,25 @@ def get_tab_keyframes(d, da, dloopArgs):
                 with FormRow():
                     checkpoint_schedule = create_gr_elem(da.checkpoint_schedule)
         # MOTION INNER TAB
+        refresh_symbol = '\U0001f504'  # 🔄
         with gr.Tabs(elem_id='motion_noise_etc'):
             with gr.TabItem('Motion') as motion_tab:
                 with FormColumn() as only_2d_motion_column:
-                    with FormRow():
+                    with FormRow(variant="compact"):
                         zoom = create_gr_elem(da.zoom)
+                        reset_zoom_button = ToolButton(elem_id='reset_zoom_btn', value=refresh_symbol, tooltip="Reset zoom to static.")
+                        components['zoom'] = zoom
+
+                        def reset_zoom_field():
+                            return {
+                                zoom: gr.update(value='0:(1)', visible=True)
+                            }
+
+                        reset_zoom_button.click(
+                            fn=reset_zoom_field,
+                            inputs=[],
+                            outputs=[zoom]
+                        )
                     with FormRow():
                         angle = create_gr_elem(da.angle)
                     with FormRow():
@@ -173,6 +188,19 @@ def get_tab_keyframes(d, da, dloopArgs):
                 with FormColumn(visible=False) as only_3d_motion_column:
                     with FormRow():
                         translation_z = create_gr_elem(da.translation_z)
+                        reset_tr_z_button = ToolButton(elem_id='reset_tr_z_btn', value=refresh_symbol, tooltip="Reset translation Z to static.")
+                        components['tr_z'] = translation_z
+
+                        def reset_tr_z_field():
+                            return {
+                                translation_z: gr.update(value='0:(0)', visible=True)
+                            }
+
+                        reset_tr_z_button.click(
+                            fn=reset_tr_z_field,
+                            inputs=[],
+                            outputs=[translation_z]
+                        )
                     with FormRow():
                         rotation_3d_x = create_gr_elem(da.rotation_3d_x)
                     with FormRow():
@@ -190,6 +218,7 @@ def get_tab_keyframes(d, da, dloopArgs):
                     perspective_flip_gamma = create_gr_elem(da.perspective_flip_gamma)
                 with FormRow(visible=False) as per_f_f_row:
                     perspective_flip_fv = create_gr_elem(da.perspective_flip_fv)
+
             # NOISE INNER TAB
             with gr.TabItem('Noise'):
                 with FormColumn() as noise_tab_column:
@@ -347,13 +376,12 @@ def get_tab_init(d, da, dp):
                     mask_contrast_adjust = create_gr_elem(d.mask_contrast_adjust)
                 with FormColumn(min_width=250):
                     mask_brightness_adjust = create_gr_elem(d.mask_brightness_adjust)
-        # PARSEQ ACCORD
-        with gr.Accordion('Parseq', open=False):
-            gr.HTML(value=get_gradio_html('parseq'))
+        # PARSEQ INNER-TAB
+        with gr.Tab('Parseq'):
             with FormRow():
                 parseq_manifest = create_gr_elem(dp.parseq_manifest)
             with FormRow():
-                parseq_non_schedule_overrides = create_gr_elem(dp.parseq_non_schedule_overrides)                
+                parseq_non_schedule_overrides = create_gr_elem(dp.parseq_non_schedule_overrides)
             with FormRow():
                 parseq_use_deltas = create_gr_elem(dp.parseq_use_deltas)
     return {k: v for k, v in {**locals(), **vars()}.items()}

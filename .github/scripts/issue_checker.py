@@ -39,12 +39,14 @@ for issue in repo.get_issues():
 
     # Define the keywords to search for in the issue
     keywords = ['Python', 'Commit hash', 'Launching Web UI with arguments', 'Model loaded', 'deforum']
+    excuse = 'I have a good reason for not including the log'
 
     # Check if ALL of the keywords are present in the issue
     def check_keywords(issue_body, keywords):
         for keyword in keywords:
             if not re.search(r'\b' + re.escape(keyword) + r'\b', issue_body, re.IGNORECASE):
-                return False
+                if not re.search(re.escape(excuse), issue_body, re.IGNORECASE):
+                    return False
         return True
 
     # Check if the issue title has at least a specified number of words
