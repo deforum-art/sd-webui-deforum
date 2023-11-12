@@ -69,9 +69,12 @@ def animatediff_infotext():
 def animatediff_component_names_raw():
     return [
         'enabled', 'model', 'motion_lora_schedule',
-        'window_length', # sliding window length (context batch size)
-        'window_overlap', # how much do the contexts overlap. if -1, then batch_size // 4
-        'latent_power', 'latent_scale',
+        'activation_schedule',
+        'batch_size_schedule',
+        'stride_schedule',
+        'overlap_schedule',
+        'latent_power_schedule', 'latent_scale_schedule',
+        'closed_loop_schedule'
     ]
 
 def animatediff_component_names():
@@ -111,28 +114,31 @@ def setup_animatediff_ui_raw():
     # TODO: unwrap
     def create_model_in_tab_ui(cn_id):
         with gr.Row():
+            gr.Markdown('Note: AnimateDiff will work only if you have ControlNet installed as well')
             enabled = gr.Checkbox(label="Enable AnimateDiff", value=False, interactive=True)
         with gr.Row(visible=False) as mod_row:
             model = gr.Dropdown(cn_models, label=f"Motion module", value="None", interactive=True, tooltip="Choose which motion module will be injected into the generation process.")
             refresh_models = ToolButton(value=refresh_symbol)
             refresh_models.click(refresh_all_models, model, model)
+        with gr.Row(visible=False) as activation_row:
+            gr.Markdown('**Important!** This schedule sets up when AnimateDiff should run on the generated N previous frames. At the moment this is made with binary values: when the expression value is 0, it will make a pass, otherwise normal Deforum frames will be made')
+            activation_schedule = gr.Textbox(label="AnimateDiff activation schedule", lines=1, value='0:("t % ")', interactive=True)
+        gr.Markdown('Internal AnimateDiff settings, see its script in normal tabs')
         with gr.Row(visible=False) as motion_lora_row:
             motion_lora_schedule = gr.Textbox(label="Motion lora schedule", lines=1, value='0:("")', interactive=True)
         with gr.Row(visible=False) as window_row:
-            window_length = gr.Textbox(label="Number of sliding window frames", lines=1, value='0:(16)', interactive=True)
+            batch_size_schedule = gr.Textbox(label="Batch size", lines=1, value='0:(16)', interactive=True)
+        with gr.Row(visible=False) as stride_row:
+            stride_schedule = gr.Textbox(label="Stride", lines=1, value='0:(1)', interactive=True)
         with gr.Row(visible=False) as overlap_row:
-            window_overlap = gr.Textbox(label="Number of overlapping frames", lines=1, value='0:(15)', interactive=True)
+            overlap_schedule = gr.Textbox(label="Overlap", lines=1, value='0:(-1)', interactive=True)
         with gr.Row(visible=False) as latent_power_row:
-            latent_power = gr.Textbox(label="Latent power schedule", lines=1, value='0:(1)', interactive=True)
+            latent_power_schedule = gr.Textbox(label="Latent power schedule", lines=1, value='0:(1)', interactive=True)
         with gr.Row(visible=False) as latent_scale_row:
-            latent_scale = gr.Textbox(label="Latent scale schedule", lines=1, value='0:(32)', interactive=True)
+            latent_scale_schedule = gr.Textbox(label="Latent scale schedule", lines=1, value='0:(32)', interactive=True)
         with gr.Row(visible=False) as rp_row:
-            closed_loop = gr.Radio(
-                    choices=["N", "R-P", "R+P", "A"],
-                    value="R-P",
-                    label="Closed loop",
-                )
-        hide_output_list = [enabled, motion_lora_row, mod_row, window_row, overlap_row, latent_power_row, latent_scale_row, closed_loop]
+            closed_loop_schedule = gr.Textbox(label="Closed loop", lines=1, value='0:("R-P")', interactive=True)
+        hide_output_list = [enabled, activation_row, motion_lora_row, mod_row, window_row, stride_row, overlap_row, latent_power_row, latent_scale_row, rp_row]
         for cn_output in hide_output_list:
             enabled.change(fn=hide_ui_by_cn_status, inputs=enabled, outputs=cn_output)
 
