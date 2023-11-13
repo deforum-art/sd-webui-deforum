@@ -216,6 +216,7 @@ def seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_arg
 
     animatediff_script = find_animatediff_script(prev_always_on_scripts)
     # let's put it before ControlNet to cause less problems
+    p.is_api = True # to parse the params internally
     p.scripts.alwayson_scripts = [animatediff_script] + p.scripts.alwayson_scripts
 
     args_dict = {
