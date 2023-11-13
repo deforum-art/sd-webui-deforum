@@ -36,7 +36,7 @@ import numpy as np
 from types import SimpleNamespace
 
 from .general_utils import debug_print
-from .deforum_animatediff import reap_animatediff
+from .deforum_animatediff import reap_animatediff, is_animatediff_enabled
 
 def load_mask_latent(mask_input, shape):
     # mask_input (str or PIL Image.Image): Path to the mask image or a PIL Image object

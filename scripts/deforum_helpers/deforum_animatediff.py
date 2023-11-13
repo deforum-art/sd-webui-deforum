@@ -245,7 +245,7 @@ def seed_animatediff(p, animatediff_args, args, anim_args, root, frame_idx):
 
     p.script_args_value = args + p.script_args_value
 
-def reap_animatediff(images, args, root, frame_idx):
+def reap_animatediff(images, animatediff_args, args, root, frame_idx):
     if not need_animatediff(animatediff_args):
         return
     
