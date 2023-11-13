@@ -242,7 +242,7 @@ def seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_arg
         'request_id': ''        # Optional request id. If provided, outputs will have request id as filename suffix
     }
 
-    args = [args_dict]
+    args = list(args_dict.values())
 
     p.script_args_value = args + p.script_args_value
 
