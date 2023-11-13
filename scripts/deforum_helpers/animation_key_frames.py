@@ -88,8 +88,8 @@ class ControlNetKeys():
                 setattr(self, output_key, self.schedules[output_key])
 
 class AnimateDiffKeys():
-    def __init__(self, animatediff_args, anim_args, seed):
-        self.fi = FrameInterpolater(anim_args.max_frames, seed)
+    def __init__(self, animatediff_args, anim_args):
+        self.fi = FrameInterpolater(anim_args.max_frames)
         self.enable = animatediff_args.animatediff_enabled
         self.model = animatediff_args.animatediff_model
         self.activation_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_activation_schedule, 'activation_schedule')
