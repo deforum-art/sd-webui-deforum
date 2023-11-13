@@ -39,7 +39,7 @@ max_models = shared.opts.data.get("control_net_unit_count", shared.opts.data.get
 num_of_models = 5 if max_models <= 5 else max_models
 
 # AnimateDiff support (it requires ControlNet anyway)
-from .deforum_animatediff import seed_animatediff
+from .deforum_animatediff import seed_animatediff, is_animatediff_enabled
 
 def find_controlnet():
     global cnet
@@ -267,7 +267,7 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, animatediff_arg
 
     cn_inputframes_list = [os.path.join(args.outdir, f'controlnet_{i}_inputframes') for i in range(1, num_of_models + 1)]
 
-    if not any(os.path.exists(cn_inputframes) for cn_inputframes in cn_inputframes_list) and not any_loopback_mode:
+    if not any(os.path.exists(cn_inputframes) for cn_inputframes in cn_inputframes_list) and not any_loopback_mode and not is_animatediff_enabled(animatediff_args):
         print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
 
     # Remove all scripts except controlnet.
