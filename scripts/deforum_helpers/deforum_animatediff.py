@@ -24,6 +24,7 @@ import scripts
 from PIL import Image
 import numpy as np
 import importlib
+import shutil
 from modules import scripts, shared
 from .deforum_controlnet_gradio import hide_ui_by_cn_status, hide_file_textboxes, ToolButton
 from .general_utils import count_files_in_folder, clean_gradio_path_strings  # TODO: do it another way
@@ -182,7 +183,7 @@ def find_animatediff_script(p):
         raise Exception("AnimateDiff script not found.")
     return animatediff_script
 
-def seed_animatediff(p, animatediff_args, anim_args, frame_idx):
+def seed_animatediff(p, animatediff_args, args, anim_args, frame_idx):
     if find_animatediff() is None or not is_animatediff_enabled(animatediff_args):
         return
 
@@ -191,6 +192,20 @@ def seed_animatediff(p, animatediff_args, anim_args, frame_idx):
     # Will do the back-render only on target frames
     if int(keys.activation_schedule_series[frame_idx]) != 0:
         return
+    
+    video_length = int(keys.video_length_schedule_series[frame_idx])
+    assert video_length > 1
+
+    # Managing the frames to be fed into AD:
+    # Create a temporal directory
+    animatediff_temp_dir = os.path.join(args.outdir, 'animatediff_temp')
+    if os.path.exists(animatediff_temp_dir):
+        shutil.rmtree(animatediff_temp_dir)
+    os.makedirs(animatediff_temp_dir)
+    # Copy the frames (except for the one which is being CN-made) into that dir
+    for offset in range(video_length - 1):
+        filename = f"{root.timestring}_{frame_idx - offset - 1:09}.png"
+        Image.open(os.path.join(args.outdir, filename)).save(os.path.join(f"{offset:09}.png"), "PNG")
 
     animatediff_script = find_animatediff_script(p)
     # let's put it before ControlNet to cause less problems
@@ -200,17 +215,17 @@ def seed_animatediff(p, animatediff_args, anim_args, frame_idx):
         'model': keys.model,   # Motion module
         'format': ['Frame'],      # Save format, 'GIF' | 'MP4' | 'PNG' | 'WEBP' | 'WEBM' | 'TXT' | 'Frame'
         'enable': keys.enable,         # Enable AnimateDiff
-        'video_length': keys.video_length_schedule_series[frame_idx],     # Number of frames
+        'video_length': video_length,     # Number of frames
         'fps': 8,               # FPS - don't care
         'loop_number': 0,       # Display loop number
         'closed_loop': keys.closed_loop_schedule_series[frame_idx],   # Closed loop, 'N' | 'R-P' | 'R+P' | 'A'
-        'batch_size': keys.batch_size_schedule_series[frame_idx],       # Context batch size
-        'stride': keys.stride_schedule_series[frame_idx],            # Stride 
-        'overlap': keys.overlap_schedule_series[frame_idx],          # Overlap
+        'batch_size': int(keys.batch_size_schedule_series[frame_idx]),       # Context batch size
+        'stride': int(keys.stride_schedule_series[frame_idx]),            # Stride 
+        'overlap': int(keys.overlap_schedule_series[frame_idx]),          # Overlap
         'interp': 'Off',        # Frame interpolation, 'Off' | 'FILM' - don't care
         'interp_x': 10,          # Interp X - don't care
         'video_source': '',  # We don't use a video
-        'video_path': 'path/to/frames', # Path with our selected video_length input frames
+        'video_path': animatediff_temp_dir, # Path with our selected video_length input frames
         'latent_power': keys.latent_power_schedule_series[frame_idx],      # Latent power
         'latent_scale': keys.latent_scale_schedule_series[frame_idx],     # Latent scale
         'last_frame': None,     # Optional last frame
