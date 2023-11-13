@@ -99,6 +99,7 @@ class AnimateDiffKeys():
         self.stride_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_stride_schedule, 'stride_schedule')
         self.overlap_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_overlap_schedule, 'overlap_schedule')
         self.latent_scale_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_latent_scale_schedule, 'latent_scale_schedule')
+        self.latent_power_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_latent_power_schedule, 'latent_power_schedule')
         self.closed_loop_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_closed_loop_schedule, 'closed_loop_schedule', is_single_string = True)
 
 class LooperAnimKeys():
