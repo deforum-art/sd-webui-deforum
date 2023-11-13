@@ -187,7 +187,7 @@ def get_animatediff_temp_dir(args):
     return os.path.join(args.outdir, 'animatediff_temp')
 
 def need_animatediff(animatediff_args):
-    return find_animatediff() is not None and is_animatediff_enabled(animatediff_args):
+    return find_animatediff() is not None and is_animatediff_enabled(animatediff_args)
 
 def seed_animatediff(p, animatediff_args, args, anim_args, root, frame_idx):
     if not need_animatediff(animatediff_args):
