@@ -293,6 +293,12 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, animatediff_arg
     # and all cn args will be replaced.
     p.script_args_value = [None] * controlnet_script.args_to
 
+    # Basically, launch AD on a number of previous frames once it hits the seed time
+    seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_args, root, frame_idx)
+
+    if is_animatediff_enabled(animatediff_args):
+        return # FIXME temporary disable CN
+
     def create_cnu_dict(cn_args, prefix, img_np, mask_np, frame_idx, CnSchKeys):
 
         keys = [
@@ -320,9 +326,6 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, animatediff_arg
                 for i, (img_np, mask_np) in enumerate(zip(images_np, masks_np))]
 
     cnet.update_cn_script_in_processing(p, cn_units, is_img2img=is_img2img, is_ui=False)
-
-    # Basically, launch AD on a number of previous frames once it hits the seed time
-    seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_args, root, frame_idx)
 
 def find_controlnet_script(p):
     controlnet_script = next((script for script in p.scripts.alwayson_scripts if script.title().lower()  == "controlnet"), None)
