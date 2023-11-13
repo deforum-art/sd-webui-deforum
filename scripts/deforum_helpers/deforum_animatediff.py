@@ -128,7 +128,7 @@ def setup_animatediff_ui_raw():
             activation_schedule = gr.Textbox(label="AnimateDiff activation schedule", lines=1, value='0:(1), 2:((t-1) % 16)', interactive=True)
         gr.Markdown('Internal AnimateDiff settings, see its script in normal tabs')
         with gr.Row(visible=False) as motion_lora_row:
-            motion_lora_schedule = gr.Textbox(label="Motion lora schedule", lines=1, value='0:("")', interactive=True)
+            motion_lora_schedule = gr.Textbox(label="Motion lora schedule (not supported atm, stay tuned!)", lines=1, value='0:("")', interactive=True)
         with gr.Row(visible=False) as length_row:
             video_length_schedule = gr.Textbox(label="N-back video length schedule", lines=1, value='0:(16)', interactive=True)
         with gr.Row(visible=False) as window_row:
