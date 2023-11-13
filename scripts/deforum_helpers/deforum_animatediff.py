@@ -63,9 +63,9 @@ def is_animatediff_enabled(animatediff_args):
     return False
 
 def animatediff_infotext():
-    return """Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff'>AnimateDiff</a> extension to be installed.</p>
-            <p">If Deforum crashes due to AnimateDiff updates, go <a style='color:Orange;' target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff/issues'>here</a> and report your problem.</p>
-           """
+    return """**Experimental!**
+Requires the <a style='color:SteelBlue;' target='_blank' href='https://github.com/continue-revolution/sd-webui-animatediff'>AnimateDiff</a> extension to be installed.</p>
+"""
 
 def animatediff_component_names_raw():
     return [
