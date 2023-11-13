@@ -221,7 +221,7 @@ def seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_arg
 
     args_dict = {
         'model': keys.model,   # Motion module
-        'format': ['Frame'],      # Save format, 'GIF' | 'MP4' | 'PNG' | 'WEBP' | 'WEBM' | 'TXT' | 'Frame'
+        'format': ['PNG', 'Frame'],      # Save format, 'GIF' | 'MP4' | 'PNG' | 'WEBP' | 'WEBM' | 'TXT' | 'Frame'
         'enable': keys.enable,         # Enable AnimateDiff
         'video_length': video_length,     # Number of frames
         'fps': 8,               # FPS - don't care
