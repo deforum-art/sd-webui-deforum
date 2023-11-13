@@ -296,6 +296,9 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, animatediff_arg
     # Basically, launch AD on a number of previous frames once it hits the seed time
     seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_args, root, frame_idx)
 
+    if is_animatediff_enabled(animatediff_args):
+        return # FIXME temporary disable CN
+
     def create_cnu_dict(cn_args, prefix, img_np, mask_np, frame_idx, CnSchKeys):
 
         keys = [
