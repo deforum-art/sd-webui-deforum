@@ -183,8 +183,14 @@ def find_animatediff_script(p):
         raise Exception("AnimateDiff script not found.")
     return animatediff_script
 
-def seed_animatediff(p, animatediff_args, args, anim_args, frame_idx):
-    if find_animatediff() is None or not is_animatediff_enabled(animatediff_args):
+def get_animatediff_temp_dir(args):
+    return os.path.join(args.outdir, 'animatediff_temp')
+
+def need_animatediff(animatediff_args):
+    return find_animatediff() is not None and is_animatediff_enabled(animatediff_args):
+
+def seed_animatediff(p, animatediff_args, args, anim_args, root, frame_idx):
+    if not need_animatediff(animatediff_args):
         return
 
     keys = AnimateDiffKeys(animatediff_args, anim_args) # if not parseq_adapter.use_parseq else parseq_adapter.cn_keys
@@ -198,14 +204,14 @@ def seed_animatediff(p, animatediff_args, args, anim_args, frame_idx):
 
     # Managing the frames to be fed into AD:
     # Create a temporal directory
-    animatediff_temp_dir = os.path.join(args.outdir, 'animatediff_temp')
+    animatediff_temp_dir = get_animatediff_temp_dir(args)
     if os.path.exists(animatediff_temp_dir):
         shutil.rmtree(animatediff_temp_dir)
     os.makedirs(animatediff_temp_dir)
     # Copy the frames (except for the one which is being CN-made) into that dir
     for offset in range(video_length - 1):
         filename = f"{root.timestring}_{frame_idx - offset - 1:09}.png"
-        Image.open(os.path.join(args.outdir, filename)).save(os.path.join(f"{offset:09}.png"), "PNG")
+        Image.open(os.path.join(args.outdir, filename)).save(os.path.join(animatediff_temp_dir, f"{offset:09}.png"), "PNG")
 
     animatediff_script = find_animatediff_script(p)
     # let's put it before ControlNet to cause less problems
@@ -237,3 +243,18 @@ def seed_animatediff(p, animatediff_args, args, anim_args, frame_idx):
     args = list(args_dict.values())
 
     p.script_args_value = args + p.script_args_value
+
+def reap_animatediff(images, args, root, frame_idx):
+    if not need_animatediff(animatediff_args):
+        return
+    
+    animatediff_temp_dir = get_animatediff_temp_dir(args)
+    assert os.path.exists(animatediff_temp_dir)
+
+    for offset in range(len(images)):
+        frame = images[-offset-1]
+        cur_frame_idx = frame_idx - offset
+
+        # overwrite the results
+        filename = f"{root.timestring}_{cur_frame_idx:09}.png"
+        frame.save(os.path.join(args.outdir, filename), "PNG")
