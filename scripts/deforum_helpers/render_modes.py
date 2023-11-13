@@ -106,7 +106,7 @@ def render_interpolation(args, anim_args, video_args, parseq_args, loop_args, an
     print(f"Saving interpolation animation frames to {args.outdir}")
 
     # save settings.txt file for the current run
-    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root)
+    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, animatediff_args, video_args, root)
         
     # Compute interpolated prompts
     if parseq_adapter.manages_prompts():

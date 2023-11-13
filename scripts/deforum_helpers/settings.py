@@ -58,7 +58,7 @@ def load_args(args_dict_main, args, anim_args, parseq_args, loop_args, controlne
         return True
 
 # save settings function that get calls when run_deforum is being called
-def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root, full_out_file_path = None):
+def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, animatediff_args, video_args, root, full_out_file_path = None):
     if full_out_file_path:
         args.__dict__["seed"] = root.raw_seed
         args.__dict__["batch_name"] = root.raw_batch_name
@@ -69,7 +69,7 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
     settings_filename = full_out_file_path if full_out_file_path else os.path.join(args.outdir, f"{root.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         s = {}
-        for d in (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, video_args.__dict__):
+        for d in (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, animatediff_args.__dict__, video_args.__dict__):
             s.update({k: v for k, v in d.items() if k not in exclude_keys})
         s["sd_model_name"] = sh.sd_model.sd_checkpoint_info.name
         s["sd_model_hash"] = sh.sd_model.sd_checkpoint_info.hash
