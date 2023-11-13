@@ -125,7 +125,7 @@ def setup_animatediff_ui_raw():
         with gr.Row(visible=False) as inforow:
             gr.Markdown('**Important!** This schedule sets up when AnimateDiff should run on the generated N previous frames. At the moment this is made with binary values: when the expression value is 0, it will make a pass, otherwise normal Deforum frames will be made')
         with gr.Row(visible=False) as activation_row:
-            activation_schedule = gr.Textbox(label="AnimateDiff activation schedule", lines=1, value='0:("(abs(t-1)) % 16")', interactive=True)
+            activation_schedule = gr.Textbox(label="AnimateDiff activation schedule", lines=1, value='0:((abs(t-1)) % 16)', interactive=True)
         gr.Markdown('Internal AnimateDiff settings, see its script in normal tabs')
         with gr.Row(visible=False) as motion_lora_row:
             motion_lora_schedule = gr.Textbox(label="Motion lora schedule", lines=1, value='0:("")', interactive=True)
