@@ -90,16 +90,16 @@ class ControlNetKeys():
 class AnimateDiffKeys():
     def __init__(self, animatediff_args, anim_args, seed):
         self.fi = FrameInterpolater(anim_args.max_frames, seed)
-        self.enable = animatediff_args.enabled
-        self.model = animatediff_args.model
-        self.activation_schedule_series = self.fi.parse_inbetweens(animatediff_args.activation_schedule, 'activation_schedule')
-        self.motion_lora_schedule_series = self.fi.parse_inbetweens(animatediff_args.motion_lora_schedule, 'motion_lora_schedule', is_single_string = True)
-        self.video_length_schedule_series = self.fi.parse_inbetweens(animatediff_args.video_length_schedule, 'video_length_schedule')
-        self.batch_size_schedule_series = self.fi.parse_inbetweens(animatediff_args.batch_size_schedule, 'batch_size_schedule')
-        self.stride_schedule_series = self.fi.parse_inbetweens(animatediff_args.stride_schedule, 'stride_schedule')
-        self.overlap_schedule_series = self.fi.parse_inbetweens(animatediff_args.overlap_schedule, 'overlap_schedule')
-        self.latent_scale_schedule_series = self.fi.parse_inbetweens(animatediff_args.latent_scale_schedule, 'latent_scale_schedule')
-        self.closed_loop_schedule_series = self.fi.parse_inbetweens(animatediff_args.closed_loop_schedule, 'closed_loop_schedule', is_single_string = True)
+        self.enable = animatediff_args.animatediff_enabled
+        self.model = animatediff_args.animatediff_model
+        self.activation_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_activation_schedule, 'activation_schedule')
+        self.motion_lora_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_motion_lora_schedule, 'motion_lora_schedule', is_single_string = True)
+        self.video_length_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_video_length_schedule, 'video_length_schedule')
+        self.batch_size_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_batch_size_schedule, 'batch_size_schedule')
+        self.stride_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_stride_schedule, 'stride_schedule')
+        self.overlap_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_overlap_schedule, 'overlap_schedule')
+        self.latent_scale_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_latent_scale_schedule, 'latent_scale_schedule')
+        self.closed_loop_schedule_series = self.fi.parse_inbetweens(animatediff_args.animatediff_closed_loop_schedule, 'closed_loop_schedule', is_single_string = True)
 
 class LooperAnimKeys():
     def __init__(self, loop_args, anim_args, seed):
