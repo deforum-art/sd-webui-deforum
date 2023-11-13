@@ -122,8 +122,9 @@ def setup_animatediff_ui_raw():
             model = gr.Dropdown(cn_models, label=f"Motion module", value="None", interactive=True, tooltip="Choose which motion module will be injected into the generation process.")
             refresh_models = ToolButton(value=refresh_symbol)
             refresh_models.click(refresh_all_models, model, model)
-        with gr.Row(visible=False) as activation_row:
+        with gr.Row(visible=False) as inforow:
             gr.Markdown('**Important!** This schedule sets up when AnimateDiff should run on the generated N previous frames. At the moment this is made with binary values: when the expression value is 0, it will make a pass, otherwise normal Deforum frames will be made')
+        with gr.Row(visible=False) as activation_row:
             activation_schedule = gr.Textbox(label="AnimateDiff activation schedule", lines=1, value='0:("(abs(t-1)) % 16")', interactive=True)
         gr.Markdown('Internal AnimateDiff settings, see its script in normal tabs')
         with gr.Row(visible=False) as motion_lora_row:
@@ -142,7 +143,7 @@ def setup_animatediff_ui_raw():
             latent_scale_schedule = gr.Textbox(label="Latent scale schedule", lines=1, value='0:(32)', interactive=True)
         with gr.Row(visible=False) as rp_row:
             closed_loop_schedule = gr.Textbox(label="Closed loop", lines=1, value='0:("R-P")', interactive=True)
-        hide_output_list = [enabled, activation_row, motion_lora_row, mod_row, window_row, stride_row, overlap_row, latent_power_row, latent_scale_row, rp_row]
+        hide_output_list = [enabled, inforow, activation_row, motion_lora_row, mod_row, length_row, window_row, stride_row, overlap_row, latent_power_row, latent_scale_row, rp_row]
         for cn_output in hide_output_list:
             enabled.change(fn=hide_ui_by_cn_status, inputs=enabled, outputs=cn_output)
 
