@@ -292,7 +292,8 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, animatedif
 
     results = processed.images[-1] # AD uses ascending order, so we need to get the last frame
 
-    reap_animatediff(processed.images, animatediff_args, args, root, frame)
+    if len(processed.images) > 1:
+        reap_animatediff(processed.images, animatediff_args, args, root, frame)
 
     return results
 
