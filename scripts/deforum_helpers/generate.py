@@ -235,7 +235,7 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, animatedif
 
             print_combined_table(args, anim_args, p_txt, keys, frame)  # print dynamic table to cli
 
-            if is_controlnet_enabled(controlnet_args):
+            if is_controlnet_enabled(controlnet_args) or is_animatediff_enabled(animatediff_args):
                 process_with_controlnet(p_txt, args, anim_args, controlnet_args, animatediff_args, root, parseq_adapter, is_img2img=False, frame_idx=frame)
 
             with A1111OptionsOverrider({"control_net_detectedmap_dir" : os.path.join(args.outdir, "controlnet_detected_map")}):
@@ -277,7 +277,7 @@ def generate_inner(args, keys, anim_args, loop_args, controlnet_args, animatedif
         if args.motion_preview_mode:
             processed = mock_process_images(args, p, init_image)
         else:
-            if is_controlnet_enabled(controlnet_args):
+            if is_controlnet_enabled(controlnet_args) or is_animatediff_enabled(animatediff_args):
                 process_with_controlnet(p, args, anim_args, controlnet_args, animatediff_args, root, parseq_adapter, is_img2img=True, frame_idx=frame)
             
             with A1111OptionsOverrider({"control_net_detectedmap_dir" : os.path.join(args.outdir, "controlnet_detected_map")}):
