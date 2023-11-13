@@ -221,6 +221,7 @@ def controlnet_component_names():
     ]]
 
 def process_with_controlnet(p, args, anim_args, controlnet_args, animatediff_args, root, parseq_adapter, is_img2img=True, frame_idx=0):
+    p.do_not_save_grid = True
     CnSchKeys = ControlNetKeys(anim_args, controlnet_args) if not parseq_adapter.use_parseq else parseq_adapter.cn_keys
 
     def read_cn_data(cn_idx):
