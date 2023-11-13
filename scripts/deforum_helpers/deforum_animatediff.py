@@ -215,9 +215,8 @@ def seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_arg
         Image.open(os.path.join(args.outdir, filename)).save(os.path.join(animatediff_temp_dir, f"{offset:09}.png"), "PNG")
 
     animatediff_script = find_animatediff_script(prev_always_on_scripts)
-    # let's put it before ControlNet to cause less problems
     p.is_api = True # to parse the params internally
-    p.scripts.alwayson_scripts = [animatediff_script] + p.scripts.alwayson_scripts
+    p.scripts.alwayson_scripts.append(animatediff_script)
 
     args_dict = {
         'model': keys.model,   # Motion module
@@ -242,9 +241,7 @@ def seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_arg
         'request_id': ''        # Optional request id. If provided, outputs will have request id as filename suffix
     }
 
-    args = [args_dict]
-
-    p.script_args_value = args + p.script_args_value
+    p.script_args_value.append(args_dict)
 
 def reap_animatediff(images, animatediff_args, args, root, frame_idx):
     if not need_animatediff(animatediff_args):
