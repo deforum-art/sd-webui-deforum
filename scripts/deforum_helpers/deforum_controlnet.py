@@ -287,13 +287,14 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, animatediff_arg
     #
     p.scripts = copy.copy(scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img)
     controlnet_script = find_controlnet_script(p)
+    prev_always_on_scripts = p.scripts.alwayson_scripts
     p.scripts.alwayson_scripts =  [controlnet_script]
     # Filling the list with None is safe because only the length will be considered,
     # and all cn args will be replaced.
     p.script_args_value = [None] * controlnet_script.args_to
 
     # Basically, launch AD on a number of previous frames once it hits the seed time
-    seed_animatediff(p, animatediff_args, args, anim_args, root, frame_idx)
+    seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_args, root, frame_idx)
 
     def create_cnu_dict(cn_args, prefix, img_np, mask_np, frame_idx, CnSchKeys):
 

@@ -178,8 +178,8 @@ def setup_animatediff_ui():
                 """, elem_id='animatediff_not_found_html_msg')
         return {}
 
-def find_animatediff_script(p):
-    animatediff_script = next((script for script in p.scripts.alwayson_scripts if "animatediff" in script.title().lower()), None)
+def find_animatediff_script(prev_always_on_scripts):
+    animatediff_script = next((script for script in prev_always_on_scripts if "animatediff" in script.title().lower()), None)
     if not animatediff_script:
         raise Exception("AnimateDiff script not found.")
     return animatediff_script
@@ -190,7 +190,7 @@ def get_animatediff_temp_dir(args):
 def need_animatediff(animatediff_args):
     return find_animatediff() is not None and is_animatediff_enabled(animatediff_args)
 
-def seed_animatediff(p, animatediff_args, args, anim_args, root, frame_idx):
+def seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_args, root, frame_idx):
     if not need_animatediff(animatediff_args):
         return
 
@@ -214,7 +214,7 @@ def seed_animatediff(p, animatediff_args, args, anim_args, root, frame_idx):
         filename = f"{root.timestring}_{frame_idx - offset - 1:09}.png"
         Image.open(os.path.join(args.outdir, filename)).save(os.path.join(animatediff_temp_dir, f"{offset:09}.png"), "PNG")
 
-    animatediff_script = find_animatediff_script(p)
+    animatediff_script = find_animatediff_script(prev_always_on_scripts)
     # let's put it before ControlNet to cause less problems
     p.scripts.alwayson_scripts = [animatediff_script] + p.scripts.alwayson_scripts
 
