@@ -378,6 +378,7 @@ def get_tab_init(d, da, dp):
                     mask_brightness_adjust = create_gr_elem(d.mask_brightness_adjust)
         # PARSEQ INNER-TAB
         with gr.Tab('Parseq'):
+            gr.HTML(value=get_gradio_html('parseq'))
             with FormRow():
                 parseq_manifest = create_gr_elem(dp.parseq_manifest)
             with FormRow():
