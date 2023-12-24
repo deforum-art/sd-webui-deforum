@@ -150,7 +150,7 @@ def vid2frames(video_path, video_in_frame_path, n=1, overwrite=True, extract_fro
 # make sure the video_path provided is an existing local file or a web URL with a supported file extension
 def is_vid_path_valid(video_path):
     # make sure file format is supported!
-    file_formats = ["mov", "mpeg", "mp4", "m4v", "avi", "mpg", "webm"]
+    file_formats = ["mov", "mpeg", "mp4", "m4v", "avi", "mpg", "webm", "gif"]
     extension = video_path.rsplit('.', 1)[-1].lower()
     # vid path is actually a URL, check it 
     if video_path.startswith('http://') or video_path.startswith('https://'):
