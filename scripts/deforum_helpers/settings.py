@@ -69,7 +69,11 @@ def save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, co
     settings_filename = full_out_file_path if full_out_file_path else os.path.join(args.outdir, f"{root.timestring}_settings.txt")
     with open(settings_filename, "w+", encoding="utf-8") as f:
         s = {}
-        for d in (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, video_args.__dict__):
+        if controlnet_args:
+            all_args = (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, controlnet_args.__dict__, video_args.__dict__)
+        else:
+            all_args = (args.__dict__, anim_args.__dict__, parseq_args.__dict__, loop_args.__dict__, video_args.__dict__)
+        for d in all_args:
             s.update({k: v for k, v in d.items() if k not in exclude_keys})
         s["sd_model_name"] = sh.sd_model.sd_checkpoint_info.name
         s["sd_model_hash"] = sh.sd_model.sd_checkpoint_info.hash

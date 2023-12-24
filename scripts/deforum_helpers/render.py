@@ -41,7 +41,7 @@ from .hybrid_video import (
 from .save_images import save_image
 from .composable_masks import compose_mask_with_check
 from .settings import save_settings_from_animation_run
-from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled
+from .deforum_controlnet import unpack_controlnet_vids, is_controlnet_enabled, find_controlnet
 from .subtitle_handler import init_srt_file, write_frame_subtitle, format_animation_params
 from .resume import get_resume_vars
 from .masks import do_overlay_mask
@@ -55,6 +55,7 @@ from deforum_api import JobStatusTracker
 def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
 
     # initialise Parseq adapter
+    controlnet_args = None if not find_controlnet() else controlnet_args
     parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args, loop_args)
 
     if opts.data.get("deforum_save_gen_info_as_srt", False):  # create .srt file and set timeframe mechanism using FPS
