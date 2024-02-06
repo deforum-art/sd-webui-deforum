@@ -21,9 +21,11 @@ import math
 import requests
 import subprocess
 import time
+import tempfile
 import re 
 import glob
 import concurrent.futures
+from pathlib import Path
 from pkg_resources import resource_filename
 from modules.shared import state, opts
 from .general_utils import checksum, clean_gradio_path_strings, debug_print
@@ -155,10 +157,10 @@ def is_vid_path_valid(video_path):
     # vid path is actually a URL, check it 
     if video_path.startswith('http://') or video_path.startswith('https://'):
         response = requests.head(video_path, allow_redirects=True)
-        extension = video_path.rsplit('?', 1)[0] # remove query string before checking file format extension.
+        extension = extension.rsplit('?', 1)[0] # remove query string before checking file format extension.
         content_disposition = response.headers.get('Content-Disposition')
-        if content_disposition:
-            # Attempt to extract the filename from the Content-Disposition header
+        if content_disposition and extension not in file_formats:
+            # Filename doesn't look valid, but perhaps the content disposition will say otherwise?
             match = re.search(r'filename="?(?P<filename>[^"]+)"?', content_disposition)
             if match:
                 extension = match.group('filename').rsplit('.', 1)[-1].lower()
@@ -236,6 +238,20 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
     if add_soundtrack != 'None':
         try:
             audio_path = clean_gradio_path_strings(audio_path)
+            if (audio_path.startswith('http://') or audio_path.startswith('https://')):
+                url = audio_path
+                print(f"Downloading audio file from: {url}")
+                response = requests.get(url, stream=True)
+                response.raise_for_status()
+                temp_file = tempfile.NamedTemporaryFile(delete=False)
+                # Write the content of the downloaded file into the temporary file
+                with open(temp_file.name, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:  # filter out keep-alive new chunks
+                            f.write(chunk)
+                audio_path = temp_file.name
+                print(f"Audio saved to: {audio_path}")
+
             audio_add_start_time = time.time()            
             cmd = [
                 ffmpeg_location,
@@ -259,6 +275,9 @@ def ffmpeg_stitch_video(ffmpeg_location=None, fps=None, outmp4_path=None, stitch
         except Exception as e:
             add_soundtrack_status = f"\rError adding audio to video: {e}"
             add_soundtrack_success = False
+        finally:
+            file_path = Path(temp_file.name)
+            file_path.unlink(missing_ok=True)
             
     add_srt = opts.data.get("deforum_save_gen_info_as_srt", False) and opts.data.get("deforum_embed_srt", False) and srt_path is not None
     add_srt_status = None
