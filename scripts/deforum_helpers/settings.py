@@ -179,3 +179,49 @@ def load_video_settings(*args, **kwargs):
             ret.append(data[key])
     
     return ret
+
+def check_file_exists(*args, **kwargs):
+    import gradio as gr
+    filepath = args[0];
+    #print(filepath)
+
+    filepath = filepath.strip()
+    filepath = clean_gradio_path_strings(filepath)
+    filepath = os.path.realpath(filepath) 
+
+    #print(f"path: {filepath}")
+    
+    save_btn_vis = True
+    overwrite_btn_vis = False
+    cancel_btn_vis = False
+    html_msg_vis = False
+    html_msg_text = ""
+
+    file_exists = os.path.isfile(filepath)
+    if(file_exists):
+        #print("file exists")
+        save_btn_vis = False
+        overwrite_btn_vis = True
+        cancel_btn_vis = True
+        html_msg_vis = True
+        html_msg_text = f"File already exists at location. You can overwrite or cancel the save."
+    else:
+        gr.Info('File Saved')
+        #print("saving file")
+        save_settings(*args)
+    
+    return gr.update(visible = save_btn_vis), gr.update(visible = overwrite_btn_vis), gr.update(visible = cancel_btn_vis), gr.update(visible = html_msg_vis), html_msg_text
+
+def overwrite_settings(*args, **kwargs):
+    import gradio as gr
+    save_btn_vis = True
+    overwrite_btn_vis = False
+    cancel_btn_vis = False
+    html_msg_vis = False
+    html_msg_text = ""
+    gr.Info('File Saved')
+    #print("saving file")
+    save_settings(*args)
+
+    return gr.update(visible = save_btn_vis), gr.update(visible = overwrite_btn_vis), gr.update(visible = cancel_btn_vis), gr.update(visible = html_msg_vis), html_msg_text
+

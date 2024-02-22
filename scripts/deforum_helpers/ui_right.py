@@ -19,7 +19,7 @@ from modules.shared import opts, state
 from modules.ui import create_output_panel, wrap_gradio_call
 from modules.call_queue import wrap_gradio_gpu_call
 from .run_deforum import run_deforum
-from .settings import save_settings, load_all_settings, load_video_settings
+from .settings import save_settings, load_all_settings, load_video_settings, check_file_exists, overwrite_settings
 from .general_utils import get_deforum_version
 from .ui_left import setup_deforum_left_side_ui
 from scripts.deforum_extend_paths import deforum_sys_extend
@@ -93,7 +93,11 @@ def on_ui_tabs():
 
                 with gr.Row(variant='compact'):
                     settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="Settings File", info="settings file path can be relative to webui folder OR full - absolute")
+                with gr.Row(variant="compact"):
+                    html_msg = gr.HTML('html component', visible=False)
                 with gr.Row(variant='compact'):
+                    overwrite_settings_btn = gr.Button('Overwrite', visible=False, variant="secondary", elem_id='deforum_overwrite_settings_btn')
+                    cancel_save_btn = gr.Button('Cancel Save', visible=False, variant="stop", elem_id='deforum_cancel_save_btn')
                     save_settings_btn = gr.Button('Save Settings', elem_id='deforum_save_settings_btn')
                     load_settings_btn = gr.Button('Load All Settings', elem_id='deforum_load_settings_btn')
                     load_video_settings_btn = gr.Button('Load Video Settings', elem_id='deforum_load_video_settings_btn')
@@ -116,9 +120,21 @@ def on_ui_tabs():
         video_settings_component_list = [components[name] for name in list(DeforumOutputArgs().keys())]
 
         save_settings_btn.click(
-            fn=wrap_gradio_call(save_settings),
+            fn=wrap_gradio_call(check_file_exists), 
             inputs=[settings_path] + settings_component_list + video_settings_component_list,
-            outputs=[],
+            outputs=[save_settings_btn, overwrite_settings_btn, cancel_save_btn, html_msg, html_msg]
+        )
+
+        overwrite_settings_btn.click(
+            fn=wrap_gradio_call(overwrite_settings), 
+            inputs=[settings_path] + settings_component_list + video_settings_component_list, 
+            outputs=[save_settings_btn, overwrite_settings_btn, cancel_save_btn, html_msg, html_msg]
+        )
+        
+        cancel_save_btn.click(
+            lambda :[gr.update(visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=False)], 
+            None, 
+            [save_settings_btn, overwrite_settings_btn, cancel_save_btn, html_msg]
         )
         
         load_settings_btn.click(
