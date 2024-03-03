@@ -75,6 +75,7 @@ def on_ui_tabs():
                 with gr.Row(elem_id=f"{id_part}_generate_box", variant='compact'):
                     skip = gr.Button('Pause/Resume', elem_id=f"{id_part}_skip", visible=False)
                     interrupt = gr.Button('Interrupt', elem_id=f"{id_part}_interrupt", visible=True)
+                    interrupting = gr.Button('Interrupting...', elem_id=f"{id_part}_interrupting", elem_classes="generate-box-interrupting", tooltip="Interrupting generation...")
                     submit = gr.Button('Generate', elem_id=f"{id_part}_generate", variant='primary')
 
                     skip.click(
@@ -88,7 +89,13 @@ def on_ui_tabs():
                         inputs=[],
                         outputs=[],
                     )
-                
+                    
+                    interrupting.click(
+                        fn=lambda: state.interrupt(),
+                        inputs=[],
+                        outputs=[],
+                    )
+                    
                 deforum_gallery, generation_info, html_info, _ = create_output_panel("deforum", opts.outdir_img2img_samples)
 
                 with gr.Row(variant='compact'):
