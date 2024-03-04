@@ -29,7 +29,7 @@ from pathlib import Path
 from pkg_resources import resource_filename
 from modules.shared import state, opts
 from .general_utils import checksum, clean_gradio_path_strings, debug_print
-from basicsr.utils.download_util import load_file_from_url
+from modules.modelloader import load_file_from_url
 from .rich import console
 import shutil
 from threading import Thread

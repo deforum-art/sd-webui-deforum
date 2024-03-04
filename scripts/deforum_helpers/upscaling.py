@@ -22,7 +22,7 @@ import subprocess
 from .frame_interpolation import clean_folder_name
 from .general_utils import duplicate_pngs_from_folder, checksum
 from .video_audio_utilities import vid2frames, ffmpeg_stitch_video, extract_number, media_file_has_audio
-from basicsr.utils.download_util import load_file_from_url
+from modules.modelloader import load_file_from_url
 from .rich import console
 
 from modules.shared import opts
