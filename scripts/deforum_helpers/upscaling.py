@@ -22,10 +22,15 @@ import subprocess
 from .frame_interpolation import clean_folder_name
 from .general_utils import duplicate_pngs_from_folder, checksum
 from .video_audio_utilities import vid2frames, ffmpeg_stitch_video, extract_number, media_file_has_audio
-from basicsr.utils.download_util import load_file_from_url
 from .rich import console
 
 from modules.shared import opts
+
+try:
+  from modules.modelloader import load_file_from_url
+except:
+  print("Try to fallback to basicsr with older modules")
+  from basicsr.utils.download_util import load_file_from_url
 
 # NCNN Upscale section START
 def process_ncnn_upscale_vid_upload_logic(vid_path, in_vid_fps, in_vid_res, out_vid_res, models_path, upscale_model, upscale_factor, keep_imgs, f_location, f_crf, f_preset, current_user_os):
