@@ -97,10 +97,14 @@ def on_ui_tabs():
                     )
                 
                 output_panel = create_output_panel("deforum", opts.outdir_img2img_samples)
-                
-                deforum_gallery = output_panel.gallery
-                generation_info = output_panel.generation_info
-                html_info = output_panel.infotext
+                if isinstance(output_panel, tuple):
+                    deforum_gallery = output_panel[0]
+                    generation_info = output_panel[1]
+                    html_info = output_panel[2]
+                else:
+                    deforum_gallery = output_panel.gallery
+                    generation_info = output_panel.generation_info
+                    html_info = output_panel.infotext
 
                 with gr.Row(variant='compact'):
                     settings_path = gr.Textbox("deforum_settings.txt", elem_id='deforum_settings_path', label="Settings File", info="settings file path can be relative to webui folder OR full - absolute")
