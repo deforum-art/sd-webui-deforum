@@ -401,7 +401,7 @@ def check_and_download_gifski(models_folder, current_user_os):
     file_path = os.path.join(models_folder, file_name)
     
     if not os.path.exists(file_path):
-        load_file_from_url(download_url, models_folder)
+        load_file_from_url(url=download_url, model_dir=models_folder)
         if current_user_os in ['Linux','Mac']:
             os.chmod(file_path, 0o755)
             if current_user_os == 'Mac':

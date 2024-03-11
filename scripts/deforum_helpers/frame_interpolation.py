@@ -206,7 +206,7 @@ def check_and_download_film_model(model_name, model_dest_folder):
     try:
         os.makedirs(model_dest_folder, exist_ok=True)
         # download film model from url
-        load_file_from_url(download_url, model_dest_folder)
+        load_file_from_url(url=download_url, model_dir=model_dest_folder)
         # verify checksum
         if checksum(model_dest_path) != film_model_hash:
             raise Exception(f"Error while downloading {model_name}. Please download from: {download_url}, and put in: {model_dest_folder}")

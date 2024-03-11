@@ -107,6 +107,6 @@ def download_rife_model(path, deforum_models_path):
             except:
                 print("Try to fallback to basicsr with older modules")
                 from basicsr.utils.download_util import load_file_from_url
-            load_file_from_url(options[path][1], deforum_models_path)
+            load_file_from_url(url=options[path][1], model_dir=deforum_models_path)
             if checksum(target_path) != options[path][0]:
                 raise Exception(f"Error while downloading {target_file}. Please download from here: {options[path][1]} and place in: " + deforum_models_path)
