@@ -102,7 +102,11 @@ def download_rife_model(path, deforum_models_path):
         target_file = f"{path}.pkl"
         target_path = os.path.join(deforum_models_path, target_file)
         if not os.path.exists(target_path):
-            from basicsr.utils.download_util import load_file_from_url
-            load_file_from_url(options[path][1], deforum_models_path)
+            try:
+                from modules.modelloader import load_file_from_url
+            except:
+                print("Try to fallback to basicsr with older modules")
+                from basicsr.utils.download_util import load_file_from_url
+            load_file_from_url(url=options[path][1], model_dir=deforum_models_path)
             if checksum(target_path) != options[path][0]:
                 raise Exception(f"Error while downloading {target_file}. Please download from here: {options[path][1]} and place in: " + deforum_models_path)

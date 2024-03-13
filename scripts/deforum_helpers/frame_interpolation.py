@@ -190,7 +190,11 @@ def prepare_film_inference(deforum_models_path, x_am, sl_enabled, sl_am, keep_im
     return interp_vid_path
 
 def check_and_download_film_model(model_name, model_dest_folder):
-    from basicsr.utils.download_util import load_file_from_url
+    try:
+        from modules.modelloader import load_file_from_url
+    except:
+        print("Try to fallback to basicsr with older modules")
+        from basicsr.utils.download_util import load_file_from_url
     if model_name == 'film_net_fp16.pt':
         model_dest_path = os.path.join(model_dest_folder, model_name)
         download_url = 'https://github.com/hithereai/frame-interpolation-pytorch/releases/download/film_net_fp16.pt/film_net_fp16.pt'
@@ -202,7 +206,7 @@ def check_and_download_film_model(model_name, model_dest_folder):
     try:
         os.makedirs(model_dest_folder, exist_ok=True)
         # download film model from url
-        load_file_from_url(download_url, model_dest_folder)
+        load_file_from_url(url=download_url, model_dir=model_dest_folder)
         # verify checksum
         if checksum(model_dest_path) != film_model_hash:
             raise Exception(f"Error while downloading {model_name}. Please download from: {download_url}, and put in: {model_dest_folder}")
