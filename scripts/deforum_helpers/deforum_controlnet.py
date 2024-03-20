@@ -328,11 +328,10 @@ def process_controlnet_input_frames(args, anim_args, controlnet_args, video_path
         frame_path = os.path.join(args.outdir, f'controlnet_{id}_{outdir_suffix}')
         os.makedirs(frame_path, exist_ok=True)
 
-        accepted_image_extensions = ('.jpg', '.jpeg', '.png', '.bmp')
-        if video_path and video_path.lower().endswith(accepted_image_extensions):
+        if video_path:
             convert_image(video_path, os.path.join(frame_path, '000000000.jpg'))
             print(f"Copied CN Model {id}'s single input image to inputframes folder!")
-        elif mask_path and mask_path.lower().endswith(accepted_image_extensions):
+        elif mask_path:
             convert_image(mask_path, os.path.join(frame_path, '000000000.jpg'))
             print(f"Copied CN Model {id}'s single input image to inputframes *mask* folder!")
         else:
