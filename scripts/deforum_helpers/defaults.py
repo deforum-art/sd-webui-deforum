@@ -44,6 +44,7 @@ def get_samplers_list():
         'ddim': 'DDIM',
         'plms': 'PLMS',
         'unipc': 'UniPC',
+        'lcm': 'LCM',
         'restart': 'Restart'
     }
 
