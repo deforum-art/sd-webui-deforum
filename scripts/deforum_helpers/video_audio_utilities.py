@@ -441,7 +441,49 @@ def make_gifski_gif(imgs_raw_path, imgs_batch_id, fps, models_folder, current_us
         print("\r" + " " * len(msg_to_print), end="", flush=True)
         print(f"\r{msg_to_print}", flush=True)
         print(f"GIF stitching *failed* with error:\n{e}")
+
+def find_interpolated_folder(directory):
+    """Return the first child folder starting with 'interpolated_' or None if not found."""
+    for entry in os.listdir(directory):
+        full_path = os.path.join(directory, entry)
+        if os.path.isdir(full_path) and entry.startswith('interpolated_'):
+            return full_path
+    return None
+
+def make_gifski_gif_from_interpolated(imgs_raw_path, imgs_batch_id, fps, models_folder, current_user_os):
+    msg_to_print = f"Stitching *gif* from frames using Gifski..."
+    # blink the msg in the cli until action is done
+    console.print(msg_to_print, style="blink yellow", end="") 
+    start_time = time.time()
+    gifski_location = os.path.join(models_folder, 'gifski' + ('.exe' if current_user_os == 'Windows' else ''))
+    final_gif_path = os.path.join(imgs_raw_path, imgs_batch_id + '.gif')
+    
+    interpolated_folder = find_interpolated_folder(imgs_raw_path)
+    if current_user_os == "Linux":
+        input_img_pattern =  '*.png'
+        input_img_files = [os.path.join(interpolated_folder, file) for file in sorted(glob.glob(os.path.join(interpolated_folder, input_img_pattern)))]
+        cmd = [gifski_location, '-o', final_gif_path] + input_img_files + ['--fps', str(fps), '--quality', str(95)]
+    elif current_user_os == "Windows":
+        input_img_pattern =  '*.png'
+        input_img_pattern_for_gifski = os.path.join(interpolated_folder, input_img_pattern)
+        cmd = [gifski_location, '-o', final_gif_path, input_img_pattern_for_gifski, '--fps', str(fps), '--quality', str(95)]
+    else: # should never this else as we check before, but just in case
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
+        raise Exception(f"No support for OS type: {current_user_os}")
         
+    check_and_download_gifski(models_folder, current_user_os)
+
+    try:
+        process = subprocess.run(cmd, capture_output=True, check=True, text=True, cwd=(models_folder if current_user_os == 'Mac' else None))
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
+        print(f"GIF stitching \033[0;32mdone\033[0m in {time.time() - start_time:.2f} seconds!")
+    except Exception as e:
+        print("\r" + " " * len(msg_to_print), end="", flush=True)
+        print(f"\r{msg_to_print}", flush=True)
+        print(f"GIF stitching *failed* with error:\n{e}")
+
 def handle_imgs_deletion(vid_path=None, imgs_folder_path=None, batch_id=None):
     try:
         total_imgs_to_delete = count_matching_frames(imgs_folder_path, batch_id)

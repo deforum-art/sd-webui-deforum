@@ -27,7 +27,7 @@ from .save_images import dump_frames_cache, reset_frames_cache
 from .frame_interpolation import process_video_interpolation
 from .general_utils import get_deforum_version
 from .upscaling import make_upscale_v2
-from .video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, handle_imgs_deletion, handle_input_frames_deletion, handle_cn_frames_deletion, get_ffmpeg_params, get_ffmpeg_paths
+from .video_audio_utilities import ffmpeg_stitch_video, make_gifski_gif, make_gifski_gif_from_interpolated, handle_imgs_deletion, handle_input_frames_deletion, handle_cn_frames_deletion, get_ffmpeg_params, get_ffmpeg_paths
 from pathlib import Path
 from .settings import save_settings_from_animation_run
 from .deforum_controlnet import num_of_models
@@ -170,10 +170,8 @@ def run_deforum(*args):
                 else:
                     print(f"** FFMPEG DID NOT STITCH ANY VIDEO ** Error: {e}")
                 pass
-              
-        if video_args.make_gif and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
-            make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = root.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
-        
+            
+
         # Upscale video once generation is done:
         if video_args.r_upscale_video and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
             # out mp4 path is defined in make_upscale func
@@ -199,6 +197,12 @@ def run_deforum(*args):
                 print(f"Moving upscaled, interpolated vid from {ouput_vid_path} to {ouput_vid_path_final}")
                 shutil.move(ouput_vid_path, ouput_vid_path_final)
 
+        if video_args.make_gif and not video_args.skip_video_creation and not video_args.store_frames_in_ram:
+            if video_args.frame_interpolation_engine != "None":
+                make_gifski_gif_from_interpolated(imgs_raw_path = args.outdir, imgs_batch_id = root.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
+            else:
+                make_gifski_gif(imgs_raw_path = args.outdir, imgs_batch_id = root.timestring, fps = video_args.fps, models_folder = root.models_path, current_user_os = root.current_user_os)
+        
         if video_args.delete_imgs and not video_args.skip_video_creation:
             handle_imgs_deletion(vid_path=mp4_path, imgs_folder_path=args.outdir, batch_id=root.timestring)
 
