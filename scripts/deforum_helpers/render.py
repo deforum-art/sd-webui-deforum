@@ -52,10 +52,14 @@ from .RAFT import RAFT
 
 from deforum_api import JobStatusTracker
 
-def render_animation(args, anim_args, video_args, parseq_args, loop_args, controlnet_args, root):
+def render_animation(args, anim_args, video_args, parseq_args, loop_args, animatediff_args, controlnet_args, root):
 
     # initialise Parseq adapter
+    # TODO: @rewbs
     parseq_adapter = ParseqAdapter(parseq_args, anim_args, video_args, controlnet_args, loop_args)
+
+    if animatediff_args.animatediff_enabled:
+        print("*Rendering with AnimateDiff turned on. (Experimental!)*")        
 
     if opts.data.get("deforum_save_gen_info_as_srt", False):  # create .srt file and set timeframe mechanism using FPS
         srt_filename = os.path.join(args.outdir, f"{root.timestring}.srt")
@@ -93,7 +97,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
     print(f"Saving animation frames to:\n{args.outdir}")
 
     # save settings.txt file for the current run
-    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, video_args, root)
+    save_settings_from_animation_run(args, anim_args, parseq_args, loop_args, controlnet_args, animatediff_args, video_args, root)
 
     # resume from timestring
     if anim_args.resume_from_timestring:
@@ -547,7 +551,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             args.seed = random.randint(0, 2 ** 32 - 1)
             print(f"Optical flow redo is diffusing and warping using {optical_flow_redo_generation} and seed {args.seed} optical flow before generation.")
 
-            disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
+            disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, animatediff_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
             disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
             disposable_flow = get_flow_from_images(prev_img, disposable_image, optical_flow_redo_generation, raft_model)
             disposable_image = cv2.cvtColor(disposable_image, cv2.COLOR_BGR2RGB)
@@ -563,7 +567,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             for n in range(0, int(anim_args.diffusion_redo)):
                 print(f"Redo generation {n + 1} of {int(anim_args.diffusion_redo)} before final generation")
                 args.seed = random.randint(0, 2 ** 32 - 1)
-                disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
+                disposable_image = generate(args, keys, anim_args, loop_args, controlnet_args, animatediff_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
                 disposable_image = cv2.cvtColor(np.array(disposable_image), cv2.COLOR_RGB2BGR)
                 # color match on last one only
                 if n == int(anim_args.diffusion_redo):
@@ -574,7 +578,7 @@ def render_animation(args, anim_args, video_args, parseq_args, loop_args, contro
             gc.collect()
 
         # generation
-        image = generate(args, keys, anim_args, loop_args, controlnet_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
+        image = generate(args, keys, anim_args, loop_args, controlnet_args, animatediff_args, root, parseq_adapter, frame_idx, sampler_name=scheduled_sampler_name)
 
         if image is None:
             break

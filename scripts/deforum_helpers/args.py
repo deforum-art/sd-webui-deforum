@@ -23,6 +23,7 @@ import modules.paths as ph
 import modules.shared as sh
 from modules.processing import get_fixed_seed
 from .defaults import get_guided_imgs_default_json, mask_fill_choices, get_samplers_list
+from .deforum_animatediff import animatediff_component_names
 from .deforum_controlnet import controlnet_component_names
 from .general_utils import get_os, substitute_placeholders
 
@@ -1119,7 +1120,7 @@ def DeforumOutputArgs():
 
 def get_component_names():
     return ['override_settings_with_file', 'custom_settings_file', *DeforumAnimArgs().keys(), 'animation_prompts', 'animation_prompts_positive', 'animation_prompts_negative',
-            *DeforumArgs().keys(), *DeforumOutputArgs().keys(), *ParseqArgs().keys(), *LoopArgs().keys(), *controlnet_component_names()]
+            *DeforumArgs().keys(), *DeforumOutputArgs().keys(), *ParseqArgs().keys(), *LoopArgs().keys(), *animatediff_component_names(), *controlnet_component_names()]
 
 def get_settings_component_names():
     return [name for name in get_component_names()]
@@ -1139,13 +1140,14 @@ def process_args(args_dict_main, run_id):
     video_args = SimpleNamespace(**{name: args_dict_main[name] for name in DeforumOutputArgs()})
     parseq_args = SimpleNamespace(**{name: args_dict_main[name] for name in ParseqArgs()})
     loop_args = SimpleNamespace(**{name: args_dict_main[name] for name in LoopArgs()})
+    animatediff_args = SimpleNamespace(**{name: args_dict_main[name] for name in animatediff_component_names()})
     controlnet_args = SimpleNamespace(**{name: args_dict_main[name] for name in controlnet_component_names()})
 
     root.animation_prompts = json.loads(args_dict_main['animation_prompts'])
 
     args_loaded_ok = True
     if override_settings_with_file:
-        args_loaded_ok = load_args(args_dict_main, args, anim_args, parseq_args, loop_args, controlnet_args, video_args, custom_settings_file, root, run_id)
+        args_loaded_ok = load_args(args_dict_main, args, anim_args, parseq_args, loop_args, animatediff_args, controlnet_args, video_args, custom_settings_file, root, run_id)
 
     positive_prompts = args_dict_main['animation_prompts_positive']
     negative_prompts = args_dict_main['animation_prompts_negative']
@@ -1184,4 +1186,4 @@ def process_args(args_dict_main, run_id):
     default_img = default_img.resize((args.W,args.H))
     root.default_img = default_img
 
-    return args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, controlnet_args
+    return args_loaded_ok, root, args, anim_args, video_args, parseq_args, loop_args, animatediff_args, controlnet_args

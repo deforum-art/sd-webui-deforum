@@ -38,6 +38,9 @@ cnet = None
 max_models = shared.opts.data.get("control_net_unit_count", shared.opts.data.get("control_net_max_models_num", 5))
 num_of_models = 5 if max_models <= 5 else max_models
 
+# AnimateDiff support (it requires ControlNet anyway)
+from .deforum_animatediff import seed_animatediff, is_animatediff_enabled
+
 def find_controlnet():
     global cnet
     if cnet: return cnet
@@ -217,7 +220,8 @@ def controlnet_component_names():
         'processor_res', 'threshold_a', 'threshold_b', 'resize_mode', 'control_mode', 'loopback_mode'
     ]]
 
-def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_adapter, is_img2img=True, frame_idx=0):
+def process_with_controlnet(p, args, anim_args, controlnet_args, animatediff_args, root, parseq_adapter, is_img2img=True, frame_idx=0):
+    p.do_not_save_grid = True
     CnSchKeys = ControlNetKeys(anim_args, controlnet_args) if not parseq_adapter.use_parseq else parseq_adapter.cn_keys
 
     def read_cn_data(cn_idx):
@@ -264,7 +268,7 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_ad
 
     cn_inputframes_list = [os.path.join(args.outdir, f'controlnet_{i}_inputframes') for i in range(1, num_of_models + 1)]
 
-    if not any(os.path.exists(cn_inputframes) for cn_inputframes in cn_inputframes_list) and not any_loopback_mode:
+    if not any(os.path.exists(cn_inputframes) for cn_inputframes in cn_inputframes_list) and not any_loopback_mode and not is_animatediff_enabled(animatediff_args):
         print(f'\033[33mNeither the base nor the masking frames for ControlNet were found. Using the regular pipeline\033[0m')
 
     # Remove all scripts except controlnet.
@@ -284,10 +288,14 @@ def process_with_controlnet(p, args, anim_args, controlnet_args, root, parseq_ad
     #
     p.scripts = copy.copy(scripts.scripts_img2img if is_img2img else scripts.scripts_txt2img)
     controlnet_script = find_controlnet_script(p)
+    prev_always_on_scripts = p.scripts.alwayson_scripts
     p.scripts.alwayson_scripts =  [controlnet_script]
     # Filling the list with None is safe because only the length will be considered,
     # and all cn args will be replaced.
     p.script_args_value = [None] * controlnet_script.args_to
+
+    # Basically, launch AD on a number of previous frames once it hits the seed time
+    seed_animatediff(p, prev_always_on_scripts, animatediff_args, args, anim_args, root, frame_idx)
 
     def create_cnu_dict(cn_args, prefix, img_np, mask_np, frame_idx, CnSchKeys):
 
